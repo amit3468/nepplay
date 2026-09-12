@@ -1,0 +1,14 @@
+﻿{
+  "name": "nepplay",
+  "version": "1.0.0",
+  "description": "Nepal Gaming Tournament Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "author": "amit3468",
+  "license": "MIT"
+}
