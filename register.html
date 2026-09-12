@@ -1,0 +1,425 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NEPPLAY - Create Account</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top left, #263a70 0%, transparent 35%),
+                radial-gradient(circle at bottom right, #531f69 0%, transparent 35%),
+                #080b16;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .logo span {
+            color: #ff3d81;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aeb6cc;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: rgba(18, 23, 40, 0.96);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 32px;
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.45);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 27px;
+        }
+
+        .description {
+            text-align: center;
+            color: #9099b2;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #dce2f2;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+
+            background: #0d1221;
+            color: white;
+
+            border: 1px solid #30384f;
+            border-radius: 9px;
+
+            outline: none;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #ff3d81;
+            box-shadow: 0 0 0 3px rgba(255,61,129,0.10);
+        }
+
+        .password-note {
+            margin-top: 6px;
+            color: #777f96;
+            font-size: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: linear-gradient(135deg, #ff3d81, #8d4dff);
+            color: white;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+            margin-top: 8px;
+
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            display: none;
+            margin-top: 17px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .error {
+            display: block;
+            background: rgba(255, 60, 80, 0.12);
+            border: 1px solid rgba(255, 60, 80, 0.3);
+            color: #ff8f9b;
+        }
+
+        .success {
+            display: block;
+            background: rgba(50, 220, 130, 0.10);
+            border: 1px solid rgba(50, 220, 130, 0.3);
+            color: #70e6a1;
+        }
+
+        .bottom {
+            text-align: center;
+            margin-top: 22px;
+            color: #858da3;
+            font-size: 14px;
+        }
+
+        .bottom a {
+            color: #ff5c96;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .bottom a:hover {
+            text-decoration: underline;
+        }
+
+        .home {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #777f96;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .home:hover {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        NEP<span>PLAY</span>
+    </div>
+
+    <div class="subtitle">
+        Nepal Gaming Community
+    </div>
+
+    <div class="card">
+
+        <h1>Create Account</h1>
+
+        <p class="description">
+            Create your NEPPLAY gaming account
+        </p>
+
+        <form id="registerForm">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    minlength="3"
+                    maxlength="30"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    maxlength="100"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    minlength="6"
+                    maxlength="100"
+                    required
+                    autocomplete="new-password"
+                >
+
+                <div class="password-note">
+                    Password must contain at least 6 characters.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Enter password again"
+                    minlength="6"
+                    maxlength="100"
+                    required
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" id="registerButton">
+                Create Account
+            </button>
+
+            <div id="message" class="message"></div>
+
+        </form>
+
+        <div class="bottom">
+            Already have an account?
+            <a href="login.html">Login</a>
+        </div>
+
+        <a class="home" href="index.html">
+            ← Back to NEPPLAY
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("registerForm");
+const message = document.getElementById("message");
+const button = document.getElementById("registerButton");
+
+function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className = "message " + type;
+}
+
+form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const username =
+        document.getElementById("username").value.trim();
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const confirmPassword =
+        document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+
+        showMessage(
+            "Passwords do not match.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (password.length < 6) {
+
+        showMessage(
+            "Password must contain at least 6 characters.",
+            "error"
+        );
+
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Creating Account...";
+
+    message.className = "message";
+    message.textContent = "";
+
+    try {
+
+        const response = await fetch("/api/users/register", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            credentials: "include",
+
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            showMessage(
+                data.message || "Registration failed.",
+                "error"
+            );
+
+            button.disabled = false;
+            button.textContent = "Create Account";
+
+            return;
+        }
+
+        showMessage(
+            "Account created successfully! Redirecting to login...",
+            "success"
+        );
+
+        setTimeout(function() {
+
+            window.location.href = "login.html";
+
+        }, 1200);
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Could not connect to the server. Make sure Node.js is running.",
+            "error"
+        );
+
+        button.disabled = false;
+        button.textContent = "Create Account";
+    }
+
+});
+
+</script>
+
+</body>
+</html>

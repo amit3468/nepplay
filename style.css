@@ -1,0 +1,2003 @@
+/* =========================================================
+   NEPPLAY GLOBAL CSS
+   Homepage + Tournament Page
+========================================================= */
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080d18;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+    width: 100%;
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 7%;
+
+    background: #080d18;
+
+    border-bottom: 1px solid #1d2635;
+
+    position: relative;
+    z-index: 100;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.logo {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: #ff3b30;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+}
+
+nav a {
+    position: relative;
+
+    color: #929caf;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    padding: 31px 0;
+
+    transition:
+        color 0.2s ease;
+}
+
+nav a:hover {
+    color: #ffffff;
+}
+
+nav a.active {
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   ACTIVE NAVIGATION
+========================================================= */
+
+nav a.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 15px;
+
+    height: 3px;
+
+    border-radius: 5px;
+
+    background: #ff3b30;
+
+    box-shadow:
+        0 0 12px rgba(255, 59, 48, 0.6);
+}
+
+
+/* =========================================================
+   HOMEPAGE HERO
+========================================================= */
+
+.hero {
+    width: 100%;
+    min-height: 620px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.1fr)
+        minmax(360px, 0.9fr);
+
+    align-items: center;
+
+    gap: 60px;
+
+    padding:
+        80px 8%;
+
+    background:
+        radial-gradient(
+            circle at 15% 30%,
+            rgba(255, 59, 48, 0.16),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at 85% 50%,
+            rgba(70, 90, 255, 0.10),
+            transparent 35%
+        ),
+
+        #080d18;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   HERO CONTENT
+========================================================= */
+
+.hero-content {
+    max-width: 680px;
+}
+
+.hero-badge {
+    display: inline-block;
+
+    margin-bottom: 24px;
+
+    padding: 9px 15px;
+
+    border:
+        1px solid
+        rgba(255, 59, 48, 0.35);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255, 59, 48, 0.08);
+
+    color: #ff665d;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+.hero h1 {
+    margin-bottom: 24px;
+
+    color: #ffffff;
+
+    font-size: clamp(48px, 6vw, 76px);
+
+    font-weight: 900;
+
+    line-height: 0.98;
+
+    letter-spacing: -2px;
+}
+
+.hero h1 span {
+    color: #ff3b30;
+
+    text-shadow:
+        0 0 30px
+        rgba(255, 59, 48, 0.25);
+}
+
+
+.hero-content > p {
+    max-width: 620px;
+
+    margin-bottom: 32px;
+
+    color: #9ca8bb;
+
+    font-size: 17px;
+
+    line-height: 1.75;
+}
+
+
+/* =========================================================
+   HERO BUTTONS
+========================================================= */
+
+.hero-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   GLOBAL BUTTON
+========================================================= */
+
+.btn {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 48px;
+
+    padding:
+        13px 22px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+========================================================= */
+
+.btn-primary {
+    background: #ff3b30;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 8px 25px
+        rgba(255, 59, 48, 0.20);
+}
+
+
+.btn-primary:hover {
+    background: #ff5148;
+
+    box-shadow:
+        0 12px 30px
+        rgba(255, 59, 48, 0.30);
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+========================================================= */
+
+.btn-secondary {
+    background: #111827;
+
+    color: #ffffff;
+
+    border:
+        1px solid #293448;
+}
+
+
+.btn-secondary:hover {
+    background: #182133;
+
+    border-color: #40506b;
+}
+
+
+/* =========================================================
+   HERO VISUAL
+========================================================= */
+
+.hero-visual {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   GAMING CARD
+========================================================= */
+
+.gaming-card {
+    width: min(100%, 420px);
+
+    padding: 30px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #141d2e,
+            #0c1320
+        );
+
+    border:
+        1px solid #28364b;
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 30px 80px
+        rgba(0, 0, 0, 0.45);
+}
+
+
+.gaming-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    top: -100px;
+    right: -80px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 59, 48, 0.15);
+
+    filter: blur(5px);
+}
+
+
+.gaming-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    bottom: -100px;
+    left: -70px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(60, 90, 255, 0.10);
+
+    filter: blur(10px);
+}
+
+
+/* =========================================================
+   CARD TOP
+========================================================= */
+
+.card-top {
+    position: relative;
+    z-index: 2;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 22px;
+
+    padding: 7px 12px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(74, 222, 128, 0.08);
+
+    color: #4ade80;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+}
+
+
+.live-dot {
+    width: 7px;
+    height: 7px;
+
+    display: inline-block;
+
+    border-radius: 50%;
+
+    background: #4ade80;
+
+    box-shadow:
+        0 0 10px
+        rgba(74, 222, 128, 0.7);
+}
+
+
+/* =========================================================
+   CONTROLLER
+========================================================= */
+
+.controller {
+    position: relative;
+    z-index: 2;
+
+    width: 110px;
+    height: 110px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: 10px auto 18px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 59, 48, 0.12);
+
+    border:
+        1px solid
+        rgba(255, 59, 48, 0.25);
+
+    font-size: 52px;
+
+    box-shadow:
+        0 0 45px
+        rgba(255, 59, 48, 0.12);
+}
+
+
+.gaming-card h3 {
+    position: relative;
+    z-index: 2;
+
+    margin-bottom: 6px;
+
+    color: #ffffff;
+
+    font-size: 28px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+
+.gaming-card > p {
+    position: relative;
+    z-index: 2;
+
+    margin-bottom: 28px;
+
+    color: #8f9bad;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   CARD STATS
+========================================================= */
+
+.card-stats {
+    position: relative;
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid #253044;
+}
+
+
+.card-stats div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+
+.card-stats strong {
+    color: #ffffff;
+
+    font-size: 20px;
+
+    font-weight: 900;
+}
+
+
+.card-stats span {
+    color: #7f8da3;
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   GAMES SECTION
+========================================================= */
+
+.games-section {
+    padding:
+        95px 8%;
+
+    background:
+        #0b111e;
+}
+
+
+.section-heading {
+    max-width: 700px;
+
+    margin:
+        0 auto 50px;
+
+    text-align: center;
+}
+
+
+.section-heading > span {
+    display: inline-block;
+
+    margin-bottom: 12px;
+
+    color: #ff4a40;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.8px;
+}
+
+
+.section-heading h2 {
+    margin-bottom: 12px;
+
+    color: #ffffff;
+
+    font-size: 42px;
+
+    font-weight: 900;
+
+    line-height: 1.15;
+}
+
+
+.section-heading p {
+    color: #8f9bad;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   GAMES GRID
+========================================================= */
+
+.games-grid {
+    width: 100%;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 25px;
+}
+
+
+/* =========================================================
+   GAME CARD
+========================================================= */
+
+.game-card {
+    min-height: 270px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    justify-content: flex-start;
+
+    padding: 30px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            #131c2c,
+            #0d1421
+        );
+
+    border:
+        1px solid #222f43;
+
+    border-radius: 16px;
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+.game-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 140px;
+    height: 140px;
+
+    right: -55px;
+    top: -55px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 59, 48, 0.08);
+}
+
+
+.game-card:hover {
+    transform: translateY(-7px);
+
+    border-color:
+        rgba(255, 59, 48, 0.55);
+
+    box-shadow:
+        0 20px 45px
+        rgba(0, 0, 0, 0.30);
+}
+
+
+/* =========================================================
+   GAME ICON
+========================================================= */
+
+.game-icon {
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 22px;
+
+    border-radius: 15px;
+
+    background:
+        rgba(255, 59, 48, 0.10);
+
+    border:
+        1px solid
+        rgba(255, 59, 48, 0.20);
+
+    font-size: 30px;
+}
+
+
+.game-card h3 {
+    margin-bottom: 7px;
+
+    color: #ffffff;
+
+    font-size: 23px;
+
+    font-weight: 800;
+}
+
+
+.game-card p {
+    margin-bottom: 22px;
+
+    color: #8f9bad;
+
+    font-size: 14px;
+}
+
+
+.game-link {
+    margin-top: auto;
+
+    color: #ff4a40;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    transition:
+        color 0.2s ease;
+}
+
+
+.game-card:hover .game-link {
+    color: #ff766f;
+}
+
+
+/* =========================================================
+   STATS SECTION
+========================================================= */
+
+.stats-section {
+    padding:
+        65px 8%;
+
+    background:
+        #080d18;
+
+    border-top:
+        1px solid #182233;
+
+    border-bottom:
+        1px solid #182233;
+}
+
+
+.stats-container {
+    width: 100%;
+
+    max-width: 1100px;
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+}
+
+
+.stat-box {
+    padding:
+        15px 25px;
+
+    text-align: center;
+
+    border-right:
+        1px solid #1d293b;
+}
+
+
+.stat-box:last-child {
+    border-right: none;
+}
+
+
+.stat-box strong {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #ffffff;
+
+    font-size: 30px;
+
+    font-weight: 900;
+}
+
+
+.stat-box span {
+    color: #7f8da3;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   CTA SECTION
+========================================================= */
+
+.cta-section {
+    padding:
+        100px 20px;
+
+    text-align: center;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(255, 59, 48, 0.14),
+            transparent 45%
+        ),
+
+        #0b111e;
+}
+
+
+.cta-content {
+    max-width: 760px;
+
+    margin: 0 auto;
+}
+
+
+.section-label {
+    display: inline-block;
+
+    margin-bottom: 15px;
+
+    color: #ff4a40;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.8px;
+}
+
+
+.cta-content h2 {
+    margin-bottom: 18px;
+
+    color: #ffffff;
+
+    font-size: clamp(36px, 5vw, 54px);
+
+    font-weight: 900;
+
+    line-height: 1.1;
+}
+
+
+.cta-content h2 span {
+    color: #ff3b30;
+}
+
+
+.cta-content p {
+    max-width: 600px;
+
+    margin:
+        0 auto 30px;
+
+    color: #8f9bad;
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    padding:
+        45px 8% 25px;
+
+    background: #060a12;
+
+    border-top:
+        1px solid #1b2433;
+}
+
+
+.footer-content {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 40px;
+
+    padding-bottom: 30px;
+
+    border-bottom:
+        1px solid #182232;
+}
+
+
+.footer-brand .logo {
+    margin-bottom: 7px;
+}
+
+
+.footer-brand p {
+    color: #7f8da3;
+
+    font-size: 13px;
+}
+
+
+.footer-links {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+    gap: 22px;
+}
+
+
+.footer-links a {
+    color: #7f8da3;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition:
+        color 0.2s ease;
+}
+
+
+.footer-links a:hover {
+    color: #ffffff;
+}
+
+
+.footer-bottom {
+    max-width: 1200px;
+
+    margin: 20px auto 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.footer-bottom p {
+    color: #59677b;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   TOURNAMENT HERO
+========================================================= */
+
+.tournament-hero {
+    padding:
+        70px 20px 55px;
+
+    text-align: center;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(255, 59, 48, 0.13),
+            transparent 40%
+        ),
+
+        #080d18;
+}
+
+
+.tournament-hero .container {
+    max-width: 1200px;
+
+    margin: 0 auto;
+}
+
+
+.tournament-hero h1 {
+    margin-bottom: 14px;
+
+    color: #ffffff;
+
+    font-size: 48px;
+
+    font-weight: 800;
+
+    line-height: 1.15;
+}
+
+
+.tournament-hero p {
+    color: #9ca8bb;
+
+    font-size: 17px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   TOURNAMENT SECTION
+========================================================= */
+
+.tournaments-section {
+    padding:
+        20px 20px 90px;
+
+    background: #080d18;
+}
+
+
+.tournaments-section .container {
+    width: 100%;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   TOURNAMENT SECTION HEADING
+========================================================= */
+
+.tournaments-section .section-heading {
+    text-align: center;
+
+    margin-bottom: 48px;
+}
+
+
+.tournaments-section .section-heading h2 {
+    margin-bottom: 12px;
+
+    color: #ffffff;
+
+    font-size: 42px;
+
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.tournaments-section .section-heading p {
+    color: #8f9bad;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   TOURNAMENT GRID
+========================================================= */
+
+.tournament-grid {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 28px;
+
+    align-items: stretch;
+}
+
+
+/* =========================================================
+   TOURNAMENT CARD
+========================================================= */
+
+.tournament-card {
+    width: 100%;
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background: #111827;
+
+    border:
+        1px solid #202b3d;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 15px 35px
+        rgba(0, 0, 0, 0.25);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+.tournament-card:hover {
+    transform: translateY(-7px);
+
+    border-color:
+        rgba(255, 59, 48, 0.65);
+
+    box-shadow:
+        0 20px 45px
+        rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   TOURNAMENT IMAGE
+========================================================= */
+
+.tournament-image {
+    width: 100%;
+
+    height: 210px;
+
+    position: relative;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    padding: 20px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   FREE FIRE
+========================================================= */
+
+.tournament-image.freefire {
+    background:
+
+        radial-gradient(
+            circle at 75% 25%,
+            rgba(255, 120, 60, 0.8),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            135deg,
+            #ff3b30 0%,
+            #9b1c16 45%,
+            #251019 100%
+        );
+}
+
+
+/* =========================================================
+   PUBG
+========================================================= */
+
+.tournament-image.pubg {
+    background:
+
+        radial-gradient(
+            circle at 70% 25%,
+            rgba(255, 215, 90, 0.7),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            135deg,
+            #d88c18 0%,
+            #65420d 45%,
+            #1a1710 100%
+        );
+}
+
+
+/* =========================================================
+   MOBILE LEGENDS
+========================================================= */
+
+.tournament-image.mlbb {
+    background:
+
+        radial-gradient(
+            circle at 75% 25%,
+            rgba(110, 130, 255, 0.75),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            135deg,
+            #4a67ff 0%,
+            #32216f 50%,
+            #10152a 100%
+        );
+}
+
+
+/* =========================================================
+   IMAGE DECORATION
+========================================================= */
+
+.tournament-image::before {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -55px;
+    top: -55px;
+
+    border-radius: 50%;
+
+    border:
+        2px solid
+        rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+        0 0 0 25px
+        rgba(255, 255, 255, 0.03),
+
+        0 0 0 50px
+        rgba(255, 255, 255, 0.02);
+}
+
+
+/* =========================================================
+   IMAGE OVERLAY
+========================================================= */
+
+.image-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.72),
+            transparent 65%
+        );
+}
+
+
+/* =========================================================
+   GAME LABEL
+========================================================= */
+
+.game-label {
+    position: relative;
+
+    z-index: 2;
+
+    display: inline-block;
+
+    padding:
+        7px 12px;
+
+    border-radius: 6px;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    backdrop-filter:
+        blur(5px);
+}
+
+
+/* =========================================================
+   TOURNAMENT CONTENT
+========================================================= */
+
+.tournament-content {
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 24px;
+}
+
+
+.tournament-content h3 {
+    margin-bottom: 10px;
+
+    color: #ffffff;
+
+    font-size: 22px;
+
+    font-weight: 750;
+
+    line-height: 1.3;
+}
+
+
+.tournament-description {
+    min-height: 48px;
+
+    margin-bottom: 22px;
+
+    color: #9ca8bb;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   TOURNAMENT INFO
+========================================================= */
+
+.tournament-info {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+
+.tournament-info > div {
+    padding: 12px;
+
+    background: #0b1220;
+
+    border:
+        1px solid #1d293b;
+
+    border-radius: 9px;
+}
+
+
+.tournament-info strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #7f8da3;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.6px;
+}
+
+
+.tournament-info span {
+    display: block;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   TOURNAMENT STATUS
+========================================================= */
+
+.tournament-info .status-open {
+    color: #4ade80;
+}
+
+
+/* =========================================================
+   REGISTER BUTTON
+========================================================= */
+
+.register-btn {
+    width: 100%;
+
+    margin-top: auto;
+
+    padding:
+        13px 20px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #ff3b30;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.register-btn:hover {
+    background: #ff5148;
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(255, 59, 48, 0.30);
+}
+
+
+.register-btn:active {
+    transform:
+        translateY(0);
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 950px) {
+
+    header {
+        padding:
+            0 30px;
+    }
+
+    nav {
+        gap: 20px;
+    }
+
+    nav a {
+        font-size: 14px;
+    }
+
+    .hero {
+        grid-template-columns: 1fr;
+
+        text-align: center;
+
+        padding:
+            70px 30px;
+    }
+
+    .hero-content {
+        max-width: 750px;
+
+        margin: 0 auto;
+    }
+
+    .hero-content > p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+
+    .hero-visual {
+        margin-top: 10px;
+    }
+
+    .games-section {
+        padding:
+            80px 30px;
+    }
+
+    .games-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .stats-section {
+        padding:
+            55px 30px;
+    }
+
+    .stats-container {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .stat-box {
+        border-right: none;
+
+        border-bottom:
+            1px solid #1d293b;
+
+        padding:
+            25px;
+    }
+
+    .stat-box:nth-child(3),
+    .stat-box:nth-child(4) {
+        border-bottom: none;
+    }
+
+    .tournament-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 680px) {
+
+    header {
+        height: auto;
+
+        min-height: 80px;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 5px;
+
+        padding:
+            15px 20px;
+    }
+
+
+    nav {
+        width: 100%;
+
+        justify-content: center;
+
+        flex-wrap: wrap;
+
+        gap:
+            8px 18px;
+    }
+
+
+    nav a {
+        padding:
+            8px 0;
+
+        font-size: 12px;
+    }
+
+
+    nav a.active::after {
+        bottom: 0;
+    }
+
+
+    /* HERO */
+
+    .hero {
+        min-height: auto;
+
+        padding:
+            60px 20px 70px;
+
+        gap: 45px;
+    }
+
+
+    .hero-badge {
+        font-size: 10px;
+
+        padding:
+            8px 11px;
+    }
+
+
+    .hero h1 {
+        font-size: 48px;
+
+        letter-spacing: -1px;
+    }
+
+
+    .hero-content > p {
+        font-size: 15px;
+
+        line-height: 1.65;
+    }
+
+
+    .hero-buttons {
+        flex-direction: column;
+
+        width: 100%;
+    }
+
+
+    .hero-buttons .btn {
+        width: 100%;
+    }
+
+
+    /* GAMING CARD */
+
+    .gaming-card {
+        padding: 25px 20px;
+
+        border-radius: 18px;
+    }
+
+
+    .controller {
+        width: 90px;
+        height: 90px;
+
+        font-size: 42px;
+    }
+
+
+    /* GAMES */
+
+    .games-section {
+        padding:
+            65px 20px;
+    }
+
+
+    .section-heading {
+        margin-bottom: 35px;
+    }
+
+
+    .section-heading h2 {
+        font-size: 32px;
+    }
+
+
+    .section-heading p {
+        font-size: 14px;
+    }
+
+
+    .games-grid {
+        grid-template-columns: 1fr;
+
+        gap: 18px;
+    }
+
+
+    .game-card {
+        min-height: 245px;
+
+        padding: 25px;
+    }
+
+
+    /* STATS */
+
+    .stats-section {
+        padding:
+            35px 20px;
+    }
+
+
+    .stats-container {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .stat-box {
+        padding:
+            20px 10px;
+    }
+
+
+    .stat-box strong {
+        font-size: 25px;
+    }
+
+
+    .stat-box span {
+        font-size: 10px;
+    }
+
+
+    /* CTA */
+
+    .cta-section {
+        padding:
+            75px 20px;
+    }
+
+
+    .cta-content h2 {
+        font-size: 36px;
+    }
+
+
+    .cta-content p {
+        font-size: 14px;
+    }
+
+
+    .cta-content .btn {
+        width: 100%;
+    }
+
+
+    /* FOOTER */
+
+    footer {
+        padding:
+            40px 20px 20px;
+    }
+
+
+    .footer-content {
+        flex-direction: column;
+
+        align-items:
+            flex-start;
+
+        gap: 25px;
+    }
+
+
+    .footer-links {
+        justify-content:
+            flex-start;
+
+        gap:
+            15px;
+    }
+
+
+    .footer-bottom {
+        flex-direction: column;
+
+        align-items:
+            flex-start;
+
+        gap: 8px;
+    }
+
+
+    /* TOURNAMENT */
+
+    .tournament-hero {
+        padding:
+            50px 15px 40px;
+    }
+
+
+    .tournament-hero h1 {
+        font-size: 34px;
+    }
+
+
+    .tournament-hero p {
+        font-size: 15px;
+    }
+
+
+    .tournaments-section {
+        padding:
+            20px 15px 60px;
+    }
+
+
+    .tournaments-section .section-heading {
+        margin-bottom: 35px;
+    }
+
+
+    .tournaments-section .section-heading h2 {
+        font-size: 30px;
+    }
+
+
+    .tournaments-section .section-heading p {
+        font-size: 14px;
+    }
+
+
+    .tournament-grid {
+        grid-template-columns: 1fr;
+
+        gap: 22px;
+    }
+
+
+    .tournament-image {
+        height: 190px;
+    }
+
+
+    .tournament-content {
+        padding: 20px;
+    }
+
+
+    .tournament-content h3 {
+        font-size: 20px;
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .logo {
+        font-size: 24px;
+    }
+
+
+    nav {
+        gap:
+            6px 13px;
+    }
+
+
+    nav a {
+        font-size: 11px;
+    }
+
+
+    .hero h1 {
+        font-size: 41px;
+    }
+
+
+    .gaming-card {
+        padding: 22px 15px;
+    }
+
+
+    .card-stats strong {
+        font-size: 17px;
+    }
+
+
+    .card-stats span {
+        font-size: 9px;
+    }
+
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+
+    .stat-box {
+        border-bottom:
+            1px solid #1d293b !important;
+    }
+
+
+    .stat-box:last-child {
+        border-bottom: none !important;
+    }
+}

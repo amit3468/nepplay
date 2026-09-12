@@ -1,0 +1,434 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>NEPPLAY - Member Login</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#111;
+    color:#fff;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.login-box{
+    width:100%;
+    max-width:420px;
+    background:#1b1b1b;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+.logo{
+    text-align:center;
+    color:#ff3b30;
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#aaa;
+    margin-bottom:28px;
+}
+
+label{
+    display:block;
+    margin-bottom:7px;
+    color:#ddd;
+    font-size:14px;
+}
+
+input{
+    width:100%;
+    padding:13px;
+    margin-bottom:18px;
+    border-radius:7px;
+    border:1px solid #444;
+    background:#111;
+    color:#fff;
+    outline:none;
+    font-size:15px;
+}
+
+input:focus{
+    border-color:#ff3b30;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:7px;
+    background:#ff3b30;
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
+.message{
+    display:none;
+    margin-top:15px;
+    padding:12px;
+    border-radius:7px;
+    text-align:center;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.error{
+    background:#3b1717;
+    color:#ff7777;
+}
+
+.success{
+    background:#173b20;
+    color:#72e08a;
+}
+
+.links{
+    text-align:center;
+    margin-top:20px;
+}
+
+.links a{
+    color:#ff3b30;
+    text-decoration:none;
+}
+
+.links a:hover{
+    text-decoration:underline;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <div class="logo">
+        NEPPLAY
+    </div>
+
+    <div class="subtitle">
+        Member Login
+    </div>
+
+    <form id="loginForm">
+
+        <label for="login">
+            Username or Email
+        </label>
+
+        <input
+            type="text"
+            id="login"
+            name="login"
+            autocomplete="username"
+            placeholder="Enter username or email"
+            required
+        >
+
+        <label for="password">
+            Password
+        </label>
+
+        <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="current-password"
+            placeholder="Enter password"
+            required
+        >
+
+        <button
+            type="submit"
+            id="loginButton"
+        >
+            Login
+        </button>
+
+    </form>
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+    <div class="links">
+
+        <a href="register.html">
+            Create Account
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const form =
+    document.getElementById("loginForm");
+
+const button =
+    document.getElementById("loginButton");
+
+const message =
+    document.getElementById("message");
+
+
+function showMessage(text, type){
+
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
+
+    message.style.display =
+        "block";
+}
+
+
+form.addEventListener(
+    "submit",
+    async function(event){
+
+        event.preventDefault();
+
+        button.disabled = true;
+
+        button.textContent =
+            "Logging in...";
+
+        message.style.display =
+            "none";
+
+
+        const login =
+            document
+                .getElementById("login")
+                .value
+                .trim();
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        if(!login || !password){
+
+            showMessage(
+                "Please enter username/email and password.",
+                "error"
+            );
+
+            button.disabled = false;
+
+            button.textContent =
+                "Login";
+
+            return;
+        }
+
+
+        try{
+
+            /*
+            ====================================================
+            DETERMINE WHETHER USER ENTERED USERNAME OR EMAIL
+            ====================================================
+            */
+
+            const isEmail =
+                login.includes("@");
+
+
+            /*
+            ====================================================
+            SEND ALL COMPATIBLE LOGIN FIELDS
+
+            The server can use username, email, or login.
+            ====================================================
+            */
+
+            const loginData = {
+
+                login: login,
+
+                username:
+                    isEmail ? "" : login,
+
+                email:
+                    isEmail ? login : "",
+
+                password: password
+
+            };
+
+
+            const response =
+                await fetch(
+                    "/api/users/login",
+                    {
+                        method:"POST",
+
+                        credentials:"include",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(loginData)
+                    }
+                );
+
+
+            let data = {};
+
+            try{
+
+                data =
+                    await response.json();
+
+            }catch(jsonError){
+
+                throw new Error(
+                    "Server returned an invalid response."
+                );
+            }
+
+
+            /*
+            ====================================================
+            LOGIN FAILED
+            ====================================================
+            */
+
+            if(!response.ok ||
+               !data.success){
+
+                throw new Error(
+                    data.message ||
+                    "Invalid username/email or password."
+                );
+            }
+
+
+            /*
+            ====================================================
+            IMPORTANT:
+            VERIFY THAT THE SESSION COOKIE ACTUALLY WORKS
+            ====================================================
+            */
+
+            const meResponse =
+                await fetch(
+                    "/api/users/me",
+                    {
+                        method:"GET",
+                        credentials:"include"
+                    }
+                );
+
+
+            const meData =
+                await meResponse.json();
+
+
+            if(!meResponse.ok ||
+               !meData.success){
+
+                throw new Error(
+                    "Login succeeded, but the member session was not created. Please restart the server and try again."
+                );
+            }
+
+
+            /*
+            ====================================================
+            LOGIN SUCCESS
+            ====================================================
+            */
+
+            showMessage(
+                "Login successful. Opening member dashboard...",
+                "success"
+            );
+
+
+            setTimeout(
+                function(){
+
+                    window.location.href =
+                        "member.html";
+
+                },
+                700
+            );
+
+        }
+
+        catch(error){
+
+            console.error(
+                "NEPPLAY LOGIN ERROR:",
+                error
+            );
+
+
+            showMessage(
+                error.message ||
+                "Login failed. Please try again.",
+                "error"
+            );
+
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Login";
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

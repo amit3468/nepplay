@@ -1,0 +1,541 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEPPLAY - Teams</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080b12; color: white; min-height: 100vh;
+}
+
+/* HEADER */
+header {
+    background: #0d111b;
+    border-bottom: 1px solid #202634;
+    padding: 18px 6%;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+}
+.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
+.logo span { color: #ff3b30; }
+nav { display: flex; align-items: center; gap: 28px; }
+nav a {
+    color: #c7ccd7; text-decoration: none;
+    font-size: 15px; font-weight: 600;
+}
+nav a:hover, nav a.active { color: #ff4438; }
+.login-btn {
+    background: #ff3b30; color: white !important;
+    padding: 10px 20px; border-radius: 7px;
+}
+
+/* HERO */
+.hero { text-align: center; padding: 60px 20px 30px; }
+.hero h1 { font-size: 46px; margin-bottom: 15px; }
+.hero h1 span { color: #ff3b30; }
+.hero p { color: #9299a8; font-size: 17px; max-width: 600px; margin: 0 auto; }
+
+/* CONTROLS */
+.controls {
+    width: 88%; max-width: 1200px;
+    margin: 30px auto 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 15px; flex-wrap: wrap;
+}
+.game-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+.game-tab {
+    padding: 10px 18px;
+    background: #111621; border: 1px solid #293141;
+    border-radius: 7px; color: #c5cbd6;
+    cursor: pointer; font-weight: 600; font-size: 14px;
+}
+.game-tab.active, .game-tab:hover {
+    background: #ff3b30; border-color: #ff3b30; color: white;
+}
+.search-input {
+    background: #111621; border: 1px solid #293141;
+    border-radius: 7px; padding: 10px 15px;
+    color: white; outline: none; min-width: 240px; font-size: 14px;
+}
+.search-input:focus { border-color: #ff3b30; }
+
+/* TEAM GRID */
+.container {
+    width: 88%; max-width: 1200px;
+    margin: auto; padding-bottom: 70px;
+}
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+.team-card {
+    background: #111621; border: 1px solid #242b39;
+    border-radius: 12px; padding: 20px;
+    cursor: pointer; transition: 0.2s;
+    display: flex; flex-direction: column;
+}
+.team-card:hover {
+    border-color: #ff3b30; transform: translateY(-3px);
+}
+.team-header {
+    display: flex; align-items: center;
+    gap: 14px; margin-bottom: 16px;
+}
+.team-avatar {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: linear-gradient(135deg, #ff3b30, #b91c1c);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900;
+    flex-shrink: 0; letter-spacing: 0.5px;
+}
+.team-info { flex: 1; min-width: 0; }
+.team-name {
+    font-size: 17px; font-weight: bold;
+    margin-bottom: 3px; word-break: break-word;
+}
+.team-captain { color: #9299a8; font-size: 12px; }
+.team-rank-badge {
+    display: inline-block; padding: 4px 10px;
+    border-radius: 20px; font-size: 11px;
+    font-weight: bold; margin-top: 4px;
+}
+.rank-1 { background: rgba(255,212,59,0.15); color: #ffd43b; }
+.rank-2 { background: rgba(184,190,199,0.15); color: #b8bec7; }
+.rank-3 { background: rgba(205,127,50,0.15); color: #cd7f32; }
+
+.team-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; margin-top: auto;
+    padding-top: 16px; border-top: 1px solid #1e293b;
+}
+.team-stat { text-align: center; }
+.team-stat-value {
+    font-size: 18px; font-weight: bold; color: white;
+}
+.team-stat-value.points { color: #ff4438; }
+.team-stat-value.wins { color: #5bed8e; }
+.team-stat-label {
+    color: #64748b; font-size: 10px;
+    text-transform: uppercase; margin-top: 2px;
+    letter-spacing: 0.4px;
+}
+.team-games {
+    margin-top: 12px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+.game-chip {
+    background: #1a2233; border: 1px solid #2d3a55;
+    color: #a8b6d1; padding: 3px 8px;
+    border-radius: 5px; font-size: 10px; font-weight: 600;
+}
+
+/* EMPTY / LOADING */
+.empty, .loading {
+    text-align: center; padding: 70px 20px;
+    color: #8993a2; font-size: 14px; line-height: 1.7;
+    background: #111621; border: 1px solid #242b39;
+    border-radius: 12px; grid-column: 1 / -1;
+}
+.loading-spinner {
+    display: inline-block;
+    width: 30px; height: 30px;
+    border: 3px solid #242b39;
+    border-top-color: #ff3b30;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 15px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* MODAL */
+.modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 200;
+    align-items: center; justify-content: center;
+    padding: 20px; overflow-y: auto;
+}
+.modal.show { display: flex; }
+.modal-box {
+    width: 100%; max-width: 600px;
+    max-height: 90vh; overflow-y: auto;
+    background: #111621; border: 1px solid #334155;
+    border-radius: 14px; padding: 25px;
+}
+.modal-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 15px;
+    margin-bottom: 22px;
+}
+.modal-team-name { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+.modal-captain { color: #9299a8; font-size: 13px; }
+.close-btn {
+    border: none; background: transparent;
+    color: #94a3b8; font-size: 26px;
+    cursor: pointer; line-height: 1; padding: 0 5px;
+}
+.close-btn:hover { color: white; }
+.modal-stats {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; margin-bottom: 22px;
+}
+.modal-stat {
+    background: #0b1220; border: 1px solid #1e293b;
+    border-radius: 10px; padding: 16px; text-align: center;
+}
+.modal-stat-value {
+    font-size: 26px; font-weight: bold;
+    color: #ff4438; margin-bottom: 4px;
+}
+.modal-stat-label {
+    color: #9299a8; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.match-history-title {
+    font-size: 15px; font-weight: bold;
+    margin-bottom: 12px; color: #c5cbd6;
+}
+.match-history { display: grid; gap: 8px; }
+.match-row {
+    background: #0b1220; border: 1px solid #1e293b;
+    border-radius: 8px; padding: 11px 14px;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; font-size: 13px;
+}
+.match-row.win { border-left: 3px solid #5bed8e; }
+.match-row.loss { border-left: 3px solid #ff7d76; }
+.match-row.tie { border-left: 3px solid #ffd75a; }
+.match-opponent {
+    flex: 1; color: #c5cbd6;
+    min-width: 0; word-break: break-word;
+}
+.match-result-badge {
+    font-weight: bold; font-size: 11px;
+    padding: 3px 8px; border-radius: 4px;
+}
+.result-win { background: rgba(91,237,142,0.15); color: #5bed8e; }
+.result-loss { background: rgba(255,125,118,0.15); color: #ff7d76; }
+.result-tie { background: rgba(255,215,90,0.15); color: #ffd75a; }
+
+footer {
+    border-top: 1px solid #202634;
+    text-align: center; padding: 25px;
+    color: #717887; font-size: 13px;
+}
+
+@media (max-width: 750px) {
+    header { flex-direction: column; gap: 15px; }
+    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
+    .hero h1 { font-size: 34px; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .search-input { width: 100%; }
+    .team-grid { grid-template-columns: 1fr; }
+    .modal-stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">NEP<span>PLAY</span></div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="tournaments.html">Tournaments</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="teams.html" class="active">Teams</a>
+        <a href="winners.html">Winners</a>
+        <a href="login.html" class="login-btn">Login</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>NEPPLAY <span>Teams</span></h1>
+    <p>Discover competitive gaming teams from Nepal, follow their progress and compete in NEPPLAY tournaments.</p>
+</section>
+
+<div class="controls">
+    <div class="game-tabs">
+        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">All Games</button>
+        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">Free Fire</button>
+        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">PUBG Mobile</button>
+        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">Mobile Legends</button>
+        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">eFootball</button>
+    </div>
+    <input type="text" class="search-input" id="searchBox" placeholder="Search team or captain..." oninput="renderTeams()">
+</div>
+
+<main class="container">
+    <div class="team-grid" id="teamGrid">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading teams...</div>
+        </div>
+    </div>
+</main>
+
+<div id="teamModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <div class="modal-team-name" id="modalTeamName">Team Name</div>
+                <div class="modal-captain" id="modalCaptain">Captain</div>
+            </div>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-stats">
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modalPoints">0</div>
+                <div class="modal-stat-label">Points</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modalWins">0</div>
+                <div class="modal-stat-label">Wins</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modalPlayed">0</div>
+                <div class="modal-stat-label">Matches Played</div>
+            </div>
+            <div class="modal-stat">
+                <div class="modal-stat-value" id="modalWinRate">0%</div>
+                <div class="modal-stat-label">Win Rate</div>
+            </div>
+        </div>
+        <div class="match-history-title">Recent Matches</div>
+        <div class="match-history" id="modalMatchHistory">Loading...</div>
+    </div>
+</div>
+
+<footer>
+    © 2026 NEPPLAY — Nepal Gaming Community
+</footer>
+
+<script>
+
+var allTeams = [];
+var allMatches = [];
+var currentGame = "all";
+
+function esc(value) {
+    if (value === undefined || value === null) return "";
+    return String(value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function teamInitials(name) {
+    var words = String(name || "?").trim().split(/\s+/).filter(function (w) { return w.length > 0; });
+    if (words.length === 0) return "?";
+    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
+}
+
+function loadTeams() {
+    fetch("/api/leaderboard", { cache: "no-store" })
+    .then(function (response) {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+    })
+    .then(function (data) {
+        var teams = [];
+        if (Array.isArray(data)) teams = data;
+        else if (data && Array.isArray(data.teams)) teams = data.teams;
+        allTeams = teams;
+        renderTeams();
+    })
+    .catch(function (error) {
+        console.error("Teams error:", error);
+        document.getElementById("teamGrid").innerHTML =
+            '<div class="empty">Could not load teams.<br>Make sure the server is running.</div>';
+    });
+}
+
+function loadMatches() {
+    return fetch("/api/matches", { cache: "no-store" })
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+        var matches = [];
+        if (Array.isArray(data)) matches = data;
+        else if (data && Array.isArray(data.matches)) matches = data.matches;
+        allMatches = matches;
+    })
+    .catch(function () { allMatches = []; });
+}
+
+function getFilteredTeams() {
+    var teams = allTeams.slice();
+    if (currentGame !== "all") {
+        teams = teams.filter(function (t) {
+            var games = t.games || [];
+            if (Array.isArray(games) && games.length > 0) {
+                return games.indexOf(currentGame) !== -1;
+            }
+            return String(t.game || "") === currentGame;
+        });
+    }
+    var search = (document.getElementById("searchBox").value || "").toLowerCase().trim();
+    if (search) {
+        teams = teams.filter(function (t) {
+            var text = ((t.name || "") + " " + (t.captain || "")).toLowerCase();
+            return text.indexOf(search) !== -1;
+        });
+    }
+    return teams;
+}
+
+function renderTeams() {
+    var grid = document.getElementById("teamGrid");
+    var teams = getFilteredTeams();
+
+    if (teams.length === 0) {
+        grid.innerHTML =
+            '<div class="empty">' +
+                'No teams found.<br>' +
+                'Complete matches to start ranking teams.' +
+            '</div>';
+        return;
+    }
+
+    teams.sort(function (a, b) {
+        if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+        if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
+        return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+    grid.innerHTML = teams.map(function (team, index) {
+        var rank = index + 1;
+        var rankBadge = "";
+        if (rank === 1) rankBadge = '<span class="team-rank-badge rank-1">Rank #1</span>';
+        else if (rank === 2) rankBadge = '<span class="team-rank-badge rank-2">Rank #2</span>';
+        else if (rank === 3) rankBadge = '<span class="team-rank-badge rank-3">Rank #3</span>';
+
+        var gamesHtml = "";
+        if (Array.isArray(team.games) && team.games.length > 0) {
+            gamesHtml = '<div class="team-games">' +
+                team.games.map(function (g) {
+                    return '<span class="game-chip">' + esc(g) + '</span>';
+                }).join("") +
+            '</div>';
+        }
+
+        var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
+
+        return (
+            '<div class="team-card" onclick="openTeamModal(\'' + esc(team.name) + '\')">' +
+                '<div class="team-header">' +
+                    '<div class="team-avatar">' + teamInitials(team.name) + '</div>' +
+                    '<div class="team-info">' +
+                        '<div class="team-name">' + esc(team.name || "Unknown") + '</div>' +
+                        '<div class="team-captain">Captain: ' + esc(team.captain || "Not set") + '</div>' +
+                        rankBadge +
+                    '</div>' +
+                '</div>' +
+                gamesHtml +
+                '<div class="team-stats">' +
+                    '<div class="team-stat"><div class="team-stat-value">' + (team.played || 0) + '</div><div class="team-stat-label">Played</div></div>' +
+                    '<div class="team-stat"><div class="team-stat-value wins">' + (team.wins || 0) + '</div><div class="team-stat-label">Wins</div></div>' +
+                    '<div class="team-stat"><div class="team-stat-value">' + winRate + '%</div><div class="team-stat-label">Win Rate</div></div>' +
+                    '<div class="team-stat"><div class="team-stat-value points">' + (team.points || 0) + '</div><div class="team-stat-label">Points</div></div>' +
+                '</div>' +
+            '</div>'
+        );
+    }).join("");
+}
+
+function openTeamModal(teamName) {
+    var team = allTeams.find(function (t) {
+        return String(t.name || "") === String(teamName);
+    });
+    if (!team) return;
+
+    document.getElementById("modalTeamName").textContent = team.name || "Unknown";
+    document.getElementById("modalCaptain").textContent = "Captain: " + (team.captain || "Not set");
+    document.getElementById("modalPoints").textContent = team.points || 0;
+    document.getElementById("modalWins").textContent = team.wins || 0;
+    document.getElementById("modalPlayed").textContent = team.played || 0;
+    var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
+    document.getElementById("modalWinRate").textContent = winRate + "%";
+
+    renderMatchHistory(team.name);
+    document.getElementById("teamModal").classList.add("show");
+}
+
+function renderMatchHistory(teamName) {
+    var container = document.getElementById("modalMatchHistory");
+
+    if (allMatches.length === 0) {
+        container.innerHTML =
+            '<div style="color:#8993a2;padding:20px;text-align:center;">No match history available.</div>';
+        return;
+    }
+
+    var key = String(teamName || "").toLowerCase().trim();
+    var teamMatches = allMatches.filter(function (m) {
+        var t1 = String(m.team1 || "").toLowerCase().trim();
+        var t2 = String(m.team2 || "").toLowerCase().trim();
+        if (t1 !== key && t2 !== key) return false;
+        var s = String(m.status || "").toLowerCase();
+        return s === "completed" || s === "complete" || s === "finished" || s === "finish";
+    });
+
+    if (teamMatches.length === 0) {
+        container.innerHTML =
+            '<div style="color:#8993a2;padding:20px;text-align:center;">This team has no completed matches yet.</div>';
+        return;
+    }
+
+    teamMatches = teamMatches.slice(-10).reverse();
+
+    container.innerHTML = teamMatches.map(function (m) {
+        var t1 = String(m.team1 || "").toLowerCase().trim();
+        var isTeam1 = t1 === key;
+        var opponent = isTeam1 ? (m.team2 || "Unknown") : (m.team1 || "Unknown");
+        var winner = String(m.winner || "").toLowerCase().trim();
+
+        var result, resultClass;
+        if (!winner) { result = "TIE"; resultClass = "result-tie"; }
+        else if (winner === key) { result = "WIN"; resultClass = "result-win"; }
+        else { result = "LOSS"; resultClass = "result-loss"; }
+
+        var rowClass = result === "WIN" ? "match-row win"
+            : result === "LOSS" ? "match-row loss"
+            : "match-row tie";
+
+        return (
+            '<div class="' + rowClass + '">' +
+                '<div class="match-opponent">vs ' + esc(opponent) + '</div>' +
+                '<span class="match-result-badge ' + resultClass + '">' + result + '</span>' +
+            '</div>'
+        );
+    }).join("");
+}
+
+function closeModal() {
+    document.getElementById("teamModal").classList.remove("show");
+}
+
+function changeGame(game, button) {
+    currentGame = game;
+    document.querySelectorAll(".game-tab").forEach(function (btn) {
+        btn.classList.remove("active");
+    });
+    button.classList.add("active");
+    renderTeams();
+}
+
+document.getElementById("teamModal").addEventListener("click", function (e) {
+    if (e.target === this) closeModal();
+});
+
+loadMatches().then(function () { loadTeams(); });
+
+</script>
+
+</body>
+</html>

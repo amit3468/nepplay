@@ -1,0 +1,484 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEPPLAY - Nepal Gaming Community</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080b12; color: white; min-height: 100vh;
+}
+
+/* HEADER */
+header {
+    background: #0d111b;
+    border-bottom: 1px solid #202634;
+    padding: 18px 6%;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+}
+.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
+.logo span { color: #ff3b30; }
+nav { display: flex; align-items: center; gap: 28px; }
+nav a {
+    color: #c7ccd7; text-decoration: none;
+    font-size: 15px; font-weight: 600;
+}
+nav a:hover, nav a.active { color: #ff4438; }
+.login-btn {
+    background: #ff3b30; color: white !important;
+    padding: 10px 20px; border-radius: 7px;
+}
+
+/* HERO */
+.hero {
+    max-width: 1200px; margin: auto;
+    padding: 60px 20px 40px;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 40px; align-items: center;
+}
+.hero-content h1 {
+    font-size: 54px; line-height: 1.05; margin-bottom: 20px;
+}
+.hero-content h1 span { color: #ff3b30; }
+.hero-badge {
+    display: inline-block; padding: 8px 14px;
+    border: 1px solid #5935a9; border-radius: 20px;
+    color: #b992ff; background: #160e2d;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 1px; margin-bottom: 20px;
+}
+.hero-content p {
+    color: #9ca6ba; font-size: 17px;
+    line-height: 1.7; max-width: 560px; margin-bottom: 30px;
+}
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+    display: inline-block; padding: 13px 24px;
+    border-radius: 9px; text-decoration: none;
+    font-weight: bold; font-size: 15px;
+    cursor: pointer; border: none;
+}
+.btn-primary { background: #ff3b30; color: white; }
+.btn-primary:hover { background: #dc2626; }
+.btn-secondary {
+    background: transparent; color: white;
+    border: 1px solid #3b4a63;
+}
+.btn-secondary:hover { background: #1e293b; }
+
+/* HERO VISUAL */
+.hero-visual { display: flex; justify-content: center; }
+.gaming-card {
+    width: 100%; max-width: 320px;
+    background: linear-gradient(135deg, #1a1608 0%, #111621 100%);
+    border: 1px solid #334155; border-radius: 18px;
+    padding: 26px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.card-top {
+    color: #ff4438; font-size: 12px; font-weight: 800;
+    letter-spacing: 1px; margin-bottom: 15px;
+}
+.live-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: #ff3b30;
+    margin-right: 6px;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.controller-icon {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #ff3b30, #b91c1c);
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900;
+    margin-bottom: 14px;
+}
+.gaming-card h3 {
+    font-size: 22px; font-weight: 900; margin-bottom: 4px;
+}
+.gaming-card p {
+    color: #8b95a8; font-size: 13px; margin-bottom: 20px;
+}
+.card-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.card-stats > div {
+    background: #0b1220; border-radius: 10px;
+    padding: 10px 5px; border: 1px solid #1e293b;
+}
+.card-stats strong {
+    display: block; color: #ff4438;
+    font-size: 17px; margin-bottom: 2px;
+}
+.card-stats span {
+    color: #7d8a9f; font-size: 10px; text-transform: uppercase;
+}
+
+/* ANNOUNCEMENTS */
+.announcements-section {
+    max-width: 1200px; margin: 30px auto 0;
+    padding: 0 20px; display: none;
+}
+.announcements-section.show { display: block; }
+.announcements-heading { margin-bottom: 20px; }
+.announcements-heading span {
+    display: inline-block; padding: 6px 12px;
+    border: 1px solid #5935a9; border-radius: 20px;
+    color: #b992ff; background: #160e2d;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 1px; margin-bottom: 12px;
+}
+.announcements-heading h2 { font-size: 30px; margin-bottom: 6px; }
+.announcements-heading p { color: #8b95a8; font-size: 14px; }
+.announcements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+}
+.announcement-card {
+    background: #101725; border: 1px solid #263149;
+    border-radius: 14px; padding: 20px; position: relative;
+}
+.announcement-card.pinned { border-color: #ffd43b; }
+.announcement-card.pinned::before {
+    content: "PINNED";
+    position: absolute; top: -1px; right: 14px;
+    background: #ffd43b; color: #0d111b;
+    font-size: 9px; font-weight: 900;
+    letter-spacing: 1px; padding: 3px 8px;
+    border-radius: 0 0 5px 5px;
+}
+.announcement-type {
+    display: inline-block; padding: 4px 10px;
+    border-radius: 20px; font-size: 10px;
+    font-weight: bold; letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+.announcement-type.info { background: #172b4a; color: #7db7ff; }
+.announcement-type.warning { background: #3a3009; color: #ffd84d; }
+.announcement-type.urgent { background: #3a1212; color: #ff7d76; }
+.announcement-title {
+    font-size: 17px; font-weight: bold;
+    color: white; margin-bottom: 8px;
+    word-break: break-word; line-height: 1.35;
+}
+.announcement-message {
+    color: #aeb7c7; font-size: 14px;
+    line-height: 1.6; margin-bottom: 12px;
+    word-break: break-word;
+}
+.announcement-time { color: #64748b; font-size: 12px; }
+
+/* GAMES SECTION */
+.games-section {
+    max-width: 1200px; margin: 60px auto 0;
+    padding: 0 20px;
+}
+.section-heading {
+    text-align: center; margin-bottom: 40px;
+}
+.section-heading span {
+    display: inline-block; padding: 6px 12px;
+    border: 1px solid #5935a9; border-radius: 20px;
+    color: #b992ff; background: #160e2d;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 1px; margin-bottom: 14px;
+}
+.section-heading h2 { font-size: 36px; margin-bottom: 10px; }
+.section-heading p {
+    color: #8b95a8; font-size: 15px;
+    max-width: 500px; margin: 0 auto;
+}
+.games-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.game-card {
+    background: #101725; border: 1px solid #263149;
+    border-radius: 16px; padding: 26px;
+    text-align: center; text-decoration: none;
+    color: white; transition: 0.2s;
+}
+.game-card:hover {
+    border-color: #7542e4; transform: translateY(-4px);
+}
+.game-icon {
+    width: 70px; height: 70px;
+    border-radius: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900;
+    margin: 0 auto 16px;
+    color: white;
+}
+.game-icon.fire {
+    background: linear-gradient(135deg, #ff3b30, #b91c1c);
+    box-shadow: 0 8px 20px rgba(255,59,48,0.3);
+}
+.game-icon.pubg {
+    background: linear-gradient(135deg, #f59e0b, #b45309);
+    box-shadow: 0 8px 20px rgba(245,158,11,0.3);
+}
+.game-icon.mlbb {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    box-shadow: 0 8px 20px rgba(124,58,237,0.3);
+}
+.game-icon.efootball {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 8px 20px rgba(5,150,105,0.3);
+}
+.game-icon.codm {
+    background: linear-gradient(135deg, #0ea5e9, #0369a1);
+    box-shadow: 0 8px 20px rgba(14,165,233,0.3);
+}
+.game-card h3 { font-size: 20px; margin-bottom: 6px; }
+.game-card p { color: #8b95a8; font-size: 13px; margin-bottom: 14px; }
+.game-link { color: #ff4438; font-weight: bold; font-size: 13px; }
+
+/* CTA */
+.cta-section {
+    max-width: 1200px; margin: 70px auto 0;
+    padding: 0 20px;
+}
+.cta-content {
+    background: linear-gradient(135deg, #1a0e2d, #111621);
+    border: 1px solid #5935a9; border-radius: 18px;
+    padding: 50px 40px; text-align: center;
+}
+.cta-content span {
+    display: inline-block; padding: 6px 12px;
+    border: 1px solid #5935a9; border-radius: 20px;
+    color: #b992ff; background: #160e2d;
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 1px; margin-bottom: 16px;
+}
+.cta-content h2 { font-size: 34px; margin-bottom: 14px; }
+.cta-content h2 span { color: #ff3b30; }
+.cta-content p {
+    color: #8b95a8; font-size: 15px;
+    max-width: 500px; margin: 0 auto 24px;
+    line-height: 1.7;
+}
+
+/* FOOTER */
+footer {
+    margin-top: 70px; border-top: 1px solid #202634;
+    padding: 40px 6% 25px;
+}
+.footer-content {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 30px;
+    flex-wrap: wrap; padding-bottom: 25px;
+    border-bottom: 1px solid #1a2130;
+}
+.footer-brand p { color: #7d8a9f; font-size: 13px; margin-top: 8px; }
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer-links a {
+    color: #aeb7c7; text-decoration: none; font-size: 14px;
+}
+.footer-links a:hover { color: #ff4438; }
+.footer-bottom {
+    max-width: 1200px; margin: 20px auto 0;
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    color: #667188; font-size: 13px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .hero {
+        grid-template-columns: 1fr; text-align: center;
+        padding: 40px 20px 30px;
+    }
+    .hero-content h1 { font-size: 40px; }
+    .hero-content p { margin-left: auto; margin-right: auto; }
+    .hero-buttons { justify-content: center; }
+    .games-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 750px) {
+    header { flex-direction: column; gap: 15px; }
+    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
+    .hero-content h1 { font-size: 34px; }
+    .section-heading h2 { font-size: 28px; }
+    .cta-content h2 { font-size: 26px; }
+    .cta-content { padding: 36px 24px; }
+    .footer-content { flex-direction: column; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">NEP<span>PLAY</span></div>
+    <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="tournaments.html">Tournaments</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="teams.html">Teams</a>
+        <a href="winners.html">Winners</a>
+        <a href="login.html" class="login-btn">Login</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">NEPAL'S GAMING COMMUNITY</div>
+        <h1>PLAY. <span>COMPETE.</span><br>DOMINATE.</h1>
+        <p>
+            Join Nepal's gaming community and compete in exciting tournaments,
+            build your team, and climb the leaderboard.
+        </p>
+        <div class="hero-buttons">
+            <a href="tournaments.html" class="btn btn-primary">Browse Tournaments</a>
+            <a href="leaderboard.html" class="btn btn-secondary">View Leaderboard</a>
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="gaming-card">
+            <div class="card-top">
+                <span class="live-dot"></span>
+                LIVE COMMUNITY
+            </div>
+            <div class="controller-icon">N</div>
+            <h3>NEPPLAY</h3>
+            <p>Nepal Gaming Community</p>
+            <div class="card-stats">
+                <div><strong>1K+</strong><span>Players</span></div>
+                <div><strong>50+</strong><span>Tournaments</span></div>
+                <div><strong>100+</strong><span>Teams</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="announcements-section" id="announcementsSection">
+    <div class="announcements-heading">
+        <span>LATEST NEWS</span>
+        <h2>Announcements</h2>
+        <p>Stay updated with the latest from NEPPLAY.</p>
+    </div>
+    <div class="announcements-grid" id="announcementsGrid"></div>
+</section>
+
+<section class="games-section">
+    <div class="section-heading">
+        <span>FEATURED GAMES</span>
+        <h2>Choose Your Battle</h2>
+        <p>Compete with the best players across popular mobile games.</p>
+    </div>
+    <div class="games-grid">
+        <a href="tournaments.html?game=Free%20Fire" class="game-card">
+            <div class="game-icon fire">FF</div>
+            <h3>Free Fire</h3>
+            <p>Battle Royale</p>
+            <span class="game-link">View Tournaments →</span>
+        </a>
+        <a href="tournaments.html?game=PUBG%20Mobile" class="game-card">
+            <div class="game-icon pubg">PM</div>
+            <h3>PUBG Mobile</h3>
+            <p>Battle Royale</p>
+            <span class="game-link">View Tournaments →</span>
+        </a>
+        <a href="tournaments.html?game=Mobile%20Legends" class="game-card">
+            <div class="game-icon mlbb">ML</div>
+            <h3>Mobile Legends</h3>
+            <p>MOBA</p>
+            <span class="game-link">View Tournaments →</span>
+        </a>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-content">
+        <span>READY TO PLAY?</span>
+        <h2>Your Next Victory <span>Starts Here.</span></h2>
+        <p>
+            Find a tournament, create your team and prove that you belong at the top.
+        </p>
+        <a href="tournaments.html" class="btn btn-primary">Find a Tournament</a>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-brand">
+            <div class="logo">NEP<span>PLAY</span></div>
+            <p>Nepal's Gaming Community</p>
+        </div>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="tournaments.html">Tournaments</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="teams.html">Teams</a>
+            <a href="winners.html">Winners</a>
+            <a href="login.html">Login</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 NEPPLAY. All rights reserved.</p>
+        <p>Built for Nepal Gamers</p>
+    </div>
+</footer>
+
+<script>
+(function () {
+    function esc(v) {
+        if (v === undefined || v === null) return "";
+        return String(v)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+    function timeAgo(iso) {
+        if (!iso) return "";
+        var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+        if (diff < 60) return diff + "s ago";
+        if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+        if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+        if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
+        return new Date(iso).toLocaleDateString("en-NP", {
+            year: "numeric", month: "short", day: "numeric"
+        });
+    }
+
+    fetch("/api/announcements?limit=3", { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var list = (data && Array.isArray(data.announcements))
+                ? data.announcements
+                : (Array.isArray(data) ? data : []);
+            if (list.length === 0) return;
+            var section = document.getElementById("announcementsSection");
+            var grid = document.getElementById("announcementsGrid");
+            var html = "";
+            for (var i = 0; i < list.length; i++) {
+                var a = list[i];
+                var type = (a.type || "info").toLowerCase();
+                html +=
+                    '<div class="announcement-card ' + (a.pinned ? 'pinned' : '') + '">' +
+                        '<span class="announcement-type ' + type + '">' + esc(type.toUpperCase()) + '</span>' +
+                        '<div class="announcement-title">' + esc(a.title || "Announcement") + '</div>' +
+                        '<div class="announcement-message">' + esc(a.message || "") + '</div>' +
+                        '<div class="announcement-time">' + timeAgo(a.createdAt) + '</div>' +
+                    '</div>';
+            }
+            grid.innerHTML = html;
+            section.classList.add("show");
+        })
+        .catch(function () {});
+})();
+</script>
+
+</body>
+</html>

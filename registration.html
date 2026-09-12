@@ -1,0 +1,671 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NEPPLAY - Tournament Registration</title>
+
+<style>
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#080d18;
+    color:#fff;
+    min-height:100vh;
+}
+
+.container{ width:min(850px,94%); margin:30px auto; }
+
+.header{
+    background:#111927;
+    border:1px solid #27364d;
+    border-radius:15px;
+    padding:25px;
+    margin-bottom:20px;
+}
+
+.logo{ font-size:30px; font-weight:900; color:#ff3b30; }
+
+.back{
+    display:inline-block;
+    margin-top:14px;
+    color:#8eb5df;
+    text-decoration:none;
+}
+
+.card{
+    background:#111927;
+    border:1px solid #27364d;
+    border-radius:15px;
+    padding:25px;
+    margin-bottom:20px;
+}
+
+.title{ font-size:25px; margin-bottom:8px; }
+
+.subtitle{
+    color:#8da2bc;
+    line-height:1.6;
+    margin-bottom:20px;
+}
+
+.tournament-box{
+    background:#0b1320;
+    border:1px solid #2b3d56;
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:22px;
+}
+
+.tournament-name{
+    font-size:21px;
+    font-weight:bold;
+    color:#ff3b30;
+}
+
+.game{ margin-top:6px; color:#9cb5d3; }
+
+.fee{ margin-top:10px; font-size:20px; font-weight:bold; }
+
+.form-group{ margin-bottom:17px; }
+
+label{
+    display:block;
+    margin-bottom:7px;
+    color:#c8d5e5;
+    font-weight:bold;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #30435e;
+    background:#0a111d;
+    color:#fff;
+    font-size:15px;
+    outline:none;
+}
+
+input:focus,
+textarea:focus,
+select:focus{ border-color:#ff3b30; }
+
+textarea{ min-height:100px; resize:vertical; }
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.section-title{
+    font-size:19px;
+    margin:25px 0 15px;
+    color:#fff;
+}
+
+.payment-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.payment-option{
+    border:1px solid #30435e;
+    background:#0b1320;
+    border-radius:10px;
+    padding:16px;
+    cursor:pointer;
+}
+
+.payment-option.selected{
+    border-color:#ff3b30;
+    background:#201517;
+}
+
+.payment-option input{ width:auto; margin-right:8px; }
+
+.payment-name{ font-weight:bold; font-size:18px; }
+
+.payment-details{
+    display:none;
+    margin-top:15px;
+    padding:15px;
+    border-radius:10px;
+    background:#080d18;
+    border:1px solid #293a52;
+}
+
+.payment-details.active{ display:block; }
+
+.qr{
+    width:180px;
+    height:180px;
+    object-fit:contain;
+    background:#fff;
+    border-radius:8px;
+    display:block;
+    margin:12px auto;
+}
+
+.wallet{ text-align:center; color:#b8c9dd; }
+.wallet strong{ color:#fff; }
+
+.amount{
+    background:#153b2b;
+    border:1px solid #267a55;
+    color:#8ef0bb;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.submit{
+    width:100%;
+    background:#ff3b30;
+    color:white;
+    border:0;
+    border-radius:9px;
+    padding:15px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.submit:disabled{ opacity:.5; cursor:not-allowed; }
+
+.message{
+    padding:15px;
+    border-radius:9px;
+    margin-bottom:18px;
+    display:none;
+}
+
+.message.error{
+    display:block;
+    background:#411818;
+    border:1px solid #9e3030;
+    color:#ffbaba;
+}
+
+.message.success{
+    display:block;
+    background:#123c28;
+    border:1px solid #2c8d5e;
+    color:#a4f2c7;
+}
+
+.small{
+    color:#8096b0;
+    font-size:13px;
+    line-height:1.6;
+}
+
+@media(max-width:650px){
+    .grid,
+    .payment-options{ grid-template-columns:1fr; }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div class="logo">NEPPLAY.</div>
+
+        <a href="/tournaments.html" class="back">
+            &larr; Back to Tournaments
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <h1 class="title">Tournament Registration</h1>
+
+        <p class="subtitle">
+            Complete your team information and payment details.
+            Your registration will remain Pending until the admin verifies your payment.
+        </p>
+
+        <div id="message" class="message"></div>
+
+        <div class="tournament-box">
+
+            <div id="tournamentName" class="tournament-name">
+                Loading tournament...
+            </div>
+
+            <div id="gameName" class="game"></div>
+
+            <div id="entryFee" class="fee"></div>
+
+        </div>
+
+        <form id="registrationForm">
+
+            <h2 class="section-title">Team Information</h2>
+
+            <div class="form-group">
+                <label>Team Name *</label>
+                <input id="teamName" required>
+            </div>
+
+            <div class="grid">
+
+                <div class="form-group">
+                    <label>Captain Name *</label>
+                    <input id="captainName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input id="phone" required>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Account Email</label>
+                <input id="email" type="email" readonly>
+            </div>
+
+            <h2 class="section-title">Players</h2>
+
+            <div class="grid">
+
+                <div class="form-group">
+                    <label>Player 1 *</label>
+                    <input id="player1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Player 2 *</label>
+                    <input id="player2" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Player 3 *</label>
+                    <input id="player3" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Player 4 *</label>
+                    <input id="player4" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Player 5</label>
+                    <input id="player5">
+                </div>
+
+                <div class="form-group">
+                    <label>Player 6</label>
+                    <input id="player6">
+                </div>
+
+            </div>
+
+            <h2 class="section-title">Payment</h2>
+
+            <div id="amountBox" class="amount">
+                Amount: Loading...
+            </div>
+
+            <div class="payment-options">
+
+                <label class="payment-option" id="esewaOption">
+                    <input type="radio" name="paymentMethod" value="eSewa">
+                    <span class="payment-name">eSewa</span>
+                </label>
+
+                <label class="payment-option" id="khaltiOption">
+                    <input type="radio" name="paymentMethod" value="Khalti">
+                    <span class="payment-name">Khalti</span>
+                </label>
+
+            </div>
+
+            <div id="esewaDetails" class="payment-details">
+
+                <strong>Pay using eSewa</strong>
+
+                <img src="/images/esewa-qr.png" class="qr" alt="eSewa QR">
+
+                <div class="wallet">
+                    eSewa Number:
+                    <strong id="esewaNumber">Loading...</strong>
+                </div>
+
+            </div>
+
+            <div id="khaltiDetails" class="payment-details">
+
+                <strong>Pay using Khalti</strong>
+
+                <img src="/images/khalti-qr.png" class="qr" alt="Khalti QR">
+
+                <div class="wallet">
+                    Khalti Number:
+                    <strong id="khaltiNumber">Loading...</strong>
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="form-group">
+                    <label>Payer Name</label>
+                    <input id="payerName">
+                </div>
+
+                <div class="form-group">
+                    <label>Payer Phone</label>
+                    <input id="payerPhone">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Transaction ID *</label>
+                <input
+                    id="transactionId"
+                    required
+                    placeholder="Enter eSewa/Khalti transaction ID"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="messageText" placeholder="Optional message"></textarea>
+            </div>
+
+            <p class="small">
+                Make sure the payment amount and transaction ID are correct.
+                The admin will verify the payment before approving your registration.
+            </p>
+
+            <button type="submit" id="submitButton" class="submit">
+                Submit Registration
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+var tournament = null;
+
+function showMessage(text, type) {
+    var box = document.getElementById("message");
+    box.textContent = text;
+    box.className = "message " + type;
+}
+
+function api(url, options) {
+    options = options || {};
+    return fetch(url, Object.assign({ credentials: "include" }, options))
+        .then(function (response) {
+            return response.text().then(function (text) {
+                var data = {};
+                try { data = text ? JSON.parse(text) : {}; } catch (e) { data = {}; }
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || "Request failed.");
+                }
+                return data;
+            });
+        });
+}
+
+function escapeHTML(value) {
+    return String(value === undefined || value === null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function load() {
+
+    api("/api/users/me")
+        .then(function (userData) {
+            if (userData && userData.user) {
+                document.getElementById("email").value = userData.user.email || "";
+            }
+        })
+        .catch(function () {
+            /* not logged in - silently continue so user sees login prompt later */
+        })
+        .then(function () {
+
+            var params = new URLSearchParams(window.location.search);
+            var tournamentId =
+                params.get("tournamentId") ||
+                params.get("tournament");
+
+            if (!tournamentId) {
+                throw new Error("Tournament was not selected.");
+            }
+
+            return api("/api/tournaments").then(function (response) {
+
+                /* Server returns { success:true, tournaments:[...] }
+                   But handle both shapes just in case */
+                var list = [];
+                if (Array.isArray(response)) {
+                    list = response;
+                } else if (response && Array.isArray(response.tournaments)) {
+                    list = response.tournaments;
+                }
+
+                var found = null;
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) === String(tournamentId)) {
+                        found = list[i];
+                        break;
+                    }
+                }
+
+                return found;
+
+            });
+
+        })
+        .then(function (found) {
+
+            if (!found) {
+                throw new Error("Tournament not found.");
+            }
+
+            tournament = found;
+
+            document.getElementById("tournamentName").textContent =
+                tournament.name || "Tournament";
+
+            document.getElementById("gameName").textContent =
+                tournament.game || "";
+
+            document.getElementById("entryFee").textContent =
+                "Entry Fee: NPR " + (tournament.entryFee || 0);
+
+            document.getElementById("amountBox").textContent =
+                "Amount to Pay: NPR " + (tournament.entryFee || 0);
+
+            if (
+                tournament.isFull ||
+                String(tournament.status || "").toLowerCase() !== "open"
+            ) {
+                document.getElementById("submitButton").disabled = true;
+                showMessage(
+                    "This tournament is not currently open for registration.",
+                    "error"
+                );
+            }
+
+            return api("/api/payment-settings").then(function (paymentData) {
+
+                if (paymentData && paymentData.payment) {
+
+                    if (paymentData.payment.eSewa) {
+                        document.getElementById("esewaNumber").textContent =
+                            paymentData.payment.eSewa.number;
+                    }
+
+                    if (paymentData.payment.Khalti) {
+                        document.getElementById("khaltiNumber").textContent =
+                            paymentData.payment.Khalti.number;
+                    }
+
+                }
+
+            }).catch(function () {
+                /* payment settings unavailable - not critical */
+            });
+
+        })
+        .catch(function (error) {
+
+            showMessage(error.message || "Could not load tournament.", "error");
+            document.getElementById("submitButton").disabled = true;
+
+        });
+
+}
+
+var radios = document.querySelectorAll('input[name="paymentMethod"]');
+
+for (var i = 0; i < radios.length; i++) {
+
+    radios[i].addEventListener("change", function () {
+
+        var esewaOpt = document.getElementById("esewaOption");
+        var khaltiOpt = document.getElementById("khaltiOption");
+        var esewaDet = document.getElementById("esewaDetails");
+        var khaltiDet = document.getElementById("khaltiDetails");
+
+        esewaOpt.classList.remove("selected");
+        khaltiOpt.classList.remove("selected");
+        esewaDet.classList.remove("active");
+        khaltiDet.classList.remove("active");
+
+        if (this.value === "eSewa") {
+            esewaOpt.classList.add("selected");
+            esewaDet.classList.add("active");
+        }
+
+        if (this.value === "Khalti") {
+            khaltiOpt.classList.add("selected");
+            khaltiDet.classList.add("active");
+        }
+
+    });
+
+}
+
+document
+    .getElementById("registrationForm")
+    .addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        if (!tournament) {
+            showMessage("Tournament information is not loaded yet.", "error");
+            return;
+        }
+
+        var selected = document.querySelector('input[name="paymentMethod"]:checked');
+
+        if (!selected) {
+            showMessage("Please select either eSewa or Khalti.", "error");
+            return;
+        }
+
+        var transactionId =
+            document.getElementById("transactionId").value.trim();
+
+        if (transactionId.length < 3) {
+            showMessage("Please enter a valid transaction ID.", "error");
+            return;
+        }
+
+        var btn = document.getElementById("submitButton");
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+
+        var body = {
+            tournamentId: tournament.id,
+            tournament: tournament.id,
+            game: tournament.game,
+            teamName: document.getElementById("teamName").value.trim(),
+            captainName: document.getElementById("captainName").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            player1: document.getElementById("player1").value.trim(),
+            player2: document.getElementById("player2").value.trim(),
+            player3: document.getElementById("player3").value.trim(),
+            player4: document.getElementById("player4").value.trim(),
+            player5: document.getElementById("player5").value.trim(),
+            player6: document.getElementById("player6").value.trim(),
+            payerName: document.getElementById("payerName").value.trim(),
+            payerPhone: document.getElementById("payerPhone").value.trim(),
+            transactionId: transactionId,
+            paymentMethod: selected.value,
+            amount: tournament.entryFee,
+            message: document.getElementById("messageText").value.trim()
+        };
+
+        api("/api/registrations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        })
+            .then(function (result) {
+
+                showMessage(
+                    result.message || "Registration submitted successfully.",
+                    "success"
+                );
+
+                document.getElementById("registrationForm").reset();
+
+                setTimeout(function () {
+                    window.location.href = "/member.html";
+                }, 1500);
+
+            })
+            .catch(function (error) {
+
+                showMessage(error.message || "Submission failed.", "error");
+                btn.disabled = false;
+                btn.textContent = "Submit Registration";
+
+            });
+
+    });
+
+load();
+
+</script>
+
+</body>
+</html>

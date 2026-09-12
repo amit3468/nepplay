@@ -1,0 +1,1037 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NEPPLAY - Match Management</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080d18;
+    color: white;
+    min-height: 100vh;
+}
+
+.container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 30px auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff3b30;
+}
+
+.header h1 {
+    margin-top: 5px;
+    font-size: 28px;
+}
+
+.header p {
+    color: #9ca3af;
+    margin-top: 5px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    border: none;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.back-btn {
+    background: #374151;
+    color: white;
+}
+
+.add-btn {
+    background: #ff3b30;
+    color: white;
+}
+
+.card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.card h2 {
+    margin-bottom: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    margin-bottom: 7px;
+    color: #d1d5db;
+    font-size: 14px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    background: #0b1220;
+    color: white;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #ff3b30;
+}
+
+.form-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+}
+
+.save-btn {
+    background: #22c55e;
+    color: white;
+}
+
+.cancel-btn {
+    background: #374151;
+    color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+th,
+td {
+    padding: 14px;
+    border-bottom: 1px solid #1f2937;
+    text-align: left;
+}
+
+th {
+    color: #9ca3af;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+td {
+    color: #e5e7eb;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-upcoming {
+    background: #1d4ed8;
+}
+
+.status-live {
+    background: #dc2626;
+}
+
+.status-completed {
+    background: #15803d;
+}
+
+.action-btn {
+    padding: 7px 10px;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+.edit-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color: white;
+}
+
+.empty {
+    text-align: center;
+    padding: 35px;
+    color: #9ca3af;
+}
+
+.tournament-info {
+    background: #0b1220;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ff3b30;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: none;
+}
+
+.success {
+    background: #14532d;
+    color: #bbf7d0;
+}
+
+.error {
+    background: #7f1d1d;
+    color: #fecaca;
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .header {
+        align-items: flex-start;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div>
+            <div class="logo">NEPPLAY</div>
+            <h1>Match Management</h1>
+            <p>Create and manage tournament matches</p>
+        </div>
+
+        <div class="buttons">
+            <button class="back-btn" onclick="goBack()">
+                ← Back
+            </button>
+
+            <button class="add-btn" onclick="showForm()">
+                + Add Match
+            </button>
+        </div>
+
+    </div>
+
+
+    <div class="tournament-info">
+        <strong>Tournament ID:</strong>
+        <span id="tournamentIdText">Loading...</span>
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <!-- ADD / EDIT FORM -->
+
+    <div id="formCard" class="card hidden">
+
+        <h2 id="formTitle">Add Match</h2>
+
+        <form id="matchForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Match Name</label>
+                    <input
+                        type="text"
+                        id="matchName"
+                        placeholder="Example: Match 1"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Game</label>
+
+                    <select id="game" required>
+
+                        <option value="">
+                            Select Game
+                        </option>
+
+                        <option value="Free Fire">
+                            Free Fire
+                        </option>
+
+                        <option value="PUBG Mobile">
+                            PUBG Mobile
+                        </option>
+
+                        <option value="Mobile Legends">
+                            Mobile Legends
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Status</label>
+
+                    <select id="status" required>
+
+                        <option value="Upcoming">
+                            Upcoming
+                        </option>
+
+                        <option value="Live">
+                            Live
+                        </option>
+
+                        <option value="Completed">
+                            Completed
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Date</label>
+
+                    <input
+                        type="date"
+                        id="matchDate"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Time</label>
+
+                    <input
+                        type="time"
+                        id="matchTime"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Room ID</label>
+
+                    <input
+                        type="text"
+                        id="roomId"
+                        placeholder="Enter Room ID"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label>Room Password</label>
+
+                    <input
+                        type="text"
+                        id="roomPassword"
+                        placeholder="Enter Room Password"
+                    >
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label>Notes</label>
+
+                    <textarea
+                        id="notes"
+                        placeholder="Optional match information..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="save-btn"
+                >
+                    Save Match
+                </button>
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    onclick="hideForm()"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- MATCH LIST -->
+
+    <div class="card">
+
+        <h2>Matches</h2>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Match</th>
+                        <th>Game</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Room ID</th>
+                        <th>Password</th>
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="matchesTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let matches = [];
+let editingId = null;
+
+
+/* =====================================================
+   GET TOURNAMENT ID FROM URL
+===================================================== */
+
+const params = new URLSearchParams(window.location.search);
+
+const tournamentId =
+    params.get("tournamentId") || "";
+
+
+document.getElementById("tournamentIdText").textContent =
+    tournamentId || "Not specified";
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(text, type) {
+
+    const box =
+        document.getElementById("message");
+
+    box.textContent = text;
+
+    box.className =
+        "message " + type;
+
+    box.style.display = "block";
+
+    setTimeout(() => {
+
+        box.style.display = "none";
+
+    }, 3000);
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+function showForm() {
+
+    editingId = null;
+
+    document.getElementById("formTitle").textContent =
+        "Add Match";
+
+    document.getElementById("matchForm").reset();
+
+    document.getElementById("formCard")
+        .classList.remove("hidden");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+function hideForm() {
+
+    editingId = null;
+
+    document.getElementById("formCard")
+        .classList.add("hidden");
+
+    document.getElementById("matchForm").reset();
+}
+
+
+/* =====================================================
+   LOAD MATCHES
+===================================================== */
+
+async function loadMatches() {
+
+    try {
+
+        let url = "/api/matches";
+
+        if (tournamentId) {
+
+            url +=
+                "?tournamentId=" +
+                encodeURIComponent(tournamentId);
+
+        }
+
+        const response =
+            await fetch(url, {
+                cache: "no-store"
+            });
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load matches"
+            );
+
+        }
+
+        matches = await response.json();
+
+        renderMatches();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Could not load matches.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderMatches() {
+
+    const tbody =
+        document.getElementById("matchesTable");
+
+    tbody.innerHTML = "";
+
+
+    if (!matches.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="empty">
+                    No matches found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    matches.forEach((match, index) => {
+
+        let statusClass =
+            "status-upcoming";
+
+        if (match.status === "Live") {
+            statusClass = "status-live";
+        }
+
+        if (match.status === "Completed") {
+            statusClass = "status-completed";
+        }
+
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>${index + 1}</td>
+
+            <td>
+                <strong>
+                    ${escapeHtml(match.matchName || "-")}
+                </strong>
+            </td>
+
+            <td>
+                ${escapeHtml(match.game || "-")}
+            </td>
+
+            <td>
+                ${escapeHtml(match.matchDate || "-")}
+            </td>
+
+            <td>
+                ${escapeHtml(match.matchTime || "-")}
+            </td>
+
+            <td>
+                <span class="status ${statusClass}">
+                    ${escapeHtml(match.status || "Upcoming")}
+                </span>
+            </td>
+
+            <td>
+                ${escapeHtml(match.roomId || "-")}
+            </td>
+
+            <td>
+                ${escapeHtml(match.roomPassword || "-")}
+            </td>
+
+            <td>
+
+                <button
+                    class="action-btn edit-btn"
+                    onclick="editMatch('${match.id}')"
+                >
+                    Edit
+                </button>
+
+                <button
+                    class="action-btn delete-btn"
+                    onclick="deleteMatch('${match.id}')"
+                >
+                    Delete
+                </button>
+
+            </td>
+        `;
+
+
+        tbody.appendChild(row);
+
+    });
+
+}
+
+
+/* =====================================================
+   ADD / EDIT MATCH
+===================================================== */
+
+document.getElementById("matchForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+
+    const matchData = {
+
+        tournamentId: tournamentId,
+
+        matchName:
+            document.getElementById("matchName").value.trim(),
+
+        game:
+            document.getElementById("game").value,
+
+        status:
+            document.getElementById("status").value,
+
+        matchDate:
+            document.getElementById("matchDate").value,
+
+        matchTime:
+            document.getElementById("matchTime").value,
+
+        roomId:
+            document.getElementById("roomId").value.trim(),
+
+        roomPassword:
+            document.getElementById("roomPassword").value.trim(),
+
+        notes:
+            document.getElementById("notes").value.trim()
+
+    };
+
+
+    try {
+
+        let response;
+
+
+        if (editingId) {
+
+            response =
+                await fetch(
+                    "/api/matches/" +
+                    encodeURIComponent(editingId),
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(matchData)
+                    }
+                );
+
+        } else {
+
+            response =
+                await fetch(
+                    "/api/matches",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(matchData)
+                    }
+                );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Failed to save match"
+            );
+
+        }
+
+
+        showMessage(
+            editingId
+                ? "Match updated successfully."
+                : "Match created successfully.",
+            "success"
+        );
+
+
+        hideForm();
+
+        await loadMatches();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+    }
+
+});
+
+
+/* =====================================================
+   EDIT
+===================================================== */
+
+function editMatch(id) {
+
+    const match =
+        matches.find(
+            item => String(item.id) === String(id)
+        );
+
+
+    if (!match) {
+        return;
+    }
+
+
+    editingId = id;
+
+
+    document.getElementById("formTitle")
+        .textContent = "Edit Match";
+
+
+    document.getElementById("matchName").value =
+        match.matchName || "";
+
+
+    document.getElementById("game").value =
+        match.game || "";
+
+
+    document.getElementById("status").value =
+        match.status || "Upcoming";
+
+
+    document.getElementById("matchDate").value =
+        match.matchDate || "";
+
+
+    document.getElementById("matchTime").value =
+        match.matchTime || "";
+
+
+    document.getElementById("roomId").value =
+        match.roomId || "";
+
+
+    document.getElementById("roomPassword").value =
+        match.roomPassword || "";
+
+
+    document.getElementById("notes").value =
+        match.notes || "";
+
+
+    document.getElementById("formCard")
+        .classList.remove("hidden");
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+async function deleteMatch(id) {
+
+    const match =
+        matches.find(
+            item => String(item.id) === String(id)
+        );
+
+
+    if (!match) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            `Delete "${match.matchName}"?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/matches/" +
+                encodeURIComponent(id),
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Failed to delete match"
+            );
+
+        }
+
+
+        showMessage(
+            "Match deleted successfully.",
+            "success"
+        );
+
+
+        await loadMatches();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   BACK
+===================================================== */
+
+function goBack() {
+
+    window.location.href =
+        "admin.html";
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadMatches();
+
+</script>
+
+</body>
+</html>

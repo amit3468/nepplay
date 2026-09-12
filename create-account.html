@@ -1,0 +1,412 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>NEPPLAY - Create Account</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(
+            circle at top,
+            #18243d,
+            #080d18 55%
+        );
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.box {
+    width: 100%;
+    max-width: 480px;
+    background: #111827;
+    border: 1px solid #263247;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+.logo {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 900;
+    color: #ff3b30;
+}
+
+.subtitle {
+    text-align: center;
+    color: #9ca8ba;
+    margin-top: 7px;
+    margin-bottom: 28px;
+}
+
+label {
+    display: block;
+    color: #dbe3ef;
+    font-weight: bold;
+    margin-bottom: 7px;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 16px;
+    background: #0b1220;
+    border: 1px solid #334155;
+    color: white;
+    border-radius: 9px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #ff3b30;
+}
+
+button {
+    width: 100%;
+    border: 0;
+    border-radius: 9px;
+    padding: 14px;
+    background: #ff3b30;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #e52d24;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.message {
+    display: none;
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.error {
+    background: #35151a;
+    color: #ff8b91;
+}
+
+.success {
+    background: #12311f;
+    color: #7ee2a5;
+}
+
+.links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+a {
+    color: #ff5b52;
+    text-decoration: none;
+}
+
+.back {
+    display: block;
+    margin-top: 12px;
+    color: #9ca8ba;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+    <div class="logo">
+        NEPPLAY
+    </div>
+
+    <div class="subtitle">
+        Create your member account
+    </div>
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+    <form id="createForm">
+
+        <label>
+            Full Name
+        </label>
+
+        <input
+            id="fullName"
+            type="text"
+            placeholder="Your full name"
+        >
+
+        <label>
+            Username
+        </label>
+
+        <input
+            id="username"
+            type="text"
+            autocomplete="username"
+            placeholder="Choose a username"
+            required
+        >
+
+        <label>
+            Email
+        </label>
+
+        <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+        >
+
+        <label>
+            Phone
+        </label>
+
+        <input
+            id="phone"
+            type="tel"
+            placeholder="98XXXXXXXX"
+        >
+
+        <label>
+            Password
+        </label>
+
+        <input
+            id="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Minimum 6 characters"
+            required
+        >
+
+        <label>
+            Confirm Password
+        </label>
+
+        <input
+            id="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Enter password again"
+            required
+        >
+
+        <button
+            id="createButton"
+            type="submit"
+        >
+            Create Account
+        </button>
+
+    </form>
+
+    <div class="links">
+
+        Already have an account?
+        <a href="/login.html">
+            Login
+        </a>
+
+        <a
+            href="/index.html"
+            class="back"
+        >
+            ← Back to Home
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+var form =
+    document.getElementById("createForm");
+
+var message =
+    document.getElementById("message");
+
+var button =
+    document.getElementById("createButton");
+
+function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
+
+    message.style.display = "block";
+}
+
+form.addEventListener(
+    "submit",
+    function (event) {
+
+        event.preventDefault();
+
+        var password =
+            document.getElementById(
+                "password"
+            ).value;
+
+        var confirmPassword =
+            document.getElementById(
+                "confirmPassword"
+            ).value;
+
+        if (password.length < 6) {
+
+            showMessage(
+                "Password must be at least 6 characters.",
+                "error"
+            );
+
+            return;
+        }
+
+        if (password !== confirmPassword) {
+
+            showMessage(
+                "Passwords do not match.",
+                "error"
+            );
+
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating account...";
+
+        fetch(
+            "/api/member/register",
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                cache: "no-store",
+                body: JSON.stringify({
+
+                    fullName:
+                        document.getElementById(
+                            "fullName"
+                        ).value.trim(),
+
+                    username:
+                        document.getElementById(
+                            "username"
+                        ).value.trim(),
+
+                    email:
+                        document.getElementById(
+                            "email"
+                        ).value.trim(),
+
+                    phone:
+                        document.getElementById(
+                            "phone"
+                        ).value.trim(),
+
+                    password: password
+                })
+            }
+        )
+        .then(function (response) {
+
+            return response.json()
+                .then(function (data) {
+
+                    return {
+                        ok: response.ok,
+                        data: data
+                    };
+
+                });
+
+        })
+        .then(function (result) {
+
+            if (!result.ok) {
+
+                throw new Error(
+                    result.data.message ||
+                    "Unable to create account."
+                );
+            }
+
+            showMessage(
+                "Account created successfully. Opening login...",
+                "success"
+            );
+
+            setTimeout(
+                function () {
+                    window.location.replace(
+                        "/login.html"
+                    );
+                },
+                1000
+            );
+
+        })
+        .catch(function (error) {
+
+            showMessage(
+                error.message ||
+                "Unable to create account.",
+                "error"
+            );
+
+            button.disabled = false;
+            button.textContent =
+                "Create Account";
+        });
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>
