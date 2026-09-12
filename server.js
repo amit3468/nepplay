@@ -31,7 +31,7 @@ var TOURNAMENTS_FILE = path.join(BASE_DIR, "tournaments.json");
 var ANNOUNCEMENTS_FILE = path.join(BASE_DIR, "announcements.json");
 
 var ADMIN_USERNAME = "admin";
-var ADMIN_PASSWORD = "admin123";
+var ADMIN_PASSWORD = "nepplay@123";
 
 var PAYMENT_SETTINGS = {
     eSewa: { name: "eSewa", number: "9748835184" },
