@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 /*
 ============================================================
@@ -7,10 +7,8 @@
 Run:  node server.js
 Site: http://localhost:3000
 
-STEP 10 + 11:
-- Battle Royale match type
-- Top 3 winners per BR match
-- Join tracking (member marks "I'm in room")
+Uses MongoDB Atlas (cloud database)
+Data persists forever ✅
 ============================================================
 */
 
@@ -19,19 +17,29 @@ var fs = require("fs");
 var path = require("path");
 var crypto = require("crypto");
 var URL = require("url").URL;
+var MongoClient = require("mongodb").MongoClient;
+var ObjectId = require("mongodb").ObjectId;
 
 var PORT = process.env.PORT || 3000;
 var HOST = "0.0.0.0";
 var BASE_DIR = __dirname;
 
-var USERS_FILE = path.join(BASE_DIR, "users.json");
-var REGISTRATIONS_FILE = path.join(BASE_DIR, "registrations.json");
-var MATCHES_FILE = path.join(BASE_DIR, "matches.json");
-var TOURNAMENTS_FILE = path.join(BASE_DIR, "tournaments.json");
-var ANNOUNCEMENTS_FILE = path.join(BASE_DIR, "announcements.json");
+var MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+    console.log("");
+    console.log("==================================================");
+    console.log("ERROR: MONGODB_URI environment variable not set!");
+    console.log("Set it in Render -> Environment tab");
+    console.log("==================================================");
+    console.log("");
+    process.exit(1);
+}
+
+var DB_NAME = "nepplay";
 
 var ADMIN_USERNAME = "admin";
-var ADMIN_PASSWORD = "nepplay@123";
+var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
 
 var PAYMENT_SETTINGS = {
     eSewa: { name: "eSewa", number: "9748835184" },
@@ -53,68 +61,82 @@ var DEFAULT_TOURNAMENTS = [
       maxTeams: 24, prizePool: 12000, status: "Open" }
 ];
 
-/* ============ FILE HELPERS ============ */
+/* ============================================================
+   MONGODB CONNECTION
+============================================================ */
 
-function ensureFile(p, d) {
-    try {
-        if (!fs.existsSync(p)) fs.writeFileSync(p, JSON.stringify(d, null, 2), "utf8");
-    } catch (e) { console.log("Could not create:", p, e.message); }
+var db = null;
+var collections = {};
+
+function connectDB() {
+    return MongoClient.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000
+    })
+    .then(function (client) {
+        console.log("Connected to MongoDB Atlas");
+        db = client.db(DB_NAME);
+        collections.users = db.collection("users");
+        collections.registrations = db.collection("registrations");
+        collections.matches = db.collection("matches");
+        collections.tournaments = db.collection("tournaments");
+        collections.announcements = db.collection("announcements");
+        return createIndexes();
+    })
+    .then(function () {
+        console.log("Indexes created");
+        return seedTournaments();
+    })
+    .then(function () {
+        console.log("Database ready");
+    })
+    .catch(function (err) {
+        console.log("MongoDB connection error:", err.message);
+        process.exit(1);
+    });
 }
 
-function readJSON(p, d) {
-    try {
-        if (!fs.existsSync(p)) {
-            fs.writeFileSync(p, JSON.stringify(d, null, 2), "utf8");
-            return d;
-        }
-        var t = fs.readFileSync(p, "utf8");
-        if (!t || !t.trim()) return d;
-        var data = JSON.parse(t);
-        if (data === null || data === undefined) return d;
-        return data;
-    } catch (e) {
-        console.log("JSON read error:", p, e.message);
-        return d;
-    }
+function createIndexes() {
+    return Promise.all([
+        collections.users.createIndex({ username: 1 }, { unique: true }),
+        collections.users.createIndex({ email: 1 }, { unique: true }),
+        collections.registrations.createIndex({ userId: 1 }),
+        collections.registrations.createIndex({ tournamentId: 1 }),
+        collections.registrations.createIndex({ transactionId: 1 }),
+        collections.matches.createIndex({ tournamentId: 1 }),
+        collections.tournaments.createIndex({ id: 1 }, { unique: true }),
+        collections.announcements.createIndex({ createdAt: -1 })
+    ]);
 }
 
-function writeJSON(p, data) {
-    try {
-        fs.writeFileSync(p, JSON.stringify(data, null, 2), "utf8");
-        return true;
-    } catch (e) {
-        console.log("JSON write error:", p, e.message);
-        return false;
-    }
+function seedTournaments() {
+    return collections.tournaments.countDocuments().then(function (count) {
+        if (count > 0) return;
+        console.log("Seeding default tournaments...");
+        return collections.tournaments.insertMany(DEFAULT_TOURNAMENTS);
+    });
 }
 
-ensureFile(USERS_FILE, []);
-ensureFile(REGISTRATIONS_FILE, []);
-ensureFile(MATCHES_FILE, []);
-ensureFile(TOURNAMENTS_FILE, DEFAULT_TOURNAMENTS);
-ensureFile(ANNOUNCEMENTS_FILE, []);
-
-/* ============ DATA GETTERS ============ */
-
-function getUsers() { var u = readJSON(USERS_FILE, []); return Array.isArray(u) ? u : []; }
-function getRegistrations() { var r = readJSON(REGISTRATIONS_FILE, []); return Array.isArray(r) ? r : []; }
-function getMatches() { var m = readJSON(MATCHES_FILE, []); return Array.isArray(m) ? m : []; }
-function getAnnouncements() { var a = readJSON(ANNOUNCEMENTS_FILE, []); return Array.isArray(a) ? a : []; }
-function getTournaments() {
-    var t = readJSON(TOURNAMENTS_FILE, DEFAULT_TOURNAMENTS);
-    if (!Array.isArray(t)) t = DEFAULT_TOURNAMENTS;
-    if (t.length === 0) t = DEFAULT_TOURNAMENTS;
-    return t;
-}
-
-/* ============ HELPERS ============ */
+/* ============================================================
+   HELPERS
+============================================================ */
 
 function createId(prefix) {
-    return prefix + "_" + Date.now().toString(36) + "_" + crypto.randomBytes(4).toString("hex");
+    return prefix + "_" + Date.now().toString(36) + "_" +
+        crypto.randomBytes(4).toString("hex");
 }
+
 function nowISO() { return new Date().toISOString(); }
-function cleanString(v) { if (v === undefined || v === null) return ""; return String(v).trim(); }
-function safeNumber(v, f) { var n = Number(v); return isNaN(n) ? f : n; }
+
+function cleanString(v) {
+    if (v === undefined || v === null) return "";
+    return String(v).trim();
+}
+
+function safeNumber(v, f) {
+    var n = Number(v);
+    return isNaN(n) ? f : n;
+}
 
 function normalizeStatus(v) {
     var s = cleanString(v);
@@ -134,8 +156,6 @@ function normalizeMatchType(v) {
     }
     return "1v1";
 }
-
-/* ============ PASSWORD ============ */
 
 function createPassword(password) {
     password = String(password);
@@ -164,10 +184,13 @@ function verifyPassword(password, user) {
 
 function safeUser(u) {
     if (!u) return null;
-    return { id: u.id || "", username: u.username || "", email: u.email || "", createdAt: u.createdAt || "" };
+    return {
+        id: u.id || String(u._id || ""),
+        username: u.username || "",
+        email: u.email || "",
+        createdAt: u.createdAt || ""
+    };
 }
-
-/* ============ COOKIES ============ */
 
 function parseCookies(req) {
     var c = {};
@@ -213,13 +236,11 @@ function clearSessionCookie(h) {
     h["Set-Cookie"] = SESSION_COOKIE + "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
 }
 
-/* ============ RESPONSES ============ */
-
 function sendJSON(res, code, data, extra) {
     var h = {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store",
-        "Access-Control-Allow-Origin": "http://localhost:3000",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": "true"
     };
     if (extra) Object.keys(extra).forEach(function (k) { h[k] = extra[k]; });
@@ -244,22 +265,33 @@ function readBody(req, cb) {
     });
 }
 
-/* ============ AUTH ============ */
+/* ============================================================
+   AUTH HELPERS
+============================================================ */
 
 function getLoggedInUser(req) {
     var s = getSession(req);
     if (!s || s.role !== "member") return null;
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) {
-        if (String(users[i].id) === String(s.userId)) return users[i];
-    }
-    return null;
+    return collections.users.findOne({ id: s.userId })
+        .then(function (u) { return u; })
+        .catch(function () { return null; });
 }
 
-function requireMember(req, res) {
-    var u = getLoggedInUser(req);
-    if (!u) { sendError(res, 401, "Please login first."); return null; }
-    return u;
+function requireMemberAsync(req, res) {
+    var s = getSession(req);
+    if (!s || s.role !== "member") {
+        sendError(res, 401, "Please login first.");
+        return Promise.resolve(null);
+    }
+    return collections.users.findOne({ id: s.userId })
+        .then(function (u) {
+            if (!u) { sendError(res, 401, "Please login first."); return null; }
+            return u;
+        })
+        .catch(function () {
+            sendError(res, 500, "Database error.");
+            return null;
+        });
 }
 
 function requireAdmin(req, res) {
@@ -271,34 +303,12 @@ function requireAdmin(req, res) {
     return true;
 }
 
-/* ============ TOURNAMENT HELPERS ============ */
+/* ============================================================
+   TOURNAMENT HELPERS
+============================================================ */
 
-function findTournament(idOrName) {
-    var list = getTournaments();
-    var q = cleanString(idOrName).toLowerCase();
-    if (!q) return null;
-    for (var i = 0; i < list.length; i++) {
-        if (String(list[i].id || "").toLowerCase() === q ||
-            String(list[i].name || "").toLowerCase() === q) {
-            return list[i];
-        }
-    }
-    return null;
-}
-
-function countTournamentRegistrations(tid) {
-    var regs = getRegistrations();
-    var c = 0;
-    for (var i = 0; i < regs.length; i++) {
-        if (String(regs[i].tournamentId || "") === String(tid || "")) {
-            if (normalizeStatus(regs[i].status) !== "Rejected") c++;
-        }
-    }
-    return c;
-}
-
-function tournamentForClient(t) {
-    var reg = countTournamentRegistrations(t.id);
+function tournamentForClient(t, registeredCount) {
+    var reg = registeredCount || 0;
     var max = safeNumber(t.maxTeams, 0);
     var remaining = max - reg;
     if (remaining < 0) remaining = 0;
@@ -317,7 +327,16 @@ function registrationForClient(reg) {
     return r;
 }
 
-/* ============ LEADERBOARD (with BR support) ============ */
+function countTournamentRegistrations(tid) {
+    return collections.registrations.countDocuments({
+        tournamentId: tid,
+        status: { $ne: "Rejected" }
+    });
+}
+
+/* ============================================================
+   LEADERBOARD + WINNERS
+============================================================ */
 
 function isCompletedMatch(m) {
     var s = String(m.status || "").toLowerCase().trim();
@@ -330,231 +349,227 @@ function teamKey(n) {
 }
 
 function buildLeaderboard(gameFilter) {
-    var matches = getMatches();
-    var tournaments = getTournaments();
-    var tGames = {};
-    for (var t = 0; t < tournaments.length; t++) {
-        tGames[String(tournaments[t].id || "")] = String(tournaments[t].game || "");
-    }
-    var teamsByName = {};
-    var counted = 0;
-    var tSeen = {};
+    return Promise.all([
+        collections.matches.find({}).toArray(),
+        collections.tournaments.find({}).toArray()
+    ])
+    .then(function (results) {
+        var matches = results[0];
+        var tournaments = results[1];
 
-    function ensureTeam(name, captain, game) {
-        var k = teamKey(name);
-        if (!teamsByName[k]) {
-            teamsByName[k] = {
-                name: name, captain: captain || "",
-                games: {}, played: 0, wins: 0, losses: 0,
-                ties: 0, points: 0, brPlacements: { first: 0, second: 0, third: 0 }
-            };
-        }
-        if (game) teamsByName[k].games[game] = true;
-        return teamsByName[k];
-    }
+        var tGames = {};
+        tournaments.forEach(function (t) {
+            tGames[String(t.id || "")] = String(t.game || "");
+        });
 
-    for (var m = 0; m < matches.length; m++) {
-        var match = matches[m];
-        if (!isCompletedMatch(match)) continue;
-        var g = cleanString(match.game) ||
-                tGames[String(match.tournamentId || "")] || "";
-        if (gameFilter && gameFilter !== "all" &&
-            g.toLowerCase() !== gameFilter.toLowerCase()) continue;
+        var teamsByName = {};
+        var counted = 0;
+        var tSeen = {};
 
-        var matchType = normalizeMatchType(match.matchType);
-
-        if (matchType === "battle-royale") {
-            /* BR: use winners array (top 3) */
-            var winnersArr = Array.isArray(match.winners) ? match.winners : [];
-            if (winnersArr.length === 0 && match.winner) {
-                /* Fallback: single winner stored as string */
-                winnersArr = [match.winner];
+        function ensureTeam(name, captain, game) {
+            var k = teamKey(name);
+            if (!teamsByName[k]) {
+                teamsByName[k] = {
+                    name: name, captain: captain || "",
+                    games: {}, played: 0, wins: 0, losses: 0,
+                    ties: 0, points: 0,
+                    brPlacements: { first: 0, second: 0, third: 0 }
+                };
             }
-            if (winnersArr.length === 0) continue;
+            if (game) teamsByName[k].games[game] = true;
+            return teamsByName[k];
+        }
+
+        matches.forEach(function (match) {
+            if (!isCompletedMatch(match)) return;
+
+            var g = cleanString(match.game) ||
+                    tGames[String(match.tournamentId || "")] || "";
+
+            if (gameFilter && gameFilter !== "all" &&
+                g.toLowerCase() !== gameFilter.toLowerCase()) return;
+
+            var matchType = normalizeMatchType(match.matchType);
+
+            if (matchType === "battle-royale") {
+                var winnersArr = Array.isArray(match.winners) ? match.winners : [];
+                if (winnersArr.length === 0 && match.winner) winnersArr = [match.winner];
+                if (winnersArr.length === 0) return;
+
+                counted++;
+                if (match.tournamentId) tSeen[String(match.tournamentId)] = true;
+
+                winnersArr.forEach(function (teamName, wi) {
+                    teamName = cleanString(teamName);
+                    if (!teamName) return;
+                    var team = ensureTeam(teamName, "", g);
+                    team.played++;
+                    if (wi === 0) { team.wins++; team.points += 3; team.brPlacements.first++; }
+                    else if (wi === 1) { team.points += 2; team.brPlacements.second++; }
+                    else if (wi === 2) { team.points += 1; team.brPlacements.third++; }
+                });
+                return;
+            }
+
+            var t1 = cleanString(match.team1);
+            var t2 = cleanString(match.team2);
+            if (!t1 || !t2) return;
 
             counted++;
             if (match.tournamentId) tSeen[String(match.tournamentId)] = true;
 
-            for (var wi = 0; wi < winnersArr.length; wi++) {
-                var teamName = cleanString(winnersArr[wi]);
-                if (!teamName) continue;
-                var team = ensureTeam(teamName, "", g);
-                team.played++;
-                if (wi === 0) {
-                    team.wins++;
-                    team.points += 3;
-                    team.brPlacements.first++;
-                } else if (wi === 1) {
-                    team.points += 2;
-                    team.brPlacements.second++;
-                } else if (wi === 2) {
-                    team.points += 1;
-                    team.brPlacements.third++;
-                }
+            var w = cleanString(match.winner);
+            var k1 = teamKey(t1), k2 = teamKey(t2);
+            var e1 = ensureTeam(t1, cleanString(match.captainName), g);
+            var e2 = ensureTeam(t2, cleanString(match.captainName), g);
+
+            e1.played++;
+            e2.played++;
+
+            var wk = teamKey(w);
+            if (!w || wk === "") {
+                e1.ties++; e2.ties++;
+                e1.points += 1; e2.points += 1;
+            } else if (wk === k1) {
+                e1.wins++; e1.points += 3;
+                e2.losses++;
+            } else if (wk === k2) {
+                e2.wins++; e2.points += 3;
+                e1.losses++;
+            } else {
+                e1.ties++; e2.ties++;
+                e1.points += 1; e2.points += 1;
             }
-            continue;
-        }
-
-        /* 1v1 match (default) */
-        var t1 = cleanString(match.team1);
-        var t2 = cleanString(match.team2);
-        if (!t1 || !t2) continue;
-
-        counted++;
-        if (match.tournamentId) tSeen[String(match.tournamentId)] = true;
-
-        var w = cleanString(match.winner);
-        var k1 = teamKey(t1), k2 = teamKey(t2);
-        var e1 = ensureTeam(t1, cleanString(match.captainName), g);
-        var e2 = ensureTeam(t2, cleanString(match.captainName), g);
-
-        e1.played++;
-        e2.played++;
-
-        var wk = teamKey(w);
-        if (!w || wk === "") {
-            e1.ties++; e2.ties++;
-            e1.points += 1; e2.points += 1;
-        } else if (wk === k1) {
-            e1.wins++; e1.points += 3;
-            e2.losses++;
-        } else if (wk === k2) {
-            e2.wins++; e2.points += 3;
-            e1.losses++;
-        } else {
-            e1.ties++; e2.ties++;
-            e1.points += 1; e2.points += 1;
-        }
-    }
-
-    var list = [];
-    Object.keys(teamsByName).forEach(function (k) {
-        var t = teamsByName[k];
-        list.push({
-            name: t.name, captain: t.captain,
-            games: Object.keys(t.games),
-            played: t.played, wins: t.wins,
-            losses: t.losses, ties: t.ties,
-            points: t.points,
-            brPlacements: t.brPlacements
         });
-    });
 
-    list.sort(function (a, b) {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.wins !== a.wins) return b.wins - a.wins;
-        return String(a.name).localeCompare(String(b.name));
-    });
+        var list = Object.keys(teamsByName).map(function (k) {
+            var t = teamsByName[k];
+            return {
+                name: t.name, captain: t.captain,
+                games: Object.keys(t.games),
+                played: t.played, wins: t.wins,
+                losses: t.losses, ties: t.ties,
+                points: t.points,
+                brPlacements: t.brPlacements
+            };
+        });
 
-    return {
-        teams: list, totalTeams: list.length,
-        totalMatches: counted,
-        totalTournaments: Object.keys(tSeen).length
-    };
+        list.sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        return {
+            teams: list, totalTeams: list.length,
+            totalMatches: counted,
+            totalTournaments: Object.keys(tSeen).length
+        };
+    });
 }
-
-/* ============ WINNERS (Hall of Champions, with BR) ============ */
 
 function buildWinners() {
-    var matches = getMatches();
-    var tournaments = getTournaments();
-    var winners = [];
+    return Promise.all([
+        collections.matches.find({}).toArray(),
+        collections.tournaments.find({}).toArray(),
+        collections.registrations.find({}).toArray()
+    ])
+    .then(function (results) {
+        var matches = results[0];
+        var tournaments = results[1];
+        var regs = results[2];
 
-    for (var t = 0; t < tournaments.length; t++) {
-        var tour = tournaments[t];
-        var tid = String(tour.id || "");
-        var completed = [];
+        var winners = [];
 
-        for (var m = 0; m < matches.length; m++) {
-            var match = matches[m];
-            if (String(match.tournamentId || "") !== tid) continue;
-            if (!isCompletedMatch(match)) continue;
+        tournaments.forEach(function (tour) {
+            var tid = String(tour.id || "");
+            var completed = matches.filter(function (m) {
+                if (String(m.tournamentId || "") !== tid) return false;
+                if (!isCompletedMatch(m)) return false;
+                var mt = normalizeMatchType(m.matchType);
+                if (mt === "battle-royale") {
+                    var wA = Array.isArray(m.winners) ? m.winners : [];
+                    if (wA.length === 0 && m.winner) wA = [m.winner];
+                    return wA.length > 0;
+                }
+                return !!m.winner;
+            });
 
-            var mt = normalizeMatchType(match.matchType);
-            if (mt === "battle-royale") {
-                var wArr = Array.isArray(match.winners) ? match.winners : [];
-                if (wArr.length === 0 && match.winner) wArr = [match.winner];
-                if (wArr.length === 0) continue;
+            if (completed.length === 0) return;
+
+            completed.sort(function (a, b) {
+                var da = (a.date || "") + "T" + (a.time || "00:00");
+                var db = (b.date || "") + "T" + (b.time || "00:00");
+                return new Date(da) - new Date(db);
+            });
+
+            var final = completed[completed.length - 1];
+            var mtFinal = normalizeMatchType(final.matchType);
+
+            var champion = "", runnerUp = "";
+            var champScore = "", runScore = "";
+
+            if (mtFinal === "battle-royale") {
+                var wA = Array.isArray(final.winners) ? final.winners : [];
+                if (wA.length === 0 && final.winner) wA = [final.winner];
+                champion = cleanString(wA[0] || "");
+                runnerUp = cleanString(wA[1] || "");
             } else {
-                if (!match.winner) continue;
+                champion = cleanString(final.winner);
+                var t1 = cleanString(final.team1);
+                var t2 = cleanString(final.team2);
+                var ck = teamKey(champion);
+                if (ck !== teamKey(t1) && ck !== teamKey(t2)) return;
+                runnerUp = (ck === teamKey(t1)) ? t2 : t1;
+                champScore = cleanString(final.scoreTeam1);
+                runScore = cleanString(final.scoreTeam2);
             }
-            completed.push(match);
-        }
 
-        if (completed.length === 0) continue;
+            if (!champion) return;
 
-        completed.sort(function (a, b) {
+            var cCapt = "", rCapt = "";
+            regs.forEach(function (reg) {
+                if (String(reg.tournamentId || "") !== tid) return;
+                var rt = cleanString(reg.teamName);
+                if (teamKey(rt) === teamKey(champion)) cCapt = cleanString(reg.captainName);
+                if (teamKey(rt) === teamKey(runnerUp)) rCapt = cleanString(reg.captainName);
+            });
+
+            winners.push({
+                tournamentId: tour.id || "",
+                tournamentName: tour.name || "Tournament",
+                game: tour.game || "",
+                date: tour.date || final.date || "",
+                time: tour.time || final.time || "",
+                entryFee: safeNumber(tour.entryFee, 0),
+                prizePool: safeNumber(tour.prizePool, 0),
+                maxTeams: safeNumber(tour.maxTeams, 0),
+                champion: champion,
+                championCaptain: cCapt,
+                runnerUp: runnerUp,
+                runnerUpCaptain: rCapt,
+                championScore: champScore,
+                runnerUpScore: runScore,
+                matchType: mtFinal,
+                finalMatchName: cleanString(final.result || final.name),
+                completedAt: final.updatedAt || final.createdAt || "",
+                totalMatches: completed.length
+            });
+        });
+
+        winners.sort(function (a, b) {
             var da = (a.date || "") + "T" + (a.time || "00:00");
             var db = (b.date || "") + "T" + (b.time || "00:00");
-            return new Date(da) - new Date(db);
+            return new Date(db) - new Date(da);
         });
 
-        var final = completed[completed.length - 1];
-        var mtFinal = normalizeMatchType(final.matchType);
-
-        var champion = "", runnerUp = "";
-        var champScore = "", runScore = "";
-
-        if (mtFinal === "battle-royale") {
-            var wA = Array.isArray(final.winners) ? final.winners : [];
-            if (wA.length === 0 && final.winner) wA = [final.winner];
-            champion = cleanString(wA[0] || "");
-            runnerUp = cleanString(wA[1] || "");
-        } else {
-            champion = cleanString(final.winner);
-            var t1 = cleanString(final.team1);
-            var t2 = cleanString(final.team2);
-            var ck = teamKey(champion);
-            if (ck !== teamKey(t1) && ck !== teamKey(t2)) continue;
-            runnerUp = (ck === teamKey(t1)) ? t2 : t1;
-            champScore = cleanString(final.scoreTeam1);
-            runScore = cleanString(final.scoreTeam2);
-        }
-
-        if (!champion) continue;
-
-        var cCapt = "", rCapt = "";
-        var regs = getRegistrations();
-        for (var r = 0; r < regs.length; r++) {
-            var reg = regs[r];
-            if (String(reg.tournamentId || "") !== tid) continue;
-            var rt = cleanString(reg.teamName);
-            if (teamKey(rt) === teamKey(champion)) cCapt = cleanString(reg.captainName);
-            if (teamKey(rt) === teamKey(runnerUp)) rCapt = cleanString(reg.captainName);
-        }
-
-        winners.push({
-            tournamentId: tour.id || "",
-            tournamentName: tour.name || "Tournament",
-            game: tour.game || "",
-            date: tour.date || final.date || "",
-            time: tour.time || final.time || "",
-            entryFee: safeNumber(tour.entryFee, 0),
-            prizePool: safeNumber(tour.prizePool, 0),
-            maxTeams: safeNumber(tour.maxTeams, 0),
-            champion: champion,
-            championCaptain: cCapt,
-            runnerUp: runnerUp,
-            runnerUpCaptain: rCapt,
-            championScore: champScore,
-            runnerUpScore: runScore,
-            matchType: mtFinal,
-            finalMatchName: cleanString(final.result || final.name),
-            completedAt: final.updatedAt || final.createdAt || "",
-            totalMatches: completed.length
-        });
-    }
-
-    winners.sort(function (a, b) {
-        var da = (a.date || "") + "T" + (a.time || "00:00");
-        var db = (b.date || "") + "T" + (b.time || "00:00");
-        return new Date(db) - new Date(da);
+        return winners;
     });
-
-    return winners;
 }
 
-/* ============ STATIC ============ */
+/* ============================================================
+   STATIC FILE SERVER
+============================================================ */
 
 var MIME = {
     ".html": "text/html; charset=utf-8",
@@ -594,875 +609,1121 @@ function serveStatic(req, res, pathname) {
     });
 }
 
-/* ============ API ============ */
+/* ============================================================
+   API ROUTES
+============================================================ */
 
 function handleAPI(req, res, pathname, query) {
+    return handleAPIPromise(req, res, pathname, query).catch(function (err) {
+        console.log("API error:", err.message);
+        try { sendError(res, 500, "Server error: " + err.message); } catch (e) {}
+        return true;
+    });
+}
 
-    /* USER REGISTER */
+function handleAPIPromise(req, res, pathname, query) {
+
+    /* ============ USER REGISTER ============ */
     if (req.method === "POST" && pathname === "/api/users/register") {
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var username = cleanString(body.username);
-            var email = cleanString(body.email).toLowerCase();
-            var password = cleanString(body.password);
-            if (!username) { sendError(res, 400, "Username is required."); return; }
-            if (!email) { sendError(res, 400, "Email is required."); return; }
-            if (!password) { sendError(res, 400, "Password is required."); return; }
-            if (password.length < 4) { sendError(res, 400, "Password min 4 chars."); return; }
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var username = cleanString(body.username);
+                var email = cleanString(body.email).toLowerCase();
+                var password = cleanString(body.password);
 
-            var users = getUsers();
-            for (var i = 0; i < users.length; i++) {
-                if (String(users[i].username || "").toLowerCase() === username.toLowerCase()) {
-                    sendError(res, 409, "Username already exists."); return;
-                }
-                if (String(users[i].email || "").toLowerCase() === email) {
-                    sendError(res, 409, "Email already exists."); return;
-                }
-            }
+                if (!username) { sendError(res, 400, "Username is required."); return resolve(true); }
+                if (!email) { sendError(res, 400, "Email is required."); return resolve(true); }
+                if (!password) { sendError(res, 400, "Password is required."); return resolve(true); }
+                if (password.length < 4) { sendError(res, 400, "Password min 4 chars."); return resolve(true); }
 
-            var pd = createPassword(password);
-            var user = {
-                id: createId("user"), username: username, email: email,
-                passwordHash: pd.passwordHash, passwordSalt: pd.passwordSalt,
-                createdAt: nowISO()
-            };
-            users.push(user);
-            if (!writeJSON(USERS_FILE, users)) {
-                sendError(res, 500, "Could not save account."); return;
-            }
-            sendJSON(res, 201, { success: true, message: "Account created.", user: safeUser(user) });
+                collections.users.findOne({
+                    $or: [
+                        { username: username },
+                        { email: email }
+                    ]
+                }).then(function (existing) {
+                    if (existing) {
+                        if (existing.username === username) {
+                            sendError(res, 409, "Username already exists.");
+                        } else {
+                            sendError(res, 409, "Email already exists.");
+                        }
+                        return resolve(true);
+                    }
+
+                    var pd = createPassword(password);
+                    var user = {
+                        id: createId("user"),
+                        username: username,
+                        email: email,
+                        passwordHash: pd.passwordHash,
+                        passwordSalt: pd.passwordSalt,
+                        createdAt: nowISO()
+                    };
+                    return collections.users.insertOne(user)
+                        .then(function () {
+                            sendJSON(res, 201, {
+                                success: true,
+                                message: "Account created successfully.",
+                                user: safeUser(user)
+                            });
+                            resolve(true);
+                        });
+                }).catch(function (e) {
+                    sendError(res, 500, "Database error.");
+                    resolve(true);
+                });
+            });
         });
-        return true;
     }
 
-    /* LOGIN */
-    if (req.method === "POST" && (pathname === "/api/users/login" || pathname === "/api/member/login")) {
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var identifier = cleanString(body.login) || cleanString(body.username) ||
-                cleanString(body.email) || cleanString(body.userId);
-            var password = cleanString(body.password);
-            if (!identifier || !password) {
-                sendError(res, 400, "Username/email and password required."); return;
-            }
-            var users = getUsers();
-            var found = null;
-            for (var i = 0; i < users.length; i++) {
-                var u = users[i];
-                if (String(u.id || "") === identifier ||
-                    String(u.username || "").toLowerCase() === identifier.toLowerCase() ||
-                    String(u.email || "").toLowerCase() === identifier.toLowerCase()) {
-                    found = u; break;
+    /* ============ LOGIN ============ */
+    if (req.method === "POST" &&
+        (pathname === "/api/users/login" || pathname === "/api/member/login")) {
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var identifier = cleanString(body.login) || cleanString(body.username) ||
+                    cleanString(body.email) || cleanString(body.userId);
+                var password = cleanString(body.password);
+
+                if (!identifier || !password) {
+                    sendError(res, 400, "Username/email and password required.");
+                    return resolve(true);
                 }
-            }
-            if (!found) { sendError(res, 401, "Invalid credentials."); return; }
-            if (!verifyPassword(password, found)) { sendError(res, 401, "Invalid credentials."); return; }
-            var sid = createSession(found.id, "member");
-            var h = {};
-            setSessionCookie(h, sid);
-            sendJSON(res, 200, { success: true, message: "Login successful.", user: safeUser(found) }, h);
+
+                collections.users.findOne({
+                    $or: [
+                        { id: identifier },
+                        { username: identifier },
+                        { email: identifier.toLowerCase() }
+                    ]
+                }).then(function (found) {
+                    if (!found) {
+                        sendError(res, 401, "Invalid username/email or password.");
+                        return resolve(true);
+                    }
+                    if (!verifyPassword(password, found)) {
+                        sendError(res, 401, "Invalid username/email or password.");
+                        return resolve(true);
+                    }
+                    var sid = createSession(found.id, "member");
+                    var h = {};
+                    setSessionCookie(h, sid);
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Login successful.",
+                        user: safeUser(found)
+                    }, h);
+                    resolve(true);
+                }).catch(function () {
+                    sendError(res, 500, "Database error.");
+                    resolve(true);
+                });
+            });
         });
-        return true;
     }
 
-    /* ME */
+    /* ============ ME ============ */
     if (req.method === "GET" && pathname === "/api/users/me") {
-        var u = getLoggedInUser(req);
-        if (!u) { sendJSON(res, 401, { success: false, loggedIn: false, user: null }); return true; }
-        sendJSON(res, 200, { success: true, loggedIn: true, user: safeUser(u) });
-        return true;
+        return requireMemberAsync(req, res).then(function (u) {
+            if (!u) {
+                sendJSON(res, 401, { success: false, loggedIn: false, user: null });
+                return true;
+            }
+            sendJSON(res, 200, { success: true, loggedIn: true, user: safeUser(u) });
+            return true;
+        });
     }
 
-    /* LOGOUT */
+    /* ============ LOGOUT ============ */
     if (req.method === "POST" && pathname === "/api/users/logout") {
         var c = parseCookies(req);
         if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
         var h = {};
         clearSessionCookie(h);
         sendJSON(res, 200, { success: true, message: "Logged out." }, h);
-        return true;
+        return Promise.resolve(true);
     }
 
-    /* MY REGISTRATIONS */
+    /* ============ MY REGISTRATIONS ============ */
     if (req.method === "GET" && pathname === "/api/users/registrations") {
-        var m = requireMember(req, res);
-        if (!m) return true;
-        var all = getRegistrations();
-        var mine = [];
-        for (var i = 0; i < all.length; i++) {
-            if (String(all[i].userId || "") === String(m.id || "")) {
-                mine.push(registrationForClient(all[i]));
-            }
-        }
-        sendJSON(res, 200, { success: true, registrations: mine });
-        return true;
+        return requireMemberAsync(req, res).then(function (u) {
+            if (!u) return true;
+            return collections.registrations.find({ userId: u.id }).toArray()
+                .then(function (regs) {
+                    sendJSON(res, 200, {
+                        success: true,
+                        registrations: regs.map(registrationForClient)
+                    });
+                    return true;
+                });
+        });
     }
 
-    /* PUBLIC TOURNAMENTS */
+    /* ============ PUBLIC TOURNAMENTS ============ */
     if (req.method === "GET" && pathname === "/api/tournaments") {
-        var list = getTournaments();
-        var out = [];
-        for (var i = 0; i < list.length; i++) out.push(tournamentForClient(list[i]));
-        sendJSON(res, 200, { success: true, tournaments: out });
-        return true;
+        return collections.tournaments.find({}).toArray()
+            .then(function (tournaments) {
+                return Promise.all(tournaments.map(function (t) {
+                    return countTournamentRegistrations(t.id)
+                        .then(function (cnt) {
+                            return tournamentForClient(t, cnt);
+                        });
+                }));
+            })
+            .then(function (list) {
+                sendJSON(res, 200, { success: true, tournaments: list });
+                return true;
+            });
     }
 
-    /* SINGLE TOURNAMENT */
+    /* ============ SINGLE TOURNAMENT ============ */
     if (req.method === "GET" && pathname === "/api/tournaments/one") {
         var key = query.get("id") || query.get("tournamentId") || query.get("tournament");
-        var t = findTournament(key);
-        if (!t) { sendError(res, 404, "Tournament not found."); return true; }
-        sendJSON(res, 200, { success: true, tournament: tournamentForClient(t) });
-        return true;
-    }
-
-    /* CREATE TOURNAMENT */
-    if (req.method === "POST" && pathname === "/api/tournaments") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var name = cleanString(body.name);
-            if (!name) { sendError(res, 400, "Tournament name required."); return; }
-            var list = getTournaments();
-            var nt = {
-                id: createId("tour"), name: name,
-                game: cleanString(body.game) || "Free Fire",
-                date: cleanString(body.date), time: cleanString(body.time),
-                entryFee: safeNumber(body.entryFee, 0),
-                teamSize: safeNumber(body.teamSize, 4),
-                maxTeams: safeNumber(body.maxTeams, 16),
-                prizePool: safeNumber(body.prizePool, 0),
-                status: cleanString(body.status) || "Upcoming",
-                createdAt: nowISO()
-            };
-            list.push(nt);
-            if (!writeJSON(TOURNAMENTS_FILE, list)) {
-                sendError(res, 500, "Could not save."); return;
+        var q = cleanString(key).toLowerCase();
+        return collections.tournaments.findOne({
+            $or: [{ id: key }, { name: key }]
+        }).then(function (t) {
+            if (!t) {
+                sendError(res, 404, "Tournament not found.");
+                return true;
             }
-            sendJSON(res, 201, { success: true, message: "Tournament created.", tournament: nt });
+            return countTournamentRegistrations(t.id).then(function (cnt) {
+                sendJSON(res, 200, {
+                    success: true,
+                    tournament: tournamentForClient(t, cnt)
+                });
+                return true;
+            });
         });
-        return true;
     }
 
-    /* UPDATE TOURNAMENT */
+    /* ============ ADMIN CREATE TOURNAMENT ============ */
+    if (req.method === "POST" && pathname === "/api/tournaments") {
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var name = cleanString(body.name);
+                if (!name) { sendError(res, 400, "Tournament name required."); return resolve(true); }
+
+                var nt = {
+                    id: createId("tour"),
+                    name: name,
+                    game: cleanString(body.game) || "Free Fire",
+                    date: cleanString(body.date),
+                    time: cleanString(body.time),
+                    entryFee: safeNumber(body.entryFee, 0),
+                    teamSize: safeNumber(body.teamSize, 4),
+                    maxTeams: safeNumber(body.maxTeams, 16),
+                    prizePool: safeNumber(body.prizePool, 0),
+                    status: cleanString(body.status) || "Upcoming",
+                    createdAt: nowISO()
+                };
+                collections.tournaments.insertOne(nt)
+                    .then(function () {
+                        sendJSON(res, 201, {
+                            success: true,
+                            message: "Tournament created.",
+                            tournament: nt
+                        });
+                        resolve(true);
+                    })
+                    .catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+            });
+        });
+    }
+
+    /* ============ UPDATE TOURNAMENT ============ */
     if (req.method === "PUT" && pathname.indexOf("/api/tournaments/") === 0 &&
         pathname.indexOf("/api/tournaments/one") !== 0) {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var upId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var list = getTournaments();
-            var found = null;
-            for (var i = 0; i < list.length; i++) {
-                if (String(list[i].id) === String(upId)) { found = list[i]; break; }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
-            ["name","game","date","time","status"].forEach(function (k) {
-                if (body[k] !== undefined && body[k] !== null) found[k] = cleanString(body[k]);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var updates = {};
+                ["name","game","date","time","status"].forEach(function (k) {
+                    if (body[k] !== undefined && body[k] !== null) updates[k] = cleanString(body[k]);
+                });
+                if (body.entryFee !== undefined) updates.entryFee = safeNumber(body.entryFee, 0);
+                if (body.teamSize !== undefined) updates.teamSize = safeNumber(body.teamSize, 4);
+                if (body.maxTeams !== undefined) updates.maxTeams = safeNumber(body.maxTeams, 16);
+                if (body.prizePool !== undefined) updates.prizePool = safeNumber(body.prizePool, 0);
+                updates.updatedAt = nowISO();
+
+                collections.tournaments.findOneAndUpdate(
+                    { id: upId },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Tournament updated.",
+                        tournament: result.value
+                    });
+                    resolve(true);
+                }).catch(function () {
+                    sendError(res, 500, "Could not update.");
+                    resolve(true);
+                });
             });
-            if (body.entryFee !== undefined) found.entryFee = safeNumber(body.entryFee, found.entryFee);
-            if (body.teamSize !== undefined) found.teamSize = safeNumber(body.teamSize, found.teamSize);
-            if (body.maxTeams !== undefined) found.maxTeams = safeNumber(body.maxTeams, found.maxTeams);
-            if (body.prizePool !== undefined) found.prizePool = safeNumber(body.prizePool, found.prizePool);
-            found.updatedAt = nowISO();
-            if (!writeJSON(TOURNAMENTS_FILE, list)) {
-                sendError(res, 500, "Could not update."); return;
-            }
-            sendJSON(res, 200, { success: true, message: "Tournament updated.", tournament: found });
         });
-        return true;
     }
 
-    /* DELETE TOURNAMENT */
+    /* ============ DELETE TOURNAMENT ============ */
     if (req.method === "DELETE" && pathname.indexOf("/api/tournaments/") === 0) {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var delId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
-        var list = getTournaments();
-        var rem = [], found = false;
-        for (var i = 0; i < list.length; i++) {
-            if (String(list[i].id) === String(delId)) { found = true; continue; }
-            rem.push(list[i]);
-        }
-        if (!found) { sendError(res, 404, "Not found."); return true; }
-        if (!writeJSON(TOURNAMENTS_FILE, rem)) {
-            sendError(res, 500, "Could not delete."); return true;
-        }
-        sendJSON(res, 200, { success: true, message: "Deleted." });
-        return true;
+        return collections.tournaments.deleteOne({ id: delId })
+            .then(function (result) {
+                if (result.deletedCount === 0) {
+                    sendError(res, 404, "Not found.");
+                    return true;
+                }
+                sendJSON(res, 200, { success: true, message: "Deleted." });
+                return true;
+            });
     }
 
-    /* CREATE REGISTRATION */
+    /* ============ CREATE REGISTRATION ============ */
     if (req.method === "POST" && pathname === "/api/registrations") {
-        var user = requireMember(req, res);
-        if (!user) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var tid = cleanString(body.tournamentId || body.tournament);
-            var tour = findTournament(tid);
-            if (!tour) { sendError(res, 404, "Tournament not found."); return; }
-            var ts = cleanString(tour.status).toLowerCase();
-            if (ts === "closed" || ts === "completed") {
-                sendError(res, 400, "Tournament is closed."); return;
-            }
-            var cnt = countTournamentRegistrations(tour.id);
-            var max = safeNumber(tour.maxTeams, 0);
-            if (max > 0 && cnt >= max) {
-                sendError(res, 400, "Tournament is full."); return;
-            }
-            var pm = cleanString(body.paymentMethod || (body.payment && body.payment.method));
-            var txId = cleanString(body.transactionId || (body.payment && body.payment.transactionId));
-            var fee = safeNumber(tour.entryFee, 0);
-            if (fee > 0) {
-                if (pm !== "Khalti" && pm !== "eSewa") {
-                    sendError(res, 400, "Select Khalti or eSewa."); return;
-                }
-                if (txId.length < 3 || txId.length > 100) {
-                    sendError(res, 400, "Invalid transaction ID."); return;
-                }
-            } else if (!pm) pm = "Free";
+        return requireMemberAsync(req, res).then(function (user) {
+            if (!user) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var tid = cleanString(body.tournamentId || body.tournament);
 
-            var regs = getRegistrations();
-            for (var d = 0; d < regs.length; d++) {
-                if (txId && String(regs[d].transactionId || "").toLowerCase() === txId.toLowerCase()) {
-                    sendError(res, 409, "Transaction ID already used."); return;
-                }
-            }
+                    collections.tournaments.findOne({ id: tid }).then(function (tour) {
+                        if (!tour) {
+                            sendError(res, 404, "Tournament not found.");
+                            return resolve(true);
+                        }
+                        var ts = cleanString(tour.status).toLowerCase();
+                        if (ts === "closed" || ts === "completed") {
+                            sendError(res, 400, "Tournament is closed.");
+                            return resolve(true);
+                        }
+                        return countTournamentRegistrations(tour.id).then(function (cnt) {
+                            var max = safeNumber(tour.maxTeams, 0);
+                            if (max > 0 && cnt >= max) {
+                                sendError(res, 400, "Tournament is full.");
+                                return resolve(true);
+                            }
 
-            var reg = {
-                id: createId("reg"),
-                userId: user.id, username: user.username, email: user.email,
-                tournamentId: tour.id, tournamentName: tour.name, game: tour.game,
-                teamName: cleanString(body.teamName),
-                captainName: cleanString(body.captainName || body.captain),
-                phone: cleanString(body.phone),
-                player1: cleanString(body.player1), player2: cleanString(body.player2),
-                player3: cleanString(body.player3), player4: cleanString(body.player4),
-                player5: cleanString(body.player5), player6: cleanString(body.player6),
-                payerName: cleanString(body.payerName), payerPhone: cleanString(body.payerPhone),
-                paymentMethod: pm, transactionId: txId, amount: fee,
-                paymentStatus: fee > 0 ? "Pending" : "Not Required",
-                status: "Pending",
-                message: cleanString(body.message),
-                createdAt: nowISO(), updatedAt: nowISO()
-            };
-            if (!reg.teamName) { sendError(res, 400, "Team name required."); return; }
-            if (!reg.captainName) { sendError(res, 400, "Captain name required."); return; }
-            regs.push(reg);
-            if (!writeJSON(REGISTRATIONS_FILE, regs)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 201, {
-                success: true,
-                message: "Registration submitted. Admin will verify payment.",
-                registration: registrationForClient(reg)
+                            var pm = cleanString(body.paymentMethod ||
+                                (body.payment && body.payment.method));
+                            var txId = cleanString(body.transactionId ||
+                                (body.payment && body.payment.transactionId));
+                            var fee = safeNumber(tour.entryFee, 0);
+
+                            if (fee > 0) {
+                                if (pm !== "Khalti" && pm !== "eSewa") {
+                                    sendError(res, 400, "Select Khalti or eSewa.");
+                                    return resolve(true);
+                                }
+                                if (txId.length < 3 || txId.length > 100) {
+                                    sendError(res, 400, "Invalid transaction ID.");
+                                    return resolve(true);
+                                }
+                            } else if (!pm) {
+                                pm = "Free";
+                            }
+
+                            return collections.registrations.findOne({
+                                transactionId: txId
+                            }).then(function (existing) {
+                                if (txId && existing) {
+                                    sendError(res, 409, "Transaction ID already used.");
+                                    return resolve(true);
+                                }
+
+                                var reg = {
+                                    id: createId("reg"),
+                                    userId: user.id,
+                                    username: user.username,
+                                    email: user.email,
+                                    tournamentId: tour.id,
+                                    tournamentName: tour.name,
+                                    game: tour.game,
+                                    teamName: cleanString(body.teamName),
+                                    captainName: cleanString(body.captainName || body.captain),
+                                    phone: cleanString(body.phone),
+                                    player1: cleanString(body.player1),
+                                    player2: cleanString(body.player2),
+                                    player3: cleanString(body.player3),
+                                    player4: cleanString(body.player4),
+                                    player5: cleanString(body.player5),
+                                    player6: cleanString(body.player6),
+                                    payerName: cleanString(body.payerName),
+                                    payerPhone: cleanString(body.payerPhone),
+                                    paymentMethod: pm,
+                                    transactionId: txId,
+                                    amount: fee,
+                                    paymentStatus: fee > 0 ? "Pending" : "Not Required",
+                                    status: "Pending",
+                                    message: cleanString(body.message),
+                                    createdAt: nowISO(),
+                                    updatedAt: nowISO()
+                                };
+
+                                if (!reg.teamName) {
+                                    sendError(res, 400, "Team name required.");
+                                    return resolve(true);
+                                }
+                                if (!reg.captainName) {
+                                    sendError(res, 400, "Captain name required.");
+                                    return resolve(true);
+                                }
+
+                                return collections.registrations.insertOne(reg)
+                                    .then(function () {
+                                        sendJSON(res, 201, {
+                                            success: true,
+                                            message: "Registration submitted.",
+                                            registration: registrationForClient(reg)
+                                        });
+                                        resolve(true);
+                                    });
+                            });
+                        });
+                    }).catch(function (e) {
+                        console.log("Reg error:", e.message);
+                        sendError(res, 500, "Database error.");
+                        resolve(true);
+                    });
+                });
             });
         });
-        return true;
     }
 
-    /* PUBLIC REGISTRATIONS */
+    /* ============ PUBLIC REGISTRATIONS ============ */
     if (req.method === "GET" && pathname === "/api/registrations") {
-        var all = getRegistrations();
-        var out = [];
-        for (var i = 0; i < all.length; i++) {
-            if (normalizeStatus(all[i].status) !== "Rejected") {
-                out.push(registrationForClient(all[i]));
-            }
-        }
-        sendJSON(res, 200, { success: true, registrations: out });
-        return true;
+        return collections.registrations.find({ status: { $ne: "Rejected" } })
+            .toArray()
+            .then(function (regs) {
+                sendJSON(res, 200, {
+                    success: true,
+                    registrations: regs.map(registrationForClient)
+                });
+                return true;
+            });
     }
 
-    /* PUBLIC MATCHES */
+    /* ============ PUBLIC MATCHES ============ */
     if (req.method === "GET" && pathname === "/api/matches") {
-        sendJSON(res, 200, { success: true, matches: getMatches() });
-        return true;
+        return collections.matches.find({}).toArray()
+            .then(function (matches) {
+                sendJSON(res, 200, { success: true, matches: matches });
+                return true;
+            });
     }
 
-    /* MEMBER MATCHES (with BR + joined tracking) */
+    /* ============ MEMBER MATCHES ============ */
     if (req.method === "GET" && pathname === "/api/member/matches") {
-        var mem = requireMember(req, res);
-        if (!mem) return true;
-        var regs = getRegistrations();
-        var myTids = {};
-        for (var i = 0; i < regs.length; i++) {
-            if (String(regs[i].userId || "") !== String(mem.id || "")) continue;
-            if (normalizeStatus(regs[i].status) !== "Approved") continue;
-            myTids[String(regs[i].tournamentId || "")] = true;
-        }
-        var matches = getMatches();
-        var tours = getTournaments();
-        var tMap = {};
-        for (var j = 0; j < tours.length; j++) tMap[String(tours[j].id || "")] = tours[j];
+        return requireMemberAsync(req, res).then(function (mem) {
+            if (!mem) return true;
+            return collections.registrations.find({
+                userId: mem.id,
+                status: "Approved"
+            }).toArray()
+            .then(function (regs) {
+                var myTids = {};
+                regs.forEach(function (r) {
+                    myTids[String(r.tournamentId || "")] = true;
+                });
 
-        var out = [];
-        for (var k = 0; k < matches.length; k++) {
-            var mm = matches[k];
-            var tid = String(mm.tournamentId || "");
-            if (!myTids[tid]) continue;
-            var t = tMap[tid] || {};
+                return Promise.all([
+                    collections.matches.find({}).toArray(),
+                    collections.tournaments.find({}).toArray()
+                ]).then(function (results) {
+                    var matches = results[0];
+                    var tours = results[1];
 
-            var em = {};
-            Object.keys(mm).forEach(function (key) { em[key] = mm[key]; });
+                    var tMap = {};
+                    tours.forEach(function (t) { tMap[String(t.id || "")] = t; });
 
-            em.matchType = normalizeMatchType(mm.matchType);
+                    var out = [];
+                    matches.forEach(function (mm) {
+                        var tid = String(mm.tournamentId || "");
+                        if (!myTids[tid]) return;
 
-            em.tournament = {
-                id: t.id || "", name: t.name || mm.tournamentName || "",
-                game: t.game || mm.game || "", date: t.date || "", time: t.time || "",
-                entryFee: t.entryFee || 0, prizePool: t.prizePool || 0,
-                teamSize: t.teamSize || 0
-            };
+                        var t = tMap[tid] || {};
+                        var em = {};
+                        Object.keys(mm).forEach(function (k) { em[k] = mm[k]; });
 
-            /* Did this member mark "I'm in the room"? */
-            var joined = Array.isArray(mm.joinedUserIds) ? mm.joinedUserIds : [];
-            em.memberJoined = false;
-            for (var ji = 0; ji < joined.length; ji++) {
-                if (String(joined[ji]) === String(mem.id)) { em.memberJoined = true; break; }
-            }
+                        em.matchType = normalizeMatchType(mm.matchType);
+                        em.tournament = {
+                            id: t.id || "",
+                            name: t.name || mm.tournamentName || "",
+                            game: t.game || mm.game || "",
+                            date: t.date || "",
+                            time: t.time || "",
+                            entryFee: t.entryFee || 0,
+                            prizePool: t.prizePool || 0,
+                            teamSize: t.teamSize || 0
+                        };
 
-            out.push(em);
-        }
-        out.sort(function (a, b) {
-            var da = (a.date || "") + "T" + (a.time || "00:00");
-            var db = (b.date || "") + "T" + (b.time || "00:00");
-            return new Date(da) - new Date(db);
+                        var joined = Array.isArray(mm.joinedUserIds) ? mm.joinedUserIds : [];
+                        em.memberJoined = joined.indexOf(mem.id) !== -1;
+
+                        out.push(em);
+                    });
+
+                    out.sort(function (a, b) {
+                        var da = (a.date || "") + "T" + (a.time || "00:00");
+                        var db = (b.date || "") + "T" + (b.time || "00:00");
+                        return new Date(da) - new Date(db);
+                    });
+
+                    sendJSON(res, 200, { success: true, matches: out });
+                    return true;
+                });
+            });
         });
-        sendJSON(res, 200, { success: true, matches: out });
-        return true;
     }
 
-    /* MEMBER JOINS MATCH (marks "I'm in the room") */
+    /* ============ MEMBER JOINS MATCH ============ */
     if (req.method === "POST" && pathname === "/api/member/join-match") {
-        var jUser = requireMember(req, res);
-        if (!jUser) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var mid = cleanString(body.matchId || body.id);
-            if (!mid) { sendError(res, 400, "Match ID required."); return; }
-            var matches = getMatches();
-            var found = null;
-            for (var i = 0; i < matches.length; i++) {
-                if (String(matches[i].id) === String(mid)) { found = matches[i]; break; }
-            }
-            if (!found) { sendError(res, 404, "Match not found."); return; }
+        return requireMemberAsync(req, res).then(function (jUser) {
+            if (!jUser) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var mid = cleanString(body.matchId || body.id);
+                    if (!mid) { sendError(res, 400, "Match ID required."); return resolve(true); }
 
-            if (!Array.isArray(found.joinedUserIds)) found.joinedUserIds = [];
-            /* Avoid duplicates */
-            var already = false;
-            for (var j = 0; j < found.joinedUserIds.length; j++) {
-                if (String(found.joinedUserIds[j]) === String(jUser.id)) { already = true; break; }
-            }
-            if (!already) found.joinedUserIds.push(jUser.id);
-
-            found.updatedAt = nowISO();
-
-            if (!writeJSON(MATCHES_FILE, matches)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 200, { success: true, message: "Joined!", joined: true });
+                    collections.matches.updateOne(
+                        { id: mid },
+                        { $addToSet: { joinedUserIds: jUser.id },
+                          $set: { updatedAt: nowISO() } }
+                    ).then(function (result) {
+                        if (result.matchedCount === 0) {
+                            sendError(res, 404, "Match not found.");
+                            return resolve(true);
+                        }
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Joined!",
+                            joined: true
+                        });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+                });
+            });
         });
-        return true;
     }
 
-    /* LEADERBOARD */
+    /* ============ LEADERBOARD ============ */
     if (req.method === "GET" && pathname === "/api/leaderboard") {
         var gf = query.get("game") || "all";
-        var r = buildLeaderboard(gf);
-        sendJSON(res, 200, {
-            success: true, teams: r.teams,
-            totalTeams: r.totalTeams, totalMatches: r.totalMatches,
-            totalTournaments: r.totalTournaments, filter: gf
-        });
-        return true;
-    }
-
-    /* WINNERS */
-    if (req.method === "GET" && pathname === "/api/winners") {
-        var w = buildWinners();
-        sendJSON(res, 200, { success: true, winners: w, totalTournaments: w.length });
-        return true;
-    }
-
-    /* PUBLIC ANNOUNCEMENTS */
-    if (req.method === "GET" && pathname === "/api/announcements") {
-        var ann = getAnnouncements();
-        ann.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-        var lim = query.get("limit");
-        if (lim) {
-            var ln = safeNumber(lim, 0);
-            if (ln > 0) ann = ann.slice(0, ln);
-        }
-        sendJSON(res, 200, { success: true, announcements: ann });
-        return true;
-    }
-
-    /* ADMIN LOGIN */
-    if (req.method === "POST" && pathname === "/api/admin/login") {
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var u = cleanString(body.username);
-            var p = cleanString(body.password);
-            if (u !== ADMIN_USERNAME || p !== ADMIN_PASSWORD) {
-                sendError(res, 401, "Invalid admin credentials."); return;
-            }
-            var sid = createSession("admin", "admin");
-            var h = {};
-            setSessionCookie(h, sid);
+        return buildLeaderboard(gf).then(function (r) {
             sendJSON(res, 200, {
-                success: true, message: "Admin login successful.",
-                admin: { username: ADMIN_USERNAME }
-            }, h);
+                success: true,
+                teams: r.teams,
+                totalTeams: r.totalTeams,
+                totalMatches: r.totalMatches,
+                totalTournaments: r.totalTournaments,
+                filter: gf
+            });
+            return true;
         });
-        return true;
     }
 
-    /* ADMIN CHECK */
+    /* ============ WINNERS ============ */
+    if (req.method === "GET" && pathname === "/api/winners") {
+        return buildWinners().then(function (w) {
+            sendJSON(res, 200, {
+                success: true,
+                winners: w,
+                totalTournaments: w.length
+            });
+            return true;
+        });
+    }
+
+    /* ============ PUBLIC ANNOUNCEMENTS ============ */
+    if (req.method === "GET" && pathname === "/api/announcements") {
+        return collections.announcements.find({})
+            .sort({ createdAt: -1 })
+            .toArray()
+            .then(function (ann) {
+                var lim = query.get("limit");
+                if (lim) {
+                    var ln = safeNumber(lim, 0);
+                    if (ln > 0) ann = ann.slice(0, ln);
+                }
+                sendJSON(res, 200, { success: true, announcements: ann });
+                return true;
+            });
+    }
+
+    /* ============ ADMIN LOGIN ============ */
+    if (req.method === "POST" && pathname === "/api/admin/login") {
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var u = cleanString(body.username);
+                var p = cleanString(body.password);
+                if (u !== ADMIN_USERNAME || p !== ADMIN_PASSWORD) {
+                    sendError(res, 401, "Invalid admin credentials.");
+                    return resolve(true);
+                }
+                var sid = createSession("admin", "admin");
+                var h = {};
+                setSessionCookie(h, sid);
+                sendJSON(res, 200, {
+                    success: true,
+                    message: "Admin login successful.",
+                    admin: { username: ADMIN_USERNAME }
+                }, h);
+                resolve(true);
+            });
+        });
+    }
+
+    /* ============ ADMIN CHECK ============ */
     if (req.method === "GET" && pathname === "/api/admin/check") {
         var s = getSession(req);
         if (!s || s.role !== "admin") {
             sendJSON(res, 401, { success: false, loggedIn: false });
-            return true;
+            return Promise.resolve(true);
         }
-        sendJSON(res, 200, { success: true, loggedIn: true, admin: { username: ADMIN_USERNAME } });
-        return true;
+        sendJSON(res, 200, {
+            success: true,
+            loggedIn: true,
+            admin: { username: ADMIN_USERNAME }
+        });
+        return Promise.resolve(true);
     }
 
-    /* ADMIN LOGOUT */
+    /* ============ ADMIN LOGOUT ============ */
     if (req.method === "POST" && pathname === "/api/admin/logout") {
         var c = parseCookies(req);
         if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
         var h = {};
         clearSessionCookie(h);
         sendJSON(res, 200, { success: true, message: "Admin logged out." }, h);
-        return true;
+        return Promise.resolve(true);
     }
 
-    /* ADMIN REGISTRATIONS */
+    /* ============ ADMIN REGISTRATIONS ============ */
     if (req.method === "GET" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return true;
-        var all = getRegistrations();
-        var out = [];
-        for (var i = 0; i < all.length; i++) out.push(registrationForClient(all[i]));
-        sendJSON(res, 200, { success: true, registrations: out });
-        return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.registrations.find({}).toArray()
+            .then(function (regs) {
+                sendJSON(res, 200, {
+                    success: true,
+                    registrations: regs.map(registrationForClient)
+                });
+                return true;
+            });
     }
 
-    /* ADMIN REG STATUS (body) */
+    /* ============ ADMIN REG STATUS (body) ============ */
     if (req.method === "PUT" && pathname === "/api/admin/registrations/status") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var rid = cleanString(body.registrationId || body.id);
-            var st = normalizeStatus(body.status);
-            if (!rid) { sendError(res, 400, "ID required."); return; }
-            if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
-                sendError(res, 400, "Invalid status."); return;
-            }
-            var regs = getRegistrations();
-            var found = null;
-            for (var i = 0; i < regs.length; i++) {
-                if (String(regs[i].id) === String(rid)) {
-                    regs[i].status = st;
-                    regs[i].updatedAt = nowISO();
-                    if (st === "Approved") regs[i].paymentStatus = "Verified";
-                    if (st === "Rejected") regs[i].paymentStatus = "Rejected";
-                    found = regs[i]; break;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var rid = cleanString(body.registrationId || body.id);
+                var st = normalizeStatus(body.status);
+                if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
+                if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
+                    sendError(res, 400, "Invalid status."); return resolve(true);
                 }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
-            if (!writeJSON(REGISTRATIONS_FILE, regs)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 200, {
-                success: true, message: "Status updated.",
-                registration: registrationForClient(found)
+
+                var updates = { status: st, updatedAt: nowISO() };
+                if (st === "Approved") updates.paymentStatus = "Verified";
+                if (st === "Rejected") updates.paymentStatus = "Rejected";
+
+                collections.registrations.findOneAndUpdate(
+                    { id: rid },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Status updated.",
+                        registration: registrationForClient(result.value)
+                    });
+                    resolve(true);
+                });
             });
         });
-        return true;
     }
 
-    /* ADMIN REG STATUS (URL) */
+    /* ============ ADMIN REG STATUS (URL) ============ */
     if (req.method === "PUT" && pathname.indexOf("/api/admin/registrations/") === 0 &&
         pathname.indexOf("/status") !== -1) {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var raw = pathname.replace("/api/admin/registrations/", "");
         var rid = decodeURIComponent(raw.replace(/\/status$/, ""));
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var st = normalizeStatus(body.status);
-            if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
-                sendError(res, 400, "Invalid status."); return;
-            }
-            var regs = getRegistrations();
-            var found = null;
-            for (var i = 0; i < regs.length; i++) {
-                if (String(regs[i].id) === String(rid)) {
-                    regs[i].status = st;
-                    regs[i].updatedAt = nowISO();
-                    if (st === "Approved") regs[i].paymentStatus = "Verified";
-                    if (st === "Rejected") regs[i].paymentStatus = "Rejected";
-                    found = regs[i]; break;
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var st = normalizeStatus(body.status);
+                if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
+                    sendError(res, 400, "Invalid status."); return resolve(true);
                 }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
-            if (!writeJSON(REGISTRATIONS_FILE, regs)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 200, {
-                success: true, message: "Status updated.",
-                registration: registrationForClient(found)
+                var updates = { status: st, updatedAt: nowISO() };
+                if (st === "Approved") updates.paymentStatus = "Verified";
+                if (st === "Rejected") updates.paymentStatus = "Rejected";
+
+                collections.registrations.findOneAndUpdate(
+                    { id: rid },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Status updated.",
+                        registration: registrationForClient(result.value)
+                    });
+                    resolve(true);
+                });
             });
         });
-        return true;
     }
 
-    /* ADMIN REG EDIT */
+    /* ============ ADMIN REG EDIT ============ */
     if (req.method === "PUT" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var rid = cleanString(body.id || body.registrationId);
-            if (!rid) { sendError(res, 400, "ID required."); return; }
-            var regs = getRegistrations();
-            var found = null;
-            for (var i = 0; i < regs.length; i++) {
-                if (String(regs[i].id) === String(rid)) { found = regs[i]; break; }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
-            var fields = ["teamName","captainName","phone","player1","player2","player3",
-                "player4","player5","player6","payerName","payerPhone","paymentMethod",
-                "transactionId","message","status","paymentStatus"];
-            fields.forEach(function (f) {
-                if (body[f] !== undefined && body[f] !== null) found[f] = cleanString(body[f]);
-            });
-            found.updatedAt = nowISO();
-            if (!writeJSON(REGISTRATIONS_FILE, regs)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 200, {
-                success: true, message: "Updated.",
-                registration: registrationForClient(found)
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var rid = cleanString(body.id || body.registrationId);
+                if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
+
+                var updates = {};
+                ["teamName","captainName","phone","player1","player2","player3",
+                    "player4","player5","player6","payerName","payerPhone","paymentMethod",
+                    "transactionId","message","status","paymentStatus"].forEach(function (f) {
+                    if (body[f] !== undefined && body[f] !== null) updates[f] = cleanString(body[f]);
+                });
+                updates.updatedAt = nowISO();
+
+                collections.registrations.findOneAndUpdate(
+                    { id: rid },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Updated.",
+                        registration: registrationForClient(result.value)
+                    });
+                    resolve(true);
+                });
             });
         });
-        return true;
     }
 
-    /* ADMIN REG DELETE */
+    /* ============ ADMIN REG DELETE ============ */
     if (req.method === "DELETE" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var rid = cleanString(query.get("id") || query.get("registrationId"));
-        if (!rid) { sendError(res, 400, "ID required."); return true; }
-        var regs = getRegistrations();
-        var rem = [], del = false;
-        for (var i = 0; i < regs.length; i++) {
-            if (String(regs[i].id) === String(rid)) { del = true; continue; }
-            rem.push(regs[i]);
-        }
-        if (!del) { sendError(res, 404, "Not found."); return true; }
-        if (!writeJSON(REGISTRATIONS_FILE, rem)) {
-            sendError(res, 500, "Could not delete."); return true;
-        }
-        sendJSON(res, 200, { success: true, message: "Deleted." });
-        return true;
+        if (!rid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.registrations.deleteOne({ id: rid })
+            .then(function (result) {
+                if (result.deletedCount === 0) {
+                    sendError(res, 404, "Not found.");
+                    return true;
+                }
+                sendJSON(res, 200, { success: true, message: "Deleted." });
+                return true;
+            });
     }
 
-    /* ADMIN TOURNAMENTS */
+    /* ============ ADMIN TOURNAMENTS LIST ============ */
     if (req.method === "GET" && pathname === "/api/admin/tournaments") {
-        if (!requireAdmin(req, res)) return true;
-        var list = getTournaments();
-        var out = [];
-        for (var i = 0; i < list.length; i++) out.push(tournamentForClient(list[i]));
-        sendJSON(res, 200, { success: true, tournaments: out });
-        return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.tournaments.find({}).toArray()
+            .then(function (tournaments) {
+                return Promise.all(tournaments.map(function (t) {
+                    return countTournamentRegistrations(t.id)
+                        .then(function (cnt) {
+                            return tournamentForClient(t, cnt);
+                        });
+                }));
+            })
+            .then(function (list) {
+                sendJSON(res, 200, { success: true, tournaments: list });
+                return true;
+            });
     }
 
-    /* ADMIN MATCHES */
+    /* ============ ADMIN MATCHES LIST ============ */
     if (req.method === "GET" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return true;
-        sendJSON(res, 200, { success: true, matches: getMatches() });
-        return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.matches.find({}).toArray()
+            .then(function (matches) {
+                sendJSON(res, 200, { success: true, matches: matches });
+                return true;
+            });
     }
 
-    /* CREATE MATCH (with BR support) */
+    /* ============ CREATE MATCH ============ */
     if (req.method === "POST" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var matches = getMatches();
-            var matchType = normalizeMatchType(body.matchType);
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var matchType = normalizeMatchType(body.matchType);
+                var winners = [];
+                if (Array.isArray(body.winners)) {
+                    winners = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
+                    winners = winners.slice(0, 3);
+                }
 
-            /* BR: winners is array of up to 3 team names */
-            var winners = [];
-            if (Array.isArray(body.winners)) {
-                winners = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
-                winners = winners.slice(0, 3);
-            }
-
-            var match = {
-                id: createId("match"),
-                matchType: matchType,
-                game: cleanString(body.game),
-                tournamentId: cleanString(body.tournamentId),
-                tournamentName: cleanString(body.tournamentName),
-                team1: cleanString(body.team1),
-                team2: cleanString(body.team2),
-                scoreTeam1: cleanString(body.scoreTeam1 || body.score1),
-                scoreTeam2: cleanString(body.scoreTeam2 || body.score2),
-                winner: cleanString(body.winner || (winners[0] || "")),
-                winners: winners,
-                date: cleanString(body.date),
-                time: cleanString(body.time),
-                status: cleanString(body.status) || "Upcoming",
-                roomId: cleanString(body.roomId),
-                roomPassword: cleanString(body.roomPassword),
-                result: cleanString(body.result),
-                notes: cleanString(body.notes),
-                joinedUserIds: [],
-                createdAt: nowISO(),
-                updatedAt: nowISO()
-            };
-            matches.push(match);
-            if (!writeJSON(MATCHES_FILE, matches)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 201, { success: true, message: "Match created.", match: match });
+                var match = {
+                    id: createId("match"),
+                    matchType: matchType,
+                    game: cleanString(body.game),
+                    tournamentId: cleanString(body.tournamentId),
+                    tournamentName: cleanString(body.tournamentName),
+                    team1: cleanString(body.team1),
+                    team2: cleanString(body.team2),
+                    scoreTeam1: cleanString(body.scoreTeam1 || body.score1),
+                    scoreTeam2: cleanString(body.scoreTeam2 || body.score2),
+                    winner: cleanString(body.winner || (winners[0] || "")),
+                    winners: winners,
+                    date: cleanString(body.date),
+                    time: cleanString(body.time),
+                    status: cleanString(body.status) || "Upcoming",
+                    roomId: cleanString(body.roomId),
+                    roomPassword: cleanString(body.roomPassword),
+                    result: cleanString(body.result),
+                    notes: cleanString(body.notes),
+                    joinedUserIds: [],
+                    createdAt: nowISO(),
+                    updatedAt: nowISO()
+                };
+                collections.matches.insertOne(match)
+                    .then(function () {
+                        sendJSON(res, 201, {
+                            success: true,
+                            message: "Match created.",
+                            match: match
+                        });
+                        resolve(true);
+                    })
+                    .catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+            });
         });
-        return true;
     }
 
-    /* UPDATE MATCH */
+    /* ============ UPDATE MATCH ============ */
     if (req.method === "PUT" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var mid = cleanString(body.id || body.matchId);
-            if (!mid) { sendError(res, 400, "ID required."); return; }
-            var matches = getMatches();
-            var found = null;
-            for (var i = 0; i < matches.length; i++) {
-                if (String(matches[i].id) === String(mid)) { found = matches[i]; break; }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var mid = cleanString(body.id || body.matchId);
+                if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
 
-            if (body.matchType !== undefined) {
-                found.matchType = normalizeMatchType(body.matchType);
-            }
+                var updates = {};
 
-            var fields = ["game","tournamentId","tournamentName","team1","team2",
-                "scoreTeam1","scoreTeam2","score1","score2","winner","date","time",
-                "status","roomId","roomPassword","result","notes"];
-            for (var m = 0; m < fields.length; m++) {
-                var f = fields[m];
-                if (body[f] !== undefined && body[f] !== null) {
-                    var af = f;
-                    if (f === "score1") af = "scoreTeam1";
-                    if (f === "score2") af = "scoreTeam2";
-                    found[af] = cleanString(body[f]);
+                if (body.matchType !== undefined) {
+                    updates.matchType = normalizeMatchType(body.matchType);
                 }
-            }
 
-            if (Array.isArray(body.winners)) {
-                var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
-                found.winners = ws.slice(0, 3);
-                if (!found.winner && found.winners.length > 0) {
-                    found.winner = found.winners[0];
+                ["game","tournamentId","tournamentName","team1","team2",
+                    "scoreTeam1","scoreTeam2","winner","date","time",
+                    "status","roomId","roomPassword","result","notes"].forEach(function (f) {
+                    if (body[f] !== undefined && body[f] !== null) {
+                        updates[f] = cleanString(body[f]);
+                    }
+                });
+
+                if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
+                if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
+
+                if (Array.isArray(body.winners)) {
+                    var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
+                    updates.winners = ws.slice(0, 3);
+                    if (!updates.winner && ws.length > 0) updates.winner = ws[0];
                 }
-            }
 
-            found.updatedAt = nowISO();
-            if (!writeJSON(MATCHES_FILE, matches)) {
-                sendError(res, 500, "Could not update."); return;
-            }
-            sendJSON(res, 200, { success: true, message: "Match updated.", match: found });
+                updates.updatedAt = nowISO();
+
+                collections.matches.findOneAndUpdate(
+                    { id: mid },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Match updated.",
+                        match: result.value
+                    });
+                    resolve(true);
+                });
+            });
         });
-        return true;
     }
 
-    /* DELETE MATCH */
+    /* ============ DELETE MATCH ============ */
     if (req.method === "DELETE" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var mid = cleanString(query.get("id") || query.get("matchId"));
-        if (!mid) { sendError(res, 400, "ID required."); return true; }
-        var matches = getMatches();
-        var rem = [], del = false;
-        for (var i = 0; i < matches.length; i++) {
-            if (String(matches[i].id) === String(mid)) { del = true; continue; }
-            rem.push(matches[i]);
-        }
-        if (!del) { sendError(res, 404, "Not found."); return true; }
-        if (!writeJSON(MATCHES_FILE, rem)) {
-            sendError(res, 500, "Could not delete."); return true;
-        }
-        sendJSON(res, 200, { success: true, message: "Match deleted." });
-        return true;
+        if (!mid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.matches.deleteOne({ id: mid })
+            .then(function (result) {
+                if (result.deletedCount === 0) {
+                    sendError(res, 404, "Not found.");
+                    return true;
+                }
+                sendJSON(res, 200, { success: true, message: "Match deleted." });
+                return true;
+            });
     }
 
-    /* ADMIN ANNOUNCEMENTS LIST */
+    /* ============ ADMIN ANNOUNCEMENTS LIST ============ */
     if (req.method === "GET" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return true;
-        var ann = getAnnouncements();
-        ann.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-        sendJSON(res, 200, { success: true, announcements: ann });
-        return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.announcements.find({}).sort({ createdAt: -1 }).toArray()
+            .then(function (ann) {
+                sendJSON(res, 200, { success: true, announcements: ann });
+                return true;
+            });
     }
 
-    /* CREATE ANNOUNCEMENT */
+    /* ============ CREATE ANNOUNCEMENT ============ */
     if (req.method === "POST" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var title = cleanString(body.title);
-            var message = cleanString(body.message);
-            if (!title) { sendError(res, 400, "Title required."); return; }
-            if (!message) { sendError(res, 400, "Message required."); return; }
-            var ann = getAnnouncements();
-            var item = {
-                id: createId("ann"), title: title, message: message,
-                type: cleanString(body.type) || "info",
-                pinned: body.pinned === true || body.pinned === "true",
-                createdAt: nowISO(), updatedAt: nowISO()
-            };
-            ann.push(item);
-            if (!writeJSON(ANNOUNCEMENTS_FILE, ann)) {
-                sendError(res, 500, "Could not save."); return;
-            }
-            sendJSON(res, 201, { success: true, message: "Created.", announcement: item });
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var title = cleanString(body.title);
+                var message = cleanString(body.message);
+                if (!title) { sendError(res, 400, "Title required."); return resolve(true); }
+                if (!message) { sendError(res, 400, "Message required."); return resolve(true); }
+
+                var item = {
+                    id: createId("ann"),
+                    title: title,
+                    message: message,
+                    type: cleanString(body.type) || "info",
+                    pinned: body.pinned === true || body.pinned === "true",
+                    createdAt: nowISO(),
+                    updatedAt: nowISO()
+                };
+                collections.announcements.insertOne(item)
+                    .then(function () {
+                        sendJSON(res, 201, {
+                            success: true,
+                            message: "Created.",
+                            announcement: item
+                        });
+                        resolve(true);
+                    })
+                    .catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+            });
         });
-        return true;
     }
 
-    /* UPDATE ANNOUNCEMENT */
+    /* ============ UPDATE ANNOUNCEMENT ============ */
     if (req.method === "PUT" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return true;
-        readBody(req, function (err, body) {
-            if (err) { sendError(res, 400, err.message); return; }
-            var annId = cleanString(body.id || body.announcementId);
-            if (!annId) { sendError(res, 400, "ID required."); return; }
-            var ann = getAnnouncements();
-            var found = null;
-            for (var i = 0; i < ann.length; i++) {
-                if (String(ann[i].id) === String(annId)) { found = ann[i]; break; }
-            }
-            if (!found) { sendError(res, 404, "Not found."); return; }
-            if (body.title !== undefined) found.title = cleanString(body.title);
-            if (body.message !== undefined) found.message = cleanString(body.message);
-            if (body.type !== undefined) found.type = cleanString(body.type);
-            if (body.pinned !== undefined) {
-                found.pinned = body.pinned === true || body.pinned === "true";
-            }
-            found.updatedAt = nowISO();
-            if (!writeJSON(ANNOUNCEMENTS_FILE, ann)) {
-                sendError(res, 500, "Could not update."); return;
-            }
-            sendJSON(res, 200, { success: true, message: "Updated.", announcement: found });
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var annId = cleanString(body.id || body.announcementId);
+                if (!annId) { sendError(res, 400, "ID required."); return resolve(true); }
+
+                var updates = {};
+                if (body.title !== undefined) updates.title = cleanString(body.title);
+                if (body.message !== undefined) updates.message = cleanString(body.message);
+                if (body.type !== undefined) updates.type = cleanString(body.type);
+                if (body.pinned !== undefined) {
+                    updates.pinned = body.pinned === true || body.pinned === "true";
+                }
+                updates.updatedAt = nowISO();
+
+                collections.announcements.findOneAndUpdate(
+                    { id: annId },
+                    { $set: updates },
+                    { returnDocument: "after" }
+                ).then(function (result) {
+                    if (!result || !result.value) {
+                        sendError(res, 404, "Not found.");
+                        return resolve(true);
+                    }
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Updated.",
+                        announcement: result.value
+                    });
+                    resolve(true);
+                });
+            });
         });
-        return true;
     }
 
-    /* DELETE ANNOUNCEMENT */
+    /* ============ DELETE ANNOUNCEMENT ============ */
     if (req.method === "DELETE" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
         var annId = cleanString(query.get("id") || query.get("announcementId"));
-        if (!annId) { sendError(res, 400, "ID required."); return true; }
-        var ann = getAnnouncements();
-        var rem = [], del = false;
-        for (var i = 0; i < ann.length; i++) {
-            if (String(ann[i].id) === String(annId)) { del = true; continue; }
-            rem.push(ann[i]);
-        }
-        if (!del) { sendError(res, 404, "Not found."); return true; }
-        if (!writeJSON(ANNOUNCEMENTS_FILE, rem)) {
-            sendError(res, 500, "Could not delete."); return true;
-        }
-        sendJSON(res, 200, { success: true, message: "Deleted." });
-        return true;
+        if (!annId) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.announcements.deleteOne({ id: annId })
+            .then(function (result) {
+                if (result.deletedCount === 0) {
+                    sendError(res, 404, "Not found.");
+                    return true;
+                }
+                sendJSON(res, 200, { success: true, message: "Deleted." });
+                return true;
+            });
     }
 
-    /* PAYMENT SETTINGS */
+    /* ============ PAYMENT SETTINGS ============ */
     if (req.method === "GET" && pathname === "/api/payment-settings") {
         sendJSON(res, 200, { success: true, payment: PAYMENT_SETTINGS });
-        return true;
+        return Promise.resolve(true);
     }
 
-    /* CSV EXPORT */
+    /* ============ CSV EXPORT ============ */
     if (req.method === "GET" && pathname === "/api/admin/registrations.csv") {
-        if (!requireAdmin(req, res)) return true;
-        var regs = getRegistrations();
-        var lines = [];
-        lines.push(["ID","Username","Email","Tournament","Game","Team","Captain","Phone",
-            "Player 1","Player 2","Player 3","Player 4","Player 5","Player 6",
-            "Payment Method","Transaction ID","Amount","Payment Status",
-            "Registration Status","Created At"].join(","));
-        function csv(v) {
-            var t = (v === undefined || v === null) ? "" : String(v);
-            t = t.replace(/"/g, '""');
-            return '"' + t + '"';
-        }
-        for (var c = 0; c < regs.length; c++) {
-            var it = regs[c];
-            lines.push([it.id,it.username,it.email,it.tournamentName,it.game,
-                it.teamName,it.captainName,it.phone,
-                it.player1,it.player2,it.player3,it.player4,it.player5,it.player6,
-                it.paymentMethod,it.transactionId,it.amount,
-                it.paymentStatus,it.status,it.createdAt].map(csv).join(","));
-        }
-        res.writeHead(200, {
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": 'attachment; filename="nepplay-registrations.csv"'
-        });
-        res.end(lines.join("\r\n"));
-        return true;
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.registrations.find({}).toArray()
+            .then(function (regs) {
+                var lines = [];
+                lines.push(["ID","Username","Email","Tournament","Game","Team","Captain","Phone",
+                    "Player 1","Player 2","Player 3","Player 4","Player 5","Player 6",
+                    "Payment Method","Transaction ID","Amount","Payment Status",
+                    "Registration Status","Created At"].join(","));
+
+                function csv(v) {
+                    var t = (v === undefined || v === null) ? "" : String(v);
+                    t = t.replace(/"/g, '""');
+                    return '"' + t + '"';
+                }
+
+                regs.forEach(function (it) {
+                    lines.push([
+                        it.id,it.username,it.email,it.tournamentName,it.game,
+                        it.teamName,it.captainName,it.phone,
+                        it.player1,it.player2,it.player3,it.player4,it.player5,it.player6,
+                        it.paymentMethod,it.transactionId,it.amount,
+                        it.paymentStatus,it.status,it.createdAt
+                    ].map(csv).join(","));
+                });
+
+                res.writeHead(200, {
+                    "Content-Type": "text/csv; charset=utf-8",
+                    "Content-Disposition": 'attachment; filename="nepplay-registrations.csv"'
+                });
+                res.end(lines.join("\r\n"));
+                return true;
+            });
     }
 
-    return false;
+    /* ============ FAVICON FALLBACK ============ */
+    if (pathname === "/favicon.ico") {
+        res.writeHead(204);
+        res.end();
+        return Promise.resolve(true);
+    }
+
+    return Promise.resolve(false);
 }
 
-/* ============ HTTP SERVER ============ */
+/* ============================================================
+   HTTP SERVER
+============================================================ */
 
 var server = http.createServer(function (req, res) {
     if (req.method === "OPTIONS") {
         res.writeHead(204, {
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type"
         });
-        res.end(); return;
+        res.end();
+        return;
     }
+
     var parsed;
     try { parsed = new URL(req.url, "http://localhost:" + PORT); }
     catch (e) { sendError(res, 400, "Invalid URL."); return; }
+
     var pathname = parsed.pathname;
     var query = parsed.searchParams;
+
     if (pathname.indexOf("/api/") === 0) {
-        var handled = handleAPI(req, res, pathname, query);
-        if (handled) return;
-        sendError(res, 404, "API route not found.");
+        handleAPI(req, res, pathname, query).then(function (handled) {
+            if (!handled) {
+                sendError(res, 404, "API route not found.");
+            }
+        });
         return;
     }
+
     serveStatic(req, res, pathname);
 });
 
-server.listen(PORT, HOST, function () {
-    console.log("");
-    console.log("==================================================");
-    console.log("              NEPPLAY SERVER STARTED");
-    console.log("==================================================");
-    console.log("Local: http://localhost:" + PORT);
-    console.log("Admin: " + ADMIN_USERNAME + " / " + ADMIN_PASSWORD);
-    console.log("eSewa: " + PAYMENT_SETTINGS.eSewa.number);
-    console.log("Khalti: " + PAYMENT_SETTINGS.Khalti.number);
-    console.log("==================================================");
-    console.log("");
+/* ============================================================
+   START
+============================================================ */
+
+connectDB().then(function () {
+    server.listen(PORT, HOST, function () {
+        console.log("");
+        console.log("==================================================");
+        console.log("        NEPPLAY SERVER STARTED (MongoDB)");
+        console.log("==================================================");
+        console.log("Local: http://localhost:" + PORT);
+        console.log("Admin: " + ADMIN_USERNAME);
+        console.log("Database: " + DB_NAME);
+        console.log("eSewa: " + PAYMENT_SETTINGS.eSewa.number);
+        console.log("Khalti: " + PAYMENT_SETTINGS.Khalti.number);
+        console.log("==================================================");
+        console.log("");
+    });
 });
 
 server.on("error", function (error) {
     console.log("");
     console.log("SERVER ERROR:", error.message);
     if (error.code === "EADDRINUSE") {
-        console.log("Port 3000 is already in use.");
-        console.log("Close the old Node server and run server.js again.");
+        console.log("Port " + PORT + " is already in use.");
     }
     console.log("");
 });
