@@ -4,11 +4,11 @@
 ============================================================
                     NEPPLAY SERVER
 ============================================================
-Run:  node server.js
-Site: https://nepplay.onrender.com
 
-Uses MongoDB Atlas
-Includes: Player Profiles + Notifications + Screenshot Upload
+Now includes:
+- Dynamic payment settings (admin editable)
+- Multiple payment methods with QR codes
+- All previous features
 ============================================================
 */
 
@@ -38,18 +38,43 @@ if (!MONGODB_URI) {
 var DB_NAME = "nepplay";
 
 var ADMIN_USERNAME = "admin";
-var ADMIN_PASSWORD = "nepplay@123";
-
-var PAYMENT_SETTINGS = {
-    eSewa: { name: "eSewa", number: "9748835184" },
-    Khalti: { name: "Khalti", number: "97766258368" }
-};
+var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
 
 var sessions = new Map();
 var SESSION_COOKIE = "nepplay_session";
 
-/* Body size limit: 8MB (for screenshots) */
 var MAX_BODY_SIZE = 8 * 1024 * 1024;
+
+/* Default payment methods - seeded on first run if settings empty */
+var DEFAULT_PAYMENT_METHODS = [
+    {
+        id: "esewa",
+        name: "eSewa",
+        number: "9748835184",
+        enabled: true,
+        qrImage: "",
+        instructions: "Open eSewa app and send money to the number above",
+        order: 1
+    },
+    {
+        id: "khalti",
+        name: "Khalti",
+        number: "97766258368",
+        enabled: true,
+        qrImage: "",
+        instructions: "Open Khalti app and send money to the number above",
+        order: 2
+    },
+    {
+        id: "imepay",
+        name: "IME Pay",
+        number: "",
+        enabled: false,
+        qrImage: "",
+        instructions: "Open IME Pay app and send money to the number above",
+        order: 3
+    }
+];
 
 var DEFAULT_TOURNAMENTS = [
     { id: "free-fire", name: "Free Fire Championship", game: "Free Fire",
@@ -63,9 +88,7 @@ var DEFAULT_TOURNAMENTS = [
       maxTeams: 24, prizePool: 12000, status: "Open" }
 ];
 
-/* ============================================================
-   MONGODB CONNECTION
-============================================================ */
+/* ============ MONGODB ============ */
 
 var db = null;
 var collections = {};
@@ -84,11 +107,15 @@ function connectDB() {
         collections.tournaments = db.collection("tournaments");
         collections.announcements = db.collection("announcements");
         collections.notifications = db.collection("notifications");
+        collections.settings = db.collection("settings");
         return createIndexes();
     })
     .then(function () {
         console.log("Indexes created");
         return seedTournaments();
+    })
+    .then(function () {
+        return seedPaymentSettings();
     })
     .then(function () {
         console.log("Database ready");
@@ -109,7 +136,8 @@ function createIndexes() {
         collections.matches.createIndex({ tournamentId: 1 }),
         collections.tournaments.createIndex({ id: 1 }, { unique: true }),
         collections.announcements.createIndex({ createdAt: -1 }),
-        collections.notifications.createIndex({ userId: 1, createdAt: -1 })
+        collections.notifications.createIndex({ userId: 1, createdAt: -1 }),
+        collections.settings.createIndex({ key: 1 }, { unique: true })
     ]);
 }
 
@@ -121,9 +149,20 @@ function seedTournaments() {
     });
 }
 
-/* ============================================================
-   HELPERS
-============================================================ */
+function seedPaymentSettings() {
+    return collections.settings.findOne({ key: "payment" })
+        .then(function (existing) {
+            if (existing) return;
+            console.log("Seeding default payment settings...");
+            return collections.settings.insertOne({
+                key: "payment",
+                methods: DEFAULT_PAYMENT_METHODS,
+                updatedAt: nowISO()
+            });
+        });
+}
+
+/* ============ HELPERS ============ */
 
 function createId(prefix) {
     return prefix + "_" + Date.now().toString(36) + "_" +
@@ -280,9 +319,7 @@ function readBody(req, cb) {
     });
 }
 
-/* ============================================================
-   NOTIFICATIONS HELPER
-============================================================ */
+/* ============ NOTIFICATIONS ============ */
 
 function createNotification(userId, type, title, message, link) {
     if (!userId) return Promise.resolve();
@@ -314,9 +351,7 @@ function createNotificationForTournament(tournamentId, type, title, message, lin
     });
 }
 
-/* ============================================================
-   AUTH HELPERS
-============================================================ */
+/* ============ AUTH ============ */
 
 function requireMemberAsync(req, res) {
     var s = getSession(req);
@@ -344,9 +379,7 @@ function requireAdmin(req, res) {
     return true;
 }
 
-/* ============================================================
-   TOURNAMENT HELPERS
-============================================================ */
+/* ============ TOURNAMENT HELPERS ============ */
 
 function tournamentForClient(t, registeredCount) {
     var reg = registeredCount || 0;
@@ -375,9 +408,7 @@ function countTournamentRegistrations(tid) {
     });
 }
 
-/* ============================================================
-   LEADERBOARD + WINNERS
-============================================================ */
+/* ============ LEADERBOARD + WINNERS ============ */
 
 function isCompletedMatch(m) {
     var s = String(m.status || "").toLowerCase().trim();
@@ -423,23 +454,18 @@ function buildLeaderboard(gameFilter) {
 
         matches.forEach(function (match) {
             if (!isCompletedMatch(match)) return;
-
             var g = cleanString(match.game) ||
                     tGames[String(match.tournamentId || "")] || "";
-
             if (gameFilter && gameFilter !== "all" &&
                 g.toLowerCase() !== gameFilter.toLowerCase()) return;
-
             var matchType = normalizeMatchType(match.matchType);
 
             if (matchType === "battle-royale") {
                 var winnersArr = Array.isArray(match.winners) ? match.winners : [];
                 if (winnersArr.length === 0 && match.winner) winnersArr = [match.winner];
                 if (winnersArr.length === 0) return;
-
                 counted++;
                 if (match.tournamentId) tSeen[String(match.tournamentId)] = true;
-
                 winnersArr.forEach(function (teamName, wi) {
                     teamName = cleanString(teamName);
                     if (!teamName) return;
@@ -455,18 +481,14 @@ function buildLeaderboard(gameFilter) {
             var t1 = cleanString(match.team1);
             var t2 = cleanString(match.team2);
             if (!t1 || !t2) return;
-
             counted++;
             if (match.tournamentId) tSeen[String(match.tournamentId)] = true;
-
             var w = cleanString(match.winner);
             var k1 = teamKey(t1), k2 = teamKey(t2);
             var e1 = ensureTeam(t1, cleanString(match.captainName), g);
             var e2 = ensureTeam(t2, cleanString(match.captainName), g);
-
             e1.played++;
             e2.played++;
-
             var wk = teamKey(w);
             if (!w || wk === "") {
                 e1.ties++; e2.ties++;
@@ -519,7 +541,6 @@ function buildWinners() {
         var matches = results[0];
         var tournaments = results[1];
         var regs = results[2];
-
         var winners = [];
 
         tournaments.forEach(function (tour) {
@@ -546,9 +567,7 @@ function buildWinners() {
 
             var final = completed[completed.length - 1];
             var mtFinal = normalizeMatchType(final.matchType);
-
-            var champion = "", runnerUp = "";
-            var champScore = "", runScore = "";
+            var champion = "", runnerUp = "", champScore = "", runScore = "";
 
             if (mtFinal === "battle-royale") {
                 var wA = Array.isArray(final.winners) ? final.winners : [];
@@ -609,9 +628,7 @@ function buildWinners() {
     });
 }
 
-/* ============================================================
-   STATIC FILE SERVER
-============================================================ */
+/* ============ STATIC ============ */
 
 var MIME = {
     ".html": "text/html; charset=utf-8",
@@ -628,18 +645,14 @@ function serveStatic(req, res, pathname) {
     var decoded;
     try { decoded = decodeURIComponent(pathname); }
     catch (e) { sendError(res, 400, "Invalid URL."); return; }
-
     if (decoded === "/") decoded = "/index.html";
-
     var safe = path.normalize(decoded).replace(/^(\.\.[\/\\])+/, "");
     var filePath = path.join(BASE_DIR, safe);
-
     var nb = path.resolve(BASE_DIR);
     var nf = path.resolve(filePath);
     if (nf !== nb && nf.indexOf(nb + path.sep) !== 0) {
         sendError(res, 403, "Access denied."); return;
     }
-
     fs.stat(filePath, function (err, stats) {
         if (err || !stats.isFile()) { sendError(res, 404, "File not found."); return; }
         var ext = path.extname(filePath).toLowerCase();
@@ -651,9 +664,7 @@ function serveStatic(req, res, pathname) {
     });
 }
 
-/* ============================================================
-   API ROUTES
-============================================================ */
+/* ============ API ============ */
 
 function handleAPI(req, res, pathname, query) {
     return handleAPIPromise(req, res, pathname, query).catch(function (err) {
@@ -665,7 +676,142 @@ function handleAPI(req, res, pathname, query) {
 
 function handleAPIPromise(req, res, pathname, query) {
 
-    /* ============ USER REGISTER ============ */
+    /* PUBLIC PAYMENT SETTINGS */
+    if (req.method === "GET" && pathname === "/api/payment-settings") {
+        return collections.settings.findOne({ key: "payment" })
+            .then(function (doc) {
+                var methods = (doc && Array.isArray(doc.methods))
+                    ? doc.methods
+                    : DEFAULT_PAYMENT_METHODS;
+                /* Only return enabled methods to public, sorted by order */
+                var enabled = methods
+                    .filter(function (m) { return m.enabled !== false; })
+                    .sort(function (a, b) {
+                        return (a.order || 99) - (b.order || 99);
+                    })
+                    /* Strip instructions for public (admin only) */
+                    .map(function (m) {
+                        return {
+                            id: m.id,
+                            name: m.name,
+                            number: m.number,
+                            qrImage: m.qrImage || "",
+                            instructions: m.instructions || ""
+                        };
+                    });
+                sendJSON(res, 200, {
+                    success: true,
+                    methods: enabled,
+                    /* Legacy shape for backwards compat */
+                    payment: {
+                        eSewa: { name: "eSewa", number: (enabled.find(function (m) { return m.id === "esewa"; }) || {}).number || "" },
+                        Khalti: { name: "Khalti", number: (enabled.find(function (m) { return m.id === "khalti"; }) || {}).number || "" }
+                    }
+                });
+                return true;
+            })
+            .catch(function () {
+                sendJSON(res, 200, {
+                    success: true,
+                    methods: DEFAULT_PAYMENT_METHODS.filter(function (m) { return m.enabled; }),
+                    payment: {
+                        eSewa: { name: "eSewa", number: "9748835184" },
+                        Khalti: { name: "Khalti", number: "97766258368" }
+                    }
+                });
+                return true;
+            });
+    }
+
+    /* ADMIN - GET ALL PAYMENT METHODS (including disabled) */
+    if (req.method === "GET" && pathname === "/api/admin/payment-settings") {
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return collections.settings.findOne({ key: "payment" })
+            .then(function (doc) {
+                var methods = (doc && Array.isArray(doc.methods))
+                    ? doc.methods
+                    : DEFAULT_PAYMENT_METHODS;
+                methods = methods.slice().sort(function (a, b) {
+                    return (a.order || 99) - (b.order || 99);
+                });
+                sendJSON(res, 200, { success: true, methods: methods });
+                return true;
+            })
+            .catch(function () {
+                sendJSON(res, 200, { success: true, methods: DEFAULT_PAYMENT_METHODS });
+                return true;
+            });
+    }
+
+    /* ADMIN - UPDATE PAYMENT METHODS */
+    if (req.method === "PUT" && pathname === "/api/admin/payment-settings") {
+        if (!requireAdmin(req, res)) return Promise.resolve(true);
+        return new Promise(function (resolve) {
+            readBody(req, function (err, body) {
+                if (err) { sendError(res, 400, err.message); return resolve(true); }
+                var methods = Array.isArray(body.methods) ? body.methods : null;
+                if (!methods) {
+                    sendError(res, 400, "methods array required.");
+                    return resolve(true);
+                }
+
+                /* Validate and sanitize */
+                var clean = [];
+                var seenIds = {};
+                for (var i = 0; i < methods.length; i++) {
+                    var m = methods[i] || {};
+                    var id = cleanString(m.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
+                    if (!id) {
+                        /* Generate id from name if missing */
+                        id = cleanString(m.name).toLowerCase().replace(/[^a-z0-9]/g, "");
+                    }
+                    if (!id) continue;
+                    if (seenIds[id]) {
+                        /* Avoid duplicate ids */
+                        id = id + "-" + (Date.now() % 10000) + "-" + i;
+                    }
+                    seenIds[id] = true;
+
+                    var name = cleanString(m.name);
+                    if (!name) continue;
+
+                    var qr = cleanString(m.qrImage);
+                    if (qr && qr.length > 1500000) {
+                        sendError(res, 400, "QR code too large. Max ~1MB per method.");
+                        return resolve(true);
+                    }
+
+                    clean.push({
+                        id: id,
+                        name: name,
+                        number: cleanString(m.number),
+                        enabled: m.enabled !== false,
+                        qrImage: qr,
+                        instructions: cleanString(m.instructions),
+                        order: safeNumber(m.order, i + 1)
+                    });
+                }
+
+                collections.settings.updateOne(
+                    { key: "payment" },
+                    { $set: { methods: clean, updatedAt: nowISO() } },
+                    { upsert: true }
+                ).then(function () {
+                    sendJSON(res, 200, {
+                        success: true,
+                        message: "Payment methods updated.",
+                        methods: clean
+                    });
+                    resolve(true);
+                }).catch(function () {
+                    sendError(res, 500, "Could not save.");
+                    resolve(true);
+                });
+            });
+        });
+    }
+
+    /* USER REGISTER */
     if (req.method === "POST" && pathname === "/api/users/register") {
         return new Promise(function (resolve) {
             readBody(req, function (err, body) {
@@ -673,7 +819,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 var username = cleanString(body.username);
                 var email = cleanString(body.email).toLowerCase();
                 var password = cleanString(body.password);
-
                 if (!username) { sendError(res, 400, "Username is required."); return resolve(true); }
                 if (!email) { sendError(res, 400, "Email is required."); return resolve(true); }
                 if (!password) { sendError(res, 400, "Password is required."); return resolve(true); }
@@ -713,7 +858,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ LOGIN ============ */
+    /* LOGIN */
     if (req.method === "POST" &&
         (pathname === "/api/users/login" || pathname === "/api/member/login")) {
         return new Promise(function (resolve) {
@@ -722,12 +867,10 @@ function handleAPIPromise(req, res, pathname, query) {
                 var identifier = cleanString(body.login) || cleanString(body.username) ||
                     cleanString(body.email) || cleanString(body.userId);
                 var password = cleanString(body.password);
-
                 if (!identifier || !password) {
                     sendError(res, 400, "Username/email and password required.");
                     return resolve(true);
                 }
-
                 collections.users.findOne({
                     $or: [
                         { id: identifier },
@@ -760,7 +903,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ME ============ */
+    /* ME */
     if (req.method === "GET" && pathname === "/api/users/me") {
         return requireMemberAsync(req, res).then(function (u) {
             if (!u) {
@@ -772,7 +915,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ LOGOUT ============ */
+    /* LOGOUT */
     if (req.method === "POST" && pathname === "/api/users/logout") {
         var c = parseCookies(req);
         if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
@@ -782,7 +925,7 @@ function handleAPIPromise(req, res, pathname, query) {
         return Promise.resolve(true);
     }
 
-    /* ============ MY REGISTRATIONS ============ */
+    /* MY REGISTRATIONS */
     if (req.method === "GET" && pathname === "/api/users/registrations") {
         return requireMemberAsync(req, res).then(function (u) {
             if (!u) return true;
@@ -797,7 +940,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ PUBLIC TOURNAMENTS ============ */
+    /* PUBLIC TOURNAMENTS */
     if (req.method === "GET" && pathname === "/api/tournaments") {
         return collections.tournaments.find({}).toArray()
             .then(function (tournaments) {
@@ -812,7 +955,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ SINGLE TOURNAMENT ============ */
+    /* SINGLE TOURNAMENT */
     if (req.method === "GET" && pathname === "/api/tournaments/one") {
         var key = query.get("id") || query.get("tournamentId") || query.get("tournament");
         return collections.tournaments.findOne({
@@ -829,7 +972,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN CREATE TOURNAMENT ============ */
+    /* CREATE TOURNAMENT */
     if (req.method === "POST" && pathname === "/api/tournaments") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -837,7 +980,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (err) { sendError(res, 400, err.message); return resolve(true); }
                 var name = cleanString(body.name);
                 if (!name) { sendError(res, 400, "Tournament name required."); return resolve(true); }
-
                 var nt = {
                     id: createId("tour"),
                     name: name,
@@ -868,7 +1010,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ UPDATE TOURNAMENT ============ */
+    /* UPDATE TOURNAMENT */
     if (req.method === "PUT" && pathname.indexOf("/api/tournaments/") === 0 &&
         pathname.indexOf("/api/tournaments/one") !== 0) {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
@@ -885,7 +1027,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (body.maxTeams !== undefined) updates.maxTeams = safeNumber(body.maxTeams, 16);
                 if (body.prizePool !== undefined) updates.prizePool = safeNumber(body.prizePool, 0);
                 updates.updatedAt = nowISO();
-
                 collections.tournaments.findOneAndUpdate(
                     { id: upId },
                     { $set: updates },
@@ -906,7 +1047,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ DELETE TOURNAMENT ============ */
+    /* DELETE TOURNAMENT */
     if (req.method === "DELETE" && pathname.indexOf("/api/tournaments/") === 0) {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         var delId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
@@ -921,7 +1062,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ CREATE REGISTRATION ============ */
+    /* CREATE REGISTRATION */
     if (req.method === "POST" && pathname === "/api/registrations") {
         return requireMemberAsync(req, res).then(function (user) {
             if (!user) return true;
@@ -951,8 +1092,8 @@ function handleAPIPromise(req, res, pathname, query) {
                             var fee = safeNumber(tour.entryFee, 0);
 
                             if (fee > 0) {
-                                if (pm !== "Khalti" && pm !== "eSewa") {
-                                    sendError(res, 400, "Select Khalti or eSewa.");
+                                if (!pm) {
+                                    sendError(res, 400, "Select a payment method.");
                                     return resolve(true);
                                 }
                                 if (txId.length < 3 || txId.length > 100) {
@@ -1033,7 +1174,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ PUBLIC REGISTRATIONS ============ */
+    /* PUBLIC REGISTRATIONS */
     if (req.method === "GET" && pathname === "/api/registrations") {
         return collections.registrations.find({ status: { $ne: "Rejected" } })
             .toArray()
@@ -1046,7 +1187,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ PUBLIC MATCHES ============ */
+    /* PUBLIC MATCHES */
     if (req.method === "GET" && pathname === "/api/matches") {
         return collections.matches.find({}).toArray()
             .then(function (matches) {
@@ -1055,7 +1196,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ MEMBER MATCHES ============ */
+    /* MEMBER MATCHES */
     if (req.method === "GET" && pathname === "/api/member/matches") {
         return requireMemberAsync(req, res).then(function (mem) {
             if (!mem) return true;
@@ -1073,7 +1214,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 ]).then(function (results) {
                     var matches = results[0];
                     var tours = results[1];
-
                     var tMap = {};
                     tours.forEach(function (t) { tMap[String(t.id || "")] = t; });
 
@@ -1081,11 +1221,9 @@ function handleAPIPromise(req, res, pathname, query) {
                     matches.forEach(function (mm) {
                         var tid = String(mm.tournamentId || "");
                         if (!myTids[tid]) return;
-
                         var t = tMap[tid] || {};
                         var em = {};
                         Object.keys(mm).forEach(function (k) { em[k] = mm[k]; });
-
                         em.matchType = normalizeMatchType(mm.matchType);
                         em.tournament = {
                             id: t.id || "",
@@ -1097,19 +1235,15 @@ function handleAPIPromise(req, res, pathname, query) {
                             prizePool: t.prizePool || 0,
                             teamSize: t.teamSize || 0
                         };
-
                         var joined = Array.isArray(mm.joinedUserIds) ? mm.joinedUserIds : [];
                         em.memberJoined = joined.indexOf(mem.id) !== -1;
-
                         out.push(em);
                     });
-
                     out.sort(function (a, b) {
                         var da = (a.date || "") + "T" + (a.time || "00:00");
                         var db = (b.date || "") + "T" + (b.time || "00:00");
                         return new Date(da) - new Date(db);
                     });
-
                     sendJSON(res, 200, { success: true, matches: out });
                     return true;
                 });
@@ -1117,7 +1251,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ MEMBER JOINS MATCH ============ */
+    /* MEMBER JOINS MATCH */
     if (req.method === "POST" && pathname === "/api/member/join-match") {
         return requireMemberAsync(req, res).then(function (jUser) {
             if (!jUser) return true;
@@ -1126,7 +1260,6 @@ function handleAPIPromise(req, res, pathname, query) {
                     if (err) { sendError(res, 400, err.message); return resolve(true); }
                     var mid = cleanString(body.matchId || body.id);
                     if (!mid) { sendError(res, 400, "Match ID required."); return resolve(true); }
-
                     collections.matches.updateOne(
                         { id: mid },
                         { $addToSet: { joinedUserIds: jUser.id },
@@ -1147,7 +1280,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ PLAYER PROFILE ============ */
+    /* PLAYER PROFILE */
     if (req.method === "GET" && pathname === "/api/player") {
         var username = cleanString(query.get("username"));
         if (!username) {
@@ -1185,7 +1318,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 var matchType = normalizeMatchType(m.matchType);
                 var involved = false;
                 var result = "";
-
                 if (matchType === "battle-royale") {
                     var winners = Array.isArray(m.winners) ? m.winners : [];
                     if (m.winner && winners.length === 0) winners = [m.winner];
@@ -1211,14 +1343,11 @@ function handleAPIPromise(req, res, pathname, query) {
                         }
                     }
                 }
-
                 if (!involved) return;
                 if (!isCompletedMatch(m)) return;
-
                 if (result === "WIN") wins++;
                 else if (result === "LOSS") losses++;
                 else if (result === "TIE") ties++;
-
                 playerMatches.push({
                     id: m.id,
                     name: m.result || m.name || "Match",
@@ -1256,17 +1385,14 @@ function handleAPIPromise(req, res, pathname, query) {
                     return !!m.winner;
                 });
                 if (completed.length === 0) return;
-
                 completed.sort(function (a, b) {
                     var da = (a.date || "") + "T" + (a.time || "00:00");
                     var db = (b.date || "") + "T" + (b.time || "00:00");
                     return new Date(da) - new Date(db);
                 });
-
                 var final = completed[completed.length - 1];
                 var mt = normalizeMatchType(final.matchType);
                 var champion = "";
-
                 if (mt === "battle-royale") {
                     var wA = Array.isArray(final.winners) ? final.winners : [];
                     if (wA.length === 0 && final.winner) wA = [final.winner];
@@ -1274,7 +1400,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 } else {
                     champion = String(final.winner || "").toLowerCase();
                 }
-
                 if (teamKeys.indexOf(champion) !== -1) {
                     championships.push({
                         tournamentId: tour.id,
@@ -1297,11 +1422,8 @@ function handleAPIPromise(req, res, pathname, query) {
                     teams: teamsList,
                     stats: {
                         matchesPlayed: total,
-                        wins: wins,
-                        losses: losses,
-                        ties: ties,
-                        winRate: winRate,
-                        points: points,
+                        wins: wins, losses: losses, ties: ties,
+                        winRate: winRate, points: points,
                         championships: championships.length,
                         tournamentsEntered: userRegs.length
                     },
@@ -1317,7 +1439,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ LEADERBOARD ============ */
+    /* LEADERBOARD */
     if (req.method === "GET" && pathname === "/api/leaderboard") {
         var gf = query.get("game") || "all";
         return buildLeaderboard(gf).then(function (r) {
@@ -1333,7 +1455,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ WINNERS ============ */
+    /* WINNERS */
     if (req.method === "GET" && pathname === "/api/winners") {
         return buildWinners().then(function (w) {
             sendJSON(res, 200, {
@@ -1345,7 +1467,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ PUBLIC ANNOUNCEMENTS ============ */
+    /* PUBLIC ANNOUNCEMENTS */
     if (req.method === "GET" && pathname === "/api/announcements") {
         return collections.announcements.find({})
             .sort({ createdAt: -1 })
@@ -1361,7 +1483,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ NOTIFICATIONS ============ */
+    /* NOTIFICATIONS */
     if (req.method === "GET" && pathname === "/api/notifications") {
         return requireMemberAsync(req, res).then(function (mem) {
             if (!mem) return true;
@@ -1390,16 +1512,12 @@ function handleAPIPromise(req, res, pathname, query) {
                 readBody(req, function (err, body) {
                     if (err) { sendError(res, 400, err.message); return resolve(true); }
                     var notifId = cleanString(body.id);
-
                     if (notifId) {
                         collections.notifications.updateOne(
                             { id: notifId, userId: mem.id },
                             { $set: { read: true, readAt: nowISO() } }
                         ).then(function () {
                             sendJSON(res, 200, { success: true });
-                            resolve(true);
-                        }).catch(function () {
-                            sendError(res, 500, "Could not save.");
                             resolve(true);
                         });
                     } else {
@@ -1409,9 +1527,6 @@ function handleAPIPromise(req, res, pathname, query) {
                         ).then(function () {
                             sendJSON(res, 200, { success: true });
                             resolve(true);
-                        }).catch(function () {
-                            sendError(res, 500, "Could not save.");
-                            resolve(true);
                         });
                     }
                 });
@@ -1419,7 +1534,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN LOGIN ============ */
+    /* ADMIN LOGIN */
     if (req.method === "POST" && pathname === "/api/admin/login") {
         return new Promise(function (resolve) {
             readBody(req, function (err, body) {
@@ -1443,7 +1558,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN CHECK ============ */
+    /* ADMIN CHECK */
     if (req.method === "GET" && pathname === "/api/admin/check") {
         var s = getSession(req);
         if (!s || s.role !== "admin") {
@@ -1458,7 +1573,7 @@ function handleAPIPromise(req, res, pathname, query) {
         return Promise.resolve(true);
     }
 
-    /* ============ ADMIN LOGOUT ============ */
+    /* ADMIN LOGOUT */
     if (req.method === "POST" && pathname === "/api/admin/logout") {
         var c = parseCookies(req);
         if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
@@ -1468,7 +1583,7 @@ function handleAPIPromise(req, res, pathname, query) {
         return Promise.resolve(true);
     }
 
-    /* ============ ADMIN REGISTRATIONS ============ */
+    /* ADMIN REGISTRATIONS */
     if (req.method === "GET" && pathname === "/api/admin/registrations") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.registrations.find({}).toArray()
@@ -1481,7 +1596,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ ADMIN REG STATUS (body) ============ */
+    /* ADMIN REG STATUS (body) */
     if (req.method === "PUT" && pathname === "/api/admin/registrations/status") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1493,7 +1608,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
                     sendError(res, 400, "Invalid status."); return resolve(true);
                 }
-
                 var updates = { status: st, updatedAt: nowISO() };
                 if (st === "Approved") updates.paymentStatus = "Verified";
                 if (st === "Rejected") updates.paymentStatus = "Rejected";
@@ -1508,26 +1622,20 @@ function handleAPIPromise(req, res, pathname, query) {
                         return resolve(true);
                     }
                     var reg = result.value;
-
                     var notifPromise = Promise.resolve();
                     if (st === "Approved") {
                         notifPromise = createNotification(
-                            reg.userId,
-                            "success",
-                            "Registration Approved",
+                            reg.userId, "success", "Registration Approved",
                             "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
                             "member.html"
                         );
                     } else if (st === "Rejected") {
                         notifPromise = createNotification(
-                            reg.userId,
-                            "error",
-                            "Registration Rejected",
+                            reg.userId, "error", "Registration Rejected",
                             "Your registration for " + reg.tournamentName + " was rejected.",
                             "member.html"
                         );
                     }
-
                     return notifPromise.then(function () {
                         sendJSON(res, 200, {
                             success: true,
@@ -1541,7 +1649,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN REG STATUS (URL) ============ */
+    /* ADMIN REG STATUS (URL) */
     if (req.method === "PUT" && pathname.indexOf("/api/admin/registrations/") === 0 &&
         pathname.indexOf("/status") !== -1) {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
@@ -1568,26 +1676,20 @@ function handleAPIPromise(req, res, pathname, query) {
                         return resolve(true);
                     }
                     var reg = result.value;
-
                     var notifPromise = Promise.resolve();
                     if (st === "Approved") {
                         notifPromise = createNotification(
-                            reg.userId,
-                            "success",
-                            "Registration Approved",
+                            reg.userId, "success", "Registration Approved",
                             "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
                             "member.html"
                         );
                     } else if (st === "Rejected") {
                         notifPromise = createNotification(
-                            reg.userId,
-                            "error",
-                            "Registration Rejected",
+                            reg.userId, "error", "Registration Rejected",
                             "Your registration for " + reg.tournamentName + " was rejected.",
                             "member.html"
                         );
                     }
-
                     return notifPromise.then(function () {
                         sendJSON(res, 200, {
                             success: true,
@@ -1601,7 +1703,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN REG EDIT ============ */
+    /* ADMIN REG EDIT */
     if (req.method === "PUT" && pathname === "/api/admin/registrations") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1609,7 +1711,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (err) { sendError(res, 400, err.message); return resolve(true); }
                 var rid = cleanString(body.id || body.registrationId);
                 if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
-
                 var updates = {};
                 ["teamName","captainName","phone","player1","player2","player3",
                     "player4","player5","player6","payerName","payerPhone","paymentMethod",
@@ -1617,7 +1718,6 @@ function handleAPIPromise(req, res, pathname, query) {
                     if (body[f] !== undefined && body[f] !== null) updates[f] = cleanString(body[f]);
                 });
                 updates.updatedAt = nowISO();
-
                 collections.registrations.findOneAndUpdate(
                     { id: rid },
                     { $set: updates },
@@ -1638,7 +1738,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ ADMIN REG DELETE ============ */
+    /* ADMIN REG DELETE */
     if (req.method === "DELETE" && pathname === "/api/admin/registrations") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         var rid = cleanString(query.get("id") || query.get("registrationId"));
@@ -1654,7 +1754,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ ADMIN TOURNAMENTS LIST ============ */
+    /* ADMIN TOURNAMENTS LIST */
     if (req.method === "GET" && pathname === "/api/admin/tournaments") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.tournaments.find({}).toArray()
@@ -1670,7 +1770,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ ADMIN MATCHES LIST ============ */
+    /* ADMIN MATCHES LIST */
     if (req.method === "GET" && pathname === "/api/admin/matches") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.matches.find({}).toArray()
@@ -1680,7 +1780,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ CREATE MATCH ============ */
+    /* CREATE MATCH */
     if (req.method === "POST" && pathname === "/api/admin/matches") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1692,14 +1792,11 @@ function handleAPIPromise(req, res, pathname, query) {
                     winners = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
                     winners = winners.slice(0, 3);
                 }
-
-                /* Screenshot: base64 data URL string */
                 var screenshot = cleanString(body.screenshot);
                 if (screenshot && screenshot.length > 6000000) {
-                    sendError(res, 400, "Screenshot too large. Max ~4MB after compression.");
+                    sendError(res, 400, "Screenshot too large.");
                     return resolve(true);
                 }
-
                 var match = {
                     id: createId("match"),
                     matchType: matchType,
@@ -1728,9 +1825,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 collections.matches.insertOne(match)
                     .then(function () {
                         return createNotificationForTournament(
-                            match.tournamentId,
-                            "info",
-                            "New Match Scheduled",
+                            match.tournamentId, "info", "New Match Scheduled",
                             match.result + " for " + match.tournamentName + " on " + match.date + " at " + match.time,
                             "member.html"
                         );
@@ -1751,7 +1846,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ UPDATE MATCH ============ */
+    /* UPDATE MATCH */
     if (req.method === "PUT" && pathname === "/api/admin/matches") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1759,13 +1854,11 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (err) { sendError(res, 400, err.message); return resolve(true); }
                 var mid = cleanString(body.id || body.matchId);
                 if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
-
                 collections.matches.findOne({ id: mid }).then(function (oldMatch) {
                     if (!oldMatch) {
                         sendError(res, 404, "Not found.");
                         return resolve(true);
                     }
-
                     var updates = {};
                     if (body.matchType !== undefined) {
                         updates.matchType = normalizeMatchType(body.matchType);
@@ -1784,8 +1877,6 @@ function handleAPIPromise(req, res, pathname, query) {
                         updates.winners = ws.slice(0, 3);
                         if (!updates.winner && ws.length > 0) updates.winner = ws[0];
                     }
-
-                    /* Screenshot handling */
                     if (body.screenshot !== undefined) {
                         var sc = cleanString(body.screenshot);
                         if (sc && sc.length > 6000000) {
@@ -1795,9 +1886,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         updates.screenshot = sc;
                         updates.screenshotUploadedAt = sc ? nowISO() : "";
                     }
-
                     updates.updatedAt = nowISO();
-
                     return collections.matches.findOneAndUpdate(
                         { id: mid },
                         { $set: updates },
@@ -1807,36 +1896,27 @@ function handleAPIPromise(req, res, pathname, query) {
                             sendError(res, 404, "Not found.");
                             return resolve(true);
                         }
-
                         var oldStatus = String(oldMatch.status || "").toLowerCase();
                         var newStatus = String(result.value.status || "").toLowerCase();
-
                         var notifPromises = [];
 
-                        if (newStatus === "live" && oldStatus !== "live" &&
-                            result.value.roomId) {
+                        if (newStatus === "live" && oldStatus !== "live" && result.value.roomId) {
                             notifPromises.push(createNotificationForTournament(
-                                result.value.tournamentId,
-                                "urgent",
-                                "Room ID Released!",
+                                result.value.tournamentId, "urgent", "Room ID Released!",
                                 result.value.result + " is live now. Room ID: " + result.value.roomId +
                                 (result.value.roomPassword ? " Password: " + result.value.roomPassword : ""),
                                 "member.html"
                             ));
                         }
-
                         if ((newStatus === "completed" || newStatus === "finished") &&
                             oldStatus !== "completed" && oldStatus !== "finished") {
                             notifPromises.push(createNotificationForTournament(
-                                result.value.tournamentId,
-                                "success",
-                                "Match Completed",
+                                result.value.tournamentId, "success", "Match Completed",
                                 result.value.result + " has finished. Winner: " +
                                 (result.value.winner || (result.value.winners && result.value.winners[0]) || "TBD"),
                                 "member.html"
                             ));
                         }
-
                         return Promise.all(notifPromises).then(function () {
                             sendJSON(res, 200, {
                                 success: true,
@@ -1855,7 +1935,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ DELETE MATCH ============ */
+    /* DELETE MATCH */
     if (req.method === "DELETE" && pathname === "/api/admin/matches") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         var mid = cleanString(query.get("id") || query.get("matchId"));
@@ -1871,7 +1951,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ ADMIN ANNOUNCEMENTS LIST ============ */
+    /* ADMIN ANNOUNCEMENTS */
     if (req.method === "GET" && pathname === "/api/admin/announcements") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.announcements.find({}).sort({ createdAt: -1 }).toArray()
@@ -1881,7 +1961,6 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ CREATE ANNOUNCEMENT ============ */
     if (req.method === "POST" && pathname === "/api/admin/announcements") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1891,15 +1970,12 @@ function handleAPIPromise(req, res, pathname, query) {
                 var message = cleanString(body.message);
                 if (!title) { sendError(res, 400, "Title required."); return resolve(true); }
                 if (!message) { sendError(res, 400, "Message required."); return resolve(true); }
-
                 var item = {
                     id: createId("ann"),
-                    title: title,
-                    message: message,
+                    title: title, message: message,
                     type: cleanString(body.type) || "info",
                     pinned: body.pinned === true || body.pinned === "true",
-                    createdAt: nowISO(),
-                    updatedAt: nowISO()
+                    createdAt: nowISO(), updatedAt: nowISO()
                 };
                 collections.announcements.insertOne(item)
                     .then(function () {
@@ -1933,7 +2009,6 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ UPDATE ANNOUNCEMENT ============ */
     if (req.method === "PUT" && pathname === "/api/admin/announcements") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
@@ -1941,7 +2016,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (err) { sendError(res, 400, err.message); return resolve(true); }
                 var annId = cleanString(body.id || body.announcementId);
                 if (!annId) { sendError(res, 400, "ID required."); return resolve(true); }
-
                 var updates = {};
                 if (body.title !== undefined) updates.title = cleanString(body.title);
                 if (body.message !== undefined) updates.message = cleanString(body.message);
@@ -1950,7 +2024,6 @@ function handleAPIPromise(req, res, pathname, query) {
                     updates.pinned = body.pinned === true || body.pinned === "true";
                 }
                 updates.updatedAt = nowISO();
-
                 collections.announcements.findOneAndUpdate(
                     { id: annId },
                     { $set: updates },
@@ -1971,7 +2044,6 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ DELETE ANNOUNCEMENT ============ */
     if (req.method === "DELETE" && pathname === "/api/admin/announcements") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         var annId = cleanString(query.get("id") || query.get("announcementId"));
@@ -1987,13 +2059,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ PAYMENT SETTINGS ============ */
-    if (req.method === "GET" && pathname === "/api/payment-settings") {
-        sendJSON(res, 200, { success: true, payment: PAYMENT_SETTINGS });
-        return Promise.resolve(true);
-    }
-
-    /* ============ CSV EXPORT ============ */
+    /* CSV EXPORT */
     if (req.method === "GET" && pathname === "/api/admin/registrations.csv") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.registrations.find({}).toArray()
@@ -2003,13 +2069,11 @@ function handleAPIPromise(req, res, pathname, query) {
                     "Player 1","Player 2","Player 3","Player 4","Player 5","Player 6",
                     "Payment Method","Transaction ID","Amount","Payment Status",
                     "Registration Status","Created At"].join(","));
-
                 function csv(v) {
                     var t = (v === undefined || v === null) ? "" : String(v);
                     t = t.replace(/"/g, '""');
                     return '"' + t + '"';
                 }
-
                 regs.forEach(function (it) {
                     lines.push([
                         it.id,it.username,it.email,it.tournamentName,it.game,
@@ -2019,7 +2083,6 @@ function handleAPIPromise(req, res, pathname, query) {
                         it.paymentStatus,it.status,it.createdAt
                     ].map(csv).join(","));
                 });
-
                 res.writeHead(200, {
                     "Content-Type": "text/csv; charset=utf-8",
                     "Content-Disposition": 'attachment; filename="nepplay-registrations.csv"'
@@ -2029,7 +2092,6 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ FAVICON FALLBACK ============ */
     if (pathname === "/favicon.ico") {
         res.writeHead(204);
         res.end();
@@ -2039,9 +2101,7 @@ function handleAPIPromise(req, res, pathname, query) {
     return Promise.resolve(false);
 }
 
-/* ============================================================
-   HTTP SERVER
-============================================================ */
+/* ============ HTTP SERVER ============ */
 
 var server = http.createServer(function (req, res) {
     if (req.method === "OPTIONS") {
@@ -2054,11 +2114,9 @@ var server = http.createServer(function (req, res) {
         res.end();
         return;
     }
-
     var parsed;
     try { parsed = new URL(req.url, "http://localhost:" + PORT); }
     catch (e) { sendError(res, 400, "Invalid URL."); return; }
-
     var pathname = parsed.pathname;
     var query = parsed.searchParams;
 
@@ -2070,25 +2128,18 @@ var server = http.createServer(function (req, res) {
         });
         return;
     }
-
     serveStatic(req, res, pathname);
 });
-
-/* ============================================================
-   START
-============================================================ */
 
 connectDB().then(function () {
     server.listen(PORT, HOST, function () {
         console.log("");
         console.log("==================================================");
-        console.log("        NEPPLAY SERVER STARTED (MongoDB + D1 + D3)");
+        console.log("     NEPPLAY SERVER STARTED (Dynamic Payments)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
         console.log("Admin: " + ADMIN_USERNAME);
         console.log("Database: " + DB_NAME);
-        console.log("eSewa: " + PAYMENT_SETTINGS.eSewa.number);
-        console.log("Khalti: " + PAYMENT_SETTINGS.Khalti.number);
         console.log("==================================================");
         console.log("");
     });
