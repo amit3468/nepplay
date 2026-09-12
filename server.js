@@ -39,7 +39,7 @@ if (!MONGODB_URI) {
 var DB_NAME = "nepplay";
 
 var ADMIN_USERNAME = "admin";
-var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
+var ADMIN_PASSWORD = "nepplay@123";
 
 var PAYMENT_SETTINGS = {
     eSewa: { name: "eSewa", number: "9748835184" },
