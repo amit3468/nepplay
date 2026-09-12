@@ -1,19 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>NEPPLAY - Leaderboard</title>
 
 <style>
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: Arial, Helvetica, sans-serif;
@@ -22,536 +15,280 @@ body {
     min-height: 100vh;
 }
 
-/* ================= HEADER ================= */
-
+/* HEADER */
 header {
     background: #0d111b;
     border-bottom: 1px solid #202634;
     padding: 18px 6%;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     position: sticky;
     top: 0;
     z-index: 100;
 }
-
-.logo {
-    font-size: 27px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.logo span {
-    color: #ff3b30;
-}
-
-nav {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-}
-
+.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
+.logo span { color: #ff3b30; }
+nav { display: flex; align-items: center; gap: 28px; }
 nav a {
-    color: #c7ccd7;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 600;
+    color: #c7ccd7; text-decoration: none;
+    font-size: 15px; font-weight: 600;
 }
-
-nav a:hover,
-nav a.active {
-    color: #ff4438;
-}
-
+nav a:hover, nav a.active { color: #ff4438; }
 .login-btn {
-    background: #ff3b30;
-    color: white !important;
-    padding: 10px 20px;
-    border-radius: 7px;
+    background: #ff3b30; color: white !important;
+    padding: 10px 20px; border-radius: 7px;
 }
 
-/* ================= HERO ================= */
-
+/* HERO */
 .hero {
     text-align: center;
     padding: 60px 20px 30px;
 }
+.hero h1 { font-size: 46px; margin-bottom: 15px; }
+.hero h1 span { color: #ff3b30; }
+.hero p { color: #9299a8; font-size: 17px; }
 
-.hero h1 {
-    font-size: 46px;
-    margin-bottom: 15px;
-}
-
-.hero h1 span {
-    color: #ff3b30;
-}
-
-.hero p {
-    color: #9299a8;
-    font-size: 17px;
-}
-
-/* ================= STATS ================= */
-
+/* STATS */
 .stats-bar {
-    width: 88%;
-    max-width: 1100px;
+    width: 88%; max-width: 1100px;
     margin: 30px auto 0;
-
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 15px;
 }
-
 .stat-box {
-    background: #111621;
-    border: 1px solid #242b39;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
+    background: #111621; border: 1px solid #242b39;
+    border-radius: 12px; padding: 20px; text-align: center;
 }
-
 .stat-number {
-    font-size: 28px;
-    font-weight: bold;
-    color: #ff4438;
-    margin-bottom: 6px;
+    font-size: 28px; font-weight: bold;
+    color: #ff4438; margin-bottom: 6px;
 }
+.stat-label { color: #9299a8; font-size: 13px; }
 
-.stat-label {
-    color: #9299a8;
-    font-size: 13px;
-}
-
-/* ================= PODIUM ================= */
-
+/* PODIUM */
 .podium-section {
-    width: 88%;
-    max-width: 1100px;
+    width: 88%; max-width: 1100px;
     margin: 40px auto 0;
 }
-
 .podium {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 15px;
     align-items: end;
 }
-
 .podium-card {
-    background: #111621;
-    border: 1px solid #242b39;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    position: relative;
+    background: #111621; border: 1px solid #242b39;
+    border-radius: 12px; padding: 20px;
+    text-align: center; position: relative;
 }
-
 .podium-card.gold {
     border-color: #ffd43b;
     background: linear-gradient(180deg, #1a1608 0%, #111621 100%);
     padding: 30px 20px;
 }
-
 .podium-card.silver {
     border-color: #b8bec7;
     padding: 25px 20px;
 }
-
 .podium-card.bronze {
     border-color: #cd7f32;
     padding: 22px 20px;
 }
-
 .podium-medal {
-    width: 60px;
-    height: 60px;
+    width: 60px; height: 60px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    font-weight: 900;
+    font-size: 26px; font-weight: 900;
     margin: 0 auto 12px;
     color: #0d111b;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
-
 .podium-medal.gold-medal {
     background: linear-gradient(135deg, #ffd43b, #ffb800);
 }
-
 .podium-medal.silver-medal {
     background: linear-gradient(135deg, #d8dde4, #a9b1bc);
 }
-
 .podium-medal.bronze-medal {
     background: linear-gradient(135deg, #d68a4c, #a5663a);
 }
-
 .podium-name {
-    font-weight: bold;
-    font-size: 17px;
-    margin-bottom: 6px;
-    word-break: break-word;
+    font-weight: bold; font-size: 17px;
+    margin-bottom: 6px; word-break: break-word;
 }
-
 .podium-captain {
-    color: #9299a8;
-    font-size: 12px;
-    margin-bottom: 10px;
+    font-size: 12px; margin-bottom: 10px;
 }
-
+.podium-captain a {
+    color: #9299a8; text-decoration: none;
+}
+.podium-captain a:hover { color: #ff4438; text-decoration: underline; }
 .podium-points {
-    color: #ff4438;
-    font-weight: bold;
-    font-size: 22px;
+    color: #ff4438; font-weight: bold; font-size: 22px;
 }
-
 .podium-wins {
-    color: #9299a8;
-    font-size: 12px;
-    margin-top: 4px;
+    color: #9299a8; font-size: 12px; margin-top: 4px;
 }
 
-/* ================= TABS + SEARCH ================= */
-
+/* TABS + SEARCH */
 .controls {
-    width: 88%;
-    max-width: 1100px;
+    width: 88%; max-width: 1100px;
     margin: 40px auto 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 15px; flex-wrap: wrap;
 }
-
-.game-tabs {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
+.game-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
 .game-tab {
     padding: 10px 18px;
-    background: #111621;
-    border: 1px solid #293141;
-    border-radius: 7px;
-    color: #c5cbd6;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
+    background: #111621; border: 1px solid #293141;
+    border-radius: 7px; color: #c5cbd6;
+    cursor: pointer; font-weight: 600; font-size: 14px;
 }
-
-.game-tab.active,
-.game-tab:hover {
-    background: #ff3b30;
-    border-color: #ff3b30;
-    color: white;
+.game-tab.active, .game-tab:hover {
+    background: #ff3b30; border-color: #ff3b30; color: white;
 }
-
 .search-input {
-    background: #111621;
-    border: 1px solid #293141;
-    border-radius: 7px;
-    padding: 10px 15px;
-    color: white;
-    outline: none;
-    min-width: 220px;
-    font-size: 14px;
+    background: #111621; border: 1px solid #293141;
+    border-radius: 7px; padding: 10px 15px;
+    color: white; outline: none; min-width: 220px; font-size: 14px;
 }
+.search-input:focus { border-color: #ff3b30; }
 
-.search-input:focus {
-    border-color: #ff3b30;
-}
-
-/* ================= TABLE ================= */
-
+/* TABLE */
 .container {
-    width: 88%;
-    max-width: 1100px;
-    margin: auto;
-    padding-bottom: 70px;
+    width: 88%; max-width: 1100px;
+    margin: auto; padding-bottom: 70px;
 }
-
 .table-box {
-    background: #111621;
-    border: 1px solid #242b39;
-    border-radius: 12px;
-    overflow: hidden;
+    background: #111621; border: 1px solid #242b39;
+    border-radius: 12px; overflow: hidden;
 }
-
 table {
-    width: 100%;
-    border-collapse: collapse;
+    width: 100%; border-collapse: collapse;
 }
-
 th {
-    background: #171d29;
-    color: #969eae;
-    text-align: left;
-    padding: 16px;
-    font-size: 12px;
-    text-transform: uppercase;
+    background: #171d29; color: #969eae;
+    text-align: left; padding: 16px;
+    font-size: 12px; text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-
 td {
-    padding: 16px;
-    border-top: 1px solid #242b39;
+    padding: 16px; border-top: 1px solid #242b39;
     font-size: 14px;
 }
-
-tr:hover {
-    background: #151b26;
-}
-
+tr:hover { background: #151b26; }
 .rank {
-    font-weight: bold;
-    font-size: 16px;
-    width: 60px;
+    font-weight: bold; font-size: 16px; width: 60px;
 }
-
-.rank-1 {
-    color: #ffd43b;
+.rank-1 { color: #ffd43b; }
+.rank-2 { color: #b8bec7; }
+.rank-3 { color: #cd7f32; }
+.player { font-weight: bold; }
+.captain { color: #9299a8; font-size: 12px; }
+.captain a {
+    color: #9299a8; text-decoration: none;
 }
-
-.rank-2 {
-    color: #b8bec7;
-}
-
-.rank-3 {
-    color: #cd7f32;
-}
-
-.player {
-    font-weight: bold;
-}
-
-.captain {
-    color: #9299a8;
-    font-size: 12px;
-}
-
+.captain a:hover { color: #ff4438; text-decoration: underline; }
 .points {
-    color: #ff4438;
-    font-weight: bold;
-    font-size: 15px;
+    color: #ff4438; font-weight: bold; font-size: 15px;
 }
+.win-rate { color: #5bed8e; font-weight: 600; }
 
-.win-rate {
-    color: #5bed8e;
-    font-weight: 600;
-}
-
-/* ================= EMPTY / LOADING ================= */
-
+/* EMPTY / LOADING */
 .empty, .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #8993a2;
-    font-size: 14px;
-    line-height: 1.7;
+    text-align: center; padding: 60px 20px;
+    color: #8993a2; font-size: 14px; line-height: 1.7;
 }
-
 .loading-spinner {
     display: inline-block;
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border: 3px solid #242b39;
     border-top-color: #ff3b30;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin-bottom: 15px;
 }
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ================= FOOTER ================= */
+@keyframes spin { to { transform: rotate(360deg); } }
 
 footer {
     border-top: 1px solid #202634;
-    text-align: center;
-    padding: 25px;
-    color: #717887;
-    font-size: 13px;
+    text-align: center; padding: 25px;
+    color: #717887; font-size: 13px;
 }
-
-/* ================= MOBILE ================= */
 
 @media (max-width: 900px) {
-
-    .podium {
-        grid-template-columns: 1fr;
-    }
-
-    .podium-card.gold {
-        order: -1;
-    }
-
-    .stats-bar {
-        grid-template-columns: 1fr;
-    }
-
+    .podium { grid-template-columns: 1fr; }
+    .podium-card.gold { order: -1; }
+    .stats-bar { grid-template-columns: 1fr; }
 }
-
 @media (max-width: 750px) {
-
-    header {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 14px;
-    }
-
-    .hero h1 {
-        font-size: 34px;
-    }
-
-    .controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-input {
-        width: 100%;
-    }
-
-    .table-box {
-        overflow-x: auto;
-    }
-
-    table {
-        min-width: 700px;
-    }
-
+    header { flex-direction: column; gap: 15px; }
+    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
+    .hero h1 { font-size: 34px; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .search-input { width: 100%; }
+    .table-box { overflow-x: auto; }
+    table { min-width: 700px; }
 }
-
 </style>
-
 </head>
 
 <body>
 
-
 <header>
-
-    <div class="logo">
-        NEP<span>PLAY</span>
-    </div>
-
+    <div class="logo">NEP<span>PLAY</span></div>
     <nav>
-
         <a href="index.html">Home</a>
-
         <a href="tournaments.html">Tournaments</a>
-
         <a href="leaderboard.html" class="active">Leaderboard</a>
-
         <a href="teams.html">Teams</a>
-
+        <a href="winners.html">Winners</a>
         <a href="login.html" class="login-btn">Login</a>
-
     </nav>
-
 </header>
 
-
 <section class="hero">
-
-    <h1>
-        NEPPLAY <span>Leaderboard</span>
-    </h1>
-
-    <p>
-        Live rankings of the top competitive teams in Nepal.
-    </p>
-
+    <h1>NEPPLAY <span>Leaderboard</span></h1>
+    <p>Live rankings of the top competitive teams in Nepal.</p>
 </section>
 
-
 <div class="stats-bar">
-
     <div class="stat-box">
         <div class="stat-number" id="totalTeams">0</div>
         <div class="stat-label">Ranked Teams</div>
     </div>
-
     <div class="stat-box">
         <div class="stat-number" id="totalMatches">0</div>
         <div class="stat-label">Matches Completed</div>
     </div>
-
     <div class="stat-box">
         <div class="stat-number" id="totalTournaments">0</div>
         <div class="stat-label">Tournaments Played</div>
     </div>
-
 </div>
-
 
 <div class="podium-section">
-    <div class="podium" id="podium">
-    </div>
+    <div class="podium" id="podium"></div>
 </div>
-
 
 <div class="controls">
-
     <div class="game-tabs">
-
-        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">
-            All Games
-        </button>
-
-        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">
-            Free Fire
-        </button>
-
-        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">
-            PUBG Mobile
-        </button>
-
-        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">
-            Mobile Legends
-        </button>
-
-        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">
-            eFootball
-        </button>
-
+        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">All Games</button>
+        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">Free Fire</button>
+        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">PUBG Mobile</button>
+        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">Mobile Legends</button>
+        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">eFootball</button>
     </div>
-
-    <input
-        type="text"
-        class="search-input"
-        id="searchBox"
-        placeholder="Search team..."
-        oninput="renderLeaderboard()"
-    >
-
+    <input type="text" class="search-input" id="searchBox" placeholder="Search team or captain..." oninput="renderLeaderboard()">
 </div>
 
-
 <main class="container">
-
     <div class="table-box">
-
         <table>
-
             <thead>
-
                 <tr>
                     <th>Rank</th>
                     <th>Team</th>
@@ -562,109 +299,54 @@ footer {
                     <th>Win Rate</th>
                     <th>Points</th>
                 </tr>
-
             </thead>
-
             <tbody id="leaderboardBody">
-
-                <tr>
-                    <td colspan="8">
-                        <div class="loading">
-                            <div class="loading-spinner"></div>
-                            <div>Loading leaderboard...</div>
-                        </div>
-                    </td>
-                </tr>
-
+                <tr><td colspan="8">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading leaderboard...</div>
+                    </div>
+                </td></tr>
             </tbody>
-
         </table>
-
     </div>
-
 </main>
-
 
 <footer>
     © 2026 NEPPLAY — Nepal Gaming Community
 </footer>
 
-
 <script>
-
-"use strict";
-
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
 
 var allTeams = [];
 var currentGame = "all";
 
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
 function esc(value) {
-
     if (value === undefined || value === null) return "";
-
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
 }
 
-
-/* =========================================================
-   LOAD LEADERBOARD FROM SERVER
-========================================================= */
-
 function loadLeaderboard() {
-
-    fetch("/api/leaderboard", {
-        method: "GET",
-        cache: "no-store"
-    })
-
+    fetch("/api/leaderboard", { method: "GET", cache: "no-store" })
     .then(function (response) {
-
-        if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-        }
-
+        if (!response.ok) throw new Error("HTTP " + response.status);
         return response.json();
-
     })
-
     .then(function (data) {
-
         var teams = [];
-
-        if (Array.isArray(data)) {
-            teams = data;
-        } else if (data && Array.isArray(data.teams)) {
-            teams = data.teams;
-        } else if (data && Array.isArray(data.leaderboard)) {
-            teams = data.leaderboard;
-        }
-
+        if (Array.isArray(data)) teams = data;
+        else if (data && Array.isArray(data.teams)) teams = data.teams;
+        else if (data && Array.isArray(data.leaderboard)) teams = data.leaderboard;
         allTeams = teams;
-
         updateStats(data);
         renderPodium();
         renderLeaderboard();
-
     })
-
     .catch(function (error) {
-
         console.error("Leaderboard error:", error);
-
         document.getElementById("leaderboardBody").innerHTML =
             '<tr><td colspan="8">' +
                 '<div class="empty">' +
@@ -672,102 +354,46 @@ function loadLeaderboard() {
                     'Make sure the server is running.' +
                 '</div>' +
             '</td></tr>';
-
         document.getElementById("podium").innerHTML = "";
-
     });
-
 }
 
-
-/* =========================================================
-   UPDATE TOP STATS
-========================================================= */
-
 function updateStats(data) {
-
-    var teamsCount = 0;
-    var matchesCount = 0;
-    var tournamentsCount = 0;
-
-    if (data && typeof data.totalTeams === "number") {
-        teamsCount = data.totalTeams;
-    } else {
-        teamsCount = allTeams.length;
-    }
-
-    if (data && typeof data.totalMatches === "number") {
-        matchesCount = data.totalMatches;
-    }
-
-    if (data && typeof data.totalTournaments === "number") {
-        tournamentsCount = data.totalTournaments;
-    }
+    var teamsCount = (data && typeof data.totalTeams === "number") ? data.totalTeams : allTeams.length;
+    var matchesCount = (data && typeof data.totalMatches === "number") ? data.totalMatches : 0;
+    var tournamentsCount = (data && typeof data.totalTournaments === "number") ? data.totalTournaments : 0;
 
     document.getElementById("totalTeams").textContent = teamsCount;
     document.getElementById("totalMatches").textContent = matchesCount;
     document.getElementById("totalTournaments").textContent = tournamentsCount;
-
 }
 
-
-/* =========================================================
-   GET FILTERED TEAMS
-========================================================= */
-
 function getFilteredTeams() {
-
     var teams = allTeams.slice();
 
     if (currentGame !== "all") {
-
         teams = teams.filter(function (t) {
-
             var games = t.games || [];
-
             if (Array.isArray(games) && games.length > 0) {
                 return games.indexOf(currentGame) !== -1;
             }
-
             return String(t.game || "") === currentGame;
-
         });
-
     }
 
-    var search =
-        (document.getElementById("searchBox").value || "")
-            .toLowerCase()
-            .trim();
-
+    var search = (document.getElementById("searchBox").value || "").toLowerCase().trim();
     if (search) {
-
         teams = teams.filter(function (t) {
-
-            var text = (
-                (t.name || "") + " " +
-                (t.captain || "")
-            ).toLowerCase();
-
+            var text = ((t.name || "") + " " + (t.captain || "")).toLowerCase();
             return text.indexOf(search) !== -1;
-
         });
-
     }
 
     return teams;
-
 }
 
-
-/* =========================================================
-   RENDER PODIUM (TOP 3)
-========================================================= */
-
 function renderPodium() {
-
     var container = document.getElementById("podium");
-
     var teams = getFilteredTeams();
 
     if (teams.length === 0) {
@@ -776,83 +402,51 @@ function renderPodium() {
     }
 
     var top3 = teams.slice(0, 3);
-
     var html = "";
 
     if (top3.length >= 1) {
-
         var first = top3[0];
         var second = top3[1];
         var third = top3[2];
 
-        /* order on screen: 2 - 1 - 3 */
-        if (second) {
-            html += podiumCard(second, 2, "silver");
-        }
-
+        if (second) html += podiumCard(second, 2, "silver");
         html += podiumCard(first, 1, "gold");
-
-        if (third) {
-            html += podiumCard(third, 3, "bronze");
-        }
-
+        if (third) html += podiumCard(third, 3, "bronze");
     }
 
     container.innerHTML = html;
-
 }
 
-
 function podiumCard(team, position, cssClass) {
-
     var medalNum = String(position);
-
     var medalColor =
         position === 1 ? "gold-medal"
         : position === 2 ? "silver-medal"
         : "bronze-medal";
 
+    var captainHtml = "-";
+    if (team.captain) {
+        captainHtml = '<a href="player.html?username=' +
+            encodeURIComponent(team.captain) + '">' +
+            esc(team.captain) + '</a>';
+    }
+
     return (
         '<div class="podium-card ' + cssClass + '">' +
-
-            '<div class="podium-medal ' + medalColor + '">' +
-                medalNum +
-            '</div>' +
-
-            '<div class="podium-name">' +
-                esc(team.name || "Unknown") +
-            '</div>' +
-
-            '<div class="podium-captain">' +
-                esc(team.captain || "-") +
-            '</div>' +
-
-            '<div class="podium-points">' +
-                (team.points || 0) + ' pts' +
-            '</div>' +
-
-            '<div class="podium-wins">' +
-                (team.wins || 0) + ' wins' +
-            '</div>' +
-
+            '<div class="podium-medal ' + medalColor + '">' + medalNum + '</div>' +
+            '<div class="podium-name">' + esc(team.name || "Unknown") + '</div>' +
+            '<div class="podium-captain">' + captainHtml + '</div>' +
+            '<div class="podium-points">' + (team.points || 0) + ' pts</div>' +
+            '<div class="podium-wins">' + (team.wins || 0) + ' wins</div>' +
         '</div>'
     );
-
 }
 
-
-/* =========================================================
-   RENDER LEADERBOARD TABLE
-========================================================= */
-
 function renderLeaderboard() {
-
     var tbody = document.getElementById("leaderboardBody");
-
     var teams = getFilteredTeams();
 
     if (teams.length === 0) {
-
         tbody.innerHTML =
             '<tr><td colspan="8">' +
                 '<div class="empty">' +
@@ -860,103 +454,59 @@ function renderLeaderboard() {
                     'Complete matches and enter results to see rankings.' +
                 '</div>' +
             '</td></tr>';
-
         return;
-
     }
 
     teams.sort(function (a, b) {
-
-        if ((b.points || 0) !== (a.points || 0)) {
-            return (b.points || 0) - (a.points || 0);
-        }
-
-        if ((b.wins || 0) !== (a.wins || 0)) {
-            return (b.wins || 0) - (a.wins || 0);
-        }
-
+        if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+        if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
         return String(a.name || "").localeCompare(String(b.name || ""));
-
     });
 
     tbody.innerHTML = teams.map(function (team, index) {
-
         var rank = index + 1;
-
         var rankClass =
             rank === 1 ? "rank rank-1"
             : rank === 2 ? "rank rank-2"
             : rank === 3 ? "rank rank-3"
             : "rank";
 
-        var winRate =
-            team.played > 0
-                ? Math.round((team.wins / team.played) * 100)
-                : 0;
+        var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
+
+        var captainHtml = "-";
+        if (team.captain) {
+            captainHtml = '<a href="player.html?username=' +
+                encodeURIComponent(team.captain) + '">' +
+                esc(team.captain) + '</a>';
+        }
 
         return (
             '<tr>' +
-
-                '<td class="' + rankClass + '">' +
-                    rank +
-                '</td>' +
-
+                '<td class="' + rankClass + '">' + rank + '</td>' +
                 '<td>' +
-                    '<div class="player">' +
-                        esc(team.name || "Unknown") +
-                    '</div>' +
-                    '<div class="captain">' +
-                        esc(team.captain || "-") +
-                    '</div>' +
+                    '<div class="player">' + esc(team.name || "Unknown") + '</div>' +
+                    '<div class="captain">' + captainHtml + '</div>' +
                 '</td>' +
-
                 '<td>' + (team.played || 0) + '</td>' +
-
                 '<td>' + (team.wins || 0) + '</td>' +
-
                 '<td>' + (team.losses || 0) + '</td>' +
-
                 '<td>' + (team.ties || 0) + '</td>' +
-
-                '<td class="win-rate">' +
-                    winRate + '%' +
-                '</td>' +
-
-                '<td class="points">' +
-                    (team.points || 0) +
-                '</td>' +
-
+                '<td class="win-rate">' + winRate + '%</td>' +
+                '<td class="points">' + (team.points || 0) + '</td>' +
             '</tr>'
         );
-
     }).join("");
-
 }
 
-
-/* =========================================================
-   CHANGE GAME FILTER
-========================================================= */
-
 function changeGame(game, button) {
-
     currentGame = game;
-
     document.querySelectorAll(".game-tab").forEach(function (btn) {
         btn.classList.remove("active");
     });
-
     button.classList.add("active");
-
     renderPodium();
     renderLeaderboard();
-
 }
-
-
-/* =========================================================
-   START
-========================================================= */
 
 loadLeaderboard();
 
