@@ -8,7 +8,7 @@ Run:  node server.js
 Site: https://nepplay.onrender.com
 
 Uses MongoDB Atlas
-Includes: Player Profiles + Notifications
+Includes: Player Profiles + Notifications + Screenshot Upload
 ============================================================
 */
 
@@ -47,6 +47,9 @@ var PAYMENT_SETTINGS = {
 
 var sessions = new Map();
 var SESSION_COOKIE = "nepplay_session";
+
+/* Body size limit: 8MB (for screenshots) */
+var MAX_BODY_SIZE = 8 * 1024 * 1024;
 
 var DEFAULT_TOURNAMENTS = [
     { id: "free-fire", name: "Free Fire Championship", game: "Free Fire",
@@ -255,14 +258,25 @@ function sendError(res, code, msg) {
 
 function readBody(req, cb) {
     var body = "";
+    var tooLarge = false;
     req.on("data", function (chunk) {
         body += chunk.toString();
-        if (body.length > 5 * 1024 * 1024) { try { req.destroy(); } catch (e) {} }
+        if (body.length > MAX_BODY_SIZE) {
+            tooLarge = true;
+            try { req.destroy(); } catch (e) {}
+        }
     });
     req.on("end", function () {
+        if (tooLarge) {
+            cb(new Error("Request body too large. Max " + Math.round(MAX_BODY_SIZE / 1024 / 1024) + "MB."));
+            return;
+        }
         if (!body) { cb(null, {}); return; }
         try { cb(null, JSON.parse(body)); }
         catch (e) { cb(new Error("Invalid JSON data.")); }
+    });
+    req.on("error", function () {
+        if (tooLarge) cb(new Error("Request body too large."));
     });
 }
 
@@ -580,7 +594,8 @@ function buildWinners() {
                 matchType: mtFinal,
                 finalMatchName: cleanString(final.result || final.name),
                 completedAt: final.updatedAt || final.createdAt || "",
-                totalMatches: completed.length
+                totalMatches: completed.length,
+                screenshot: final.screenshot || ""
             });
         });
 
@@ -1132,7 +1147,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ============ PLAYER PROFILE (D1) ============ */
+    /* ============ PLAYER PROFILE ============ */
     if (req.method === "GET" && pathname === "/api/player") {
         var username = cleanString(query.get("username"));
         if (!username) {
@@ -1346,7 +1361,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ============ NOTIFICATIONS (D3) ============ */
+    /* ============ NOTIFICATIONS ============ */
     if (req.method === "GET" && pathname === "/api/notifications") {
         return requireMemberAsync(req, res).then(function (mem) {
             if (!mem) return true;
@@ -1678,6 +1693,13 @@ function handleAPIPromise(req, res, pathname, query) {
                     winners = winners.slice(0, 3);
                 }
 
+                /* Screenshot: base64 data URL string */
+                var screenshot = cleanString(body.screenshot);
+                if (screenshot && screenshot.length > 6000000) {
+                    sendError(res, 400, "Screenshot too large. Max ~4MB after compression.");
+                    return resolve(true);
+                }
+
                 var match = {
                     id: createId("match"),
                     matchType: matchType,
@@ -1697,13 +1719,14 @@ function handleAPIPromise(req, res, pathname, query) {
                     roomPassword: cleanString(body.roomPassword),
                     result: cleanString(body.result),
                     notes: cleanString(body.notes),
+                    screenshot: screenshot,
+                    screenshotUploadedAt: screenshot ? nowISO() : "",
                     joinedUserIds: [],
                     createdAt: nowISO(),
                     updatedAt: nowISO()
                 };
                 collections.matches.insertOne(match)
                     .then(function () {
-                        /* Notify all approved members of this tournament */
                         return createNotificationForTournament(
                             match.tournamentId,
                             "info",
@@ -1737,7 +1760,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 var mid = cleanString(body.id || body.matchId);
                 if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
 
-                /* Get old match first to detect status changes */
                 collections.matches.findOne({ id: mid }).then(function (oldMatch) {
                     if (!oldMatch) {
                         sendError(res, 404, "Not found.");
@@ -1762,6 +1784,18 @@ function handleAPIPromise(req, res, pathname, query) {
                         updates.winners = ws.slice(0, 3);
                         if (!updates.winner && ws.length > 0) updates.winner = ws[0];
                     }
+
+                    /* Screenshot handling */
+                    if (body.screenshot !== undefined) {
+                        var sc = cleanString(body.screenshot);
+                        if (sc && sc.length > 6000000) {
+                            sendError(res, 400, "Screenshot too large.");
+                            return resolve(true);
+                        }
+                        updates.screenshot = sc;
+                        updates.screenshotUploadedAt = sc ? nowISO() : "";
+                    }
+
                     updates.updatedAt = nowISO();
 
                     return collections.matches.findOneAndUpdate(
@@ -1779,7 +1813,6 @@ function handleAPIPromise(req, res, pathname, query) {
 
                         var notifPromises = [];
 
-                        /* Notify when Room ID is published (status changes to Live) */
                         if (newStatus === "live" && oldStatus !== "live" &&
                             result.value.roomId) {
                             notifPromises.push(createNotificationForTournament(
@@ -1792,7 +1825,6 @@ function handleAPIPromise(req, res, pathname, query) {
                             ));
                         }
 
-                        /* Notify when match is completed */
                         if ((newStatus === "completed" || newStatus === "finished") &&
                             oldStatus !== "completed" && oldStatus !== "finished") {
                             notifPromises.push(createNotificationForTournament(
@@ -1871,7 +1903,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 };
                 collections.announcements.insertOne(item)
                     .then(function () {
-                        /* Notify all users */
                         return collections.users.find({}).toArray()
                             .then(function (users) {
                                 var promises = users.map(function (u) {
