@@ -1,15 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>NEPPLAY - Tournament Registration</title>
 
 <style>
-
 *{ box-sizing:border-box; margin:0; padding:0; }
 
 body{
@@ -112,10 +108,12 @@ textarea{ min-height:100px; resize:vertical; }
     color:#fff;
 }
 
+/* DYNAMIC PAYMENT OPTIONS */
 .payment-options{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
     gap:15px;
+    margin-bottom:16px;
 }
 
 .payment-option{
@@ -124,6 +122,15 @@ textarea{ min-height:100px; resize:vertical; }
     border-radius:10px;
     padding:16px;
     cursor:pointer;
+    transition:0.15s;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.payment-option:hover{
+    border-color:#4a5f7d;
+    background:#101b2e;
 }
 
 .payment-option.selected{
@@ -131,14 +138,25 @@ textarea{ min-height:100px; resize:vertical; }
     background:#201517;
 }
 
-.payment-option input{ width:auto; margin-right:8px; }
+.payment-option input[type="radio"]{
+    width:auto;
+    margin:0;
+    accent-color:#ff3b30;
+    flex-shrink:0;
+}
 
-.payment-name{ font-weight:bold; font-size:18px; }
+.payment-name{
+    font-weight:bold;
+    font-size:16px;
+    color:white;
+    word-break:break-word;
+}
 
+/* PAYMENT DETAILS PANEL */
 .payment-details{
     display:none;
     margin-top:15px;
-    padding:15px;
+    padding:18px;
     border-radius:10px;
     background:#080d18;
     border:1px solid #293a52;
@@ -146,18 +164,86 @@ textarea{ min-height:100px; resize:vertical; }
 
 .payment-details.active{ display:block; }
 
+.payment-details-title{
+    font-size:15px;
+    font-weight:bold;
+    color:#7db7ff;
+    margin-bottom:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
 .qr{
-    width:180px;
-    height:180px;
+    width:200px;
+    height:200px;
     object-fit:contain;
     background:#fff;
     border-radius:8px;
     display:block;
-    margin:12px auto;
+    margin:14px auto;
+    padding:6px;
 }
 
-.wallet{ text-align:center; color:#b8c9dd; }
-.wallet strong{ color:#fff; }
+.wallet{
+    text-align:center;
+    color:#b8c9dd;
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+.wallet strong{
+    color:#fff;
+    font-family:'Courier New', monospace;
+    font-size:16px;
+    letter-spacing:1px;
+    display:inline-block;
+    padding:2px 8px;
+    background:#172033;
+    border-radius:5px;
+    margin-left:4px;
+}
+
+.wallet-copy{
+    display:inline-block;
+    margin-left:8px;
+    background:#1e3a5f;
+    color:#7db7ff;
+    border:none;
+    border-radius:5px;
+    padding:4px 10px;
+    font-size:11px;
+    font-weight:bold;
+    text-transform:uppercase;
+    cursor:pointer;
+}
+
+.wallet-copy:hover{
+    background:#3b82f6;
+    color:white;
+}
+
+.payment-instructions{
+    color:#9cb5d3;
+    font-size:13px;
+    line-height:1.6;
+    margin-top:12px;
+    padding:12px;
+    background:#0b1a2e;
+    border-left:3px solid #3b82f6;
+    border-radius:4px;
+}
+
+.payment-no-methods{
+    padding:30px 20px;
+    text-align:center;
+    color:#a87918;
+    background:#1a1408;
+    border:2px dashed #a87918;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.6;
+}
 
 .amount{
     background:#153b2b;
@@ -216,9 +302,7 @@ textarea{ min-height:100px; resize:vertical; }
     .grid,
     .payment-options{ grid-template-columns:1fr; }
 }
-
 </style>
-
 </head>
 
 <body>
@@ -226,19 +310,12 @@ textarea{ min-height:100px; resize:vertical; }
 <div class="container">
 
     <div class="header">
-
         <div class="logo">NEPPLAY.</div>
-
-        <a href="/tournaments.html" class="back">
-            &larr; Back to Tournaments
-        </a>
-
+        <a href="/tournaments.html" class="back">← Back to Tournaments</a>
     </div>
 
     <div class="card">
-
         <h1 class="title">Tournament Registration</h1>
-
         <p class="subtitle">
             Complete your team information and payment details.
             Your registration will remain Pending until the admin verifies your payment.
@@ -247,15 +324,9 @@ textarea{ min-height:100px; resize:vertical; }
         <div id="message" class="message"></div>
 
         <div class="tournament-box">
-
-            <div id="tournamentName" class="tournament-name">
-                Loading tournament...
-            </div>
-
+            <div id="tournamentName" class="tournament-name">Loading tournament...</div>
             <div id="gameName" class="game"></div>
-
             <div id="entryFee" class="fee"></div>
-
         </div>
 
         <form id="registrationForm">
@@ -268,17 +339,14 @@ textarea{ min-height:100px; resize:vertical; }
             </div>
 
             <div class="grid">
-
                 <div class="form-group">
                     <label>Captain Name *</label>
                     <input id="captainName" required>
                 </div>
-
                 <div class="form-group">
                     <label>Phone *</label>
                     <input id="phone" required>
                 </div>
-
             </div>
 
             <div class="form-group">
@@ -289,106 +357,41 @@ textarea{ min-height:100px; resize:vertical; }
             <h2 class="section-title">Players</h2>
 
             <div class="grid">
-
-                <div class="form-group">
-                    <label>Player 1 *</label>
-                    <input id="player1" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Player 2 *</label>
-                    <input id="player2" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Player 3 *</label>
-                    <input id="player3" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Player 4 *</label>
-                    <input id="player4" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Player 5</label>
-                    <input id="player5">
-                </div>
-
-                <div class="form-group">
-                    <label>Player 6</label>
-                    <input id="player6">
-                </div>
-
+                <div class="form-group"><label>Player 1 *</label><input id="player1" required></div>
+                <div class="form-group"><label>Player 2 *</label><input id="player2" required></div>
+                <div class="form-group"><label>Player 3 *</label><input id="player3" required></div>
+                <div class="form-group"><label>Player 4 *</label><input id="player4" required></div>
+                <div class="form-group"><label>Player 5</label><input id="player5"></div>
+                <div class="form-group"><label>Player 6</label><input id="player6"></div>
             </div>
 
             <h2 class="section-title">Payment</h2>
 
-            <div id="amountBox" class="amount">
-                Amount: Loading...
-            </div>
+            <div id="amountBox" class="amount">Amount: Loading...</div>
 
-            <div class="payment-options">
-
-                <label class="payment-option" id="esewaOption">
-                    <input type="radio" name="paymentMethod" value="eSewa">
-                    <span class="payment-name">eSewa</span>
-                </label>
-
-                <label class="payment-option" id="khaltiOption">
-                    <input type="radio" name="paymentMethod" value="Khalti">
-                    <span class="payment-name">Khalti</span>
-                </label>
-
-            </div>
-
-            <div id="esewaDetails" class="payment-details">
-
-                <strong>Pay using eSewa</strong>
-
-                <img src="/images/esewa-qr.png" class="qr" alt="eSewa QR">
-
-                <div class="wallet">
-                    eSewa Number:
-                    <strong id="esewaNumber">Loading...</strong>
+            <div id="paymentContainer">
+                <div class="payment-options" id="paymentOptions">
+                    <!-- Populated dynamically -->
                 </div>
-
-            </div>
-
-            <div id="khaltiDetails" class="payment-details">
-
-                <strong>Pay using Khalti</strong>
-
-                <img src="/images/khalti-qr.png" class="qr" alt="Khalti QR">
-
-                <div class="wallet">
-                    Khalti Number:
-                    <strong id="khaltiNumber">Loading...</strong>
+                <div id="paymentDetailsContainer">
+                    <!-- Detail panels injected here -->
                 </div>
-
             </div>
 
             <div class="grid">
-
                 <div class="form-group">
                     <label>Payer Name</label>
                     <input id="payerName">
                 </div>
-
                 <div class="form-group">
                     <label>Payer Phone</label>
                     <input id="payerPhone">
                 </div>
-
             </div>
 
             <div class="form-group">
                 <label>Transaction ID *</label>
-                <input
-                    id="transactionId"
-                    required
-                    placeholder="Enter eSewa/Khalti transaction ID"
-                >
+                <input id="transactionId" required placeholder="Enter transaction ID">
             </div>
 
             <div class="form-group">
@@ -406,14 +409,14 @@ textarea{ min-height:100px; resize:vertical; }
             </button>
 
         </form>
-
     </div>
-
 </div>
 
 <script>
 
 var tournament = null;
+var paymentMethods = [];
+var selectedPaymentId = "";
 
 function showMessage(text, type) {
     var box = document.getElementById("message");
@@ -445,6 +448,176 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
+/* =========================================
+   PAYMENT METHOD RENDERING
+========================================= */
+
+function renderPaymentMethods(methods) {
+
+    paymentMethods = methods || [];
+    var container = document.getElementById("paymentOptions");
+    var detailsContainer = document.getElementById("paymentDetailsContainer");
+
+    if (paymentMethods.length === 0) {
+        container.innerHTML = "";
+        detailsContainer.innerHTML =
+            '<div class="payment-no-methods">' +
+                'No payment methods are currently available.<br>' +
+                'Please contact the admin or try again later.' +
+            '</div>';
+        document.getElementById("submitButton").disabled = true;
+        return;
+    }
+
+    /* Build radio buttons */
+    var html = "";
+    for (var i = 0; i < paymentMethods.length; i++) {
+        var m = paymentMethods[i];
+        var methodId = String(m.id || "");
+        html +=
+            '<label class="payment-option" id="payment-opt-' + escapeHTML(methodId) + '" ' +
+                'onclick="selectPayment(\'' + escapeHTML(methodId).replace(/'/g, "\\'") + '\')">' +
+                '<input type="radio" name="paymentMethod" value="' + escapeHTML(methodId) + '" ' +
+                    'onclick="event.stopPropagation(); selectPayment(\'' + escapeHTML(methodId).replace(/'/g, "\\'") + '\')">' +
+                '<span class="payment-name">' + escapeHTML(m.name || "Method") + '</span>' +
+            '</label>';
+    }
+    container.innerHTML = html;
+
+    /* Build detail panels for each method */
+    var details = "";
+    for (var j = 0; j < paymentMethods.length; j++) {
+        var d = paymentMethods[j];
+        var did = String(d.id || "");
+
+        var qrHtml = "";
+        if (d.qrImage) {
+            qrHtml = '<img src="' + escapeHTML(d.qrImage) + '" class="qr" alt="' + escapeHTML(d.name) + ' QR">';
+        }
+
+        var walletHtml = "";
+        if (d.number) {
+            var safeNum = escapeHTML(d.number).replace(/'/g, "\\'");
+            walletHtml =
+                '<div class="wallet">' +
+                    escapeHTML(d.name) + ' Number:' +
+                    '<strong>' + escapeHTML(d.number) + '</strong>' +
+                    '<button type="button" class="wallet-copy" ' +
+                        'onclick="copyToClipboard(\'' + safeNum + '\')">Copy</button>' +
+                '</div>';
+        } else {
+            walletHtml = '<div class="wallet" style="color:#a87918;">No number provided. Contact admin.</div>';
+        }
+
+        var instructionsHtml = "";
+        if (d.instructions) {
+            instructionsHtml =
+                '<div class="payment-instructions">' +
+                    escapeHTML(d.instructions) +
+                '</div>';
+        }
+
+        details +=
+            '<div class="payment-details" id="payment-details-' + escapeHTML(did) + '">' +
+                '<div class="payment-details-title">Pay using ' + escapeHTML(d.name) + '</div>' +
+                qrHtml +
+                walletHtml +
+                instructionsHtml +
+            '</div>';
+    }
+    detailsContainer.innerHTML = details;
+
+    /* Auto-select first method */
+    if (paymentMethods.length > 0) {
+        selectPayment(String(paymentMethods[0].id || ""));
+    }
+}
+
+function selectPayment(methodId) {
+
+    selectedPaymentId = methodId;
+
+    /* Clear all highlights */
+    var options = document.querySelectorAll(".payment-option");
+    for (var i = 0; i < options.length; i++) {
+        options[i].classList.remove("selected");
+    }
+
+    /* Clear all details */
+    var details = document.querySelectorAll(".payment-details");
+    for (var j = 0; j < details.length; j++) {
+        details[j].classList.remove("active");
+    }
+
+    /* Highlight selected */
+    var selectedOpt = document.getElementById("payment-opt-" + methodId);
+    if (selectedOpt) selectedOpt.classList.add("selected");
+
+    /* Show details */
+    var selectedDetails = document.getElementById("payment-details-" + methodId);
+    if (selectedDetails) selectedDetails.classList.add("active");
+
+    /* Check the radio */
+    var radio = document.querySelector('input[name="paymentMethod"][value="' + methodId + '"]');
+    if (radio) radio.checked = true;
+
+    /* Get the method name for display */
+    var m = paymentMethods.find(function (x) { return String(x.id) === String(methodId); });
+    if (m && m.name) {
+        /* Set the transaction ID placeholder to make it clearer */
+        var txInput = document.getElementById("transactionId");
+        if (txInput) {
+            txInput.placeholder = "Enter your " + m.name + " transaction ID";
+        }
+    }
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+            showTempMessage("Copied: " + text);
+        }).catch(function () {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand("copy");
+        showTempMessage("Copied: " + text);
+    } catch (e) {
+        showTempMessage("Could not copy");
+    }
+    document.body.removeChild(ta);
+}
+
+function showTempMessage(msg) {
+    /* Small floating toast on registration page */
+    var el = document.getElementById("copyToast");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "copyToast";
+        el.style.cssText = "position:fixed;bottom:20px;right:20px;background:#0d3020;color:#6bea9a;border:1px solid #195f3a;padding:12px 16px;border-radius:8px;font-size:13px;font-weight:bold;z-index:999;display:none;box-shadow:0 10px 30px rgba(0,0,0,.4);";
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.display = "block";
+    setTimeout(function () { el.style.display = "none"; }, 1800);
+}
+
+/* =========================================
+   LOAD TOURNAMENT + PAYMENT METHODS
+========================================= */
+
 function load() {
 
     api("/api/users/me")
@@ -453,9 +626,7 @@ function load() {
                 document.getElementById("email").value = userData.user.email || "";
             }
         })
-        .catch(function () {
-            /* not logged in - silently continue so user sees login prompt later */
-        })
+        .catch(function () {})
         .then(function () {
 
             var params = new URLSearchParams(window.location.search);
@@ -469,8 +640,6 @@ function load() {
 
             return api("/api/tournaments").then(function (response) {
 
-                /* Server returns { success:true, tournaments:[...] }
-                   But handle both shapes just in case */
                 var list = [];
                 if (Array.isArray(response)) {
                     list = response;
@@ -524,22 +693,37 @@ function load() {
 
             return api("/api/payment-settings").then(function (paymentData) {
 
-                if (paymentData && paymentData.payment) {
+                var methods = [];
 
+                if (paymentData && Array.isArray(paymentData.methods)) {
+                    methods = paymentData.methods;
+                } else if (paymentData && paymentData.payment) {
+                    /* Legacy fallback */
                     if (paymentData.payment.eSewa) {
-                        document.getElementById("esewaNumber").textContent =
-                            paymentData.payment.eSewa.number;
+                        methods.push({
+                            id: "esewa",
+                            name: "eSewa",
+                            number: paymentData.payment.eSewa.number || "",
+                            qrImage: "",
+                            instructions: ""
+                        });
                     }
-
                     if (paymentData.payment.Khalti) {
-                        document.getElementById("khaltiNumber").textContent =
-                            paymentData.payment.Khalti.number;
+                        methods.push({
+                            id: "khalti",
+                            name: "Khalti",
+                            number: paymentData.payment.Khalti.number || "",
+                            qrImage: "",
+                            instructions: ""
+                        });
                     }
-
                 }
 
-            }).catch(function () {
-                /* payment settings unavailable - not critical */
+                renderPaymentMethods(methods);
+
+            }).catch(function (err) {
+                console.error("Payment load error:", err);
+                renderPaymentMethods([]);
             });
 
         })
@@ -552,35 +736,9 @@ function load() {
 
 }
 
-var radios = document.querySelectorAll('input[name="paymentMethod"]');
-
-for (var i = 0; i < radios.length; i++) {
-
-    radios[i].addEventListener("change", function () {
-
-        var esewaOpt = document.getElementById("esewaOption");
-        var khaltiOpt = document.getElementById("khaltiOption");
-        var esewaDet = document.getElementById("esewaDetails");
-        var khaltiDet = document.getElementById("khaltiDetails");
-
-        esewaOpt.classList.remove("selected");
-        khaltiOpt.classList.remove("selected");
-        esewaDet.classList.remove("active");
-        khaltiDet.classList.remove("active");
-
-        if (this.value === "eSewa") {
-            esewaOpt.classList.add("selected");
-            esewaDet.classList.add("active");
-        }
-
-        if (this.value === "Khalti") {
-            khaltiOpt.classList.add("selected");
-            khaltiDet.classList.add("active");
-        }
-
-    });
-
-}
+/* =========================================
+   SUBMIT REGISTRATION
+========================================= */
 
 document
     .getElementById("registrationForm")
@@ -593,10 +751,16 @@ document
             return;
         }
 
-        var selected = document.querySelector('input[name="paymentMethod"]:checked');
+        if (!selectedPaymentId) {
+            showMessage("Please select a payment method.", "error");
+            return;
+        }
 
-        if (!selected) {
-            showMessage("Please select either eSewa or Khalti.", "error");
+        var selectedMethod = paymentMethods.find(function (m) {
+            return String(m.id) === String(selectedPaymentId);
+        });
+        if (!selectedMethod) {
+            showMessage("Please select a payment method.", "error");
             return;
         }
 
@@ -629,7 +793,7 @@ document
             payerName: document.getElementById("payerName").value.trim(),
             payerPhone: document.getElementById("payerPhone").value.trim(),
             transactionId: transactionId,
-            paymentMethod: selected.value,
+            paymentMethod: selectedMethod.name,
             amount: tournament.entryFee,
             message: document.getElementById("messageText").value.trim()
         };
@@ -639,27 +803,27 @@ document
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
         })
-            .then(function (result) {
+        .then(function (result) {
 
-                showMessage(
-                    result.message || "Registration submitted successfully.",
-                    "success"
-                );
+            showMessage(
+                result.message || "Registration submitted successfully.",
+                "success"
+            );
 
-                document.getElementById("registrationForm").reset();
+            document.getElementById("registrationForm").reset();
 
-                setTimeout(function () {
-                    window.location.href = "/member.html";
-                }, 1500);
+            setTimeout(function () {
+                window.location.href = "/member.html";
+            }, 1500);
 
-            })
-            .catch(function (error) {
+        })
+        .catch(function (error) {
 
-                showMessage(error.message || "Submission failed.", "error");
-                btn.disabled = false;
-                btn.textContent = "Submit Registration";
+            showMessage(error.message || "Submission failed.", "error");
+            btn.disabled = false;
+            btn.textContent = "Submit Registration";
 
-            });
+        });
 
     });
 
