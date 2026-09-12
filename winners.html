@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,7 +15,6 @@ body {
     min-height: 100vh;
 }
 
-/* HEADER */
 header {
     background: #0d111b;
     border-bottom: 1px solid #202634;
@@ -30,17 +29,21 @@ header {
 .logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
 .logo span { color: #ff3b30; }
 nav { display: flex; align-items: center; gap: 28px; }
-nav a { color: #c7ccd7; text-decoration: none; font-size: 15px; font-weight: 600; }
+nav a {
+    color: #c7ccd7; text-decoration: none;
+    font-size: 15px; font-weight: 600;
+}
 nav a:hover, nav a.active { color: #ff4438; }
-.login-btn { background: #ff3b30; color: white !important; padding: 10px 20px; border-radius: 7px; }
+.login-btn {
+    background: #ff3b30; color: white !important;
+    padding: 10px 20px; border-radius: 7px;
+}
 
-/* HERO */
 .hero { text-align: center; padding: 60px 20px 30px; }
 .hero h1 { font-size: 46px; margin-bottom: 15px; }
 .hero h1 span { color: #ff3b30; }
 .hero p { color: #9299a8; font-size: 17px; }
 
-/* STATS */
 .stats-bar {
     width: 88%; max-width: 1100px; margin: 30px auto 0;
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
@@ -55,7 +58,6 @@ nav a:hover, nav a.active { color: #ff4438; }
 }
 .stat-label { color: #9299a8; font-size: 13px; }
 
-/* CONTROLS */
 .controls {
     width: 88%; max-width: 1100px; margin: 40px auto 20px;
     display: flex; align-items: center; justify-content: space-between;
@@ -77,7 +79,6 @@ nav a:hover, nav a.active { color: #ff4438; }
 }
 .search-input:focus { border-color: #ff3b30; }
 
-/* CHAMPION LIST */
 .container { width: 88%; max-width: 1100px; margin: auto; padding-bottom: 70px; }
 .champions-list { display: grid; gap: 20px; }
 
@@ -105,11 +106,8 @@ nav a:hover, nav a.active { color: #ff4438; }
 }
 
 .champion-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 18px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
+    display: flex; align-items: flex-start;
+    gap: 18px; margin-bottom: 18px; flex-wrap: wrap;
 }
 
 .trophy-icon {
@@ -130,7 +128,6 @@ nav a:hover, nav a.active { color: #ff4438; }
 .tournament-meta { color: #9299a8; font-size: 13px; line-height: 1.6; }
 .tournament-meta span { margin-right: 14px; display: inline-block; }
 
-/* VS SECTION */
 .final-display {
     background: #0b1220;
     border: 1px solid #2d3a55;
@@ -161,7 +158,12 @@ nav a:hover, nav a.active { color: #ff4438; }
     word-break: break-word;
 }
 .final-team.champion .final-team-name { color: #ffd43b; }
-.final-team-captain { color: #9299a8; font-size: 12px; margin-bottom: 8px; }
+.final-team-captain { font-size: 12px; margin-bottom: 8px; }
+.final-team-captain a {
+    color: #9299a8; text-decoration: none;
+}
+.final-team-captain a:hover { color: #ff4438; text-decoration: underline; }
+.final-team.champion .final-team-captain a { color: #ffd43b; }
 .final-team-score {
     font-size: 26px; font-weight: bold; color: #ff4438;
 }
@@ -204,7 +206,6 @@ nav a:hover, nav a.active { color: #ff4438; }
     letter-spacing: 1px;
 }
 
-/* EMPTY / LOADING */
 .empty, .loading {
     text-align: center; padding: 60px 20px;
     color: #8993a2; font-size: 14px; line-height: 1.7;
@@ -233,7 +234,6 @@ footer {
     .final-display { grid-template-columns: 1fr; }
     .final-vs { padding: 6px 0; }
 }
-
 @media (max-width: 750px) {
     header { flex-direction: column; gap: 15px; }
     nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
@@ -241,7 +241,6 @@ footer {
     .controls { flex-direction: column; align-items: stretch; }
     .search-input { width: 100%; }
 }
-
 </style>
 </head>
 
@@ -311,10 +310,8 @@ var currentGame = "all";
 function esc(v) {
     if (v === undefined || v === null) return "";
     return String(v)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
 
@@ -352,7 +349,6 @@ function loadWinners() {
 function updateStats() {
     var total = allWinners.length;
 
-    /* unique champions */
     var seen = {};
     var unique = 0;
     var prizeSum = 0;
@@ -427,6 +423,26 @@ function renderCard(w) {
           '</div>'
         : '<div class="prize-info">No prize pool</div>';
 
+    /* Champion captain link */
+    var champCaptainHtml = "";
+    if (w.championCaptain) {
+        champCaptainHtml = 'Captain: <a href="player.html?username=' +
+            encodeURIComponent(w.championCaptain) + '">' +
+            esc(w.championCaptain) + '</a>';
+    } else {
+        champCaptainHtml = "&nbsp;";
+    }
+
+    /* Runner-up captain link */
+    var runCaptainHtml = "";
+    if (w.runnerUpCaptain) {
+        runCaptainHtml = 'Captain: <a href="player.html?username=' +
+            encodeURIComponent(w.runnerUpCaptain) + '">' +
+            esc(w.runnerUpCaptain) + '</a>';
+    } else {
+        runCaptainHtml = "&nbsp;";
+    }
+
     return (
         '<div class="champion-card">' +
 
@@ -450,11 +466,9 @@ function renderCard(w) {
                     '<div class="final-team-name">' +
                         esc(w.champion || "Champion") +
                     '</div>' +
-                    (w.championCaptain
-                        ? '<div class="final-team-captain">Captain: ' +
-                            esc(w.championCaptain) +
-                          '</div>'
-                        : '<div class="final-team-captain">&nbsp;</div>') +
+                    '<div class="final-team-captain">' +
+                        champCaptainHtml +
+                    '</div>' +
                     '<div class="final-team-score">' +
                         esc(w.championScore || "0") +
                     '</div>' +
@@ -467,11 +481,9 @@ function renderCard(w) {
                     '<div class="final-team-name">' +
                         esc(w.runnerUp || "Runner-up") +
                     '</div>' +
-                    (w.runnerUpCaptain
-                        ? '<div class="final-team-captain">Captain: ' +
-                            esc(w.runnerUpCaptain) +
-                          '</div>'
-                        : '<div class="final-team-captain">&nbsp;</div>') +
+                    '<div class="final-team-captain">' +
+                        runCaptainHtml +
+                    '</div>' +
                     '<div class="final-team-score">' +
                         esc(w.runnerUpScore || "0") +
                     '</div>' +
