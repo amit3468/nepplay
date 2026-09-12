@@ -6,9 +6,8 @@
 ============================================================
 
 Now includes:
-- Dynamic payment settings (admin editable)
-- Multiple payment methods with QR codes
-- All previous features
+- Tournament details endpoint (standings + top killers)
+- Top Killer tracking per match + cumulative
 ============================================================
 */
 
@@ -29,9 +28,7 @@ if (!MONGODB_URI) {
     console.log("");
     console.log("==================================================");
     console.log("ERROR: MONGODB_URI environment variable not set!");
-    console.log("Set it in Render -> Environment tab");
     console.log("==================================================");
-    console.log("");
     process.exit(1);
 }
 
@@ -42,38 +39,15 @@ var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
 
 var sessions = new Map();
 var SESSION_COOKIE = "nepplay_session";
-
 var MAX_BODY_SIZE = 8 * 1024 * 1024;
 
-/* Default payment methods - seeded on first run if settings empty */
 var DEFAULT_PAYMENT_METHODS = [
-    {
-        id: "esewa",
-        name: "eSewa",
-        number: "9748835184",
-        enabled: true,
-        qrImage: "",
-        instructions: "Open eSewa app and send money to the number above",
-        order: 1
-    },
-    {
-        id: "khalti",
-        name: "Khalti",
-        number: "97766258368",
-        enabled: true,
-        qrImage: "",
-        instructions: "Open Khalti app and send money to the number above",
-        order: 2
-    },
-    {
-        id: "imepay",
-        name: "IME Pay",
-        number: "",
-        enabled: false,
-        qrImage: "",
-        instructions: "Open IME Pay app and send money to the number above",
-        order: 3
-    }
+    { id: "esewa", name: "eSewa", number: "9748835184", enabled: true,
+      qrImage: "", instructions: "Open eSewa app and send money to the number above", order: 1 },
+    { id: "khalti", name: "Khalti", number: "97766258368", enabled: true,
+      qrImage: "", instructions: "Open Khalti app and send money to the number above", order: 2 },
+    { id: "imepay", name: "IME Pay", number: "", enabled: false,
+      qrImage: "", instructions: "Open IME Pay app and send money to the number above", order: 3 }
 ];
 
 var DEFAULT_TOURNAMENTS = [
@@ -114,12 +88,8 @@ function connectDB() {
         console.log("Indexes created");
         return seedTournaments();
     })
-    .then(function () {
-        return seedPaymentSettings();
-    })
-    .then(function () {
-        console.log("Database ready");
-    })
+    .then(function () { return seedPaymentSettings(); })
+    .then(function () { console.log("Database ready"); })
     .catch(function (err) {
         console.log("MongoDB connection error:", err.message);
         process.exit(1);
@@ -168,19 +138,15 @@ function createId(prefix) {
     return prefix + "_" + Date.now().toString(36) + "_" +
         crypto.randomBytes(4).toString("hex");
 }
-
 function nowISO() { return new Date().toISOString(); }
-
 function cleanString(v) {
     if (v === undefined || v === null) return "";
     return String(v).trim();
 }
-
 function safeNumber(v, f) {
     var n = Number(v);
     return isNaN(n) ? f : n;
 }
-
 function normalizeStatus(v) {
     var s = cleanString(v);
     if (!s) return "Pending";
@@ -190,13 +156,10 @@ function normalizeStatus(v) {
     if (l === "pending") return "Pending";
     return s;
 }
-
 function normalizeMatchType(v) {
     var s = cleanString(v).toLowerCase();
     if (s === "battle-royale" || s === "battle_royale" || s === "br" ||
-        s === "royale" || s === "battle royale") {
-        return "battle-royale";
-    }
+        s === "royale" || s === "battle royale") return "battle-royale";
     return "1v1";
 }
 
@@ -249,7 +212,6 @@ function parseCookies(req) {
     });
     return c;
 }
-
 function getSession(req) {
     var c = parseCookies(req);
     var id = c[SESSION_COOKIE];
@@ -259,7 +221,6 @@ function getSession(req) {
     if (s.expiresAt < Date.now()) { sessions.delete(id); return null; }
     return s;
 }
-
 function createSession(userId, role) {
     var id = crypto.randomBytes(32).toString("hex");
     sessions.set(id, {
@@ -269,12 +230,10 @@ function createSession(userId, role) {
     });
     return id;
 }
-
 function setSessionCookie(h, id) {
     h["Set-Cookie"] = SESSION_COOKIE + "=" + encodeURIComponent(id) +
         "; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800";
 }
-
 function clearSessionCookie(h) {
     h["Set-Cookie"] = SESSION_COOKIE + "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
 }
@@ -306,17 +265,12 @@ function readBody(req, cb) {
         }
     });
     req.on("end", function () {
-        if (tooLarge) {
-            cb(new Error("Request body too large. Max " + Math.round(MAX_BODY_SIZE / 1024 / 1024) + "MB."));
-            return;
-        }
+        if (tooLarge) { cb(new Error("Body too large.")); return; }
         if (!body) { cb(null, {}); return; }
         try { cb(null, JSON.parse(body)); }
         catch (e) { cb(new Error("Invalid JSON data.")); }
     });
-    req.on("error", function () {
-        if (tooLarge) cb(new Error("Request body too large."));
-    });
+    req.on("error", function () { if (tooLarge) cb(new Error("Body too large.")); });
 }
 
 /* ============ NOTIFICATIONS ============ */
@@ -324,31 +278,22 @@ function readBody(req, cb) {
 function createNotification(userId, type, title, message, link) {
     if (!userId) return Promise.resolve();
     return collections.notifications.insertOne({
-        id: createId("notif"),
-        userId: userId,
-        type: type || "info",
-        title: title || "",
-        message: message || "",
-        link: link || "",
-        read: false,
-        createdAt: nowISO()
-    }).catch(function (e) {
-        console.log("Notification error:", e.message);
-    });
+        id: createId("notif"), userId: userId,
+        type: type || "info", title: title || "",
+        message: message || "", link: link || "",
+        read: false, createdAt: nowISO()
+    }).catch(function (e) { console.log("Notif err:", e.message); });
 }
 
 function createNotificationForTournament(tournamentId, type, title, message, link) {
     return collections.registrations.find({
-        tournamentId: tournamentId,
-        status: "Approved"
+        tournamentId: tournamentId, status: "Approved"
     }).toArray().then(function (regs) {
         var promises = regs.map(function (reg) {
             return createNotification(reg.userId, type, title, message, link);
         });
         return Promise.all(promises);
-    }).catch(function (e) {
-        console.log("Bulk notification error:", e.message);
-    });
+    }).catch(function (e) { console.log("Bulk notif err:", e.message); });
 }
 
 /* ============ AUTH ============ */
@@ -428,11 +373,8 @@ function buildLeaderboard(gameFilter) {
     .then(function (results) {
         var matches = results[0];
         var tournaments = results[1];
-
         var tGames = {};
-        tournaments.forEach(function (t) {
-            tGames[String(t.id || "")] = String(t.game || "");
-        });
+        tournaments.forEach(function (t) { tGames[String(t.id || "")] = String(t.game || ""); });
 
         var teamsByName = {};
         var counted = 0;
@@ -454,8 +396,7 @@ function buildLeaderboard(gameFilter) {
 
         matches.forEach(function (match) {
             if (!isCompletedMatch(match)) return;
-            var g = cleanString(match.game) ||
-                    tGames[String(match.tournamentId || "")] || "";
+            var g = cleanString(match.game) || tGames[String(match.tournamentId || "")] || "";
             if (gameFilter && gameFilter !== "all" &&
                 g.toLowerCase() !== gameFilter.toLowerCase()) return;
             var matchType = normalizeMatchType(match.matchType);
@@ -494,11 +435,9 @@ function buildLeaderboard(gameFilter) {
                 e1.ties++; e2.ties++;
                 e1.points += 1; e2.points += 1;
             } else if (wk === k1) {
-                e1.wins++; e1.points += 3;
-                e2.losses++;
+                e1.wins++; e1.points += 3; e2.losses++;
             } else if (wk === k2) {
-                e2.wins++; e2.points += 3;
-                e1.losses++;
+                e2.wins++; e2.points += 3; e1.losses++;
             } else {
                 e1.ties++; e2.ties++;
                 e1.points += 1; e2.points += 1;
@@ -510,9 +449,8 @@ function buildLeaderboard(gameFilter) {
             return {
                 name: t.name, captain: t.captain,
                 games: Object.keys(t.games),
-                played: t.played, wins: t.wins,
-                losses: t.losses, ties: t.ties,
-                points: t.points,
+                played: t.played, wins: t.wins, losses: t.losses,
+                ties: t.ties, points: t.points,
                 brPlacements: t.brPlacements
             };
         });
@@ -556,7 +494,6 @@ function buildWinners() {
                 }
                 return !!m.winner;
             });
-
             if (completed.length === 0) return;
 
             completed.sort(function (a, b) {
@@ -584,7 +521,6 @@ function buildWinners() {
                 champScore = cleanString(final.scoreTeam1);
                 runScore = cleanString(final.scoreTeam2);
             }
-
             if (!champion) return;
 
             var cCapt = "", rCapt = "";
@@ -593,6 +529,25 @@ function buildWinners() {
                 var rt = cleanString(reg.teamName);
                 if (teamKey(rt) === teamKey(champion)) cCapt = cleanString(reg.captainName);
                 if (teamKey(rt) === teamKey(runnerUp)) rCapt = cleanString(reg.captainName);
+            });
+
+            /* Cumulative Top Killer for this tournament */
+            var topKillerTotals = {};
+            completed.forEach(function (mm) {
+                if (mm.topKiller) {
+                    var k = cleanString(mm.topKiller);
+                    var kills = safeNumber(mm.topKillerKills, 0);
+                    topKillerTotals[k] = (topKillerTotals[k] || 0) + kills;
+                }
+            });
+
+            var cumTopKiller = "";
+            var cumTopKills = 0;
+            Object.keys(topKillerTotals).forEach(function (name) {
+                if (topKillerTotals[name] > cumTopKills) {
+                    cumTopKills = topKillerTotals[name];
+                    cumTopKiller = name;
+                }
             });
 
             winners.push({
@@ -614,7 +569,9 @@ function buildWinners() {
                 finalMatchName: cleanString(final.result || final.name),
                 completedAt: final.updatedAt || final.createdAt || "",
                 totalMatches: completed.length,
-                screenshot: final.screenshot || ""
+                screenshot: final.screenshot || "",
+                topKiller: cumTopKiller,
+                topKillerKills: cumTopKills
             });
         });
 
@@ -625,6 +582,183 @@ function buildWinners() {
         });
 
         return winners;
+    });
+}
+
+/* ============ TOURNAMENT DETAILS (NEW) ============ */
+
+function buildTournamentDetails(tournamentId) {
+    var tour = null;
+
+    return collections.tournaments.findOne({
+        $or: [{ id: tournamentId }, { name: tournamentId }]
+    }).then(function (t) {
+        if (!t) return null;
+        tour = t;
+        var tid = String(t.id || "");
+
+        return Promise.all([
+            collections.registrations.find({
+                tournamentId: tid,
+                status: "Approved"
+            }).toArray(),
+            collections.matches.find({ tournamentId: tid }).toArray()
+        ]);
+    }).then(function (results) {
+        if (!tour || !results) return null;
+
+        var registrations = results[0];
+        var matches = results[1];
+
+        /* Sort matches by date/time ascending */
+        matches.sort(function (a, b) {
+            var da = (a.date || "") + "T" + (a.time || "00:00");
+            var db = (b.date || "") + "T" + (b.time || "00:00");
+            return new Date(da) - new Date(db);
+        });
+
+        /* ---- Build Team Standings ---- */
+        var teamStats = {};
+
+        function ensure(teamName, captainName) {
+            var key = teamKey(teamName);
+            if (!teamStats[key]) {
+                teamStats[key] = {
+                    name: teamName,
+                    captain: captainName || "",
+                    played: 0, wins: 0, losses: 0, ties: 0,
+                    points: 0, kills: 0,
+                    placements: { first: 0, second: 0, third: 0 }
+                };
+            }
+            if (captainName && !teamStats[key].captain) {
+                teamStats[key].captain = captainName;
+            }
+            return teamStats[key];
+        }
+
+        /* Seed all approved teams (even those who haven't played) */
+        registrations.forEach(function (r) {
+            ensure(r.teamName || "", r.captainName || "");
+        });
+
+        /* Process completed matches */
+        var completedCount = 0;
+        var liveCount = 0;
+        var upcomingCount = 0;
+
+        matches.forEach(function (m) {
+            var status = String(m.status || "").toLowerCase();
+            var isCompleted = isCompletedMatch(m);
+            var isLive = status === "live";
+            var isUpcoming = !isCompleted && !isLive;
+
+            if (isCompleted) completedCount++;
+            else if (isLive) liveCount++;
+            else upcomingCount++;
+
+            /* Accumulate Top Killer kills regardless of status */
+            if (isCompleted && m.topKiller) {
+                var tk = cleanString(m.topKiller);
+                if (tk) {
+                    var team = ensure(tk);
+                    team.kills += safeNumber(m.topKillerKills, 0);
+                }
+            }
+
+            if (!isCompleted) return;
+
+            var matchType = normalizeMatchType(m.matchType);
+
+            if (matchType === "battle-royale") {
+                var winnersArr = Array.isArray(m.winners) ? m.winners : [];
+                if (winnersArr.length === 0 && m.winner) winnersArr = [m.winner];
+
+                winnersArr.forEach(function (teamName, wi) {
+                    teamName = cleanString(teamName);
+                    if (!teamName) return;
+                    var team = ensure(teamName);
+                    team.played++;
+                    if (wi === 0) {
+                        team.wins++; team.points += 3;
+                        team.placements.first++;
+                    } else if (wi === 1) {
+                        team.points += 2;
+                        team.placements.second++;
+                    } else if (wi === 2) {
+                        team.points += 1;
+                        team.placements.third++;
+                    }
+                });
+                return;
+            }
+
+            var t1 = cleanString(m.team1);
+            var t2 = cleanString(m.team2);
+            if (!t1 || !t2) return;
+
+            var w = cleanString(m.winner);
+            var k1 = teamKey(t1), k2 = teamKey(t2);
+            var e1 = ensure(t1);
+            var e2 = ensure(t2);
+            e1.played++;
+            e2.played++;
+
+            var wk = teamKey(w);
+            if (!w || wk === "") {
+                e1.ties++; e2.ties++;
+                e1.points += 1; e2.points += 1;
+            } else if (wk === k1) {
+                e1.wins++; e1.points += 3; e2.losses++;
+            } else if (wk === k2) {
+                e2.wins++; e2.points += 3; e1.losses++;
+            } else {
+                e1.ties++; e2.ties++;
+                e1.points += 1; e2.points += 1;
+            }
+        });
+
+        /* Convert to array & sort */
+        var standings = Object.keys(teamStats).map(function (k) {
+            return teamStats[k];
+        });
+
+        standings.sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            if (b.kills !== a.kills) return b.kills - a.kills;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        /* ---- Top Killers Leaderboard ---- */
+        var killers = standings
+            .filter(function (t) { return t.kills > 0; })
+            .map(function (t) {
+                return { name: t.name, captain: t.captain, kills: t.kills };
+            });
+
+        killers.sort(function (a, b) {
+            if (b.kills !== a.kills) return b.kills - a.kills;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        /* ---- Tournament-level stats ---- */
+        var totalKills = 0;
+        killers.forEach(function (k) { totalKills += k.kills; });
+
+        return {
+            tournament: tournamentForClient(tour, registrations.length),
+            standings: standings,
+            killers: killers,
+            matches: matches,
+            totalKills: totalKills,
+            matchesStats: {
+                total: matches.length,
+                completed: completedCount,
+                live: liveCount,
+                upcoming: upcomingCount
+            }
+        };
     });
 }
 
@@ -676,33 +810,52 @@ function handleAPI(req, res, pathname, query) {
 
 function handleAPIPromise(req, res, pathname, query) {
 
+    /* PUBLIC TOURNAMENT DETAILS */
+    if (req.method === "GET" && pathname === "/api/tournament/details") {
+        var tid = cleanString(query.get("id") || query.get("tournamentId") || query.get("tournament"));
+        if (!tid) {
+            sendError(res, 400, "Tournament ID required.");
+            return Promise.resolve(true);
+        }
+        return buildTournamentDetails(tid).then(function (data) {
+            if (!data) {
+                sendError(res, 404, "Tournament not found.");
+                return true;
+            }
+            sendJSON(res, 200, {
+                success: true,
+                tournament: data.tournament,
+                standings: data.standings,
+                killers: data.killers,
+                matches: data.matches,
+                totalKills: data.totalKills,
+                matchesStats: data.matchesStats
+            });
+            return true;
+        }).catch(function (err) {
+            console.log("Tournament details error:", err.message);
+            sendError(res, 500, "Could not load tournament.");
+            return true;
+        });
+    }
+
     /* PUBLIC PAYMENT SETTINGS */
     if (req.method === "GET" && pathname === "/api/payment-settings") {
         return collections.settings.findOne({ key: "payment" })
             .then(function (doc) {
                 var methods = (doc && Array.isArray(doc.methods))
-                    ? doc.methods
-                    : DEFAULT_PAYMENT_METHODS;
-                /* Only return enabled methods to public, sorted by order */
+                    ? doc.methods : DEFAULT_PAYMENT_METHODS;
                 var enabled = methods
                     .filter(function (m) { return m.enabled !== false; })
-                    .sort(function (a, b) {
-                        return (a.order || 99) - (b.order || 99);
-                    })
-                    /* Strip instructions for public (admin only) */
+                    .sort(function (a, b) { return (a.order || 99) - (b.order || 99); })
                     .map(function (m) {
                         return {
-                            id: m.id,
-                            name: m.name,
-                            number: m.number,
-                            qrImage: m.qrImage || "",
-                            instructions: m.instructions || ""
+                            id: m.id, name: m.name, number: m.number,
+                            qrImage: m.qrImage || "", instructions: m.instructions || ""
                         };
                     });
                 sendJSON(res, 200, {
-                    success: true,
-                    methods: enabled,
-                    /* Legacy shape for backwards compat */
+                    success: true, methods: enabled,
                     payment: {
                         eSewa: { name: "eSewa", number: (enabled.find(function (m) { return m.id === "esewa"; }) || {}).number || "" },
                         Khalti: { name: "Khalti", number: (enabled.find(function (m) { return m.id === "khalti"; }) || {}).number || "" }
@@ -723,14 +876,13 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ADMIN - GET ALL PAYMENT METHODS (including disabled) */
+    /* ADMIN GET PAYMENT SETTINGS */
     if (req.method === "GET" && pathname === "/api/admin/payment-settings") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return collections.settings.findOne({ key: "payment" })
             .then(function (doc) {
                 var methods = (doc && Array.isArray(doc.methods))
-                    ? doc.methods
-                    : DEFAULT_PAYMENT_METHODS;
+                    ? doc.methods : DEFAULT_PAYMENT_METHODS;
                 methods = methods.slice().sort(function (a, b) {
                     return (a.order || 99) - (b.order || 99);
                 });
@@ -743,47 +895,33 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ADMIN - UPDATE PAYMENT METHODS */
+    /* ADMIN UPDATE PAYMENT SETTINGS */
     if (req.method === "PUT" && pathname === "/api/admin/payment-settings") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
         return new Promise(function (resolve) {
             readBody(req, function (err, body) {
                 if (err) { sendError(res, 400, err.message); return resolve(true); }
                 var methods = Array.isArray(body.methods) ? body.methods : null;
-                if (!methods) {
-                    sendError(res, 400, "methods array required.");
-                    return resolve(true);
-                }
+                if (!methods) { sendError(res, 400, "methods array required."); return resolve(true); }
 
-                /* Validate and sanitize */
                 var clean = [];
                 var seenIds = {};
                 for (var i = 0; i < methods.length; i++) {
                     var m = methods[i] || {};
                     var id = cleanString(m.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
-                    if (!id) {
-                        /* Generate id from name if missing */
-                        id = cleanString(m.name).toLowerCase().replace(/[^a-z0-9]/g, "");
-                    }
+                    if (!id) id = cleanString(m.name).toLowerCase().replace(/[^a-z0-9]/g, "");
                     if (!id) continue;
-                    if (seenIds[id]) {
-                        /* Avoid duplicate ids */
-                        id = id + "-" + (Date.now() % 10000) + "-" + i;
-                    }
+                    if (seenIds[id]) id = id + "-" + (Date.now() % 10000) + "-" + i;
                     seenIds[id] = true;
-
                     var name = cleanString(m.name);
                     if (!name) continue;
-
                     var qr = cleanString(m.qrImage);
                     if (qr && qr.length > 1500000) {
-                        sendError(res, 400, "QR code too large. Max ~1MB per method.");
+                        sendError(res, 400, "QR code too large. Max ~1MB.");
                         return resolve(true);
                     }
-
                     clean.push({
-                        id: id,
-                        name: name,
+                        id: id, name: name,
                         number: cleanString(m.number),
                         enabled: m.enabled !== false,
                         qrImage: qr,
@@ -834,11 +972,8 @@ function handleAPIPromise(req, res, pathname, query) {
                     }
                     var pd = createPassword(password);
                     var user = {
-                        id: createId("user"),
-                        username: username,
-                        email: email,
-                        passwordHash: pd.passwordHash,
-                        passwordSalt: pd.passwordSalt,
+                        id: createId("user"), username: username, email: email,
+                        passwordHash: pd.passwordHash, passwordSalt: pd.passwordSalt,
                         createdAt: nowISO()
                     };
                     return collections.users.insertOne(user)
@@ -873,8 +1008,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 }
                 collections.users.findOne({
                     $or: [
-                        { id: identifier },
-                        { username: identifier },
+                        { id: identifier }, { username: identifier },
                         { email: identifier.toLowerCase() }
                     ]
                 }).then(function (found) {
@@ -890,9 +1024,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     var h = {};
                     setSessionCookie(h, sid);
                     sendJSON(res, 200, {
-                        success: true,
-                        message: "Login successful.",
-                        user: safeUser(found)
+                        success: true, message: "Login successful.", user: safeUser(found)
                     }, h);
                     resolve(true);
                 }).catch(function () {
@@ -981,11 +1113,9 @@ function handleAPIPromise(req, res, pathname, query) {
                 var name = cleanString(body.name);
                 if (!name) { sendError(res, 400, "Tournament name required."); return resolve(true); }
                 var nt = {
-                    id: createId("tour"),
-                    name: name,
+                    id: createId("tour"), name: name,
                     game: cleanString(body.game) || "Free Fire",
-                    date: cleanString(body.date),
-                    time: cleanString(body.time),
+                    date: cleanString(body.date), time: cleanString(body.time),
                     entryFee: safeNumber(body.entryFee, 0),
                     teamSize: safeNumber(body.teamSize, 4),
                     maxTeams: safeNumber(body.maxTeams, 16),
@@ -996,9 +1126,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 collections.tournaments.insertOne(nt)
                     .then(function () {
                         sendJSON(res, 201, {
-                            success: true,
-                            message: "Tournament created.",
-                            tournament: nt
+                            success: true, message: "Tournament created.", tournament: nt
                         });
                         resolve(true);
                     })
@@ -1037,9 +1165,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         return resolve(true);
                     }
                     sendJSON(res, 200, {
-                        success: true,
-                        message: "Tournament updated.",
-                        tournament: result.value
+                        success: true, message: "Tournament updated.", tournament: result.value
                     });
                     resolve(true);
                 });
@@ -1084,25 +1210,17 @@ function handleAPIPromise(req, res, pathname, query) {
                                 sendError(res, 400, "Tournament is full.");
                                 return resolve(true);
                             }
-
                             var pm = cleanString(body.paymentMethod ||
                                 (body.payment && body.payment.method));
                             var txId = cleanString(body.transactionId ||
                                 (body.payment && body.payment.transactionId));
                             var fee = safeNumber(tour.entryFee, 0);
-
                             if (fee > 0) {
-                                if (!pm) {
-                                    sendError(res, 400, "Select a payment method.");
-                                    return resolve(true);
-                                }
+                                if (!pm) { sendError(res, 400, "Select a payment method."); return resolve(true); }
                                 if (txId.length < 3 || txId.length > 100) {
-                                    sendError(res, 400, "Invalid transaction ID.");
-                                    return resolve(true);
+                                    sendError(res, 400, "Invalid transaction ID."); return resolve(true);
                                 }
-                            } else if (!pm) {
-                                pm = "Free";
-                            }
+                            } else if (!pm) pm = "Free";
 
                             return collections.registrations.findOne({
                                 transactionId: txId
@@ -1111,15 +1229,10 @@ function handleAPIPromise(req, res, pathname, query) {
                                     sendError(res, 409, "Transaction ID already used.");
                                     return resolve(true);
                                 }
-
                                 var reg = {
                                     id: createId("reg"),
-                                    userId: user.id,
-                                    username: user.username,
-                                    email: user.email,
-                                    tournamentId: tour.id,
-                                    tournamentName: tour.name,
-                                    game: tour.game,
+                                    userId: user.id, username: user.username, email: user.email,
+                                    tournamentId: tour.id, tournamentName: tour.name, game: tour.game,
                                     teamName: cleanString(body.teamName),
                                     captainName: cleanString(body.captainName || body.captain),
                                     phone: cleanString(body.phone),
@@ -1131,25 +1244,18 @@ function handleAPIPromise(req, res, pathname, query) {
                                     player6: cleanString(body.player6),
                                     payerName: cleanString(body.payerName),
                                     payerPhone: cleanString(body.payerPhone),
-                                    paymentMethod: pm,
-                                    transactionId: txId,
-                                    amount: fee,
+                                    paymentMethod: pm, transactionId: txId, amount: fee,
                                     paymentStatus: fee > 0 ? "Pending" : "Not Required",
                                     status: "Pending",
                                     message: cleanString(body.message),
-                                    createdAt: nowISO(),
-                                    updatedAt: nowISO()
+                                    createdAt: nowISO(), updatedAt: nowISO()
                                 };
-
                                 if (!reg.teamName) { sendError(res, 400, "Team name required."); return resolve(true); }
                                 if (!reg.captainName) { sendError(res, 400, "Captain name required."); return resolve(true); }
-
                                 return collections.registrations.insertOne(reg)
                                     .then(function () {
                                         return createNotification(
-                                            user.id,
-                                            "info",
-                                            "Registration submitted",
+                                            user.id, "info", "Registration submitted",
                                             "Your registration for " + tour.name + " is pending admin approval.",
                                             "member.html"
                                         );
@@ -1201,8 +1307,7 @@ function handleAPIPromise(req, res, pathname, query) {
         return requireMemberAsync(req, res).then(function (mem) {
             if (!mem) return true;
             return collections.registrations.find({
-                userId: mem.id,
-                status: "Approved"
+                userId: mem.id, status: "Approved"
             }).toArray()
             .then(function (regs) {
                 var myTids = {};
@@ -1229,8 +1334,7 @@ function handleAPIPromise(req, res, pathname, query) {
                             id: t.id || "",
                             name: t.name || mm.tournamentName || "",
                             game: t.game || mm.game || "",
-                            date: t.date || "",
-                            time: t.time || "",
+                            date: t.date || "", time: t.time || "",
                             entryFee: t.entryFee || 0,
                             prizePool: t.prizePool || 0,
                             teamSize: t.teamSize || 0
@@ -1304,12 +1408,10 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (!r.captainName) return false;
                 return String(r.captainName).toLowerCase() === usernameLower;
             });
-
             var teamNames = {};
             userRegs.forEach(function (r) {
                 if (r.teamName) teamNames[String(r.teamName).toLowerCase()] = r.teamName;
             });
-
             var teamKeys = Object.keys(teamNames);
             var playerMatches = [];
             var wins = 0, losses = 0, ties = 0;
@@ -1349,15 +1451,11 @@ function handleAPIPromise(req, res, pathname, query) {
                 else if (result === "LOSS") losses++;
                 else if (result === "TIE") ties++;
                 playerMatches.push({
-                    id: m.id,
-                    name: m.result || m.name || "Match",
+                    id: m.id, name: m.result || m.name || "Match",
                     tournament: m.tournamentName || "",
-                    game: m.game || "",
-                    date: m.date || "",
-                    result: result,
-                    matchType: matchType,
-                    team1: m.team1 || "",
-                    team2: m.team2 || "",
+                    game: m.game || "", date: m.date || "",
+                    result: result, matchType: matchType,
+                    team1: m.team1 || "", team2: m.team2 || "",
                     winner: m.winner || (m.winners && m.winners[0]) || ""
                 });
             });
@@ -1421,8 +1519,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     exists: !!user,
                     teams: teamsList,
                     stats: {
-                        matchesPlayed: total,
-                        wins: wins, losses: losses, ties: ties,
+                        matchesPlayed: total, wins: wins, losses: losses, ties: ties,
                         winRate: winRate, points: points,
                         championships: championships.length,
                         tournamentsEntered: userRegs.length
@@ -1445,8 +1542,7 @@ function handleAPIPromise(req, res, pathname, query) {
         return buildLeaderboard(gf).then(function (r) {
             sendJSON(res, 200, {
                 success: true,
-                teams: r.teams,
-                totalTeams: r.totalTeams,
+                teams: r.teams, totalTeams: r.totalTeams,
                 totalMatches: r.totalMatches,
                 totalTournaments: r.totalTournaments,
                 filter: gf
@@ -1459,9 +1555,7 @@ function handleAPIPromise(req, res, pathname, query) {
     if (req.method === "GET" && pathname === "/api/winners") {
         return buildWinners().then(function (w) {
             sendJSON(res, 200, {
-                success: true,
-                winners: w,
-                totalTournaments: w.length
+                success: true, winners: w, totalTournaments: w.length
             });
             return true;
         });
@@ -1495,11 +1589,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 .then(function (list) {
                     var unread = 0;
                     list.forEach(function (n) { if (!n.read) unread++; });
-                    sendJSON(res, 200, {
-                        success: true,
-                        notifications: list,
-                        unread: unread
-                    });
+                    sendJSON(res, 200, { success: true, notifications: list, unread: unread });
                     return true;
                 });
         });
@@ -1516,18 +1606,12 @@ function handleAPIPromise(req, res, pathname, query) {
                         collections.notifications.updateOne(
                             { id: notifId, userId: mem.id },
                             { $set: { read: true, readAt: nowISO() } }
-                        ).then(function () {
-                            sendJSON(res, 200, { success: true });
-                            resolve(true);
-                        });
+                        ).then(function () { sendJSON(res, 200, { success: true }); resolve(true); });
                     } else {
                         collections.notifications.updateMany(
                             { userId: mem.id, read: false },
                             { $set: { read: true, readAt: nowISO() } }
-                        ).then(function () {
-                            sendJSON(res, 200, { success: true });
-                            resolve(true);
-                        });
+                        ).then(function () { sendJSON(res, 200, { success: true }); resolve(true); });
                     }
                 });
             });
@@ -1549,8 +1633,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 var h = {};
                 setSessionCookie(h, sid);
                 sendJSON(res, 200, {
-                    success: true,
-                    message: "Admin login successful.",
+                    success: true, message: "Admin login successful.",
                     admin: { username: ADMIN_USERNAME }
                 }, h);
                 resolve(true);
@@ -1566,8 +1649,7 @@ function handleAPIPromise(req, res, pathname, query) {
             return Promise.resolve(true);
         }
         sendJSON(res, 200, {
-            success: true,
-            loggedIn: true,
+            success: true, loggedIn: true,
             admin: { username: ADMIN_USERNAME }
         });
         return Promise.resolve(true);
@@ -1575,11 +1657,11 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* ADMIN LOGOUT */
     if (req.method === "POST" && pathname === "/api/admin/logout") {
-        var c = parseCookies(req);
-        if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
-        var h = {};
-        clearSessionCookie(h);
-        sendJSON(res, 200, { success: true, message: "Admin logged out." }, h);
+        var c2 = parseCookies(req);
+        if (c2[SESSION_COOKIE]) sessions.delete(c2[SESSION_COOKIE]);
+        var h2 = {};
+        clearSessionCookie(h2);
+        sendJSON(res, 200, { success: true, message: "Admin logged out." }, h2);
         return Promise.resolve(true);
     }
 
@@ -1611,10 +1693,8 @@ function handleAPIPromise(req, res, pathname, query) {
                 var updates = { status: st, updatedAt: nowISO() };
                 if (st === "Approved") updates.paymentStatus = "Verified";
                 if (st === "Rejected") updates.paymentStatus = "Rejected";
-
                 collections.registrations.findOneAndUpdate(
-                    { id: rid },
-                    { $set: updates },
+                    { id: rid }, { $set: updates },
                     { returnDocument: "after" }
                 ).then(function (result) {
                     if (!result || !result.value) {
@@ -1638,8 +1718,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     }
                     return notifPromise.then(function () {
                         sendJSON(res, 200, {
-                            success: true,
-                            message: "Status updated.",
+                            success: true, message: "Status updated.",
                             registration: registrationForClient(reg)
                         });
                         resolve(true);
@@ -1665,10 +1744,8 @@ function handleAPIPromise(req, res, pathname, query) {
                 var updates = { status: st, updatedAt: nowISO() };
                 if (st === "Approved") updates.paymentStatus = "Verified";
                 if (st === "Rejected") updates.paymentStatus = "Rejected";
-
                 collections.registrations.findOneAndUpdate(
-                    { id: rid },
-                    { $set: updates },
+                    { id: rid }, { $set: updates },
                     { returnDocument: "after" }
                 ).then(function (result) {
                     if (!result || !result.value) {
@@ -1692,8 +1769,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     }
                     return notifPromise.then(function () {
                         sendJSON(res, 200, {
-                            success: true,
-                            message: "Status updated.",
+                            success: true, message: "Status updated.",
                             registration: registrationForClient(reg)
                         });
                         resolve(true);
@@ -1719,8 +1795,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 });
                 updates.updatedAt = nowISO();
                 collections.registrations.findOneAndUpdate(
-                    { id: rid },
-                    { $set: updates },
+                    { id: rid }, { $set: updates },
                     { returnDocument: "after" }
                 ).then(function (result) {
                     if (!result || !result.value) {
@@ -1728,8 +1803,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         return resolve(true);
                     }
                     sendJSON(res, 200, {
-                        success: true,
-                        message: "Updated.",
+                        success: true, message: "Updated.",
                         registration: registrationForClient(result.value)
                     });
                     resolve(true);
@@ -1741,9 +1815,9 @@ function handleAPIPromise(req, res, pathname, query) {
     /* ADMIN REG DELETE */
     if (req.method === "DELETE" && pathname === "/api/admin/registrations") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var rid = cleanString(query.get("id") || query.get("registrationId"));
-        if (!rid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.registrations.deleteOne({ id: rid })
+        var rid2 = cleanString(query.get("id") || query.get("registrationId"));
+        if (!rid2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.registrations.deleteOne({ id: rid2 })
             .then(function (result) {
                 if (result.deletedCount === 0) {
                     sendError(res, 404, "Not found.");
@@ -1797,6 +1871,10 @@ function handleAPIPromise(req, res, pathname, query) {
                     sendError(res, 400, "Screenshot too large.");
                     return resolve(true);
                 }
+
+                var topKiller = cleanString(body.topKiller);
+                var topKillerKills = safeNumber(body.topKillerKills, 0);
+
                 var match = {
                     id: createId("match"),
                     matchType: matchType,
@@ -1809,6 +1887,8 @@ function handleAPIPromise(req, res, pathname, query) {
                     scoreTeam2: cleanString(body.scoreTeam2 || body.score2),
                     winner: cleanString(body.winner || (winners[0] || "")),
                     winners: winners,
+                    topKiller: topKiller,
+                    topKillerKills: topKillerKills,
                     date: cleanString(body.date),
                     time: cleanString(body.time),
                     status: cleanString(body.status) || "Upcoming",
@@ -1826,15 +1906,14 @@ function handleAPIPromise(req, res, pathname, query) {
                     .then(function () {
                         return createNotificationForTournament(
                             match.tournamentId, "info", "New Match Scheduled",
-                            match.result + " for " + match.tournamentName + " on " + match.date + " at " + match.time,
+                            match.result + " for " + match.tournamentName +
+                            " on " + match.date + " at " + match.time,
                             "member.html"
                         );
                     })
                     .then(function () {
                         sendJSON(res, 201, {
-                            success: true,
-                            message: "Match created.",
-                            match: match
+                            success: true, message: "Match created.", match: match
                         });
                         resolve(true);
                     })
@@ -1865,11 +1944,15 @@ function handleAPIPromise(req, res, pathname, query) {
                     }
                     ["game","tournamentId","tournamentName","team1","team2",
                         "scoreTeam1","scoreTeam2","winner","date","time",
-                        "status","roomId","roomPassword","result","notes"].forEach(function (f) {
+                        "status","roomId","roomPassword","result","notes",
+                        "topKiller"].forEach(function (f) {
                         if (body[f] !== undefined && body[f] !== null) {
                             updates[f] = cleanString(body[f]);
                         }
                     });
+                    if (body.topKillerKills !== undefined) {
+                        updates.topKillerKills = safeNumber(body.topKillerKills, 0);
+                    }
                     if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
                     if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
                     if (Array.isArray(body.winners)) {
@@ -1888,8 +1971,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     }
                     updates.updatedAt = nowISO();
                     return collections.matches.findOneAndUpdate(
-                        { id: mid },
-                        { $set: updates },
+                        { id: mid }, { $set: updates },
                         { returnDocument: "after" }
                     ).then(function (result) {
                         if (!result || !result.value) {
@@ -1919,9 +2001,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         }
                         return Promise.all(notifPromises).then(function () {
                             sendJSON(res, 200, {
-                                success: true,
-                                message: "Match updated.",
-                                match: result.value
+                                success: true, message: "Match updated.", match: result.value
                             });
                             resolve(true);
                         });
@@ -1938,9 +2018,9 @@ function handleAPIPromise(req, res, pathname, query) {
     /* DELETE MATCH */
     if (req.method === "DELETE" && pathname === "/api/admin/matches") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var mid = cleanString(query.get("id") || query.get("matchId"));
-        if (!mid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.matches.deleteOne({ id: mid })
+        var mid2 = cleanString(query.get("id") || query.get("matchId"));
+        if (!mid2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.matches.deleteOne({ id: mid2 })
             .then(function (result) {
                 if (result.deletedCount === 0) {
                     sendError(res, 404, "Not found.");
@@ -1971,8 +2051,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (!title) { sendError(res, 400, "Title required."); return resolve(true); }
                 if (!message) { sendError(res, 400, "Message required."); return resolve(true); }
                 var item = {
-                    id: createId("ann"),
-                    title: title, message: message,
+                    id: createId("ann"), title: title, message: message,
                     type: cleanString(body.type) || "info",
                     pinned: body.pinned === true || body.pinned === "true",
                     createdAt: nowISO(), updatedAt: nowISO()
@@ -1986,8 +2065,7 @@ function handleAPIPromise(req, res, pathname, query) {
                                         u.id,
                                         item.type === "urgent" ? "error" : "info",
                                         "Announcement: " + item.title,
-                                        item.message,
-                                        "index.html"
+                                        item.message, "index.html"
                                     );
                                 });
                                 return Promise.all(promises);
@@ -1995,9 +2073,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     })
                     .then(function () {
                         sendJSON(res, 201, {
-                            success: true,
-                            message: "Created.",
-                            announcement: item
+                            success: true, message: "Created.", announcement: item
                         });
                         resolve(true);
                     })
@@ -2025,8 +2101,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 }
                 updates.updatedAt = nowISO();
                 collections.announcements.findOneAndUpdate(
-                    { id: annId },
-                    { $set: updates },
+                    { id: annId }, { $set: updates },
                     { returnDocument: "after" }
                 ).then(function (result) {
                     if (!result || !result.value) {
@@ -2034,9 +2109,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         return resolve(true);
                     }
                     sendJSON(res, 200, {
-                        success: true,
-                        message: "Updated.",
-                        announcement: result.value
+                        success: true, message: "Updated.", announcement: result.value
                     });
                     resolve(true);
                 });
@@ -2046,9 +2119,9 @@ function handleAPIPromise(req, res, pathname, query) {
 
     if (req.method === "DELETE" && pathname === "/api/admin/announcements") {
         if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var annId = cleanString(query.get("id") || query.get("announcementId"));
-        if (!annId) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.announcements.deleteOne({ id: annId })
+        var annId2 = cleanString(query.get("id") || query.get("announcementId"));
+        if (!annId2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+        return collections.announcements.deleteOne({ id: annId2 })
             .then(function (result) {
                 if (result.deletedCount === 0) {
                     sendError(res, 404, "Not found.");
@@ -2122,9 +2195,7 @@ var server = http.createServer(function (req, res) {
 
     if (pathname.indexOf("/api/") === 0) {
         handleAPI(req, res, pathname, query).then(function (handled) {
-            if (!handled) {
-                sendError(res, 404, "API route not found.");
-            }
+            if (!handled) sendError(res, 404, "API route not found.");
         });
         return;
     }
@@ -2135,7 +2206,7 @@ connectDB().then(function () {
     server.listen(PORT, HOST, function () {
         console.log("");
         console.log("==================================================");
-        console.log("     NEPPLAY SERVER STARTED (Dynamic Payments)");
+        console.log("     NEPPLAY SERVER STARTED (Tournament Details)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
         console.log("Admin: " + ADMIN_USERNAME);
@@ -2148,8 +2219,6 @@ connectDB().then(function () {
 server.on("error", function (error) {
     console.log("");
     console.log("SERVER ERROR:", error.message);
-    if (error.code === "EADDRINUSE") {
-        console.log("Port " + PORT + " is already in use.");
-    }
+    if (error.code === "EADDRINUSE") console.log("Port already in use.");
     console.log("");
 });
