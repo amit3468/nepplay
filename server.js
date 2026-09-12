@@ -5,10 +5,10 @@
                     NEPPLAY SERVER
 ============================================================
 Run:  node server.js
-Site: http://localhost:3000
+Site: https://nepplay.onrender.com
 
-Uses MongoDB Atlas (cloud database)
-Data persists forever ✅
+Uses MongoDB Atlas
+Includes: Player Profiles + Notifications
 ============================================================
 */
 
@@ -18,7 +18,6 @@ var path = require("path");
 var crypto = require("crypto");
 var URL = require("url").URL;
 var MongoClient = require("mongodb").MongoClient;
-var ObjectId = require("mongodb").ObjectId;
 
 var PORT = process.env.PORT || 3000;
 var HOST = "0.0.0.0";
@@ -39,7 +38,7 @@ if (!MONGODB_URI) {
 var DB_NAME = "nepplay";
 
 var ADMIN_USERNAME = "admin";
-var ADMIN_PASSWORD = "nepplay@123";
+var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
 
 var PAYMENT_SETTINGS = {
     eSewa: { name: "eSewa", number: "9748835184" },
@@ -81,6 +80,7 @@ function connectDB() {
         collections.matches = db.collection("matches");
         collections.tournaments = db.collection("tournaments");
         collections.announcements = db.collection("announcements");
+        collections.notifications = db.collection("notifications");
         return createIndexes();
     })
     .then(function () {
@@ -105,7 +105,8 @@ function createIndexes() {
         collections.registrations.createIndex({ transactionId: 1 }),
         collections.matches.createIndex({ tournamentId: 1 }),
         collections.tournaments.createIndex({ id: 1 }, { unique: true }),
-        collections.announcements.createIndex({ createdAt: -1 })
+        collections.announcements.createIndex({ createdAt: -1 }),
+        collections.notifications.createIndex({ userId: 1, createdAt: -1 })
     ]);
 }
 
@@ -266,16 +267,42 @@ function readBody(req, cb) {
 }
 
 /* ============================================================
-   AUTH HELPERS
+   NOTIFICATIONS HELPER
 ============================================================ */
 
-function getLoggedInUser(req) {
-    var s = getSession(req);
-    if (!s || s.role !== "member") return null;
-    return collections.users.findOne({ id: s.userId })
-        .then(function (u) { return u; })
-        .catch(function () { return null; });
+function createNotification(userId, type, title, message, link) {
+    if (!userId) return Promise.resolve();
+    return collections.notifications.insertOne({
+        id: createId("notif"),
+        userId: userId,
+        type: type || "info",
+        title: title || "",
+        message: message || "",
+        link: link || "",
+        read: false,
+        createdAt: nowISO()
+    }).catch(function (e) {
+        console.log("Notification error:", e.message);
+    });
 }
+
+function createNotificationForTournament(tournamentId, type, title, message, link) {
+    return collections.registrations.find({
+        tournamentId: tournamentId,
+        status: "Approved"
+    }).toArray().then(function (regs) {
+        var promises = regs.map(function (reg) {
+            return createNotification(reg.userId, type, title, message, link);
+        });
+        return Promise.all(promises);
+    }).catch(function (e) {
+        console.log("Bulk notification error:", e.message);
+    });
+}
+
+/* ============================================================
+   AUTH HELPERS
+============================================================ */
 
 function requireMemberAsync(req, res) {
     var s = getSession(req);
@@ -638,20 +665,13 @@ function handleAPIPromise(req, res, pathname, query) {
                 if (password.length < 4) { sendError(res, 400, "Password min 4 chars."); return resolve(true); }
 
                 collections.users.findOne({
-                    $or: [
-                        { username: username },
-                        { email: email }
-                    ]
+                    $or: [{ username: username }, { email: email }]
                 }).then(function (existing) {
                     if (existing) {
-                        if (existing.username === username) {
-                            sendError(res, 409, "Username already exists.");
-                        } else {
-                            sendError(res, 409, "Email already exists.");
-                        }
+                        if (existing.username === username) sendError(res, 409, "Username already exists.");
+                        else sendError(res, 409, "Email already exists.");
                         return resolve(true);
                     }
-
                     var pd = createPassword(password);
                     var user = {
                         id: createId("user"),
@@ -670,7 +690,7 @@ function handleAPIPromise(req, res, pathname, query) {
                             });
                             resolve(true);
                         });
-                }).catch(function (e) {
+                }).catch(function () {
                     sendError(res, 500, "Database error.");
                     resolve(true);
                 });
@@ -768,9 +788,7 @@ function handleAPIPromise(req, res, pathname, query) {
             .then(function (tournaments) {
                 return Promise.all(tournaments.map(function (t) {
                     return countTournamentRegistrations(t.id)
-                        .then(function (cnt) {
-                            return tournamentForClient(t, cnt);
-                        });
+                        .then(function (cnt) { return tournamentForClient(t, cnt); });
                 }));
             })
             .then(function (list) {
@@ -782,14 +800,10 @@ function handleAPIPromise(req, res, pathname, query) {
     /* ============ SINGLE TOURNAMENT ============ */
     if (req.method === "GET" && pathname === "/api/tournaments/one") {
         var key = query.get("id") || query.get("tournamentId") || query.get("tournament");
-        var q = cleanString(key).toLowerCase();
         return collections.tournaments.findOne({
             $or: [{ id: key }, { name: key }]
         }).then(function (t) {
-            if (!t) {
-                sendError(res, 404, "Tournament not found.");
-                return true;
-            }
+            if (!t) { sendError(res, 404, "Tournament not found."); return true; }
             return countTournamentRegistrations(t.id).then(function (cnt) {
                 sendJSON(res, 200, {
                     success: true,
@@ -872,9 +886,6 @@ function handleAPIPromise(req, res, pathname, query) {
                         tournament: result.value
                     });
                     resolve(true);
-                }).catch(function () {
-                    sendError(res, 500, "Could not update.");
-                    resolve(true);
                 });
             });
         });
@@ -905,10 +916,7 @@ function handleAPIPromise(req, res, pathname, query) {
                     var tid = cleanString(body.tournamentId || body.tournament);
 
                     collections.tournaments.findOne({ id: tid }).then(function (tour) {
-                        if (!tour) {
-                            sendError(res, 404, "Tournament not found.");
-                            return resolve(true);
-                        }
+                        if (!tour) { sendError(res, 404, "Tournament not found."); return resolve(true); }
                         var ts = cleanString(tour.status).toLowerCase();
                         if (ts === "closed" || ts === "completed") {
                             sendError(res, 400, "Tournament is closed.");
@@ -977,16 +985,19 @@ function handleAPIPromise(req, res, pathname, query) {
                                     updatedAt: nowISO()
                                 };
 
-                                if (!reg.teamName) {
-                                    sendError(res, 400, "Team name required.");
-                                    return resolve(true);
-                                }
-                                if (!reg.captainName) {
-                                    sendError(res, 400, "Captain name required.");
-                                    return resolve(true);
-                                }
+                                if (!reg.teamName) { sendError(res, 400, "Team name required."); return resolve(true); }
+                                if (!reg.captainName) { sendError(res, 400, "Captain name required."); return resolve(true); }
 
                                 return collections.registrations.insertOne(reg)
+                                    .then(function () {
+                                        return createNotification(
+                                            user.id,
+                                            "info",
+                                            "Registration submitted",
+                                            "Your registration for " + tour.name + " is pending admin approval.",
+                                            "member.html"
+                                        );
+                                    })
                                     .then(function () {
                                         sendJSON(res, 201, {
                                             success: true,
@@ -1039,9 +1050,7 @@ function handleAPIPromise(req, res, pathname, query) {
             }).toArray()
             .then(function (regs) {
                 var myTids = {};
-                regs.forEach(function (r) {
-                    myTids[String(r.tournamentId || "")] = true;
-                });
+                regs.forEach(function (r) { myTids[String(r.tournamentId || "")] = true; });
 
                 return Promise.all([
                     collections.matches.find({}).toArray(),
@@ -1112,11 +1121,7 @@ function handleAPIPromise(req, res, pathname, query) {
                             sendError(res, 404, "Match not found.");
                             return resolve(true);
                         }
-                        sendJSON(res, 200, {
-                            success: true,
-                            message: "Joined!",
-                            joined: true
-                        });
+                        sendJSON(res, 200, { success: true, message: "Joined!", joined: true });
                         resolve(true);
                     }).catch(function () {
                         sendError(res, 500, "Could not save.");
@@ -1124,6 +1129,176 @@ function handleAPIPromise(req, res, pathname, query) {
                     });
                 });
             });
+        });
+    }
+
+    /* ============ PLAYER PROFILE (D1) ============ */
+    if (req.method === "GET" && pathname === "/api/player") {
+        var username = cleanString(query.get("username"));
+        if (!username) {
+            sendError(res, 400, "Username required.");
+            return Promise.resolve(true);
+        }
+        var usernameLower = username.toLowerCase();
+
+        return Promise.all([
+            collections.users.findOne({ username: username }),
+            collections.registrations.find({}).toArray(),
+            collections.matches.find({}).toArray(),
+            collections.tournaments.find({}).toArray()
+        ]).then(function (results) {
+            var user = results[0];
+            var registrations = results[1];
+            var matches = results[2];
+            var tournaments = results[3];
+
+            var userRegs = registrations.filter(function (r) {
+                if (!r.captainName) return false;
+                return String(r.captainName).toLowerCase() === usernameLower;
+            });
+
+            var teamNames = {};
+            userRegs.forEach(function (r) {
+                if (r.teamName) teamNames[String(r.teamName).toLowerCase()] = r.teamName;
+            });
+
+            var teamKeys = Object.keys(teamNames);
+            var playerMatches = [];
+            var wins = 0, losses = 0, ties = 0;
+
+            matches.forEach(function (m) {
+                var matchType = normalizeMatchType(m.matchType);
+                var involved = false;
+                var result = "";
+
+                if (matchType === "battle-royale") {
+                    var winners = Array.isArray(m.winners) ? m.winners : [];
+                    if (m.winner && winners.length === 0) winners = [m.winner];
+                    for (var i = 0; i < teamKeys.length; i++) {
+                        var tn = teamNames[teamKeys[i]];
+                        if (winners.indexOf(tn) !== -1) {
+                            involved = true;
+                            result = (i === 0) ? "WIN" : "TOP 3";
+                            break;
+                        }
+                    }
+                } else {
+                    var t1 = String(m.team1 || "").toLowerCase();
+                    var t2 = String(m.team2 || "").toLowerCase();
+                    for (var j = 0; j < teamKeys.length; j++) {
+                        if (t1 === teamKeys[j] || t2 === teamKeys[j]) {
+                            involved = true;
+                            var w = String(m.winner || "").toLowerCase();
+                            if (!w) result = "TIE";
+                            else if (w === teamKeys[j]) result = "WIN";
+                            else result = "LOSS";
+                            break;
+                        }
+                    }
+                }
+
+                if (!involved) return;
+                if (!isCompletedMatch(m)) return;
+
+                if (result === "WIN") wins++;
+                else if (result === "LOSS") losses++;
+                else if (result === "TIE") ties++;
+
+                playerMatches.push({
+                    id: m.id,
+                    name: m.result || m.name || "Match",
+                    tournament: m.tournamentName || "",
+                    game: m.game || "",
+                    date: m.date || "",
+                    result: result,
+                    matchType: matchType,
+                    team1: m.team1 || "",
+                    team2: m.team2 || "",
+                    winner: m.winner || (m.winners && m.winners[0]) || ""
+                });
+            });
+
+            playerMatches.sort(function (a, b) {
+                return new Date(b.date || "1970-01-01") - new Date(a.date || "1970-01-01");
+            });
+
+            var points = wins * 3 + ties * 1;
+            var total = wins + losses + ties;
+            var winRate = total > 0 ? Math.round(wins / total * 100) : 0;
+
+            var championships = [];
+            tournaments.forEach(function (tour) {
+                var tid = String(tour.id || "");
+                var completed = matches.filter(function (m) {
+                    if (String(m.tournamentId || "") !== tid) return false;
+                    if (!isCompletedMatch(m)) return false;
+                    var mt = normalizeMatchType(m.matchType);
+                    if (mt === "battle-royale") {
+                        var wA = Array.isArray(m.winners) ? m.winners : [];
+                        if (wA.length === 0 && m.winner) wA = [m.winner];
+                        return wA.length > 0;
+                    }
+                    return !!m.winner;
+                });
+                if (completed.length === 0) return;
+
+                completed.sort(function (a, b) {
+                    var da = (a.date || "") + "T" + (a.time || "00:00");
+                    var db = (b.date || "") + "T" + (b.time || "00:00");
+                    return new Date(da) - new Date(db);
+                });
+
+                var final = completed[completed.length - 1];
+                var mt = normalizeMatchType(final.matchType);
+                var champion = "";
+
+                if (mt === "battle-royale") {
+                    var wA = Array.isArray(final.winners) ? final.winners : [];
+                    if (wA.length === 0 && final.winner) wA = [final.winner];
+                    champion = String(wA[0] || "").toLowerCase();
+                } else {
+                    champion = String(final.winner || "").toLowerCase();
+                }
+
+                if (teamKeys.indexOf(champion) !== -1) {
+                    championships.push({
+                        tournamentId: tour.id,
+                        tournamentName: tour.name || "Tournament",
+                        game: tour.game || "",
+                        date: tour.date || "",
+                        prizePool: tour.prizePool || 0
+                    });
+                }
+            });
+
+            var teamsList = Object.keys(teamNames).map(function (k) { return teamNames[k]; });
+
+            sendJSON(res, 200, {
+                success: true,
+                player: {
+                    username: username,
+                    memberSince: user ? user.createdAt : "",
+                    exists: !!user,
+                    teams: teamsList,
+                    stats: {
+                        matchesPlayed: total,
+                        wins: wins,
+                        losses: losses,
+                        ties: ties,
+                        winRate: winRate,
+                        points: points,
+                        championships: championships.length,
+                        tournamentsEntered: userRegs.length
+                    },
+                    championships: championships,
+                    matchHistory: playerMatches.slice(0, 20)
+                }
+            });
+            return true;
+        }).catch(function (err) {
+            console.log("Player error:", err.message);
+            sendError(res, 500, "Could not load player profile.");
+            return true;
         });
     }
 
@@ -1169,6 +1344,64 @@ function handleAPIPromise(req, res, pathname, query) {
                 sendJSON(res, 200, { success: true, announcements: ann });
                 return true;
             });
+    }
+
+    /* ============ NOTIFICATIONS (D3) ============ */
+    if (req.method === "GET" && pathname === "/api/notifications") {
+        return requireMemberAsync(req, res).then(function (mem) {
+            if (!mem) return true;
+            return collections.notifications
+                .find({ userId: mem.id })
+                .sort({ createdAt: -1 })
+                .limit(50)
+                .toArray()
+                .then(function (list) {
+                    var unread = 0;
+                    list.forEach(function (n) { if (!n.read) unread++; });
+                    sendJSON(res, 200, {
+                        success: true,
+                        notifications: list,
+                        unread: unread
+                    });
+                    return true;
+                });
+        });
+    }
+
+    if (req.method === "POST" && pathname === "/api/notifications/read") {
+        return requireMemberAsync(req, res).then(function (mem) {
+            if (!mem) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var notifId = cleanString(body.id);
+
+                    if (notifId) {
+                        collections.notifications.updateOne(
+                            { id: notifId, userId: mem.id },
+                            { $set: { read: true, readAt: nowISO() } }
+                        ).then(function () {
+                            sendJSON(res, 200, { success: true });
+                            resolve(true);
+                        }).catch(function () {
+                            sendError(res, 500, "Could not save.");
+                            resolve(true);
+                        });
+                    } else {
+                        collections.notifications.updateMany(
+                            { userId: mem.id, read: false },
+                            { $set: { read: true, readAt: nowISO() } }
+                        ).then(function () {
+                            sendJSON(res, 200, { success: true });
+                            resolve(true);
+                        }).catch(function () {
+                            sendError(res, 500, "Could not save.");
+                            resolve(true);
+                        });
+                    }
+                });
+            });
+        });
     }
 
     /* ============ ADMIN LOGIN ============ */
@@ -1259,12 +1492,35 @@ function handleAPIPromise(req, res, pathname, query) {
                         sendError(res, 404, "Not found.");
                         return resolve(true);
                     }
-                    sendJSON(res, 200, {
-                        success: true,
-                        message: "Status updated.",
-                        registration: registrationForClient(result.value)
+                    var reg = result.value;
+
+                    var notifPromise = Promise.resolve();
+                    if (st === "Approved") {
+                        notifPromise = createNotification(
+                            reg.userId,
+                            "success",
+                            "Registration Approved",
+                            "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
+                            "member.html"
+                        );
+                    } else if (st === "Rejected") {
+                        notifPromise = createNotification(
+                            reg.userId,
+                            "error",
+                            "Registration Rejected",
+                            "Your registration for " + reg.tournamentName + " was rejected.",
+                            "member.html"
+                        );
+                    }
+
+                    return notifPromise.then(function () {
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Status updated.",
+                            registration: registrationForClient(reg)
+                        });
+                        resolve(true);
                     });
-                    resolve(true);
                 });
             });
         });
@@ -1296,12 +1552,35 @@ function handleAPIPromise(req, res, pathname, query) {
                         sendError(res, 404, "Not found.");
                         return resolve(true);
                     }
-                    sendJSON(res, 200, {
-                        success: true,
-                        message: "Status updated.",
-                        registration: registrationForClient(result.value)
+                    var reg = result.value;
+
+                    var notifPromise = Promise.resolve();
+                    if (st === "Approved") {
+                        notifPromise = createNotification(
+                            reg.userId,
+                            "success",
+                            "Registration Approved",
+                            "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
+                            "member.html"
+                        );
+                    } else if (st === "Rejected") {
+                        notifPromise = createNotification(
+                            reg.userId,
+                            "error",
+                            "Registration Rejected",
+                            "Your registration for " + reg.tournamentName + " was rejected.",
+                            "member.html"
+                        );
+                    }
+
+                    return notifPromise.then(function () {
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Status updated.",
+                            registration: registrationForClient(reg)
+                        });
+                        resolve(true);
                     });
-                    resolve(true);
                 });
             });
         });
@@ -1367,9 +1646,7 @@ function handleAPIPromise(req, res, pathname, query) {
             .then(function (tournaments) {
                 return Promise.all(tournaments.map(function (t) {
                     return countTournamentRegistrations(t.id)
-                        .then(function (cnt) {
-                            return tournamentForClient(t, cnt);
-                        });
+                        .then(function (cnt) { return tournamentForClient(t, cnt); });
                 }));
             })
             .then(function (list) {
@@ -1426,6 +1703,16 @@ function handleAPIPromise(req, res, pathname, query) {
                 };
                 collections.matches.insertOne(match)
                     .then(function () {
+                        /* Notify all approved members of this tournament */
+                        return createNotificationForTournament(
+                            match.tournamentId,
+                            "info",
+                            "New Match Scheduled",
+                            match.result + " for " + match.tournamentName + " on " + match.date + " at " + match.time,
+                            "member.html"
+                        );
+                    })
+                    .then(function () {
                         sendJSON(res, 201, {
                             success: true,
                             message: "Match created.",
@@ -1450,45 +1737,86 @@ function handleAPIPromise(req, res, pathname, query) {
                 var mid = cleanString(body.id || body.matchId);
                 if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
 
-                var updates = {};
-
-                if (body.matchType !== undefined) {
-                    updates.matchType = normalizeMatchType(body.matchType);
-                }
-
-                ["game","tournamentId","tournamentName","team1","team2",
-                    "scoreTeam1","scoreTeam2","winner","date","time",
-                    "status","roomId","roomPassword","result","notes"].forEach(function (f) {
-                    if (body[f] !== undefined && body[f] !== null) {
-                        updates[f] = cleanString(body[f]);
-                    }
-                });
-
-                if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
-                if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
-
-                if (Array.isArray(body.winners)) {
-                    var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
-                    updates.winners = ws.slice(0, 3);
-                    if (!updates.winner && ws.length > 0) updates.winner = ws[0];
-                }
-
-                updates.updatedAt = nowISO();
-
-                collections.matches.findOneAndUpdate(
-                    { id: mid },
-                    { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
+                /* Get old match first to detect status changes */
+                collections.matches.findOne({ id: mid }).then(function (oldMatch) {
+                    if (!oldMatch) {
                         sendError(res, 404, "Not found.");
                         return resolve(true);
                     }
-                    sendJSON(res, 200, {
-                        success: true,
-                        message: "Match updated.",
-                        match: result.value
+
+                    var updates = {};
+                    if (body.matchType !== undefined) {
+                        updates.matchType = normalizeMatchType(body.matchType);
+                    }
+                    ["game","tournamentId","tournamentName","team1","team2",
+                        "scoreTeam1","scoreTeam2","winner","date","time",
+                        "status","roomId","roomPassword","result","notes"].forEach(function (f) {
+                        if (body[f] !== undefined && body[f] !== null) {
+                            updates[f] = cleanString(body[f]);
+                        }
                     });
+                    if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
+                    if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
+                    if (Array.isArray(body.winners)) {
+                        var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
+                        updates.winners = ws.slice(0, 3);
+                        if (!updates.winner && ws.length > 0) updates.winner = ws[0];
+                    }
+                    updates.updatedAt = nowISO();
+
+                    return collections.matches.findOneAndUpdate(
+                        { id: mid },
+                        { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+
+                        var oldStatus = String(oldMatch.status || "").toLowerCase();
+                        var newStatus = String(result.value.status || "").toLowerCase();
+
+                        var notifPromises = [];
+
+                        /* Notify when Room ID is published (status changes to Live) */
+                        if (newStatus === "live" && oldStatus !== "live" &&
+                            result.value.roomId) {
+                            notifPromises.push(createNotificationForTournament(
+                                result.value.tournamentId,
+                                "urgent",
+                                "Room ID Released!",
+                                result.value.result + " is live now. Room ID: " + result.value.roomId +
+                                (result.value.roomPassword ? " Password: " + result.value.roomPassword : ""),
+                                "member.html"
+                            ));
+                        }
+
+                        /* Notify when match is completed */
+                        if ((newStatus === "completed" || newStatus === "finished") &&
+                            oldStatus !== "completed" && oldStatus !== "finished") {
+                            notifPromises.push(createNotificationForTournament(
+                                result.value.tournamentId,
+                                "success",
+                                "Match Completed",
+                                result.value.result + " has finished. Winner: " +
+                                (result.value.winner || (result.value.winners && result.value.winners[0]) || "TBD"),
+                                "member.html"
+                            ));
+                        }
+
+                        return Promise.all(notifPromises).then(function () {
+                            sendJSON(res, 200, {
+                                success: true,
+                                message: "Match updated.",
+                                match: result.value
+                            });
+                            resolve(true);
+                        });
+                    });
+                }).catch(function (e) {
+                    console.log("Update match error:", e.message);
+                    sendError(res, 500, "Could not update.");
                     resolve(true);
                 });
             });
@@ -1542,6 +1870,22 @@ function handleAPIPromise(req, res, pathname, query) {
                     updatedAt: nowISO()
                 };
                 collections.announcements.insertOne(item)
+                    .then(function () {
+                        /* Notify all users */
+                        return collections.users.find({}).toArray()
+                            .then(function (users) {
+                                var promises = users.map(function (u) {
+                                    return createNotification(
+                                        u.id,
+                                        item.type === "urgent" ? "error" : "info",
+                                        "Announcement: " + item.title,
+                                        item.message,
+                                        "index.html"
+                                    );
+                                });
+                                return Promise.all(promises);
+                            });
+                    })
                     .then(function () {
                         sendJSON(res, 201, {
                             success: true,
@@ -1707,7 +2051,7 @@ connectDB().then(function () {
     server.listen(PORT, HOST, function () {
         console.log("");
         console.log("==================================================");
-        console.log("        NEPPLAY SERVER STARTED (MongoDB)");
+        console.log("        NEPPLAY SERVER STARTED (MongoDB + D1 + D3)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
         console.log("Admin: " + ADMIN_USERNAME);
