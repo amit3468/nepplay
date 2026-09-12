@@ -183,6 +183,42 @@ nav a:hover, nav a.active { color: #ff4438; }
     margin-top: 6px;
 }
 
+/* SCREENSHOT */
+.champion-screenshot {
+    margin: 18px 0;
+    background: #0d1118;
+    border: 1px solid #2d3a55;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+}
+.champion-screenshot-label {
+    font-size: 11px;
+    color: #ffd43b;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+}
+.champion-screenshot img {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.15s;
+    border: 1px solid #263244;
+}
+.champion-screenshot img:hover {
+    transform: scale(1.01);
+    border-color: #ffd43b;
+}
+.champion-screenshot-hint {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
 .champion-footer {
     display: flex;
     justify-content: space-between;
@@ -348,7 +384,6 @@ function loadWinners() {
 
 function updateStats() {
     var total = allWinners.length;
-
     var seen = {};
     var unique = 0;
     var prizeSum = 0;
@@ -411,19 +446,18 @@ function renderChampions() {
 
     var html = "";
     for (var i = 0; i < list.length; i++) {
-        html += renderCard(list[i]);
+        html += renderCard(list[i], i);
     }
     container.innerHTML = html;
 }
 
-function renderCard(w) {
+function renderCard(w, index) {
     var prize = (w.prizePool || 0) > 0
         ? '<div class="prize-info">Prize Pool: Rs. ' +
             Number(w.prizePool).toLocaleString("en-NP") +
           '</div>'
         : '<div class="prize-info">No prize pool</div>';
 
-    /* Champion captain link */
     var champCaptainHtml = "";
     if (w.championCaptain) {
         champCaptainHtml = 'Captain: <a href="player.html?username=' +
@@ -433,7 +467,6 @@ function renderCard(w) {
         champCaptainHtml = "&nbsp;";
     }
 
-    /* Runner-up captain link */
     var runCaptainHtml = "";
     if (w.runnerUpCaptain) {
         runCaptainHtml = 'Captain: <a href="player.html?username=' +
@@ -441,6 +474,17 @@ function renderCard(w) {
             esc(w.runnerUpCaptain) + '</a>';
     } else {
         runCaptainHtml = "&nbsp;";
+    }
+
+    /* Screenshot display */
+    var screenshotHtml = "";
+    if (w.screenshot) {
+        screenshotHtml =
+            '<div class="champion-screenshot">' +
+                '<div class="champion-screenshot-label">Final Match Result</div>' +
+                '<img src="' + esc(w.screenshot) + '" alt="Final match result" onclick="openChampionScreenshot(' + index + ')">' +
+                '<div class="champion-screenshot-hint">Click image to view full size</div>' +
+            '</div>';
     }
 
     return (
@@ -491,6 +535,8 @@ function renderCard(w) {
 
             '</div>' +
 
+            screenshotHtml +
+
             '<div class="champion-footer">' +
                 prize +
                 '<div class="winner-name-large">' +
@@ -500,6 +546,13 @@ function renderCard(w) {
 
         '</div>'
     );
+}
+
+function openChampionScreenshot(index) {
+    var w = allWinners[index];
+    if (!w || !w.screenshot) return;
+    var win = window.open("");
+    win.document.write('<html><head><title>' + esc(w.tournamentName || "Champion") + ' — Result</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + w.screenshot + '" alt="Result screenshot"></body></html>');
 }
 
 function changeGame(game, button) {
