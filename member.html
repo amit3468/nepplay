@@ -7,12 +7,10 @@
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: #080d18; color: white; min-height: 100vh;
 }
-
 .header {
     background: #0d1424; border-bottom: 1px solid #1d2a42;
     padding: 20px 6%;
@@ -110,14 +108,28 @@ body {
 .match-card.live { border-color: #ff3b30; }
 .match-card.upcoming { border-color: #1e3a5f; }
 .match-card.completed { border-color: #1e4030; opacity: 0.92; }
+
 .match-header {
     display: flex; align-items: flex-start; justify-content: space-between;
     gap: 15px; margin-bottom: 16px; flex-wrap: wrap;
 }
 .match-header-left { flex: 1; min-width: 200px; }
 .match-name { font-size: 19px; font-weight: bold; margin-bottom: 6px; word-break: break-word; }
+.match-name a {
+    color: white;
+    text-decoration: none;
+}
+.match-name a:hover { color: #ff4438; }
 .match-meta { color: #94a3b8; font-size: 13px; margin-top: 3px; }
 .match-meta span { margin-right: 12px; display: inline-block; }
+
+.tournament-link {
+    color: #b992ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.tournament-link:hover { text-decoration: underline; color: #d4b3ff; }
+
 .status-badge {
     padding: 6px 12px; border-radius: 20px;
     font-size: 11px; font-weight: bold;
@@ -162,7 +174,45 @@ body {
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* SCREENSHOT */
+/* TOP KILLER IN MEMBER MATCH CARD */
+.tk-match-row {
+    background: linear-gradient(135deg, #2a1408, #1a0e08);
+    border: 1px solid #ff9f43;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.tk-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9f43, #ff6b00);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; color: #0d111b;
+    flex-shrink: 0;
+}
+.tk-content { flex: 1; }
+.tk-label {
+    font-size: 9px;
+    color: #ffb84d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+.tk-team {
+    color: #ff9f43;
+    font-weight: bold;
+    font-size: 13px;
+}
+.tk-kills {
+    color: white;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
 .match-screenshot {
     margin: 16px 0;
     background: #0d1118;
@@ -172,35 +222,25 @@ body {
     text-align: center;
 }
 .match-screenshot-label {
-    font-size: 11px;
-    color: #7db7ff;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
+    font-size: 11px; color: #7db7ff;
+    font-weight: bold; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 10px;
 }
 .match-screenshot img {
-    max-width: 100%;
-    max-height: 400px;
-    border-radius: 8px;
-    cursor: pointer;
+    max-width: 100%; max-height: 400px;
+    border-radius: 8px; cursor: pointer;
     display: inline-block;
     transition: transform 0.15s;
 }
-.match-screenshot img:hover {
-    transform: scale(1.02);
-}
+.match-screenshot img:hover { transform: scale(1.02); }
 .match-screenshot-hint {
-    color: #64748b;
-    font-size: 11px;
-    margin-top: 8px;
+    color: #64748b; font-size: 11px; margin-top: 8px;
 }
 
 .join-panel {
     background: linear-gradient(135deg, #0b1a2e, #0d1118);
     border: 2px solid #3b82f6;
-    border-radius: 14px;
-    padding: 20px; margin-top: 16px;
+    border-radius: 14px; padding: 20px; margin-top: 16px;
 }
 .join-panel.live {
     border-color: #ff3b30;
@@ -342,6 +382,8 @@ body {
     gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
 }
 .reg-tournament { font-size: 17px; font-weight: bold; word-break: break-word; }
+.reg-tournament a { color: white; text-decoration: none; }
+.reg-tournament a:hover { color: #ff4438; }
 .reg-info { color: #aeb7c7; margin: 5px 0; font-size: 13px; line-height: 1.5; }
 .reg-info strong { color: white; }
 .reg-info a { color: #ff4438; text-decoration: none; }
@@ -732,6 +774,15 @@ function openGame(gameName) {
     catch (e) { showToast("Please open " + scheme.fallbackName + " manually.", true); }
 }
 
+/* Tournament page link helper */
+function tournamentLink(m) {
+    var tid = (m.tournament && m.tournament.id) || m.tournamentId || "";
+    var tname = (m.tournament && m.tournament.name) || m.tournamentName || "";
+    var key = tid || tname;
+    if (!key) return "";
+    return "tournament.html?id=" + encodeURIComponent(key);
+}
+
 function dismissAnnouncement() {
     document.getElementById("announcementAlert").classList.remove("show");
     try { localStorage.setItem("nepplay_ann_dismissed", String(Date.now())); }
@@ -942,6 +993,7 @@ function renderRegistrations(regs) {
         var status = String(r.status || "Pending");
         var s = status.toLowerCase();
         var cls = s === "approved" ? "approved" : s === "rejected" ? "rejected" : "pending";
+
         var captainHtml = "-";
         if (r.captainName) {
             captainHtml = '<a href="player.html?username=' +
@@ -949,10 +1001,19 @@ function renderRegistrations(regs) {
                 esc(r.captainName) + '</a>';
         }
 
+        /* Tournament page link for registration */
+        var regTourneyKey = r.tournamentId || r.tournamentName || "";
+        var tourneyNameHtml = esc(r.tournamentName || "Tournament");
+        if (regTourneyKey) {
+            tourneyNameHtml = '<a href="tournament.html?id=' +
+                encodeURIComponent(regTourneyKey) + '">' +
+                esc(r.tournamentName || "Tournament") + '</a>';
+        }
+
         html +=
             '<div class="reg-card">' +
                 '<div class="reg-header">' +
-                    '<div class="reg-tournament">' + esc(r.tournamentName || "Tournament") + '</div>' +
+                    '<div class="reg-tournament">' + tourneyNameHtml + '</div>' +
                     '<span class="reg-status ' + cls + '">' + esc(status) + '</span>' +
                 '</div>' +
                 '<div class="reg-info">Game: <strong>' + esc(r.game || "-") + '</strong></div>' +
@@ -1022,6 +1083,19 @@ function renderMatchCard(m) {
     var matchType = String(m.matchType || "1v1").toLowerCase();
     var isBR = matchType === "battle-royale";
 
+    /* Tournament link */
+    var tLink = tournamentLink(m);
+    var matchNameHtml = esc(m.result || m.name || "Match");
+    if (tLink) {
+        matchNameHtml = '<a href="' + esc(tLink) + '">' + matchNameHtml + '</a>';
+    }
+
+    /* Tournament name link */
+    var tourneyNameHtml = esc(tournamentName);
+    if (tLink) {
+        tourneyNameHtml = '<a href="' + esc(tLink) + '" class="tournament-link">' + esc(tournamentName) + '</a>';
+    }
+
     var teamsHtml = "";
     if (isBR) {
         var winners = Array.isArray(m.winners) ? m.winners : [];
@@ -1051,7 +1125,20 @@ function renderMatchCard(m) {
             '</div>';
     }
 
-    /* Screenshot display */
+    /* Top Killer row */
+    var tkHtml = "";
+    if (m.topKiller) {
+        tkHtml = '<div class="tk-match-row">' +
+            '<div class="tk-icon">TK</div>' +
+            '<div class="tk-content">' +
+                '<div class="tk-label">Top Killer</div>' +
+                '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
+            '</div>' +
+            '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+        '</div>';
+    }
+
+    /* Screenshot */
     var screenshotHtml = "";
     if (m.screenshot && isCompletedStatus(cls)) {
         var escapedId = esc(m.id);
@@ -1137,10 +1224,10 @@ function renderMatchCard(m) {
         '<div class="' + cardClass + '">' +
             '<div class="match-header">' +
                 '<div class="match-header-left">' +
-                    '<div class="match-name">' + esc(m.result || m.name || "Match") + '</div>' +
+                    '<div class="match-name">' + matchNameHtml + '</div>' +
                     '<div class="match-meta">' +
                         '<span>Game: ' + esc(game) + '</span>' +
-                        '<span>Tournament: ' + esc(tournamentName) + '</span>' +
+                        '<span>Tournament: ' + tourneyNameHtml + '</span>' +
                     '</div>' +
                     '<div class="match-meta">' +
                         '<span>Date: ' + esc(formatDate(m.date)) + '</span>' +
@@ -1151,6 +1238,7 @@ function renderMatchCard(m) {
                 '<span class="status-badge ' + cls + '">' + esc(status) + '</span>' +
             '</div>' +
             teamsHtml +
+            tkHtml +
             screenshotHtml +
             joinHtml +
             winnerHtml +
@@ -1163,7 +1251,6 @@ function isCompletedStatus(s) {
 }
 
 function openScreenshot(matchId) {
-    var matches = [];
     fetch("/api/member/matches", { credentials: "include", cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -1211,6 +1298,18 @@ function renderHistory(matches) {
         var matchType = String(m.matchType || "1v1").toLowerCase();
         var isBR = matchType === "battle-royale";
 
+        /* Tournament link */
+        var tLink = tournamentLink(m);
+        var matchNameHtml = esc(m.result || m.name || "Match");
+        if (tLink) {
+            matchNameHtml = '<a href="' + esc(tLink) + '">' + matchNameHtml + '</a>';
+        }
+
+        var tourneyNameHtml = esc(m.tournamentName || "-");
+        if (tLink) {
+            tourneyNameHtml = '<a href="' + esc(tLink) + '" class="tournament-link">' + esc(m.tournamentName || "-") + '</a>';
+        }
+
         var teamsHtml = "";
         if (isBR) {
             var winners = Array.isArray(m.winners) ? m.winners : [];
@@ -1236,6 +1335,19 @@ function renderHistory(matches) {
                 '</div>';
         }
 
+        /* Top Killer row for history */
+        var tkHtml = "";
+        if (m.topKiller) {
+            tkHtml = '<div class="tk-match-row">' +
+                '<div class="tk-icon">TK</div>' +
+                '<div class="tk-content">' +
+                    '<div class="tk-label">Top Killer</div>' +
+                    '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
+                '</div>' +
+                '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+            '</div>';
+        }
+
         var screenshotHtml = "";
         if (m.screenshot) {
             var escapedId = esc(m.id);
@@ -1243,7 +1355,6 @@ function renderHistory(matches) {
                 '<div class="match-screenshot">' +
                     '<div class="match-screenshot-label">Result Screenshot</div>' +
                     '<img src="' + esc(m.screenshot) + '" alt="Match result screenshot" onclick="openScreenshot(\'' + escapedId + '\')">' +
-                    '<div class="match-screenshot-hint">Click image to view full size</div>' +
                 '</div>';
         }
 
@@ -1259,10 +1370,10 @@ function renderHistory(matches) {
             '<div class="match-card completed">' +
                 '<div class="match-header">' +
                     '<div class="match-header-left">' +
-                        '<div class="match-name">' + esc(m.result || m.name || "Match") + '</div>' +
+                        '<div class="match-name">' + matchNameHtml + '</div>' +
                         '<div class="match-meta">' +
                             '<span>Game: ' + esc(m.game || "-") + '</span>' +
-                            '<span>Tournament: ' + esc(m.tournamentName || "-") + '</span>' +
+                            '<span>Tournament: ' + tourneyNameHtml + '</span>' +
                         '</div>' +
                         '<div class="match-meta">' +
                             '<span>Date: ' + esc(formatDate(m.date)) + '</span>' +
@@ -1271,6 +1382,7 @@ function renderHistory(matches) {
                     '<span class="status-badge completed">Completed</span>' +
                 '</div>' +
                 teamsHtml +
+                tkHtml +
                 screenshotHtml +
                 winnerHtml +
             '</div>';
