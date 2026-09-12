@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEPPLAY - Player Profile</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #080b12;
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    background: #0d111b;
+    border-bottom: 1px solid #202634;
+    padding: 18px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
+.logo span { color: #ff3b30; }
+nav { display: flex; align-items: center; gap: 28px; }
+nav a {
+    color: #c7ccd7; text-decoration: none;
+    font-size: 15px; font-weight: 600;
+}
+nav a:hover, nav a.active { color: #ff4438; }
+.login-btn {
+    background: #ff3b30; color: white !important;
+    padding: 10px 20px; border-radius: 7px;
+}
+
+.container {
+    width: 88%; max-width: 1000px;
+    margin: 30px auto 60px;
+}
+
+/* HERO CARD */
+.profile-hero {
+    background: linear-gradient(135deg, #1a0e2d, #111621);
+    border: 1px solid #5935a9;
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.avatar {
+    width: 90px; height: 90px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ff3b30, #b91c1c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 900;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(255, 59, 48, 0.4);
+}
+
+.profile-info { flex: 1; min-width: 200px; }
+.profile-info h1 {
+    font-size: 30px;
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+.profile-meta {
+    color: #9299a8;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.profile-meta span {
+    margin-right: 16px;
+    display: inline-block;
+}
+
+.profile-rank-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: #1a2233;
+    border: 1px solid #2d3a55;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffd43b;
+}
+
+/* STATS GRID */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.stat-box {
+    background: #111621;
+    border: 1px solid #242b39;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.stat-value.points { color: #ff4438; }
+.stat-value.wins { color: #5bed8e; }
+.stat-value.losses { color: #ff7d76; }
+.stat-value.winrate { color: #7db7ff; }
+
+.stat-label {
+    color: #7d8a9f;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+/* SECTION */
+.section {
+    background: #111621;
+    border: 1px solid #242b39;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+.section h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* TEAMS */
+.teams-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.team-chip {
+    background: #1a2233;
+    border: 1px solid #2d3a55;
+    color: #a8b6d1;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* CHAMPIONSHIPS */
+.champ-card {
+    background: linear-gradient(135deg, #1a1608, #111621);
+    border: 1px solid #ffd43b;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.champ-info { flex: 1; min-width: 180px; }
+.champ-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffd43b;
+    margin-bottom: 4px;
+}
+.champ-sub {
+    color: #9299a8;
+    font-size: 12px;
+}
+.champ-prize {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffd43b;
+}
+
+/* MATCH HISTORY */
+.match-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #0b1220;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+    margin-bottom: 8px;
+}
+.match-row.win { border-left: 3px solid #5bed8e; }
+.match-row.loss { border-left: 3px solid #ff7d76; }
+.match-row.tie { border-left: 3px solid #ffd75a; }
+.match-row.top3 { border-left: 3px solid #c084fc; }
+
+.match-info { flex: 1; min-width: 0; }
+.match-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 3px;
+    word-break: break-word;
+}
+.match-meta {
+    color: #7d8a9f;
+    font-size: 12px;
+}
+.match-result {
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+}
+.result-win { background: rgba(91,237,142,0.15); color: #5bed8e; }
+.result-loss { background: rgba(255,125,118,0.15); color: #ff7d76; }
+.result-tie { background: rgba(255,215,90,0.15); color: #ffd75a; }
+.result-top3 { background: rgba(192,132,252,0.15); color: #c084fc; }
+
+/* EMPTY */
+.empty {
+    text-align: center;
+    color: #7d8a9f;
+    font-size: 14px;
+    padding: 24px 12px;
+    border: 1px dashed #2d3a55;
+    border-radius: 10px;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8993a2;
+}
+.spinner {
+    display: inline-block;
+    width: 32px; height: 32px;
+    border: 3px solid #242b39;
+    border-top-color: #ff3b30;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+footer {
+    border-top: 1px solid #202634;
+    text-align: center;
+    padding: 25px;
+    color: #717887;
+    font-size: 13px;
+    margin-top: 40px;
+}
+
+@media (max-width: 750px) {
+    header { flex-direction: column; gap: 15px; }
+    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .profile-hero { flex-direction: column; text-align: center; }
+    .profile-info h1 { font-size: 24px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">NEP<span>PLAY</span></div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="tournaments.html">Tournaments</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="teams.html">Teams</a>
+        <a href="winners.html">Winners</a>
+        <a href="login.html" class="login-btn">Login</a>
+    </nav>
+</header>
+
+<div class="container" id="container">
+    <div class="loading">
+        <div class="spinner"></div>
+        <div>Loading player profile...</div>
+    </div>
+</div>
+
+<footer>
+    © 2026 NEPPLAY — Nepal Gaming Community
+</footer>
+
+<script>
+var params = new URLSearchParams(window.location.search);
+var username = params.get("username") || params.get("user") || "";
+
+function esc(v) {
+    if (v === undefined || v === null) return "";
+    return String(v)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function initials(name) {
+    var parts = String(name || "?").trim().split(/\s+/).filter(function (w) { return w; });
+    if (parts.length === 0) return "?";
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function formatDate(value) {
+    if (!value) return "—";
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+    return d.toLocaleDateString("en-NP", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function showError(msg) {
+    document.getElementById("container").innerHTML =
+        '<div class="section"><div class="empty">' + esc(msg) + '</div></div>';
+}
+
+function renderProfile(p) {
+
+    var stat = p.stats || {};
+
+    var html =
+        '<div class="profile-hero">' +
+            '<div class="avatar">' + esc(initials(p.username)) + '</div>' +
+            '<div class="profile-info">' +
+                '<h1>' + esc(p.username) + '</h1>' +
+                '<div class="profile-meta">' +
+                    '<span>Member since: ' + esc(formatDate(p.memberSince)) + '</span>' +
+                    '<span>Tournaments: ' + (stat.tournamentsEntered || 0) + '</span>' +
+                '</div>' +
+                (stat.championships > 0
+                    ? '<span class="profile-rank-badge">' + stat.championships + 'x Champion</span>'
+                    : '') +
+            '</div>' +
+        '</div>' +
+
+        '<div class="stats-grid">' +
+            '<div class="stat-box">' +
+                '<div class="stat-value wins">' + (stat.wins || 0) + '</div>' +
+                '<div class="stat-label">Wins</div>' +
+            '</div>' +
+            '<div class="stat-box">' +
+                '<div class="stat-value losses">' + (stat.losses || 0) + '</div>' +
+                '<div class="stat-label">Losses</div>' +
+            '</div>' +
+            '<div class="stat-box">' +
+                '<div class="stat-value winrate">' + (stat.winRate || 0) + '%</div>' +
+                '<div class="stat-label">Win Rate</div>' +
+            '</div>' +
+            '<div class="stat-box">' +
+                '<div class="stat-value points">' + (stat.points || 0) + '</div>' +
+                '<div class="stat-label">Points</div>' +
+            '</div>' +
+        '</div>';
+
+    /* Teams */
+    if (p.teams && p.teams.length > 0) {
+        html += '<div class="section">' +
+            '<h2>Teams</h2>' +
+            '<div class="teams-list">' +
+                p.teams.map(function (t) {
+                    return '<span class="team-chip">' + esc(t) + '</span>';
+                }).join("") +
+            '</div>' +
+        '</div>';
+    }
+
+    /* Championships */
+    if (p.championships && p.championships.length > 0) {
+        html += '<div class="section">' +
+            '<h2>Championships</h2>' +
+            p.championships.map(function (c) {
+                return '<div class="champ-card">' +
+                    '<div class="champ-info">' +
+                        '<div class="champ-title">' + esc(c.tournamentName) + '</div>' +
+                        '<div class="champ-sub">' +
+                            esc(c.game || "") + ' • ' +
+                            esc(formatDate(c.date)) +
+                        '</div>' +
+                    '</div>' +
+                    (c.prizePool > 0
+                        ? '<div class="champ-prize">Rs. ' + Number(c.prizePool).toLocaleString("en-NP") + '</div>'
+                        : '') +
+                '</div>';
+            }).join("") +
+        '</div>';
+    }
+
+    /* Match History */
+    html += '<div class="section">' +
+        '<h2>Recent Matches</h2>';
+
+    if (p.matchHistory && p.matchHistory.length > 0) {
+        html += p.matchHistory.map(function (m) {
+            var cls = "match-row";
+            var label = "COMPLETED";
+            var labelCls = "result-tie";
+
+            if (m.result === "WIN") {
+                cls += " win"; label = "WIN"; labelCls = "result-win";
+            } else if (m.result === "LOSS") {
+                cls += " loss"; label = "LOSS"; labelCls = "result-loss";
+            } else if (m.result === "TIE") {
+                cls += " tie"; label = "TIE"; labelCls = "result-tie";
+            } else if (m.result === "TOP 3") {
+                cls += " top3"; label = "TOP 3"; labelCls = "result-top3";
+            }
+
+            var opponent = "";
+            if (m.matchType === "battle-royale") {
+                opponent = "Battle Royale";
+            } else {
+                opponent = m.team1 + " vs " + m.team2;
+            }
+
+            return '<div class="' + cls + '">' +
+                '<div class="match-info">' +
+                    '<div class="match-name">' + esc(m.name) + '</div>' +
+                    '<div class="match-meta">' +
+                        esc(m.tournament) + ' • ' + esc(m.game) + ' • ' + esc(formatDate(m.date)) +
+                    '</div>' +
+                '</div>' +
+                '<span class="match-result ' + labelCls + '">' + esc(label) + '</span>' +
+            '</div>';
+        }).join("");
+    } else {
+        html += '<div class="empty">No completed matches yet.</div>';
+    }
+
+    html += '</div>';
+
+    document.getElementById("container").innerHTML = html;
+}
+
+if (!username) {
+    showError("No player specified. Add ?username=XXX to the URL.");
+} else {
+    fetch("/api/player?username=" + encodeURIComponent(username), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (!data.success || !data.player) {
+                showError("Player not found: " + username);
+                return;
+            }
+            renderProfile(data.player);
+        })
+        .catch(function (err) {
+            showError("Could not load profile: " + err.message);
+        });
+}
+</script>
+
+</body>
+</html>
