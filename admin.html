@@ -14,7 +14,6 @@ body {
 button, input, select, textarea { font-family: inherit; }
 .hidden { display: none !important; }
 
-/* LOGIN */
 .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .login-box {
     width: 100%; max-width: 420px; background: #101827;
@@ -45,7 +44,6 @@ button, input, select, textarea { font-family: inherit; }
     color: #ffaaa5; padding: 12px; border-radius: 8px; font-size: 13px;
 }
 
-/* LAYOUT */
 .admin-page { min-height: 100vh; }
 .topbar {
     height: 70px; display: flex; align-items: center;
@@ -67,7 +65,6 @@ button, input, select, textarea { font-family: inherit; }
 .logout-btn:hover { background: #ff3b30; color: white; }
 .container { width: 94%; max-width: 1400px; margin: 25px auto 60px; }
 
-/* TABS */
 .tabs {
     display: flex; gap: 8px; margin-bottom: 22px;
     border-bottom: 1px solid #1e293b; overflow-x: auto;
@@ -83,7 +80,6 @@ button, input, select, textarea { font-family: inherit; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* STATS */
 .stats {
     display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 15px; margin-bottom: 22px;
@@ -103,7 +99,6 @@ button, input, select, textarea { font-family: inherit; }
 .stat-red .stat-value { color: #ff7d76; }
 .stat-purple .stat-value { color: #c084fc; }
 
-/* SECTION */
 .section {
     background: #101827; border: 1px solid #263244;
     border-radius: 12px; margin-bottom: 22px; overflow: hidden;
@@ -134,8 +129,14 @@ button, input, select, textarea { font-family: inherit; }
     cursor: pointer; font-size: 13px;
 }
 .secondary-btn:hover { background: #334155; }
+.danger-btn {
+    background: #3a1212; color: #ff817a;
+    border: 1px solid #762929; border-radius: 8px;
+    padding: 9px 14px; font-weight: bold;
+    cursor: pointer; font-size: 13px;
+}
+.danger-btn:hover { background: #4a1717; }
 
-/* TABLE */
 .table-wrap { width: 100%; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 800px; }
 th, td {
@@ -148,7 +149,6 @@ th {
 }
 tr:last-child td { border-bottom: 0; }
 
-/* BADGES */
 .badge {
     display: inline-block; padding: 5px 10px;
     border-radius: 20px; font-size: 11px; font-weight: bold;
@@ -164,8 +164,9 @@ tr:last-child td { border-bottom: 0; }
 .badge-br { background: #3a2a09; color: #ffd75a; }
 .badge-1v1 { background: #172b4a; color: #7db7ff; }
 .badge-screenshot { background: #0c3621; color: #5bed8e; }
+.badge-enabled { background: #0c3621; color: #5bed8e; }
+.badge-disabled { background: #3a1212; color: #ff7d76; }
 
-/* ACTIONS */
 .action-row { display: flex; gap: 5px; flex-wrap: wrap; }
 .action-btn {
     border: 1px solid #333d4b; background: #171e28;
@@ -185,7 +186,6 @@ tr:last-child td { border-bottom: 0; }
 .delete-btn { border-color: #991b1b; color: #ff817a; }
 .delete-btn:hover { background: #3a1212; }
 
-/* MATCH CARDS */
 .match-list { display: grid; gap: 14px; padding: 16px; }
 .match-card {
     background: #0b1220; border: 1px solid #263244;
@@ -211,7 +211,6 @@ tr:last-child td { border-bottom: 0; }
 .match-score { font-size: 22px; font-weight: bold; color: #ff3b30; }
 .match-vs { text-align: center; color: #64748b; font-weight: bold; font-size: 13px; }
 
-/* BR PODIUM */
 .br-winners { display: grid; gap: 8px; margin: 12px 0; }
 .br-winner-row {
     display: flex; align-items: center; gap: 12px;
@@ -233,7 +232,6 @@ tr:last-child td { border-bottom: 0; }
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* SCREENSHOT THUMB */
 .match-screenshot-thumb {
     margin: 12px 0;
     border-radius: 8px;
@@ -248,7 +246,6 @@ tr:last-child td { border-bottom: 0; }
     cursor: pointer;
 }
 
-/* INFO GRID */
 .match-info {
     display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 8px; margin-top: 12px;
@@ -268,6 +265,181 @@ tr:last-child td { border-bottom: 0; }
     margin-top: 12px; padding-top: 12px;
     border-top: 1px solid #1e293b; flex-wrap: wrap;
 }
+
+/* PAYMENT METHOD CARDS */
+.payment-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    padding: 16px;
+}
+.payment-card {
+    background: #0b1220;
+    border: 1px solid #263244;
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+}
+.payment-card.disabled {
+    opacity: 0.6;
+    border-style: dashed;
+}
+.payment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.payment-card-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+}
+.payment-card-id {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    font-family: 'Courier New', monospace;
+}
+.payment-qr-preview {
+    width: 100px;
+    height: 100px;
+    background: #0d1118;
+    border: 1px solid #263244;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.payment-qr-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: white;
+}
+.payment-qr-empty {
+    color: #475569;
+    font-size: 11px;
+    text-align: center;
+    padding: 8px;
+}
+.payment-field {
+    margin-bottom: 10px;
+}
+.payment-field-label {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+.payment-field-value {
+    color: #cbd5e1;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+.payment-card-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #1e293b;
+    flex-wrap: wrap;
+}
+
+/* PAYMENT EDITOR MODAL */
+.payment-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+.payment-qr-upload {
+    background: #0b1220;
+    border: 2px dashed #334155;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s;
+}
+.payment-qr-upload:hover {
+    border-color: #ff3b30;
+    background: #171e28;
+}
+.payment-qr-upload.has-image {
+    border-style: solid;
+    border-color: #176b3c;
+    padding: 12px;
+    cursor: default;
+}
+.payment-qr-upload-hint {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.payment-qr-upload-hint strong {
+    color: #ff4438;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+.payment-qr-preview-img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+    background: white;
+    padding: 8px;
+}
+.payment-qr-remove {
+    display: inline-block;
+    margin-top: 10px;
+    background: #3a1212;
+    color: #ff817a;
+    border: 1px solid #762929;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.payment-qr-remove:hover { background: #4a1717; }
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+.toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: #334155;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+.toggle-switch.on { background: #16a34a; }
+.toggle-switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+.toggle-switch.on::after { left: 22px; }
+.toggle-label { color: #cbd5e1; font-size: 13px; }
 
 /* MODAL */
 .modal {
@@ -321,7 +493,6 @@ tr:last-child td { border-bottom: 0; }
     padding-top: 16px; border-top: 1px solid #1e293b;
 }
 
-/* MATCH TYPE SELECTOR */
 .match-type-selector {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; grid-column: 1 / -1;
@@ -340,7 +511,6 @@ tr:last-child td { border-bottom: 0; }
 .match-type-option-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
 .match-type-option-desc { color: #94a3b8; font-size: 11px; line-height: 1.4; }
 
-/* WINNERS PICKER */
 .winners-picker { display: grid; gap: 8px; }
 .winner-slot {
     display: flex; align-items: center; gap: 10px;
@@ -357,7 +527,6 @@ tr:last-child td { border-bottom: 0; }
 }
 .winner-slot select:focus { border-color: #ff3b30; }
 
-/* SCREENSHOT UPLOAD */
 .screenshot-upload-area {
     background: #0b1220;
     border: 2px dashed #334155;
@@ -366,7 +535,6 @@ tr:last-child td { border-bottom: 0; }
     text-align: center;
     cursor: pointer;
     transition: 0.15s;
-    position: relative;
 }
 .screenshot-upload-area:hover {
     border-color: #ff3b30;
@@ -415,7 +583,6 @@ tr:last-child td { border-bottom: 0; }
     margin-top: 8px;
 }
 
-/* TOAST */
 .toast {
     position: fixed; right: 20px; bottom: 20px;
     background: #172033; border: 1px solid #334155;
@@ -487,6 +654,7 @@ tr:last-child td { border-bottom: 0; }
             <button class="tab-btn active" data-tab="registrations" onclick="switchTab('registrations')">📋 Registrations</button>
             <button class="tab-btn" data-tab="matches" onclick="switchTab('matches')">🎮 Matches</button>
             <button class="tab-btn" data-tab="tournaments" onclick="switchTab('tournaments')">🏆 Tournaments</button>
+            <button class="tab-btn" data-tab="payments" onclick="switchTab('payments')">💳 Payments</button>
             <button class="tab-btn" data-tab="announcements" onclick="switchTab('announcements')">📢 Announcements</button>
         </div>
 
@@ -570,6 +738,27 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
+        <div id="tab-payments" class="tab-content">
+            <div class="stats">
+                <div class="stat stat-blue"><div class="stat-label">Total Methods</div><div class="stat-value" id="totalPaymentMethods">0</div></div>
+                <div class="stat stat-green"><div class="stat-label">Enabled</div><div class="stat-value" id="enabledPaymentMethods">0</div></div>
+                <div class="stat stat-yellow"><div class="stat-label">QR Codes</div><div class="stat-value" id="qrPaymentMethods">0</div></div>
+                <div class="stat stat-red"><div class="stat-label">Disabled</div><div class="stat-value" id="disabledPaymentMethods">0</div></div>
+            </div>
+            <section class="section">
+                <div class="section-header">
+                    <h2>Payment Methods</h2>
+                    <div class="section-actions">
+                        <button class="secondary-btn" onclick="loadPaymentMethods()">Refresh</button>
+                        <button class="primary-btn" onclick="openAddPayment()">+ Add Payment Method</button>
+                    </div>
+                </div>
+                <div id="paymentList" class="payment-list">
+                    <div class="loading">Loading payment methods...</div>
+                </div>
+            </section>
+        </div>
+
         <div id="tab-announcements" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalAnnouncements">0</div></div>
@@ -594,7 +783,7 @@ tr:last-child td { border-bottom: 0; }
     </main>
 </div>
 
-<!-- ============ MATCH MODAL ============ -->
+<!-- MATCH MODAL -->
 <div id="matchModal" class="modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -603,7 +792,6 @@ tr:last-child td { border-bottom: 0; }
         </div>
         <form id="matchForm" onsubmit="saveMatch(event)">
             <div class="form-grid">
-
                 <div class="form-group full">
                     <label>Match Type</label>
                     <div class="match-type-selector">
@@ -619,32 +807,24 @@ tr:last-child td { border-bottom: 0; }
                         </div>
                     </div>
                 </div>
-
                 <div class="form-group full">
                     <label>Tournament</label>
                     <select id="matchTournament" required>
                         <option value="">Select tournament</option>
                     </select>
-                    <div class="form-help" id="matchTournamentHelp">Only tournaments are listed here.</div>
                 </div>
-
                 <div class="form-group full">
                     <label>Match Name</label>
                     <input type="text" id="matchName" placeholder="Example: Semi Final 1 / Grand Final" required>
                 </div>
-
                 <div class="form-group" id="teamAField">
                     <label>Team A</label>
                     <select id="matchTeamA"><option value="">Select Team A</option></select>
-                    <div class="form-help" id="teamAHelp">Only approved teams appear here.</div>
                 </div>
-
                 <div class="form-group" id="teamBField">
                     <label>Team B</label>
                     <select id="matchTeamB"><option value="">Select Team B</option></select>
-                    <div class="form-help" id="teamBHelp">Only approved teams appear here.</div>
                 </div>
-
                 <div class="form-group full" id="brWinnersField" style="display:none;">
                     <label>Top 3 Winners (Battle Royale)</label>
                     <div class="winners-picker">
@@ -661,29 +841,23 @@ tr:last-child td { border-bottom: 0; }
                             <select id="matchWinner3"><option value="">Select 3rd place team</option></select>
                         </div>
                     </div>
-                    <div class="form-help">Leave empty if match not completed yet. Points: 1st = 3, 2nd = 2, 3rd = 1.</div>
                 </div>
-
                 <div class="form-group">
                     <label>Match Date</label>
                     <input type="date" id="matchDate" required>
                 </div>
-
                 <div class="form-group">
                     <label>Match Time</label>
                     <input type="time" id="matchTime" required>
                 </div>
-
                 <div class="form-group">
                     <label>Room ID</label>
                     <input type="text" id="matchRoomId" placeholder="Room ID">
                 </div>
-
                 <div class="form-group">
                     <label>Room Password</label>
                     <input type="text" id="matchRoomPassword" placeholder="Room password">
                 </div>
-
                 <div class="form-group">
                     <label>Status</label>
                     <select id="matchStatus">
@@ -693,41 +867,33 @@ tr:last-child td { border-bottom: 0; }
                         <option value="Cancelled">Cancelled</option>
                     </select>
                 </div>
-
                 <div class="form-group" id="winnerField">
                     <label>Winner</label>
                     <select id="matchWinner"><option value="">Not decided</option></select>
                 </div>
-
                 <div class="form-group" id="scoreAField">
                     <label>Team A Score</label>
                     <input type="number" id="matchScoreA" min="0" value="0">
                 </div>
-
                 <div class="form-group" id="scoreBField">
                     <label>Team B Score</label>
                     <input type="number" id="matchScoreB" min="0" value="0">
                 </div>
-
-                <!-- SCREENSHOT UPLOAD -->
                 <div class="form-group full">
                     <label>Result Screenshot (optional)</label>
                     <div class="screenshot-upload-area" id="screenshotArea" onclick="triggerScreenshotUpload()">
                         <input type="file" id="screenshotInput" accept="image/*" style="display:none;" onchange="handleScreenshotSelect(event)">
                         <div id="screenshotUploadHint" class="screenshot-upload-hint">
                             <strong>Click to upload result screenshot</strong>
-                            Free Fire / PUBG results screen showing winners<br>
-                            <span style="font-size:11px;color:#64748b;">Max 5MB - will be compressed automatically</span>
+                            Max 5MB - will be compressed automatically
                         </div>
                         <div id="screenshotPreview" style="display:none;">
                             <img id="screenshotPreviewImg" class="screenshot-preview" alt="Screenshot preview">
-                            <button type="button" class="screenshot-remove-btn" onclick="removeScreenshot(event)">Remove Screenshot</button>
+                            <button type="button" class="screenshot-remove-btn" onclick="removeScreenshot(event)">Remove</button>
                         </div>
                         <div id="screenshotLoading" class="screenshot-loading" style="display:none;">Processing image...</div>
                     </div>
-                    <div class="form-help">Screenshot is public proof of match result. Shown on member dashboards.</div>
                 </div>
-
                 <div class="form-group full">
                     <label>Notes</label>
                     <textarea id="matchNotes" placeholder="Optional notes"></textarea>
@@ -741,7 +907,7 @@ tr:last-child td { border-bottom: 0; }
     </div>
 </div>
 
-<!-- ============ TOURNAMENT MODAL ============ -->
+<!-- TOURNAMENT MODAL -->
 <div id="tournamentModal" class="modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -806,7 +972,62 @@ tr:last-child td { border-bottom: 0; }
     </div>
 </div>
 
-<!-- ============ ANNOUNCEMENT MODAL ============ -->
+<!-- PAYMENT MODAL -->
+<div id="paymentModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 id="paymentModalTitle">Add Payment Method</h2>
+            <button class="close-btn" onclick="closePaymentModal()">×</button>
+        </div>
+        <form id="paymentForm" onsubmit="savePayment(event)">
+            <div class="payment-editor-grid">
+                <div class="form-group">
+                    <label>Method Name</label>
+                    <input type="text" id="paymentName" placeholder="eSewa / Khalti / IME Pay / Bank" required>
+                    <div class="form-help">Display name shown to members.</div>
+                </div>
+                <div class="form-group">
+                    <label>Wallet Number / Account</label>
+                    <input type="text" id="paymentNumber" placeholder="98XXXXXXXX">
+                    <div class="form-help">The number members send money to.</div>
+                </div>
+                <div class="form-group">
+                    <label>Internal ID</label>
+                    <input type="text" id="paymentId" placeholder="esewa, khalti, imepay, bank">
+                    <div class="form-help">Lowercase, no spaces. Used internally.</div>
+                </div>
+                <div class="form-group">
+                    <label>Instructions (optional)</label>
+                    <textarea id="paymentInstructions" placeholder="How to pay using this method" style="min-height: 60px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>QR Code Image (optional)</label>
+                    <div class="payment-qr-upload" id="paymentQrArea" onclick="triggerPaymentQrUpload()">
+                        <input type="file" id="paymentQrInput" accept="image/*" style="display:none;" onchange="handlePaymentQrSelect(event)">
+                        <div id="paymentQrHint" class="payment-qr-upload-hint">
+                            <strong>Click to upload QR code</strong>
+                            PNG or JPG - Max 1MB
+                        </div>
+                        <div id="paymentQrPreview" style="display:none;">
+                            <img id="paymentQrPreviewImg" class="payment-qr-preview-img" alt="QR preview">
+                            <button type="button" class="payment-qr-remove" onclick="removePaymentQr(event)">Remove QR</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-switch on" id="paymentEnabledToggle" onclick="togglePaymentEnabled()"></div>
+                    <div class="toggle-label">Enabled (shown to members during registration)</div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="secondary-btn" onclick="closePaymentModal()">Cancel</button>
+                <button type="submit" class="primary-btn" id="savePaymentBtn">Save Method</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ANNOUNCEMENT MODAL -->
 <div id="announcementModal" class="modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -856,11 +1077,15 @@ var currentMatches = [];
 var currentTournaments = [];
 var currentApprovedTeams = [];
 var currentAnnouncements = [];
+var currentPaymentMethods = [];
 var editingMatchId = null;
 var editingTournamentId = null;
 var editingAnnouncementId = null;
+var editingPaymentId = null;
 var currentMatchType = "1v1";
 var currentScreenshot = "";
+var currentPaymentQr = "";
+var currentPaymentEnabled = true;
 
 function apiJSON(response) {
     return response.text().then(function (text) {
@@ -919,6 +1144,8 @@ function switchTab(name) {
     if (btn) btn.classList.add("active");
     var c = document.getElementById("tab-" + name);
     if (c) c.classList.add("active");
+
+    if (name === "payments") loadPaymentMethods();
 }
 
 function checkAdmin() {
@@ -1070,6 +1297,292 @@ function changeRegStatus(id, status) {
     .catch(function (error) { showToast(error.message || "Could not change.", "error"); });
 }
 
+/* ============== PAYMENTS ============== */
+
+function loadPaymentMethods() {
+    var container = document.getElementById("paymentList");
+    container.innerHTML = '<div class="loading">Loading payment methods...</div>';
+
+    return fetch("/api/admin/payment-settings", {
+        method: "GET", credentials: "same-origin", cache: "no-store"
+    })
+    .then(apiJSON)
+    .then(function (data) {
+        var methods = Array.isArray(data.methods) ? data.methods : [];
+        currentPaymentMethods = methods;
+        updatePaymentStats();
+        renderPaymentMethods();
+    })
+    .catch(function (error) {
+        container.innerHTML = '<div class="empty">Could not load: ' + esc(error.message) + '</div>';
+    });
+}
+
+function updatePaymentStats() {
+    var total = currentPaymentMethods.length;
+    var enabled = 0, withQr = 0, disabled = 0;
+    currentPaymentMethods.forEach(function (m) {
+        if (m.enabled !== false) enabled++; else disabled++;
+        if (m.qrImage) withQr++;
+    });
+    document.getElementById("totalPaymentMethods").textContent = total;
+    document.getElementById("enabledPaymentMethods").textContent = enabled;
+    document.getElementById("qrPaymentMethods").textContent = withQr;
+    document.getElementById("disabledPaymentMethods").textContent = disabled;
+}
+
+function renderPaymentMethods() {
+    var container = document.getElementById("paymentList");
+
+    if (currentPaymentMethods.length === 0) {
+        container.innerHTML = '<div class="empty">No payment methods yet. Click "+ Add Payment Method".</div>';
+        return;
+    }
+
+    container.innerHTML = currentPaymentMethods.map(function (m) {
+        var isEnabled = m.enabled !== false;
+        var cardClass = "payment-card" + (isEnabled ? "" : " disabled");
+        var badgeClass = isEnabled ? "badge-enabled" : "badge-disabled";
+        var badgeLabel = isEnabled ? "ENABLED" : "DISABLED";
+
+        var qrHtml = "";
+        if (m.qrImage) {
+            qrHtml = '<div class="payment-qr-preview">' +
+                '<img src="' + esc(m.qrImage) + '" alt="QR">' +
+            '</div>';
+        } else {
+            qrHtml = '<div class="payment-qr-preview">' +
+                '<div class="payment-qr-empty">No QR<br>uploaded</div>' +
+            '</div>';
+        }
+
+        var escapedId = esc(m.id);
+
+        return '<div class="' + cardClass + '">' +
+            '<div class="payment-card-header">' +
+                '<div>' +
+                    '<div class="payment-card-title">' + esc(m.name || "Unnamed") + '</div>' +
+                    '<div class="payment-card-id">ID: ' + escapedId + '</div>' +
+                    '<span class="badge ' + badgeClass + '" style="margin-top:6px;">' + badgeLabel + '</span>' +
+                '</div>' +
+                qrHtml +
+            '</div>' +
+            '<div class="payment-field">' +
+                '<div class="payment-field-label">Number / Account</div>' +
+                '<div class="payment-field-value">' + esc(m.number || "Not set") + '</div>' +
+            '</div>' +
+            (m.instructions
+                ? '<div class="payment-field"><div class="payment-field-label">Instructions</div><div style="color:#cbd5e1;font-size:12px;line-height:1.5;">' + esc(m.instructions) + '</div></div>'
+                : '') +
+            '<div class="payment-card-actions">' +
+                '<button class="action-btn edit-btn" onclick="openEditPayment(\'' + escapedId + '\')">Edit</button>' +
+                '<button class="action-btn ' + (isEnabled ? 'reject-btn' : 'approve-btn') + '" onclick="togglePaymentById(\'' + escapedId + '\')">' +
+                    (isEnabled ? 'Disable' : 'Enable') +
+                '</button>' +
+                '<button class="action-btn delete-btn" onclick="deletePaymentMethod(\'' + escapedId + '\')">Delete</button>' +
+            '</div>' +
+        '</div>';
+    }).join("");
+}
+
+function openAddPayment() {
+    editingPaymentId = null;
+    currentPaymentQr = "";
+    currentPaymentEnabled = true;
+    document.getElementById("paymentModalTitle").textContent = "Add Payment Method";
+    document.getElementById("paymentForm").reset();
+    document.getElementById("paymentId").disabled = false;
+    document.getElementById("paymentEnabledToggle").classList.add("on");
+    resetPaymentQrArea();
+    document.getElementById("paymentModal").classList.add("show");
+}
+
+function openEditPayment(id) {
+    var m = currentPaymentMethods.find(function (x) { return String(x.id) === String(id); });
+    if (!m) return;
+    editingPaymentId = id;
+    document.getElementById("paymentModalTitle").textContent = "Edit: " + m.name;
+    document.getElementById("paymentName").value = m.name || "";
+    document.getElementById("paymentNumber").value = m.number || "";
+    document.getElementById("paymentId").value = m.id || "";
+    document.getElementById("paymentId").disabled = true;
+    document.getElementById("paymentInstructions").value = m.instructions || "";
+    currentPaymentQr = m.qrImage || "";
+    currentPaymentEnabled = m.enabled !== false;
+
+    var toggle = document.getElementById("paymentEnabledToggle");
+    if (currentPaymentEnabled) toggle.classList.add("on");
+    else toggle.classList.remove("on");
+
+    resetPaymentQrArea();
+    if (currentPaymentQr) {
+        showPaymentQrPreview(currentPaymentQr);
+    }
+
+    document.getElementById("paymentModal").classList.add("show");
+}
+
+function closePaymentModal() {
+    document.getElementById("paymentModal").classList.remove("show");
+    editingPaymentId = null;
+    currentPaymentQr = "";
+}
+
+function togglePaymentEnabled() {
+    currentPaymentEnabled = !currentPaymentEnabled;
+    var t = document.getElementById("paymentEnabledToggle");
+    if (currentPaymentEnabled) t.classList.add("on");
+    else t.classList.remove("on");
+}
+
+function togglePaymentById(id) {
+    var m = currentPaymentMethods.find(function (x) { return String(x.id) === String(id); });
+    if (!m) return;
+    m.enabled = (m.enabled === false);
+    saveAllPaymentMethods("Toggled " + m.name);
+}
+
+function triggerPaymentQrUpload() {
+    if (currentPaymentQr) return;
+    document.getElementById("paymentQrInput").click();
+}
+
+function handlePaymentQrSelect(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+        showToast("QR image too large. Max 1MB.", "error");
+        event.target.value = "";
+        return;
+    }
+    if (!file.type.match(/^image\//)) {
+        showToast("Please select an image file.", "error");
+        event.target.value = "";
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+            /* Compress QR to max 400px square */
+            var maxW = 400;
+            var w = img.width, h = img.height;
+            if (w > maxW || h > maxW) {
+                var ratio = Math.min(maxW / w, maxW / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+            }
+            var canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            var compressed = canvas.toDataURL("image/jpeg", 0.9);
+            currentPaymentQr = compressed;
+            showPaymentQrPreview(compressed);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function showPaymentQrPreview(dataUrl) {
+    document.getElementById("paymentQrHint").style.display = "none";
+    document.getElementById("paymentQrPreview").style.display = "block";
+    document.getElementById("paymentQrPreviewImg").src = dataUrl;
+    document.getElementById("paymentQrArea").classList.add("has-image");
+}
+
+function removePaymentQr(e) {
+    if (e) e.stopPropagation();
+    currentPaymentQr = "";
+    document.getElementById("paymentQrInput").value = "";
+    document.getElementById("paymentQrPreview").style.display = "none";
+    document.getElementById("paymentQrHint").style.display = "block";
+    document.getElementById("paymentQrArea").classList.remove("has-image");
+}
+
+function resetPaymentQrArea() {
+    document.getElementById("paymentQrInput").value = "";
+    document.getElementById("paymentQrPreview").style.display = "none";
+    document.getElementById("paymentQrHint").style.display = "block";
+    document.getElementById("paymentQrArea").classList.remove("has-image");
+}
+
+function savePayment(event) {
+    event.preventDefault();
+    var name = document.getElementById("paymentName").value.trim();
+    if (!name) { showToast("Please enter a method name.", "error"); return; }
+
+    var id = document.getElementById("paymentId").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if (!id && !editingPaymentId) {
+        id = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+    if (!id) id = "method-" + Date.now();
+
+    var newMethod = {
+        id: editingPaymentId || id,
+        name: name,
+        number: document.getElementById("paymentNumber").value.trim(),
+        enabled: currentPaymentEnabled,
+        qrImage: currentPaymentQr || "",
+        instructions: document.getElementById("paymentInstructions").value.trim(),
+        order: editingPaymentId
+            ? (currentPaymentMethods.find(function (m) { return m.id === editingPaymentId; }) || {}).order || 99
+            : currentPaymentMethods.length + 1
+    };
+
+    var list = currentPaymentMethods.slice();
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) {
+        if (String(list[i].id) === String(newMethod.id)) { idx = i; break; }
+    }
+
+    if (idx >= 0) list[idx] = newMethod;
+    else list.push(newMethod);
+
+    savePaymentListToServer(list, "Payment method saved");
+}
+
+function deletePaymentMethod(id) {
+    if (!confirm("Delete this payment method? Members won't see it anymore.")) return;
+    var list = currentPaymentMethods.filter(function (m) {
+        return String(m.id) !== String(id);
+    });
+    savePaymentListToServer(list, "Payment method deleted");
+}
+
+function saveAllPaymentMethods(msg) {
+    savePaymentListToServer(currentPaymentMethods, msg);
+}
+
+function savePaymentListToServer(list, successMsg) {
+    var btn = document.getElementById("savePaymentBtn");
+    if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+
+    fetch("/api/admin/payment-settings", {
+        method: "PUT", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ methods: list })
+    })
+    .then(apiJSON)
+    .then(function (data) {
+        currentPaymentMethods = Array.isArray(data.methods) ? data.methods : list;
+        updatePaymentStats();
+        renderPaymentMethods();
+        showToast(successMsg || "Saved.", "success");
+        closePaymentModal();
+    })
+    .catch(function (error) {
+        showToast(error.message || "Could not save.", "error");
+    })
+    .then(function () {
+        if (btn) { btn.disabled = false; btn.textContent = "Save Method"; }
+    });
+}
+
 /* ============== MATCHES ============== */
 
 function loadMatches() {
@@ -1118,7 +1631,7 @@ function renderMatches() {
         });
     }
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty">No matches yet. Click "+ Add Match" to create one.</div>';
+        container.innerHTML = '<div class="empty">No matches yet.</div>';
         return;
     }
     filtered = filtered.slice().sort(function (a, b) {
@@ -1167,7 +1680,6 @@ function renderMatches() {
                 '</div>';
         }
 
-        /* Screenshot thumbnail */
         var screenshotHtml = "";
         if (m.screenshot) {
             screenshotHtml = '<div class="match-screenshot-thumb">' +
@@ -1273,8 +1785,6 @@ function populateMatchTeams(selectedA, selectedB) {
     selectedA = selectedA || ""; selectedB = selectedB || "";
     var selA = document.getElementById("matchTeamA");
     var selB = document.getElementById("matchTeamB");
-    var helpA = document.getElementById("teamAHelp");
-    var helpB = document.getElementById("teamBHelp");
 
     var tid = document.getElementById("matchTournament").value;
     var teams = getTeamsForTournament(tid);
@@ -1282,10 +1792,6 @@ function populateMatchTeams(selectedA, selectedB) {
     if (teams.length === 0) {
         selA.innerHTML = '<option value="" disabled selected>No approved teams</option>';
         selB.innerHTML = '<option value="" disabled selected>No approved teams</option>';
-        helpA.textContent = "Approve registrations first in the Registrations tab.";
-        helpA.classList.add("warning");
-        helpB.textContent = "Approve registrations first in the Registrations tab.";
-        helpB.classList.add("warning");
         return;
     }
 
@@ -1295,11 +1801,6 @@ function populateMatchTeams(selectedA, selectedB) {
     if (selectedA) selA.value = selectedA;
     if (selectedB) selB.value = selectedB;
 
-    helpA.classList.remove("warning");
-    helpB.classList.remove("warning");
-    helpA.textContent = teams.length + " approved teams available.";
-    helpB.textContent = teams.length + " approved teams available.";
-
     updateMatchWinnerOptions();
 }
 
@@ -1307,7 +1808,6 @@ function populateBRWinnerSelects(selected1, selected2, selected3) {
     var sel1 = document.getElementById("matchWinner1");
     var sel2 = document.getElementById("matchWinner2");
     var sel3 = document.getElementById("matchWinner3");
-
     var tid = document.getElementById("matchTournament").value;
     var teams = getTeamsForTournament(tid);
 
@@ -1366,36 +1866,29 @@ function selectMatchType(type) {
     }
 }
 
-/* ============== SCREENSHOT HANDLING ============== */
-
 function triggerScreenshotUpload() {
-    if (currentScreenshot) return; /* already has one, block */
+    if (currentScreenshot) return;
     document.getElementById("screenshotInput").click();
 }
 
 function handleScreenshotSelect(event) {
     var file = event.target.files[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
         showToast("Image too large. Max 5MB.", "error");
         event.target.value = "";
         return;
     }
-
     if (!file.type.match(/^image\//)) {
         showToast("Please select an image file.", "error");
         event.target.value = "";
         return;
     }
-
     document.getElementById("screenshotLoading").style.display = "block";
-
     var reader = new FileReader();
     reader.onload = function (e) {
         var img = new Image();
         img.onload = function () {
-            /* Compress: max 1200px width, JPEG quality 0.85 */
             var maxW = 1200;
             var w = img.width;
             var h = img.height;
@@ -1409,19 +1902,10 @@ function handleScreenshotSelect(event) {
             var ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, w, h);
             var compressed = canvas.toDataURL("image/jpeg", 0.85);
-
             currentScreenshot = compressed;
             showScreenshotPreview(compressed);
         };
-        img.onerror = function () {
-            document.getElementById("screenshotLoading").style.display = "none";
-            showToast("Could not read image.", "error");
-        };
         img.src = e.target.result;
-    };
-    reader.onerror = function () {
-        document.getElementById("screenshotLoading").style.display = "none";
-        showToast("Could not read file.", "error");
     };
     reader.readAsDataURL(file);
 }
@@ -1452,8 +1936,6 @@ function resetScreenshotArea() {
     document.getElementById("screenshotArea").classList.remove("has-image");
 }
 
-/* ============== MATCH MODAL ============== */
-
 function openAddMatch() {
     editingMatchId = null;
     document.getElementById("matchModalTitle").textContent = "Add Match";
@@ -1471,10 +1953,8 @@ function openEditMatch(id) {
     var m = currentMatches.find(function (x) { return String(x.id) === String(id); });
     if (!m) return;
     editingMatchId = id;
-
     document.getElementById("matchModalTitle").textContent = "Edit Match";
     populateMatchTournaments(m.tournamentId);
-
     var mt = String(m.matchType || "1v1").toLowerCase();
     if (mt === "battle-royale") {
         currentMatchType = "battle-royale";
@@ -1489,7 +1969,6 @@ function openEditMatch(id) {
         document.getElementById("matchScoreB").value = m.scoreTeam2 || 0;
         if (m.winner) document.getElementById("matchWinner").value = m.winner;
     }
-
     document.getElementById("matchName").value = m.result || m.name || "";
     document.getElementById("matchDate").value = m.date || "";
     document.getElementById("matchTime").value = m.time || "";
@@ -1497,14 +1976,11 @@ function openEditMatch(id) {
     document.getElementById("matchRoomPassword").value = m.roomPassword || "";
     document.getElementById("matchStatus").value = m.status || "Scheduled";
     document.getElementById("matchNotes").value = m.notes || "";
-
-    /* Load existing screenshot */
     resetScreenshotArea();
     if (m.screenshot) {
         currentScreenshot = m.screenshot;
         showScreenshotPreview(m.screenshot);
     }
-
     document.getElementById("matchModal").classList.add("show");
 }
 
@@ -1522,7 +1998,6 @@ function closeMatchModal() {
 
 function saveMatch(event) {
     event.preventDefault();
-
     var tid = document.getElementById("matchTournament").value;
     var tournament = currentTournaments.find(function (t) { return String(t.id) === String(tid); });
     if (!tournament) { showToast("Please select a tournament.", "error"); return; }
@@ -1554,7 +2029,6 @@ function saveMatch(event) {
         var w2 = document.getElementById("matchWinner2").value;
         var w3 = document.getElementById("matchWinner3").value;
         var winners = [w1, w2, w3].filter(function (x) { return x !== ""; });
-
         for (var i = 0; i < winners.length; i++) {
             for (var j = i + 1; j < winners.length; j++) {
                 if (winners[i] === winners[j]) {
@@ -1563,7 +2037,6 @@ function saveMatch(event) {
                 }
             }
         }
-
         payload.winners = winners;
         payload.team1 = "";
         payload.team2 = "";
@@ -1572,7 +2045,6 @@ function saveMatch(event) {
         var teamB = document.getElementById("matchTeamB").value;
         if (!teamA || !teamB) { showToast("Please select both teams.", "error"); return; }
         if (teamA === teamB) { showToast("Team A and Team B must be different.", "error"); return; }
-
         payload.team1 = teamA;
         payload.team2 = teamB;
         payload.winner = document.getElementById("matchWinner").value;
@@ -1777,7 +2249,7 @@ function loadAnnouncements() {
     })
     .catch(function (error) {
         document.getElementById("announcementsList").innerHTML =
-            '<div class="empty">Could not load announcements: ' + esc(error.message) + '</div>';
+            '<div class="empty">Could not load: ' + esc(error.message) + '</div>';
     });
 }
 
@@ -1807,7 +2279,7 @@ function renderAnnouncements() {
         });
     }
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty">No announcements yet. Click "+ New Announcement" to create one.</div>';
+        container.innerHTML = '<div class="empty">No announcements yet.</div>';
         return;
     }
     var html = "";
@@ -1872,7 +2344,7 @@ function saveAnnouncement(event) {
     event.preventDefault();
     var title = document.getElementById("annTitle").value.trim();
     var message = document.getElementById("annMessage").value.trim();
-    if (!title || !message) { showToast("Title and message are required.", "error"); return; }
+    if (!title || !message) { showToast("Title and message required.", "error"); return; }
     var payload = {
         id: editingAnnouncementId || undefined,
         title: title, message: message,
@@ -1927,6 +2399,9 @@ document.getElementById("tournamentModal").addEventListener("click", function (e
 });
 document.getElementById("announcementModal").addEventListener("click", function (e) {
     if (e.target === this) closeAnnouncementModal();
+});
+document.getElementById("paymentModal").addEventListener("click", function (e) {
+    if (e.target === this) closePaymentModal();
 });
 
 checkAdmin();
