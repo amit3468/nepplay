@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -163,6 +163,7 @@ tr:last-child td { border-bottom: 0; }
 .badge-completed { background: #2b1a4d; color: #c084fc; }
 .badge-br { background: #3a2a09; color: #ffd75a; }
 .badge-1v1 { background: #172b4a; color: #7db7ff; }
+.badge-screenshot { background: #0c3621; color: #5bed8e; }
 
 /* ACTIONS */
 .action-row { display: flex; gap: 5px; flex-wrap: wrap; }
@@ -210,10 +211,8 @@ tr:last-child td { border-bottom: 0; }
 .match-score { font-size: 22px; font-weight: bold; color: #ff3b30; }
 .match-vs { text-align: center; color: #64748b; font-weight: bold; font-size: 13px; }
 
-/* BR PODIUM ROWS */
-.br-winners {
-    display: grid; gap: 8px; margin: 12px 0;
-}
+/* BR PODIUM */
+.br-winners { display: grid; gap: 8px; margin: 12px 0; }
 .br-winner-row {
     display: flex; align-items: center; gap: 12px;
     background: #101827; border: 1px solid #263244;
@@ -232,6 +231,21 @@ tr:last-child td { border-bottom: 0; }
 .br-place-label {
     font-size: 11px; color: #94a3b8;
     text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* SCREENSHOT THUMB */
+.match-screenshot-thumb {
+    margin: 12px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #263244;
+    background: #0d1118;
+    max-width: 400px;
+}
+.match-screenshot-thumb img {
+    width: 100%;
+    display: block;
+    cursor: pointer;
 }
 
 /* INFO GRID */
@@ -327,9 +341,7 @@ tr:last-child td { border-bottom: 0; }
 .match-type-option-desc { color: #94a3b8; font-size: 11px; line-height: 1.4; }
 
 /* WINNERS PICKER */
-.winners-picker {
-    display: grid; gap: 8px;
-}
+.winners-picker { display: grid; gap: 8px; }
 .winner-slot {
     display: flex; align-items: center; gap: 10px;
     background: #0b1220; border: 1px solid #334155;
@@ -344,6 +356,64 @@ tr:last-child td { border-bottom: 0; }
     padding: 8px 10px; color: white; outline: none; font-size: 13px;
 }
 .winner-slot select:focus { border-color: #ff3b30; }
+
+/* SCREENSHOT UPLOAD */
+.screenshot-upload-area {
+    background: #0b1220;
+    border: 2px dashed #334155;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s;
+    position: relative;
+}
+.screenshot-upload-area:hover {
+    border-color: #ff3b30;
+    background: #171e28;
+}
+.screenshot-upload-area.has-image {
+    border-style: solid;
+    border-color: #176b3c;
+    padding: 12px;
+    cursor: default;
+}
+.screenshot-upload-hint {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.screenshot-upload-hint strong {
+    color: #ff4438;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+.screenshot-preview {
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+}
+.screenshot-remove-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: #3a1212;
+    color: #ff817a;
+    border: 1px solid #762929;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.screenshot-remove-btn:hover { background: #4a1717; }
+.screenshot-loading {
+    color: #ffd84d;
+    font-size: 12px;
+    margin-top: 8px;
+}
 
 /* TOAST */
 .toast {
@@ -420,7 +490,6 @@ tr:last-child td { border-bottom: 0; }
             <button class="tab-btn" data-tab="announcements" onclick="switchTab('announcements')">📢 Announcements</button>
         </div>
 
-        <!-- REGISTRATIONS -->
         <div id="tab-registrations" class="tab-content active">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalRegistrations">0</div></div>
@@ -450,7 +519,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- MATCHES -->
         <div id="tab-matches" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalMatches">0</div></div>
@@ -473,7 +541,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- TOURNAMENTS -->
         <div id="tab-tournaments" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalTournaments">0</div></div>
@@ -503,7 +570,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- ANNOUNCEMENTS -->
         <div id="tab-announcements" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalAnnouncements">0</div></div>
@@ -536,9 +602,8 @@ tr:last-child td { border-bottom: 0; }
             <button class="close-btn" onclick="closeMatchModal()">×</button>
         </div>
         <form id="matchForm" onsubmit="saveMatch(event)">
-
-            <!-- MATCH TYPE SELECTOR -->
             <div class="form-grid">
+
                 <div class="form-group full">
                     <label>Match Type</label>
                     <div class="match-type-selector">
@@ -568,7 +633,6 @@ tr:last-child td { border-bottom: 0; }
                     <input type="text" id="matchName" placeholder="Example: Semi Final 1 / Grand Final" required>
                 </div>
 
-                <!-- 1v1 FIELDS -->
                 <div class="form-group" id="teamAField">
                     <label>Team A</label>
                     <select id="matchTeamA"><option value="">Select Team A</option></select>
@@ -581,20 +645,19 @@ tr:last-child td { border-bottom: 0; }
                     <div class="form-help" id="teamBHelp">Only approved teams appear here.</div>
                 </div>
 
-                <!-- BR FIELDS: Top 3 winners -->
                 <div class="form-group full" id="brWinnersField" style="display:none;">
                     <label>Top 3 Winners (Battle Royale)</label>
                     <div class="winners-picker">
                         <div class="winner-slot">
-                            <div class="winner-slot-label" style="color:#ffd43b;">🥇 1st</div>
+                            <div class="winner-slot-label" style="color:#ffd43b;">1st</div>
                             <select id="matchWinner1"><option value="">Select 1st place team</option></select>
                         </div>
                         <div class="winner-slot">
-                            <div class="winner-slot-label" style="color:#b8bec7;">🥈 2nd</div>
+                            <div class="winner-slot-label" style="color:#b8bec7;">2nd</div>
                             <select id="matchWinner2"><option value="">Select 2nd place team</option></select>
                         </div>
                         <div class="winner-slot">
-                            <div class="winner-slot-label" style="color:#cd7f32;">🥉 3rd</div>
+                            <div class="winner-slot-label" style="color:#cd7f32;">3rd</div>
                             <select id="matchWinner3"><option value="">Select 3rd place team</option></select>
                         </div>
                     </div>
@@ -631,7 +694,6 @@ tr:last-child td { border-bottom: 0; }
                     </select>
                 </div>
 
-                <!-- Winner (1v1 only) -->
                 <div class="form-group" id="winnerField">
                     <label>Winner</label>
                     <select id="matchWinner"><option value="">Not decided</option></select>
@@ -647,12 +709,30 @@ tr:last-child td { border-bottom: 0; }
                     <input type="number" id="matchScoreB" min="0" value="0">
                 </div>
 
+                <!-- SCREENSHOT UPLOAD -->
+                <div class="form-group full">
+                    <label>Result Screenshot (optional)</label>
+                    <div class="screenshot-upload-area" id="screenshotArea" onclick="triggerScreenshotUpload()">
+                        <input type="file" id="screenshotInput" accept="image/*" style="display:none;" onchange="handleScreenshotSelect(event)">
+                        <div id="screenshotUploadHint" class="screenshot-upload-hint">
+                            <strong>Click to upload result screenshot</strong>
+                            Free Fire / PUBG results screen showing winners<br>
+                            <span style="font-size:11px;color:#64748b;">Max 5MB - will be compressed automatically</span>
+                        </div>
+                        <div id="screenshotPreview" style="display:none;">
+                            <img id="screenshotPreviewImg" class="screenshot-preview" alt="Screenshot preview">
+                            <button type="button" class="screenshot-remove-btn" onclick="removeScreenshot(event)">Remove Screenshot</button>
+                        </div>
+                        <div id="screenshotLoading" class="screenshot-loading" style="display:none;">Processing image...</div>
+                    </div>
+                    <div class="form-help">Screenshot is public proof of match result. Shown on member dashboards.</div>
+                </div>
+
                 <div class="form-group full">
                     <label>Notes</label>
                     <textarea id="matchNotes" placeholder="Optional notes"></textarea>
                 </div>
             </div>
-
             <div class="form-actions">
                 <button type="button" class="secondary-btn" onclick="closeMatchModal()">Cancel</button>
                 <button type="submit" class="primary-btn" id="saveMatchBtn">Save Match</button>
@@ -780,6 +860,7 @@ var editingMatchId = null;
 var editingTournamentId = null;
 var editingAnnouncementId = null;
 var currentMatchType = "1v1";
+var currentScreenshot = "";
 
 function apiJSON(response) {
     return response.text().then(function (text) {
@@ -1057,8 +1138,8 @@ function renderMatches() {
         var matchType = String(m.matchType || "1v1").toLowerCase();
         var isBR = matchType === "battle-royale";
         var typeBadge = isBR
-            ? '<span class="badge badge-br">🔥 Battle Royale</span>'
-            : '<span class="badge badge-1v1">⚔️ 1v1</span>';
+            ? '<span class="badge badge-br">Battle Royale</span>'
+            : '<span class="badge badge-1v1">1v1</span>';
 
         var teamsHtml = "";
         if (isBR) {
@@ -1086,14 +1167,26 @@ function renderMatches() {
                 '</div>';
         }
 
+        /* Screenshot thumbnail */
+        var screenshotHtml = "";
+        if (m.screenshot) {
+            screenshotHtml = '<div class="match-screenshot-thumb">' +
+                '<img src="' + esc(m.screenshot) + '" alt="Result screenshot" onclick="openFullScreenshot(\'' + esc(m.id) + '\')">' +
+            '</div>';
+        }
+
         var winnerValue = isBR
             ? (Array.isArray(m.winners) && m.winners[0] ? m.winners[0] : "Not decided")
             : (m.winner || "Not decided");
 
+        var screenshotBadge = m.screenshot
+            ? ' <span class="badge badge-screenshot">Screenshot</span>'
+            : '';
+
         return '<div class="match-card">' +
             '<div class="match-top">' +
                 '<div>' +
-                    '<div class="match-title">' + esc(matchName) + '</div>' +
+                    '<div class="match-title">' + esc(matchName) + screenshotBadge + '</div>' +
                     '<div class="match-sub">' +
                         typeBadge + ' ' +
                         '<span>' + esc(m.game || "-") + '</span>' +
@@ -1103,6 +1196,7 @@ function renderMatches() {
                 '<span class="badge ' + badgeClass + '">' + esc(status) + '</span>' +
             '</div>' +
             teamsHtml +
+            screenshotHtml +
             '<div class="match-info">' +
                 '<div class="info-item"><div class="info-label">Date</div><div class="info-value">' + esc(formatDate(m.date)) + '</div></div>' +
                 '<div class="info-item"><div class="info-label">Time</div><div class="info-value">' + esc(m.time || "-") + '</div></div>' +
@@ -1116,6 +1210,14 @@ function renderMatches() {
             '</div>' +
         '</div>';
     }).join("");
+}
+
+function openFullScreenshot(matchId) {
+    var match = currentMatches.find(function (m) { return String(m.id) === String(matchId); });
+    if (match && match.screenshot) {
+        var w = window.open("");
+        w.document.write('<html><head><title>Screenshot</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + match.screenshot + '" alt="Result screenshot"></body></html>');
+    }
 }
 
 function countApprovedTeamsFor(tid) {
@@ -1264,6 +1366,94 @@ function selectMatchType(type) {
     }
 }
 
+/* ============== SCREENSHOT HANDLING ============== */
+
+function triggerScreenshotUpload() {
+    if (currentScreenshot) return; /* already has one, block */
+    document.getElementById("screenshotInput").click();
+}
+
+function handleScreenshotSelect(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("Image too large. Max 5MB.", "error");
+        event.target.value = "";
+        return;
+    }
+
+    if (!file.type.match(/^image\//)) {
+        showToast("Please select an image file.", "error");
+        event.target.value = "";
+        return;
+    }
+
+    document.getElementById("screenshotLoading").style.display = "block";
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+            /* Compress: max 1200px width, JPEG quality 0.85 */
+            var maxW = 1200;
+            var w = img.width;
+            var h = img.height;
+            if (w > maxW) {
+                h = Math.round(h * maxW / w);
+                w = maxW;
+            }
+            var canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            var compressed = canvas.toDataURL("image/jpeg", 0.85);
+
+            currentScreenshot = compressed;
+            showScreenshotPreview(compressed);
+        };
+        img.onerror = function () {
+            document.getElementById("screenshotLoading").style.display = "none";
+            showToast("Could not read image.", "error");
+        };
+        img.src = e.target.result;
+    };
+    reader.onerror = function () {
+        document.getElementById("screenshotLoading").style.display = "none";
+        showToast("Could not read file.", "error");
+    };
+    reader.readAsDataURL(file);
+}
+
+function showScreenshotPreview(dataUrl) {
+    document.getElementById("screenshotLoading").style.display = "none";
+    document.getElementById("screenshotUploadHint").style.display = "none";
+    document.getElementById("screenshotPreview").style.display = "block";
+    document.getElementById("screenshotPreviewImg").src = dataUrl;
+    document.getElementById("screenshotArea").classList.add("has-image");
+}
+
+function removeScreenshot(e) {
+    if (e) e.stopPropagation();
+    currentScreenshot = "";
+    document.getElementById("screenshotInput").value = "";
+    document.getElementById("screenshotPreview").style.display = "none";
+    document.getElementById("screenshotUploadHint").style.display = "block";
+    document.getElementById("screenshotArea").classList.remove("has-image");
+}
+
+function resetScreenshotArea() {
+    currentScreenshot = "";
+    document.getElementById("screenshotInput").value = "";
+    document.getElementById("screenshotPreview").style.display = "none";
+    document.getElementById("screenshotUploadHint").style.display = "block";
+    document.getElementById("screenshotLoading").style.display = "none";
+    document.getElementById("screenshotArea").classList.remove("has-image");
+}
+
+/* ============== MATCH MODAL ============== */
+
 function openAddMatch() {
     editingMatchId = null;
     document.getElementById("matchModalTitle").textContent = "Add Match";
@@ -1271,11 +1461,9 @@ function openAddMatch() {
     document.getElementById("matchScoreA").value = 0;
     document.getElementById("matchScoreB").value = 0;
     document.getElementById("matchStatus").value = "Scheduled";
-
+    resetScreenshotArea();
     populateMatchTournaments();
-
     selectMatchType("1v1");
-
     document.getElementById("matchModal").classList.add("show");
 }
 
@@ -1310,6 +1498,13 @@ function openEditMatch(id) {
     document.getElementById("matchStatus").value = m.status || "Scheduled";
     document.getElementById("matchNotes").value = m.notes || "";
 
+    /* Load existing screenshot */
+    resetScreenshotArea();
+    if (m.screenshot) {
+        currentScreenshot = m.screenshot;
+        showScreenshotPreview(m.screenshot);
+    }
+
     document.getElementById("matchModal").classList.add("show");
 }
 
@@ -1322,6 +1517,7 @@ function openMatchResult(id) {
 function closeMatchModal() {
     document.getElementById("matchModal").classList.remove("show");
     editingMatchId = null;
+    resetScreenshotArea();
 }
 
 function saveMatch(event) {
@@ -1349,7 +1545,8 @@ function saveMatch(event) {
         roomPassword: document.getElementById("matchRoomPassword").value.trim(),
         status: document.getElementById("matchStatus").value,
         result: document.getElementById("matchName").value.trim(),
-        notes: document.getElementById("matchNotes").value.trim()
+        notes: document.getElementById("matchNotes").value.trim(),
+        screenshot: currentScreenshot || ""
     };
 
     if (currentMatchType === "battle-royale") {
@@ -1358,7 +1555,6 @@ function saveMatch(event) {
         var w3 = document.getElementById("matchWinner3").value;
         var winners = [w1, w2, w3].filter(function (x) { return x !== ""; });
 
-        /* Check duplicates */
         for (var i = 0; i < winners.length; i++) {
             for (var j = i + 1; j < winners.length; j++) {
                 if (winners[i] === winners[j]) {
@@ -1732,8 +1928,6 @@ document.getElementById("tournamentModal").addEventListener("click", function (e
 document.getElementById("announcementModal").addEventListener("click", function (e) {
     if (e.target === this) closeAnnouncementModal();
 });
-
-/* ============== START ============== */
 
 checkAdmin();
 
