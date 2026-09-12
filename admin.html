@@ -129,13 +129,6 @@ button, input, select, textarea { font-family: inherit; }
     cursor: pointer; font-size: 13px;
 }
 .secondary-btn:hover { background: #334155; }
-.danger-btn {
-    background: #3a1212; color: #ff817a;
-    border: 1px solid #762929; border-radius: 8px;
-    padding: 9px 14px; font-weight: bold;
-    cursor: pointer; font-size: 13px;
-}
-.danger-btn:hover { background: #4a1717; }
 
 .table-wrap { width: 100%; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 800px; }
@@ -164,6 +157,7 @@ tr:last-child td { border-bottom: 0; }
 .badge-br { background: #3a2a09; color: #ffd75a; }
 .badge-1v1 { background: #172b4a; color: #7db7ff; }
 .badge-screenshot { background: #0c3621; color: #5bed8e; }
+.badge-topkiller { background: #4a1717; color: #ff9f43; }
 .badge-enabled { background: #0c3621; color: #5bed8e; }
 .badge-disabled { background: #3a1212; color: #ff7d76; }
 
@@ -232,6 +226,46 @@ tr:last-child td { border-bottom: 0; }
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 
+/* TOP KILLER ROW IN MATCH CARD */
+.top-killer-display {
+    background: linear-gradient(135deg, #4a1717, #5a2020);
+    border: 1px solid #ff9f43;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.top-killer-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9f43, #ff6b00);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px; color: #0d111b;
+    flex-shrink: 0;
+}
+.top-killer-info { flex: 1; }
+.top-killer-label {
+    font-size: 10px;
+    color: #ffb84d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+.top-killer-name {
+    color: #ff9f43;
+    font-weight: bold;
+    font-size: 14px;
+}
+.top-killer-kills {
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+}
+
 .match-screenshot-thumb {
     margin: 12px 0;
     border-radius: 8px;
@@ -266,7 +300,7 @@ tr:last-child td { border-bottom: 0; }
     border-top: 1px solid #1e293b; flex-wrap: wrap;
 }
 
-/* PAYMENT METHOD CARDS */
+/* PAYMENT */
 .payment-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -278,7 +312,6 @@ tr:last-child td { border-bottom: 0; }
     border: 1px solid #263244;
     border-radius: 12px;
     padding: 16px;
-    position: relative;
 }
 .payment-card.disabled {
     opacity: 0.6;
@@ -303,68 +336,50 @@ tr:last-child td { border-bottom: 0; }
     font-family: 'Courier New', monospace;
 }
 .payment-qr-preview {
-    width: 100px;
-    height: 100px;
+    width: 100px; height: 100px;
     background: #0d1118;
     border: 1px solid #263244;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
 }
 .payment-qr-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: white;
+    width: 100%; height: 100%;
+    object-fit: contain; background: white;
 }
 .payment-qr-empty {
-    color: #475569;
-    font-size: 11px;
-    text-align: center;
-    padding: 8px;
+    color: #475569; font-size: 11px;
+    text-align: center; padding: 8px;
 }
-.payment-field {
-    margin-bottom: 10px;
-}
+.payment-field { margin-bottom: 10px; }
 .payment-field-label {
-    font-size: 10px;
-    color: #64748b;
+    font-size: 10px; color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 4px;
 }
 .payment-field-value {
-    color: #cbd5e1;
-    font-size: 13px;
+    color: #cbd5e1; font-size: 13px;
     font-family: 'Courier New', monospace;
     word-break: break-all;
 }
 .payment-card-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-    padding-top: 12px;
+    display: flex; gap: 6px;
+    margin-top: 14px; padding-top: 12px;
     border-top: 1px solid #1e293b;
     flex-wrap: wrap;
 }
 
-/* PAYMENT EDITOR MODAL */
 .payment-editor-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: grid; grid-template-columns: 1fr;
     gap: 14px;
 }
 .payment-qr-upload {
     background: #0b1220;
     border: 2px dashed #334155;
     border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.15s;
+    padding: 16px; text-align: center;
+    cursor: pointer; transition: 0.15s;
 }
 .payment-qr-upload:hover {
     border-color: #ff3b30;
@@ -373,69 +388,47 @@ tr:last-child td { border-bottom: 0; }
 .payment-qr-upload.has-image {
     border-style: solid;
     border-color: #176b3c;
-    padding: 12px;
-    cursor: default;
+    padding: 12px; cursor: default;
 }
 .payment-qr-upload-hint {
-    color: #94a3b8;
-    font-size: 13px;
-    line-height: 1.5;
+    color: #94a3b8; font-size: 13px; line-height: 1.5;
 }
 .payment-qr-upload-hint strong {
-    color: #ff4438;
-    display: block;
-    margin-bottom: 4px;
-    font-size: 14px;
+    color: #ff4438; display: block;
+    margin-bottom: 4px; font-size: 14px;
 }
 .payment-qr-preview-img {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 8px;
-    display: block;
-    margin: 0 auto;
-    background: white;
-    padding: 8px;
+    max-width: 200px; max-height: 200px;
+    border-radius: 8px; display: block;
+    margin: 0 auto; background: white; padding: 8px;
 }
 .payment-qr-remove {
-    display: inline-block;
-    margin-top: 10px;
-    background: #3a1212;
-    color: #ff817a;
+    display: inline-block; margin-top: 10px;
+    background: #3a1212; color: #ff817a;
     border: 1px solid #762929;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: bold;
+    border-radius: 6px; padding: 6px 12px;
+    font-size: 12px; font-weight: bold;
     cursor: pointer;
 }
 .payment-qr-remove:hover { background: #4a1717; }
 
 .toggle-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
+    display: flex; align-items: center;
+    gap: 10px; padding: 10px 0;
 }
 .toggle-switch {
     position: relative;
-    width: 44px;
-    height: 24px;
-    background: #334155;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.2s;
+    width: 44px; height: 24px;
+    background: #334155; border-radius: 12px;
+    cursor: pointer; transition: 0.2s;
     flex-shrink: 0;
 }
 .toggle-switch.on { background: #16a34a; }
 .toggle-switch::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-radius: 50%;
+    content: ""; position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: white; border-radius: 50%;
     transition: 0.2s;
 }
 .toggle-switch.on::after { left: 22px; }
@@ -527,14 +520,54 @@ tr:last-child td { border-bottom: 0; }
 }
 .winner-slot select:focus { border-color: #ff3b30; }
 
+/* TOP KILLER SECTION IN MODAL */
+.top-killer-section {
+    background: linear-gradient(135deg, #1a0e08, #101827);
+    border: 1px solid #ff9f43;
+    border-radius: 10px;
+    padding: 16px;
+}
+.top-killer-section-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #ff9f43;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.top-killer-icon-small {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9f43, #ff6b00);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    color: #0d111b;
+}
+.top-killer-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+}
+.top-killer-input {
+    background: #0d1118 !important;
+    border: 1px solid #4a2a1a !important;
+}
+.top-killer-input:focus {
+    border-color: #ff9f43 !important;
+}
+
 .screenshot-upload-area {
     background: #0b1220;
     border: 2px dashed #334155;
     border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.15s;
+    padding: 16px; text-align: center;
+    cursor: pointer; transition: 0.15s;
 }
 .screenshot-upload-area:hover {
     border-color: #ff3b30;
@@ -543,44 +576,30 @@ tr:last-child td { border-bottom: 0; }
 .screenshot-upload-area.has-image {
     border-style: solid;
     border-color: #176b3c;
-    padding: 12px;
-    cursor: default;
+    padding: 12px; cursor: default;
 }
 .screenshot-upload-hint {
-    color: #94a3b8;
-    font-size: 13px;
-    line-height: 1.5;
+    color: #94a3b8; font-size: 13px; line-height: 1.5;
 }
 .screenshot-upload-hint strong {
-    color: #ff4438;
-    display: block;
-    margin-bottom: 4px;
-    font-size: 14px;
+    color: #ff4438; display: block;
+    margin-bottom: 4px; font-size: 14px;
 }
 .screenshot-preview {
-    max-width: 100%;
-    max-height: 240px;
-    border-radius: 8px;
-    display: block;
-    margin: 0 auto;
+    max-width: 100%; max-height: 240px;
+    border-radius: 8px; display: block; margin: 0 auto;
 }
 .screenshot-remove-btn {
-    display: inline-block;
-    margin-top: 10px;
-    background: #3a1212;
-    color: #ff817a;
+    display: inline-block; margin-top: 10px;
+    background: #3a1212; color: #ff817a;
     border: 1px solid #762929;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: bold;
+    border-radius: 6px; padding: 6px 12px;
+    font-size: 12px; font-weight: bold;
     cursor: pointer;
 }
 .screenshot-remove-btn:hover { background: #4a1717; }
 .screenshot-loading {
-    color: #ffd84d;
-    font-size: 12px;
-    margin-top: 8px;
+    color: #ffd84d; font-size: 12px; margin-top: 8px;
 }
 
 .toast {
@@ -615,6 +634,7 @@ tr:last-child td { border-bottom: 0; }
     .match-team:first-child { order: 1; }
     .match-team:last-child { order: 3; }
     .match-info { grid-template-columns: 1fr; }
+    .top-killer-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -658,6 +678,7 @@ tr:last-child td { border-bottom: 0; }
             <button class="tab-btn" data-tab="announcements" onclick="switchTab('announcements')">📢 Announcements</button>
         </div>
 
+        <!-- REGISTRATIONS -->
         <div id="tab-registrations" class="tab-content active">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalRegistrations">0</div></div>
@@ -687,6 +708,7 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
+        <!-- MATCHES -->
         <div id="tab-matches" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalMatches">0</div></div>
@@ -709,6 +731,7 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
+        <!-- TOURNAMENTS -->
         <div id="tab-tournaments" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalTournaments">0</div></div>
@@ -738,6 +761,7 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
+        <!-- PAYMENTS -->
         <div id="tab-payments" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total Methods</div><div class="stat-value" id="totalPaymentMethods">0</div></div>
@@ -759,6 +783,7 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
+        <!-- ANNOUNCEMENTS -->
         <div id="tab-announcements" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalAnnouncements">0</div></div>
@@ -879,6 +904,36 @@ tr:last-child td { border-bottom: 0; }
                     <label>Team B Score</label>
                     <input type="number" id="matchScoreB" min="0" value="0">
                 </div>
+
+                <!-- TOP KILLER SECTION -->
+                <div class="form-group full">
+                    <div class="top-killer-section">
+                        <div class="top-killer-section-title">
+                            <span class="top-killer-icon-small">TK</span>
+                            Top Killer of the Match (Rs. 500 Bonus)
+                        </div>
+                        <div class="top-killer-row">
+                            <div>
+                                <label style="color:#ffb84d;font-size:11px;">Team / Player</label>
+                                <select id="matchTopKiller" class="top-killer-input">
+                                    <option value="">Not decided yet</option>
+                                </select>
+                                <div class="form-help" style="color:#a87918;">
+                                    Pick the team with most kills
+                                </div>
+                            </div>
+                            <div>
+                                <label style="color:#ffb84d;font-size:11px;">Kills</label>
+                                <input type="number" id="matchTopKillerKills" class="top-killer-input"
+                                    min="0" value="0">
+                                <div class="form-help" style="color:#a87918;">
+                                    Total kills this match
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group full">
                     <label>Result Screenshot (optional)</label>
                     <div class="screenshot-upload-area" id="screenshotArea" onclick="triggerScreenshotUpload()">
@@ -984,17 +1039,14 @@ tr:last-child td { border-bottom: 0; }
                 <div class="form-group">
                     <label>Method Name</label>
                     <input type="text" id="paymentName" placeholder="eSewa / Khalti / IME Pay / Bank" required>
-                    <div class="form-help">Display name shown to members.</div>
                 </div>
                 <div class="form-group">
                     <label>Wallet Number / Account</label>
                     <input type="text" id="paymentNumber" placeholder="98XXXXXXXX">
-                    <div class="form-help">The number members send money to.</div>
                 </div>
                 <div class="form-group">
                     <label>Internal ID</label>
                     <input type="text" id="paymentId" placeholder="esewa, khalti, imepay, bank">
-                    <div class="form-help">Lowercase, no spaces. Used internally.</div>
                 </div>
                 <div class="form-group">
                     <label>Instructions (optional)</label>
@@ -1144,7 +1196,6 @@ function switchTab(name) {
     if (btn) btn.classList.add("active");
     var c = document.getElementById("tab-" + name);
     if (c) c.classList.add("active");
-
     if (name === "payments") loadPaymentMethods();
 }
 
@@ -1302,7 +1353,6 @@ function changeRegStatus(id, status) {
 function loadPaymentMethods() {
     var container = document.getElementById("paymentList");
     container.innerHTML = '<div class="loading">Loading payment methods...</div>';
-
     return fetch("/api/admin/payment-settings", {
         method: "GET", credentials: "same-origin", cache: "no-store"
     })
@@ -1333,31 +1383,22 @@ function updatePaymentStats() {
 
 function renderPaymentMethods() {
     var container = document.getElementById("paymentList");
-
     if (currentPaymentMethods.length === 0) {
         container.innerHTML = '<div class="empty">No payment methods yet. Click "+ Add Payment Method".</div>';
         return;
     }
-
     container.innerHTML = currentPaymentMethods.map(function (m) {
         var isEnabled = m.enabled !== false;
         var cardClass = "payment-card" + (isEnabled ? "" : " disabled");
         var badgeClass = isEnabled ? "badge-enabled" : "badge-disabled";
         var badgeLabel = isEnabled ? "ENABLED" : "DISABLED";
-
         var qrHtml = "";
         if (m.qrImage) {
-            qrHtml = '<div class="payment-qr-preview">' +
-                '<img src="' + esc(m.qrImage) + '" alt="QR">' +
-            '</div>';
+            qrHtml = '<div class="payment-qr-preview"><img src="' + esc(m.qrImage) + '" alt="QR"></div>';
         } else {
-            qrHtml = '<div class="payment-qr-preview">' +
-                '<div class="payment-qr-empty">No QR<br>uploaded</div>' +
-            '</div>';
+            qrHtml = '<div class="payment-qr-preview"><div class="payment-qr-empty">No QR<br>uploaded</div></div>';
         }
-
         var escapedId = esc(m.id);
-
         return '<div class="' + cardClass + '">' +
             '<div class="payment-card-header">' +
                 '<div>' +
@@ -1409,16 +1450,11 @@ function openEditPayment(id) {
     document.getElementById("paymentInstructions").value = m.instructions || "";
     currentPaymentQr = m.qrImage || "";
     currentPaymentEnabled = m.enabled !== false;
-
     var toggle = document.getElementById("paymentEnabledToggle");
     if (currentPaymentEnabled) toggle.classList.add("on");
     else toggle.classList.remove("on");
-
     resetPaymentQrArea();
-    if (currentPaymentQr) {
-        showPaymentQrPreview(currentPaymentQr);
-    }
-
+    if (currentPaymentQr) showPaymentQrPreview(currentPaymentQr);
     document.getElementById("paymentModal").classList.add("show");
 }
 
@@ -1452,19 +1488,16 @@ function handlePaymentQrSelect(event) {
     if (!file) return;
     if (file.size > 1024 * 1024) {
         showToast("QR image too large. Max 1MB.", "error");
-        event.target.value = "";
-        return;
+        event.target.value = ""; return;
     }
     if (!file.type.match(/^image\//)) {
         showToast("Please select an image file.", "error");
-        event.target.value = "";
-        return;
+        event.target.value = ""; return;
     }
     var reader = new FileReader();
     reader.onload = function (e) {
         var img = new Image();
         img.onload = function () {
-            /* Compress QR to max 400px square */
             var maxW = 400;
             var w = img.width, h = img.height;
             if (w > maxW || h > maxW) {
@@ -1473,8 +1506,7 @@ function handlePaymentQrSelect(event) {
                 h = Math.round(h * ratio);
             }
             var canvas = document.createElement("canvas");
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = w; canvas.height = h;
             var ctx = canvas.getContext("2d");
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, w, h);
@@ -1515,13 +1547,9 @@ function savePayment(event) {
     event.preventDefault();
     var name = document.getElementById("paymentName").value.trim();
     if (!name) { showToast("Please enter a method name.", "error"); return; }
-
     var id = document.getElementById("paymentId").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-    if (!id && !editingPaymentId) {
-        id = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-    }
+    if (!id && !editingPaymentId) id = name.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (!id) id = "method-" + Date.now();
-
     var newMethod = {
         id: editingPaymentId || id,
         name: name,
@@ -1533,21 +1561,18 @@ function savePayment(event) {
             ? (currentPaymentMethods.find(function (m) { return m.id === editingPaymentId; }) || {}).order || 99
             : currentPaymentMethods.length + 1
     };
-
     var list = currentPaymentMethods.slice();
     var idx = -1;
     for (var i = 0; i < list.length; i++) {
         if (String(list[i].id) === String(newMethod.id)) { idx = i; break; }
     }
-
     if (idx >= 0) list[idx] = newMethod;
     else list.push(newMethod);
-
     savePaymentListToServer(list, "Payment method saved");
 }
 
 function deletePaymentMethod(id) {
-    if (!confirm("Delete this payment method? Members won't see it anymore.")) return;
+    if (!confirm("Delete this payment method?")) return;
     var list = currentPaymentMethods.filter(function (m) {
         return String(m.id) !== String(id);
     });
@@ -1561,7 +1586,6 @@ function saveAllPaymentMethods(msg) {
 function savePaymentListToServer(list, successMsg) {
     var btn = document.getElementById("savePaymentBtn");
     if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
-
     fetch("/api/admin/payment-settings", {
         method: "PUT", credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -1626,7 +1650,7 @@ function renderMatches() {
             if (Array.isArray(m.winners)) w = m.winners.join(" ");
             var text = ((m.team1 || "") + " " + (m.team2 || "") + " " + w + " " +
                 (m.tournamentName || "") + " " + (m.result || "") + " " +
-                (m.game || "")).toLowerCase();
+                (m.game || "") + " " + (m.topKiller || "")).toLowerCase();
             return text.indexOf(search) !== -1;
         });
     }
@@ -1680,6 +1704,19 @@ function renderMatches() {
                 '</div>';
         }
 
+        /* Top Killer row */
+        var topKillerHtml = "";
+        if (m.topKiller) {
+            topKillerHtml = '<div class="top-killer-display">' +
+                '<div class="top-killer-icon">TK</div>' +
+                '<div class="top-killer-info">' +
+                    '<div class="top-killer-label">Top Killer</div>' +
+                    '<div class="top-killer-name">' + esc(m.topKiller) + '</div>' +
+                '</div>' +
+                '<div class="top-killer-kills">' + safeNum(m.topKillerKills, 0) + ' kills</div>' +
+            '</div>';
+        }
+
         var screenshotHtml = "";
         if (m.screenshot) {
             screenshotHtml = '<div class="match-screenshot-thumb">' +
@@ -1694,11 +1731,14 @@ function renderMatches() {
         var screenshotBadge = m.screenshot
             ? ' <span class="badge badge-screenshot">Screenshot</span>'
             : '';
+        var tkBadge = m.topKiller
+            ? ' <span class="badge badge-topkiller">TK ' + safeNum(m.topKillerKills, 0) + '</span>'
+            : '';
 
         return '<div class="match-card">' +
             '<div class="match-top">' +
                 '<div>' +
-                    '<div class="match-title">' + esc(matchName) + screenshotBadge + '</div>' +
+                    '<div class="match-title">' + esc(matchName) + screenshotBadge + tkBadge + '</div>' +
                     '<div class="match-sub">' +
                         typeBadge + ' ' +
                         '<span>' + esc(m.game || "-") + '</span>' +
@@ -1708,6 +1748,7 @@ function renderMatches() {
                 '<span class="badge ' + badgeClass + '">' + esc(status) + '</span>' +
             '</div>' +
             teamsHtml +
+            topKillerHtml +
             screenshotHtml +
             '<div class="match-info">' +
                 '<div class="info-item"><div class="info-label">Date</div><div class="info-value">' + esc(formatDate(m.date)) + '</div></div>' +
@@ -1722,6 +1763,11 @@ function renderMatches() {
             '</div>' +
         '</div>';
     }).join("");
+}
+
+function safeNum(v, f) {
+    var n = Number(v);
+    return isNaN(n) ? f : n;
 }
 
 function openFullScreenshot(matchId) {
@@ -1785,23 +1831,19 @@ function populateMatchTeams(selectedA, selectedB) {
     selectedA = selectedA || ""; selectedB = selectedB || "";
     var selA = document.getElementById("matchTeamA");
     var selB = document.getElementById("matchTeamB");
-
     var tid = document.getElementById("matchTournament").value;
     var teams = getTeamsForTournament(tid);
-
     if (teams.length === 0) {
         selA.innerHTML = '<option value="" disabled selected>No approved teams</option>';
         selB.innerHTML = '<option value="" disabled selected>No approved teams</option>';
         return;
     }
-
     populateSelect(selA, teams, "Select Team A");
     populateSelect(selB, teams, "Select Team B");
-
     if (selectedA) selA.value = selectedA;
     if (selectedB) selB.value = selectedB;
-
     updateMatchWinnerOptions();
+    updateTopKillerOptions();
 }
 
 function populateBRWinnerSelects(selected1, selected2, selected3) {
@@ -1810,14 +1852,13 @@ function populateBRWinnerSelects(selected1, selected2, selected3) {
     var sel3 = document.getElementById("matchWinner3");
     var tid = document.getElementById("matchTournament").value;
     var teams = getTeamsForTournament(tid);
-
     populateSelect(sel1, teams, "Select 1st place team");
     populateSelect(sel2, teams, "Select 2nd place team");
     populateSelect(sel3, teams, "Select 3rd place team");
-
     if (selected1) sel1.value = selected1;
     if (selected2) sel2.value = selected2;
     if (selected3) sel3.value = selected3;
+    updateTopKillerOptions();
 }
 
 function updateMatchWinnerOptions() {
@@ -1831,13 +1872,28 @@ function updateMatchWinnerOptions() {
     if (old) sel.value = old;
 }
 
+function updateTopKillerOptions() {
+    var sel = document.getElementById("matchTopKiller");
+    if (!sel) return;
+    var old = sel.value;
+    var tid = document.getElementById("matchTournament").value;
+    var teams = getTeamsForTournament(tid);
+    sel.innerHTML = '<option value="">Not decided yet</option>';
+    teams.forEach(function (r) {
+        var name = r.teamName || r.captainName || "Unnamed Team";
+        var o = document.createElement("option");
+        o.value = name; o.textContent = name;
+        sel.appendChild(o);
+    });
+    if (old) sel.value = old;
+}
+
 function selectMatchType(type) {
     currentMatchType = type;
     var type1v1 = document.getElementById("type1v1");
     var typeBR = document.getElementById("typeBR");
     type1v1.classList.remove("selected");
     typeBR.classList.remove("selected");
-
     var teamA = document.getElementById("teamAField");
     var teamB = document.getElementById("teamBField");
     var brWinners = document.getElementById("brWinnersField");
@@ -1876,13 +1932,11 @@ function handleScreenshotSelect(event) {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
         showToast("Image too large. Max 5MB.", "error");
-        event.target.value = "";
-        return;
+        event.target.value = ""; return;
     }
     if (!file.type.match(/^image\//)) {
         showToast("Please select an image file.", "error");
-        event.target.value = "";
-        return;
+        event.target.value = ""; return;
     }
     document.getElementById("screenshotLoading").style.display = "block";
     var reader = new FileReader();
@@ -1892,13 +1946,9 @@ function handleScreenshotSelect(event) {
             var maxW = 1200;
             var w = img.width;
             var h = img.height;
-            if (w > maxW) {
-                h = Math.round(h * maxW / w);
-                w = maxW;
-            }
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
             var canvas = document.createElement("canvas");
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = w; canvas.height = h;
             var ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, w, h);
             var compressed = canvas.toDataURL("image/jpeg", 0.85);
@@ -1936,6 +1986,12 @@ function resetScreenshotArea() {
     document.getElementById("screenshotArea").classList.remove("has-image");
 }
 
+function resetTopKillerFields() {
+    document.getElementById("matchTopKiller").innerHTML =
+        '<option value="">Not decided yet</option>';
+    document.getElementById("matchTopKillerKills").value = 0;
+}
+
 function openAddMatch() {
     editingMatchId = null;
     document.getElementById("matchModalTitle").textContent = "Add Match";
@@ -1944,6 +2000,7 @@ function openAddMatch() {
     document.getElementById("matchScoreB").value = 0;
     document.getElementById("matchStatus").value = "Scheduled";
     resetScreenshotArea();
+    resetTopKillerFields();
     populateMatchTournaments();
     selectMatchType("1v1");
     document.getElementById("matchModal").classList.add("show");
@@ -1981,6 +2038,14 @@ function openEditMatch(id) {
         currentScreenshot = m.screenshot;
         showScreenshotPreview(m.screenshot);
     }
+
+    /* Top Killer prefill */
+    updateTopKillerOptions();
+    if (m.topKiller) {
+        document.getElementById("matchTopKiller").value = m.topKiller;
+    }
+    document.getElementById("matchTopKillerKills").value = safeNum(m.topKillerKills, 0);
+
     document.getElementById("matchModal").classList.add("show");
 }
 
@@ -2021,7 +2086,9 @@ function saveMatch(event) {
         status: document.getElementById("matchStatus").value,
         result: document.getElementById("matchName").value.trim(),
         notes: document.getElementById("matchNotes").value.trim(),
-        screenshot: currentScreenshot || ""
+        screenshot: currentScreenshot || "",
+        topKiller: document.getElementById("matchTopKiller").value,
+        topKillerKills: Number(document.getElementById("matchTopKillerKills").value || 0)
     };
 
     if (currentMatchType === "battle-royale") {
@@ -2387,6 +2454,7 @@ document.getElementById("matchTournament").addEventListener("change", function (
     } else {
         populateMatchTeams();
     }
+    updateTopKillerOptions();
 });
 document.getElementById("matchTeamA").addEventListener("change", updateMatchWinnerOptions);
 document.getElementById("matchTeamB").addEventListener("change", updateMatchWinnerOptions);
