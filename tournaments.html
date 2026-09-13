@@ -1,591 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Tournaments</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    min-height: 100vh;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #070b14;
-    color: #ffffff;
-}
-header {
-    width: 100%;
-    background: #080c15;
-    border-bottom: 1px solid #20283a;
-}
-.header-inner {
-    max-width: 1200px;
-    margin: auto;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-}
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: #ffffff;
-    font-size: 25px;
-    font-weight: 800;
-}
-.logo span { color: #8b4dff; }
-.logo-mark {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #7640ff, #4d6fff);
-    font-weight: 900;
-}
-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-nav a {
-    color: #aeb7ca;
-    text-decoration: none;
-    padding: 11px 15px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-}
-nav a:hover { color: #ffffff; background: #151b2b; }
-nav a.active { color: #ffffff; background: #24154d; border: 1px solid #6539c7; }
-
-.hero { max-width: 1200px; margin: auto; padding: 70px 20px 40px; }
-.hero-label {
-    display: inline-block;
-    padding: 8px 13px;
-    border: 1px solid #5935a9;
-    border-radius: 20px;
-    color: #b992ff;
-    background: #160e2d;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 18px;
-}
-.hero h1 { font-size: 52px; line-height: 1.05; margin-bottom: 18px; }
-.hero h1 span { color: #8b4dff; }
-.hero p { max-width: 700px; color: #9ca6ba; font-size: 17px; line-height: 1.7; }
-
-.filters {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px 35px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.filter-btn {
-    border: 1px solid #29334a;
-    background: #0d1321;
-    color: #aeb7ca;
-    padding: 11px 17px;
-    border-radius: 9px;
-    cursor: pointer;
-    font-weight: 700;
-}
-.filter-btn:hover { border-color: #6d3ddd; color: #ffffff; }
-.filter-btn.active {
-    background: linear-gradient(135deg, #7a36ff, #5630d8);
-    color: #ffffff;
-    border-color: #8b55ff;
-}
-
-.tournament-section {
-    max-width: 1200px;
-    margin: auto;
-    padding: 0 20px 70px;
-}
-.section-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    gap: 15px;
-}
-.section-heading h2 { font-size: 26px; }
-.tournament-count { color: #7f8ba3; font-size: 14px; }
-
-.tournament-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.tournament-card {
-    background: #101725;
-    border: 1px solid #263149;
-    border-radius: 16px;
-    padding: 22px;
-    transition: transform 0.2s, border-color 0.2s;
-    display: flex;
-    flex-direction: column;
-}
-.tournament-card:hover {
-    transform: translateY(-4px);
-    border-color: #7542e4;
-}
-
-.game-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-.game-badge {
-    color: #b9c3d7;
-    font-size: 13px;
-    font-weight: 800;
-}
-.game-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #8b4dff;
-    margin-right: 6px;
-}
-.status-badge {
-    padding: 6px 9px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 800;
-}
-.status-open { background: #102c21; color: #57df9c; }
-.status-closed { background: #32171b; color: #ff7777; }
-.status-upcoming { background: #29200e; color: #ffc857; }
-.status-completed { background: #1d2230; color: #929db3; }
-
-.tournament-card h3 {
-    font-size: 20px;
-    line-height: 1.35;
-    margin-bottom: 12px;
-}
-.description {
-    color: #929db0;
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 45px;
-    margin-bottom: 20px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.info-item {
-    background: #0b111e;
-    border: 1px solid #1d273a;
-    border-radius: 9px;
-    padding: 11px;
-}
-.info-label { color: #738098; font-size: 11px; margin-bottom: 5px; }
-.info-value { color: #e5e9f1; font-size: 13px; font-weight: 700; }
-.prize-value { color: #b98aff; }
-
-.card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-top: auto;
-}
-.teams-info { color: #7f8ba3; font-size: 12px; }
-.teams-info strong { color: #ffffff; font-size: 14px; }
-
-.card-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.details-btn {
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    border: 1px solid #6539c7;
-    background: transparent;
-    border-radius: 9px;
-    padding: 11px 16px;
-    color: #b992ff;
-    font-weight: 800;
-    cursor: pointer;
-    font-size: 13px;
-}
-.details-btn:hover { background: #24154d; color: white; }
-
-.register-btn {
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    border: none;
-    border-radius: 9px;
-    padding: 12px 18px;
-    background: linear-gradient(135deg, #803cff, #5726d8);
-    color: #ffffff;
-    font-weight: 800;
-    cursor: pointer;
-    font-size: 13px;
-}
-.register-btn:hover { filter: brightness(1.15); }
-.register-btn.disabled {
-    background: #252c3b;
-    color: #737d91;
-    cursor: not-allowed;
-}
-
-.loading-message,
-.empty-message,
-.error-message {
-    grid-column: 1 / -1;
-    min-height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    color: #8994a9;
-    background: #101725;
-    border: 1px solid #263149;
-    border-radius: 16px;
-    padding: 30px;
-}
-.error-message { color: #ff7474; }
-.loading-spinner {
-    width: 35px;
-    height: 35px;
-    border: 4px solid #252e43;
-    border-top-color: #8b4dff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 15px;
-}
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-footer {
-    border-top: 1px solid #1d2638;
-    color: #667188;
-    text-align: center;
-    padding: 28px 20px;
-    font-size: 13px;
-}
-
-@media (max-width: 900px) {
-    .tournament-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 650px) {
-    .header-inner { align-items: flex-start; flex-direction: column; }
-    nav { width: 100%; }
-    .hero h1 { font-size: 38px; }
-    .tournament-grid { grid-template-columns: 1fr; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winners - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #b45309; }
+        .winner-card { transition: transform 0.2s; }
+        .winner-card:hover { transform: translateY(-5px); }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<header>
-    <div class="header-inner">
-        <a href="index.html" class="logo">
-            <div class="logo-mark">NP</div>
-            NEP<span>PLAY</span>
-        </a>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="tournaments.html" class="active">Tournaments</a>
-            <a href="leaderboard.html">Leaderboard</a>
-            <a href="teams.html">Teams</a>
-            <a href="winners.html">Winners</a>
-            <a href="login.html">Login</a>
-        </nav>
-    </div>
-</header>
-
-<section class="hero">
-    <div class="hero-label">NEPPLAY TOURNAMENTS</div>
-    <h1>Compete. <span>Win.</span> Repeat.</h1>
-    <p>
-        Join gaming tournaments across Nepal,
-        compete with the best players and teams,
-        and prove your skills.
-    </p>
-</section>
-
-<div class="filters">
-    <button type="button" class="filter-btn active" data-filter="all">All</button>
-    <button type="button" class="filter-btn" data-filter="Free Fire">Free Fire</button>
-    <button type="button" class="filter-btn" data-filter="PUBG Mobile">PUBG Mobile</button>
-    <button type="button" class="filter-btn" data-filter="Mobile Legends">Mobile Legends</button>
-    <button type="button" class="filter-btn" data-filter="eFootball">eFootball</button>
-</div>
-
-<section class="tournament-section">
-    <div class="section-heading">
-        <h2>Available Tournaments</h2>
-        <div class="tournament-count" id="tournamentCount">Loading...</div>
-    </div>
-    <div class="tournament-grid" id="tournamentGrid">
-        <div class="loading-message">
-            <div class="loading-spinner"></div>
-            Loading tournaments...
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
         </div>
-    </div>
-</section>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="winners.html" class="text-sm text-blue-400 font-bold">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
+    </nav>
 
-<footer>
-    © 2026 NEPPLAY — Nepal Gaming Community
-</footer>
+    <main class="flex-grow container mx-auto p-6">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-3"></i>Hall of Winners</h1>
+            <p class="text-gray-400">Celebrating the top players and their prize winnings.</p>
+        </div>
 
-<script>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end">
+            <div class="glass-panel winner-card rounded-xl p-6 text-center order-2 md:order-1 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400"><i class="fa-solid fa-user text-2xl text-gray-300"></i></div>
+                <h3 class="text-xl font-bold text-white">Sujal Thapa</h3>
+                <p class="text-sm text-gray-400 mb-2">Free Fire Solo Cup</p>
+                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 300</div>
+            </div>
+            <div class="glass-panel winner-card rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
+                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2"><i class="fa-solid fa-crown text-3xl text-yellow-500"></i></div>
+                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500"><i class="fa-solid fa-user text-3xl text-yellow-500"></i></div>
+                <h3 class="text-2xl font-bold text-white">Rahul Sharma</h3>
+                <p class="text-sm text-gray-400 mb-2">PUBG Mobile Squad</p>
+                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
+                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500">Rs. 1,000</div>
+            </div>
+            <div class="glass-panel winner-card rounded-xl p-6 text-center order-3 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700"><i class="fa-solid fa-user text-2xl text-orange-400"></i></div>
+                <h3 class="text-xl font-bold text-white">Bibek Gurung</h3>
+                <p class="text-sm text-gray-400 mb-2">Clash of Clans War</p>
+                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 200</div>
+            </div>
+        </div>
 
-var tournamentGrid = document.getElementById("tournamentGrid");
-var tournamentCount = document.getElementById("tournamentCount");
-var allTournaments = [];
-var currentFilter = "all";
+        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recent Winners</h2>
+                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Updated Live</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                        <tr>
+                            <th class="px-6 py-3">Player</th>
+                            <th class="px-6 py-3">Tournament</th>
+                            <th class="px-6 py-3">Rank</th>
+                            <th class="px-6 py-3">Prize Won</th>
+                            <th class="px-6 py-3">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winners-table-body" class="divide-y divide-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-function escapeHTML(value) {
-    if (value === null || value === undefined) return "";
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+    <script>
+        const winnersData = [
+            { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
+            { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
+            { player: "Bibek Gurung", tournament: "Clash of Clans War", rank: "#3", prize: 200, date: "2023-10-25" },
+            { player: "Anish Rai", tournament: "Free Fire Solo Cup", rank: "#1", prize: 500, date: "2023-10-20" },
+            { player: "Kiran Shah", tournament: "Valorant Night Cup", rank: "#1", prize: 1500, date: "2023-10-15" },
+            { player: "Sita Karki", tournament: "Ludo King Championship", rank: "#2", prize: 400, date: "2023-10-10" }
+        ];
 
-function getValue(tournament, keys, fallback) {
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        if (tournament[key] !== undefined && tournament[key] !== null && tournament[key] !== "") {
-            return tournament[key];
+        function loadWinners() {
+            const tableBody = document.getElementById('winners-table-body');
+            winnersData.forEach(winner => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                let rankClass = "text-gray-300";
+                let rankIcon = "";
+                if(winner.rank === "#1") { rankClass = "text-yellow-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
+                else if(winner.rank === "#2") { rankClass = "text-gray-300 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
+                else if(winner.rank === "#3") { rankClass = "text-orange-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">${winner.player.charAt(0)}</div>
+                        ${winner.player}
+                    </td>
+                    <td class="px-6 py-4">${winner.tournament}</td>
+                    <td class="px-6 py-4 ${rankClass}">${rankIcon}${winner.rank}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${winner.prize}</td>
+                    <td class="px-6 py-4 text-gray-500">${winner.date}</td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
-    }
-    return fallback;
-}
-
-function formatDate(value) {
-    if (!value) return "Not set";
-    var date = new Date(value);
-    if (isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString("en-NP", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function formatTime(value) {
-    if (!value) return "Not set";
-    return String(value);
-}
-
-function formatMoney(value) {
-    if (value === null || value === undefined || value === "" || value === "Not set") return "Not set";
-    if (String(value).toLowerCase() === "free") return "Free";
-    var number = Number(value);
-    if (!isNaN(number)) return "Rs. " + number.toLocaleString("en-NP");
-    return String(value);
-}
-
-function normalizeGame(value) {
-    var game = String(value || "").trim();
-    var lower = game.toLowerCase();
-    if (lower === "freefire" || lower === "free fire") return "Free Fire";
-    if (lower === "pubg" || lower === "pubg mobile") return "PUBG Mobile";
-    if (lower === "mobile legends" || lower === "mlbb") return "Mobile Legends";
-    if (lower === "efootball" || lower === "e-football") return "eFootball";
-    return game;
-}
-
-function getStatusClass(status) {
-    var value = String(status || "").toLowerCase();
-    if (value === "open") return "status-open";
-    if (value === "closed") return "status-closed";
-    if (value === "completed") return "status-completed";
-    return "status-upcoming";
-}
-
-function loadTournaments() {
-    tournamentGrid.innerHTML =
-        '<div class="loading-message">' +
-            '<div class="loading-spinner"></div>' +
-            'Loading tournaments...' +
-        '</div>';
-    tournamentCount.textContent = "Loading...";
-
-    fetch("/api/tournaments", { method: "GET", cache: "no-store", credentials: "same-origin" })
-        .then(function (response) {
-            if (!response.ok) throw new Error("HTTP " + response.status);
-            return response.json();
-        })
-        .then(function (data) {
-            if (Array.isArray(data)) allTournaments = data;
-            else if (data && Array.isArray(data.tournaments)) allTournaments = data.tournaments;
-            else allTournaments = [];
-            renderTournaments();
-        })
-        .catch(function (error) {
-            tournamentCount.textContent = "Error";
-            tournamentGrid.innerHTML =
-                '<div class="error-message">' +
-                    '<strong>Unable to load tournaments</strong><br><br>' +
-                    'The NEPPLAY server could not load tournament data.<br><br>' +
-                    '<button type="button" class="register-btn" onclick="loadTournaments()">Try Again</button>' +
-                '</div>';
-        });
-}
-
-function renderTournaments() {
-    var tournaments = allTournaments.slice();
-    if (currentFilter !== "all") {
-        tournaments = tournaments.filter(function (tournament) {
-            var game = normalizeGame(getValue(tournament, ["game", "gameName"], ""));
-            return game === currentFilter;
-        });
-    }
-
-    tournamentCount.textContent = tournaments.length +
-        (tournaments.length === 1 ? " tournament" : " tournaments");
-
-    if (tournaments.length === 0) {
-        tournamentGrid.innerHTML =
-            '<div class="empty-message">' +
-                '<strong>No tournaments found</strong><br><br>' +
-                'There are currently no tournaments in this category.' +
-            '</div>';
-        return;
-    }
-
-    tournamentGrid.innerHTML = tournaments.map(createTournamentCard).join("");
-}
-
-function createTournamentCard(tournament) {
-    var id = getValue(tournament, ["id", "_id", "tournamentId"], "");
-    var name = getValue(tournament, ["name", "title", "tournamentName"], "NEPPLAY Tournament");
-    var game = normalizeGame(getValue(tournament, ["game", "gameName"], "Gaming Tournament"));
-    var description = getValue(tournament, ["description", "details"], "Join this NEPPLAY tournament and compete for the prize.");
-
-    var dateValue = getValue(tournament, ["date", "tournamentDate", "startDate", "eventDate"], "");
-    var timeValue = getValue(tournament, ["time", "tournamentTime", "startTime"], "");
-
-    var entryFee = getValue(tournament, ["entryFee", "entry_fee", "fee", "registrationFee"], "Free");
-    var teamSize = getValue(tournament, ["teamSize", "team_size", "playersPerTeam"], "Not set");
-    var maxTeams = getValue(tournament, ["maxTeams", "max_teams", "maximumTeams", "teamLimit"], "Not set");
-    var prizePool = getValue(tournament, ["prizePool", "prize_pool", "prize", "totalPrize"], "Not set");
-    var status = getValue(tournament, ["status", "registrationStatus"], "Open");
-    var registeredTeams = getValue(tournament, ["registeredTeams", "teamsRegistered", "currentTeams"], 0);
-
-    var formattedDate = formatDate(dateValue);
-    var formattedTime = formatTime(timeValue);
-    var formattedFee = String(entryFee).toLowerCase() === "free" ? "Free" : formatMoney(entryFee);
-    var formattedPrize = formatMoney(prizePool);
-    var statusClass = getStatusClass(status);
-
-    var isDisabled =
-        String(status).toLowerCase() === "closed" ||
-        String(status).toLowerCase() === "completed";
-
-    /* Details URL — use ID if available, else name */
-    var detailsKey = id || name;
-    var detailsURL = "tournament.html?id=" + encodeURIComponent(detailsKey);
-
-    /* Register URL — uses id + game + name */
-    var registerURL = "registration.html" +
-        "?game=" + encodeURIComponent(game) +
-        "&tournamentId=" + encodeURIComponent(id || name) +
-        "&tournament=" + encodeURIComponent(name);
-
-    var registerButtonHTML;
-    if (isDisabled) {
-        registerButtonHTML = '<span class="register-btn disabled">Registration Closed</span>';
-    } else {
-        registerButtonHTML = '<a class="register-btn" href="' + escapeHTML(registerURL) + '">Register Now</a>';
-    }
-
-    return '<article class="tournament-card">' +
-
-        '<div class="game-row">' +
-            '<div class="game-badge">' +
-                '<span class="game-dot"></span>' +
-                escapeHTML(game) +
-            '</div>' +
-            '<div class="status-badge ' + statusClass + '">' +
-                escapeHTML(status) +
-            '</div>' +
-        '</div>' +
-
-        '<h3>' + escapeHTML(name) + '</h3>' +
-
-        '<div class="description">' + escapeHTML(description) + '</div>' +
-
-        '<div class="info-grid">' +
-            '<div class="info-item">' +
-                '<div class="info-label">Date</div>' +
-                '<div class="info-value">' + escapeHTML(formattedDate) + '</div>' +
-            '</div>' +
-            '<div class="info-item">' +
-                '<div class="info-label">Time</div>' +
-                '<div class="info-value">' + escapeHTML(formattedTime) + '</div>' +
-            '</div>' +
-            '<div class="info-item">' +
-                '<div class="info-label">Entry Fee</div>' +
-                '<div class="info-value">' + escapeHTML(formattedFee) + '</div>' +
-            '</div>' +
-            '<div class="info-item">' +
-                '<div class="info-label">Team Size</div>' +
-                '<div class="info-value">' + escapeHTML(teamSize) + '</div>' +
-            '</div>' +
-            '<div class="info-item">' +
-                '<div class="info-label">Max Teams</div>' +
-                '<div class="info-value">' + escapeHTML(maxTeams) + '</div>' +
-            '</div>' +
-            '<div class="info-item">' +
-                '<div class="info-label">Prize Pool</div>' +
-                '<div class="info-value prize-value">' + escapeHTML(formattedPrize) + '</div>' +
-            '</div>' +
-        '</div>' +
-
-        '<div class="card-bottom">' +
-            '<div class="teams-info">' +
-                '<strong>' + escapeHTML(registeredTeams) + '</strong> / ' +
-                escapeHTML(maxTeams) + ' teams registered' +
-            '</div>' +
-            '<div class="card-actions">' +
-                '<a class="details-btn" href="' + escapeHTML(detailsURL) + '">Details</a>' +
-                registerButtonHTML +
-            '</div>' +
-        '</div>' +
-
-    '</article>';
-}
-
-var filterButtons = document.querySelectorAll(".filter-btn");
-for (var i = 0; i < filterButtons.length; i++) {
-    filterButtons[i].addEventListener("click", function () {
-        for (var j = 0; j < filterButtons.length; j++) {
-            filterButtons[j].classList.remove("active");
-        }
-        this.classList.add("active");
-        currentFilter = this.getAttribute("data-filter");
-        renderTournaments();
-    });
-}
-
-loadTournaments();
-
-</script>
-
+        document.addEventListener('DOMContentLoaded', loadWinners);
+    </script>
 </body>
 </html>
