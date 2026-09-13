@@ -18,14 +18,11 @@
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
-        /* Announcement Card Animation */
-        .announcement-card {
-            transition: all 0.3s;
-        }
-        .announcement-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
-        }
+        .announcement-card { transition: all 0.3s; }
+        .announcement-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2); }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+        .empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -123,74 +120,69 @@
                 <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
                     <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
+                    <p class="text-xs text-gray-500 mt-2" id="earnings-subtitle">No winnings yet</p>
                 </div>
                 <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
                     <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
+                    <p class="text-xs text-gray-500 mt-2" id="matches-subtitle">No registrations yet</p>
                 </div>
                 <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
                     <p class="text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
+                    <p class="text-xs text-gray-500 mt-2">Ongoing events</p>
                 </div>
             </div>
 
-            <!-- Announcements (Dynamic with Images) -->
+            <!-- Announcements -->
             <div class="glass-panel rounded-xl shadow-lg mb-8 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Latest Announcements</h2>
                     <p class="text-xs text-gray-400 mt-1">Stay updated with the latest news from Nepal Gaming</p>
                 </div>
-                <div id="announcements-container" class="p-6 space-y-4">
-                    <!-- Announcements injected via JS -->
-                </div>
+                <div id="announcements-container" class="p-6 space-y-4"></div>
             </div>
 
-            <!-- Upcoming Tournaments -->
+            <!-- Upcoming Tournaments (Real User Data) -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
-                    <p class="text-sm text-gray-400 mt-1">Tournaments you have registered for but haven't played yet.</p>
+                    <p class="text-sm text-gray-400 mt-1">Tournaments you have registered for.</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
                                 <th class="px-6 py-3">Tournament Name</th>
-                                <th class="px-6 py-3">Date & Time</th>
+                                <th class="px-6 py-3">Registered</th>
                                 <th class="px-6 py-3">Entry Fee</th>
                                 <th class="px-6 py-3">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            <tr class="hover:bg-gray-800/50 transition">
-                                <td class="px-6 py-4 font-medium text-white">Valorant Night Cup</td>
-                                <td class="px-6 py-4">2023-11-20 08:00 PM</td>
-                                <td class="px-6 py-4">Rs. 100</td>
-                                <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i> Upcoming</span></td>
-                            </tr>
-                            <tr class="hover:bg-gray-800/50 transition">
-                                <td class="px-6 py-4 font-medium text-white">PUBG Mobile Solo</td>
-                                <td class="px-6 py-4">2023-11-22 07:30 PM</td>
-                                <td class="px-6 py-4">Rs. 50</td>
-                                <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i> Upcoming</span></td>
-                            </tr>
-                        </tbody>
+                        <tbody id="upcoming-table-body" class="divide-y divide-gray-700"></tbody>
                     </table>
+                </div>
+                <div id="empty-upcoming" class="empty-state hidden">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <p class="text-lg font-bold text-white mb-1">No upcoming tournaments</p>
+                    <p class="text-sm mb-4">Register for a tournament to see it here.</p>
+                    <a href="tournaments.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-trophy mr-2"></i>Browse Tournaments
+                    </a>
                 </div>
             </div>
 
-            <!-- Tournament History -->
+            <!-- Tournament History (Real User Wins) -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
-                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
-                    <p class="text-sm text-gray-400 mt-1">Track your past participation and prize payment status.</p>
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings History</h2>
+                    <p class="text-sm text-gray-400 mt-1">Tournaments you've won prizes in and their payment status.</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
-                                <th class="px-6 py-3">Tournament Name</th>
-                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3">Tournament</th>
                                 <th class="px-6 py-3">Rank</th>
                                 <th class="px-6 py-3">Prize Amount</th>
                                 <th class="px-6 py-3">Payment Status</th>
@@ -199,6 +191,11 @@
                         <tbody id="history-table-body" class="divide-y divide-gray-700"></tbody>
                     </table>
                 </div>
+                <div id="empty-history" class="empty-state hidden">
+                    <i class="fa-solid fa-trophy"></i>
+                    <p class="text-lg font-bold text-white mb-1">No winnings yet</p>
+                    <p class="text-sm">Win a tournament to see your prize history here.</p>
+                </div>
             </div>
         </main>
     </div>
@@ -206,6 +203,10 @@
     <script>
         console.log("--- MEMBER PAGE LOADED ---");
 
+        // Store current user globally
+        let currentUser = null;
+
+        // ================= LOGIN =================
         function handleLogin(event) {
             event.preventDefault();
             const usernameInput = document.getElementById('username').value;
@@ -218,9 +219,16 @@
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
                 msgBox.innerText = "Login successful. Opening dashboard...";
-                const user = { username: usernameInput };
+                
+                // Create user object with unique ID for this user
+                const user = { 
+                    username: usernameInput,
+                    email: usernameInput + "@gmail.com", // Default email if not provided
+                    loginAt: new Date().toISOString()
+                };
                 localStorage.setItem('currentUser', JSON.stringify(user));
-                setTimeout(() => showDashboard(user), 1000);
+                
+                setTimeout(() => showDashboard(user), 800);
             } else {
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
@@ -229,6 +237,7 @@
         }
 
         function showDashboard(user) {
+            currentUser = user;
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
             
@@ -237,58 +246,187 @@
             document.getElementById('dropdown-username').textContent = user.email || user.username;
             
             loadDashboardData();
-            loadAnnouncements(); // ← Load announcements with images
+            loadAnnouncements();
         }
 
-        window.onload = function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser) showDashboard(currentUser);
-        }
+        // ================= LOAD REAL USER DATA =================
+        function loadDashboardData() {
+            if (!currentUser) return;
 
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
-        }
+            const username = currentUser.username.toLowerCase();
+            console.log("Loading real data for user:", username);
 
-        document.addEventListener('click', function(e) {
-            const profile = document.getElementById('user-profile');
-            const dropdown = document.getElementById('profile-dropdown');
-            if (profile && !profile.contains(e.target)) {
-                dropdown.classList.remove('open');
+            // 1. Get this user's registrations
+            const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+            const userRegistrations = allRegistrations.filter(
+                r => r.username.toLowerCase() === username
+            );
+
+            // 2. Get this user's payouts (wins)
+            const allPayouts = JSON.parse(localStorage.getItem('payouts') || '[]');
+            const userPayouts = allPayouts.filter(
+                p => p.username.toLowerCase() === username
+            );
+
+            // 3. Calculate total earnings (only PAID wins)
+            const paidWins = userPayouts.filter(p => p.status === 'paid');
+            const totalEarnings = paidWins.reduce((sum, p) => sum + p.prize, 0);
+
+            // 4. Count matches played (unique tournaments registered)
+            const uniqueTournaments = new Set(userRegistrations.map(r => r.tournamentName));
+            const matchesPlayed = uniqueTournaments.size;
+
+            // 5. Update stats cards
+            document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
+            document.getElementById('matches-played').textContent = matchesPlayed;
+
+            // Update subtitles with real context
+            const earningsSubtitle = document.getElementById('earnings-subtitle');
+            const matchesSubtitle = document.getElementById('matches-subtitle');
+
+            if (totalEarnings > 0) {
+                earningsSubtitle.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize${paidWins.length > 1 ? 's' : ''} won`;
+                earningsSubtitle.className = "text-xs text-green-400 mt-2";
+            } else if (userPayouts.length > 0) {
+                earningsSubtitle.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${userPayouts.length} pending payout${userPayouts.length > 1 ? 's' : ''}`;
+                earningsSubtitle.className = "text-xs text-yellow-400 mt-2";
+            } else {
+                earningsSubtitle.textContent = "No winnings yet";
+                earningsSubtitle.className = "text-xs text-gray-500 mt-2";
             }
-        });
 
-        // ================= ANNOUNCEMENTS (with images!) =================
+            if (matchesPlayed > 0) {
+                matchesSubtitle.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> Registered for ${matchesPlayed} tournament${matchesPlayed > 1 ? 's' : ''}`;
+                matchesSubtitle.className = "text-xs text-blue-400 mt-2";
+            } else {
+                matchesSubtitle.textContent = "No registrations yet";
+                matchesSubtitle.className = "text-xs text-gray-500 mt-2";
+            }
+
+            // 6. Count active tournaments from admin (available to register)
+            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+            document.getElementById('active-tournaments').textContent = customTournaments.length;
+
+            // 7. Render upcoming tournaments (this user's registrations)
+            renderUpcomingTournaments(userRegistrations);
+
+            // 8. Render winnings history (this user's payouts)
+            renderWinningsHistory(userPayouts);
+
+            console.log(`Stats loaded: Rs. ${totalEarnings}, ${matchesPlayed} matches, ${userPayouts.length} payouts`);
+        }
+
+        // ================= RENDER UPCOMING TOURNAMENTS =================
+        function renderUpcomingTournaments(registrations) {
+            const tbody = document.getElementById('upcoming-table-body');
+            const emptyState = document.getElementById('empty-upcoming');
+            const tableContainer = tbody.closest('.overflow-x-auto');
+
+            if (registrations.length === 0) {
+                tableContainer.style.display = 'none';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            tableContainer.style.display = 'block';
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = '';
+
+            // Get entry fees for tournaments
+            const defaultFees = {
+                "Free Fire Solo Cup #12": 50,
+                "PUBG Squad Championship": 100,
+                "Valorant Night Cup": 100,
+                "COD Mobile Battle Royale": 75,
+                "Free Fire Duo Cup": 40,
+                "PUBG Solo Showdown": 60
+            };
+            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+
+            // Remove duplicates (one row per tournament)
+            const uniqueRegs = [];
+            const seen = new Set();
+            [...registrations].reverse().forEach(r => {
+                if (!seen.has(r.tournamentName)) {
+                    seen.add(r.tournamentName);
+                    uniqueRegs.push(r);
+                }
+            });
+
+            uniqueRegs.forEach(reg => {
+                let entryFee = defaultFees[reg.tournamentName];
+                if (!entryFee) {
+                    const custom = customTournaments.find(t => t.name === reg.tournamentName);
+                    entryFee = custom ? custom.entryFee : 0;
+                }
+
+                const regDate = new Date(reg.registeredAt);
+                const dateStr = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${reg.tournamentName}</td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">${dateStr}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${entryFee}</td>
+                    <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i>Upcoming</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ================= RENDER WINNINGS HISTORY =================
+        function renderWinningsHistory(payouts) {
+            const tbody = document.getElementById('history-table-body');
+            const emptyState = document.getElementById('empty-history');
+            const tableContainer = tbody.closest('.overflow-x-auto');
+
+            if (payouts.length === 0) {
+                tableContainer.style.display = 'none';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            tableContainer.style.display = 'block';
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = '';
+
+            [...payouts].reverse().forEach(p => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                
+                const statusHtml = p.status === 'paid'
+                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i>Paid</span>`
+                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i>Pending</span>`;
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${p.tournament}</td>
+                    <td class="px-6 py-4 text-yellow-400 font-bold">${p.rank}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${p.prize}</td>
+                    <td class="px-6 py-4">${statusHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ================= ANNOUNCEMENTS =================
         function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             if (!container) return;
 
             const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
             
-            // If no custom announcements from admin, show default ones
             if (announcements.length === 0) {
                 container.innerHTML = `
                     <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
                         <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">New "Valorant Night Cup" registration is now open!</span>
-                    </div>
-                    <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
-                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">Prize distribution for Free Fire Solo Cup will happen this Friday.</span>
-                    </div>
-                    <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
-                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">Server maintenance scheduled for Sunday 2 AM - 4 AM.</span>
+                        <span class="text-sm text-gray-300">Welcome to Nepal Gaming! Check back soon for tournament announcements.</span>
                     </div>
                 `;
-                console.log("No admin announcements. Showing defaults.");
                 return;
             }
 
-            const colorMap = { 
-                normal: 'border-blue-500', 
-                high: 'border-yellow-500', 
-                urgent: 'border-red-500' 
-            };
+            const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
             const iconMap = {
                 normal: 'fa-info-circle text-blue-400',
                 high: 'fa-exclamation-triangle text-yellow-400',
@@ -296,8 +434,6 @@
             };
 
             container.innerHTML = '';
-            
-            // Show latest announcements first (reverse order)
             [...announcements].reverse().forEach(a => {
                 const card = document.createElement('div');
                 card.className = `announcement-card bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colorMap[a.priority] || 'border-blue-500'}`;
@@ -313,60 +449,39 @@
                 card.innerHTML = `
                     ${imageHtml}
                     <div class="p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-start gap-3 flex-grow">
-                                <i class="fa-solid ${iconMap[a.priority] || 'fa-info-circle'} mt-0.5"></i>
-                                <div class="flex-grow">
-                                    <h3 class="font-bold text-white text-sm">${a.title}</h3>
-                                    <p class="text-sm text-gray-300 mt-2 leading-relaxed">${a.message}</p>
-                                </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid ${iconMap[a.priority] || 'fa-info-circle'} mt-0.5"></i>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-white text-sm">${a.title}</h3>
+                                <p class="text-sm text-gray-300 mt-2 leading-relaxed">${a.message}</p>
+                                <p class="text-xs text-gray-500 mt-3"><i class="fa-regular fa-clock mr-1"></i>${date}</p>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-3 pl-7"><i class="fa-regular fa-clock mr-1"></i>${date}</p>
                     </div>
                 `;
                 container.appendChild(card);
             });
-
-            console.log("Loaded", announcements.length, "announcements");
         }
 
-        // ================= DASHBOARD DATA =================
-        function loadDashboardData() {
-            const mockHistory = [
-                { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
-                { name: "PUBG Mobile Squad", date: "2023-10-28", rank: "#3", prize: 200, status: "Pending" },
-                { name: "Clash of Clans War", date: "2023-11-01", rank: "#2", prize: 300, status: "Paid" },
-                { name: "Valorant Night Cup", date: "2023-11-05", rank: "#1", prize: 1500, status: "Paid" },
-                { name: "Ludo King Championship", date: "2023-11-10", rank: "#4", prize: 0, status: "Pending" },
-                { name: "COD Mobile Battle", date: "2023-11-12", rank: "#2", prize: 400, status: "Paid" }
-            ];
+        // ================= INIT =================
+        window.onload = function() {
+            const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (storedUser) {
+                showDashboard(storedUser);
+            }
+        };
 
-            let totalEarnings = 0;
-            const tableBody = document.getElementById('history-table-body');
-            tableBody.innerHTML = '';
-
-            mockHistory.forEach(item => {
-                if(item.status === "Paid") totalEarnings += item.prize;
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
-                let statusHtml = item.status === "Paid" 
-                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`
-                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white">${item.name}</td>
-                    <td class="px-6 py-4">${item.date}</td>
-                    <td class="px-6 py-4">${item.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${item.prize}</td>
-                    <td class="px-6 py-4">${statusHtml}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            document.getElementById('total-earnings').textContent = totalEarnings;
-            document.getElementById('matches-played').textContent = mockHistory.length;
-            document.getElementById('active-tournaments').textContent = "2";
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
         }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
 
         function logout() {
             localStorage.removeItem('currentUser');
