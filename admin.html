@@ -55,12 +55,90 @@
         .detail-label { color: #94a3b8; font-size: 0.75rem; }
         .detail-value { color: #e2e8f0; font-weight: 600; font-size: 0.8rem; }
 
+        /* Calculator Styles */
+        .calc-result-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15));
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s;
+        }
+        .calc-result-card.profit {
+            border-color: #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1));
+        }
+        .calc-result-card.prizepool {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
+        }
+        .calc-result-card.total {
+            border-color: #facc15;
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.1));
+        }
+        .prize-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #64748b;
+            transition: all 0.2s;
+        }
+        .prize-row:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateX(4px);
+        }
+        .prize-row.rank-1 { border-left-color: #facc15; }
+        .prize-row.rank-2 { border-left-color: #94a3b8; }
+        .prize-row.rank-3 { border-left-color: #ea580c; }
+        .prize-row.kills { border-left-color: #ec4899; }
+        .preset-btn {
+            padding: 6px 14px;
+            border-radius: 9999px;
+            border: 1px solid #334155;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        .preset-btn:hover {
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+        .preset-btn.active {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
         .shake { animation: shake 0.3s; }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #22c55e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            z-index: 10000;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
+        }
+        .copy-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -148,6 +226,7 @@
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
                     <ul class="space-y-1">
                         <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
+                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator <span class="ml-auto bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">NEW</span></a></li>
                         <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
                         <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
                         <li><a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-plus-circle w-5"></i> Add Tournament</a></li>
@@ -156,7 +235,7 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p>v1.5.1</p>
+                    <p>v1.6.0</p>
                     <p>&copy; 2023 Nepal Gaming</p>
                 </div>
             </aside>
@@ -194,24 +273,160 @@
                             <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick Actions</h2>
                         </div>
                         <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[3])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                            <button onclick="switchTab('calculator', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-calculator text-purple-500 text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-sm">Prize Calculator</p>
+                            </button>
+                            <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
                                 <i class="fa-solid fa-plus-circle text-green-500 text-2xl mb-2"></i>
                                 <p class="font-bold text-white text-sm">Add Tournament</p>
                             </button>
-                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[4])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
                                 <i class="fa-solid fa-clipboard-list text-blue-500 text-2xl mb-2"></i>
                                 <p class="font-bold text-white text-sm">View Registrations</p>
                             </button>
-                            <button onclick="switchTab('earnings', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                            <button onclick="switchTab('earnings', document.querySelectorAll('.sidebar-item')[2])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
                                 <i class="fa-solid fa-coins text-yellow-500 text-2xl mb-2"></i>
                                 <p class="font-bold text-white text-sm">View Earnings</p>
                             </button>
-                            <button onclick="switchTab('announcements', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-bullhorn text-yellow-500 text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-sm">Announcement</p>
-                            </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- ============ CALCULATOR (NEW!) ============ -->
+                <div id="tab-calculator" class="tab-content">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-calculator text-purple-500 mr-2"></i>Prize Pool Calculator</h1>
+                        <p class="text-gray-400 mt-1">Enter numbers → get instant prize breakdown + your profit</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- INPUT SIDE -->
+                        <div class="glass-panel rounded-xl p-6">
+                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Enter Tournament Details</h2>
+                            
+                            <!-- Preset Buttons -->
+                            <div class="mb-5">
+                                <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider">Quick Presets</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="preset-btn active" onclick="applyPreset('solo', this)">🎯 Solo (20p, Rs. 150)</button>
+                                    <button class="preset-btn" onclick="applyPreset('duo', this)">👥 Duo (20p, Rs. 200)</button>
+                                    <button class="preset-btn" onclick="applyPreset('squad', this)">👨‍👩‍👧‍👦 Squad (24p, Rs. 250)</button>
+                                    <button class="preset-btn" onclick="applyPreset('custom', this)">⚙️ Custom</button>
+                                </div>
+                            </div>
+
+                            <!-- Players -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Number of Players <span class="text-red-400">*</span></label>
+                                <input type="number" id="calc-players" class="form-input w-full px-4 py-3 rounded-lg" value="20" min="2" max="100" oninput="calculate()">
+                                <p class="text-xs text-gray-500 mt-1">Free Fire Solo: max 50. Duo/Squad: 24-48 players.</p>
+                            </div>
+
+                            <!-- Entry Fee -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee per Player (Rs.) <span class="text-red-400">*</span></label>
+                                <input type="number" id="calc-fee" class="form-input w-full px-4 py-3 rounded-lg" value="150" min="0" oninput="calculate()">
+                            </div>
+
+                            <!-- Profit % -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Your Profit % 
+                                    <span class="text-purple-400 font-bold" id="profitPercentLabel">30%</span>
+                                </label>
+                                <input type="range" id="calc-profit" min="10" max="50" value="30" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateProfitLabel(); calculate()">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>10% (generous)</span>
+                                    <span>30% (recommended)</span>
+                                    <span>50% (aggressive)</span>
+                                </div>
+                                <p class="text-xs text-yellow-400 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Recommended: 25-30% for first tournaments. Increase later.</p>
+                            </div>
+
+                            <!-- Top Kill Toggle -->
+                            <div class="mb-4 flex items-center gap-3">
+                                <input type="checkbox" id="calc-topkill" checked class="w-4 h-4 rounded" onchange="calculate()">
+                                <label for="calc-topkill" class="text-sm text-gray-300 cursor-pointer">Include separate Top Killer prize</label>
+                            </div>
+
+                            <!-- Distribution Style -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Prize Distribution Style</label>
+                                <select id="calc-style" class="form-input w-full px-4 py-3 rounded-lg" onchange="calculate()">
+                                    <option value="balanced" selected>Balanced (recommended for new organizers)</option>
+                                    <option value="winner">Winner Focused (bigger 1st prize)</option>
+                                    <option value="top3">Top 3 Only (no top kill)</option>
+                                </select>
+                            </div>
+
+                            <button onclick="copyBreakdown()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                                <i class="fa-solid fa-copy mr-2"></i>Copy Breakdown for WhatsApp
+                            </button>
+                        </div>
+
+                        <!-- RESULT SIDE -->
+                        <div class="space-y-4">
+
+                            <!-- Total Collected -->
+                            <div class="calc-result-card total">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-yellow-300 uppercase tracking-wider">Total Collected</p>
+                                        <p class="text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-total-formula">20 players × Rs. 150</p>
+                                    </div>
+                                    <i class="fa-solid fa-money-bill-wave text-4xl text-yellow-500 opacity-50"></i>
+                                </div>
+                            </div>
+
+                            <!-- Prize Pool -->
+                            <div class="calc-result-card prizepool">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-blue-300 uppercase tracking-wider">Prize Pool (Winners)</p>
+                                        <p class="text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-prizepool-formula">70% of total collection</p>
+                                    </div>
+                                    <i class="fa-solid fa-trophy text-4xl text-blue-500 opacity-50"></i>
+                                </div>
+                            </div>
+
+                            <!-- Your Profit -->
+                            <div class="calc-result-card profit">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-green-300 uppercase tracking-wider">💰 Your Profit</p>
+                                        <p class="text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-profit-formula">30% commission</p>
+                                    </div>
+                                    <i class="fa-solid fa-hand-holding-dollar text-4xl text-green-500 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRIZE BREAKDOWN -->
+                    <div class="glass-panel rounded-xl p-6 mt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
+                            <button onclick="pushToTournamentForm()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
+                                <i class="fa-solid fa-plus mr-2"></i>Create This Tournament
+                            </button>
+                        </div>
+                        <div id="prize-breakdown">
+                            <!-- Injected via JS -->
+                        </div>
+
+                        <div class="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                            <p class="text-xs text-purple-300">
+                                <i class="fa-solid fa-lightbulb mr-1"></i>
+                                <strong>Tip:</strong> Distribute prizes within 24 hours after the match ends. Post the payment screenshots in your WhatsApp group for transparency.
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- EARNINGS -->
@@ -421,7 +636,7 @@
                     </div>
                 </div>
 
-                <!-- REGISTRATIONS (DETAILED VIEW) -->
+                <!-- REGISTRATIONS -->
                 <div id="tab-registrations" class="tab-content">
                     <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
                         <div>
@@ -625,13 +840,17 @@
         </div>
     </div>
 
+    <!-- COPY TOAST -->
+    <div id="copyToast" class="copy-toast">
+        <i class="fa-solid fa-check mr-2"></i>Copied to clipboard!
+    </div>
+
     <script>
-        console.log("--- ADMIN PANEL LOADED v1.5.1 ---");
+        console.log("--- ADMIN PANEL LOADED v1.6 ---");
 
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
 
-        // ============ AUTH ============
         function handleAdminLogin(event) {
             event.preventDefault();
             const password = document.getElementById('adminPassword').value;
@@ -655,6 +874,7 @@
             document.getElementById('mainPanel').classList.remove('hidden');
             showAdminIdentity();
             initializePanel();
+            calculate();
         }
 
         function adminLogout() {
@@ -673,7 +893,6 @@
             if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') showAdminPanel();
         }
 
-        // ============ ADMIN IDENTITY (FIXED - always shows Admin, not member) ============
         function showAdminIdentity() {
             document.getElementById('user-profile').classList.remove('hidden');
             document.getElementById('user-avatar').textContent = 'A';
@@ -688,7 +907,6 @@
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
 
-        // ============ TABS ============
         function switchTab(tabName, linkElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
@@ -698,9 +916,250 @@
             if (tabName === 'registrations') { renderRegistrations(); populateTournamentFilter(); }
             if (tabName === 'earnings') renderEarnings();
             if (tabName === 'payouts') renderPayouts();
+            if (tabName === 'calculator') calculate();
         }
 
-        // ============ TOURNAMENT CREATION ============
+        // ==================== CALCULATOR ====================
+        let calcResult = null;
+
+        function applyPreset(preset, btn) {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const players = document.getElementById('calc-players');
+            const fee = document.getElementById('calc-fee');
+            const profit = document.getElementById('calc-profit');
+            const style = document.getElementById('calc-style');
+            const topkill = document.getElementById('calc-topkill');
+
+            switch(preset) {
+                case 'solo':
+                    players.value = 20;
+                    fee.value = 150;
+                    profit.value = 30;
+                    style.value = 'balanced';
+                    topkill.checked = true;
+                    break;
+                case 'duo':
+                    players.value = 20;
+                    fee.value = 200;
+                    profit.value = 25;
+                    style.value = 'balanced';
+                    topkill.checked = true;
+                    break;
+                case 'squad':
+                    players.value = 24;
+                    fee.value = 250;
+                    profit.value = 25;
+                    style.value = 'winner';
+                    topkill.checked = true;
+                    break;
+                case 'custom':
+                    // Don't change values
+                    break;
+            }
+            updateProfitLabel();
+            calculate();
+        }
+
+        function updateProfitLabel() {
+            document.getElementById('profitPercentLabel').textContent = document.getElementById('calc-profit').value + '%';
+        }
+
+        function calculate() {
+            const players = parseInt(document.getElementById('calc-players').value) || 0;
+            const fee = parseInt(document.getElementById('calc-fee').value) || 0;
+            const profitPercent = parseInt(document.getElementById('calc-profit').value) || 30;
+            const style = document.getElementById('calc-style').value;
+            const includeTopKill = document.getElementById('calc-topkill').checked;
+
+            const total = players * fee;
+            const prizePoolPercent = 100 - profitPercent;
+            const prizePool = Math.round(total * (prizePoolPercent / 100));
+            const profit = total - prizePool;
+
+            // Update summary
+            document.getElementById('calc-total').textContent = `Rs. ${total.toLocaleString()}`;
+            document.getElementById('calc-total-formula').textContent = `${players} players × Rs. ${fee}`;
+            document.getElementById('calc-prizepool').textContent = `Rs. ${prizePool.toLocaleString()}`;
+            document.getElementById('calc-prizepool-formula').textContent = `${prizePoolPercent}% of total collection`;
+            document.getElementById('calc-profit-amount').textContent = `Rs. ${profit.toLocaleString()}`;
+            document.getElementById('calc-profit-formula').textContent = `${profitPercent}% commission`;
+
+            // Calculate prize distribution
+            let prizes = {};
+            let topKillPrize = 0;
+            let topKillPercent = 0;
+
+            if (style === 'balanced') {
+                // Balanced: 1st=40%, 2nd=25%, 3rd=15%, TopKill=20%
+                if (includeTopKill) {
+                    prizes = {
+                        '1st': Math.round(prizePool * 0.40),
+                        '2nd': Math.round(prizePool * 0.25),
+                        '3rd': Math.round(prizePool * 0.15)
+                    };
+                    topKillPercent = 20;
+                    topKillPrize = Math.round(prizePool * 0.20);
+                } else {
+                    prizes = {
+                        '1st': Math.round(prizePool * 0.50),
+                        '2nd': Math.round(prizePool * 0.30),
+                        '3rd': Math.round(prizePool * 0.20)
+                    };
+                }
+            } else if (style === 'winner') {
+                // Winner Focused: 1st=60%, 2nd=20%, 3rd=10%, TopKill=10%
+                if (includeTopKill) {
+                    prizes = {
+                        '1st': Math.round(prizePool * 0.60),
+                        '2nd': Math.round(prizePool * 0.20),
+                        '3rd': Math.round(prizePool * 0.10)
+                    };
+                    topKillPercent = 10;
+                    topKillPrize = Math.round(prizePool * 0.10);
+                } else {
+                    prizes = {
+                        '1st': Math.round(prizePool * 0.65),
+                        '2nd': Math.round(prizePool * 0.25),
+                        '3rd': Math.round(prizePool * 0.10)
+                    };
+                }
+            } else if (style === 'top3') {
+                // Top 3 only, no top kill
+                prizes = {
+                    '1st': Math.round(prizePool * 0.55),
+                    '2nd': Math.round(prizePool * 0.30),
+                    '3rd': Math.round(prizePool * 0.15)
+                };
+                topKillPercent = 0;
+                topKillPrize = 0;
+            }
+
+            // Render breakdown
+            const breakdown = document.getElementById('prize-breakdown');
+            let html = '';
+
+            html += `<div class="prize-row rank-1">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🥇</span>
+                    <div>
+                        <p class="font-bold text-white text-sm">1st Place</p>
+                        <p class="text-xs text-gray-500">Winner takes the top prize</p>
+                    </div>
+                </div>
+                <p class="text-xl font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p>
+            </div>`;
+
+            html += `<div class="prize-row rank-2">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🥈</span>
+                    <div>
+                        <p class="font-bold text-white text-sm">2nd Place</p>
+                        <p class="text-xs text-gray-500">Runner-up prize</p>
+                    </div>
+                </div>
+                <p class="text-xl font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p>
+            </div>`;
+
+            html += `<div class="prize-row rank-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🥉</span>
+                    <div>
+                        <p class="font-bold text-white text-sm">3rd Place</p>
+                        <p class="text-xs text-gray-500">Third place reward</p>
+                    </div>
+                </div>
+                <p class="text-xl font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p>
+            </div>`;
+
+            if (topKillPrize > 0) {
+                html += `<div class="prize-row kills">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <p class="font-bold text-white text-sm">Top Killer</p>
+                            <p class="text-xs text-gray-500">Most kills in the match (${topKillPercent}% of pool)</p>
+                        </div>
+                    </div>
+                    <p class="text-xl font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p>
+                </div>`;
+            }
+
+            const sumPrizes = prizes['1st'] + prizes['2nd'] + prizes['3rd'] + topKillPrize;
+            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-gray-400 uppercase">Total Prize Distribution</p>
+                    <p class="text-xs text-gray-500">Sum of all prizes above</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-blue-400">Rs. ${sumPrizes.toLocaleString()}</p>
+                    <p class="text-xs text-gray-500">= Prize Pool (Rs. ${prizePool.toLocaleString()})</p>
+                </div>
+            </div>`;
+
+            breakdown.innerHTML = html;
+
+            // Save result for copy function
+            calcResult = {
+                players, fee, profitPercent, total, prizePool, profit,
+                prizes, topKillPrize, topKillPercent, style, includeTopKill,
+                sumPrizes
+            };
+        }
+
+        function copyBreakdown() {
+            if (!calcResult) {
+                alert("Calculate first!");
+                return;
+            }
+
+            const r = calcResult;
+            const text = `🔥 TOURNAMENT PRIZE BREAKDOWN 🔥
+
+👥 Players: ${r.players}
+💰 Entry Fee: Rs. ${r.fee}
+💵 Total Collection: Rs. ${r.total.toLocaleString()}
+
+🏆 PRIZES:
+🥇 1st Place: Rs. ${r.prizes['1st'].toLocaleString()}
+🥈 2nd Place: Rs. ${r.prizes['2nd'].toLocaleString()}
+🥉 3rd Place: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Killer: Rs. ${r.topKillPrize.toLocaleString()}` : ''}
+
+📊 Total Prize Pool: Rs. ${r.sumPrizes.toLocaleString()}
+
+Register: nepplay.onrender.com`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }).catch(err => {
+                alert("Copy failed. Please copy manually.");
+            });
+        }
+
+        function pushToTournamentForm() {
+            if (!calcResult) {
+                alert("Calculate first!");
+                return;
+            }
+            const r = calcResult;
+            document.getElementById('t-fee').value = r.fee;
+            document.getElementById('t-prize').value = r.prizes['1st'] + r.prizes['2nd'] + r.prizes['3rd'] + r.topKillPrize;
+            document.getElementById('t-slots').value = r.players;
+
+            // Scroll to form and switch tabs
+            switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4]);
+            setTimeout(() => {
+                document.getElementById('t-name').focus();
+                document.getElementById('tournament-msg').classList.remove('hidden');
+                document.getElementById('tournament-msg').className = "text-center text-sm mt-4 text-green-400";
+                document.getElementById('tournament-msg').textContent = "✅ Numbers from calculator filled in! Complete the form above.";
+            }, 300);
+        }
+
+        // ==================== TOURNAMENT CREATION ====================
         function createTournament(event) {
             event.preventDefault();
             const newTournament = {
@@ -745,7 +1204,7 @@
             list.prepend(row);
         }
 
-        // ============ REGISTRATIONS ============
+        // ==================== REGISTRATIONS ====================
         function getRegistrations() { return JSON.parse(localStorage.getItem('userRegistrations') || '[]'); }
 
         function populateTournamentFilter() {
@@ -823,7 +1282,6 @@
             });
         }
 
-        // ============ VIEW REGISTRATION DETAILS ============
         function viewDetails(regId) {
             const registrations = getRegistrations();
             const reg = registrations.find(r => r.id === regId);
@@ -907,44 +1365,20 @@
                 <div class="mb-4">
                     <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Tournament</h3>
                     <div class="bg-gray-800/50 rounded-lg p-3">
-                        <div class="detail-row">
-                            <span class="detail-label">Name</span>
-                            <span class="detail-value">${reg.tournamentName}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Game</span>
-                            <span class="detail-value capitalize">${reg.tournamentGame || '—'}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Mode</span>
-                            <span class="detail-value">${reg.mode || '—'}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Entry Fee</span>
-                            <span class="detail-value text-green-400">${reg.entryFee === 0 ? 'FREE' : 'Rs. ' + reg.entryFee}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Registered</span>
-                            <span class="detail-value text-xs">${registered}</span>
-                        </div>
+                        <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${reg.tournamentName}</span></div>
+                        <div class="detail-row"><span class="detail-label">Game</span><span class="detail-value capitalize">${reg.tournamentGame || '—'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Mode</span><span class="detail-value">${reg.mode || '—'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Entry Fee</span><span class="detail-value text-green-400">${reg.entryFee === 0 ? 'FREE' : 'Rs. ' + reg.entryFee}</span></div>
+                        <div class="detail-row"><span class="detail-label">Registered</span><span class="detail-value text-xs">${registered}</span></div>
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-user mr-2"></i>Player Details</h3>
                     <div class="bg-gray-800/50 rounded-lg p-3">
-                        <div class="detail-row">
-                            <span class="detail-label">In-Game Name (IGN)</span>
-                            <span class="detail-value text-blue-400">${reg.ign || '—'}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Game UID</span>
-                            <span class="detail-value text-green-400 font-mono">${reg.uid || '—'}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">WhatsApp</span>
-                            <span class="detail-value">${reg.phone || '—'}</span>
-                        </div>
+                        <div class="detail-row"><span class="detail-label">In-Game Name (IGN)</span><span class="detail-value text-blue-400">${reg.ign || '—'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Game UID</span><span class="detail-value text-green-400 font-mono">${reg.uid || '—'}</span></div>
+                        <div class="detail-row"><span class="detail-label">WhatsApp</span><span class="detail-value">${reg.phone || '—'}</span></div>
                         ${teamNameHtml}
                     </div>
                 </div>
@@ -954,9 +1388,7 @@
                 ${reg.entryFee > 0 ? `
                     <div class="mb-4 mt-4">
                         <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-money-bill-wave mr-2"></i>Payment Details</h3>
-                        <div class="bg-gray-800/50 rounded-lg p-3 mb-3">
-                            ${txIdHtml}
-                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-3 mb-3">${txIdHtml}</div>
                         <div class="bg-gray-800/50 rounded-lg p-3">
                             <p class="text-xs text-gray-400 mb-2 text-center">Payment Screenshot</p>
                             ${screenshotHtml}
@@ -967,19 +1399,14 @@
                 ${actionButtonsHtml}
                 ${contactHtml}
 
-                <button onclick="closeDetailsModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition text-sm mt-3">
-                    Close
-                </button>
+                <button onclick="closeDetailsModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition text-sm mt-3">Close</button>
             `;
 
             document.getElementById('detailsModal').classList.remove('hidden');
         }
 
-        function closeDetailsModal() {
-            document.getElementById('detailsModal').classList.add('hidden');
-        }
+        function closeDetailsModal() { document.getElementById('detailsModal').classList.add('hidden'); }
 
-        // ============ APPROVE / REJECT ============
         function approvePayment(regId) {
             if (!confirm("Mark this payment as VERIFIED?")) return;
             const registrations = getRegistrations();
@@ -994,7 +1421,7 @@
         }
 
         function rejectPayment(regId) {
-            if (!confirm("Reject this payment? User will need to re-register with valid proof.")) return;
+            if (!confirm("Reject this payment?")) return;
             const registrations = getRegistrations();
             const reg = registrations.find(r => r.id === regId);
             if (!reg) return;
@@ -1006,28 +1433,24 @@
             renderRegistrations();
         }
 
-        // ============ CSV DOWNLOAD ============
         function downloadRegistrationsCSV() {
             const allRegistrations = getRegistrations();
             if (allRegistrations.length === 0) { alert("No registrations to download."); return; }
-            
             let csv = "Username,Email,Phone,Tournament,Game,Mode,IGN,UID,Team Name,Teammates,Entry Fee,Transaction ID,Payment Status,Registered At\n";
             allRegistrations.forEach(r => {
                 const teammates = r.teammates ? r.teammates.map(t => `${t.ign}(${t.uid})`).join(' | ') : '';
                 const date = new Date(r.registeredAt).toLocaleString();
                 csv += `"${r.username}","${r.email || ''}","${r.phone || ''}","${r.tournamentName}","${r.tournamentGame || ''}","${r.mode || ''}","${r.ign || ''}","${r.uid || ''}","${r.teamName || ''}","${teammates}","${r.entryFee || 0}","${r.transactionId || ''}","${r.paymentStatus || 'free'}","${date}"\n`;
             });
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `nepplay-registrations-${new Date().toISOString().split('T')[0]}.csv`;
+            a.href = url; a.download = `nepplay-registrations-${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }
 
-        // ============ EARNINGS ============
+        // ==================== EARNINGS ====================
         let currentPeriod = 'today';
         function setEarningsPeriod(period, btn) {
             currentPeriod = period;
@@ -1043,7 +1466,6 @@
             const startOfWeek = new Date(startOfToday);
             startOfWeek.setDate(startOfWeek.getDate() - 7);
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
             return allRegs.filter(r => {
                 const regDate = new Date(r.registeredAt);
                 if (period === 'today') return regDate >= startOfToday;
@@ -1054,14 +1476,7 @@
         }
 
         function getEntryFeeForTournament(tournamentName) {
-            const defaults = {
-                "Free Fire Solo Cup #12": 50,
-                "PUBG Squad Championship": 100,
-                "Valorant Night Cup": 150,
-                "COD Mobile Battle Royale": 75,
-                "Free Fire Duo Cup": 40,
-                "PUBG Solo Showdown": 60
-            };
+            const defaults = { "Free Fire Solo Cup #12": 50, "PUBG Squad Championship": 100, "Valorant Night Cup": 150, "COD Mobile Battle Royale": 75, "Free Fire Duo Cup": 40, "PUBG Solo Showdown": 60 };
             if (defaults[tournamentName]) return defaults[tournamentName];
             const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             const found = custom.find(t => t.name === tournamentName);
@@ -1071,22 +1486,18 @@
         function renderEarnings() {
             const periodRegs = filterRegistrationsByPeriod(currentPeriod);
             let totalEarnings = 0, totalCommission = 0, totalPayouts = 0;
-
             periodRegs.forEach(r => {
                 const fee = r.entryFee || getEntryFeeForTournament(r.tournamentName);
                 totalEarnings += fee;
                 totalCommission += fee * 0.20;
                 totalPayouts += fee * 0.80;
             });
-
             document.getElementById('period-earnings').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
             document.getElementById('period-commission').textContent = `Rs. ${Math.round(totalCommission).toLocaleString()}`;
             document.getElementById('period-registrations').textContent = periodRegs.length;
             document.getElementById('period-payouts').textContent = `Rs. ${Math.round(totalPayouts).toLocaleString()}`;
-
             const labels = { today: 'Today', week: 'Last 7 Days', month: 'This Month', all: 'All Time' };
             document.getElementById('period-label').textContent = labels[currentPeriod];
-
             renderBarChart();
         }
 
@@ -1096,18 +1507,15 @@
             const days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const allRegs = getRegistrations();
-            
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
                 const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                 const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-                const dayEarnings = allRegs
-                    .filter(r => { const regDate = new Date(r.registeredAt); return regDate >= dayStart && regDate < dayEnd; })
+                const dayEarnings = allRegs.filter(r => { const regDate = new Date(r.registeredAt); return regDate >= dayStart && regDate < dayEnd; })
                     .reduce((sum, r) => sum + (r.entryFee || getEntryFeeForTournament(r.tournamentName)), 0);
                 days.push({ label: i === 0 ? 'Today' : dayNames[d.getDay()], value: dayEarnings });
             }
-
             const maxValue = Math.max(...days.map(d => d.value), 1);
             let total = 0;
             days.forEach(day => {
@@ -1141,10 +1549,9 @@
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // ============ PAYOUTS ============
+        // ==================== PAYOUTS ====================
         function getPayouts() { return JSON.parse(localStorage.getItem('payouts') || '[]'); }
         function savePayouts(payouts) { localStorage.setItem('payouts', JSON.stringify(payouts)); }
-
         function openAddPayoutModal() { document.getElementById('addPayoutModal').classList.remove('hidden'); }
         function closeAddPayoutModal() {
             document.getElementById('addPayoutModal').classList.add('hidden');
@@ -1214,7 +1621,6 @@
 
             const tbody = document.getElementById('payouts-body');
             const emptyState = document.getElementById('empty-payouts');
-
             if (filtered.length === 0) {
                 tbody.innerHTML = '';
                 emptyState.classList.remove('hidden');
@@ -1222,7 +1628,6 @@
             }
             emptyState.classList.add('hidden');
             tbody.innerHTML = '';
-
             filtered.forEach(p => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
@@ -1232,17 +1637,13 @@
                 const actionBtn = p.status === 'pending'
                     ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1 rounded transition"><i class="fa-solid fa-check mr-1"></i>Mark Paid</button>`
                     : `<span class="text-xs text-gray-500">${new Date(p.paidAt).toLocaleDateString()}</span>`;
-                
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${p.username}</td>
                     <td class="px-6 py-4 text-gray-300">${p.tournament}</td>
                     <td class="px-6 py-4 text-yellow-400 font-bold">${p.rank}</td>
                     <td class="px-6 py-4 text-green-400 font-bold">Rs. ${p.prize}</td>
                     <td class="px-6 py-4">${statusBadge}</td>
-                    <td class="px-6 py-4 flex items-center gap-2">
-                        ${actionBtn}
-                        <button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td class="px-6 py-4 flex items-center gap-2">${actionBtn}<button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1255,7 +1656,7 @@
             else badge.classList.add('hidden');
         }
 
-        // ============ ANNOUNCEMENTS ============
+        // ==================== ANNOUNCEMENTS ====================
         let currentImageData = null;
 
         function handleImageUpload(event) {
@@ -1285,16 +1686,13 @@
             const title = document.getElementById('a-title').value || 'Your Title';
             const message = document.getElementById('a-message').value || 'Your message...';
             const priority = document.getElementById('a-priority').value;
-
             document.getElementById('previewTitle').textContent = title;
             document.getElementById('previewMessage').textContent = message;
-
             const preview = document.getElementById('livePreview');
             let borderColor = '#3b82f6';
             if (priority === 'high') borderColor = '#facc15';
             else if (priority === 'urgent') borderColor = '#ef4444';
             preview.style.borderLeftColor = borderColor;
-
             const imgContainer = document.getElementById('previewImageContainer');
             if (currentImageData) {
                 imgContainer.classList.remove('hidden');
@@ -1310,21 +1708,17 @@
             const message = document.getElementById('a-message').value.trim();
             const priority = document.getElementById('a-priority').value;
             const msgBox = document.getElementById('announcement-msg');
-
             if (!title || !message) {
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.textContent = "Title and message required.";
                 return;
             }
-
             const newAnnouncement = { id: Date.now(), title, message, priority, image: currentImageData, createdAt: new Date().toISOString() };
             const existing = JSON.parse(localStorage.getItem('announcements') || '[]');
             existing.push(newAnnouncement);
-            
             try { localStorage.setItem('announcements', JSON.stringify(existing)); }
             catch (e) { alert("Storage full! Use smaller images."); return; }
-
             msgBox.classList.remove('hidden');
             msgBox.className = "text-center text-sm mt-4 text-green-400";
             msgBox.textContent = `✅ "${title}" published!`;
@@ -1339,7 +1733,6 @@
             const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
             const list = document.getElementById('announcements-list');
             if (list.querySelector('.no-announcements')) list.querySelector('.no-announcements').remove();
-            
             const card = document.createElement('div');
             card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colorMap[a.priority]}`;
             const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -1349,9 +1742,7 @@
                 <div class="p-4">
                     <div class="flex justify-between items-start gap-2">
                         <h3 class="font-bold text-white text-sm flex-grow">${a.title}</h3>
-                        <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 hover:text-red-300 text-xs">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                        <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <p class="text-xs text-gray-400 mt-2">${a.message}</p>
                     <p class="text-xs text-gray-500 mt-3">${date}</p>
@@ -1377,7 +1768,7 @@
             document.getElementById('announcements-list').innerHTML = '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
         }
 
-        // ============ DASHBOARD ============
+        // ==================== DASHBOARD ====================
         function updateDashboardStats() {
             const tournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             const registrations = getRegistrations();
@@ -1389,7 +1780,7 @@
             if (registrations.length > 0) { badge.textContent = registrations.length; badge.classList.remove('hidden'); }
         }
 
-        // ============ INIT ============
+        // ==================== INIT ====================
         function initializePanel() {
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             existing.reverse().forEach(t => addToCreatedList(t));
