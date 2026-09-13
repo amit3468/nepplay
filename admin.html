@@ -21,7 +21,6 @@
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
         .stat-badge { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
         
-        /* Bar Chart */
         .bar-container { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 20px 0; }
         .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
         .bar { width: 100%; max-width: 60px; border-radius: 6px 6px 0 0; transition: all 0.3s; position: relative; min-height: 4px; background: linear-gradient(to top, #3b82f6, #8b5cf6); }
@@ -29,513 +28,658 @@
         .bar-label { font-size: 0.7rem; color: #94a3b8; margin-top: 8px; text-align: center; }
         .bar-value { font-size: 0.7rem; color: #e2e8f0; font-weight: 600; margin-bottom: 4px; }
         
-        /* Period tabs */
         .period-tab { padding: 8px 20px; border-radius: 9999px; border: 1px solid #334155; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
         .period-tab.active { background-color: #3b82f6; border-color: #3b82f6; color: white; }
         .period-tab:hover:not(.active) { border-color: #3b82f6; }
+        
+        /* Login Screen */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* Payout status badge */
+        .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+        .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+        
+        /* Shake animation for wrong password */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .shake { animation: shake 0.3s; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Admin Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-700">
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
-                <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
+    <!-- ============ LOGIN SCREEN ============ -->
+    <div id="loginScreen">
+        <div class="glass-panel w-full max-w-md p-8 rounded-xl shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-red-500/20 rounded-full p-4 mb-4">
+                    <i class="fa-solid fa-shield-halved text-red-500 text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white mb-2">Admin Access</h1>
+                <p class="text-gray-400 text-sm">Enter password to continue</p>
             </div>
-
-            <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">Admin</span></span>
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Admin Password</label>
+                    <div class="relative">
+                        <input type="password" id="adminPassword" class="w-full px-4 py-3 pr-12 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter password" required autofocus>
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <p id="loginError" class="hidden text-red-400 text-sm mt-3 text-center"></p>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
+                    <i class="fa-solid fa-lock-open mr-2"></i>Access Admin Panel
                 </button>
-                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
-                    <div class="p-3 border-b border-gray-700">
-                        <p class="text-xs text-gray-500">Signed in as</p>
-                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin</p>
-                        <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Administrator</p>
-                    </div>
-                    <div class="py-1">
-                        <a href="index.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-globe w-4"></i> View Public Site</a>
-                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Member View</a>
-                    </div>
-                    <div class="py-1 border-t border-gray-700">
-                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
-                    </div>
-                </div>
+            </form>
+            <div class="text-center mt-6">
+                <a href="index.html" class="text-sm text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i>Back to Site
+                </a>
             </div>
         </div>
+    </div>
 
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="index.html" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit</a>
-        </div>
-    </nav>
+    <!-- ============ MAIN ADMIN PANEL (hidden until login) ============ -->
+    <div id="mainPanel" class="hidden min-h-screen flex flex-col">
 
-    <div class="flex-grow flex">
-        
-        <!-- Sidebar -->
-        <aside class="hidden md:flex flex-col w-64 glass-panel border-r border-gray-700 p-4 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
-            <div class="mb-6">
-                <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
-                <ul class="space-y-1">
-                    <li>
-                        <a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-gauge-high w-5"></i> Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-coins w-5"></i> Earnings
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-plus-circle w-5"></i> Add Tournament
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="switchTab('registrations', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-clipboard-list w-5"></i> Registrations
-                            <span id="reg-count-badge" class="ml-auto bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="switchTab('users', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-users w-5"></i> Manage Users
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="switchTab('announcements', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400">
-                            <i class="fa-solid fa-bullhorn w-5"></i> Announcements
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="mt-auto text-xs text-gray-500 px-3">
-                <p>v1.2.0</p>
-                <p>&copy; 2023 Nepal Gaming</p>
-            </div>
-        </aside>
-
-        <main class="flex-grow p-6 overflow-y-auto">
-
-            <!-- ============ TAB: DASHBOARD ============ -->
-            <div id="tab-dashboard" class="tab-content active">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white">Dashboard Overview</h1>
-                    <p class="text-gray-400 mt-1">Welcome back, Admin. Here's what's happening today.</p>
+        <!-- Admin Navbar -->
+        <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-700">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                    <span class="text-xl font-bold text-white">Nepal Gaming</span>
+                    <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase">Total Users</p>
-                                <p class="text-3xl font-bold text-white mt-1">1,247</p>
-                                <p class="text-xs text-green-400 mt-1"><i class="fa-solid fa-arrow-up"></i> +12% this week</p>
-                            </div>
-                            <i class="fa-solid fa-users text-blue-500 text-2xl"></i>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase">Total Earnings</p>
-                                <p class="text-3xl font-bold text-green-400 mt-1" id="dash-total-earnings">Rs. 0</p>
-                                <p class="text-xs text-green-400 mt-1"><i class="fa-solid fa-arrow-up"></i> This month</p>
-                            </div>
-                            <i class="fa-solid fa-coins text-green-500 text-2xl"></i>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase">Active Tournaments</p>
-                                <p class="text-3xl font-bold text-purple-400 mt-1" id="active-tournaments-count">0</p>
-                                <p class="text-xs text-gray-400 mt-1">Currently live</p>
-                            </div>
-                            <i class="fa-solid fa-trophy text-purple-500 text-2xl"></i>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-xs text-gray-400 uppercase">Total Registrations</p>
-                                <p class="text-3xl font-bold text-yellow-400 mt-1" id="total-registrations">0</p>
-                                <p class="text-xs text-yellow-400 mt-1">Across all tournaments</p>
-                            </div>
-                            <i class="fa-solid fa-clipboard-check text-yellow-500 text-2xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                    <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick Actions</h2>
-                    </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[2])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                            <i class="fa-solid fa-plus-circle text-green-500 text-2xl mb-2"></i>
-                            <p class="font-bold text-white text-sm">Add Tournament</p>
-                        </button>
-                        <button onclick="switchTab('earnings', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                            <i class="fa-solid fa-coins text-yellow-500 text-2xl mb-2"></i>
-                            <p class="font-bold text-white text-sm">View Earnings</p>
-                        </button>
-                        <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[3])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                            <i class="fa-solid fa-clipboard-list text-blue-500 text-2xl mb-2"></i>
-                            <p class="font-bold text-white text-sm">Registrations</p>
-                        </button>
-                        <button onclick="switchTab('announcements', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                            <i class="fa-solid fa-bullhorn text-yellow-500 text-2xl mb-2"></i>
-                            <p class="font-bold text-white text-sm">Announcement</p>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============ TAB: EARNINGS (NEW!) ============ -->
-            <div id="tab-earnings" class="tab-content">
-                <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
-                        <p class="text-gray-400 mt-1">Track your platform's revenue in real time.</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="period-tab active" onclick="setEarningsPeriod('today', this)">Today</button>
-                        <button class="period-tab" onclick="setEarningsPeriod('week', this)">This Week</button>
-                        <button class="period-tab" onclick="setEarningsPeriod('month', this)">This Month</button>
-                        <button class="period-tab" onclick="setEarningsPeriod('all', this)">All Time</button>
-                    </div>
-                </div>
-
-                <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
-                        <p class="text-xs text-gray-400 uppercase">Period Earnings</p>
-                        <p class="text-3xl font-bold text-green-400 mt-1" id="period-earnings">Rs. 0</p>
-                        <p class="text-xs text-gray-500 mt-1" id="period-label">Today</p>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                        <p class="text-xs text-gray-400 uppercase">Platform Commission</p>
-                        <p class="text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
-                        <p class="text-xs text-gray-500 mt-1">20% of entry fees</p>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
-                        <p class="text-xs text-gray-400 uppercase">Registrations</p>
-                        <p class="text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
-                        <p class="text-xs text-gray-500 mt-1">Paid sign-ups</p>
-                    </div>
-                    <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
-                        <p class="text-xs text-gray-400 uppercase">Pending Payouts</p>
-                        <p class="text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
-                        <p class="text-xs text-gray-500 mt-1">To be distributed</p>
-                    </div>
-                </div>
-
-                <!-- Bar Chart -->
-                <div class="glass-panel rounded-xl p-6 mb-8">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i>Last 7 Days</h2>
-                        <span class="text-xs text-gray-500" id="chart-total-label">Total: Rs. 0</span>
-                    </div>
-                    <div class="bar-container" id="bar-chart">
-                        <!-- Bars injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Earning Breakdown -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    
-                    <!-- By Tournament -->
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="p-6 border-b border-gray-700">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Earning Tournaments</h2>
-                        </div>
-                        <div class="p-4">
-                            <div id="top-tournaments-list" class="space-y-3">
-                                <!-- Injected via JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Revenue Sources -->
-                    <div class="glass-panel rounded-xl overflow-hidden">
-                        <div class="p-6 border-b border-gray-700">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-purple-500 mr-2"></i>Revenue Sources</h2>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-300">Entry Fees (100%)</span>
-                                    <span class="text-white font-bold" id="source-entry-total">Rs. 0</span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-300">Platform Commission (20%)</span>
-                                    <span class="text-green-400 font-bold" id="source-commission">Rs. 0</span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-green-500 h-2 rounded-full" id="source-commission-bar" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-300">Prize Payouts (80%)</span>
-                                    <span class="text-red-400 font-bold" id="source-payouts">Rs. 0</span>
-                                </div>
-                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-red-500 h-2 rounded-full" id="source-payouts-bar" style="width: 0%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- ============ TAB: ADD TOURNAMENT ============ -->
-            <div id="tab-add-tournament" class="tab-content">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white">Add New Tournament</h1>
-                    <p class="text-gray-400 mt-1">Create a new tournament. It will appear on the tournaments page immediately.</p>
-                </div>
-
-                <div class="glass-panel rounded-xl p-6 max-w-3xl">
-                    <form id="tournamentForm" onsubmit="createTournament(event)">
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
-                            <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #13" required>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
-                                <select id="t-game" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                    <option value="">Select a game</option>
-                                    <option value="freefire">Free Fire</option>
-                                    <option value="pubg">PUBG Mobile</option>
-                                    <option value="valorant">Valorant</option>
-                                    <option value="cod">COD Mobile</option>
-                                    <option value="ludo">Ludo King</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Mode *</label>
-                                <select id="t-mode" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                    <option value="">Select mode</option>
-                                    <option value="Solo">Solo</option>
-                                    <option value="Duo">Duo</option>
-                                    <option value="Squad">Squad</option>
-                                    <option value="5v5">5v5</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
-                                <input type="date" id="t-date" class="form-input w-full px-4 py-3 rounded-lg" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Time *</label>
-                                <input type="time" id="t-time" class="form-input w-full px-4 py-3 rounded-lg" required>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
-                                <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="0" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Prize Pool (Rs.) *</label>
-                                <input type="number" id="t-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="2000" min="0" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
-                            <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="100" min="2" required>
-                        </div>
-
-                        <div class="flex gap-3">
-                            <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
-                                <i class="fa-solid fa-plus mr-2"></i> Create Tournament
-                            </button>
-                            <button type="reset" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Reset</button>
-                        </div>
-
-                        <p id="tournament-msg" class="hidden text-center text-sm mt-4"></p>
-                    </form>
-                </div>
-
-                <div class="glass-panel rounded-xl shadow-lg overflow-hidden mt-8 max-w-3xl">
-                    <div class="p-6 border-b border-gray-700">
-                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recently Created</h2>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-400">
-                            <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                                <tr>
-                                    <th class="px-6 py-3">Name</th>
-                                    <th class="px-6 py-3">Game</th>
-                                    <th class="px-6 py-3">Date</th>
-                                    <th class="px-6 py-3">Prize</th>
-                                </tr>
-                            </thead>
-                            <tbody id="created-list" class="divide-y divide-gray-700">
-                                <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500 text-xs">No tournaments created yet.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============ TAB: REGISTRATIONS ============ -->
-            <div id="tab-registrations" class="tab-content">
-                <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-blue-500 mr-2"></i>Registrations</h1>
-                        <p class="text-gray-400 mt-1">See all users who registered for your tournaments.</p>
-                    </div>
-                    <button onclick="downloadCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
-                        <i class="fa-solid fa-download mr-2"></i>Download CSV
+                <div id="user-profile" class="hidden relative">
+                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                        <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">Admin</span></span>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                     </button>
-                </div>
-
-                <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center">
-                    <div class="flex-grow min-w-[200px]">
-                        <label class="block text-xs text-gray-400 mb-1">Filter by Tournament</label>
-                        <select id="filter-tournament" onchange="renderRegistrations()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                            <option value="all">All Tournaments</option>
-                        </select>
-                    </div>
-                    <div class="flex-grow min-w-[200px]">
-                        <label class="block text-xs text-gray-400 mb-1">Search User</label>
-                        <input type="text" id="search-user" oninput="renderRegistrations()" placeholder="Search by username..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Total</label>
-                        <span id="reg-total-count" class="stat-badge">0</span>
-                    </div>
-                </div>
-
-                <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-400">
-                            <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                                <tr>
-                                    <th class="px-6 py-3">#</th>
-                                    <th class="px-6 py-3">Player</th>
-                                    <th class="px-6 py-3">Tournament</th>
-                                    <th class="px-6 py-3">Entry Fee</th>
-                                    <th class="px-6 py-3">Registered</th>
-                                </tr>
-                            </thead>
-                            <tbody id="registrations-body" class="divide-y divide-gray-700"></tbody>
-                        </table>
-                    </div>
-                    <div id="empty-registrations" class="hidden p-10 text-center text-gray-500">
-                        <i class="fa-solid fa-clipboard text-4xl mb-3"></i>
-                        <p class="font-bold text-white mb-1">No registrations yet</p>
-                        <p class="text-xs">When users click "Register Now", they'll appear here.</p>
+                    <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                        <div class="p-3 border-b border-gray-700">
+                            <p class="text-xs text-gray-500">Signed in as</p>
+                            <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin</p>
+                            <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Administrator</p>
+                        </div>
+                        <div class="py-1">
+                            <a href="index.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-globe w-4"></i> View Public Site</a>
+                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Member View</a>
+                        </div>
+                        <div class="py-1 border-t border-gray-700">
+                            <button onclick="adminLogout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Exit Admin</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ============ TAB: MANAGE USERS ============ -->
-            <div id="tab-users" class="tab-content">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white">Manage Users</h1>
-                    <p class="text-gray-400 mt-1">View, search, and manage all registered users.</p>
-                </div>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+                <button onclick="adminLogout()" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit</button>
+            </div>
+        </nav>
 
-                <div class="glass-panel rounded-xl p-4 mb-6">
-                    <div class="flex items-center px-4 py-2 bg-gray-800 rounded-lg">
-                        <i class="fa-solid fa-search text-gray-500 mr-3"></i>
-                        <input type="text" placeholder="Search users by name or email..." class="bg-transparent flex-grow text-white placeholder-gray-500 focus:outline-none py-2">
+        <div class="flex-grow flex">
+            
+            <!-- Sidebar -->
+            <aside class="hidden md:flex flex-col w-64 glass-panel border-r border-gray-700 p-4 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
+                <div class="mb-6">
+                    <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
+                    <ul class="space-y-1">
+                        <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
+                        <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
+                        <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
+                        <li><a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-plus-circle w-5"></i> Add Tournament</a></li>
+                        <li><a href="#" onclick="switchTab('registrations', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-clipboard-list w-5"></i> Registrations <span id="reg-count-badge" class="ml-auto bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
+                        <li><a href="#" onclick="switchTab('announcements', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-bullhorn w-5"></i> Announcements</a></li>
+                    </ul>
+                </div>
+                <div class="mt-auto text-xs text-gray-500 px-3">
+                    <p>v1.3.0</p>
+                    <p>&copy; 2023 Nepal Gaming</p>
+                </div>
+            </aside>
+
+            <main class="flex-grow p-6 overflow-y-auto">
+
+                <!-- ============ DASHBOARD ============ -->
+                <div id="tab-dashboard" class="tab-content active">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-white">Dashboard Overview</h1>
+                        <p class="text-gray-400 mt-1">Welcome back, Admin. Here's what's happening today.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Users</p>
+                            <p class="text-3xl font-bold text-white mt-1">1,247</p>
+                            <p class="text-xs text-green-400 mt-1"><i class="fa-solid fa-arrow-up"></i> +12% this week</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Earnings</p>
+                            <p class="text-3xl font-bold text-green-400 mt-1" id="dash-total-earnings">Rs. 0</p>
+                            <p class="text-xs text-green-400 mt-1"><i class="fa-solid fa-arrow-up"></i> This month</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase">Active Tournaments</p>
+                            <p class="text-3xl font-bold text-purple-400 mt-1" id="active-tournaments-count">0</p>
+                            <p class="text-xs text-gray-400 mt-1">Currently live</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Registrations</p>
+                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="total-registrations">0</p>
+                            <p class="text-xs text-yellow-400 mt-1">Across all tournaments</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+                        <div class="p-6 border-b border-gray-700">
+                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick Actions</h2>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[3])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-plus-circle text-green-500 text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-sm">Add Tournament</p>
+                            </button>
+                            <button onclick="switchTab('earnings', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-coins text-yellow-500 text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-sm">View Earnings</p>
+                            </button>
+                            <button onclick="switchTab('payouts', document.querySelectorAll('.sidebar-item')[2])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-money-bill-transfer text-purple-500 text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-sm">Manage Payouts</p>
+                            </button>
+                            <button onclick="switchTab('announcements', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-bullhorn text-yellow-500 text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-sm">Announcement</p>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                    <table class="w-full text-left text-sm text-gray-400">
-                        <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                            <tr>
-                                <th class="px-6 py-3">Player</th>
-                                <th class="px-6 py-3">Email</th>
-                                <th class="px-6 py-3">Tournaments</th>
-                                <th class="px-6 py-3">Total Won</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            <tr class="hover:bg-gray-800/50 transition">
-                                <td class="px-6 py-4 flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">R</div>Rahul Sharma</td>
-                                <td class="px-6 py-4">rahul@example.com</td>
-                                <td class="px-6 py-4">72</td>
-                                <td class="px-6 py-4 text-green-400 font-bold">Rs. 1,25,500</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ============ TAB: ANNOUNCEMENTS ============ -->
-            <div id="tab-announcements" class="tab-content">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white">Announcements</h1>
-                    <p class="text-gray-400 mt-1">Post a new announcement that appears on all member dashboards.</p>
-                </div>
-
-                <div class="glass-panel rounded-xl p-6 max-w-3xl">
-                    <form id="announcementForm" onsubmit="createAnnouncement(event)">
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Announcement Title *</label>
-                            <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., New Tournament Announcement" required>
+                <!-- ============ EARNINGS ============ -->
+                <div id="tab-earnings" class="tab-content">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
+                            <p class="text-gray-400 mt-1">Track your platform's revenue in real time.</p>
                         </div>
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
-                            <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Type your announcement here..." required></textarea>
+                        <div class="flex gap-2 flex-wrap">
+                            <button class="period-tab active" onclick="setEarningsPeriod('today', this)">Today</button>
+                            <button class="period-tab" onclick="setEarningsPeriod('week', this)">This Week</button>
+                            <button class="period-tab" onclick="setEarningsPeriod('month', this)">This Month</button>
+                            <button class="period-tab" onclick="setEarningsPeriod('all', this)">All Time</button>
                         </div>
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                            <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg">
-                                <option value="normal">Normal</option>
-                                <option value="high">High (shows in yellow)</option>
-                                <option value="urgent">Urgent (shows in red)</option>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Period Earnings</p>
+                            <p class="text-3xl font-bold text-green-400 mt-1" id="period-earnings">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1" id="period-label">Today</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Platform Commission</p>
+                            <p class="text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">20% of entry fees</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase">Registrations</p>
+                            <p class="text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Paid sign-ups</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Pending Payouts</p>
+                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">To be distributed</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mb-4">
+                        <button onclick="exportEarnings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-download mr-2"></i>Export Earnings CSV
+                        </button>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i>Last 7 Days</h2>
+                            <span class="text-xs text-gray-500" id="chart-total-label">Total: Rs. 0</span>
+                        </div>
+                        <div class="bar-container" id="bar-chart"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-panel rounded-xl overflow-hidden">
+                            <div class="p-6 border-b border-gray-700">
+                                <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Earning Tournaments</h2>
+                            </div>
+                            <div class="p-4">
+                                <div id="top-tournaments-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-xl overflow-hidden">
+                            <div class="p-6 border-b border-gray-700">
+                                <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-purple-500 mr-2"></i>Revenue Sources</h2>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Entry Fees (100%)</span>
+                                        <span class="text-white font-bold" id="source-entry-total">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Platform Commission (20%)</span>
+                                        <span class="text-green-400 font-bold" id="source-commission">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-green-500 h-2 rounded-full" id="source-commission-bar" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Prize Payouts (80%)</span>
+                                        <span class="text-red-400 font-bold" id="source-payouts">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-red-500 h-2 rounded-full" id="source-payouts-bar" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ PAYOUTS ============ -->
+                <div id="tab-payouts" class="tab-content">
+                    <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payout Tracker</h1>
+                            <p class="text-gray-400 mt-1">Track which winners you've paid and which are pending.</p>
+                        </div>
+                        <button onclick="openAddPayoutModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-plus mr-2"></i>Add Winner
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Paid</p>
+                            <p class="text-3xl font-bold text-green-400 mt-1" id="payout-total-paid">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">Completed payouts</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Pending</p>
+                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="payout-total-pending">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">Awaiting payment</p>
+                        </div>
+                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Winners</p>
+                            <p class="text-3xl font-bold text-blue-400 mt-1" id="payout-total-winners">0</p>
+                            <p class="text-xs text-gray-500 mt-1">All records</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center">
+                        <div class="flex-grow min-w-[200px]">
+                            <label class="block text-xs text-gray-400 mb-1">Filter by Status</label>
+                            <select id="payout-status-filter" onchange="renderPayouts()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="all">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
                             </select>
                         </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
-                            <i class="fa-solid fa-bullhorn mr-2"></i> Publish Announcement
+                        <div class="flex-grow min-w-[200px]">
+                            <label class="block text-xs text-gray-400 mb-1">Search Winner</label>
+                            <input type="text" id="payout-search" oninput="renderPayouts()" placeholder="Search by name..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-400">
+                                <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                                    <tr>
+                                        <th class="px-6 py-3">Winner</th>
+                                        <th class="px-6 py-3">Tournament</th>
+                                        <th class="px-6 py-3">Rank</th>
+                                        <th class="px-6 py-3">Prize</th>
+                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payouts-body" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-payouts" class="hidden p-10 text-center text-gray-500">
+                            <i class="fa-solid fa-money-bill-transfer text-4xl mb-3"></i>
+                            <p class="font-bold text-white mb-1">No payouts yet</p>
+                            <p class="text-xs">Click "Add Winner" to log a prize payout.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ ADD TOURNAMENT ============ -->
+                <div id="tab-add-tournament" class="tab-content">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-white">Add New Tournament</h1>
+                        <p class="text-gray-400 mt-1">Create a new tournament. It will appear on the tournaments page immediately.</p>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 max-w-3xl">
+                        <form id="tournamentForm" onsubmit="createTournament(event)">
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
+                                <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #13" required>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
+                                    <select id="t-game" class="form-input w-full px-4 py-3 rounded-lg" required>
+                                        <option value="">Select a game</option>
+                                        <option value="freefire">Free Fire</option>
+                                        <option value="pubg">PUBG Mobile</option>
+                                        <option value="valorant">Valorant</option>
+                                        <option value="cod">COD Mobile</option>
+                                        <option value="ludo">Ludo King</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Mode *</label>
+                                    <select id="t-mode" class="form-input w-full px-4 py-3 rounded-lg" required>
+                                        <option value="">Select mode</option>
+                                        <option value="Solo">Solo</option>
+                                        <option value="Duo">Duo</option>
+                                        <option value="Squad">Squad</option>
+                                        <option value="5v5">5v5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
+                                    <input type="date" id="t-date" class="form-input w-full px-4 py-3 rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Time *</label>
+                                    <input type="time" id="t-time" class="form-input w-full px-4 py-3 rounded-lg" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
+                                    <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="0" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Prize Pool (Rs.) *</label>
+                                    <input type="number" id="t-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="2000" min="0" required>
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
+                                <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="100" min="2" required>
+                            </div>
+                            <div class="flex gap-3">
+                                <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+                                    <i class="fa-solid fa-plus mr-2"></i> Create Tournament
+                                </button>
+                                <button type="reset" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Reset</button>
+                            </div>
+                            <p id="tournament-msg" class="hidden text-center text-sm mt-4"></p>
+                        </form>
+                    </div>
+
+                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden mt-8 max-w-3xl">
+                        <div class="p-6 border-b border-gray-700">
+                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recently Created</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-400">
+                                <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                                    <tr>
+                                        <th class="px-6 py-3">Name</th>
+                                        <th class="px-6 py-3">Game</th>
+                                        <th class="px-6 py-3">Date</th>
+                                        <th class="px-6 py-3">Prize</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="created-list" class="divide-y divide-gray-700">
+                                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500 text-xs">No tournaments created yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ REGISTRATIONS ============ -->
+                <div id="tab-registrations" class="tab-content">
+                    <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-blue-500 mr-2"></i>Registrations</h1>
+                            <p class="text-gray-400 mt-1">See all users who registered for your tournaments.</p>
+                        </div>
+                        <button onclick="downloadRegistrationsCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-download mr-2"></i>Download CSV
                         </button>
-                        <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
-                    </form>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center">
+                        <div class="flex-grow min-w-[200px]">
+                            <label class="block text-xs text-gray-400 mb-1">Filter by Tournament</label>
+                            <select id="filter-tournament" onchange="renderRegistrations()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="all">All Tournaments</option>
+                            </select>
+                        </div>
+                        <div class="flex-grow min-w-[200px]">
+                            <label class="block text-xs text-gray-400 mb-1">Search User</label>
+                            <input type="text" id="search-user" oninput="renderRegistrations()" placeholder="Search by username..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Total</label>
+                            <span id="reg-total-count" class="stat-badge">0</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-400">
+                                <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                                    <tr>
+                                        <th class="px-6 py-3">#</th>
+                                        <th class="px-6 py-3">Player</th>
+                                        <th class="px-6 py-3">Tournament</th>
+                                        <th class="px-6 py-3">Entry Fee</th>
+                                        <th class="px-6 py-3">Registered</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registrations-body" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-registrations" class="hidden p-10 text-center text-gray-500">
+                            <i class="fa-solid fa-clipboard text-4xl mb-3"></i>
+                            <p class="font-bold text-white mb-1">No registrations yet</p>
+                            <p class="text-xs">When users click "Register Now", they'll appear here.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-8 max-w-3xl">
-                    <h2 class="text-lg font-bold text-white mb-4">Recent Announcements</h2>
-                    <div id="announcements-list" class="space-y-3"></div>
+                <!-- ============ ANNOUNCEMENTS ============ -->
+                <div id="tab-announcements" class="tab-content">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-white">Announcements</h1>
+                        <p class="text-gray-400 mt-1">Post a new announcement that appears on all member dashboards.</p>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 max-w-3xl">
+                        <form id="announcementForm" onsubmit="createAnnouncement(event)">
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Announcement Title *</label>
+                                <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., New Tournament Announcement" required>
+                            </div>
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
+                                <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Type your announcement here..." required></textarea>
+                            </div>
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                                <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High (shows in yellow)</option>
+                                    <option value="urgent">Urgent (shows in red)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                                <i class="fa-solid fa-bullhorn mr-2"></i> Publish Announcement
+                            </button>
+                            <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
+                        </form>
+                    </div>
+
+                    <div class="mt-8 max-w-3xl">
+                        <h2 class="text-lg font-bold text-white mb-4">Recent Announcements</h2>
+                        <div id="announcements-list" class="space-y-3"></div>
+                    </div>
                 </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Payout Modal -->
+    <div id="addPayoutModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.75); backdrop-filter: blur(4px);">
+        <div class="glass-panel rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Add Winner</h2>
+                <button onclick="closeAddPayoutModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-
-        </main>
+            <form id="addPayoutForm" onsubmit="addPayout(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Winner Username *</label>
+                    <input type="text" id="p-username" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., rahul_sharma" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
+                    <input type="text" id="p-tournament" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #12" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Rank *</label>
+                        <select id="p-rank" class="form-input w-full px-4 py-3 rounded-lg" required>
+                            <option value="#1">#1 (Winner)</option>
+                            <option value="#2">#2 (Runner-up)</option>
+                            <option value="#3">#3 (Third)</option>
+                            <option value="#4">#4</option>
+                            <option value="#5">#5</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Prize (Rs.) *</label>
+                        <input type="number" id="p-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="500" min="0" required>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
+                    <select id="p-method" class="form-input w-full px-4 py-3 rounded-lg">
+                        <option value="eSewa">eSewa</option>
+                        <option value="Khalti">Khalti</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+                        <i class="fa-solid fa-check mr-2"></i>Add Winner
+                    </button>
+                    <button type="button" onclick="closeAddPayoutModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
         console.log("--- ADMIN PANEL LOADED ---");
 
-        // ============ AUTH ============
+        // ============ ADMIN PASSWORD ============
+        const ADMIN_PASSWORD = "nepplay@123";
+        const SESSION_KEY = "adminSession";
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            const errorEl = document.getElementById('loginError');
+            const form = document.getElementById('adminLoginForm');
+
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem(SESSION_KEY, 'authenticated');
+                console.log("Admin authenticated");
+                showAdminPanel();
+            } else {
+                errorEl.textContent = "❌ Incorrect password. Try again.";
+                errorEl.classList.remove('hidden');
+                form.classList.add('shake');
+                setTimeout(() => form.classList.remove('shake'), 400);
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainPanel').classList.remove('hidden');
+            checkUserStatus();
+            initializePanel();
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            window.location.reload();
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // ============ INITIAL AUTH CHECK ============
+        function checkAuthOnLoad() {
+            if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') {
+                showAdminPanel();
+            }
+        }
+
+        // ============ USER PROFILE ============
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (user && user.username) {
@@ -552,7 +696,6 @@
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-        function logout() { localStorage.removeItem('currentUser'); window.location.href = 'index.html'; }
 
         // ============ TAB SWITCHING ============
         function switchTab(tabName, linkElement) {
@@ -563,6 +706,7 @@
 
             if (tabName === 'registrations') { renderRegistrations(); populateTournamentFilter(); }
             if (tabName === 'earnings') { renderEarnings(); }
+            if (tabName === 'payouts') { renderPayouts(); }
         }
 
         // ============ CREATE TOURNAMENT ============
@@ -635,7 +779,6 @@
         }
 
         function getEntryFeeForTournament(tournamentName) {
-            // Check default tournaments
             const defaults = {
                 "Free Fire Solo Cup #12": 50,
                 "PUBG Squad Championship": 100,
@@ -645,8 +788,6 @@
                 "PUBG Solo Showdown": 60
             };
             if (defaults[tournamentName]) return defaults[tournamentName];
-            
-            // Check custom tournaments
             const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             const found = custom.find(t => t.name === tournamentName);
             return found ? found.entryFee : 0;
@@ -700,7 +841,7 @@
             });
         }
 
-        function downloadCSV() {
+        function downloadRegistrationsCSV() {
             const allRegistrations = getRegistrations();
             if (allRegistrations.length === 0) { alert("No registrations to download yet."); return; }
             let csv = "Username,Tournament,Entry Fee,Registered At\n";
@@ -709,16 +850,10 @@
                 const fee = getEntryFeeForTournament(r.tournamentName);
                 csv += `"${r.username}","${r.tournamentName}","${fee}","${date}"\n`;
             });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `nepplay-registrations-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+            downloadCSV(csv, `nepplay-registrations-${new Date().toISOString().split('T')[0]}.csv`);
         }
 
-        // ============ EARNINGS (NEW!) ============
+        // ============ EARNINGS ============
         let currentPeriod = 'today';
 
         function setEarningsPeriod(period, btn) {
@@ -741,7 +876,7 @@
                 if (period === 'today') return regDate >= startOfToday;
                 if (period === 'week') return regDate >= startOfWeek;
                 if (period === 'month') return regDate >= startOfMonth;
-                return true; // all
+                return true;
             });
         }
 
@@ -756,14 +891,12 @@
             periodRegs.forEach(r => {
                 const fee = getEntryFeeForTournament(r.tournamentName);
                 totalEarnings += fee;
-                totalCommission += fee * 0.20; // 20% platform cut
-                totalPayouts += fee * 0.80;    // 80% to prizes
-
+                totalCommission += fee * 0.20;
+                totalPayouts += fee * 0.80;
                 if (!tournamentEarnings[r.tournamentName]) tournamentEarnings[r.tournamentName] = 0;
                 tournamentEarnings[r.tournamentName] += fee;
             });
 
-            // Update summary cards
             document.getElementById('period-earnings').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
             document.getElementById('period-commission').textContent = `Rs. ${Math.round(totalCommission).toLocaleString()}`;
             document.getElementById('period-registrations').textContent = periodRegs.length;
@@ -772,19 +905,12 @@
             const labels = { today: 'Today', week: 'Last 7 Days', month: 'This Month', all: 'All Time' };
             document.getElementById('period-label').textContent = labels[currentPeriod];
 
-            // Revenue sources
             document.getElementById('source-entry-total').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
             document.getElementById('source-commission').textContent = `Rs. ${Math.round(totalCommission).toLocaleString()}`;
             document.getElementById('source-payouts').textContent = `Rs. ${Math.round(totalPayouts).toLocaleString()}`;
-            if (totalEarnings > 0) {
-                document.getElementById('source-commission-bar').style.width = '20%';
-                document.getElementById('source-payouts-bar').style.width = '80%';
-            }
 
-            // Render bar chart (last 7 days)
             renderBarChart();
 
-            // Top tournaments list
             const sortedTournaments = Object.entries(tournamentEarnings).sort((a, b) => b[1] - a[1]).slice(0, 5);
             const topList = document.getElementById('top-tournaments-list');
             topList.innerHTML = '';
@@ -812,8 +938,6 @@
         function renderBarChart() {
             const chart = document.getElementById('bar-chart');
             chart.innerHTML = '';
-            
-            // Get last 7 days including today
             const days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const allRegs = getRegistrations();
@@ -823,18 +947,10 @@
                 d.setDate(d.getDate() - i);
                 const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                 const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-                
                 const dayEarnings = allRegs
-                    .filter(r => {
-                        const regDate = new Date(r.registeredAt);
-                        return regDate >= dayStart && regDate < dayEnd;
-                    })
+                    .filter(r => { const regDate = new Date(r.registeredAt); return regDate >= dayStart && regDate < dayEnd; })
                     .reduce((sum, r) => sum + getEntryFeeForTournament(r.tournamentName), 0);
-                
-                days.push({
-                    label: i === 0 ? 'Today' : dayNames[d.getDay()],
-                    value: dayEarnings
-                });
+                days.push({ label: i === 0 ? 'Today' : dayNames[d.getDay()], value: dayEarnings });
             }
 
             const maxValue = Math.max(...days.map(d => d.value), 1);
@@ -843,7 +959,6 @@
             days.forEach(day => {
                 total += day.value;
                 const heightPercent = (day.value / maxValue) * 100;
-                
                 const wrapper = document.createElement('div');
                 wrapper.className = 'bar-wrapper';
                 wrapper.innerHTML = `
@@ -855,6 +970,155 @@
             });
 
             document.getElementById('chart-total-label').textContent = `Total (7 days): Rs. ${total.toLocaleString()}`;
+        }
+
+        function exportEarnings() {
+            const periodRegs = filterRegistrationsByPeriod(currentPeriod);
+            if (periodRegs.length === 0) { alert("No earnings data to export."); return; }
+
+            let csv = "Date,Username,Tournament,Entry Fee,Platform Commission (20%),Prize Pool (80%)\n";
+            periodRegs.forEach(r => {
+                const date = new Date(r.registeredAt).toLocaleString();
+                const fee = getEntryFeeForTournament(r.tournamentName);
+                const commission = Math.round(fee * 0.20);
+                const payout = Math.round(fee * 0.80);
+                csv += `"${date}","${r.username}","${r.tournamentName}","${fee}","${commission}","${payout}"\n`;
+            });
+
+            let totalFees = periodRegs.reduce((s, r) => s + getEntryFeeForTournament(r.tournamentName), 0);
+            let totalCommission = Math.round(totalFees * 0.20);
+            let totalPayouts = Math.round(totalFees * 0.80);
+
+            csv += `\n"SUMMARY",,,,,\n`;
+            csv += `"Total Entry Fees Collected","","","${totalFees}","",""\n`;
+            csv += `"Total Platform Commission","","","","${totalCommission}",""\n`;
+            csv += `"Total Prize Pool Reserved","","","","","${totalPayouts}"\n`;
+            csv += `"Period","${currentPeriod}","","","",""\n`;
+
+            downloadCSV(csv, `nepplay-earnings-${currentPeriod}-${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        // ============ PAYOUTS ============
+        function getPayouts() { return JSON.parse(localStorage.getItem('payouts') || '[]'); }
+        function savePayouts(payouts) { localStorage.setItem('payouts', JSON.stringify(payouts)); }
+
+        function openAddPayoutModal() {
+            document.getElementById('addPayoutModal').classList.remove('hidden');
+        }
+
+        function closeAddPayoutModal() {
+            document.getElementById('addPayoutModal').classList.add('hidden');
+            document.getElementById('addPayoutForm').reset();
+        }
+
+        document.getElementById('addPayoutModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddPayoutModal();
+        });
+
+        function addPayout(event) {
+            event.preventDefault();
+            const payouts = getPayouts();
+            const newPayout = {
+                id: Date.now(),
+                username: document.getElementById('p-username').value.trim(),
+                tournament: document.getElementById('p-tournament').value.trim(),
+                rank: document.getElementById('p-rank').value,
+                prize: parseInt(document.getElementById('p-prize').value),
+                method: document.getElementById('p-method').value,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                paidAt: null
+            };
+            payouts.push(newPayout);
+            savePayouts(payouts);
+            closeAddPayoutModal();
+            renderPayouts();
+            updatePayoutBadge();
+            alert(`✅ Winner "${newPayout.username}" added with pending Rs. ${newPayout.prize} payout.`);
+        }
+
+        function markAsPaid(payoutId) {
+            const payouts = getPayouts();
+            const payout = payouts.find(p => p.id === payoutId);
+            if (!payout) return;
+            if (!confirm(`Mark Rs. ${payout.prize} to ${payout.username} as PAID?`)) return;
+            payout.status = 'paid';
+            payout.paidAt = new Date().toISOString();
+            savePayouts(payouts);
+            renderPayouts();
+            updatePayoutBadge();
+        }
+
+        function deletePayout(payoutId) {
+            if (!confirm("Delete this payout record?")) return;
+            const payouts = getPayouts().filter(p => p.id !== payoutId);
+            savePayouts(payouts);
+            renderPayouts();
+            updatePayoutBadge();
+        }
+
+        function renderPayouts() {
+            const allPayouts = getPayouts();
+            const statusFilter = document.getElementById('payout-status-filter').value;
+            const search = document.getElementById('payout-search').value.toLowerCase();
+
+            let filtered = allPayouts;
+            if (statusFilter !== 'all') filtered = filtered.filter(p => p.status === statusFilter);
+            if (search) filtered = filtered.filter(p => p.username.toLowerCase().includes(search));
+            filtered = [...filtered].reverse();
+
+            // Stats
+            const totalPaid = allPayouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.prize, 0);
+            const totalPending = allPayouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.prize, 0);
+            document.getElementById('payout-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
+            document.getElementById('payout-total-pending').textContent = `Rs. ${totalPending.toLocaleString()}`;
+            document.getElementById('payout-total-winners').textContent = allPayouts.length;
+
+            const tbody = document.getElementById('payouts-body');
+            const emptyState = document.getElementById('empty-payouts');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = '';
+
+            filtered.forEach(p => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                const statusBadge = p.status === 'paid' 
+                    ? `<span class="payout-paid"><i class="fa-solid fa-check-circle mr-1"></i>Paid</span>` 
+                    : `<span class="payout-pending"><i class="fa-solid fa-clock mr-1"></i>Pending</span>`;
+                const actionBtn = p.status === 'pending'
+                    ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1 rounded transition"><i class="fa-solid fa-check mr-1"></i>Mark Paid</button>`
+                    : `<span class="text-xs text-gray-500">${new Date(p.paidAt).toLocaleDateString()}</span>`;
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${p.username}</td>
+                    <td class="px-6 py-4 text-gray-300">${p.tournament}</td>
+                    <td class="px-6 py-4 text-yellow-400 font-bold">${p.rank}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${p.prize}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4 flex items-center gap-2">
+                        ${actionBtn}
+                        <button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePayoutBadge() {
+            const pendingCount = getPayouts().filter(p => p.status === 'pending').length;
+            const badge = document.getElementById('payout-badge');
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
         }
 
         // ============ ANNOUNCEMENTS ============
@@ -911,7 +1175,6 @@
             document.getElementById('active-tournaments-count').textContent = tournaments.length;
             document.getElementById('total-registrations').textContent = registrations.length;
 
-            // Total earnings (all time)
             const totalEarnings = registrations.reduce((sum, r) => sum + getEntryFeeForTournament(r.tournamentName), 0);
             document.getElementById('dash-total-earnings').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
 
@@ -922,10 +1185,21 @@
             }
         }
 
-        // ============ INITIAL LOAD ============
-        window.onload = function() {
-            checkUserStatus();
-            
+        // ============ UTILITY ============
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // ============ INITIALIZE PANEL ============
+        function initializePanel() {
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             existing.reverse().forEach(t => addToCreatedList(t));
 
@@ -933,7 +1207,14 @@
             announcements.reverse().forEach(a => addAnnouncementCard(a));
 
             updateDashboardStats();
-            renderEarnings(); // Pre-render earnings
+            updatePayoutBadge();
+            renderEarnings();
+            renderPayouts();
+        }
+
+        // ============ ON PAGE LOAD ============
+        window.onload = function() {
+            checkAuthOnLoad();
         };
     </script>
 </body>
