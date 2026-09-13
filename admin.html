@@ -37,8 +37,12 @@
             <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
         </div>
         <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <span class="text-sm text-gray-300">Admin: <span id="admin-name" class="font-bold text-white">admin</span></span>
-            <a href="index.html" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit to Site</a>
+            <a href="index.html" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit</a>
         </div>
     </nav>
 
@@ -102,7 +106,6 @@
                     <p class="text-gray-400 mt-1">Welcome back, Admin. Here's what's happening today.</p>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
                         <div class="flex justify-between items-start">
@@ -146,7 +149,6 @@
                     </div>
                 </div>
 
-                <!-- Recent Registrations -->
                 <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                         <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-user-plus text-blue-500 mr-2"></i>Recent Registrations</h2>
@@ -196,14 +198,11 @@
 
                 <div class="glass-panel rounded-xl p-6 max-w-3xl">
                     <form id="tournamentForm" onsubmit="createTournament(event)">
-                        
-                        <!-- Tournament Name -->
                         <div class="mb-5">
                             <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
                             <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #13" required>
                         </div>
 
-                        <!-- Game + Mode Row -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
@@ -228,7 +227,6 @@
                             </div>
                         </div>
 
-                        <!-- Date + Time Row -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
@@ -240,7 +238,6 @@
                             </div>
                         </div>
 
-                        <!-- Entry Fee + Prize Pool Row -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
@@ -252,13 +249,11 @@
                             </div>
                         </div>
 
-                        <!-- Total Slots -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
                             <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="100" min="2" required>
                         </div>
 
-                        <!-- Buttons -->
                         <div class="flex gap-3">
                             <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
                                 <i class="fa-solid fa-plus mr-2"></i> Create Tournament
@@ -268,12 +263,10 @@
                             </button>
                         </div>
 
-                        <!-- Success Message -->
                         <p id="tournament-msg" class="hidden text-center text-sm mt-4"></p>
                     </form>
                 </div>
 
-                <!-- Recently Created Tournaments -->
                 <div class="glass-panel rounded-xl shadow-lg overflow-hidden mt-8 max-w-3xl">
                     <div class="p-6 border-b border-gray-700">
                         <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recently Created</h2>
@@ -380,7 +373,6 @@
                     </form>
                 </div>
 
-                <!-- Recent Announcements -->
                 <div class="mt-8 max-w-3xl">
                     <h2 class="text-lg font-bold text-white mb-4">Recent Announcements</h2>
                     <div id="announcements-list" class="space-y-3">
@@ -409,29 +401,18 @@
         </main>
     </div>
 
-    <!-- Scripts -->
     <script>
         console.log("--- ADMIN PANEL LOADED ---");
 
-        // 1. Tab Switching
         function switchTab(tabName, linkElement) {
             console.log("Switching to tab:", tabName);
-            
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            
-            // Remove active from all sidebar items
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-            
-            // Show target tab
             document.getElementById('tab-' + tabName).classList.add('active');
-            
-            // Add active class to clicked link
             if (linkElement) linkElement.classList.add('active');
         }
 
-        // 2. Create Tournament
-        const createdTournaments = []; // In-memory storage (would be database in real app)
+        const createdTournaments = [];
 
         function createTournament(event) {
             event.preventDefault();
@@ -447,7 +428,6 @@
             const slots = document.getElementById('t-slots').value;
             const msgBox = document.getElementById('tournament-msg');
 
-            // Validate
             if (!name || !game || !mode || !date || !time || !fee || !prize || !slots) {
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
@@ -455,7 +435,6 @@
                 return;
             }
 
-            // Create tournament object
             const newTournament = {
                 id: Date.now(),
                 name, game, mode, date, time,
@@ -466,36 +445,24 @@
                 createdAt: new Date().toISOString()
             };
 
-            // Save to localStorage so tournaments.html can read it
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             existing.push(newTournament);
             localStorage.setItem('customTournaments', JSON.stringify(existing));
 
             console.log("Tournament created and saved:", newTournament);
 
-            // Show success
             msgBox.classList.remove('hidden');
             msgBox.className = "text-center text-sm mt-4 text-green-400";
             msgBox.textContent = `✅ Tournament "${name}" created successfully! Check the tournaments page.`;
 
-            // Add to recently created list
             addToCreatedList(newTournament);
-
-            // Reset form
             document.getElementById('tournamentForm').reset();
-
-            // Clear message after 4 seconds
             setTimeout(() => msgBox.classList.add('hidden'), 4000);
         }
 
         function addToCreatedList(t) {
             const list = document.getElementById('created-list');
-            
-            // Clear "no tournaments" message
-            if (list.querySelector('td[colspan]')) {
-                list.innerHTML = '';
-            }
-
+            if (list.querySelector('td[colspan]')) list.innerHTML = '';
             const row = document.createElement('tr');
             row.className = "hover:bg-gray-800/50 transition";
             row.innerHTML = `
@@ -507,7 +474,6 @@
             list.prepend(row);
         }
 
-        // 3. Create Announcement
         function createAnnouncement(event) {
             event.preventDefault();
             console.log("Creating announcement...");
@@ -524,25 +490,15 @@
                 return;
             }
 
-            // Save to localStorage
-            const newAnnouncement = {
-                id: Date.now(),
-                title, message, priority,
-                createdAt: new Date().toISOString()
-            };
-
+            const newAnnouncement = { id: Date.now(), title, message, priority, createdAt: new Date().toISOString() };
             const existing = JSON.parse(localStorage.getItem('announcements') || '[]');
             existing.push(newAnnouncement);
             localStorage.setItem('announcements', JSON.stringify(existing));
 
-            console.log("Announcement saved:", newAnnouncement);
-
-            // Show success
             msgBox.classList.remove('hidden');
             msgBox.className = "text-center text-sm mt-4 text-green-400";
             msgBox.textContent = `✅ Announcement "${title}" published!`;
 
-            // Add to display
             const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
             const list = document.getElementById('announcements-list');
             const card = document.createElement('div');
@@ -558,12 +514,10 @@
             `;
             list.prepend(card);
 
-            // Reset form
             document.getElementById('announcementForm').reset();
             setTimeout(() => msgBox.classList.add('hidden'), 4000);
         }
 
-        // 4. Load recently created tournaments on page load
         window.onload = function() {
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             console.log("Loaded", existing.length, "custom tournaments from localStorage");
