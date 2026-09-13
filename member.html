@@ -10,9 +10,10 @@
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; display: inline-block; }
         .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
         .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
+        .status-upcoming { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -39,7 +40,6 @@
                     Login
                 </button>
                 
-                <!-- Message Box for Errors/Success -->
                 <p id="login-message" class="hidden text-center text-sm mt-4"></p>
             </form>
 
@@ -67,27 +67,80 @@
         <!-- Main Content -->
         <main class="flex-grow container mx-auto p-6">
             
-            <!-- Dashboard Stats -->
+            <!-- 1. Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
                     <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
                 </div>
-                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
                     <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
                 </div>
-                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
-                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">2</p>
+                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
                 </div>
             </div>
 
-            <!-- Tournament History & Prize Status -->
+            <!-- 2. Announcements Section -->
+            <div class="glass-panel rounded-xl shadow-lg p-6 mb-8 border-l-4 border-yellow-500">
+                <h2 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Latest Announcements</h2>
+                <ul class="text-sm text-gray-300 space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
+                        <span>New "Valorant Night Cup" registration is now open! Register before Nov 20.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
+                        <span>Prize distribution for Free Fire Solo Cup will happen this Friday.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
+                        <span>Server maintenance scheduled for Sunday 2 AM - 4 AM. Please plan accordingly.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 3. Upcoming Registrations Table -->
+            <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-8">
+                <div class="p-6 border-b border-gray-700 bg-gray-800/30">
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
+                    <p class="text-sm text-gray-400 mt-1">Tournaments you have registered for but haven't played yet.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                            <tr>
+                                <th class="px-6 py-3">Tournament Name</th>
+                                <th class="px-6 py-3">Date & Time</th>
+                                <th class="px-6 py-3">Entry Fee</th>
+                                <th class="px-6 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr class="hover:bg-gray-800/50 transition">
+                                <td class="px-6 py-4 font-medium text-white">Valorant Night Cup</td>
+                                <td class="px-6 py-4">2023-11-20 08:00 PM</td>
+                                <td class="px-6 py-4">Rs. 100</td>
+                                <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i> Upcoming</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-800/50 transition">
+                                <td class="px-6 py-4 font-medium text-white">PUBG Mobile Solo</td>
+                                <td class="px-6 py-4">2023-11-22 07:30 PM</td>
+                                <td class="px-6 py-4">Rs. 50</td>
+                                <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i> Upcoming</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Past Tournament History & Prize Status -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                <div class="p-6 border-b border-gray-700">
+                <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
-                    <p class="text-sm text-gray-400 mt-1">Track your participation and prize payment status.</p>
+                    <p class="text-sm text-gray-400 mt-1">Track your past participation and prize payment status.</p>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -102,7 +155,7 @@
                             </tr>
                         </thead>
                         <tbody id="history-table-body" class="divide-y divide-gray-700">
-                            <!-- Data will be injected here via JS -->
+                            <!-- Data injected via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -117,7 +170,6 @@
         // 1. Handle Login Form Submission
         function handleLogin(event) {
             event.preventDefault(); // Stop page refresh
-            console.log("Login form submitted. Prevented default refresh.");
             
             const usernameInput = document.getElementById('username').value;
             const passwordInput = document.getElementById('password').value;
@@ -125,64 +177,51 @@
             const btn = document.getElementById('login-btn');
 
             if (usernameInput && passwordInput) {
-                console.log("Credentials entered. Processing login for:", usernameInput);
-                
-                // Show loading state
                 btn.innerHTML = "Logging in...";
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
                 msgBox.innerText = "Login successful. Opening member dashboard...";
 
-                // Save user to localStorage
                 const user = { username: usernameInput };
                 localStorage.setItem('currentUser', JSON.stringify(user));
-                console.log("User object saved to localStorage:", user);
+                console.log("User saved to localStorage:", user);
 
-                // Wait 1 second, then load the dashboard WITHOUT redirecting
                 setTimeout(() => {
-                    console.log("Timeout finished. Switching to dashboard view.");
                     showDashboard(user);
                 }, 1000);
             } else {
-                console.log("Login failed: Missing username or password.");
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.innerText = "Please enter username and password.";
             }
         }
 
-        // 2. Hide login form and show dashboard
+        // 2. Show Dashboard
         function showDashboard(user) {
             console.log("Executing showDashboard() for user:", user.username);
-            
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
             document.getElementById('username-display').textContent = user.username;
-            
-            console.log("Login container hidden. Dashboard container visible.");
-            
-            // Load the dashboard data
             loadDashboardData();
         }
 
-        // 3. Check if user is already logged in when page loads
+        // 3. Check on Load
         window.onload = function() {
-            console.log("Window loaded. Checking localStorage for existing session...");
+            console.log("Window loaded. Checking session...");
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            
             if (currentUser) {
-                console.log("Existing session found for:", currentUser.username, ". Skipping login form.");
+                console.log("Session found for:", currentUser.username);
                 showDashboard(currentUser);
             } else {
-                console.log("No existing session found. Showing login form.");
+                console.log("No session found. Showing login form.");
             }
         }
 
-        // 4. Load the detailed mock dashboard data
+        // 4. Load Dashboard Data
         function loadDashboardData() {
-            console.log("Starting loadDashboardData(). Preparing to render table...");
+            console.log("Loading mock dashboard data...");
 
-            // EXPANDED MOCK DATA LIST
+            // Expanded Mock Data for History Table
             const mockHistory = [
                 { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
                 { name: "PUBG Mobile Squad", date: "2023-10-28", rank: "#3", prize: 200, status: "Pending" },
@@ -194,30 +233,19 @@
                 { name: "PUBG Mobile Solo", date: "2023-11-18", rank: "#1", prize: 800, status: "Pending" }
             ];
 
-            console.log("Mock data loaded. Total records found:", mockHistory.length);
-
             let totalEarnings = 0;
             const tableBody = document.getElementById('history-table-body');
-            tableBody.innerHTML = ''; // Clear existing static rows
-            console.log("Cleared existing table body HTML.");
+            tableBody.innerHTML = ''; 
 
-            mockHistory.forEach((item, index) => {
-                // Calculate stats
-                if(item.status === "Paid") { 
-                    totalEarnings += item.prize; 
-                }
+            mockHistory.forEach(item => {
+                if(item.status === "Paid") { totalEarnings += item.prize; }
 
-                // Create Row
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 
-                // Status Badge Logic
-                let statusHtml = '';
-                if (item.status === "Paid") {
-                    statusHtml = `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`;
-                } else {
-                    statusHtml = `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
-                }
+                let statusHtml = item.status === "Paid" 
+                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`
+                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
 
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${item.name}</td>
@@ -229,21 +257,19 @@
                 tableBody.appendChild(row);
             });
 
-            console.log("Table rendering complete. Appended", mockHistory.length, "rows.");
-
             // Update Stats Cards
             document.getElementById('total-earnings').textContent = totalEarnings;
             document.getElementById('matches-played').textContent = mockHistory.length;
-            document.getElementById('active-tournaments').textContent = "2"; // Example static number
+            document.getElementById('active-tournaments').textContent = "2"; // Static for now
             
-            console.log("Stats updated. Total Earnings: Rs." + totalEarnings, "| Matches Played:", mockHistory.length);
+            console.log("Dashboard loaded. Stats: Rs." + totalEarnings + " | Matches: " + mockHistory.length);
         }
 
-        // 5. Logout function
+        // 5. Logout
         function logout() {
-            console.log("Logout button clicked. Clearing localStorage and reloading page.");
+            console.log("Logging out...");
             localStorage.removeItem('currentUser');
-            window.location.reload(); // Reload page to show login form again
+            window.location.reload(); 
         }
     </script>
 </body>
