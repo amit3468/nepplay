@@ -19,24 +19,37 @@
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
-        /* Modal */
         .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
         .form-input {
             background-color: #1e293b;
             color: #e2e8f0;
-            border: 1px solid #334155;
+            border: 2px solid #334155;
             transition: all 0.2s;
         }
         .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .form-input::placeholder { color: #64748b; }
         .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* Modal animation */
+        
+        .form-input.valid { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
+        .form-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+        
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .modal-content { animation: slideUp 0.3s ease-out; }
+
+        .validation-message {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 16px;
+        }
+        .validation-message.success { color: #4ade80; }
+        .validation-message.error { color: #f87171; }
+        .validation-message.warning { color: #facc15; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -114,7 +127,6 @@
     <div id="registrationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
         <div class="glass-panel rounded-xl w-full max-w-lg modal-content max-h-[90vh] overflow-y-auto">
             
-            <!-- Modal Header -->
             <div class="p-6 border-b border-gray-700 sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
                 <div class="flex justify-between items-start">
                     <div>
@@ -127,10 +139,8 @@
                 </div>
             </div>
 
-            <!-- Modal Body -->
-            <form id="registrationForm" onsubmit="submitRegistration(event)" class="p-6">
+            <form id="registrationForm" onsubmit="submitRegistration(event)" class="p-6" novalidate>
                 
-                <!-- Tournament Info Summary -->
                 <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-5">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-gray-400 uppercase">Tournament</span>
@@ -146,59 +156,63 @@
                     </div>
                 </div>
 
-                <!-- Hidden tournament ID -->
                 <input type="hidden" id="regTournamentId">
                 <input type="hidden" id="regTournamentGame">
 
-                <!-- IN-GAME NAME (Required) -->
+                <!-- IGN -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        In-Game Name (IGN) <span class="text-red-400">*</span>
-                    </label>
-                    <input type="text" id="regIgn" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., AmitOP123" required>
-                    <p class="text-xs text-gray-500 mt-1">The exact name you use in the game (case-sensitive)</p>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-sm font-medium text-gray-300">
+                            In-Game Name (IGN) <span class="text-red-400">*</span>
+                        </label>
+                        <span class="text-xs text-gray-500" id="ignCount">0/20</span>
+                    </div>
+                    <input type="text" id="regIgn" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., AmitOP123" maxlength="20" autocomplete="off">
+                    <div class="validation-message" id="ignMessage"></div>
                 </div>
 
-                <!-- GAME UID (Required) -->
+                <!-- UID -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         Game UID <span class="text-red-400">*</span>
                     </label>
-                    <input type="text" id="regUid" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890" required>
-                    <p class="text-xs text-gray-500 mt-1">Found in your game profile settings</p>
+                    <input type="text" id="regUid" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Loading..." maxlength="15" autocomplete="off">
+                    <div class="validation-message" id="uidMessage"></div>
                 </div>
 
-                <!-- TEAM SECTION (Only for Squad/Duo/5v5) -->
+                <!-- TEAM -->
                 <div id="teamSection" class="hidden">
                     <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
                         <p class="text-xs text-yellow-300">
                             <i class="fa-solid fa-users mr-1"></i>
-                            This is a <strong id="modeName">team</strong> tournament. You must provide your team details.
+                            <strong id="modeName">Team</strong> tournament — You must provide your team details.
                         </p>
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">
-                            Team Name <span class="text-red-400">*</span>
-                        </label>
-                        <input type="text" id="regTeamName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Kathmandu Kings">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-300">
+                                Team Name <span class="text-red-400">*</span>
+                            </label>
+                            <span class="text-xs text-gray-500" id="teamCount">0/20</span>
+                        </div>
+                        <input type="text" id="regTeamName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Kathmandu Kings" maxlength="20" autocomplete="off">
+                        <div class="validation-message" id="teamNameMessage"></div>
                     </div>
 
-                    <div id="teammatesContainer">
-                        <!-- Teammate inputs injected via JS -->
-                    </div>
+                    <div id="teammatesContainer"></div>
                 </div>
 
-                <!-- PHONE NUMBER (Required) -->
+                <!-- PHONE -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         WhatsApp Number <span class="text-red-400">*</span>
                     </label>
-                    <input type="tel" id="regPhone" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 98XXXXXXXX" pattern="[0-9]{10}" required>
-                    <p class="text-xs text-gray-500 mt-1">We'll send match room details here</p>
+                    <input type="tel" id="regPhone" class="form-input w-full px-4 py-3 rounded-lg" placeholder="97XXXXXXXX or 98XXXXXXXX" maxlength="10" autocomplete="off">
+                    <div class="validation-message" id="phoneMessage"></div>
                 </div>
 
-                <!-- PAYMENT CONFIRMATION (Only if Entry Fee > 0) -->
+                <!-- PAYMENT -->
                 <div id="paymentSection" class="hidden">
                     <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
                         <p class="text-sm text-red-300 font-bold mb-2">
@@ -206,31 +220,29 @@
                         </p>
                         <p class="text-xs text-red-200 mb-3">Send the entry fee to confirm registration:</p>
                         <div class="bg-slate-900/50 rounded-lg p-3 text-xs">
-                            <p class="mb-1"><strong>eSewa:</strong> 9748835184 (Nepal Gaming)</p>
-                            <p><strong>Khalti:</strong> 9766258368</p>
+                            <p class="mb-1"><strong>eSewa:</strong> 98XXXXXXXX (Nepal Gaming)</p>
+                            <p><strong>Khalti:</strong> 98XXXXXXXX</p>
                         </div>
                     </div>
 
                     <label class="flex items-start gap-2 cursor-pointer mb-4">
                         <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded">
                         <span class="text-sm text-gray-300">
-                            I confirm that I have sent <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> to the account above. I understand that failure to pay will result in disqualification.
+                            I confirm that I have sent <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> to the account above.
                         </span>
                     </label>
                 </div>
 
-                <!-- Terms Checkbox -->
+                <!-- TERMS -->
                 <label class="flex items-start gap-2 cursor-pointer mb-6">
-                    <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded" required>
+                    <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded">
                     <span class="text-sm text-gray-300">
                         I agree to the tournament rules and confirm that all information provided is accurate.
                     </span>
                 </label>
 
-                <!-- Error Message -->
-                <p id="regError" class="hidden text-center text-sm mb-4 text-red-400"></p>
+                <p id="regError" class="hidden text-center text-sm mb-4 text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3"></p>
 
-                <!-- Submit Buttons -->
                 <div class="flex gap-3">
                     <button type="button" onclick="closeRegistrationModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
                         Cancel
@@ -243,7 +255,7 @@
         </div>
     </div>
 
-    <!-- ============ SUCCESS MODAL ============ -->
+    <!-- SUCCESS MODAL -->
     <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
         <div class="glass-panel rounded-xl w-full max-w-md p-8 text-center modal-content">
             <div class="w-20 h-20 mx-auto bg-green-500/20 border-4 border-green-500 rounded-full flex items-center justify-center mb-4">
@@ -272,7 +284,7 @@
     </div>
 
     <script>
-        console.log("--- TOURNAMENTS PAGE LOADED ---");
+        console.log("--- TOURNAMENTS PAGE LOADED (STRICT VALIDATION, 97/98 PHONE) ---");
 
         // ============ USER AUTH ============
         function checkUserStatus() {
@@ -295,9 +307,89 @@
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.reload();
+        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
+
+        // ============ VALIDATION RULES ============
+        const UID_RULES = {
+            freefire: { min: 8, max: 12, pattern: /^\d+$/, name: "Free Fire", hint: "8-12 digit number" },
+            pubg: { min: 9, max: 12, pattern: /^\d+$/, name: "PUBG Mobile", hint: "9-12 digit number" },
+            valorant: { min: 6, max: 12, pattern: /^[a-zA-Z0-9]+$/, name: "Valorant", hint: "6-12 letters/numbers" },
+            cod: { min: 8, max: 15, pattern: /^\d+$/, name: "COD Mobile", hint: "8-15 digit number" },
+            ludo: { min: 6, max: 20, pattern: /^[a-zA-Z0-9]+$/, name: "Ludo King", hint: "6-20 letters/numbers" }
+        };
+
+        function validateIGN(value) {
+            const v = value.trim();
+            if (!v) return { valid: false, msg: "In-Game Name is required", type: "error" };
+            if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
+            if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
+            if (/^\d/.test(v)) return { valid: false, msg: "IGN cannot start with a number", type: "error" };
+            if (!/^[a-zA-Z][a-zA-Z0-9_.-]*$/.test(v)) {
+                return { valid: false, msg: "Only letters, numbers, _, ., - allowed", type: "error" };
+            }
+            if (v.includes('  ')) return { valid: false, msg: "No double spaces", type: "error" };
+            return { valid: true, msg: "✓ Looks good", type: "success" };
+        }
+
+        function validateUID(value, game) {
+            const v = value.trim();
+            const rule = UID_RULES[game] || { min: 6, max: 15, pattern: /^\d+$/, name: "Game", hint: "6-15 characters" };
+            
+            if (!v) return { valid: false, msg: "Game UID is required", type: "error", hint: rule.hint };
+            if (v.length < rule.min) return { valid: false, msg: `Minimum ${rule.min} characters for ${rule.name}`, type: "error", hint: rule.hint };
+            if (v.length > rule.max) return { valid: false, msg: `Maximum ${rule.max} characters for ${rule.name}`, type: "error", hint: rule.hint };
+            if (!rule.pattern.test(v)) {
+                const patternHint = rule.pattern.source === '^\\d+$' ? "Only numbers allowed" : "Only letters and numbers allowed";
+                return { valid: false, msg: patternHint, type: "error", hint: rule.hint };
+            }
+            return { valid: true, msg: `✓ Valid ${rule.name} UID`, type: "success" };
+        }
+
+        function validateTeamName(value) {
+            const v = value.trim();
+            if (!v) return { valid: false, msg: "Team name is required", type: "error" };
+            if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
+            if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
+            if (!/^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(v)) {
+                return { valid: false, msg: "Only letters, numbers, spaces, _ , - allowed", type: "error" };
+            }
+            return { valid: true, msg: "✓ Team name is valid", type: "success" };
+        }
+
+        // ⭐ UPDATED: Accept both 97 and 98 prefixes (Nepal mobile range)
+        function validatePhone(value) {
+            const v = value.trim();
+            if (!v) return { valid: false, msg: "Phone number is required", type: "error" };
+            if (!/^\d{10}$/.test(v)) return { valid: false, msg: "Must be exactly 10 digits", type: "error" };
+            if (!/^(97|98)/.test(v)) return { valid: false, msg: "Nepal mobile must start with 97 or 98", type: "error" };
+            return { valid: true, msg: "✓ Valid Nepal mobile number", type: "success" };
+        }
+
+        // ============ DISPLAY VALIDATION ============
+        function showValidation(fieldId, messageId, result) {
+            const field = document.getElementById(fieldId);
+            const msg = document.getElementById(messageId);
+            
+            if (!field || !msg) return;
+
+            field.classList.remove('valid', 'invalid');
+            msg.classList.remove('success', 'error', 'warning');
+            msg.innerHTML = '';
+
+            if (field.value.trim() === '') {
+                return;
+            }
+
+            if (result.valid) {
+                field.classList.add('valid');
+                msg.classList.add('success');
+                msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${result.msg}`;
+            } else {
+                field.classList.add('invalid');
+                msg.classList.add('error');
+                const hint = result.hint ? ` <span class="text-gray-500">(${result.hint})</span>` : '';
+                msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${result.msg}${hint}`;
+            }
         }
 
         // ============ TOURNAMENTS DATA ============
@@ -417,11 +509,10 @@
             renderTournaments(game);
         }
 
-        // ============ REGISTRATION MODAL LOGIC ============
+        // ============ REGISTRATION MODAL ============
         let currentTournament = null;
 
         function openRegistrationModal(tournamentId) {
-            // Check login
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
                 if (confirm("You need to login first to register for a tournament.\n\nGo to login page?")) {
@@ -430,7 +521,6 @@
                 return;
             }
 
-            // Find tournament
             const allTournaments = getAllTournaments();
             const tournament = allTournaments.find(t => t.id === tournamentId);
             if (!tournament) {
@@ -438,7 +528,6 @@
                 return;
             }
 
-            // Check if already registered
             const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
             const alreadyRegistered = allRegistrations.some(
                 r => r.tournamentId === tournamentId && r.username.toLowerCase() === user.username.toLowerCase()
@@ -450,9 +539,7 @@
             }
 
             currentTournament = tournament;
-            console.log("Opening registration modal for:", tournament.name);
 
-            // Populate tournament info
             document.getElementById('modalTitle').textContent = tournament.name;
             document.getElementById('modalSubtitle').textContent = `${tournament.gameName} • ${tournament.mode} Mode`;
             document.getElementById('regTournamentName').textContent = tournament.name;
@@ -462,64 +549,77 @@
             document.getElementById('regTournamentId').value = tournament.id;
             document.getElementById('regTournamentGame').value = tournament.game;
 
-            // Team section (only for Squad/Duo/5v5)
+            // UID placeholder based on game
+            const rule = UID_RULES[tournament.game] || { hint: "6-15 characters" };
+            document.getElementById('regUid').placeholder = `e.g., ${rule.hint}`;
+
+            // Team section
             const teamSection = document.getElementById('teamSection');
             const teammatesContainer = document.getElementById('teammatesContainer');
             
             if (tournament.mode === 'Solo') {
                 teamSection.classList.add('hidden');
-                document.getElementById('regTeamName').required = false;
             } else {
                 teamSection.classList.remove('hidden');
-                document.getElementById('regTeamName').required = true;
                 document.getElementById('modeName').textContent = tournament.mode === 'Duo' ? 'Duo (2 players)' : tournament.mode === 'Squad' ? 'Squad (4 players)' : 'Team';
 
-                // Determine teammate count
                 let teammateCount = 0;
                 if (tournament.mode === 'Duo') teammateCount = 1;
                 else if (tournament.mode === 'Squad') teammateCount = 3;
                 else if (tournament.mode === '5v5') teammateCount = 4;
 
-                // Build teammate input fields
                 teammatesContainer.innerHTML = '';
                 for (let i = 1; i <= teammateCount; i++) {
                     const teammateHtml = `
                         <div class="bg-gray-800/50 rounded-lg p-3 mb-3 border border-gray-700">
                             <p class="text-xs text-gray-400 mb-2 font-bold"><i class="fa-solid fa-user mr-1"></i>Teammate ${i}</p>
-                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg mb-2 teammate-ign" placeholder="In-Game Name (IGN)" required>
-                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg teammate-uid" placeholder="Game UID" required>
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg mb-2 teammate-ign" placeholder="In-Game Name (IGN)" maxlength="20">
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg teammate-uid" placeholder="Game UID" maxlength="15">
                         </div>
                     `;
                     teammatesContainer.insertAdjacentHTML('beforeend', teammateHtml);
                 }
             }
 
-            // Payment section (only if entry fee > 0)
+            // Payment section
             const paymentSection = document.getElementById('paymentSection');
             if (tournament.entryFee > 0) {
                 paymentSection.classList.remove('hidden');
                 document.getElementById('paymentAmount').textContent = tournament.entryFee;
                 document.getElementById('paymentAmount2').textContent = tournament.entryFee;
-                document.getElementById('regPaymentConfirmed').required = true;
-                document.getElementById('regPaymentConfirmed').checked = false;
             } else {
                 paymentSection.classList.add('hidden');
-                document.getElementById('regPaymentConfirmed').required = false;
             }
 
-            // Clear previous values
+            // Reset form
             document.getElementById('regIgn').value = '';
             document.getElementById('regUid').value = '';
             document.getElementById('regTeamName').value = '';
             document.getElementById('regPhone').value = '';
+            document.getElementById('regPaymentConfirmed').checked = false;
             document.getElementById('regTerms').checked = false;
             document.getElementById('regError').classList.add('hidden');
             document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
             document.getElementById('regSubmitBtn').disabled = false;
 
+            // Reset validation UI
+            ['regIgn', 'regUid', 'regTeamName', 'regPhone'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('valid', 'invalid');
+            });
+            ['ignMessage', 'uidMessage', 'teamNameMessage', 'phoneMessage'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '';
+            });
+            document.getElementById('ignCount').textContent = '0/20';
+            document.getElementById('teamCount').textContent = '0/20';
+
             // Show modal
             document.getElementById('registrationModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+
+            // Attach real-time validation listeners
+            setTimeout(attachValidationListeners, 100);
         }
 
         function closeRegistrationModal() {
@@ -528,9 +628,50 @@
             currentTournament = null;
         }
 
+        function attachValidationListeners() {
+            const ignField = document.getElementById('regIgn');
+            const uidField = document.getElementById('regUid');
+            const teamField = document.getElementById('regTeamName');
+            const phoneField = document.getElementById('regPhone');
+
+            // Remove old listeners by cloning (simple approach)
+            [ignField, uidField, teamField, phoneField].forEach(field => {
+                if (!field) return;
+                field.oninput = null;
+            });
+
+            if (ignField) {
+                ignField.oninput = function() {
+                    document.getElementById('ignCount').textContent = this.value.length + '/20';
+                    showValidation('regIgn', 'ignMessage', validateIGN(this.value));
+                };
+            }
+
+            if (uidField) {
+                uidField.oninput = function() {
+                    if (!currentTournament) return;
+                    showValidation('regUid', 'uidMessage', validateUID(this.value, currentTournament.game));
+                };
+            }
+
+            if (teamField) {
+                teamField.oninput = function() {
+                    document.getElementById('teamCount').textContent = this.value.length + '/20';
+                    showValidation('regTeamName', 'teamNameMessage', validateTeamName(this.value));
+                };
+            }
+
+            if (phoneField) {
+                phoneField.oninput = function() {
+                    // Only allow digits
+                    this.value = this.value.replace(/\D/g, '');
+                    showValidation('regPhone', 'phoneMessage', validatePhone(this.value));
+                };
+            }
+        }
+
         function submitRegistration(event) {
             event.preventDefault();
-            console.log("Submitting registration...");
 
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user || !currentTournament) {
@@ -541,32 +682,40 @@
             const btn = document.getElementById('regSubmitBtn');
             const errorEl = document.getElementById('regError');
 
-            // Collect all form data
             const ign = document.getElementById('regIgn').value.trim();
             const uid = document.getElementById('regUid').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const teamName = document.getElementById('regTeamName').value.trim();
 
-            // Validation
-            if (ign.length < 2) {
-                errorEl.textContent = "Please enter a valid In-Game Name.";
+            // Validate all
+            const ignResult = validateIGN(ign);
+            if (!ignResult.valid) {
+                errorEl.textContent = "❌ IGN: " + ignResult.msg;
                 errorEl.classList.remove('hidden');
                 return;
             }
-            if (uid.length < 4) {
-                errorEl.textContent = "Please enter a valid Game UID.";
+
+            const uidResult = validateUID(uid, currentTournament.game);
+            if (!uidResult.valid) {
+                errorEl.textContent = "❌ UID: " + uidResult.msg;
                 errorEl.classList.remove('hidden');
                 return;
             }
-            if (!/^[0-9]{10}$/.test(phone)) {
-                errorEl.textContent = "Please enter a valid 10-digit phone number.";
+
+            const phoneResult = validatePhone(phone);
+            if (!phoneResult.valid) {
+                errorEl.textContent = "❌ Phone: " + phoneResult.msg;
                 errorEl.classList.remove('hidden');
                 return;
             }
-            if (currentTournament.mode !== 'Solo' && !teamName) {
-                errorEl.textContent = "Please enter your team name.";
-                errorEl.classList.remove('hidden');
-                return;
+
+            if (currentTournament.mode !== 'Solo') {
+                const teamResult = validateTeamName(teamName);
+                if (!teamResult.valid) {
+                    errorEl.textContent = "❌ Team: " + teamResult.msg;
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
             }
 
             // Validate teammates
@@ -574,15 +723,40 @@
             if (currentTournament.mode !== 'Solo') {
                 const ignInputs = document.querySelectorAll('.teammate-ign');
                 const uidInputs = document.querySelectorAll('.teammate-uid');
+                const teammateIGNs = new Set([ign.toLowerCase()]); // Add user's own IGN to detect duplicates
                 
                 for (let i = 0; i < ignInputs.length; i++) {
                     const tIgn = ignInputs[i].value.trim();
                     const tUid = uidInputs[i].value.trim();
+                    
                     if (!tIgn || !tUid) {
-                        errorEl.textContent = `Please fill teammate ${i + 1}'s details.`;
+                        errorEl.textContent = `❌ Please fill teammate ${i + 1}'s details.`;
                         errorEl.classList.remove('hidden');
                         return;
                     }
+                    
+                    const tIgnResult = validateIGN(tIgn);
+                    if (!tIgnResult.valid) {
+                        errorEl.textContent = `❌ Teammate ${i + 1} IGN: ${tIgnResult.msg}`;
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    const tUidResult = validateUID(tUid, currentTournament.game);
+                    if (!tUidResult.valid) {
+                        errorEl.textContent = `❌ Teammate ${i + 1} UID: ${tUidResult.msg}`;
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    // Check duplicates
+                    if (teammateIGNs.has(tIgn.toLowerCase())) {
+                        errorEl.textContent = `❌ Teammate ${i + 1}'s IGN is a duplicate. All IGNs must be unique.`;
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    teammateIGNs.add(tIgn.toLowerCase());
+                    
                     teammates.push({ ign: tIgn, uid: tUid });
                 }
             }
@@ -590,7 +764,7 @@
             // Payment check
             if (currentTournament.entryFee > 0) {
                 if (!document.getElementById('regPaymentConfirmed').checked) {
-                    errorEl.textContent = "Please confirm you have sent the entry fee.";
+                    errorEl.textContent = "❌ Please confirm you have sent the entry fee.";
                     errorEl.classList.remove('hidden');
                     return;
                 }
@@ -598,7 +772,7 @@
 
             // Terms check
             if (!document.getElementById('regTerms').checked) {
-                errorEl.textContent = "Please agree to the tournament rules.";
+                errorEl.textContent = "❌ Please agree to the tournament rules.";
                 errorEl.classList.remove('hidden');
                 return;
             }
@@ -608,7 +782,6 @@
             btn.disabled = true;
             errorEl.classList.add('hidden');
 
-            // Create registration object with full details
             const registration = {
                 id: Date.now(),
                 tournamentId: currentTournament.id,
@@ -628,23 +801,19 @@
                 registeredAt: new Date().toISOString()
             };
 
-            // Save
             setTimeout(() => {
                 const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
                 allRegistrations.push(registration);
                 localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
 
-                // Update slots filled on the tournament
                 updateTournamentSlots(currentTournament.id);
+                console.log("✅ Registration saved:", registration);
 
-                console.log("Registration saved:", registration);
-
-                // Close registration modal, show success
                 closeRegistrationModal();
                 document.getElementById('successTournamentName').textContent = currentTournament.name;
                 document.getElementById('successModal').classList.remove('hidden');
 
-                // Refresh tournaments grid to update slot count
+                // Refresh grid
                 const activeFilter = document.querySelector('.filter-btn.active');
                 if (activeFilter) {
                     const filterText = activeFilter.textContent.toLowerCase();
@@ -659,13 +828,11 @@
         }
 
         function updateTournamentSlots(tournamentId) {
-            // Update custom tournament slots if applicable
             const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             const custom = customTournaments.find(t => t.id === tournamentId);
             if (custom) {
                 custom.slotsFilled = (custom.slotsFilled || 0) + 1;
                 localStorage.setItem('customTournaments', JSON.stringify(customTournaments));
-                console.log("Updated custom tournament slots:", custom.slotsFilled);
             }
         }
 
@@ -674,7 +841,6 @@
             document.body.style.overflow = '';
         }
 
-        // Close modal on backdrop click
         document.getElementById('registrationModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegistrationModal();
         });
@@ -682,7 +848,6 @@
             if (e.target === this) closeSuccessModal();
         });
 
-        // Close modals on Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 if (!document.getElementById('registrationModal').classList.contains('hidden')) closeRegistrationModal();
@@ -690,7 +855,6 @@
             }
         });
 
-        // ============ INITIAL LOAD ============
         window.onload = function() { 
             checkUserStatus();
             renderTournaments('all'); 
