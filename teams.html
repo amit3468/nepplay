@@ -15,35 +15,67 @@
         .modal-overlay { background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
         .role-captain { background-color: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
         .role-member { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        
+        <!-- LEFT: Logo + User Profile -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+            </div>
+
+            <div id="user-profile" class="hidden relative">
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                    <div class="p-3 border-b border-gray-700">
+                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
+                    </div>
+                    <div class="py-1">
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
+                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                    </div>
+                    <div class="py-1 border-t border-gray-700">
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-blue-400 font-bold">Teams</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
 
     <main class="flex-grow container mx-auto p-6">
         
-        <!-- Page Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-users-rays text-blue-500 mr-3"></i>Teams</h1>
             <p class="text-gray-400">Create a team, invite friends, and dominate together.</p>
         </div>
 
-        <!-- Toggle Tabs -->
         <div class="flex justify-center gap-3 mb-8">
             <button id="tabMyTeams" class="tab-btn active px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="showView('my', this)">
                 <i class="fa-solid fa-user-group mr-1"></i> My Teams
@@ -56,7 +88,6 @@
             </button>
         </div>
 
-        <!-- Empty State (shows when user has no teams) -->
         <div id="empty-my-teams" class="hidden text-center py-20">
             <i class="fa-solid fa-users-slash text-6xl text-gray-600 mb-4"></i>
             <h2 class="text-xl font-bold text-white mb-2">You're not in any team yet</h2>
@@ -66,10 +97,7 @@
             </button>
         </div>
 
-        <!-- Teams Grid -->
-        <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Team cards injected via JS -->
-        </div>
+        <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     </main>
 
@@ -139,13 +167,10 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div id="detailsContent">
-                <!-- Content injected via JS -->
-            </div>
+            <div id="detailsContent"></div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="glass-panel w-full p-6 mt-8">
         <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2">
@@ -156,98 +181,51 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
         console.log("--- TEAMS PAGE LOADED ---");
 
-        // 1. Sample Teams Data
-        const allTeams = [
-            {
-                id: 1,
-                name: "Kathmandu Kings",
-                tagline: "Born to win",
-                game: "pubg",
-                gameName: "PUBG Mobile",
-                icon: "fa-crosshairs",
-                color: "from-yellow-500 to-orange-600",
-                isPublic: true,
-                maxMembers: 4,
-                earnings: 45000,
-                wins: 12,
-                createdBy: "rahul_sharma",
-                members: [
-                    { name: "Rahul Sharma", role: "Captain", isCurrentUser: false },
-                    { name: "Sujal Thapa", role: "Member", isCurrentUser: false },
-                    { name: "Bibek Gurung", role: "Member", isCurrentUser: false }
-                ]
-            },
-            {
-                id: 2,
-                name: "Pokhara Warriors",
-                tagline: "Fear the warriors",
-                game: "freefire",
-                gameName: "Free Fire",
-                icon: "fa-fire",
-                color: "from-orange-500 to-red-600",
-                isPublic: true,
-                maxMembers: 4,
-                earnings: 32000,
-                wins: 9,
-                createdBy: "sujal_thapa",
-                members: [
-                    { name: "Sujal Thapa", role: "Captain", isCurrentUser: false },
-                    { name: "Anish Rai", role: "Member", isCurrentUser: false }
-                ]
-            },
-            {
-                id: 3,
-                name: "Everest Esports",
-                tagline: "Reach the peak",
-                game: "valorant",
-                gameName: "Valorant",
-                icon: "fa-bullseye",
-                color: "from-red-500 to-pink-600",
-                isPublic: false,
-                maxMembers: 5,
-                earnings: 78000,
-                wins: 21,
-                createdBy: "bibek_gurung",
-                members: [
-                    { name: "Bibek Gurung", role: "Captain", isCurrentUser: false },
-                    { name: "Kiran Shah", role: "Member", isCurrentUser: false },
-                    { name: "Rita Shrestha", role: "Member", isCurrentUser: false },
-                    { name: "Hari Bahadur", role: "Member", isCurrentUser: false },
-                    { name: "Sita Karki", role: "Member", isCurrentUser: false }
-                ]
-            },
-            {
-                id: 4,
-                name: "Lalitpur Legends",
-                tagline: "Legends never die",
-                game: "cod",
-                gameName: "COD Mobile",
-                icon: "fa-gun",
-                color: "from-green-500 to-emerald-700",
-                isPublic: true,
-                maxMembers: 4,
-                earnings: 18500,
-                wins: 6,
-                createdBy: "anish_rai",
-                members: [
-                    { name: "Anish Rai", role: "Captain", isCurrentUser: false },
-                    { name: "Nabin Magar", role: "Member", isCurrentUser: false },
-                    { name: "Deepak Lama", role: "Member", isCurrentUser: false }
-                ]
+        function checkUserStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.username) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('user-name').textContent = user.username;
+                document.getElementById('dropdown-username').textContent = user.email || user.username;
+                document.getElementById('nav-login-btn').classList.add('hidden');
+            } else {
+                document.getElementById('user-profile').classList.add('hidden');
+                document.getElementById('nav-login-btn').classList.remove('hidden');
             }
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.reload();
+        }
+
+        // Sample Teams
+        const allTeams = [
+            { id: 1, name: "Kathmandu Kings", tagline: "Born to win", game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", isPublic: true, maxMembers: 4, earnings: 45000, wins: 12, createdBy: "rahul_sharma", members: [ { name: "Rahul Sharma", role: "Captain", isCurrentUser: false }, { name: "Sujal Thapa", role: "Member", isCurrentUser: false }, { name: "Bibek Gurung", role: "Member", isCurrentUser: false } ] },
+            { id: 2, name: "Pokhara Warriors", tagline: "Fear the warriors", game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", isPublic: true, maxMembers: 4, earnings: 32000, wins: 9, createdBy: "sujal_thapa", members: [ { name: "Sujal Thapa", role: "Captain", isCurrentUser: false }, { name: "Anish Rai", role: "Member", isCurrentUser: false } ] },
+            { id: 3, name: "Everest Esports", tagline: "Reach the peak", game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", isPublic: false, maxMembers: 5, earnings: 78000, wins: 21, createdBy: "bibek_gurung", members: [ { name: "Bibek Gurung", role: "Captain", isCurrentUser: false }, { name: "Kiran Shah", role: "Member", isCurrentUser: false }, { name: "Rita Shrestha", role: "Member", isCurrentUser: false }, { name: "Hari Bahadur", role: "Member", isCurrentUser: false }, { name: "Sita Karki", role: "Member", isCurrentUser: false } ] },
+            { id: 4, name: "Lalitpur Legends", tagline: "Legends never die", game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", isPublic: true, maxMembers: 4, earnings: 18500, wins: 6, createdBy: "anish_rai", members: [ { name: "Anish Rai", role: "Captain", isCurrentUser: false }, { name: "Nabin Magar", role: "Member", isCurrentUser: false }, { name: "Deepak Lama", role: "Member", isCurrentUser: false } ] }
         ];
 
-        // Load custom-created teams from localStorage
         function loadAllTeams() {
             const custom = JSON.parse(localStorage.getItem('customTeams') || '[]');
             return [...allTeams, ...custom];
         }
 
-        // 2. View switching
         let currentView = 'my';
 
         function showView(view, btn) {
@@ -257,25 +235,17 @@
             renderTeams();
         }
 
-        // 3. Render Teams
         function renderTeams() {
             const grid = document.getElementById('teams-grid');
             const emptyState = document.getElementById('empty-my-teams');
             const teams = loadAllTeams();
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-            console.log("Rendering", currentView, "view with", teams.length, "total teams");
-
-            // Filter teams based on view
             let displayTeams = teams;
             if (currentView === 'my') {
-                if (!currentUser) {
-                    displayTeams = [];
-                } else {
-                    displayTeams = teams.filter(t => t.createdBy === currentUser.username);
-                }
+                if (!currentUser) displayTeams = [];
+                else displayTeams = teams.filter(t => t.createdBy === currentUser.username);
             } else {
-                // Browse view - show only public teams
                 displayTeams = teams.filter(t => t.isPublic);
             }
 
@@ -290,7 +260,6 @@
                         <h2 class="text-xl font-bold text-white mb-2">No public teams available</h2>
                         <p class="text-gray-400 mb-6">Check back later or create your own team!</p>
                     `;
-                    emptyState.classList.remove('hidden');
                 }
                 return;
             }
@@ -312,9 +281,7 @@
                             <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
                                 <i class="fa-solid ${team.icon}"></i> ${team.gameName}
                             </div>
-                            ${team.isPublic ? 
-                                '<div class="bg-green-500/30 rounded-full px-3 py-1 text-xs font-bold text-green-300 border border-green-500">Public</div>' :
-                                '<div class="bg-gray-500/30 rounded-full px-3 py-1 text-xs font-bold text-gray-300 border border-gray-500">Private</div>'}
+                            ${team.isPublic ? '<div class="bg-green-500/30 rounded-full px-3 py-1 text-xs font-bold text-green-300 border border-green-500">Public</div>' : '<div class="bg-gray-500/30 rounded-full px-3 py-1 text-xs font-bold text-gray-300 border border-gray-500">Private</div>'}
                         </div>
                         <div class="flex items-center gap-3 mt-5">
                             <div class="w-14 h-14 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
@@ -366,7 +333,6 @@
             });
         }
 
-        // 4. Create Team Modal
         function openCreateModal() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
@@ -417,25 +383,18 @@
                 earnings: 0,
                 wins: 0,
                 createdBy: currentUser.username,
-                members: [
-                    { name: currentUser.username, role: "Captain", isCurrentUser: true }
-                ]
+                members: [ { name: currentUser.username, role: "Captain", isCurrentUser: true } ]
             };
 
             const existing = JSON.parse(localStorage.getItem('customTeams') || '[]');
             existing.push(newTeam);
             localStorage.setItem('customTeams', JSON.stringify(existing));
 
-            console.log("Team created:", newTeam);
-
             closeCreateModal();
             alert(`✅ Team "${name}" created successfully!\n\nYou are now the captain.`);
-            
-            // Switch to "My Teams" view
             document.getElementById('tabMyTeams').click();
         }
 
-        // 5. View Team Details
         function viewTeamDetails(teamId) {
             const teams = loadAllTeams();
             const team = teams.find(t => t.id === teamId);
@@ -495,7 +454,6 @@
             document.getElementById('detailsModal').classList.add('hidden');
         }
 
-        // 6. Join Team
         function joinTeam(teamId) {
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             if (!currentUser) {
@@ -510,12 +468,10 @@
             }
         }
 
-        // 7. Manage Team (owner only)
         function manageTeam(teamId) {
             alert("Team management panel coming soon! You'll be able to invite, kick, and edit your team.");
         }
 
-        // 8. Modal backdrop click to close
         document.getElementById('createModal').addEventListener('click', function(e) {
             if (e.target === this) closeCreateModal();
         });
@@ -523,8 +479,8 @@
             if (e.target === this) closeDetailsModal();
         });
 
-        // Initialize
         window.onload = function() {
+            checkUserStatus();
             renderTeams();
         };
     </script>
