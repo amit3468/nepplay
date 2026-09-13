@@ -226,9 +226,9 @@ tr:last-child td { border-bottom: 0; }
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* TOP KILLER ROW IN MATCH CARD */
+/* TOP KILLER — with prize badge */
 .top-killer-display {
-    background: linear-gradient(135deg, #4a1717, #5a2020);
+    background: linear-gradient(135deg, #2a1408, #1a0e08);
     border: 1px solid #ff9f43;
     border-radius: 8px;
     padding: 10px 14px;
@@ -236,6 +236,7 @@ tr:last-child td { border-bottom: 0; }
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 .top-killer-icon {
     width: 32px; height: 32px;
@@ -245,7 +246,7 @@ tr:last-child td { border-bottom: 0; }
     font-weight: 900; font-size: 14px; color: #0d111b;
     flex-shrink: 0;
 }
-.top-killer-info { flex: 1; }
+.top-killer-info { flex: 1; min-width: 120px; }
 .top-killer-label {
     font-size: 10px;
     color: #ffb84d;
@@ -259,11 +260,27 @@ tr:last-child td { border-bottom: 0; }
     font-weight: bold;
     font-size: 14px;
 }
+.top-killer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 .top-killer-kills {
     color: white;
     font-weight: bold;
     font-size: 14px;
     font-family: 'Courier New', monospace;
+}
+.tk-prize-badge {
+    background: linear-gradient(135deg, #ffd43b, #ffb800);
+    color: #0d111b;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .match-screenshot-thumb {
@@ -304,41 +321,25 @@ tr:last-child td { border-bottom: 0; }
 .payment-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 16px;
-    padding: 16px;
+    gap: 16px; padding: 16px;
 }
 .payment-card {
-    background: #0b1220;
-    border: 1px solid #263244;
-    border-radius: 12px;
-    padding: 16px;
+    background: #0b1220; border: 1px solid #263244;
+    border-radius: 12px; padding: 16px;
 }
-.payment-card.disabled {
-    opacity: 0.6;
-    border-style: dashed;
-}
+.payment-card.disabled { opacity: 0.6; border-style: dashed; }
 .payment-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 14px;
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 10px; margin-bottom: 14px;
 }
-.payment-card-title {
-    font-size: 17px;
-    font-weight: bold;
-    color: white;
-}
+.payment-card-title { font-size: 17px; font-weight: bold; color: white; }
 .payment-card-id {
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 2px;
-    font-family: 'Courier New', monospace;
+    font-size: 11px; color: #64748b;
+    margin-top: 2px; font-family: 'Courier New', monospace;
 }
 .payment-qr-preview {
     width: 100px; height: 100px;
-    background: #0d1118;
-    border: 1px solid #263244;
+    background: #0d1118; border: 1px solid #263244;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; flex-shrink: 0;
@@ -354,8 +355,7 @@ tr:last-child td { border-bottom: 0; }
 .payment-field { margin-bottom: 10px; }
 .payment-field-label {
     font-size: 10px; color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    text-transform: uppercase; letter-spacing: 0.5px;
     margin-bottom: 4px;
 }
 .payment-field-value {
@@ -364,38 +364,28 @@ tr:last-child td { border-bottom: 0; }
     word-break: break-all;
 }
 .payment-card-actions {
-    display: flex; gap: 6px;
-    margin-top: 14px; padding-top: 12px;
-    border-top: 1px solid #1e293b;
+    display: flex; gap: 6px; margin-top: 14px;
+    padding-top: 12px; border-top: 1px solid #1e293b;
     flex-wrap: wrap;
 }
 
 .payment-editor-grid {
-    display: grid; grid-template-columns: 1fr;
-    gap: 14px;
+    display: grid; grid-template-columns: 1fr; gap: 14px;
 }
 .payment-qr-upload {
     background: #0b1220;
     border: 2px dashed #334155;
-    border-radius: 10px;
-    padding: 16px; text-align: center;
-    cursor: pointer; transition: 0.15s;
+    border-radius: 10px; padding: 16px;
+    text-align: center; cursor: pointer; transition: 0.15s;
 }
-.payment-qr-upload:hover {
-    border-color: #ff3b30;
-    background: #171e28;
-}
+.payment-qr-upload:hover { border-color: #ff3b30; background: #171e28; }
 .payment-qr-upload.has-image {
-    border-style: solid;
-    border-color: #176b3c;
+    border-style: solid; border-color: #176b3c;
     padding: 12px; cursor: default;
 }
-.payment-qr-upload-hint {
-    color: #94a3b8; font-size: 13px; line-height: 1.5;
-}
+.payment-qr-upload-hint { color: #94a3b8; font-size: 13px; line-height: 1.5; }
 .payment-qr-upload-hint strong {
-    color: #ff4438; display: block;
-    margin-bottom: 4px; font-size: 14px;
+    color: #ff4438; display: block; margin-bottom: 4px; font-size: 14px;
 }
 .payment-qr-preview-img {
     max-width: 200px; max-height: 200px;
@@ -407,8 +397,7 @@ tr:last-child td { border-bottom: 0; }
     background: #3a1212; color: #ff817a;
     border: 1px solid #762929;
     border-radius: 6px; padding: 6px 12px;
-    font-size: 12px; font-weight: bold;
-    cursor: pointer;
+    font-size: 12px; font-weight: bold; cursor: pointer;
 }
 .payment-qr-remove:hover { background: #4a1717; }
 
@@ -417,11 +406,9 @@ tr:last-child td { border-bottom: 0; }
     gap: 10px; padding: 10px 0;
 }
 .toggle-switch {
-    position: relative;
-    width: 44px; height: 24px;
+    position: relative; width: 44px; height: 24px;
     background: #334155; border-radius: 12px;
-    cursor: pointer; transition: 0.2s;
-    flex-shrink: 0;
+    cursor: pointer; transition: 0.2s; flex-shrink: 0;
 }
 .toggle-switch.on { background: #16a34a; }
 .toggle-switch::after {
@@ -434,7 +421,6 @@ tr:last-child td { border-bottom: 0; }
 .toggle-switch.on::after { left: 22px; }
 .toggle-label { color: #cbd5e1; font-size: 13px; }
 
-/* MODAL */
 .modal {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.75); z-index: 100;
@@ -497,8 +483,7 @@ tr:last-child td { border-bottom: 0; }
 }
 .match-type-option:hover { border-color: #64748b; }
 .match-type-option.selected {
-    border-color: #ff3b30;
-    background: #201517;
+    border-color: #ff3b30; background: #201517;
 }
 .match-type-option-icon { font-size: 24px; margin-bottom: 6px; }
 .match-type-option-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
@@ -520,70 +505,48 @@ tr:last-child td { border-bottom: 0; }
 }
 .winner-slot select:focus { border-color: #ff3b30; }
 
-/* TOP KILLER SECTION IN MODAL */
 .top-killer-section {
     background: linear-gradient(135deg, #1a0e08, #101827);
     border: 1px solid #ff9f43;
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 10px; padding: 16px;
 }
 .top-killer-section-title {
-    font-size: 13px;
-    font-weight: bold;
+    font-size: 13px; font-weight: bold;
     color: #ff9f43;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    text-transform: uppercase; letter-spacing: 1px;
     margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex; align-items: center; gap: 8px;
 }
 .top-killer-icon-small {
-    width: 22px; height: 22px;
-    border-radius: 50%;
+    width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, #ff9f43, #ff6b00);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 900;
-    color: #0d111b;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #0d111b;
 }
 .top-killer-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    display: grid; grid-template-columns: 2fr 1fr;
     gap: 12px;
 }
 .top-killer-input {
     background: #0d1118 !important;
     border: 1px solid #4a2a1a !important;
 }
-.top-killer-input:focus {
-    border-color: #ff9f43 !important;
-}
+.top-killer-input:focus { border-color: #ff9f43 !important; }
 
 .screenshot-upload-area {
     background: #0b1220;
     border: 2px dashed #334155;
-    border-radius: 10px;
-    padding: 16px; text-align: center;
-    cursor: pointer; transition: 0.15s;
+    border-radius: 10px; padding: 16px;
+    text-align: center; cursor: pointer; transition: 0.15s;
 }
-.screenshot-upload-area:hover {
-    border-color: #ff3b30;
-    background: #171e28;
-}
+.screenshot-upload-area:hover { border-color: #ff3b30; background: #171e28; }
 .screenshot-upload-area.has-image {
-    border-style: solid;
-    border-color: #176b3c;
+    border-style: solid; border-color: #176b3c;
     padding: 12px; cursor: default;
 }
-.screenshot-upload-hint {
-    color: #94a3b8; font-size: 13px; line-height: 1.5;
-}
+.screenshot-upload-hint { color: #94a3b8; font-size: 13px; line-height: 1.5; }
 .screenshot-upload-hint strong {
-    color: #ff4438; display: block;
-    margin-bottom: 4px; font-size: 14px;
+    color: #ff4438; display: block; margin-bottom: 4px; font-size: 14px;
 }
 .screenshot-preview {
     max-width: 100%; max-height: 240px;
@@ -594,13 +557,10 @@ tr:last-child td { border-bottom: 0; }
     background: #3a1212; color: #ff817a;
     border: 1px solid #762929;
     border-radius: 6px; padding: 6px 12px;
-    font-size: 12px; font-weight: bold;
-    cursor: pointer;
+    font-size: 12px; font-weight: bold; cursor: pointer;
 }
 .screenshot-remove-btn:hover { background: #4a1717; }
-.screenshot-loading {
-    color: #ffd84d; font-size: 12px; margin-top: 8px;
-}
+.screenshot-loading { color: #ffd84d; font-size: 12px; margin-top: 8px; }
 
 .toast {
     position: fixed; right: 20px; bottom: 20px;
@@ -678,7 +638,6 @@ tr:last-child td { border-bottom: 0; }
             <button class="tab-btn" data-tab="announcements" onclick="switchTab('announcements')">📢 Announcements</button>
         </div>
 
-        <!-- REGISTRATIONS -->
         <div id="tab-registrations" class="tab-content active">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalRegistrations">0</div></div>
@@ -708,7 +667,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- MATCHES -->
         <div id="tab-matches" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalMatches">0</div></div>
@@ -731,7 +689,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- TOURNAMENTS -->
         <div id="tab-tournaments" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalTournaments">0</div></div>
@@ -761,7 +718,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- PAYMENTS -->
         <div id="tab-payments" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total Methods</div><div class="stat-value" id="totalPaymentMethods">0</div></div>
@@ -783,7 +739,6 @@ tr:last-child td { border-bottom: 0; }
             </section>
         </div>
 
-        <!-- ANNOUNCEMENTS -->
         <div id="tab-announcements" class="tab-content">
             <div class="stats">
                 <div class="stat stat-blue"><div class="stat-label">Total</div><div class="stat-value" id="totalAnnouncements">0</div></div>
@@ -905,7 +860,6 @@ tr:last-child td { border-bottom: 0; }
                     <input type="number" id="matchScoreB" min="0" value="0">
                 </div>
 
-                <!-- TOP KILLER SECTION -->
                 <div class="form-group full">
                     <div class="top-killer-section">
                         <div class="top-killer-section-title">
@@ -1138,6 +1092,7 @@ var currentMatchType = "1v1";
 var currentScreenshot = "";
 var currentPaymentQr = "";
 var currentPaymentEnabled = true;
+var TK_PRIZE = 500;
 
 function apiJSON(response) {
     return response.text().then(function (text) {
@@ -1384,7 +1339,7 @@ function updatePaymentStats() {
 function renderPaymentMethods() {
     var container = document.getElementById("paymentList");
     if (currentPaymentMethods.length === 0) {
-        container.innerHTML = '<div class="empty">No payment methods yet. Click "+ Add Payment Method".</div>';
+        container.innerHTML = '<div class="empty">No payment methods yet.</div>';
         return;
     }
     container.innerHTML = currentPaymentMethods.map(function (m) {
@@ -1392,12 +1347,9 @@ function renderPaymentMethods() {
         var cardClass = "payment-card" + (isEnabled ? "" : " disabled");
         var badgeClass = isEnabled ? "badge-enabled" : "badge-disabled";
         var badgeLabel = isEnabled ? "ENABLED" : "DISABLED";
-        var qrHtml = "";
-        if (m.qrImage) {
-            qrHtml = '<div class="payment-qr-preview"><img src="' + esc(m.qrImage) + '" alt="QR"></div>';
-        } else {
-            qrHtml = '<div class="payment-qr-preview"><div class="payment-qr-empty">No QR<br>uploaded</div></div>';
-        }
+        var qrHtml = m.qrImage
+            ? '<div class="payment-qr-preview"><img src="' + esc(m.qrImage) + '" alt="QR"></div>'
+            : '<div class="payment-qr-preview"><div class="payment-qr-empty">No QR<br>uploaded</div></div>';
         var escapedId = esc(m.id);
         return '<div class="' + cardClass + '">' +
             '<div class="payment-card-header">' +
@@ -1405,8 +1357,7 @@ function renderPaymentMethods() {
                     '<div class="payment-card-title">' + esc(m.name || "Unnamed") + '</div>' +
                     '<div class="payment-card-id">ID: ' + escapedId + '</div>' +
                     '<span class="badge ' + badgeClass + '" style="margin-top:6px;">' + badgeLabel + '</span>' +
-                '</div>' +
-                qrHtml +
+                '</div>' + qrHtml +
             '</div>' +
             '<div class="payment-field">' +
                 '<div class="payment-field-label">Number / Account</div>' +
@@ -1487,11 +1438,11 @@ function handlePaymentQrSelect(event) {
     var file = event.target.files[0];
     if (!file) return;
     if (file.size > 1024 * 1024) {
-        showToast("QR image too large. Max 1MB.", "error");
+        showToast("QR too large. Max 1MB.", "error");
         event.target.value = ""; return;
     }
     if (!file.type.match(/^image\//)) {
-        showToast("Please select an image file.", "error");
+        showToast("Select an image file.", "error");
         event.target.value = ""; return;
     }
     var reader = new FileReader();
@@ -1546,7 +1497,7 @@ function resetPaymentQrArea() {
 function savePayment(event) {
     event.preventDefault();
     var name = document.getElementById("paymentName").value.trim();
-    if (!name) { showToast("Please enter a method name.", "error"); return; }
+    if (!name) { showToast("Enter method name.", "error"); return; }
     var id = document.getElementById("paymentId").value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     if (!id && !editingPaymentId) id = name.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (!id) id = "method-" + Date.now();
@@ -1704,7 +1655,6 @@ function renderMatches() {
                 '</div>';
         }
 
-        /* Top Killer row */
         var topKillerHtml = "";
         if (m.topKiller) {
             topKillerHtml = '<div class="top-killer-display">' +
@@ -1713,7 +1663,10 @@ function renderMatches() {
                     '<div class="top-killer-label">Top Killer</div>' +
                     '<div class="top-killer-name">' + esc(m.topKiller) + '</div>' +
                 '</div>' +
-                '<div class="top-killer-kills">' + safeNum(m.topKillerKills, 0) + ' kills</div>' +
+                '<div class="top-killer-right">' +
+                    '<div class="top-killer-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+                    '<span class="tk-prize-badge">Rs. ' + TK_PRIZE + '</span>' +
+                '</div>' +
             '</div>';
         }
 
@@ -1732,7 +1685,7 @@ function renderMatches() {
             ? ' <span class="badge badge-screenshot">Screenshot</span>'
             : '';
         var tkBadge = m.topKiller
-            ? ' <span class="badge badge-topkiller">TK ' + safeNum(m.topKillerKills, 0) + '</span>'
+            ? ' <span class="badge badge-topkiller">TK ' + (Number(m.topKillerKills) || 0) + '</span>'
             : '';
 
         return '<div class="match-card">' +
@@ -1763,11 +1716,6 @@ function renderMatches() {
             '</div>' +
         '</div>';
     }).join("");
-}
-
-function safeNum(v, f) {
-    var n = Number(v);
-    return isNaN(n) ? f : n;
 }
 
 function openFullScreenshot(matchId) {
@@ -1935,7 +1883,7 @@ function handleScreenshotSelect(event) {
         event.target.value = ""; return;
     }
     if (!file.type.match(/^image\//)) {
-        showToast("Please select an image file.", "error");
+        showToast("Select an image file.", "error");
         event.target.value = ""; return;
     }
     document.getElementById("screenshotLoading").style.display = "block";
@@ -2038,14 +1986,11 @@ function openEditMatch(id) {
         currentScreenshot = m.screenshot;
         showScreenshotPreview(m.screenshot);
     }
-
-    /* Top Killer prefill */
     updateTopKillerOptions();
     if (m.topKiller) {
         document.getElementById("matchTopKiller").value = m.topKiller;
     }
-    document.getElementById("matchTopKillerKills").value = safeNum(m.topKillerKills, 0);
-
+    document.getElementById("matchTopKillerKills").value = Number(m.topKillerKills) || 0;
     document.getElementById("matchModal").classList.add("show");
 }
 
@@ -2065,7 +2010,7 @@ function saveMatch(event) {
     event.preventDefault();
     var tid = document.getElementById("matchTournament").value;
     var tournament = currentTournaments.find(function (t) { return String(t.id) === String(tid); });
-    if (!tournament) { showToast("Please select a tournament.", "error"); return; }
+    if (!tournament) { showToast("Select tournament.", "error"); return; }
 
     var teams = getTeamsForTournament(tid);
     if (teams.length === 0) {
@@ -2110,7 +2055,7 @@ function saveMatch(event) {
     } else {
         var teamA = document.getElementById("matchTeamA").value;
         var teamB = document.getElementById("matchTeamB").value;
-        if (!teamA || !teamB) { showToast("Please select both teams.", "error"); return; }
+        if (!teamA || !teamB) { showToast("Select both teams.", "error"); return; }
         if (teamA === teamB) { showToast("Team A and Team B must be different.", "error"); return; }
         payload.team1 = teamA;
         payload.team2 = teamB;
@@ -2255,7 +2200,7 @@ function closeTournamentModal() {
 function saveTournament(event) {
     event.preventDefault();
     var name = document.getElementById("tournamentName").value.trim();
-    if (!name) { showToast("Please enter a name.", "error"); return; }
+    if (!name) { showToast("Enter a name.", "error"); return; }
     var payload = {
         name: name,
         game: document.getElementById("tournamentGame").value,
