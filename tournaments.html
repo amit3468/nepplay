@@ -15,25 +15,40 @@
         .new-badge { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
         
-        /* Profile Dropdown */
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        /* Modal */
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
+        .form-input {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            transition: all 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .form-input::placeholder { color: #64748b; }
+        .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Modal animation */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-content { animation: slideUp 0.3s ease-out; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        
-        <!-- LEFT: Logo + User Profile -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
                 <span class="text-xl font-bold text-white">Nepal Gaming</span>
             </div>
 
-            <!-- User Profile (shows when logged in) -->
             <div id="user-profile" class="hidden relative">
                 <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
                     <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
@@ -58,7 +73,6 @@
             </div>
         </div>
 
-        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-blue-400 font-bold">Tournaments</a>
@@ -96,10 +110,171 @@
         &copy; 2023 Nepal Gaming Platform. All rights reserved.
     </footer>
 
+    <!-- ============ REGISTRATION MODAL ============ -->
+    <div id="registrationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-panel rounded-xl w-full max-w-lg modal-content max-h-[90vh] overflow-y-auto">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-700 sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-bold text-white" id="modalTitle">Register for Tournament</h2>
+                        <p class="text-sm text-gray-400 mt-1" id="modalSubtitle">Fill in your details to confirm registration</p>
+                    </div>
+                    <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-white transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <form id="registrationForm" onsubmit="submitRegistration(event)" class="p-6">
+                
+                <!-- Tournament Info Summary -->
+                <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-5">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-400 uppercase">Tournament</span>
+                        <span class="text-xs text-gray-400 uppercase">Entry Fee</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white" id="regTournamentName">Tournament Name</span>
+                        <span class="font-bold text-green-400" id="regTournamentFee">Rs. 0</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-400"><i class="fa-solid fa-gamepad mr-1"></i><span id="regTournamentMode">Mode</span></span>
+                        <span class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i><span id="regTournamentTime">Time</span></span>
+                    </div>
+                </div>
+
+                <!-- Hidden tournament ID -->
+                <input type="hidden" id="regTournamentId">
+                <input type="hidden" id="regTournamentGame">
+
+                <!-- IN-GAME NAME (Required) -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        In-Game Name (IGN) <span class="text-red-400">*</span>
+                    </label>
+                    <input type="text" id="regIgn" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., AmitOP123" required>
+                    <p class="text-xs text-gray-500 mt-1">The exact name you use in the game (case-sensitive)</p>
+                </div>
+
+                <!-- GAME UID (Required) -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        Game UID <span class="text-red-400">*</span>
+                    </label>
+                    <input type="text" id="regUid" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890" required>
+                    <p class="text-xs text-gray-500 mt-1">Found in your game profile settings</p>
+                </div>
+
+                <!-- TEAM SECTION (Only for Squad/Duo/5v5) -->
+                <div id="teamSection" class="hidden">
+                    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-yellow-300">
+                            <i class="fa-solid fa-users mr-1"></i>
+                            This is a <strong id="modeName">team</strong> tournament. You must provide your team details.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Team Name <span class="text-red-400">*</span>
+                        </label>
+                        <input type="text" id="regTeamName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Kathmandu Kings">
+                    </div>
+
+                    <div id="teammatesContainer">
+                        <!-- Teammate inputs injected via JS -->
+                    </div>
+                </div>
+
+                <!-- PHONE NUMBER (Required) -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        WhatsApp Number <span class="text-red-400">*</span>
+                    </label>
+                    <input type="tel" id="regPhone" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 98XXXXXXXX" pattern="[0-9]{10}" required>
+                    <p class="text-xs text-gray-500 mt-1">We'll send match room details here</p>
+                </div>
+
+                <!-- PAYMENT CONFIRMATION (Only if Entry Fee > 0) -->
+                <div id="paymentSection" class="hidden">
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-red-300 font-bold mb-2">
+                            <i class="fa-solid fa-money-bill-wave mr-2"></i>Payment Required: Rs. <span id="paymentAmount">0</span>
+                        </p>
+                        <p class="text-xs text-red-200 mb-3">Send the entry fee to confirm registration:</p>
+                        <div class="bg-slate-900/50 rounded-lg p-3 text-xs">
+                            <p class="mb-1"><strong>eSewa:</strong> 98XXXXXXXX (Nepal Gaming)</p>
+                            <p><strong>Khalti:</strong> 98XXXXXXXX</p>
+                        </div>
+                    </div>
+
+                    <label class="flex items-start gap-2 cursor-pointer mb-4">
+                        <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded">
+                        <span class="text-sm text-gray-300">
+                            I confirm that I have sent <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> to the account above. I understand that failure to pay will result in disqualification.
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <label class="flex items-start gap-2 cursor-pointer mb-6">
+                    <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded" required>
+                    <span class="text-sm text-gray-300">
+                        I agree to the tournament rules and confirm that all information provided is accurate.
+                    </span>
+                </label>
+
+                <!-- Error Message -->
+                <p id="regError" class="hidden text-center text-sm mb-4 text-red-400"></p>
+
+                <!-- Submit Buttons -->
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeRegistrationModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="regSubmitBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+                        <i class="fa-solid fa-check mr-2"></i>Confirm Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ SUCCESS MODAL ============ -->
+    <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-panel rounded-xl w-full max-w-md p-8 text-center modal-content">
+            <div class="w-20 h-20 mx-auto bg-green-500/20 border-4 border-green-500 rounded-full flex items-center justify-center mb-4">
+                <i class="fa-solid fa-check text-3xl text-green-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
+            <p class="text-gray-400 mb-2">You're registered for:</p>
+            <p class="font-bold text-green-400 text-lg mb-4" id="successTournamentName">Tournament</p>
+            <div class="bg-gray-800/50 rounded-lg p-4 text-sm text-left mb-6">
+                <p class="text-gray-300 mb-2"><strong class="text-white">What happens next:</strong></p>
+                <ul class="text-gray-400 space-y-1 text-xs">
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will verify your details</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Room ID + password sent to your WhatsApp</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Join the match 10 min before start time</li>
+                </ul>
+            </div>
+            <div class="flex gap-3">
+                <a href="member.html" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                    <i class="fa-solid fa-gauge mr-2"></i>Dashboard
+                </a>
+                <button onclick="closeSuccessModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
+                    Register More
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         console.log("--- TOURNAMENTS PAGE LOADED ---");
 
-        // Check user login
+        // ============ USER AUTH ============
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (user && user.username) {
@@ -114,22 +289,18 @@
             }
         }
 
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
-        }
-
+        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-
         function logout() {
             localStorage.removeItem('currentUser');
             window.location.reload();
         }
 
-        // Default tournaments
+        // ============ TOURNAMENTS DATA ============
         const defaultTournaments = [
             { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo", isNew: false },
             { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad", isNew: false },
@@ -206,7 +377,7 @@
                         <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
                             <div class="bg-gray-800/50 rounded-lg p-3">
                                 <p class="text-xs text-gray-400 mb-1">Entry Fee</p>
-                                <p class="text-white font-bold">Rs. ${t.entryFee}</p>
+                                <p class="text-white font-bold">${t.entryFee === 0 ? 'FREE' : 'Rs. ' + t.entryFee}</p>
                             </div>
                             <div class="bg-gray-800/50 rounded-lg p-3">
                                 <p class="text-xs text-gray-400 mb-1">Prize Pool</p>
@@ -231,7 +402,7 @@
                     </div>
 
                     <div class="p-5 pt-0">
-                        <button onclick="registerForTournament('${t.name}', ${t.id})" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
+                        <button onclick="openRegistrationModal(${t.id})" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
                             ${isFull ? 'Tournament Full' : 'Register Now'}
                         </button>
                     </div>
@@ -246,23 +417,280 @@
             renderTournaments(game);
         }
 
-        function registerForTournament(name, id) {
+        // ============ REGISTRATION MODAL LOGIC ============
+        let currentTournament = null;
+
+        function openRegistrationModal(tournamentId) {
+            // Check login
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
-                alert("You need to login first to register for a tournament.");
-                window.location.href = 'member.html';
+                if (confirm("You need to login first to register for a tournament.\n\nGo to login page?")) {
+                    window.location.href = 'member.html';
+                }
                 return;
             }
-            const registrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-            if (registrations.some(r => r.tournamentId === id && r.username === user.username)) {
+
+            // Find tournament
+            const allTournaments = getAllTournaments();
+            const tournament = allTournaments.find(t => t.id === tournamentId);
+            if (!tournament) {
+                alert("Tournament not found.");
+                return;
+            }
+
+            // Check if already registered
+            const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+            const alreadyRegistered = allRegistrations.some(
+                r => r.tournamentId === tournamentId && r.username.toLowerCase() === user.username.toLowerCase()
+            );
+            
+            if (alreadyRegistered) {
                 alert("You have already registered for this tournament!");
                 return;
             }
-            registrations.push({ username: user.username, tournamentId: id, tournamentName: name, registeredAt: new Date().toISOString() });
-            localStorage.setItem('userRegistrations', JSON.stringify(registrations));
-            alert(`✅ Success! You have registered for "${name}".\n\nCheck your dashboard for updates.`);
+
+            currentTournament = tournament;
+            console.log("Opening registration modal for:", tournament.name);
+
+            // Populate tournament info
+            document.getElementById('modalTitle').textContent = tournament.name;
+            document.getElementById('modalSubtitle').textContent = `${tournament.gameName} • ${tournament.mode} Mode`;
+            document.getElementById('regTournamentName').textContent = tournament.name;
+            document.getElementById('regTournamentFee').textContent = tournament.entryFee === 0 ? 'FREE' : 'Rs. ' + tournament.entryFee;
+            document.getElementById('regTournamentMode').textContent = tournament.mode;
+            document.getElementById('regTournamentTime').textContent = tournament.date + ' • ' + tournament.time;
+            document.getElementById('regTournamentId').value = tournament.id;
+            document.getElementById('regTournamentGame').value = tournament.game;
+
+            // Team section (only for Squad/Duo/5v5)
+            const teamSection = document.getElementById('teamSection');
+            const teammatesContainer = document.getElementById('teammatesContainer');
+            
+            if (tournament.mode === 'Solo') {
+                teamSection.classList.add('hidden');
+                document.getElementById('regTeamName').required = false;
+            } else {
+                teamSection.classList.remove('hidden');
+                document.getElementById('regTeamName').required = true;
+                document.getElementById('modeName').textContent = tournament.mode === 'Duo' ? 'Duo (2 players)' : tournament.mode === 'Squad' ? 'Squad (4 players)' : 'Team';
+
+                // Determine teammate count
+                let teammateCount = 0;
+                if (tournament.mode === 'Duo') teammateCount = 1;
+                else if (tournament.mode === 'Squad') teammateCount = 3;
+                else if (tournament.mode === '5v5') teammateCount = 4;
+
+                // Build teammate input fields
+                teammatesContainer.innerHTML = '';
+                for (let i = 1; i <= teammateCount; i++) {
+                    const teammateHtml = `
+                        <div class="bg-gray-800/50 rounded-lg p-3 mb-3 border border-gray-700">
+                            <p class="text-xs text-gray-400 mb-2 font-bold"><i class="fa-solid fa-user mr-1"></i>Teammate ${i}</p>
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg mb-2 teammate-ign" placeholder="In-Game Name (IGN)" required>
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg teammate-uid" placeholder="Game UID" required>
+                        </div>
+                    `;
+                    teammatesContainer.insertAdjacentHTML('beforeend', teammateHtml);
+                }
+            }
+
+            // Payment section (only if entry fee > 0)
+            const paymentSection = document.getElementById('paymentSection');
+            if (tournament.entryFee > 0) {
+                paymentSection.classList.remove('hidden');
+                document.getElementById('paymentAmount').textContent = tournament.entryFee;
+                document.getElementById('paymentAmount2').textContent = tournament.entryFee;
+                document.getElementById('regPaymentConfirmed').required = true;
+                document.getElementById('regPaymentConfirmed').checked = false;
+            } else {
+                paymentSection.classList.add('hidden');
+                document.getElementById('regPaymentConfirmed').required = false;
+            }
+
+            // Clear previous values
+            document.getElementById('regIgn').value = '';
+            document.getElementById('regUid').value = '';
+            document.getElementById('regTeamName').value = '';
+            document.getElementById('regPhone').value = '';
+            document.getElementById('regTerms').checked = false;
+            document.getElementById('regError').classList.add('hidden');
+            document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
+            document.getElementById('regSubmitBtn').disabled = false;
+
+            // Show modal
+            document.getElementById('registrationModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
+        function closeRegistrationModal() {
+            document.getElementById('registrationModal').classList.add('hidden');
+            document.body.style.overflow = '';
+            currentTournament = null;
+        }
+
+        function submitRegistration(event) {
+            event.preventDefault();
+            console.log("Submitting registration...");
+
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user || !currentTournament) {
+                alert("Error: User or tournament missing. Please try again.");
+                return;
+            }
+
+            const btn = document.getElementById('regSubmitBtn');
+            const errorEl = document.getElementById('regError');
+
+            // Collect all form data
+            const ign = document.getElementById('regIgn').value.trim();
+            const uid = document.getElementById('regUid').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const teamName = document.getElementById('regTeamName').value.trim();
+
+            // Validation
+            if (ign.length < 2) {
+                errorEl.textContent = "Please enter a valid In-Game Name.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (uid.length < 4) {
+                errorEl.textContent = "Please enter a valid Game UID.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (!/^[0-9]{10}$/.test(phone)) {
+                errorEl.textContent = "Please enter a valid 10-digit phone number.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (currentTournament.mode !== 'Solo' && !teamName) {
+                errorEl.textContent = "Please enter your team name.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Validate teammates
+            const teammates = [];
+            if (currentTournament.mode !== 'Solo') {
+                const ignInputs = document.querySelectorAll('.teammate-ign');
+                const uidInputs = document.querySelectorAll('.teammate-uid');
+                
+                for (let i = 0; i < ignInputs.length; i++) {
+                    const tIgn = ignInputs[i].value.trim();
+                    const tUid = uidInputs[i].value.trim();
+                    if (!tIgn || !tUid) {
+                        errorEl.textContent = `Please fill teammate ${i + 1}'s details.`;
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                    teammates.push({ ign: tIgn, uid: tUid });
+                }
+            }
+
+            // Payment check
+            if (currentTournament.entryFee > 0) {
+                if (!document.getElementById('regPaymentConfirmed').checked) {
+                    errorEl.textContent = "Please confirm you have sent the entry fee.";
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Terms check
+            if (!document.getElementById('regTerms').checked) {
+                errorEl.textContent = "Please agree to the tournament rules.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Registering...';
+            btn.disabled = true;
+            errorEl.classList.add('hidden');
+
+            // Create registration object with full details
+            const registration = {
+                id: Date.now(),
+                tournamentId: currentTournament.id,
+                tournamentName: currentTournament.name,
+                tournamentGame: currentTournament.game,
+                mode: currentTournament.mode,
+                entryFee: currentTournament.entryFee,
+                username: user.username,
+                email: user.email || '',
+                ign: ign,
+                uid: uid,
+                phone: phone,
+                teamName: currentTournament.mode !== 'Solo' ? teamName : null,
+                teammates: teammates,
+                paymentConfirmed: currentTournament.entryFee > 0,
+                status: 'registered',
+                registeredAt: new Date().toISOString()
+            };
+
+            // Save
+            setTimeout(() => {
+                const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+                allRegistrations.push(registration);
+                localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
+
+                // Update slots filled on the tournament
+                updateTournamentSlots(currentTournament.id);
+
+                console.log("Registration saved:", registration);
+
+                // Close registration modal, show success
+                closeRegistrationModal();
+                document.getElementById('successTournamentName').textContent = currentTournament.name;
+                document.getElementById('successModal').classList.remove('hidden');
+
+                // Refresh tournaments grid to update slot count
+                const activeFilter = document.querySelector('.filter-btn.active');
+                if (activeFilter) {
+                    const filterText = activeFilter.textContent.toLowerCase();
+                    let filter = 'all';
+                    if (filterText.includes('free')) filter = 'freefire';
+                    else if (filterText.includes('pubg')) filter = 'pubg';
+                    else if (filterText.includes('valorant')) filter = 'valorant';
+                    else if (filterText.includes('cod')) filter = 'cod';
+                    renderTournaments(filter);
+                }
+            }, 800);
+        }
+
+        function updateTournamentSlots(tournamentId) {
+            // Update custom tournament slots if applicable
+            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+            const custom = customTournaments.find(t => t.id === tournamentId);
+            if (custom) {
+                custom.slotsFilled = (custom.slotsFilled || 0) + 1;
+                localStorage.setItem('customTournaments', JSON.stringify(customTournaments));
+                console.log("Updated custom tournament slots:", custom.slotsFilled);
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('registrationModal').addEventListener('click', function(e) {
+            if (e.target === this) closeRegistrationModal();
+        });
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSuccessModal();
+        });
+
+        // Close modals on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('registrationModal').classList.contains('hidden')) closeRegistrationModal();
+                if (!document.getElementById('successModal').classList.contains('hidden')) closeSuccessModal();
+            }
+        });
+
+        // ============ INITIAL LOAD ============
         window.onload = function() { 
             checkUserStatus();
             renderTournaments('all'); 
