@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<head<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,6 +28,7 @@
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-blue-400 font-bold">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
             <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
         </div>
     </nav>
@@ -123,174 +122,6 @@
                 tableBody.appendChild(row);
             });
         }
-        document.addEventListener('DOMContentLoaded', loadWinners);
-    </script>
-</body>
-</html>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hall of Winners - Nepal Gaming Platform</title>
-    <!-- Using Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
-        .rank-2 { color: #94a3b8; }
-        .rank-3 { color: #b45309; }
-        .winner-card { transition: transform 0.2s; }
-        .winner-card:hover { transform: translateY(-5px); }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto p-6">
-        
-        <!-- Header -->
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-3"></i>Hall of Winners</h1>
-            <p class="text-gray-400">Celebrating the top players and their prize winnings.</p>
-        </div>
-
-        <!-- Featured Winners (Top 3 Podium) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end">
-            <!-- 2nd Place -->
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-2 md:order-1 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400">
-                    <i class="fa-solid fa-user text-2xl text-gray-300"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white">Sujal Thapa</h3>
-                <p class="text-sm text-gray-400 mb-2">Free Fire Solo Cup</p>
-                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">
-                    Rs. 300
-                </div>
-            </div>
-
-            <!-- 1st Place -->
-            <div class="glass-panel winner-card rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
-                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
-                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                    <i class="fa-solid fa-crown text-3xl text-yellow-500"></i>
-                </div>
-                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500">
-                    <i class="fa-solid fa-user text-3xl text-yellow-500"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-white">Rahul Sharma</h3>
-                <p class="text-sm text-gray-400 mb-2">PUBG Mobile Squad</p>
-                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
-                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500">
-                    Rs. 1,000
-                </div>
-            </div>
-
-            <!-- 3rd Place -->
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-3 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700">
-                    <i class="fa-solid fa-user text-2xl text-orange-400"></i>
-                </div>
-                <h3 class="text-xl font-bold text-white">Bibek Gurung</h3>
-                <p class="text-sm text-gray-400 mb-2">Clash of Clans War</p>
-                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">
-                    Rs. 200
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Winners Table -->
-        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recent Winners</h2>
-                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Updated Live</span>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Player</th>
-                            <th scope="col" class="px-6 py-3">Tournament</th>
-                            <th scope="col" class="px-6 py-3">Rank</th>
-                            <th scope="col" class="px-6 py-3">Prize Won</th>
-                            <th scope="col" class="px-6 py-3">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winners-table-body" class="divide-y divide-gray-700">
-                        <!-- Data injected via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- Scripts -->
-    <script>
-        // Mock Data for Winners
-        const winnersData = [
-            { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
-            { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
-            { player: "Bibek Gurung", tournament: "Clash of Clans War", rank: "#3", prize: 200, date: "2023-10-25" },
-            { player: "Anish Rai", tournament: "Free Fire Solo Cup", rank: "#1", prize: 500, date: "2023-10-20" },
-            { player: "Kiran Shah", tournament: "Valorant Night Cup", rank: "#1", prize: 1500, date: "2023-10-15" },
-            { player: "Sita Karki", tournament: "Ludo King Championship", rank: "#2", prize: 400, date: "2023-10-10" }
-        ];
-
-        function loadWinners() {
-            const tableBody = document.getElementById('winners-table-body');
-            
-            winnersData.forEach(winner => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
-
-                // Rank styling logic
-                let rankClass = "text-gray-300";
-                let rankIcon = "";
-                if(winner.rank === "#1") {
-                    rankClass = "text-yellow-400 font-bold";
-                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
-                } else if(winner.rank === "#2") {
-                    rankClass = "text-gray-300 font-bold";
-                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
-                } else if(winner.rank === "#3") {
-                    rankClass = "text-orange-400 font-bold";
-                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
-                }
-
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">
-                            ${winner.player.charAt(0)}
-                        </div>
-                        ${winner.player}
-                    </td>
-                    <td class="px-6 py-4">${winner.tournament}</td>
-                    <td class="px-6 py-4 ${rankClass}">${rankIcon}${winner.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${winner.prize}</td>
-                    <td class="px-6 py-4 text-gray-500">${winner.date}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Initialize
         document.addEventListener('DOMContentLoaded', loadWinners);
     </script>
 </body>
