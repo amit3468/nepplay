@@ -79,7 +79,7 @@
                 </div>
                 <div class="glass-panel p-6 rounded-xl shadow-lg">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
-                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">1</p>
+                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">2</p>
                 </div>
             </div>
 
@@ -112,9 +112,12 @@
 
     <!-- Scripts -->
     <script>
+        console.log("--- MEMBER PAGE SCRIPT LOADED ---");
+
         // 1. Handle Login Form Submission
         function handleLogin(event) {
             event.preventDefault(); // Stop page refresh
+            console.log("Login form submitted. Prevented default refresh.");
             
             const usernameInput = document.getElementById('username').value;
             const passwordInput = document.getElementById('password').value;
@@ -122,6 +125,8 @@
             const btn = document.getElementById('login-btn');
 
             if (usernameInput && passwordInput) {
+                console.log("Credentials entered. Processing login for:", usernameInput);
+                
                 // Show loading state
                 btn.innerHTML = "Logging in...";
                 msgBox.classList.remove('hidden');
@@ -131,12 +136,15 @@
                 // Save user to localStorage
                 const user = { username: usernameInput };
                 localStorage.setItem('currentUser', JSON.stringify(user));
+                console.log("User object saved to localStorage:", user);
 
                 // Wait 1 second, then load the dashboard WITHOUT redirecting
                 setTimeout(() => {
+                    console.log("Timeout finished. Switching to dashboard view.");
                     showDashboard(user);
                 }, 1000);
             } else {
+                console.log("Login failed: Missing username or password.");
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.innerText = "Please enter username and password.";
@@ -145,42 +153,71 @@
 
         // 2. Hide login form and show dashboard
         function showDashboard(user) {
+            console.log("Executing showDashboard() for user:", user.username);
+            
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
             document.getElementById('username-display').textContent = user.username;
+            
+            console.log("Login container hidden. Dashboard container visible.");
+            
+            // Load the dashboard data
             loadDashboardData();
         }
 
         // 3. Check if user is already logged in when page loads
         window.onload = function() {
+            console.log("Window loaded. Checking localStorage for existing session...");
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
             if (currentUser) {
-                // If already logged in, skip the form
+                console.log("Existing session found for:", currentUser.username, ". Skipping login form.");
                 showDashboard(currentUser);
+            } else {
+                console.log("No existing session found. Showing login form.");
             }
         }
 
-        // 4. Load the mock dashboard data
+        // 4. Load the detailed mock dashboard data
         function loadDashboardData() {
+            console.log("Starting loadDashboardData(). Preparing to render table...");
+
+            // EXPANDED MOCK DATA LIST
             const mockHistory = [
                 { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
                 { name: "PUBG Mobile Squad", date: "2023-10-28", rank: "#3", prize: 200, status: "Pending" },
-                { name: "Clash of Clans War", date: "2023-11-01", rank: "#2", prize: 300, status: "Paid" }
+                { name: "Clash of Clans War", date: "2023-11-01", rank: "#2", prize: 300, status: "Paid" },
+                { name: "Valorant Night Cup", date: "2023-11-05", rank: "#1", prize: 1500, status: "Paid" },
+                { name: "Ludo King Championship", date: "2023-11-10", rank: "#4", prize: 0, status: "Pending" },
+                { name: "COD Mobile Battle", date: "2023-11-12", rank: "#2", prize: 400, status: "Paid" },
+                { name: "Free Fire Duo Cup", date: "2023-11-15", rank: "#5", prize: 50, status: "Paid" },
+                { name: "PUBG Mobile Solo", date: "2023-11-18", rank: "#1", prize: 800, status: "Pending" }
             ];
+
+            console.log("Mock data loaded. Total records found:", mockHistory.length);
 
             let totalEarnings = 0;
             const tableBody = document.getElementById('history-table-body');
             tableBody.innerHTML = ''; // Clear existing static rows
+            console.log("Cleared existing table body HTML.");
 
-            mockHistory.forEach(item => {
-                if(item.status === "Paid") { totalEarnings += item.prize; }
+            mockHistory.forEach((item, index) => {
+                // Calculate stats
+                if(item.status === "Paid") { 
+                    totalEarnings += item.prize; 
+                }
 
+                // Create Row
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 
-                let statusHtml = item.status === "Paid" 
-                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`
-                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
+                // Status Badge Logic
+                let statusHtml = '';
+                if (item.status === "Paid") {
+                    statusHtml = `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`;
+                } else {
+                    statusHtml = `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
+                }
 
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${item.name}</td>
@@ -192,12 +229,19 @@
                 tableBody.appendChild(row);
             });
 
+            console.log("Table rendering complete. Appended", mockHistory.length, "rows.");
+
+            // Update Stats Cards
             document.getElementById('total-earnings').textContent = totalEarnings;
             document.getElementById('matches-played').textContent = mockHistory.length;
+            document.getElementById('active-tournaments').textContent = "2"; // Example static number
+            
+            console.log("Stats updated. Total Earnings: Rs." + totalEarnings, "| Matches Played:", mockHistory.length);
         }
 
         // 5. Logout function
         function logout() {
+            console.log("Logout button clicked. Clearing localStorage and reloading page.");
             localStorage.removeItem('currentUser');
             window.location.reload(); // Reload page to show login form again
         }
