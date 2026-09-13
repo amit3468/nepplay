@@ -101,6 +101,85 @@ body {
 .section-title { font-size: 22px; margin-bottom: 6px; }
 .section-sub { color: #7d8a9f; font-size: 13px; margin-bottom: 18px; }
 
+/* ANNOUNCEMENTS PANEL — persistent */
+.announcements-panel {
+    background: linear-gradient(135deg, #0f1a2e, #111827);
+    border: 1px solid #2d3a55;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 20px;
+}
+.announcements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.announcements-header-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+.announcements-header-sub {
+    color: #7d8a9f;
+    font-size: 12px;
+}
+.announcement-item {
+    background: #0b1220;
+    border: 1px solid #263244;
+    border-left: 3px solid #3b82f6;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.announcement-item.warning { border-left-color: #ffb84d; }
+.announcement-item.urgent { border-left-color: #ff3b30; }
+.announcement-item:last-child { margin-bottom: 0; }
+
+.announcement-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.announcement-item-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    flex: 1;
+    min-width: 150px;
+    word-break: break-word;
+}
+.announcement-item-type {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #172b4a;
+    color: #7db7ff;
+    white-space: nowrap;
+}
+.announcement-item-type.warning { background: #3a3009; color: #ffd84d; }
+.announcement-item-type.urgent { background: #3a1212; color: #ff7d76; }
+
+.announcement-item-message {
+    color: #c5cbd6;
+    font-size: 13px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+.announcement-item-time {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
 .match-card {
     background: #111827; border: 1px solid #273244;
     border-radius: 14px; padding: 20px; margin-bottom: 16px;
@@ -115,18 +194,13 @@ body {
 }
 .match-header-left { flex: 1; min-width: 200px; }
 .match-name { font-size: 19px; font-weight: bold; margin-bottom: 6px; word-break: break-word; }
-.match-name a {
-    color: white;
-    text-decoration: none;
-}
+.match-name a { color: white; text-decoration: none; }
 .match-name a:hover { color: #ff4438; }
 .match-meta { color: #94a3b8; font-size: 13px; margin-top: 3px; }
 .match-meta span { margin-right: 12px; display: inline-block; }
 
 .tournament-link {
-    color: #b992ff;
-    text-decoration: none;
-    font-weight: bold;
+    color: #b992ff; text-decoration: none; font-weight: bold;
 }
 .tournament-link:hover { text-decoration: underline; color: #d4b3ff; }
 
@@ -174,7 +248,7 @@ body {
     text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* TOP KILLER IN MEMBER MATCH CARD */
+/* TOP KILLER with prize */
 .tk-match-row {
     background: linear-gradient(135deg, #2a1408, #1a0e08);
     border: 1px solid #ff9f43;
@@ -184,6 +258,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 .tk-icon {
     width: 28px; height: 28px;
@@ -193,7 +268,7 @@ body {
     font-size: 12px; font-weight: 900; color: #0d111b;
     flex-shrink: 0;
 }
-.tk-content { flex: 1; }
+.tk-content { flex: 1; min-width: 120px; }
 .tk-label {
     font-size: 9px;
     color: #ffb84d;
@@ -206,11 +281,27 @@ body {
     font-weight: bold;
     font-size: 13px;
 }
+.tk-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 .tk-kills {
     color: white;
     font-weight: bold;
     font-family: 'Courier New', monospace;
     font-size: 13px;
+}
+.tk-prize {
+    background: linear-gradient(135deg, #ffd43b, #ffb800);
+    color: #0d111b;
+    font-weight: 900;
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .match-screenshot {
@@ -573,6 +664,20 @@ body {
         </div>
     </div>
 
+    <!-- ANNOUNCEMENTS PANEL (Persistent) -->
+    <div class="announcements-panel" id="announcementsPanel" style="display:none;">
+        <div class="announcements-header">
+            <div>
+                <div class="announcements-header-title">📢 Announcements</div>
+                <div class="announcements-header-sub" id="announcementsCount">Latest news from NEPPLAY</div>
+            </div>
+            <button class="notif-mark-read" onclick="loadAnnouncementsPanel()">Refresh</button>
+        </div>
+        <div id="announcementsList">
+            <div class="notif-empty">Loading announcements...</div>
+        </div>
+    </div>
+
     <div class="section">
         <div class="section-title">My Matches</div>
         <div class="section-sub" id="matchRefreshText">Room IDs appear here once admin releases them.</div>
@@ -601,6 +706,7 @@ body {
 <script>
 
 var currentUser = null;
+var TK_PRIZE = 500;
 
 function esc(v) {
     if (v === undefined || v === null) return "";
@@ -716,31 +822,11 @@ function copyRoomBoth(roomId, roomPassword, game) {
 }
 
 var GAME_SCHEMES = {
-    "free fire": {
-        android: "intent://launch/#Intent;scheme=freefire;package=com.dts.freefireth;end",
-        ios: "freefire://",
-        fallbackName: "Free Fire"
-    },
-    "pubg mobile": {
-        android: "intent://launch/#Intent;scheme=pubgmobile;package=com.tencent.ig;end",
-        ios: "pubgmobile://",
-        fallbackName: "PUBG Mobile"
-    },
-    "mobile legends": {
-        android: "intent://launch/#Intent;scheme=mlbb;package=com.mobile.legends;end",
-        ios: "mobilelegends://",
-        fallbackName: "Mobile Legends"
-    },
-    "efootball": {
-        android: "intent://launch/#Intent;scheme=efootball;package=jp.konami.pesam;end",
-        ios: "efootball://",
-        fallbackName: "eFootball"
-    },
-    "call of duty mobile": {
-        android: "intent://launch/#Intent;scheme=codm;package=com.activision.callofduty.shooter;end",
-        ios: "codm://",
-        fallbackName: "Call of Duty Mobile"
-    }
+    "free fire": { android: "intent://launch/#Intent;scheme=freefire;package=com.dts.freefireth;end", ios: "freefire://", fallbackName: "Free Fire" },
+    "pubg mobile": { android: "intent://launch/#Intent;scheme=pubgmobile;package=com.tencent.ig;end", ios: "pubgmobile://", fallbackName: "PUBG Mobile" },
+    "mobile legends": { android: "intent://launch/#Intent;scheme=mlbb;package=com.mobile.legends;end", ios: "mobilelegends://", fallbackName: "Mobile Legends" },
+    "efootball": { android: "intent://launch/#Intent;scheme=efootball;package=jp.konami.pesam;end", ios: "efootball://", fallbackName: "eFootball" },
+    "call of duty mobile": { android: "intent://launch/#Intent;scheme=codm;package=com.activision.callofduty.shooter;end", ios: "codm://", fallbackName: "Call of Duty Mobile" }
 };
 
 function getSchemeForGame(gameName) {
@@ -774,7 +860,6 @@ function openGame(gameName) {
     catch (e) { showToast("Please open " + scheme.fallbackName + " manually.", true); }
 }
 
-/* Tournament page link helper */
 function tournamentLink(m) {
     var tid = (m.tournament && m.tournament.id) || m.tournamentId || "";
     var tname = (m.tournament && m.tournament.name) || m.tournamentName || "";
@@ -782,6 +867,59 @@ function tournamentLink(m) {
     if (!key) return "";
     return "tournament.html?id=" + encodeURIComponent(key);
 }
+
+/* ============ ANNOUNCEMENTS PANEL (Persistent) ============ */
+
+function loadAnnouncementsPanel() {
+    fetch("/api/announcements?limit=5", { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var list = (data && Array.isArray(data.announcements))
+                ? data.announcements
+                : (Array.isArray(data) ? data : []);
+
+            var panel = document.getElementById("announcementsPanel");
+            var listEl = document.getElementById("announcementsList");
+            var countEl = document.getElementById("announcementsCount");
+
+            if (list.length === 0) {
+                panel.style.display = "none";
+                return;
+            }
+
+            panel.style.display = "block";
+            countEl.textContent = list.length + " announcement" + (list.length === 1 ? "" : "s");
+
+            var html = "";
+            for (var i = 0; i < list.length; i++) {
+                var a = list[i];
+                var type = (a.type || "info").toLowerCase();
+                var typeLabel = type.toUpperCase();
+                if (a.pinned && type === "info") typeLabel = "PINNED";
+
+                html += '<div class="announcement-item ' + esc(type) + '">' +
+                    '<div class="announcement-item-top">' +
+                        '<div class="announcement-item-title">' +
+                            esc(a.title || "Announcement") +
+                        '</div>' +
+                        '<span class="announcement-item-type ' + esc(type) + '">' +
+                            esc(typeLabel) +
+                        '</span>' +
+                    '</div>' +
+                    '<div class="announcement-item-message">' +
+                        esc(a.message || "") +
+                    '</div>' +
+                    '<div class="announcement-item-time">' +
+                        timeAgo(a.createdAt) +
+                    '</div>' +
+                '</div>';
+            }
+            listEl.innerHTML = html;
+        })
+        .catch(function () {});
+}
+
+/* ============ ANNOUNCEMENT BANNER (Dismissible) ============ */
 
 function dismissAnnouncement() {
     document.getElementById("announcementAlert").classList.remove("show");
@@ -819,6 +957,8 @@ function loadAnnouncement() {
         })
         .catch(function () {});
 }
+
+/* ============ NOTIFICATIONS ============ */
 
 var notifPanelOpen = false;
 
@@ -925,6 +1065,8 @@ function refreshNotifications() {
         .catch(function () {});
 }
 
+/* ============ LOAD MEMBER ============ */
+
 function loadMember() {
     fetch("/api/users/me", { credentials: "include", cache: "no-store" })
     .then(function (r) {
@@ -1001,7 +1143,6 @@ function renderRegistrations(regs) {
                 esc(r.captainName) + '</a>';
         }
 
-        /* Tournament page link for registration */
         var regTourneyKey = r.tournamentId || r.tournamentName || "";
         var tourneyNameHtml = esc(r.tournamentName || "Tournament");
         if (regTourneyKey) {
@@ -1083,14 +1224,12 @@ function renderMatchCard(m) {
     var matchType = String(m.matchType || "1v1").toLowerCase();
     var isBR = matchType === "battle-royale";
 
-    /* Tournament link */
     var tLink = tournamentLink(m);
     var matchNameHtml = esc(m.result || m.name || "Match");
     if (tLink) {
         matchNameHtml = '<a href="' + esc(tLink) + '">' + matchNameHtml + '</a>';
     }
 
-    /* Tournament name link */
     var tourneyNameHtml = esc(tournamentName);
     if (tLink) {
         tourneyNameHtml = '<a href="' + esc(tLink) + '" class="tournament-link">' + esc(tournamentName) + '</a>';
@@ -1125,7 +1264,6 @@ function renderMatchCard(m) {
             '</div>';
     }
 
-    /* Top Killer row */
     var tkHtml = "";
     if (m.topKiller) {
         tkHtml = '<div class="tk-match-row">' +
@@ -1134,11 +1272,13 @@ function renderMatchCard(m) {
                 '<div class="tk-label">Top Killer</div>' +
                 '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
             '</div>' +
-            '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+            '<div class="tk-right">' +
+                '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+                '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' +
+            '</div>' +
         '</div>';
     }
 
-    /* Screenshot */
     var screenshotHtml = "";
     if (m.screenshot && isCompletedStatus(cls)) {
         var escapedId = esc(m.id);
@@ -1298,7 +1438,6 @@ function renderHistory(matches) {
         var matchType = String(m.matchType || "1v1").toLowerCase();
         var isBR = matchType === "battle-royale";
 
-        /* Tournament link */
         var tLink = tournamentLink(m);
         var matchNameHtml = esc(m.result || m.name || "Match");
         if (tLink) {
@@ -1335,7 +1474,6 @@ function renderHistory(matches) {
                 '</div>';
         }
 
-        /* Top Killer row for history */
         var tkHtml = "";
         if (m.topKiller) {
             tkHtml = '<div class="tk-match-row">' +
@@ -1344,7 +1482,10 @@ function renderHistory(matches) {
                     '<div class="tk-label">Top Killer</div>' +
                     '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
                 '</div>' +
-                '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+                '<div class="tk-right">' +
+                    '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
+                    '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' +
+                '</div>' +
             '</div>';
         }
 
@@ -1438,6 +1579,7 @@ setInterval(function () {
 
 loadMember();
 loadAnnouncement();
+loadAnnouncementsPanel();
 
 </script>
 
