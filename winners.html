@@ -1,573 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Hall of Champions</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #080b12;
-    color: white;
-    min-height: 100vh;
-}
-
-header {
-    background: #0d111b;
-    border-bottom: 1px solid #202634;
-    padding: 18px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
-.logo span { color: #ff3b30; }
-nav { display: flex; align-items: center; gap: 28px; }
-nav a {
-    color: #c7ccd7; text-decoration: none;
-    font-size: 15px; font-weight: 600;
-}
-nav a:hover, nav a.active { color: #ff4438; }
-.login-btn {
-    background: #ff3b30; color: white !important;
-    padding: 10px 20px; border-radius: 7px;
-}
-
-.hero { text-align: center; padding: 60px 20px 30px; }
-.hero h1 { font-size: 46px; margin-bottom: 15px; }
-.hero h1 span { color: #ff3b30; }
-.hero p { color: #9299a8; font-size: 17px; }
-
-.stats-bar {
-    width: 88%; max-width: 1100px; margin: 30px auto 0;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
-}
-.stat-box {
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; padding: 20px; text-align: center;
-}
-.stat-number {
-    font-size: 28px; font-weight: bold;
-    color: #ffd43b; margin-bottom: 6px;
-}
-.stat-label { color: #9299a8; font-size: 13px; }
-
-.controls {
-    width: 88%; max-width: 1100px; margin: 40px auto 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 15px; flex-wrap: wrap;
-}
-.game-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
-.game-tab {
-    padding: 10px 18px; background: #111621;
-    border: 1px solid #293141; border-radius: 7px;
-    color: #c5cbd6; cursor: pointer; font-weight: 600; font-size: 14px;
-}
-.game-tab.active, .game-tab:hover {
-    background: #ff3b30; border-color: #ff3b30; color: white;
-}
-.search-input {
-    background: #111621; border: 1px solid #293141;
-    border-radius: 7px; padding: 10px 15px;
-    color: white; outline: none; min-width: 240px; font-size: 14px;
-}
-.search-input:focus { border-color: #ff3b30; }
-
-.container { width: 88%; max-width: 1100px; margin: auto; padding-bottom: 70px; }
-.champions-list { display: grid; gap: 20px; }
-
-.champion-card {
-    background: linear-gradient(135deg, #1a1608 0%, #111621 100%);
-    border: 2px solid #ffd43b;
-    border-radius: 14px;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-}
-
-.champion-card::before {
-    content: "CHAMPION";
-    position: absolute;
-    top: 14px; right: -32px;
-    background: #ffd43b;
-    color: #0d111b;
-    font-weight: 900;
-    font-size: 11px;
-    letter-spacing: 2px;
-    padding: 6px 40px;
-    transform: rotate(45deg);
-    transform-origin: center;
-}
-
-.champion-header {
-    display: flex; align-items: flex-start;
-    gap: 18px; margin-bottom: 18px; flex-wrap: wrap;
-}
-
-.trophy-icon {
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ffd43b, #ffb800);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; font-weight: 900; color: #0d111b;
-    flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(255, 212, 59, 0.4);
-}
-
-.tournament-info { flex: 1; min-width: 200px; }
-.tournament-name {
-    font-size: 20px; font-weight: bold; margin-bottom: 6px;
-    color: white;
-}
-.tournament-meta { color: #9299a8; font-size: 13px; line-height: 1.6; }
-.tournament-meta span { margin-right: 14px; display: inline-block; }
-
-.final-display {
-    background: #0b1220;
-    border: 1px solid #2d3a55;
-    border-radius: 12px;
-    padding: 18px;
-    margin: 18px 0;
-    display: grid;
-    grid-template-columns: 1fr 60px 1fr;
-    align-items: center;
-    gap: 15px;
-}
-
-.final-team {
-    text-align: center;
-    padding: 12px;
-    border-radius: 10px;
-    background: #111621;
-    border: 1px solid #273244;
-}
-
-.final-team.champion {
-    background: linear-gradient(135deg, #2a2208, #111621);
-    border-color: #ffd43b;
-}
-
-.final-team-name {
-    font-size: 16px; font-weight: bold; margin-bottom: 5px;
-    word-break: break-word;
-}
-.final-team.champion .final-team-name { color: #ffd43b; }
-.final-team-captain { font-size: 12px; margin-bottom: 8px; }
-.final-team-captain a {
-    color: #9299a8; text-decoration: none;
-}
-.final-team-captain a:hover { color: #ff4438; text-decoration: underline; }
-.final-team.champion .final-team-captain a { color: #ffd43b; }
-.final-team-score {
-    font-size: 26px; font-weight: bold; color: #ff4438;
-}
-.final-team.champion .final-team-score { color: #ffd43b; }
-
-.final-vs { text-align: center; color: #64748b; font-weight: bold; font-size: 14px; }
-
-.champion-badge {
-    display: inline-block;
-    background: #ffd43b;
-    color: #0d111b;
-    padding: 3px 10px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    margin-top: 6px;
-}
-
-/* SCREENSHOT */
-.champion-screenshot {
-    margin: 18px 0;
-    background: #0d1118;
-    border: 1px solid #2d3a55;
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-}
-.champion-screenshot-label {
-    font-size: 11px;
-    color: #ffd43b;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 10px;
-}
-.champion-screenshot img {
-    max-width: 100%;
-    max-height: 500px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-block;
-    transition: transform 0.15s;
-    border: 1px solid #263244;
-}
-.champion-screenshot img:hover {
-    transform: scale(1.01);
-    border-color: #ffd43b;
-}
-.champion-screenshot-hint {
-    color: #64748b;
-    font-size: 11px;
-    margin-top: 8px;
-}
-
-.champion-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    padding-top: 14px;
-    border-top: 1px solid #2d3a55;
-}
-
-.prize-info {
-    color: #ffd43b;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.winner-name-large {
-    font-size: 22px;
-    color: #ffd43b;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
-
-.empty, .loading {
-    text-align: center; padding: 60px 20px;
-    color: #8993a2; font-size: 14px; line-height: 1.7;
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px;
-}
-.loading-spinner {
-    display: inline-block;
-    width: 30px; height: 30px;
-    border: 3px solid #242b39;
-    border-top-color: #ff3b30;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 15px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-footer {
-    border-top: 1px solid #202634;
-    text-align: center; padding: 25px;
-    color: #717887; font-size: 13px;
-}
-
-@media (max-width: 900px) {
-    .stats-bar { grid-template-columns: 1fr; }
-    .final-display { grid-template-columns: 1fr; }
-    .final-vs { padding: 6px 0; }
-}
-@media (max-width: 750px) {
-    header { flex-direction: column; gap: 15px; }
-    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
-    .hero h1 { font-size: 34px; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .search-input { width: 100%; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hall of Winners - Nepal Gaming Platform</title>
+    <!-- Using Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #b45309; }
+        .winner-card { transition: transform 0.2s; }
+        .winner-card:hover { transform: translateY(-5px); }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<header>
-    <div class="logo">NEP<span>PLAY</span></div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="tournaments.html">Tournaments</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="teams.html">Teams</a>
-        <a href="winners.html" class="active">Winners</a>
-        <a href="login.html" class="login-btn">Login</a>
-    </nav>
-</header>
-
-<section class="hero">
-    <h1>Hall of <span>Champions</span></h1>
-    <p>Every NEPPLAY tournament winner. Every legend. Every victory.</p>
-</section>
-
-<div class="stats-bar">
-    <div class="stat-box">
-        <div class="stat-number" id="totalTournaments">0</div>
-        <div class="stat-label">Tournaments Completed</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-number" id="totalChampions">0</div>
-        <div class="stat-label">Champions Crowned</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-number" id="totalPrize">Rs. 0</div>
-        <div class="stat-label">Total Prize Money</div>
-    </div>
-</div>
-
-<div class="controls">
-    <div class="game-tabs">
-        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">All Games</button>
-        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">Free Fire</button>
-        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">PUBG Mobile</button>
-        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">Mobile Legends</button>
-        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">eFootball</button>
-    </div>
-    <input type="text" class="search-input" id="searchBox" placeholder="Search champion or tournament..." oninput="renderChampions()">
-</div>
-
-<main class="container">
-    <div class="champions-list" id="championsList">
-        <div class="loading">
-            <div class="loading-spinner"></div>
-            <div>Loading champions...</div>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
         </div>
-    </div>
-</main>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
+    </nav>
 
-<footer>
-    © 2026 NEPPLAY — Nepal Gaming Community
-</footer>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-6">
+        
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-3"></i>Hall of Winners</h1>
+            <p class="text-gray-400">Celebrating the top players and their prize winnings.</p>
+        </div>
 
-<script>
+        <!-- Featured Winners (Top 3 Podium) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end">
+            <!-- 2nd Place -->
+            <div class="glass-panel winner-card rounded-xl p-6 text-center order-2 md:order-1 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400">
+                    <i class="fa-solid fa-user text-2xl text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Sujal Thapa</h3>
+                <p class="text-sm text-gray-400 mb-2">Free Fire Solo Cup</p>
+                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">
+                    Rs. 300
+                </div>
+            </div>
 
-var allWinners = [];
-var currentGame = "all";
+            <!-- 1st Place -->
+            <div class="glass-panel winner-card rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
+                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+                    <i class="fa-solid fa-crown text-3xl text-yellow-500"></i>
+                </div>
+                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500">
+                    <i class="fa-solid fa-user text-3xl text-yellow-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Rahul Sharma</h3>
+                <p class="text-sm text-gray-400 mb-2">PUBG Mobile Squad</p>
+                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
+                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500">
+                    Rs. 1,000
+                </div>
+            </div>
 
-function esc(v) {
-    if (v === undefined || v === null) return "";
-    return String(v)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+            <!-- 3rd Place -->
+            <div class="glass-panel winner-card rounded-xl p-6 text-center order-3 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700">
+                    <i class="fa-solid fa-user text-2xl text-orange-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Bibek Gurung</h3>
+                <p class="text-sm text-gray-400 mb-2">Clash of Clans War</p>
+                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">
+                    Rs. 200
+                </div>
+            </div>
+        </div>
 
-function formatDate(value) {
-    if (!value) return "Date TBA";
-    var d = new Date(value + "T00:00:00");
-    if (isNaN(d.getTime())) return value;
-    return d.toLocaleDateString("en-NP", {
-        year: "numeric", month: "short", day: "numeric"
-    });
-}
+        <!-- Recent Winners Table -->
+        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recent Winners</h2>
+                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Updated Live</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Player</th>
+                            <th scope="col" class="px-6 py-3">Tournament</th>
+                            <th scope="col" class="px-6 py-3">Rank</th>
+                            <th scope="col" class="px-6 py-3">Prize Won</th>
+                            <th scope="col" class="px-6 py-3">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winners-table-body" class="divide-y divide-gray-700">
+                        <!-- Data injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-function loadWinners() {
-    fetch("/api/winners", { cache: "no-store" })
-    .then(function (r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-    })
-    .then(function (data) {
-        var list = [];
-        if (Array.isArray(data)) list = data;
-        else if (data && Array.isArray(data.winners)) list = data.winners;
+    <!-- Scripts -->
+    <script>
+        // Mock Data for Winners
+        const winnersData = [
+            { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
+            { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
+            { player: "Bibek Gurung", tournament: "Clash of Clans War", rank: "#3", prize: 200, date: "2023-10-25" },
+            { player: "Anish Rai", tournament: "Free Fire Solo Cup", rank: "#1", prize: 500, date: "2023-10-20" },
+            { player: "Kiran Shah", tournament: "Valorant Night Cup", rank: "#1", prize: 1500, date: "2023-10-15" },
+            { player: "Sita Karki", tournament: "Ludo King Championship", rank: "#2", prize: 400, date: "2023-10-10" }
+        ];
 
-        allWinners = list;
-        updateStats();
-        renderChampions();
-    })
-    .catch(function (err) {
-        document.getElementById("championsList").innerHTML =
-            '<div class="empty">Could not load champions.<br>Make sure the server is running.</div>';
-        console.error(err);
-    });
-}
+        function loadWinners() {
+            const tableBody = document.getElementById('winners-table-body');
+            
+            winnersData.forEach(winner => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
 
-function updateStats() {
-    var total = allWinners.length;
-    var seen = {};
-    var unique = 0;
-    var prizeSum = 0;
+                // Rank styling logic
+                let rankClass = "text-gray-300";
+                let rankIcon = "";
+                if(winner.rank === "#1") {
+                    rankClass = "text-yellow-400 font-bold";
+                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
+                } else if(winner.rank === "#2") {
+                    rankClass = "text-gray-300 font-bold";
+                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
+                } else if(winner.rank === "#3") {
+                    rankClass = "text-orange-400 font-bold";
+                    rankIcon = '<i class="fa-solid fa-medal mr-1"></i>';
+                }
 
-    for (var i = 0; i < allWinners.length; i++) {
-        var w = allWinners[i];
-        var key = String(w.champion || "").toLowerCase();
-        if (key && !seen[key]) {
-            seen[key] = true;
-            unique++;
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">
+                            ${winner.player.charAt(0)}
+                        </div>
+                        ${winner.player}
+                    </td>
+                    <td class="px-6 py-4">${winner.tournament}</td>
+                    <td class="px-6 py-4 ${rankClass}">${rankIcon}${winner.rank}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${winner.prize}</td>
+                    <td class="px-6 py-4 text-gray-500">${winner.date}</td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
-        prizeSum += Number(w.prizePool) || 0;
-    }
 
-    document.getElementById("totalTournaments").textContent = total;
-    document.getElementById("totalChampions").textContent = unique;
-    document.getElementById("totalPrize").textContent =
-        "Rs. " + prizeSum.toLocaleString("en-NP");
-}
-
-function getFiltered() {
-    var list = allWinners.slice();
-
-    if (currentGame !== "all") {
-        list = list.filter(function (w) {
-            return String(w.game || "").toLowerCase() === currentGame.toLowerCase();
-        });
-    }
-
-    var search = (document.getElementById("searchBox").value || "")
-        .toLowerCase().trim();
-
-    if (search) {
-        list = list.filter(function (w) {
-            var text = (
-                (w.champion || "") + " " +
-                (w.runnerUp || "") + " " +
-                (w.tournamentName || "") + " " +
-                (w.game || "")
-            ).toLowerCase();
-            return text.indexOf(search) !== -1;
-        });
-    }
-
-    return list;
-}
-
-function renderChampions() {
-    var container = document.getElementById("championsList");
-    var list = getFiltered();
-
-    if (list.length === 0) {
-        container.innerHTML =
-            '<div class="empty">' +
-                '<strong>No champions yet.</strong><br>' +
-                'Complete a tournament and mark the final match to see winners here.' +
-            '</div>';
-        return;
-    }
-
-    var html = "";
-    for (var i = 0; i < list.length; i++) {
-        html += renderCard(list[i], i);
-    }
-    container.innerHTML = html;
-}
-
-function renderCard(w, index) {
-    var prize = (w.prizePool || 0) > 0
-        ? '<div class="prize-info">Prize Pool: Rs. ' +
-            Number(w.prizePool).toLocaleString("en-NP") +
-          '</div>'
-        : '<div class="prize-info">No prize pool</div>';
-
-    var champCaptainHtml = "";
-    if (w.championCaptain) {
-        champCaptainHtml = 'Captain: <a href="player.html?username=' +
-            encodeURIComponent(w.championCaptain) + '">' +
-            esc(w.championCaptain) + '</a>';
-    } else {
-        champCaptainHtml = "&nbsp;";
-    }
-
-    var runCaptainHtml = "";
-    if (w.runnerUpCaptain) {
-        runCaptainHtml = 'Captain: <a href="player.html?username=' +
-            encodeURIComponent(w.runnerUpCaptain) + '">' +
-            esc(w.runnerUpCaptain) + '</a>';
-    } else {
-        runCaptainHtml = "&nbsp;";
-    }
-
-    /* Screenshot display */
-    var screenshotHtml = "";
-    if (w.screenshot) {
-        screenshotHtml =
-            '<div class="champion-screenshot">' +
-                '<div class="champion-screenshot-label">Final Match Result</div>' +
-                '<img src="' + esc(w.screenshot) + '" alt="Final match result" onclick="openChampionScreenshot(' + index + ')">' +
-                '<div class="champion-screenshot-hint">Click image to view full size</div>' +
-            '</div>';
-    }
-
-    return (
-        '<div class="champion-card">' +
-
-            '<div class="champion-header">' +
-                '<div class="trophy-icon">1</div>' +
-                '<div class="tournament-info">' +
-                    '<div class="tournament-name">' +
-                        esc(w.tournamentName || "Tournament") +
-                    '</div>' +
-                    '<div class="tournament-meta">' +
-                        '<span>Game: ' + esc(w.game || "-") + '</span>' +
-                        '<span>Date: ' + esc(formatDate(w.date)) + '</span>' +
-                        '<span>Matches: ' + (w.totalMatches || 0) + '</span>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-
-            '<div class="final-display">' +
-
-                '<div class="final-team champion">' +
-                    '<div class="final-team-name">' +
-                        esc(w.champion || "Champion") +
-                    '</div>' +
-                    '<div class="final-team-captain">' +
-                        champCaptainHtml +
-                    '</div>' +
-                    '<div class="final-team-score">' +
-                        esc(w.championScore || "0") +
-                    '</div>' +
-                    '<span class="champion-badge">WINNER</span>' +
-                '</div>' +
-
-                '<div class="final-vs">VS</div>' +
-
-                '<div class="final-team">' +
-                    '<div class="final-team-name">' +
-                        esc(w.runnerUp || "Runner-up") +
-                    '</div>' +
-                    '<div class="final-team-captain">' +
-                        runCaptainHtml +
-                    '</div>' +
-                    '<div class="final-team-score">' +
-                        esc(w.runnerUpScore || "0") +
-                    '</div>' +
-                '</div>' +
-
-            '</div>' +
-
-            screenshotHtml +
-
-            '<div class="champion-footer">' +
-                prize +
-                '<div class="winner-name-large">' +
-                    esc(w.champion || "") +
-                '</div>' +
-            '</div>' +
-
-        '</div>'
-    );
-}
-
-function openChampionScreenshot(index) {
-    var w = allWinners[index];
-    if (!w || !w.screenshot) return;
-    var win = window.open("");
-    win.document.write('<html><head><title>' + esc(w.tournamentName || "Champion") + ' — Result</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + w.screenshot + '" alt="Result screenshot"></body></html>');
-}
-
-function changeGame(game, button) {
-    currentGame = game;
-    var tabs = document.querySelectorAll(".game-tab");
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove("active");
-    }
-    button.classList.add("active");
-    renderChampions();
-}
-
-loadWinners();
-
-</script>
-
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadWinners);
+    </script>
 </body>
 </html>
