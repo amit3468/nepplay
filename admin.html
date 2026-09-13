@@ -45,13 +45,11 @@
         .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         
-        /* Payment status badges */
         .status-verified { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-pending-verify { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-rejected { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-free { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
 
-        /* Registration detail panel */
         .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(100, 116, 139, 0.3); }
         .detail-row:last-child { border-bottom: none; }
         .detail-label { color: #94a3b8; font-size: 0.75rem; }
@@ -120,7 +118,7 @@
                     <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
                         <div class="p-3 border-b border-gray-700">
                             <p class="text-xs text-gray-500">Signed in as</p>
-                            <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin</p>
+                            <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin@nepplay.com</p>
                             <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Administrator</p>
                         </div>
                         <div class="py-1">
@@ -158,7 +156,7 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p>v1.5.0</p>
+                    <p>v1.5.1</p>
                     <p>&copy; 2023 Nepal Gaming</p>
                 </div>
             </aside>
@@ -628,7 +626,7 @@
     </div>
 
     <script>
-        console.log("--- ADMIN PANEL LOADED v1.5 ---");
+        console.log("--- ADMIN PANEL LOADED v1.5.1 ---");
 
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
@@ -655,7 +653,7 @@
         function showAdminPanel() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainPanel').classList.remove('hidden');
-            checkUserStatus();
+            showAdminIdentity();
             initializePanel();
         }
 
@@ -675,14 +673,12 @@
             if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') showAdminPanel();
         }
 
-        function checkUserStatus() {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (user && user.username) {
-                document.getElementById('user-profile').classList.remove('hidden');
-                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('user-name').textContent = user.username;
-                document.getElementById('dropdown-username').textContent = user.email || user.username;
-            }
+        // ============ ADMIN IDENTITY (FIXED - always shows Admin, not member) ============
+        function showAdminIdentity() {
+            document.getElementById('user-profile').classList.remove('hidden');
+            document.getElementById('user-avatar').textContent = 'A';
+            document.getElementById('user-name').textContent = 'Admin';
+            document.getElementById('dropdown-username').textContent = 'admin@nepplay.com';
         }
 
         function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
@@ -796,7 +792,6 @@
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 
-                // Payment status badge
                 let paymentBadge = '';
                 const status = reg.paymentStatus || 'free';
                 if (status === 'verified') paymentBadge = '<span class="status-verified"><i class="fa-solid fa-check-circle mr-1"></i>Verified</span>';
@@ -841,12 +836,10 @@
             else if (status === 'rejected') statusBadge = '<span class="status-rejected"><i class="fa-solid fa-times-circle mr-1"></i>Rejected</span>';
             else statusBadge = '<span class="status-free"><i class="fa-solid fa-gift mr-1"></i>Free Tournament</span>';
 
-            // Screenshot
             const screenshotHtml = reg.paymentScreenshot 
                 ? `<img src="${reg.paymentScreenshot}" class="w-full max-w-md mx-auto rounded-lg border-2 border-green-500/30 cursor-pointer" onclick="window.open(this.src)" alt="Payment Proof">` 
                 : '<p class="text-gray-500 text-sm text-center py-4">No screenshot provided</p>';
 
-            // Teammates
             let teammatesHtml = '';
             if (reg.teammates && reg.teammates.length > 0) {
                 teammatesHtml = `
@@ -867,12 +860,10 @@
                 `;
             }
 
-            // Team name
             const teamNameHtml = reg.teamName 
                 ? `<div class="detail-row"><span class="detail-label">Team Name</span><span class="detail-value text-yellow-400">${reg.teamName}</span></div>` 
                 : '';
 
-            // Transaction ID
             const txIdHtml = reg.transactionId 
                 ? `<div class="detail-row"><span class="detail-label">Transaction ID</span><span class="detail-value text-green-400 font-mono">${reg.transactionId}</span></div>` 
                 : '';
@@ -881,7 +872,6 @@
                 month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
             });
 
-            // Action buttons - only show for pending payments
             const actionButtonsHtml = (reg.entryFee > 0 && status === 'pending-verification') 
                 ? `
                     <div class="mt-4 pt-4 border-t border-gray-700 grid grid-cols-2 gap-3">
@@ -894,7 +884,6 @@
                     </div>
                 ` : '';
 
-            // Contact button
             const contactHtml = reg.phone 
                 ? `<a href="https://wa.me/977${reg.phone}" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm text-center mt-4">
                         <i class="fa-brands fa-whatsapp mr-2"></i>Contact via WhatsApp
@@ -902,7 +891,6 @@
                 : '';
 
             document.getElementById('detailsContent').innerHTML = `
-                <!-- Header -->
                 <div class="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-4 mb-4 border border-blue-500/30">
                     <div class="flex justify-between items-center flex-wrap gap-2">
                         <div>
@@ -916,7 +904,6 @@
                     </div>
                 </div>
 
-                <!-- Tournament Info -->
                 <div class="mb-4">
                     <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Tournament</h3>
                     <div class="bg-gray-800/50 rounded-lg p-3">
@@ -943,7 +930,6 @@
                     </div>
                 </div>
 
-                <!-- Player Details -->
                 <div class="mb-4">
                     <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-user mr-2"></i>Player Details</h3>
                     <div class="bg-gray-800/50 rounded-lg p-3">
