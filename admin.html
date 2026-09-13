@@ -9,39 +9,64 @@
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .form-input { 
-            background-color: #1e293b; 
-            color: #e2e8f0; 
-            border: 1px solid #334155;
-            transition: all 0.2s;
-        }
-        .form-input:focus { 
-            outline: none; 
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
+        .form-input { background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155; transition: all 0.2s; }
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .sidebar-item { transition: all 0.2s; border-left: 3px solid transparent; }
         .sidebar-item.active { background-color: rgba(59, 130, 246, 0.1); border-left-color: #3b82f6; color: white; }
         .sidebar-item:hover { background-color: rgba(59, 130, 246, 0.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Admin Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-700">
-        <div class="flex items-center gap-3">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
-            <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
+        
+        <!-- LEFT: Logo + ADMIN Badge + Profile -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+                <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
+            </div>
+
+            <!-- Profile Dropdown -->
+            <div id="user-profile" class="hidden relative">
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">Admin</span></span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                    <div class="p-3 border-b border-gray-700">
+                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin</p>
+                        <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Administrator</p>
+                    </div>
+                    <div class="py-1">
+                        <a href="#" onclick="switchTab('dashboard', document.querySelector('.sidebar-item'))" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Admin Dashboard</a>
+                        <a href="index.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-globe w-4"></i> View Public Site</a>
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Member View</a>
+                    </div>
+                    <div class="py-1 border-t border-gray-700">
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- RIGHT: Quick links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <span class="text-sm text-gray-300">Admin: <span id="admin-name" class="font-bold text-white">admin</span></span>
             <a href="index.html" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit</a>
         </div>
     </nav>
@@ -152,7 +177,7 @@
                 <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                         <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-user-plus text-blue-500 mr-2"></i>Recent Registrations</h2>
-                        <a href="#" onclick="switchTab('users', this)" class="text-xs text-blue-400 hover:text-blue-300">View All →</a>
+                        <a href="#" onclick="switchTab('users', document.querySelectorAll('.sidebar-item')[2])" class="text-xs text-blue-400 hover:text-blue-300">View All →</a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-400">
@@ -404,6 +429,35 @@
     <script>
         console.log("--- ADMIN PANEL LOADED ---");
 
+        // 1. Check login status
+        function checkUserStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.username) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('user-name').textContent = user.username;
+                document.getElementById('dropdown-username').textContent = user.email || user.username;
+            } else {
+                document.getElementById('user-profile').classList.add('hidden');
+            }
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // 2. Tab Switching
         function switchTab(tabName, linkElement) {
             console.log("Switching to tab:", tabName);
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -412,12 +466,9 @@
             if (linkElement) linkElement.classList.add('active');
         }
 
-        const createdTournaments = [];
-
+        // 3. Create Tournament
         function createTournament(event) {
             event.preventDefault();
-            console.log("Creating new tournament...");
-
             const name = document.getElementById('t-name').value.trim();
             const game = document.getElementById('t-game').value;
             const mode = document.getElementById('t-mode').value;
@@ -449,12 +500,9 @@
             existing.push(newTournament);
             localStorage.setItem('customTournaments', JSON.stringify(existing));
 
-            console.log("Tournament created and saved:", newTournament);
-
             msgBox.classList.remove('hidden');
             msgBox.className = "text-center text-sm mt-4 text-green-400";
-            msgBox.textContent = `✅ Tournament "${name}" created successfully! Check the tournaments page.`;
-
+            msgBox.textContent = `✅ Tournament "${name}" created successfully!`;
             addToCreatedList(newTournament);
             document.getElementById('tournamentForm').reset();
             setTimeout(() => msgBox.classList.add('hidden'), 4000);
@@ -474,10 +522,9 @@
             list.prepend(row);
         }
 
+        // 4. Create Announcement
         function createAnnouncement(event) {
             event.preventDefault();
-            console.log("Creating announcement...");
-
             const title = document.getElementById('a-title').value.trim();
             const message = document.getElementById('a-message').value.trim();
             const priority = document.getElementById('a-priority').value;
@@ -519,8 +566,8 @@
         }
 
         window.onload = function() {
+            checkUserStatus();
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            console.log("Loaded", existing.length, "custom tournaments from localStorage");
             existing.reverse().forEach(t => addToCreatedList(t));
         };
     </script>
