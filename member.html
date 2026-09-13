@@ -1,1587 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Member Dashboard</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #080d18; color: white; min-height: 100vh;
-}
-.header {
-    background: #0d1424; border-bottom: 1px solid #1d2a42;
-    padding: 20px 6%;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 15px; flex-wrap: wrap;
-    position: sticky; top: 0; z-index: 50;
-}
-.header-left { display: flex; flex-direction: column; gap: 4px; }
-.logo { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
-.logo span { color: #ff3b30; }
-.welcome { color: #aeb7c7; font-size: 13px; }
-.welcome a { color: #ff4438; text-decoration: none; font-weight: bold; }
-.welcome a:hover { text-decoration: underline; }
-.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.header-btn {
-    text-decoration: none; padding: 10px 16px; border-radius: 8px;
-    font-weight: bold; font-size: 13px; border: none; cursor: pointer;
-}
-.header-btn.primary { background: #ff3b30; color: white; }
-.header-btn.primary:hover { background: #dc2626; }
-.header-btn.secondary { background: #1e293b; color: white; }
-.header-btn.secondary:hover { background: #334155; }
-
-.container { width: 92%; max-width: 1000px; margin: 25px auto 60px; }
-
-.announcement-alert {
-    background: linear-gradient(135deg, #1e3a5f, #172b4a);
-    border: 1px solid #3b82f6; border-radius: 12px;
-    padding: 16px 20px; margin-bottom: 20px;
-    position: relative; display: none;
-}
-.announcement-alert.show { display: block; }
-.announcement-alert.warning {
-    background: linear-gradient(135deg, #3a2a09, #5a3f12);
-    border-color: #a87918;
-}
-.announcement-alert.urgent {
-    background: linear-gradient(135deg, #4a1717, #7a2020);
-    border-color: #ff3b30;
-}
-.announcement-alert-type {
-    font-size: 11px; font-weight: bold; letter-spacing: 1px;
-    color: #7db7ff; margin-bottom: 8px; text-transform: uppercase;
-}
-.announcement-alert.warning .announcement-alert-type { color: #ffd84d; }
-.announcement-alert.urgent .announcement-alert-type { color: #ff8f8f; }
-.announcement-alert-title {
-    font-size: 16px; font-weight: bold; color: white;
-    margin-bottom: 6px; padding-right: 30px;
-}
-.announcement-alert-message {
-    color: #c5cbd6; font-size: 14px; line-height: 1.6; padding-right: 30px;
-}
-.announcement-alert-close {
-    position: absolute; top: 12px; right: 14px;
-    background: transparent; border: none; color: #94a3b8;
-    font-size: 20px; cursor: pointer; line-height: 1; padding: 4px 8px;
-}
-.announcement-alert-close:hover { color: white; }
-
-.starting-banner {
-    background: linear-gradient(135deg, #4a1717, #7a2020);
-    border: 1px solid #ff3b30; border-radius: 12px;
-    padding: 18px 22px; margin-bottom: 22px; display: none;
-}
-.starting-banner.show { display: block; }
-.starting-banner-title {
-    font-size: 18px; font-weight: bold;
-    margin-bottom: 6px; color: white;
-}
-.starting-banner-sub { color: #ffcccc; font-size: 13px; }
-
-.stats {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 14px; margin-bottom: 28px;
-}
-.stat {
-    background: #111827; border: 1px solid #273244;
-    border-radius: 12px; padding: 18px; text-align: center;
-}
-.stat-number { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
-.stat-label { color: #9faabd; font-size: 12px; }
-.stat-total .stat-number { color: #7db7ff; }
-.stat-approved .stat-number { color: #5cff91; }
-.stat-pending .stat-number { color: #ffd75a; }
-
-.section { margin-top: 30px; }
-.section-title { font-size: 22px; margin-bottom: 6px; }
-.section-sub { color: #7d8a9f; font-size: 13px; margin-bottom: 18px; }
-
-/* ANNOUNCEMENTS PANEL — persistent */
-.announcements-panel {
-    background: linear-gradient(135deg, #0f1a2e, #111827);
-    border: 1px solid #2d3a55;
-    border-radius: 14px;
-    padding: 20px;
-    margin-top: 20px;
-}
-.announcements-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.announcements-header-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-}
-.announcements-header-sub {
-    color: #7d8a9f;
-    font-size: 12px;
-}
-.announcement-item {
-    background: #0b1220;
-    border: 1px solid #263244;
-    border-left: 3px solid #3b82f6;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-}
-.announcement-item.warning { border-left-color: #ffb84d; }
-.announcement-item.urgent { border-left-color: #ff3b30; }
-.announcement-item:last-child { margin-bottom: 0; }
-
-.announcement-item-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-}
-.announcement-item-title {
-    font-size: 15px;
-    font-weight: bold;
-    color: white;
-    flex: 1;
-    min-width: 150px;
-    word-break: break-word;
-}
-.announcement-item-type {
-    font-size: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background: #172b4a;
-    color: #7db7ff;
-    white-space: nowrap;
-}
-.announcement-item-type.warning { background: #3a3009; color: #ffd84d; }
-.announcement-item-type.urgent { background: #3a1212; color: #ff7d76; }
-
-.announcement-item-message {
-    color: #c5cbd6;
-    font-size: 13px;
-    line-height: 1.6;
-    word-break: break-word;
-}
-.announcement-item-time {
-    color: #64748b;
-    font-size: 11px;
-    margin-top: 8px;
-}
-
-.match-card {
-    background: #111827; border: 1px solid #273244;
-    border-radius: 14px; padding: 20px; margin-bottom: 16px;
-}
-.match-card.live { border-color: #ff3b30; }
-.match-card.upcoming { border-color: #1e3a5f; }
-.match-card.completed { border-color: #1e4030; opacity: 0.92; }
-
-.match-header {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 15px; margin-bottom: 16px; flex-wrap: wrap;
-}
-.match-header-left { flex: 1; min-width: 200px; }
-.match-name { font-size: 19px; font-weight: bold; margin-bottom: 6px; word-break: break-word; }
-.match-name a { color: white; text-decoration: none; }
-.match-name a:hover { color: #ff4438; }
-.match-meta { color: #94a3b8; font-size: 13px; margin-top: 3px; }
-.match-meta span { margin-right: 12px; display: inline-block; }
-
-.tournament-link {
-    color: #b992ff; text-decoration: none; font-weight: bold;
-}
-.tournament-link:hover { text-decoration: underline; color: #d4b3ff; }
-
-.status-badge {
-    padding: 6px 12px; border-radius: 20px;
-    font-size: 11px; font-weight: bold;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-.status-badge.scheduled { background: #172b4a; color: #7db7ff; }
-.status-badge.live { background: #4a1717; color: #ff6b6b; }
-.status-badge.completed { background: #173c29; color: #62e69a; }
-.status-badge.cancelled { background: #3a1212; color: #ff7d76; }
-
-.match-teams {
-    display: grid; grid-template-columns: 1fr 60px 1fr;
-    align-items: center; gap: 15px; margin: 16px 0;
-}
-.match-team {
-    background: #0b1220; border: 1px solid #273244;
-    border-radius: 10px; padding: 14px; text-align: center;
-}
-.match-team-name { font-size: 15px; font-weight: bold; margin-bottom: 6px; word-break: break-word; }
-.match-team-score { font-size: 24px; font-weight: bold; color: #ff3b30; }
-.match-vs { text-align: center; color: #64748b; font-weight: bold; font-size: 13px; }
-
-.br-winners { display: grid; gap: 8px; margin: 16px 0; }
-.br-winner-row {
-    display: flex; align-items: center; gap: 12px;
-    background: #0b1220; border: 1px solid #263244;
-    border-radius: 8px; padding: 10px 14px;
-}
-.br-medal {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 13px; color: #0d111b;
-    flex-shrink: 0;
-}
-.br-medal.p1 { background: linear-gradient(135deg, #ffd43b, #ffb800); }
-.br-medal.p2 { background: linear-gradient(135deg, #d8dde4, #a9b1bc); }
-.br-medal.p3 { background: linear-gradient(135deg, #d68a4c, #a5663a); }
-.br-winner-name { font-weight: bold; font-size: 14px; flex: 1; }
-.br-place-label {
-    font-size: 11px; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: 0.5px;
-}
-
-/* TOP KILLER with prize */
-.tk-match-row {
-    background: linear-gradient(135deg, #2a1408, #1a0e08);
-    border: 1px solid #ff9f43;
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin: 12px 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.tk-icon {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff9f43, #ff6b00);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 900; color: #0d111b;
-    flex-shrink: 0;
-}
-.tk-content { flex: 1; min-width: 120px; }
-.tk-label {
-    font-size: 9px;
-    color: #ffb84d;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-.tk-team {
-    color: #ff9f43;
-    font-weight: bold;
-    font-size: 13px;
-}
-.tk-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.tk-kills {
-    color: white;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-}
-.tk-prize {
-    background: linear-gradient(135deg, #ffd43b, #ffb800);
-    color: #0d111b;
-    font-weight: 900;
-    font-size: 10px;
-    padding: 4px 9px;
-    border-radius: 5px;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-
-.match-screenshot {
-    margin: 16px 0;
-    background: #0d1118;
-    border: 1px solid #263244;
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
-}
-.match-screenshot-label {
-    font-size: 11px; color: #7db7ff;
-    font-weight: bold; text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 10px;
-}
-.match-screenshot img {
-    max-width: 100%; max-height: 400px;
-    border-radius: 8px; cursor: pointer;
-    display: inline-block;
-    transition: transform 0.15s;
-}
-.match-screenshot img:hover { transform: scale(1.02); }
-.match-screenshot-hint {
-    color: #64748b; font-size: 11px; margin-top: 8px;
-}
-
-.join-panel {
-    background: linear-gradient(135deg, #0b1a2e, #0d1118);
-    border: 2px solid #3b82f6;
-    border-radius: 14px; padding: 20px; margin-top: 16px;
-}
-.join-panel.live {
-    border-color: #ff3b30;
-    animation: pulse-live 1.8s infinite;
-}
-@keyframes pulse-live {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(255,59,48,0); }
-}
-.join-panel-title {
-    font-size: 13px; font-weight: bold;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    color: #7db7ff; margin-bottom: 14px;
-    display: flex; align-items: center; gap: 8px;
-}
-.join-panel.live .join-panel-title { color: #ff8f8f; }
-.live-dot {
-    display: inline-block; width: 8px; height: 8px;
-    border-radius: 50%; background: #ff3b30;
-    animation: dot-pulse 1.2s infinite;
-}
-@keyframes dot-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-.join-room-info {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; margin-bottom: 14px;
-}
-.join-room-field {
-    background: #0d1118; border: 1px solid #1e3a5f;
-    border-radius: 8px; padding: 12px; position: relative;
-}
-.join-room-label {
-    color: #64748b; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: 5px;
-}
-.join-room-value {
-    font-size: 18px; font-weight: bold; color: white;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px; word-break: break-all;
-    padding-right: 60px;
-}
-.join-mini-copy {
-    position: absolute; top: 10px; right: 10px;
-    background: #1e3a5f; border: none;
-    color: #7db7ff; padding: 5px 10px;
-    border-radius: 5px; cursor: pointer;
-    font-size: 10px; font-weight: bold;
-    text-transform: uppercase;
-}
-.join-mini-copy:hover { background: #3b82f6; color: white; }
-
-.join-buttons {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 14px;
-}
-.join-btn {
-    padding: 14px 16px; border-radius: 10px; border: none;
-    cursor: pointer; font-weight: bold;
-    font-size: 14px; text-decoration: none;
-    text-align: center; display: block;
-    transition: 0.15s;
-}
-.join-btn.copy-all {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-}
-.join-btn.copy-all:hover { filter: brightness(1.15); }
-.join-btn.open-game {
-    background: linear-gradient(135deg, #ff3b30, #b91c1c);
-    color: white;
-}
-.join-btn.open-game:hover { filter: brightness(1.15); }
-.join-btn.joined {
-    background: #0c3621; color: #5bed8e;
-    border: 1px solid #176b3c; cursor: default;
-}
-.join-btn.joined:hover { filter: none; }
-
-.join-steps {
-    background: #0d1118; border-radius: 10px;
-    padding: 14px 16px; border: 1px solid #1e293b;
-}
-.join-steps-title {
-    font-size: 11px; font-weight: bold;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    color: #94a3b8; margin-bottom: 10px;
-}
-.join-step {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 6px 0; color: #c5cbd6; font-size: 13px; line-height: 1.5;
-}
-.join-step-num {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: #1e3a5f; color: #7db7ff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: bold;
-    flex-shrink: 0; margin-top: 1px;
-}
-.join-step code {
-    background: #172033; color: #ffd84d;
-    padding: 1px 6px; border-radius: 4px;
-    font-size: 12px; font-family: 'Courier New', monospace;
-}
-
-.room-not-yet {
-    background: #1a1408;
-    border: 2px dashed #a87918;
-    border-radius: 12px;
-    padding: 18px; margin-top: 16px;
-    text-align: center;
-}
-.room-not-yet-title {
-    font-size: 13px; font-weight: bold;
-    text-transform: uppercase; letter-spacing: 1px;
-    color: #ffb84d; margin-bottom: 8px;
-}
-.room-not-yet-text {
-    color: #d4a84d; font-size: 13px; line-height: 1.6;
-}
-
-.match-winner {
-    background: linear-gradient(135deg, #173c29, #1a4a32);
-    border: 1px solid #2c8d5e; border-radius: 10px;
-    padding: 12px 16px; margin-top: 14px;
-    text-align: center; font-weight: bold;
-    color: #a4f2c7; font-size: 14px;
-}
-
-.reg-card {
-    background: #111827; border: 1px solid #273244;
-    border-radius: 12px; padding: 18px; margin-bottom: 12px;
-}
-.reg-header {
-    display: flex; align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
-}
-.reg-tournament { font-size: 17px; font-weight: bold; word-break: break-word; }
-.reg-tournament a { color: white; text-decoration: none; }
-.reg-tournament a:hover { color: #ff4438; }
-.reg-info { color: #aeb7c7; margin: 5px 0; font-size: 13px; line-height: 1.5; }
-.reg-info strong { color: white; }
-.reg-info a { color: #ff4438; text-decoration: none; }
-.reg-info a:hover { text-decoration: underline; }
-.reg-status {
-    display: inline-block; padding: 6px 14px;
-    border-radius: 20px; font-weight: bold; font-size: 12px;
-}
-.reg-status.pending { background: #4a3a12; color: #ffd75a; }
-.reg-status.approved { background: #123d25; color: #5cff91; }
-.reg-status.rejected { background: #4a1717; color: #ff7777; }
-
-.empty {
-    background: #111827; border: 1px dashed #334155;
-    border-radius: 12px; padding: 40px 20px;
-    text-align: center; color: #94a3b8;
-    font-size: 14px; line-height: 1.7;
-}
-.empty strong { color: white; display: block; margin-bottom: 8px; font-size: 16px; }
-.empty a {
-    display: inline-block; margin-top: 14px;
-    background: #ff3b30; color: white;
-    text-decoration: none; padding: 10px 18px;
-    border-radius: 8px; font-weight: bold; font-size: 13px;
-}
-
-.error {
-    background: #3a1414; border: 1px solid #8b2c2c;
-    color: #ff8f8f; padding: 14px; border-radius: 9px;
-    margin-bottom: 20px; display: none;
-    line-height: 1.5; font-size: 13px;
-}
-
-.toast {
-    position: fixed; right: 20px; bottom: 20px;
-    background: #0d3020; border: 1px solid #195f3a;
-    color: #6bea9a; padding: 13px 18px;
-    border-radius: 9px; display: none;
-    z-index: 300; font-size: 14px; max-width: 320px;
-    line-height: 1.5;
-}
-.toast.show { display: block; }
-.toast.error { background: #351414; border-color: #762929; color: #ffaaa5; }
-
-.notif-bell {
-    position: relative;
-    background: #1e293b; color: white;
-    border: 1px solid #334155; border-radius: 8px;
-    padding: 10px 14px; font-weight: bold;
-    font-size: 13px; cursor: pointer;
-}
-.notif-bell:hover { background: #334155; }
-.notif-badge {
-    position: absolute; top: -6px; right: -6px;
-    background: #ff3b30; color: white;
-    border-radius: 10px; min-width: 18px; height: 18px;
-    padding: 0 5px; display: none;
-    align-items: center; justify-content: center;
-    font-size: 10px; font-weight: bold;
-}
-.notif-badge.show { display: flex; }
-
-.notif-panel {
-    position: fixed; top: 90px; right: 20px;
-    width: 340px; max-height: 500px; overflow-y: auto;
-    background: #111827; border: 1px solid #334155;
-    border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    display: none; z-index: 200;
-}
-.notif-panel.show { display: block; }
-.notif-header {
-    padding: 14px 16px;
-    border-bottom: 1px solid #1e293b;
-    display: flex; justify-content: space-between;
-    align-items: center;
-}
-.notif-header-title { font-weight: bold; font-size: 15px; }
-.notif-mark-read {
-    background: transparent; border: none;
-    color: #7db7ff; font-size: 12px;
-    font-weight: bold; cursor: pointer;
-}
-.notif-mark-read:hover { color: white; }
-.notif-list { padding: 6px; }
-.notif-item {
-    padding: 12px 14px; border-radius: 8px;
-    margin-bottom: 4px; cursor: pointer;
-    display: flex; gap: 10px; align-items: flex-start;
-}
-.notif-item:hover { background: #1a2233; }
-.notif-item.unread { background: #172b4a; }
-.notif-item.unread:hover { background: #1e3a5f; }
-.notif-icon {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 900; flex-shrink: 0;
-}
-.notif-icon.info { background: #172b4a; color: #7db7ff; }
-.notif-icon.success { background: #0c3621; color: #5bed8e; }
-.notif-icon.error { background: #3a1212; color: #ff7d76; }
-.notif-icon.urgent { background: #4a1717; color: #ff6b6b; }
-.notif-content { flex: 1; min-width: 0; }
-.notif-title {
-    font-weight: bold; font-size: 13px;
-    margin-bottom: 3px; color: white;
-    word-break: break-word;
-}
-.notif-message {
-    color: #aeb7c7; font-size: 12px;
-    line-height: 1.5; word-break: break-word;
-}
-.notif-time { color: #64748b; font-size: 11px; margin-top: 6px; }
-.notif-empty {
-    text-align: center; padding: 40px 20px;
-    color: #64748b; font-size: 13px;
-}
-
-@media (max-width: 700px) {
-    .stats { grid-template-columns: 1fr; }
-    .match-teams { grid-template-columns: 1fr; }
-    .match-vs { order: 2; }
-    .match-team:first-child { order: 1; }
-    .match-team:last-child { order: 3; }
-    .join-room-info { grid-template-columns: 1fr; }
-    .join-buttons { grid-template-columns: 1fr; }
-    .header { flex-direction: column; align-items: flex-start; }
-    .notif-panel { width: 90%; right: 5%; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard - Nepal Gaming Platform</title>
+    <!-- Using Tailwind CSS for styling to match modern look -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
+        .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<div class="header">
-    <div class="header-left">
-        <div class="logo">NEP<span>PLAY</span>.</div>
-        <div class="welcome">Welcome, <a id="usernameLink" href="#">...</a></div>
-    </div>
-    <div class="header-actions">
-        <button class="notif-bell" onclick="toggleNotifications()">
-            Notifications
-            <span class="notif-badge" id="notifBadge">0</span>
-        </button>
-        <a href="tournaments.html" class="header-btn primary">Browse Tournaments</a>
-        <button class="header-btn secondary" onclick="logout()">Logout</button>
-    </div>
-</div>
-
-<div id="notifPanel" class="notif-panel">
-    <div class="notif-header">
-        <div class="notif-header-title">Notifications</div>
-        <button class="notif-mark-read" onclick="markAllRead()">Mark all read</button>
-    </div>
-    <div class="notif-list" id="notifList">
-        <div class="notif-empty">Loading...</div>
-    </div>
-</div>
-
-<div class="container">
-    <div class="error" id="error"></div>
-
-    <div class="announcement-alert" id="announcementAlert">
-        <button class="announcement-alert-close" onclick="dismissAnnouncement()" title="Dismiss">×</button>
-        <div class="announcement-alert-type" id="announcementType">LATEST NEWS</div>
-        <div class="announcement-alert-title" id="announcementTitle"></div>
-        <div class="announcement-alert-message" id="announcementMessage"></div>
-    </div>
-
-    <div class="starting-banner" id="startingBanner">
-        <div class="starting-banner-title" id="startingTitle">Match starting soon!</div>
-        <div class="starting-banner-sub" id="startingSub">Check Room ID below.</div>
-    </div>
-
-    <div class="stats">
-        <div class="stat stat-total">
-            <div class="stat-number" id="totalRegistrations">0</div>
-            <div class="stat-label">My Registrations</div>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
         </div>
-        <div class="stat stat-approved">
-            <div class="stat-number" id="approvedRegistrations">0</div>
-            <div class="stat-label">Approved</div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-300">Welcome, <span id="username-display" class="font-bold text-white">Gamer</span></span>
+            <button onclick="logout()" class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">Logout</button>
         </div>
-        <div class="stat stat-pending">
-            <div class="stat-number" id="pendingRegistrations">0</div>
-            <div class="stat-label">Pending</div>
-        </div>
-    </div>
+    </nav>
 
-    <!-- ANNOUNCEMENTS PANEL (Persistent) -->
-    <div class="announcements-panel" id="announcementsPanel" style="display:none;">
-        <div class="announcements-header">
-            <div>
-                <div class="announcements-header-title">📢 Announcements</div>
-                <div class="announcements-header-sub" id="announcementsCount">Latest news from NEPPLAY</div>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-6">
+        
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
+                <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
             </div>
-            <button class="notif-mark-read" onclick="loadAnnouncementsPanel()">Refresh</button>
+            <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
+                <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl shadow-lg">
+                <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
+                <p class="text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
+            </div>
         </div>
-        <div id="announcementsList">
-            <div class="notif-empty">Loading announcements...</div>
+
+        <!-- Tournament History & Prize Status -->
+        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
+                <p class="text-sm text-gray-400 mt-1">Track your participation and prize payment status.</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Tournament Name</th>
+                            <th scope="col" class="px-6 py-3">Date</th>
+                            <th scope="col" class="px-6 py-3">Rank</th>
+                            <th scope="col" class="px-6 py-3">Prize Amount</th>
+                            <th scope="col" class="px-6 py-3">Payment Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-gray-700">
+                        <!-- Data will be injected here via JS -->
+                        <tr class="hover:bg-gray-800/50 transition">
+                            <td class="px-6 py-4 font-medium text-white">Free Fire Solo Cup</td>
+                            <td class="px-6 py-4">2023-10-25</td>
+                            <td class="px-6 py-4">#1</td>
+                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 500</td>
+                            <td class="px-6 py-4">
+                                <span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-800/50 transition">
+                            <td class="px-6 py-4 font-medium text-white">PUBG Mobile Squad</td>
+                            <td class="px-6 py-4">2023-10-28</td>
+                            <td class="px-6 py-4">#3</td>
+                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 200</td>
+                            <td class="px-6 py-4">
+                                <span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-800/50 transition">
+                            <td class="px-6 py-4 font-medium text-white">Clash of Clans War</td>
+                            <td class="px-6 py-4">2023-11-01</td>
+                            <td class="px-6 py-4">#2</td>
+                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 300</td>
+                            <td class="px-6 py-4">
+                                <span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State (Hidden by default) -->
+            <div id="empty-state" class="hidden p-10 text-center text-gray-500">
+                <i class="fa-solid fa-ghost text-4xl mb-3"></i>
+                <p>No tournament history found.</p>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <div class="section">
-        <div class="section-title">My Matches</div>
-        <div class="section-sub" id="matchRefreshText">Room IDs appear here once admin releases them.</div>
-        <div id="upcomingMatchesContainer">
-            <div class="empty"><strong>Loading matches...</strong></div>
-        </div>
-    </div>
+    <!-- Scripts -->
+    <script>
+        // Check authentication
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-    <div class="section" id="historySection" style="display:none;">
-        <div class="section-title">Match History</div>
-        <div class="section-sub">Your completed matches.</div>
-        <div id="historyMatchesContainer"></div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">My Registrations</div>
-        <div class="section-sub">Your tournament registration status.</div>
-        <div id="registrationsContainer">
-            <div class="empty"><strong>Loading registrations...</strong></div>
-        </div>
-    </div>
-</div>
-
-<div class="toast" id="toast">Copied!</div>
-
-<script>
-
-var currentUser = null;
-var TK_PRIZE = 500;
-
-function esc(v) {
-    if (v === undefined || v === null) return "";
-    return String(v)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function formatDate(value) {
-    if (!value) return "Date TBA";
-    var d = new Date(value + "T00:00:00");
-    if (isNaN(d.getTime())) return value;
-    return d.toLocaleDateString("en-NP", {
-        weekday: "short", year: "numeric",
-        month: "short", day: "numeric"
-    });
-}
-
-function parseTime(timeStr) {
-    if (!timeStr) return "00:00";
-    timeStr = String(timeStr).trim();
-    if (timeStr.match(/[AP]M/i)) {
-        var parts = timeStr.split(":");
-        var hours = parseInt(parts[0], 10);
-        var minutes = parseInt(String(parts[1]).replace(/[^0-9]/g, ""), 10);
-        var isPM = /PM/i.test(timeStr);
-        if (isPM && hours < 12) hours += 12;
-        if (!isPM && hours === 12) hours = 0;
-        return (hours < 10 ? "0" : "") + hours + ":" +
-               (minutes < 10 ? "0" : "") + minutes;
-    }
-    return timeStr;
-}
-
-function timeUntil(matchDate, matchTime) {
-    if (!matchDate) return null;
-    var dt = new Date(matchDate + "T" + parseTime(matchTime) + ":00");
-    if (isNaN(dt.getTime())) return null;
-    var diff = dt.getTime() - Date.now();
-    if (diff < 0) return null;
-    var mins = Math.floor(diff / 60000);
-    if (mins < 60) return mins + " min";
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + " hr " + (mins % 60) + " min";
-    var days = Math.floor(hrs / 24);
-    return days + " day" + (days === 1 ? "" : "s");
-}
-
-function minutesUntil(matchDate, matchTime) {
-    if (!matchDate) return null;
-    var dt = new Date(matchDate + "T" + parseTime(matchTime) + ":00");
-    if (isNaN(dt.getTime())) return null;
-    return Math.floor((dt.getTime() - Date.now()) / 60000);
-}
-
-function timeAgo(iso) {
-    if (!iso) return "";
-    var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (diff < 60) return diff + "s ago";
-    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
-    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
-    if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
-    return new Date(iso).toLocaleDateString("en-NP", { month: "short", day: "numeric" });
-}
-
-function showError(msg) {
-    var box = document.getElementById("error");
-    box.textContent = msg;
-    box.style.display = "block";
-    setTimeout(function () { box.style.display = "none"; }, 6000);
-}
-
-var toastTimer = null;
-function showToast(msg, isError) {
-    var t = document.getElementById("toast");
-    t.textContent = msg;
-    t.className = "toast show";
-    if (isError) t.classList.add("error");
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.className = "toast"; }, 2200);
-}
-
-function copyText(text, label) {
-    var msg = "Copied" + (label ? ": " + label : "");
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-            showToast(msg);
-        }).catch(function () { fallbackCopy(text, msg); });
-    } else {
-        fallbackCopy(text, msg);
-    }
-}
-
-function fallbackCopy(text, msg) {
-    var ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand("copy"); showToast(msg); }
-    catch (e) { showToast("Copy failed. Select manually.", true); }
-    document.body.removeChild(ta);
-}
-
-function copyRoomBoth(roomId, roomPassword, game) {
-    var text = "NEPPLAY Match Info\n" +
-               "Game: " + (game || "Match") + "\n" +
-               "Room ID: " + roomId + "\n" +
-               "Password: " + (roomPassword || "(none)");
-    copyText(text, "Room ID + Password");
-}
-
-var GAME_SCHEMES = {
-    "free fire": { android: "intent://launch/#Intent;scheme=freefire;package=com.dts.freefireth;end", ios: "freefire://", fallbackName: "Free Fire" },
-    "pubg mobile": { android: "intent://launch/#Intent;scheme=pubgmobile;package=com.tencent.ig;end", ios: "pubgmobile://", fallbackName: "PUBG Mobile" },
-    "mobile legends": { android: "intent://launch/#Intent;scheme=mlbb;package=com.mobile.legends;end", ios: "mobilelegends://", fallbackName: "Mobile Legends" },
-    "efootball": { android: "intent://launch/#Intent;scheme=efootball;package=jp.konami.pesam;end", ios: "efootball://", fallbackName: "eFootball" },
-    "call of duty mobile": { android: "intent://launch/#Intent;scheme=codm;package=com.activision.callofduty.shooter;end", ios: "codm://", fallbackName: "Call of Duty Mobile" }
-};
-
-function getSchemeForGame(gameName) {
-    var key = String(gameName || "").toLowerCase().trim();
-    if (GAME_SCHEMES[key]) return GAME_SCHEMES[key];
-    for (var k in GAME_SCHEMES) {
-        if (key.indexOf(k) !== -1 || k.indexOf(key) !== -1) {
-            return GAME_SCHEMES[k];
-        }
-    }
-    return null;
-}
-
-function openGame(gameName) {
-    var scheme = getSchemeForGame(gameName);
-    if (!scheme) {
-        showToast("Open your game manually and join using the Room ID.", true);
-        return;
-    }
-    var ua = navigator.userAgent || "";
-    var isAndroid = /Android/i.test(ua);
-    var isIOS = /iPhone|iPad|iPod/i.test(ua);
-    var url;
-    if (isAndroid) url = scheme.android;
-    else if (isIOS) url = scheme.ios;
-    else {
-        showToast("Open " + scheme.fallbackName + " on your phone to join.", false);
-        return;
-    }
-    try { window.location.href = url; }
-    catch (e) { showToast("Please open " + scheme.fallbackName + " manually.", true); }
-}
-
-function tournamentLink(m) {
-    var tid = (m.tournament && m.tournament.id) || m.tournamentId || "";
-    var tname = (m.tournament && m.tournament.name) || m.tournamentName || "";
-    var key = tid || tname;
-    if (!key) return "";
-    return "tournament.html?id=" + encodeURIComponent(key);
-}
-
-/* ============ ANNOUNCEMENTS PANEL (Persistent) ============ */
-
-function loadAnnouncementsPanel() {
-    fetch("/api/announcements?limit=5", { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            var list = (data && Array.isArray(data.announcements))
-                ? data.announcements
-                : (Array.isArray(data) ? data : []);
-
-            var panel = document.getElementById("announcementsPanel");
-            var listEl = document.getElementById("announcementsList");
-            var countEl = document.getElementById("announcementsCount");
-
-            if (list.length === 0) {
-                panel.style.display = "none";
-                return;
-            }
-
-            panel.style.display = "block";
-            countEl.textContent = list.length + " announcement" + (list.length === 1 ? "" : "s");
-
-            var html = "";
-            for (var i = 0; i < list.length; i++) {
-                var a = list[i];
-                var type = (a.type || "info").toLowerCase();
-                var typeLabel = type.toUpperCase();
-                if (a.pinned && type === "info") typeLabel = "PINNED";
-
-                html += '<div class="announcement-item ' + esc(type) + '">' +
-                    '<div class="announcement-item-top">' +
-                        '<div class="announcement-item-title">' +
-                            esc(a.title || "Announcement") +
-                        '</div>' +
-                        '<span class="announcement-item-type ' + esc(type) + '">' +
-                            esc(typeLabel) +
-                        '</span>' +
-                    '</div>' +
-                    '<div class="announcement-item-message">' +
-                        esc(a.message || "") +
-                    '</div>' +
-                    '<div class="announcement-item-time">' +
-                        timeAgo(a.createdAt) +
-                    '</div>' +
-                '</div>';
-            }
-            listEl.innerHTML = html;
-        })
-        .catch(function () {});
-}
-
-/* ============ ANNOUNCEMENT BANNER (Dismissible) ============ */
-
-function dismissAnnouncement() {
-    document.getElementById("announcementAlert").classList.remove("show");
-    try { localStorage.setItem("nepplay_ann_dismissed", String(Date.now())); }
-    catch (e) {}
-}
-
-function loadAnnouncement() {
-    fetch("/api/announcements?limit=1", { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            var list = (data && Array.isArray(data.announcements))
-                ? data.announcements
-                : (Array.isArray(data) ? data : []);
-            if (list.length === 0) return;
-            var a = list[0];
-            var age = Date.now() - new Date(a.createdAt).getTime();
-            if (age > 7 * 24 * 60 * 60 * 1000) return;
-            try {
-                var last = Number(localStorage.getItem("nepplay_ann_dismissed") || 0);
-                if (Date.now() - last < 24 * 60 * 60 * 1000) return;
-            } catch (e) {}
-            var banner = document.getElementById("announcementAlert");
-            banner.classList.remove("warning", "urgent");
-            if (a.type === "urgent") banner.classList.add("urgent");
-            else if (a.type === "warning") banner.classList.add("warning");
-            var label = "LATEST NEWS";
-            if (a.type === "urgent") label = "URGENT";
-            else if (a.type === "warning") label = "IMPORTANT";
-            else if (a.pinned) label = "PINNED NEWS";
-            document.getElementById("announcementType").textContent = label;
-            document.getElementById("announcementTitle").textContent = a.title || "Announcement";
-            document.getElementById("announcementMessage").textContent = a.message || "";
-            banner.classList.add("show");
-        })
-        .catch(function () {});
-}
-
-/* ============ NOTIFICATIONS ============ */
-
-var notifPanelOpen = false;
-
-function toggleNotifications() {
-    var panel = document.getElementById("notifPanel");
-    notifPanelOpen = !notifPanelOpen;
-    if (notifPanelOpen) {
-        panel.classList.add("show");
-        loadNotifications();
-    } else {
-        panel.classList.remove("show");
-    }
-}
-
-function closeNotifications() {
-    document.getElementById("notifPanel").classList.remove("show");
-    notifPanelOpen = false;
-}
-
-function loadNotifications() {
-    fetch("/api/notifications", { credentials: "include", cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (!data.success) return;
-            renderNotifications(data.notifications || []);
-            updateBadge(data.unread || 0);
-        })
-        .catch(function () {});
-}
-
-function updateBadge(count) {
-    var badge = document.getElementById("notifBadge");
-    if (count > 0) {
-        badge.textContent = count > 99 ? "99+" : count;
-        badge.classList.add("show");
-    } else {
-        badge.classList.remove("show");
-    }
-}
-
-function renderNotifications(list) {
-    var container = document.getElementById("notifList");
-    if (!list || list.length === 0) {
-        container.innerHTML = '<div class="notif-empty">No notifications yet.</div>';
-        return;
-    }
-    var html = "";
-    for (var i = 0; i < list.length; i++) {
-        var n = list[i];
-        var iconChar = "i";
-        var typeClass = n.type || "info";
-        if (typeClass === "success") iconChar = "OK";
-        else if (typeClass === "error" || typeClass === "urgent") iconChar = "!";
-        else iconChar = "i";
-
-        html += '<div class="notif-item' + (n.read ? '' : ' unread') + '" ' +
-                'onclick="markRead(\'' + esc(n.id) + '\')">' +
-            '<div class="notif-icon ' + esc(typeClass) + '">' + esc(iconChar) + '</div>' +
-            '<div class="notif-content">' +
-                '<div class="notif-title">' + esc(n.title || "") + '</div>' +
-                '<div class="notif-message">' + esc(n.message || "") + '</div>' +
-                '<div class="notif-time">' + esc(timeAgo(n.createdAt)) + '</div>' +
-            '</div>' +
-        '</div>';
-    }
-    container.innerHTML = html;
-}
-
-function markRead(id) {
-    fetch("/api/notifications/read", {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id })
-    })
-    .then(function () { loadNotifications(); })
-    .catch(function () {});
-}
-
-function markAllRead() {
-    fetch("/api/notifications/read", {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})
-    })
-    .then(function () { loadNotifications(); })
-    .catch(function () {});
-}
-
-document.addEventListener("click", function (e) {
-    if (!notifPanelOpen) return;
-    var panel = document.getElementById("notifPanel");
-    var bell = document.querySelector(".notif-bell");
-    if (!panel.contains(e.target) && !bell.contains(e.target)) {
-        closeNotifications();
-    }
-});
-
-function refreshNotifications() {
-    fetch("/api/notifications", { credentials: "include", cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) updateBadge(data.unread || 0);
-        })
-        .catch(function () {});
-}
-
-/* ============ LOAD MEMBER ============ */
-
-function loadMember() {
-    fetch("/api/users/me", { credentials: "include", cache: "no-store" })
-    .then(function (r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-    })
-    .then(function (data) {
-        if (!data || !data.loggedIn || !data.user) {
-            window.location.href = "login.html"; return;
-        }
-        currentUser = data.user;
-        var uname = data.user.username || data.user.email || "Member";
-        var link = document.getElementById("usernameLink");
-        link.textContent = uname;
-        link.href = "player.html?username=" + encodeURIComponent(data.user.username || "");
-        loadRegistrations();
-        loadMatches();
-        refreshNotifications();
-    })
-    .catch(function (err) {
-        showError("Could not load profile. Please log in again.");
-        console.error(err);
-    });
-}
-
-function loadRegistrations() {
-    fetch("/api/users/registrations", { credentials: "include", cache: "no-store" })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-        var regs = (data && Array.isArray(data.registrations)) ? data.registrations : [];
-        updateRegStats(regs);
-        renderRegistrations(regs);
-    })
-    .catch(function () {
-        document.getElementById("registrationsContainer").innerHTML =
-            '<div class="empty">Could not load registrations.</div>';
-    });
-}
-
-function updateRegStats(regs) {
-    var approved = 0, pending = 0;
-    for (var i = 0; i < regs.length; i++) {
-        var s = String(regs[i].status || "Pending").toLowerCase();
-        if (s === "approved") approved++;
-        if (s === "pending") pending++;
-    }
-    document.getElementById("totalRegistrations").textContent = regs.length;
-    document.getElementById("approvedRegistrations").textContent = approved;
-    document.getElementById("pendingRegistrations").textContent = pending;
-}
-
-function renderRegistrations(regs) {
-    var c = document.getElementById("registrationsContainer");
-    if (regs.length === 0) {
-        c.innerHTML =
-            '<div class="empty">' +
-                '<strong>No registrations yet</strong>' +
-                'Join a tournament to get started.' +
-                '<a href="tournaments.html">Browse Tournaments</a>' +
-            '</div>';
-        return;
-    }
-    var html = "";
-    for (var i = regs.length - 1; i >= 0; i--) {
-        var r = regs[i];
-        var status = String(r.status || "Pending");
-        var s = status.toLowerCase();
-        var cls = s === "approved" ? "approved" : s === "rejected" ? "rejected" : "pending";
-
-        var captainHtml = "-";
-        if (r.captainName) {
-            captainHtml = '<a href="player.html?username=' +
-                encodeURIComponent(r.captainName) + '">' +
-                esc(r.captainName) + '</a>';
-        }
-
-        var regTourneyKey = r.tournamentId || r.tournamentName || "";
-        var tourneyNameHtml = esc(r.tournamentName || "Tournament");
-        if (regTourneyKey) {
-            tourneyNameHtml = '<a href="tournament.html?id=' +
-                encodeURIComponent(regTourneyKey) + '">' +
-                esc(r.tournamentName || "Tournament") + '</a>';
-        }
-
-        html +=
-            '<div class="reg-card">' +
-                '<div class="reg-header">' +
-                    '<div class="reg-tournament">' + tourneyNameHtml + '</div>' +
-                    '<span class="reg-status ' + cls + '">' + esc(status) + '</span>' +
-                '</div>' +
-                '<div class="reg-info">Game: <strong>' + esc(r.game || "-") + '</strong></div>' +
-                '<div class="reg-info">Team: <strong>' + esc(r.teamName || "-") + '</strong></div>' +
-                '<div class="reg-info">Captain: <strong>' + captainHtml + '</strong></div>' +
-            '</div>';
-    }
-    c.innerHTML = html;
-}
-
-function loadMatches() {
-    fetch("/api/member/matches", { credentials: "include", cache: "no-store" })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-        var matches = (data && Array.isArray(data.matches)) ? data.matches : [];
-        var upcoming = [], live = [], completed = [];
-        for (var i = 0; i < matches.length; i++) {
-            var s = String(matches[i].status || "").toLowerCase();
-            if (s === "live") live.push(matches[i]);
-            else if (s === "completed" || s === "finished" || s === "finish") completed.push(matches[i]);
-            else if (s !== "cancelled") upcoming.push(matches[i]);
-        }
-        renderUpcoming(upcoming.concat(live));
-        renderHistory(completed);
-        checkStartingSoon(live.concat(upcoming));
-        document.getElementById("matchRefreshText").textContent =
-            "Last updated: " + new Date().toLocaleTimeString() +
-            " - Auto-refreshes every 30 seconds";
-    })
-    .catch(function () {
-        document.getElementById("upcomingMatchesContainer").innerHTML =
-            '<div class="empty">Could not load matches.</div>';
-    });
-}
-
-function renderUpcoming(matches) {
-    var c = document.getElementById("upcomingMatchesContainer");
-    if (matches.length === 0) {
-        c.innerHTML =
-            '<div class="empty">' +
-                '<strong>No upcoming matches</strong>' +
-                'Matches from your approved tournaments will appear here.' +
-            '</div>';
-        return;
-    }
-    var html = "";
-    for (var i = 0; i < matches.length; i++) {
-        html += renderMatchCard(matches[i]);
-    }
-    c.innerHTML = html;
-}
-
-function renderMatchCard(m) {
-    var status = String(m.status || "Scheduled");
-    var cls = status.toLowerCase();
-    var isLive = cls === "live";
-    var cardClass = isLive ? "match-card live" : "match-card upcoming";
-    var timeLeft = timeUntil(m.date, m.time);
-
-    var roomId = m.roomId || "";
-    var roomPassword = m.roomPassword || "";
-    var hasRoom = roomId !== "";
-
-    var tournamentName = (m.tournament && m.tournament.name) || m.tournamentName || "-";
-    var game = m.game || "-";
-
-    var matchType = String(m.matchType || "1v1").toLowerCase();
-    var isBR = matchType === "battle-royale";
-
-    var tLink = tournamentLink(m);
-    var matchNameHtml = esc(m.result || m.name || "Match");
-    if (tLink) {
-        matchNameHtml = '<a href="' + esc(tLink) + '">' + matchNameHtml + '</a>';
-    }
-
-    var tourneyNameHtml = esc(tournamentName);
-    if (tLink) {
-        tourneyNameHtml = '<a href="' + esc(tLink) + '" class="tournament-link">' + esc(tournamentName) + '</a>';
-    }
-
-    var teamsHtml = "";
-    if (isBR) {
-        var winners = Array.isArray(m.winners) ? m.winners : [];
-        if (winners.length > 0) {
-            var rows = "";
-            for (var w = 0; w < Math.min(winners.length, 3); w++) {
-                var medal = "p" + (w + 1);
-                var label = w === 0 ? "1st Place" : w === 1 ? "2nd Place" : "3rd Place";
-                rows += '<div class="br-winner-row">' +
-                    '<div class="br-medal ' + medal + '">' + (w + 1) + '</div>' +
-                    '<div class="br-winner-name">' + esc(winners[w]) + '</div>' +
-                    '<div class="br-place-label">' + label + '</div>' +
-                '</div>';
-            }
-            teamsHtml = '<div class="br-winners">' + rows + '</div>';
+        if (!currentUser) {
+            // If not logged in, redirect to login page
+            window.location.href = 'login.html';
         } else {
-            teamsHtml = '<div class="br-winners" style="color:#64748b;font-size:13px;padding:12px;text-align:center;">Battle Royale - Open to all approved teams</div>';
+            document.getElementById('username-display').textContent = currentUser.username;
+            loadDashboardData();
         }
-    } else {
-        teamsHtml =
-            '<div class="match-teams">' +
-                '<div class="match-team"><div class="match-team-name">' + esc(m.team1 || "Team A") + '</div>' +
-                    '<div class="match-team-score">' + esc(m.scoreTeam1 || "0") + '</div></div>' +
-                '<div class="match-vs">VS</div>' +
-                '<div class="match-team"><div class="match-team-name">' + esc(m.team2 || "Team B") + '</div>' +
-                    '<div class="match-team-score">' + esc(m.scoreTeam2 || "0") + '</div></div>' +
-            '</div>';
-    }
 
-    var tkHtml = "";
-    if (m.topKiller) {
-        tkHtml = '<div class="tk-match-row">' +
-            '<div class="tk-icon">TK</div>' +
-            '<div class="tk-content">' +
-                '<div class="tk-label">Top Killer</div>' +
-                '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
-            '</div>' +
-            '<div class="tk-right">' +
-                '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
-                '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' +
-            '</div>' +
-        '</div>';
-    }
+        function loadDashboardData() {
+            // In a real app, this would fetch from a database.
+            // Here we simulate loading data based on the user.
+            
+            // Mock Data for display
+            const mockHistory = [
+                { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
+                { name: "PUBG Mobile Squad", date: "2023-10-28", rank: "#3", prize: 200, status: "Pending" },
+                { name: "Clash of Clans War", date: "2023-11-01", rank: "#2", prize: 300, status: "Paid" }
+            ];
 
-    var screenshotHtml = "";
-    if (m.screenshot && isCompletedStatus(cls)) {
-        var escapedId = esc(m.id);
-        screenshotHtml =
-            '<div class="match-screenshot">' +
-                '<div class="match-screenshot-label">Result Screenshot</div>' +
-                '<img src="' + esc(m.screenshot) + '" alt="Match result screenshot" onclick="openScreenshot(\'' + escapedId + '\')">' +
-                '<div class="match-screenshot-hint">Click image to view full size</div>' +
-            '</div>';
-    }
+            let totalEarnings = 0;
+            let paidCount = 0;
 
-    var joinHtml = "";
-    if (hasRoom && !isCompletedStatus(cls)) {
-        var joinedClass = m.memberJoined ? " joined" : "";
-        var joinedText = m.memberJoined ? "Marked as joined" : "I'm in the room";
+            const tableBody = document.getElementById('history-table-body');
+            tableBody.innerHTML = ''; // Clear existing static rows
 
-        var miniCopyId = esc(roomId).replace(/'/g, "\\'");
-        var miniCopyPw = esc(roomPassword).replace(/'/g, "\\'");
-        var bothCopyId = esc(roomId).replace(/'/g, "\\'");
-        var bothCopyPw = esc(roomPassword).replace(/'/g, "\\'");
-        var gameEsc = esc(game).replace(/'/g, "\\'");
-
-        joinHtml =
-            '<div class="join-panel' + (isLive ? " live" : "") + '">' +
-                '<div class="join-panel-title">' +
-                    (isLive ? '<span class="live-dot"></span>Match is LIVE - Join Now' : 'Room Ready - Join Now') +
-                '</div>' +
-                '<div class="join-room-info">' +
-                    '<div class="join-room-field">' +
-                        '<div class="join-room-label">Room ID</div>' +
-                        '<div class="join-room-value">' + esc(roomId) + '</div>' +
-                        '<button class="join-mini-copy" onclick="copyText(\'' + miniCopyId + '\', \'Room ID\')">Copy</button>' +
-                    '</div>' +
-                    '<div class="join-room-field">' +
-                        '<div class="join-room-label">Password</div>' +
-                        '<div class="join-room-value">' + (roomPassword ? esc(roomPassword) : "No password") + '</div>' +
-                        (roomPassword ? '<button class="join-mini-copy" onclick="copyText(\'' + miniCopyPw + '\', \'Password\')">Copy</button>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<div class="join-buttons">' +
-                    '<button class="join-btn copy-all" onclick="copyRoomBoth(\'' + bothCopyId + '\', \'' + bothCopyPw + '\', \'' + gameEsc + '\')">Copy Room Info</button>' +
-                    '<button class="join-btn open-game" onclick="openGame(\'' + gameEsc + '\')">Open ' + esc(game) + '</button>' +
-                '</div>' +
-                '<div class="join-buttons" style="grid-template-columns:1fr;">' +
-                    '<button class="join-btn' + joinedClass + '" ' +
-                        (m.memberJoined ? 'disabled' : 'onclick="markJoined(\'' + esc(m.id) + '\')"') + '>' +
-                        joinedText +
-                    '</button>' +
-                '</div>' +
-                '<div class="join-steps">' +
-                    '<div class="join-steps-title">How to join</div>' +
-                    '<div class="join-step"><div class="join-step-num">1</div><div>Tap <strong>Copy Room Info</strong> above.</div></div>' +
-                    '<div class="join-step"><div class="join-step-num">2</div><div>Tap <strong>Open ' + esc(game) + '</strong>.</div></div>' +
-                    '<div class="join-step"><div class="join-step-num">3</div><div>In the game go to <code>Multiplayer</code> then <code>Custom Room</code>.</div></div>' +
-                    '<div class="join-step"><div class="join-step-num">4</div><div>Paste <code>Room ID</code> and <code>Password</code>, then tap Join.</div></div>' +
-                    '<div class="join-step"><div class="join-step-num">5</div><div>Back on NEPPLAY tap <strong>I\'m in the room</strong>.</div></div>' +
-                '</div>' +
-            '</div>';
-    } else if (!hasRoom && !isCompletedStatus(cls)) {
-        joinHtml =
-            '<div class="room-not-yet">' +
-                '<div class="room-not-yet-title">Room ID not released yet</div>' +
-                '<div class="room-not-yet-text">' +
-                    'Admin will publish the Room ID + Password closer to match time.' +
-                '</div>' +
-            '</div>';
-    }
-
-    var winnerHtml = "";
-    if (isCompletedStatus(cls)) {
-        var winnerText = "";
-        if (isBR && Array.isArray(m.winners) && m.winners[0]) {
-            winnerText = "Winner: " + m.winners[0];
-        } else if (m.winner) {
-            winnerText = "Winner: " + m.winner;
-        }
-        if (winnerText) {
-            winnerHtml = '<div class="match-winner">' + esc(winnerText) + '</div>';
-        }
-    }
-
-    return (
-        '<div class="' + cardClass + '">' +
-            '<div class="match-header">' +
-                '<div class="match-header-left">' +
-                    '<div class="match-name">' + matchNameHtml + '</div>' +
-                    '<div class="match-meta">' +
-                        '<span>Game: ' + esc(game) + '</span>' +
-                        '<span>Tournament: ' + tourneyNameHtml + '</span>' +
-                    '</div>' +
-                    '<div class="match-meta">' +
-                        '<span>Date: ' + esc(formatDate(m.date)) + '</span>' +
-                        '<span>Time: ' + esc(m.time || "-") + '</span>' +
-                        (timeLeft && !isCompletedStatus(cls) ? '<span>Starts in ' + esc(timeLeft) + '</span>' : '') +
-                    '</div>' +
-                '</div>' +
-                '<span class="status-badge ' + cls + '">' + esc(status) + '</span>' +
-            '</div>' +
-            teamsHtml +
-            tkHtml +
-            screenshotHtml +
-            joinHtml +
-            winnerHtml +
-        '</div>'
-    );
-}
-
-function isCompletedStatus(s) {
-    return s === "completed" || s === "finished" || s === "finish";
-}
-
-function openScreenshot(matchId) {
-    fetch("/api/member/matches", { credentials: "include", cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (!data || !data.matches) return;
-            var found = null;
-            for (var i = 0; i < data.matches.length; i++) {
-                if (String(data.matches[i].id) === String(matchId)) {
-                    found = data.matches[i]; break;
+            mockHistory.forEach(item => {
+                // Calculate stats
+                if(item.status === "Paid") {
+                    totalEarnings += item.prize;
+                    paidCount++;
                 }
-            }
-            if (found && found.screenshot) {
-                var w = window.open("");
-                w.document.write('<html><head><title>Screenshot</title><style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style></head><body><img src="' + found.screenshot + '" alt="Result screenshot"></body></html>');
-            }
-        })
-        .catch(function () {});
-}
 
-function markJoined(matchId) {
-    fetch("/api/member/join-match", {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId: matchId })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-        if (!data.success) throw new Error(data.message || "Could not mark joined.");
-        showToast("Marked as joined");
-        loadMatches();
-    })
-    .catch(function (err) {
-        showToast(err.message || "Could not mark joined.", true);
-    });
-}
+                // Create Row
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                
+                // Status Badge Logic
+                let statusHtml = '';
+                if (item.status === "Paid") {
+                    statusHtml = `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`;
+                } else {
+                    statusHtml = `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
+                }
 
-function renderHistory(matches) {
-    var section = document.getElementById("historySection");
-    var c = document.getElementById("historyMatchesContainer");
-    if (matches.length === 0) { section.style.display = "none"; return; }
-    section.style.display = "block";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${item.name}</td>
+                    <td class="px-6 py-4">${item.date}</td>
+                    <td class="px-6 py-4">${item.rank}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${item.prize}</td>
+                    <td class="px-6 py-4">${statusHtml}</td>
+                `;
+                tableBody.appendChild(row);
+            });
 
-    var html = "";
-    for (var i = matches.length - 1; i >= 0; i--) {
-        var m = matches[i];
-        var matchType = String(m.matchType || "1v1").toLowerCase();
-        var isBR = matchType === "battle-royale";
-
-        var tLink = tournamentLink(m);
-        var matchNameHtml = esc(m.result || m.name || "Match");
-        if (tLink) {
-            matchNameHtml = '<a href="' + esc(tLink) + '">' + matchNameHtml + '</a>';
+            // Update Stats Cards
+            document.getElementById('total-earnings').textContent = totalEarnings;
+            document.getElementById('matches-played').textContent = mockHistory.length;
+            document.getElementById('active-tournaments').textContent = "1"; // Example static number
         }
 
-        var tourneyNameHtml = esc(m.tournamentName || "-");
-        if (tLink) {
-            tourneyNameHtml = '<a href="' + esc(tLink) + '" class="tournament-link">' + esc(m.tournamentName || "-") + '</a>';
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
         }
-
-        var teamsHtml = "";
-        if (isBR) {
-            var winners = Array.isArray(m.winners) ? m.winners : [];
-            var rows = "";
-            for (var w = 0; w < Math.min(winners.length, 3); w++) {
-                var medal = "p" + (w + 1);
-                var label = w === 0 ? "1st" : w === 1 ? "2nd" : "3rd";
-                rows += '<div class="br-winner-row">' +
-                    '<div class="br-medal ' + medal + '">' + (w + 1) + '</div>' +
-                    '<div class="br-winner-name">' + esc(winners[w]) + '</div>' +
-                    '<div class="br-place-label">' + label + '</div>' +
-                '</div>';
-            }
-            teamsHtml = '<div class="br-winners">' + rows + '</div>';
-        } else {
-            teamsHtml =
-                '<div class="match-teams">' +
-                    '<div class="match-team"><div class="match-team-name">' + esc(m.team1 || "Team A") + '</div>' +
-                        '<div class="match-team-score">' + esc(m.scoreTeam1 || "0") + '</div></div>' +
-                    '<div class="match-vs">VS</div>' +
-                    '<div class="match-team"><div class="match-team-name">' + esc(m.team2 || "Team B") + '</div>' +
-                        '<div class="match-team-score">' + esc(m.scoreTeam2 || "0") + '</div></div>' +
-                '</div>';
-        }
-
-        var tkHtml = "";
-        if (m.topKiller) {
-            tkHtml = '<div class="tk-match-row">' +
-                '<div class="tk-icon">TK</div>' +
-                '<div class="tk-content">' +
-                    '<div class="tk-label">Top Killer</div>' +
-                    '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
-                '</div>' +
-                '<div class="tk-right">' +
-                    '<div class="tk-kills">' + (Number(m.topKillerKills) || 0) + ' kills</div>' +
-                    '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' +
-                '</div>' +
-            '</div>';
-        }
-
-        var screenshotHtml = "";
-        if (m.screenshot) {
-            var escapedId = esc(m.id);
-            screenshotHtml =
-                '<div class="match-screenshot">' +
-                    '<div class="match-screenshot-label">Result Screenshot</div>' +
-                    '<img src="' + esc(m.screenshot) + '" alt="Match result screenshot" onclick="openScreenshot(\'' + escapedId + '\')">' +
-                '</div>';
-        }
-
-        var winnerHtml = "";
-        var winnerText = isBR
-            ? (Array.isArray(m.winners) && m.winners[0] ? m.winners[0] : "")
-            : (m.winner || "");
-        if (winnerText) {
-            winnerHtml = '<div class="match-winner">Winner: ' + esc(winnerText) + '</div>';
-        }
-
-        html +=
-            '<div class="match-card completed">' +
-                '<div class="match-header">' +
-                    '<div class="match-header-left">' +
-                        '<div class="match-name">' + matchNameHtml + '</div>' +
-                        '<div class="match-meta">' +
-                            '<span>Game: ' + esc(m.game || "-") + '</span>' +
-                            '<span>Tournament: ' + tourneyNameHtml + '</span>' +
-                        '</div>' +
-                        '<div class="match-meta">' +
-                            '<span>Date: ' + esc(formatDate(m.date)) + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<span class="status-badge completed">Completed</span>' +
-                '</div>' +
-                teamsHtml +
-                tkHtml +
-                screenshotHtml +
-                winnerHtml +
-            '</div>';
-    }
-    c.innerHTML = html;
-}
-
-function checkStartingSoon(matches) {
-    var banner = document.getElementById("startingBanner");
-    var soonest = null;
-    var soonestMins = null;
-
-    for (var i = 0; i < matches.length; i++) {
-        var m = matches[i];
-        var status = String(m.status || "").toLowerCase();
-        if (status === "live") { soonest = m; soonestMins = 0; break; }
-        var mins = minutesUntil(m.date, m.time);
-        if (mins !== null && mins >= 0 && mins <= 60) {
-            if (soonestMins === null || mins < soonestMins) {
-                soonest = m; soonestMins = mins;
-            }
-        }
-    }
-
-    if (!soonest) { banner.classList.remove("show"); return; }
-
-    var tName = (soonest.tournament && soonest.tournament.name) ||
-                soonest.tournamentName || "your match";
-
-    if (soonestMins === 0) {
-        document.getElementById("startingTitle").textContent = "Match is LIVE now!";
-        document.getElementById("startingSub").textContent =
-            (soonest.result || soonest.name || "Match") + " - Join immediately.";
-    } else {
-        document.getElementById("startingTitle").textContent =
-            "Match starting in " + soonestMins + " min!";
-        document.getElementById("startingSub").textContent =
-            (soonest.result || soonest.name || "Match") + " (" + tName + ")";
-    }
-    banner.classList.add("show");
-}
-
-function logout() {
-    fetch("/api/users/logout", { method: "POST", credentials: "include" })
-        .then(function () { window.location.href = "login.html"; })
-        .catch(function () { window.location.href = "login.html"; });
-}
-
-setInterval(function () {
-    loadMatches();
-    refreshNotifications();
-}, 30000);
-
-loadMember();
-loadAnnouncement();
-loadAnnouncementsPanel();
-
-</script>
-
+    </script>
 </body>
 </html>
