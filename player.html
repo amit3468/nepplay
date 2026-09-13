@@ -1,475 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Player Profile</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #080b12;
-    color: white;
-    min-height: 100vh;
-}
-
-header {
-    background: #0d111b;
-    border-bottom: 1px solid #202634;
-    padding: 18px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
-.logo span { color: #ff3b30; }
-nav { display: flex; align-items: center; gap: 28px; }
-nav a {
-    color: #c7ccd7; text-decoration: none;
-    font-size: 15px; font-weight: 600;
-}
-nav a:hover, nav a.active { color: #ff4438; }
-.login-btn {
-    background: #ff3b30; color: white !important;
-    padding: 10px 20px; border-radius: 7px;
-}
-
-.container {
-    width: 88%; max-width: 1000px;
-    margin: 30px auto 60px;
-}
-
-/* HERO CARD */
-.profile-hero {
-    background: linear-gradient(135deg, #1a0e2d, #111621);
-    border: 1px solid #5935a9;
-    border-radius: 16px;
-    padding: 30px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.avatar {
-    width: 90px; height: 90px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #ff3b30, #b91c1c);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    font-weight: 900;
-    flex-shrink: 0;
-    box-shadow: 0 8px 24px rgba(255, 59, 48, 0.4);
-}
-
-.profile-info { flex: 1; min-width: 200px; }
-.profile-info h1 {
-    font-size: 30px;
-    margin-bottom: 6px;
-    word-break: break-word;
-}
-.profile-meta {
-    color: #9299a8;
-    font-size: 14px;
-    line-height: 1.6;
-}
-.profile-meta span {
-    margin-right: 16px;
-    display: inline-block;
-}
-
-.profile-rank-badge {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 6px 14px;
-    background: #1a2233;
-    border: 1px solid #2d3a55;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #ffd43b;
-}
-
-/* STATS GRID */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.stat-box {
-    background: #111621;
-    border: 1px solid #242b39;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
-
-.stat-value {
-    font-size: 28px;
-    font-weight: 900;
-    margin-bottom: 6px;
-}
-
-.stat-value.points { color: #ff4438; }
-.stat-value.wins { color: #5bed8e; }
-.stat-value.losses { color: #ff7d76; }
-.stat-value.winrate { color: #7db7ff; }
-
-.stat-label {
-    color: #7d8a9f;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-/* SECTION */
-.section {
-    background: #111621;
-    border: 1px solid #242b39;
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-}
-.section h2 {
-    font-size: 18px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* TEAMS */
-.teams-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.team-chip {
-    background: #1a2233;
-    border: 1px solid #2d3a55;
-    color: #a8b6d1;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* CHAMPIONSHIPS */
-.champ-card {
-    background: linear-gradient(135deg, #1a1608, #111621);
-    border: 1px solid #ffd43b;
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.champ-info { flex: 1; min-width: 180px; }
-.champ-title {
-    font-size: 15px;
-    font-weight: bold;
-    color: #ffd43b;
-    margin-bottom: 4px;
-}
-.champ-sub {
-    color: #9299a8;
-    font-size: 12px;
-}
-.champ-prize {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffd43b;
-}
-
-/* MATCH HISTORY */
-.match-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: #0b1220;
-    border-radius: 8px;
-    border: 1px solid #1e293b;
-    margin-bottom: 8px;
-}
-.match-row.win { border-left: 3px solid #5bed8e; }
-.match-row.loss { border-left: 3px solid #ff7d76; }
-.match-row.tie { border-left: 3px solid #ffd75a; }
-.match-row.top3 { border-left: 3px solid #c084fc; }
-
-.match-info { flex: 1; min-width: 0; }
-.match-name {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 3px;
-    word-break: break-word;
-}
-.match-meta {
-    color: #7d8a9f;
-    font-size: 12px;
-}
-.match-result {
-    font-weight: bold;
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 5px;
-    letter-spacing: 0.5px;
-}
-.result-win { background: rgba(91,237,142,0.15); color: #5bed8e; }
-.result-loss { background: rgba(255,125,118,0.15); color: #ff7d76; }
-.result-tie { background: rgba(255,215,90,0.15); color: #ffd75a; }
-.result-top3 { background: rgba(192,132,252,0.15); color: #c084fc; }
-
-/* EMPTY */
-.empty {
-    text-align: center;
-    color: #7d8a9f;
-    font-size: 14px;
-    padding: 24px 12px;
-    border: 1px dashed #2d3a55;
-    border-radius: 10px;
-}
-
-.loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #8993a2;
-}
-.spinner {
-    display: inline-block;
-    width: 32px; height: 32px;
-    border: 3px solid #242b39;
-    border-top-color: #ff3b30;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 14px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-footer {
-    border-top: 1px solid #202634;
-    text-align: center;
-    padding: 25px;
-    color: #717887;
-    font-size: 13px;
-    margin-top: 40px;
-}
-
-@media (max-width: 750px) {
-    header { flex-direction: column; gap: 15px; }
-    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .profile-hero { flex-direction: column; text-align: center; }
-    .profile-info h1 { font-size: 24px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .profile-banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #6b21a8 50%, #be185d 100%);
+            height: 200px;
+            position: relative;
+        }
+        .profile-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, #0f172a 100%);
+        }
+        .avatar-ring {
+            box-shadow: 0 0 0 4px #0f172a, 0 0 0 8px #3b82f6;
+        }
+        .badge-earned {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+        }
+        .badge-locked {
+            background: rgba(51, 65, 85, 0.5);
+            color: #64748b;
+        }
+        .achievement-card { transition: transform 0.2s; }
+        .achievement-card:hover { transform: translateY(-3px); }
+        .stat-card { transition: all 0.2s; }
+        .stat-card:hover { border-color: #3b82f6; }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<header>
-    <div class="logo">NEP<span>PLAY</span></div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="tournaments.html">Tournaments</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="teams.html">Teams</a>
-        <a href="winners.html">Winners</a>
-        <a href="login.html" class="login-btn">Login</a>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
     </nav>
-</header>
 
-<div class="container" id="container">
-    <div class="loading">
-        <div class="spinner"></div>
-        <div>Loading player profile...</div>
-    </div>
-</div>
+    <main class="flex-grow">
+        
+        <!-- Profile Banner -->
+        <div class="profile-banner"></div>
 
-<footer>
-    © 2026 NEPPLAY — Nepal Gaming Community
-</footer>
+        <!-- Profile Header -->
+        <div class="container mx-auto px-6 -mt-24 relative z-10">
+            <div class="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8">
+                
+                <!-- Avatar -->
+                <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring">
+                    <span class="text-5xl md:text-6xl font-bold text-white">R</span>
+                </div>
+                
+                <!-- Name & Details -->
+                <div class="flex-grow text-center md:text-left">
+                    <div class="flex items-center gap-2 justify-center md:justify-start flex-wrap mb-2">
+                        <h1 class="text-3xl md:text-4xl font-bold text-white">Rahul Sharma</h1>
+                        <i class="fa-solid fa-circle-check text-blue-500 text-xl" title="Verified Player"></i>
+                        <span class="bg-yellow-500/20 border border-yellow-500 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full">
+                            <i class="fa-solid fa-crown mr-1"></i> #1 RANK
+                        </span>
+                    </div>
+                    <p class="text-gray-400 mb-2">@rahul_sharma</p>
+                    <div class="flex items-center gap-4 justify-center md:justify-start text-sm text-gray-400 flex-wrap">
+                        <span><i class="fa-regular fa-calendar mr-1"></i> Joined January 2023</span>
+                        <span><i class="fa-solid fa-location-dot mr-1"></i> Kathmandu, Nepal</span>
+                        <span><i class="fa-solid fa-gamepad mr-1"></i> PUBG Specialist</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="challengePlayer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                        <i class="fa-solid fa-hand-fist mr-2"></i>Challenge
+                    </button>
+                    <button onclick="followPlayer()" id="followBtn" class="glass-panel hover:bg-gray-800/50 text-white font-bold py-3 px-6 rounded-lg transition">
+                        <i class="fa-solid fa-user-plus mr-2"></i>Follow
+                    </button>
+                </div>
+            </div>
 
-<script>
-var params = new URLSearchParams(window.location.search);
-var username = params.get("username") || params.get("user") || "";
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Total Earnings</p>
+                    <p class="text-2xl font-bold text-green-400">Rs. 1,25,500</p>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-arrow-up text-green-500"></i> +Rs. 5,200 this month</p>
+                </div>
+                <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Tournaments</p>
+                    <p class="text-2xl font-bold text-blue-400">87</p>
+                    <p class="text-xs text-gray-500 mt-1">12 active registrations</p>
+                </div>
+                <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Wins</p>
+                    <p class="text-2xl font-bold text-yellow-400">72</p>
+                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-crown text-yellow-500"></i> 15 solo victories</p>
+                </div>
+                <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
+                    <p class="text-xs text-gray-400 uppercase mb-1">Win Rate</p>
+                    <p class="text-2xl font-bold text-purple-400">82%</p>
+                    <p class="text-xs text-gray-500 mt-1">Top 1% in Nepal</p>
+                </div>
+            </div>
 
-function esc(v) {
-    if (v === undefined || v === null) return "";
-    return String(v)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Achievements (Left, 2 cols) -->
+                <div class="lg:col-span-2 glass-panel rounded-xl p-6">
+                    <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-medal text-yellow-500 mr-2"></i>Achievements</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        
+                        <!-- Earned Badges -->
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
+                            <i class="fa-solid fa-crown text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Tournament King</p>
+                            <p class="text-[10px] opacity-80">50+ wins</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
+                            <i class="fa-solid fa-fire text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">On Fire</p>
+                            <p class="text-[10px] opacity-80">5-win streak</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
+                            <i class="fa-solid fa-bolt text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Speed Demon</p>
+                            <p class="text-[10px] opacity-80">Fastest finalist</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
+                            <i class="fa-solid fa-shield-halved text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Survivor</p>
+                            <p class="text-[10px] opacity-80">Top 10 x 100</p>
+                        </div>
+                        
+                        <!-- Locked Badges -->
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
+                            <i class="fa-solid fa-diamond text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Legend</p>
+                            <p class="text-[10px] opacity-80">100+ wins</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
+                            <i class="fa-solid fa-star text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">MVP</p>
+                            <p class="text-[10px] opacity-80">10 MVPs</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
+                            <i class="fa-solid fa-trophy text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Champion</p>
+                            <p class="text-[10px] opacity-80">Win monthly cup</p>
+                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
+                            <i class="fa-solid fa-rocket text-3xl mb-2"></i>
+                            <p class="text-xs font-bold">Rising Star</p>
+                            <p class="text-[10px] opacity-80">Win 3 in a row</p>
+                        </div>
+                    </div>
+                </div>
 
-function initials(name) {
-    var parts = String(name || "?").trim().split(/\s+/).filter(function (w) { return w; });
-    if (parts.length === 0) return "?";
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-}
+                <!-- Favorite Games (Right, 1 col) -->
+                <div class="glass-panel rounded-xl p-6">
+                    <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-gamepad text-blue-500 mr-2"></i>Favorite Games</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                                <i class="fa-solid fa-crosshairs text-white"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <p class="font-bold text-white text-sm">PUBG Mobile</p>
+                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                                    <div class="bg-yellow-500 h-1.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">85%</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                                <i class="fa-solid fa-fire text-white"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <p class="font-bold text-white text-sm">Free Fire</p>
+                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                                    <div class="bg-orange-500 h-1.5 rounded-full" style="width: 62%"></div>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">62%</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
+                                <i class="fa-solid fa-bullseye text-white"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <p class="font-bold text-white text-sm">Valorant</p>
+                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                                    <div class="bg-red-500 h-1.5 rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400">45%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-function formatDate(value) {
-    if (!value) return "—";
-    var d = new Date(value);
-    if (isNaN(d.getTime())) return value;
-    return d.toLocaleDateString("en-NP", { year: "numeric", month: "short", day: "numeric" });
-}
+            <!-- Recent Matches -->
+            <div class="glass-panel rounded-xl overflow-hidden mb-8">
+                <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i>Recent Matches</h2>
+                    <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Last 10 matches</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                            <tr>
+                                <th class="px-6 py-3">Tournament</th>
+                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3">Placement</th>
+                                <th class="px-6 py-3">Kills</th>
+                                <th class="px-6 py-3">Prize</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matches-body" class="divide-y divide-gray-700">
+                            <!-- Data injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
 
-function showError(msg) {
-    document.getElementById("container").innerHTML =
-        '<div class="section"><div class="empty">' + esc(msg) + '</div></div>';
-}
+    <!-- Footer -->
+    <footer class="glass-panel w-full p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
+            </div>
+            <div class="text-sm text-gray-500">&copy; 2023 Nepal Gaming. All rights reserved.</div>
+        </div>
+    </footer>
 
-function renderProfile(p) {
+    <!-- Scripts -->
+    <script>
+        console.log("--- PLAYER PROFILE PAGE LOADED ---");
 
-    var stat = p.stats || {};
+        // Recent matches data
+        const recentMatches = [
+            { tournament: "PUBG Squad Championship", date: "Nov 18, 2023", placement: 1, kills: 12, prize: 800 },
+            { tournament: "Free Fire Solo Cup #11", date: "Nov 15, 2023", placement: 3, kills: 8, prize: 200 },
+            { tournament: "Valorant Night Cup", date: "Nov 12, 2023", placement: 1, kills: 18, prize: 1500 },
+            { tournament: "COD Mobile Battle", date: "Nov 10, 2023", placement: 2, kills: 15, prize: 400 },
+            { tournament: "PUBG Solo Showdown", date: "Nov 08, 2023", placement: 1, kills: 10, prize: 500 },
+            { tournament: "Free Fire Duo Cup", date: "Nov 05, 2023", placement: 4, kills: 6, prize: 50 },
+            { tournament: "Clash of Clans War", date: "Nov 01, 2023", placement: 2, kills: 0, prize: 300 },
+            { tournament: "PUBG Mobile Squad", date: "Oct 28, 2023", placement: 3, kills: 11, prize: 200 },
+            { tournament: "Free Fire Solo Cup", date: "Oct 25, 2023", placement: 1, kills: 14, prize: 500 },
+            { tournament: "Valorant Weekend Cup", date: "Oct 22, 2023", placement: 2, kills: 16, prize: 600 }
+        ];
 
-    var html =
-        '<div class="profile-hero">' +
-            '<div class="avatar">' + esc(initials(p.username)) + '</div>' +
-            '<div class="profile-info">' +
-                '<h1>' + esc(p.username) + '</h1>' +
-                '<div class="profile-meta">' +
-                    '<span>Member since: ' + esc(formatDate(p.memberSince)) + '</span>' +
-                    '<span>Tournaments: ' + (stat.tournamentsEntered || 0) + '</span>' +
-                '</div>' +
-                (stat.championships > 0
-                    ? '<span class="profile-rank-badge">' + stat.championships + 'x Champion</span>'
-                    : '') +
-            '</div>' +
-        '</div>' +
+        function renderMatches() {
+            const tbody = document.getElementById('matches-body');
 
-        '<div class="stats-grid">' +
-            '<div class="stat-box">' +
-                '<div class="stat-value wins">' + (stat.wins || 0) + '</div>' +
-                '<div class="stat-label">Wins</div>' +
-            '</div>' +
-            '<div class="stat-box">' +
-                '<div class="stat-value losses">' + (stat.losses || 0) + '</div>' +
-                '<div class="stat-label">Losses</div>' +
-            '</div>' +
-            '<div class="stat-box">' +
-                '<div class="stat-value winrate">' + (stat.winRate || 0) + '%</div>' +
-                '<div class="stat-label">Win Rate</div>' +
-            '</div>' +
-            '<div class="stat-box">' +
-                '<div class="stat-value points">' + (stat.points || 0) + '</div>' +
-                '<div class="stat-label">Points</div>' +
-            '</div>' +
-        '</div>';
+            recentMatches.forEach(m => {
+                // Placement badge
+                let placementHtml = '';
+                if (m.placement === 1) {
+                    placementHtml = `<span class="bg-yellow-500/20 text-yellow-400 border border-yellow-500 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>#1</span>`;
+                } else if (m.placement === 2) {
+                    placementHtml = `<span class="bg-gray-500/20 text-gray-300 border border-gray-400 text-xs font-bold px-3 py-1 rounded-full">#2</span>`;
+                } else if (m.placement === 3) {
+                    placementHtml = `<span class="bg-orange-500/20 text-orange-400 border border-orange-500 text-xs font-bold px-3 py-1 rounded-full">#3</span>`;
+                } else {
+                    placementHtml = `<span class="bg-gray-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-full">#${m.placement}</span>`;
+                }
 
-    /* Teams */
-    if (p.teams && p.teams.length > 0) {
-        html += '<div class="section">' +
-            '<h2>Teams</h2>' +
-            '<div class="teams-list">' +
-                p.teams.map(function (t) {
-                    return '<span class="team-chip">' + esc(t) + '</span>';
-                }).join("") +
-            '</div>' +
-        '</div>';
-    }
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-white">${m.tournament}</td>
+                    <td class="px-6 py-4">${m.date}</td>
+                    <td class="px-6 py-4">${placementHtml}</td>
+                    <td class="px-6 py-4 text-blue-400 font-bold">${m.kills}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">${m.prize > 0 ? 'Rs. ' + m.prize : '—'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-    /* Championships */
-    if (p.championships && p.championships.length > 0) {
-        html += '<div class="section">' +
-            '<h2>Championships</h2>' +
-            p.championships.map(function (c) {
-                return '<div class="champ-card">' +
-                    '<div class="champ-info">' +
-                        '<div class="champ-title">' + esc(c.tournamentName) + '</div>' +
-                        '<div class="champ-sub">' +
-                            esc(c.game || "") + ' • ' +
-                            esc(formatDate(c.date)) +
-                        '</div>' +
-                    '</div>' +
-                    (c.prizePool > 0
-                        ? '<div class="champ-prize">Rs. ' + Number(c.prizePool).toLocaleString("en-NP") + '</div>'
-                        : '') +
-                '</div>';
-            }).join("") +
-        '</div>';
-    }
-
-    /* Match History */
-    html += '<div class="section">' +
-        '<h2>Recent Matches</h2>';
-
-    if (p.matchHistory && p.matchHistory.length > 0) {
-        html += p.matchHistory.map(function (m) {
-            var cls = "match-row";
-            var label = "COMPLETED";
-            var labelCls = "result-tie";
-
-            if (m.result === "WIN") {
-                cls += " win"; label = "WIN"; labelCls = "result-win";
-            } else if (m.result === "LOSS") {
-                cls += " loss"; label = "LOSS"; labelCls = "result-loss";
-            } else if (m.result === "TIE") {
-                cls += " tie"; label = "TIE"; labelCls = "result-tie";
-            } else if (m.result === "TOP 3") {
-                cls += " top3"; label = "TOP 3"; labelCls = "result-top3";
-            }
-
-            var opponent = "";
-            if (m.matchType === "battle-royale") {
-                opponent = "Battle Royale";
-            } else {
-                opponent = m.team1 + " vs " + m.team2;
-            }
-
-            return '<div class="' + cls + '">' +
-                '<div class="match-info">' +
-                    '<div class="match-name">' + esc(m.name) + '</div>' +
-                    '<div class="match-meta">' +
-                        esc(m.tournament) + ' • ' + esc(m.game) + ' • ' + esc(formatDate(m.date)) +
-                    '</div>' +
-                '</div>' +
-                '<span class="match-result ' + labelCls + '">' + esc(label) + '</span>' +
-            '</div>';
-        }).join("");
-    } else {
-        html += '<div class="empty">No completed matches yet.</div>';
-    }
-
-    html += '</div>';
-
-    document.getElementById("container").innerHTML = html;
-}
-
-if (!username) {
-    showError("No player specified. Add ?username=XXX to the URL.");
-} else {
-    fetch("/api/player?username=" + encodeURIComponent(username), { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (!data.success || !data.player) {
-                showError("Player not found: " + username);
+        // Challenge Button
+        function challengePlayer() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                alert("You need to login first to challenge this player.");
+                window.location.href = 'member.html';
                 return;
             }
-            renderProfile(data.player);
-        })
-        .catch(function (err) {
-            showError("Could not load profile: " + err.message);
-        });
-}
-</script>
+            alert("Challenge request sent to Rahul Sharma! You'll be notified when they accept.");
+        }
 
+        // Follow Button
+        function followPlayer() {
+            const btn = document.getElementById('followBtn');
+            if (btn.innerHTML.includes('Follow')) {
+                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Following';
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                console.log("Now following player");
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i>Follow';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                console.log("Unfollowed player");
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            renderMatches();
+            console.log("Recent matches rendered:", recentMatches.length);
+        };
+    </script>
 </body>
 </html>
