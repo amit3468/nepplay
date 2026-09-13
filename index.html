@@ -31,73 +31,123 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
         }
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            transition: all 0.3s;
+        }
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+        }
         .feature-card { transition: transform 0.3s; }
         .feature-card:hover { transform: translateY(-5px); }
         .tournament-preview { transition: transform 0.3s, box-shadow 0.3s; }
         .tournament-preview:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); }
         
-        /* User profile dropdown */
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        /* Floating WhatsApp Button */
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+            z-index: 100;
+            transition: all 0.3s;
+            animation: pulse-wa 2s infinite;
+        }
+        .floating-whatsapp:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(37, 211, 102, 0.6);
+        }
+        @keyframes pulse-wa {
+            0%, 100% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.7); }
+        }
+        .floating-whatsapp .tooltip {
+            position: absolute;
+            right: 75px;
+            background: #1e293b;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+        }
+        .floating-whatsapp:hover .tooltip { opacity: 1; }
+
+        /* QR Code Display */
+        .qr-box {
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            display: inline-block;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+        }
+        .qr-box img {
+            width: 180px;
+            height: 180px;
+            display: block;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- Floating WhatsApp Button -->
+    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="floating-whatsapp" title="Join WhatsApp Group">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span class="tooltip">💬 Join our WhatsApp Group</span>
+    </a>
+
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
         
-        <!-- LEFT SIDE: Logo + User Profile -->
         <div class="flex items-center gap-4">
-            
-            <!-- Logo -->
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
                 <span class="text-xl font-bold text-white">Nepal Gaming</span>
             </div>
 
-            <!-- User Profile (only shows when logged in) -->
             <div id="user-profile" class="hidden relative">
                 <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                        A
-                    </div>
-                    <span id="user-greeting" class="text-sm text-gray-300 hidden md:inline">
-                        Hi, <span id="user-name" class="font-bold text-white">User</span>
-                    </span>
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span id="user-greeting" class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
                     <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                 </button>
-
-                <!-- Dropdown Menu -->
                 <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
                     <div class="p-3 border-b border-gray-700">
                         <p class="text-xs text-gray-500">Signed in as</p>
-                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user@email.com</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
                     </div>
                     <div class="py-1">
-                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
-                            <i class="fa-solid fa-gauge w-4"></i> My Dashboard
-                        </a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
-                            <i class="fa-solid fa-user w-4"></i> My Profile
-                        </a>
-                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
-                            <i class="fa-solid fa-users w-4"></i> My Teams
-                        </a>
-                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
-                            <i class="fa-solid fa-trophy w-4"></i> My Tournaments
-                        </a>
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
+                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
-                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left">
-                            <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
-                        </button>
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT SIDE: Nav Links + Login Button -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-blue-400 font-bold">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
@@ -120,12 +170,15 @@
             <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
                 Join thousands of gamers across Nepal in daily tournaments for Free Fire, PUBG Mobile, Valorant, and more. Instant payouts, verified matches, zero hassle.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
                 <a href="tournaments.html" class="btn-primary text-white font-bold py-4 px-8 rounded-lg inline-flex items-center justify-center gap-2">
                     <i class="fa-solid fa-trophy"></i> Browse Tournaments
                 </a>
                 <a href="register.html" class="glass-panel text-white font-bold py-4 px-8 rounded-lg inline-flex items-center justify-center gap-2 hover:bg-gray-800/50 transition">
                     <i class="fa-solid fa-user-plus"></i> Create Account
+                </a>
+                <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-whatsapp text-white font-bold py-4 px-8 rounded-lg inline-flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> Join WhatsApp
                 </a>
             </div>
             
@@ -146,7 +199,7 @@
         </div>
     </section>
 
-    <!-- Why Choose Us Section -->
+    <!-- Why Choose Us -->
     <section class="py-16 px-6 bg-gray-900/50">
         <div class="container mx-auto">
             <div class="text-center mb-12">
@@ -180,7 +233,7 @@
         </div>
     </section>
 
-    <!-- Featured Tournaments Section -->
+    <!-- Featured Tournaments -->
     <section class="py-16 px-6">
         <div class="container mx-auto">
             <div class="flex justify-between items-end mb-8 max-w-6xl mx-auto">
@@ -194,6 +247,50 @@
             </div>
             
             <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+        </div>
+    </section>
+
+    <!-- WhatsApp CTA Section with QR Code -->
+    <section class="py-16 px-6">
+        <div class="container mx-auto max-w-5xl">
+            <div class="glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(37, 211, 102, 0.12), rgba(18, 140, 126, 0.12)); border: 1px solid rgba(37, 211, 102, 0.3);">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    
+                    <!-- LEFT: Text -->
+                    <div class="text-center md:text-left">
+                        <div class="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/40 rounded-full px-4 py-1 text-xs font-bold text-green-400 mb-4">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Community
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Join Our Community</h2>
+                        <p class="text-gray-300 mb-6">Get instant match updates, room IDs, prize announcements, and chat with fellow gamers directly on WhatsApp.</p>
+                        
+                        <div class="flex flex-wrap gap-2 mb-6 justify-center md:justify-start">
+                            <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/40 text-xs"><i class="fa-solid fa-bolt mr-1"></i> Instant Updates</span>
+                            <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/40 text-xs"><i class="fa-solid fa-trophy mr-1"></i> Winners</span>
+                            <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/40 text-xs"><i class="fa-solid fa-headset mr-1"></i> Support</span>
+                        </div>
+
+                        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-whatsapp text-white font-bold py-4 px-8 rounded-lg inline-flex items-center gap-2 text-lg">
+                            <i class="fa-brands fa-whatsapp text-2xl"></i> Join Group Now
+                        </a>
+                    </div>
+
+                    <!-- RIGHT: QR Code -->
+                    <div class="text-center">
+                        <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Or scan to join</p>
+                        <div class="qr-box mx-auto">
+                            <img src="images/whatsapp-qr.png" alt="WhatsApp Group QR Code" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='block';">
+                        </div>
+                        <p class="hidden text-xs text-yellow-400 mt-3">
+                            QR image missing. Upload as <code>images/whatsapp-qr.png</code> in your repo.
+                        </p>
+                        <p class="text-xs text-gray-500 mt-3 max-w-xs mx-auto">
+                            <i class="fa-solid fa-mobile-screen mr-1"></i> Open WhatsApp → Tap Menu → Scan QR Code
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -219,11 +316,14 @@
                     <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
                     <span class="font-bold text-white">Nepal Gaming</span>
                 </div>
-                <div class="flex gap-6 text-sm text-gray-400">
+                <div class="flex items-center gap-4 text-sm text-gray-400">
                     <a href="index.html" class="hover:text-white transition">Home</a>
                     <a href="tournaments.html" class="hover:text-white transition">Tournaments</a>
                     <a href="winners.html" class="hover:text-white transition">Winners</a>
                     <a href="teams.html" class="hover:text-white transition">Teams</a>
+                    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="text-green-400 hover:text-green-300 transition flex items-center gap-1">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </a>
                 </div>
                 <div class="text-sm text-gray-500">
                     &copy; 2023 Nepal Gaming. All rights reserved.
@@ -232,59 +332,34 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
-        console.log("--- HOMEPAGE LOADED ---");
+        console.log("--- HOMEPAGE LOADED (WhatsApp + QR) ---");
 
-        // 1. Check login status and show user profile
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            
             if (user && user.username) {
-                console.log("User logged in:", user.username);
-                
-                // Show profile badge
                 document.getElementById('user-profile').classList.remove('hidden');
-                
-                // Set avatar initial
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                
-                // Set username
                 document.getElementById('user-name').textContent = user.username;
                 document.getElementById('dropdown-username').textContent = user.email || user.username;
-                
-                // Hide the Login button on the right
                 document.getElementById('nav-login-btn').classList.add('hidden');
             } else {
-                console.log("No user logged in");
                 document.getElementById('user-profile').classList.add('hidden');
                 document.getElementById('nav-login-btn').classList.remove('hidden');
             }
         }
 
-        // 2. Toggle profile dropdown
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
-        }
-
-        // 3. Close dropdown when clicking outside
+        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
-            
-            if (profile && !profile.contains(e.target)) {
-                dropdown.classList.remove('open');
-            }
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-
-        // 4. Logout
         function logout() {
-            console.log("Logging out...");
             localStorage.removeItem('currentUser');
             window.location.reload();
         }
 
-        // 5. Featured Tournaments
         const featuredTournaments = [
             { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo" },
             { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad" },
@@ -295,10 +370,8 @@
             const grid = document.getElementById('featured-grid');
             featuredTournaments.forEach(t => {
                 const percentage = Math.round((t.slotsFilled / t.slotsTotal) * 100);
-                
                 const card = document.createElement('div');
                 card.className = "tournament-preview glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
-                
                 card.innerHTML = `
                     <div class="bg-gradient-to-br ${t.color} p-4 relative">
                         <div class="flex justify-between items-start">
@@ -351,7 +424,6 @@
         window.onload = function() {
             checkUserStatus();
             renderFeatured();
-            console.log("Homepage initialized");
         };
     </script>
 </body>
