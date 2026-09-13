@@ -34,13 +34,13 @@
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-blue-400 font-bold">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
             <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
         </div>
     </nav>
 
     <main class="flex-grow container mx-auto p-6">
         
-        <!-- Page Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-ranking-star text-blue-500 mr-3"></i>Leaderboard</h1>
             <p class="text-gray-400">Top players ranked by total earnings and tournament wins.</p>
@@ -61,7 +61,6 @@
 
         <!-- Top 3 Podium -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end max-w-4xl mx-auto">
-            <!-- 2nd Place -->
             <div class="podium-card glass-panel rounded-xl p-6 text-center order-2 md:order-1 relative">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
                 <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400">
@@ -75,7 +74,6 @@
                 </div>
             </div>
 
-            <!-- 1st Place -->
             <div class="podium-card glass-panel rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
                 <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
@@ -92,7 +90,6 @@
                 </div>
             </div>
 
-            <!-- 3rd Place -->
             <div class="podium-card glass-panel rounded-xl p-6 text-center order-3 relative">
                 <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
                 <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700">
@@ -128,16 +125,13 @@
                             <th scope="col" class="px-6 py-4 w-20">Trend</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-body" class="divide-y divide-gray-700">
-                        <!-- Data injected via JS -->
-                    </tbody>
+                    <tbody id="leaderboard-body" class="divide-y divide-gray-700"></tbody>
                 </table>
             </div>
         </div>
 
     </main>
 
-    <!-- Footer -->
     <footer class="glass-panel w-full p-6 mt-8">
         <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2">
@@ -148,11 +142,9 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
         console.log("--- LEADERBOARD PAGE LOADED ---");
 
-        // Full leaderboard data
         const leaderboardData = [
             { rank: 1, name: "Rahul Sharma", wins: 72, earnings: 125500, trend: "up" },
             { rank: 2, name: "Sujal Thapa", wins: 45, earnings: 45200, trend: "up" },
@@ -168,7 +160,6 @@
             { rank: 12, name: "Deepak Lama", wins: 14, earnings: 11500, trend: "up" }
         ];
 
-        // Weekly data (subset with different ranks - just for demo)
         const weeklyData = [
             { rank: 1, name: "Anish Rai", wins: 8, earnings: 8500, trend: "up" },
             { rank: 2, name: "Rahul Sharma", wins: 6, earnings: 7200, trend: "down" },
@@ -177,7 +168,6 @@
             { rank: 5, name: "Bibek Gurung", wins: 3, earnings: 3600, trend: "up" }
         ];
 
-        // Monthly data
         const monthlyData = [
             { rank: 1, name: "Rahul Sharma", wins: 24, earnings: 42000, trend: "up" },
             { rank: 2, name: "Sujal Thapa", wins: 18, earnings: 28500, trend: "up" },
@@ -195,21 +185,18 @@
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = '';
 
-            // Get current user to highlight
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
             data.forEach(player => {
                 const row = document.createElement('tr');
                 let rowClass = "hover:bg-gray-800/50 transition";
                 
-                // Highlight if this is the current user
                 if (currentUser && player.name.toLowerCase() === currentUser.username.toLowerCase()) {
                     rowClass += " highlight-you";
                 }
                 
                 row.className = rowClass;
 
-                // Trend icon
                 let trendHtml = '';
                 if (player.trend === 'up') {
                     trendHtml = '<span class="trend-up"><i class="fa-solid fa-arrow-up"></i> Up</span>';
@@ -219,7 +206,6 @@
                     trendHtml = '<span class="trend-flat"><i class="fa-solid fa-minus"></i> Same</span>';
                 }
 
-                // Rank styling
                 let rankClass = "text-gray-400 font-bold";
                 let rankIcon = '';
                 if (player.rank === 1) { rankClass = "rank-1 font-bold"; rankIcon = '<i class="fa-solid fa-crown mr-1"></i>'; }
@@ -252,14 +238,12 @@
             renderLeaderboard(currentData);
         }
 
-        // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const query = e.target.value.toLowerCase();
             const filtered = currentData.filter(p => p.name.toLowerCase().includes(query));
             renderLeaderboard(filtered);
         });
 
-        // Initial render
         window.onload = function() {
             renderLeaderboard(leaderboardData);
         };
