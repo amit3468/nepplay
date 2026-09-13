@@ -1,516 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Leaderboard</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #080b12;
-    color: white;
-    min-height: 100vh;
-}
-
-/* HEADER */
-header {
-    background: #0d111b;
-    border-bottom: 1px solid #202634;
-    padding: 18px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
-.logo span { color: #ff3b30; }
-nav { display: flex; align-items: center; gap: 28px; }
-nav a {
-    color: #c7ccd7; text-decoration: none;
-    font-size: 15px; font-weight: 600;
-}
-nav a:hover, nav a.active { color: #ff4438; }
-.login-btn {
-    background: #ff3b30; color: white !important;
-    padding: 10px 20px; border-radius: 7px;
-}
-
-/* HERO */
-.hero {
-    text-align: center;
-    padding: 60px 20px 30px;
-}
-.hero h1 { font-size: 46px; margin-bottom: 15px; }
-.hero h1 span { color: #ff3b30; }
-.hero p { color: #9299a8; font-size: 17px; }
-
-/* STATS */
-.stats-bar {
-    width: 88%; max-width: 1100px;
-    margin: 30px auto 0;
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-}
-.stat-box {
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; padding: 20px; text-align: center;
-}
-.stat-number {
-    font-size: 28px; font-weight: bold;
-    color: #ff4438; margin-bottom: 6px;
-}
-.stat-label { color: #9299a8; font-size: 13px; }
-
-/* PODIUM */
-.podium-section {
-    width: 88%; max-width: 1100px;
-    margin: 40px auto 0;
-}
-.podium {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 15px;
-    align-items: end;
-}
-.podium-card {
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; padding: 20px;
-    text-align: center; position: relative;
-}
-.podium-card.gold {
-    border-color: #ffd43b;
-    background: linear-gradient(180deg, #1a1608 0%, #111621 100%);
-    padding: 30px 20px;
-}
-.podium-card.silver {
-    border-color: #b8bec7;
-    padding: 25px 20px;
-}
-.podium-card.bronze {
-    border-color: #cd7f32;
-    padding: 22px 20px;
-}
-.podium-medal {
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px; font-weight: 900;
-    margin: 0 auto 12px;
-    color: #0d111b;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.podium-medal.gold-medal {
-    background: linear-gradient(135deg, #ffd43b, #ffb800);
-}
-.podium-medal.silver-medal {
-    background: linear-gradient(135deg, #d8dde4, #a9b1bc);
-}
-.podium-medal.bronze-medal {
-    background: linear-gradient(135deg, #d68a4c, #a5663a);
-}
-.podium-name {
-    font-weight: bold; font-size: 17px;
-    margin-bottom: 6px; word-break: break-word;
-}
-.podium-captain {
-    font-size: 12px; margin-bottom: 10px;
-}
-.podium-captain a {
-    color: #9299a8; text-decoration: none;
-}
-.podium-captain a:hover { color: #ff4438; text-decoration: underline; }
-.podium-points {
-    color: #ff4438; font-weight: bold; font-size: 22px;
-}
-.podium-wins {
-    color: #9299a8; font-size: 12px; margin-top: 4px;
-}
-
-/* TABS + SEARCH */
-.controls {
-    width: 88%; max-width: 1100px;
-    margin: 40px auto 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 15px; flex-wrap: wrap;
-}
-.game-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
-.game-tab {
-    padding: 10px 18px;
-    background: #111621; border: 1px solid #293141;
-    border-radius: 7px; color: #c5cbd6;
-    cursor: pointer; font-weight: 600; font-size: 14px;
-}
-.game-tab.active, .game-tab:hover {
-    background: #ff3b30; border-color: #ff3b30; color: white;
-}
-.search-input {
-    background: #111621; border: 1px solid #293141;
-    border-radius: 7px; padding: 10px 15px;
-    color: white; outline: none; min-width: 220px; font-size: 14px;
-}
-.search-input:focus { border-color: #ff3b30; }
-
-/* TABLE */
-.container {
-    width: 88%; max-width: 1100px;
-    margin: auto; padding-bottom: 70px;
-}
-.table-box {
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; overflow: hidden;
-}
-table {
-    width: 100%; border-collapse: collapse;
-}
-th {
-    background: #171d29; color: #969eae;
-    text-align: left; padding: 16px;
-    font-size: 12px; text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-td {
-    padding: 16px; border-top: 1px solid #242b39;
-    font-size: 14px;
-}
-tr:hover { background: #151b26; }
-.rank {
-    font-weight: bold; font-size: 16px; width: 60px;
-}
-.rank-1 { color: #ffd43b; }
-.rank-2 { color: #b8bec7; }
-.rank-3 { color: #cd7f32; }
-.player { font-weight: bold; }
-.captain { color: #9299a8; font-size: 12px; }
-.captain a {
-    color: #9299a8; text-decoration: none;
-}
-.captain a:hover { color: #ff4438; text-decoration: underline; }
-.points {
-    color: #ff4438; font-weight: bold; font-size: 15px;
-}
-.win-rate { color: #5bed8e; font-weight: 600; }
-
-/* EMPTY / LOADING */
-.empty, .loading {
-    text-align: center; padding: 60px 20px;
-    color: #8993a2; font-size: 14px; line-height: 1.7;
-}
-.loading-spinner {
-    display: inline-block;
-    width: 30px; height: 30px;
-    border: 3px solid #242b39;
-    border-top-color: #ff3b30;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 15px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-footer {
-    border-top: 1px solid #202634;
-    text-align: center; padding: 25px;
-    color: #717887; font-size: 13px;
-}
-
-@media (max-width: 900px) {
-    .podium { grid-template-columns: 1fr; }
-    .podium-card.gold { order: -1; }
-    .stats-bar { grid-template-columns: 1fr; }
-}
-@media (max-width: 750px) {
-    header { flex-direction: column; gap: 15px; }
-    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
-    .hero h1 { font-size: 34px; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .search-input { width: 100%; }
-    .table-box { overflow-x: auto; }
-    table { min-width: 700px; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        .rank-2 { color: #94a3b8; }
+        .rank-3 { color: #b45309; }
+        .podium-card { transition: transform 0.2s; }
+        .podium-card:hover { transform: translateY(-5px); }
+        .filter-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .trend-up { color: #4ade80; }
+        .trend-down { color: #f87171; }
+        .trend-flat { color: #94a3b8; }
+        .highlight-you { background-color: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<header>
-    <div class="logo">NEP<span>PLAY</span></div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="tournaments.html">Tournaments</a>
-        <a href="leaderboard.html" class="active">Leaderboard</a>
-        <a href="teams.html">Teams</a>
-        <a href="winners.html">Winners</a>
-        <a href="login.html" class="login-btn">Login</a>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-blue-400 font-bold">Leaderboard</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
     </nav>
-</header>
 
-<section class="hero">
-    <h1>NEPPLAY <span>Leaderboard</span></h1>
-    <p>Live rankings of the top competitive teams in Nepal.</p>
-</section>
+    <main class="flex-grow container mx-auto p-6">
+        
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-ranking-star text-blue-500 mr-3"></i>Leaderboard</h1>
+            <p class="text-gray-400">Top players ranked by total earnings and tournament wins.</p>
+        </div>
 
-<div class="stats-bar">
-    <div class="stat-box">
-        <div class="stat-number" id="totalTeams">0</div>
-        <div class="stat-label">Ranked Teams</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-number" id="totalMatches">0</div>
-        <div class="stat-label">Matches Completed</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-number" id="totalTournaments">0</div>
-        <div class="stat-label">Tournaments Played</div>
-    </div>
-</div>
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <button class="filter-btn active px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterLeaderboard('global', this)">
+                <i class="fa-solid fa-globe mr-1"></i> All Time
+            </button>
+            <button class="filter-btn px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterLeaderboard('monthly', this)">
+                <i class="fa-solid fa-calendar mr-1"></i> This Month
+            </button>
+            <button class="filter-btn px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterLeaderboard('weekly', this)">
+                <i class="fa-solid fa-calendar-week mr-1"></i> This Week
+            </button>
+        </div>
 
-<div class="podium-section">
-    <div class="podium" id="podium"></div>
-</div>
+        <!-- Top 3 Podium -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end max-w-4xl mx-auto">
+            <!-- 2nd Place -->
+            <div class="podium-card glass-panel rounded-xl p-6 text-center order-2 md:order-1 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400">
+                    <i class="fa-solid fa-user text-2xl text-gray-300"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Sujal Thapa</h3>
+                <p class="text-xs text-gray-400 mb-3">45 Tournaments Won</p>
+                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600 text-sm">
+                    Rs. 45,200
+                </div>
+            </div>
 
-<div class="controls">
-    <div class="game-tabs">
-        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">All Games</button>
-        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">Free Fire</button>
-        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">PUBG Mobile</button>
-        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">Mobile Legends</button>
-        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">eFootball</button>
-    </div>
-    <input type="text" class="search-input" id="searchBox" placeholder="Search team or captain..." oninput="renderLeaderboard()">
-</div>
+            <!-- 1st Place -->
+            <div class="podium-card glass-panel rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
+                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+                    <i class="fa-solid fa-crown text-3xl text-yellow-500"></i>
+                </div>
+                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500">
+                    <i class="fa-solid fa-user text-3xl text-yellow-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Rahul Sharma</h3>
+                <p class="text-xs text-gray-400 mb-3">72 Tournaments Won</p>
+                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
+                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500 text-sm">
+                    Rs. 1,25,500
+                </div>
+            </div>
 
-<main class="container">
-    <div class="table-box">
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Team</th>
-                    <th>Played</th>
-                    <th>Wins</th>
-                    <th>Losses</th>
-                    <th>Ties</th>
-                    <th>Win Rate</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-                <tr><td colspan="8">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <div>Loading leaderboard...</div>
-                    </div>
-                </td></tr>
-            </tbody>
-        </table>
-    </div>
-</main>
+            <!-- 3rd Place -->
+            <div class="podium-card glass-panel rounded-xl p-6 text-center order-3 relative">
+                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
+                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700">
+                    <i class="fa-solid fa-user text-2xl text-orange-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Bibek Gurung</h3>
+                <p class="text-xs text-gray-400 mb-3">38 Tournaments Won</p>
+                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
+                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600 text-sm">
+                    Rs. 32,800
+                </div>
+            </div>
+        </div>
 
-<footer>
-    © 2026 NEPPLAY — Nepal Gaming Community
-</footer>
+        <!-- Search Bar -->
+        <div class="max-w-4xl mx-auto mb-4">
+            <div class="glass-panel rounded-lg flex items-center px-4 py-2">
+                <i class="fa-solid fa-search text-gray-500 mr-3"></i>
+                <input type="text" id="searchInput" placeholder="Search for a player..." class="bg-transparent flex-grow text-white placeholder-gray-500 focus:outline-none py-2">
+            </div>
+        </div>
 
-<script>
+        <!-- Full Rankings Table -->
+        <div class="glass-panel rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 w-16">Rank</th>
+                            <th scope="col" class="px-6 py-4">Player</th>
+                            <th scope="col" class="px-6 py-4 hidden md:table-cell">Tournaments Won</th>
+                            <th scope="col" class="px-6 py-4">Earnings</th>
+                            <th scope="col" class="px-6 py-4 w-20">Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-gray-700">
+                        <!-- Data injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-var allTeams = [];
-var currentGame = "all";
+    </main>
 
-function esc(value) {
-    if (value === undefined || value === null) return "";
-    return String(value)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+    <!-- Footer -->
+    <footer class="glass-panel w-full p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
+            </div>
+            <div class="text-sm text-gray-500">&copy; 2023 Nepal Gaming. All rights reserved.</div>
+        </div>
+    </footer>
 
-function loadLeaderboard() {
-    fetch("/api/leaderboard", { method: "GET", cache: "no-store" })
-    .then(function (response) {
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        return response.json();
-    })
-    .then(function (data) {
-        var teams = [];
-        if (Array.isArray(data)) teams = data;
-        else if (data && Array.isArray(data.teams)) teams = data.teams;
-        else if (data && Array.isArray(data.leaderboard)) teams = data.leaderboard;
-        allTeams = teams;
-        updateStats(data);
-        renderPodium();
-        renderLeaderboard();
-    })
-    .catch(function (error) {
-        console.error("Leaderboard error:", error);
-        document.getElementById("leaderboardBody").innerHTML =
-            '<tr><td colspan="8">' +
-                '<div class="empty">' +
-                    'Could not load leaderboard.<br>' +
-                    'Make sure the server is running.' +
-                '</div>' +
-            '</td></tr>';
-        document.getElementById("podium").innerHTML = "";
-    });
-}
+    <!-- Scripts -->
+    <script>
+        console.log("--- LEADERBOARD PAGE LOADED ---");
 
-function updateStats(data) {
-    var teamsCount = (data && typeof data.totalTeams === "number") ? data.totalTeams : allTeams.length;
-    var matchesCount = (data && typeof data.totalMatches === "number") ? data.totalMatches : 0;
-    var tournamentsCount = (data && typeof data.totalTournaments === "number") ? data.totalTournaments : 0;
+        // Full leaderboard data
+        const leaderboardData = [
+            { rank: 1, name: "Rahul Sharma", wins: 72, earnings: 125500, trend: "up" },
+            { rank: 2, name: "Sujal Thapa", wins: 45, earnings: 45200, trend: "up" },
+            { rank: 3, name: "Bibek Gurung", wins: 38, earnings: 32800, trend: "down" },
+            { rank: 4, name: "Anish Rai", wins: 32, earnings: 28400, trend: "up" },
+            { rank: 5, name: "Kiran Shah", wins: 29, earnings: 25100, trend: "flat" },
+            { rank: 6, name: "Sita Karki", wins: 26, earnings: 22000, trend: "down" },
+            { rank: 7, name: "Nabin Magar", wins: 24, earnings: 19800, trend: "up" },
+            { rank: 8, name: "Prakash Adhikari", wins: 21, earnings: 17500, trend: "down" },
+            { rank: 9, name: "Rita Shrestha", wins: 19, earnings: 15900, trend: "up" },
+            { rank: 10, name: "Hari Bahadur", wins: 17, earnings: 14200, trend: "flat" },
+            { rank: 11, name: "Sarita Rai", wins: 15, earnings: 12800, trend: "down" },
+            { rank: 12, name: "Deepak Lama", wins: 14, earnings: 11500, trend: "up" }
+        ];
 
-    document.getElementById("totalTeams").textContent = teamsCount;
-    document.getElementById("totalMatches").textContent = matchesCount;
-    document.getElementById("totalTournaments").textContent = tournamentsCount;
-}
+        // Weekly data (subset with different ranks - just for demo)
+        const weeklyData = [
+            { rank: 1, name: "Anish Rai", wins: 8, earnings: 8500, trend: "up" },
+            { rank: 2, name: "Rahul Sharma", wins: 6, earnings: 7200, trend: "down" },
+            { rank: 3, name: "Kiran Shah", wins: 5, earnings: 5900, trend: "up" },
+            { rank: 4, name: "Sujal Thapa", wins: 4, earnings: 4800, trend: "flat" },
+            { rank: 5, name: "Bibek Gurung", wins: 3, earnings: 3600, trend: "up" }
+        ];
 
-function getFilteredTeams() {
-    var teams = allTeams.slice();
+        // Monthly data
+        const monthlyData = [
+            { rank: 1, name: "Rahul Sharma", wins: 24, earnings: 42000, trend: "up" },
+            { rank: 2, name: "Sujal Thapa", wins: 18, earnings: 28500, trend: "up" },
+            { rank: 3, name: "Anish Rai", wins: 15, earnings: 22000, trend: "up" },
+            { rank: 4, name: "Bibek Gurung", wins: 12, earnings: 18500, trend: "down" },
+            { rank: 5, name: "Kiran Shah", wins: 10, earnings: 15200, trend: "flat" },
+            { rank: 6, name: "Sita Karki", wins: 8, earnings: 12800, trend: "up" },
+            { rank: 7, name: "Nabin Magar", wins: 7, earnings: 10500, trend: "down" }
+        ];
 
-    if (currentGame !== "all") {
-        teams = teams.filter(function (t) {
-            var games = t.games || [];
-            if (Array.isArray(games) && games.length > 0) {
-                return games.indexOf(currentGame) !== -1;
-            }
-            return String(t.game || "") === currentGame;
-        });
-    }
+        let currentData = leaderboardData;
 
-    var search = (document.getElementById("searchBox").value || "").toLowerCase().trim();
-    if (search) {
-        teams = teams.filter(function (t) {
-            var text = ((t.name || "") + " " + (t.captain || "")).toLowerCase();
-            return text.indexOf(search) !== -1;
-        });
-    }
+        function renderLeaderboard(data) {
+            console.log("Rendering leaderboard with", data.length, "entries");
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
 
-    return teams;
-}
+            // Get current user to highlight
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-function renderPodium() {
-    var container = document.getElementById("podium");
-    var teams = getFilteredTeams();
+            data.forEach(player => {
+                const row = document.createElement('tr');
+                let rowClass = "hover:bg-gray-800/50 transition";
+                
+                // Highlight if this is the current user
+                if (currentUser && player.name.toLowerCase() === currentUser.username.toLowerCase()) {
+                    rowClass += " highlight-you";
+                }
+                
+                row.className = rowClass;
 
-    if (teams.length === 0) {
-        container.innerHTML = "";
-        return;
-    }
+                // Trend icon
+                let trendHtml = '';
+                if (player.trend === 'up') {
+                    trendHtml = '<span class="trend-up"><i class="fa-solid fa-arrow-up"></i> Up</span>';
+                } else if (player.trend === 'down') {
+                    trendHtml = '<span class="trend-down"><i class="fa-solid fa-arrow-down"></i> Down</span>';
+                } else {
+                    trendHtml = '<span class="trend-flat"><i class="fa-solid fa-minus"></i> Same</span>';
+                }
 
-    var top3 = teams.slice(0, 3);
-    var html = "";
+                // Rank styling
+                let rankClass = "text-gray-400 font-bold";
+                let rankIcon = '';
+                if (player.rank === 1) { rankClass = "rank-1 font-bold"; rankIcon = '<i class="fa-solid fa-crown mr-1"></i>'; }
+                else if (player.rank === 2) { rankClass = "rank-2 font-bold"; }
+                else if (player.rank === 3) { rankClass = "rank-3 font-bold"; }
 
-    if (top3.length >= 1) {
-        var first = top3[0];
-        var second = top3[1];
-        var third = top3[2];
-
-        if (second) html += podiumCard(second, 2, "silver");
-        html += podiumCard(first, 1, "gold");
-        if (third) html += podiumCard(third, 3, "bronze");
-    }
-
-    container.innerHTML = html;
-}
-
-function podiumCard(team, position, cssClass) {
-    var medalNum = String(position);
-    var medalColor =
-        position === 1 ? "gold-medal"
-        : position === 2 ? "silver-medal"
-        : "bronze-medal";
-
-    var captainHtml = "-";
-    if (team.captain) {
-        captainHtml = '<a href="player.html?username=' +
-            encodeURIComponent(team.captain) + '">' +
-            esc(team.captain) + '</a>';
-    }
-
-    return (
-        '<div class="podium-card ' + cssClass + '">' +
-            '<div class="podium-medal ' + medalColor + '">' + medalNum + '</div>' +
-            '<div class="podium-name">' + esc(team.name || "Unknown") + '</div>' +
-            '<div class="podium-captain">' + captainHtml + '</div>' +
-            '<div class="podium-points">' + (team.points || 0) + ' pts</div>' +
-            '<div class="podium-wins">' + (team.wins || 0) + ' wins</div>' +
-        '</div>'
-    );
-}
-
-function renderLeaderboard() {
-    var tbody = document.getElementById("leaderboardBody");
-    var teams = getFilteredTeams();
-
-    if (teams.length === 0) {
-        tbody.innerHTML =
-            '<tr><td colspan="8">' +
-                '<div class="empty">' +
-                    'No teams on the leaderboard yet.<br>' +
-                    'Complete matches and enter results to see rankings.' +
-                '</div>' +
-            '</td></tr>';
-        return;
-    }
-
-    teams.sort(function (a, b) {
-        if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-        if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
-        return String(a.name || "").localeCompare(String(b.name || ""));
-    });
-
-    tbody.innerHTML = teams.map(function (team, index) {
-        var rank = index + 1;
-        var rankClass =
-            rank === 1 ? "rank rank-1"
-            : rank === 2 ? "rank rank-2"
-            : rank === 3 ? "rank rank-3"
-            : "rank";
-
-        var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
-
-        var captainHtml = "-";
-        if (team.captain) {
-            captainHtml = '<a href="player.html?username=' +
-                encodeURIComponent(team.captain) + '">' +
-                esc(team.captain) + '</a>';
+                row.innerHTML = `
+                    <td class="px-6 py-4 ${rankClass}">${rankIcon}#${player.rank}</td>
+                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">${player.name.charAt(0)}</div>
+                        ${player.name}
+                    </td>
+                    <td class="px-6 py-4 hidden md:table-cell">${player.wins}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${player.earnings.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-xs">${trendHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
-        return (
-            '<tr>' +
-                '<td class="' + rankClass + '">' + rank + '</td>' +
-                '<td>' +
-                    '<div class="player">' + esc(team.name || "Unknown") + '</div>' +
-                    '<div class="captain">' + captainHtml + '</div>' +
-                '</td>' +
-                '<td>' + (team.played || 0) + '</td>' +
-                '<td>' + (team.wins || 0) + '</td>' +
-                '<td>' + (team.losses || 0) + '</td>' +
-                '<td>' + (team.ties || 0) + '</td>' +
-                '<td class="win-rate">' + winRate + '%</td>' +
-                '<td class="points">' + (team.points || 0) + '</td>' +
-            '</tr>'
-        );
-    }).join("");
-}
+        function filterLeaderboard(period, btn) {
+            console.log("Filtering leaderboard by:", period);
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-function changeGame(game, button) {
-    currentGame = game;
-    document.querySelectorAll(".game-tab").forEach(function (btn) {
-        btn.classList.remove("active");
-    });
-    button.classList.add("active");
-    renderPodium();
-    renderLeaderboard();
-}
+            if (period === 'weekly') currentData = weeklyData;
+            else if (period === 'monthly') currentData = monthlyData;
+            else currentData = leaderboardData;
 
-loadLeaderboard();
+            renderLeaderboard(currentData);
+        }
 
-</script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const filtered = currentData.filter(p => p.name.toLowerCase().includes(query));
+            renderLeaderboard(filtered);
+        });
 
+        // Initial render
+        window.onload = function() {
+            renderLeaderboard(leaderboardData);
+        };
+    </script>
 </body>
 </html>
