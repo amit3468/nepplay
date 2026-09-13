@@ -14,22 +14,57 @@
         .rank-3 { color: #b45309; }
         .winner-card { transition: transform 0.2s; }
         .winner-card:hover { transform: translateY(-5px); }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        
+        <!-- LEFT: Logo + User Profile -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+            </div>
+
+            <div id="user-profile" class="hidden relative">
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                    <div class="p-3 border-b border-gray-700">
+                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
+                    </div>
+                    <div class="py-1">
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
+                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                    </div>
+                    <div class="py-1 border-t border-gray-700">
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-blue-400 font-bold">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
 
@@ -90,6 +125,37 @@
     </main>
 
     <script>
+        console.log("--- WINNERS PAGE LOADED ---");
+
+        function checkUserStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.username) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('user-name').textContent = user.username;
+                document.getElementById('dropdown-username').textContent = user.email || user.username;
+                document.getElementById('nav-login-btn').classList.add('hidden');
+            } else {
+                document.getElementById('user-profile').classList.add('hidden');
+                document.getElementById('nav-login-btn').classList.remove('hidden');
+            }
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.reload();
+        }
+
         const winnersData = [
             { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
             { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
@@ -122,7 +188,11 @@
                 tableBody.appendChild(row);
             });
         }
-        document.addEventListener('DOMContentLoaded', loadWinners);
+
+        window.onload = function() {
+            checkUserStatus();
+            loadWinners();
+        };
     </script>
 </body>
 </html>
