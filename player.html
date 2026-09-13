@@ -9,48 +9,66 @@
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .profile-banner {
-            background: linear-gradient(135deg, #1e3a8a 0%, #6b21a8 50%, #be185d 100%);
-            height: 200px;
-            position: relative;
-        }
-        .profile-banner::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent 40%, #0f172a 100%);
-        }
-        .avatar-ring {
-            box-shadow: 0 0 0 4px #0f172a, 0 0 0 8px #3b82f6;
-        }
-        .badge-earned {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #78350f;
-        }
-        .badge-locked {
-            background: rgba(51, 65, 85, 0.5);
-            color: #64748b;
-        }
+        .profile-banner { background: linear-gradient(135deg, #1e3a8a 0%, #6b21a8 50%, #be185d 100%); height: 200px; position: relative; }
+        .profile-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, #0f172a 100%); }
+        .avatar-ring { box-shadow: 0 0 0 4px #0f172a, 0 0 0 8px #3b82f6; }
+        .badge-earned { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #78350f; }
+        .badge-locked { background: rgba(51, 65, 85, 0.5); color: #64748b; }
         .achievement-card { transition: transform 0.2s; }
         .achievement-card:hover { transform: translateY(-3px); }
         .stat-card { transition: all 0.2s; }
         .stat-card:hover { border-color: #3b82f6; }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        
+        <!-- LEFT: Logo + User Profile -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+            </div>
+
+            <div id="user-profile" class="hidden relative">
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                    <div class="p-3 border-b border-gray-700">
+                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
+                    </div>
+                    <div class="py-1">
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
+                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                    </div>
+                    <div class="py-1 border-t border-gray-700">
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
 
@@ -241,6 +259,35 @@
     <script>
         console.log("--- PLAYER PROFILE PAGE LOADED ---");
 
+        function checkUserStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.username) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('user-name').textContent = user.username;
+                document.getElementById('dropdown-username').textContent = user.email || user.username;
+                document.getElementById('nav-login-btn').classList.add('hidden');
+            } else {
+                document.getElementById('user-profile').classList.add('hidden');
+                document.getElementById('nav-login-btn').classList.remove('hidden');
+            }
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.reload();
+        }
+
         const recentMatches = [
             { tournament: "PUBG Squad Championship", date: "Nov 18, 2023", placement: 1, kills: 12, prize: 800 },
             { tournament: "Free Fire Solo Cup #11", date: "Nov 15, 2023", placement: 3, kills: 8, prize: 200 },
@@ -256,18 +303,12 @@
 
         function renderMatches() {
             const tbody = document.getElementById('matches-body');
-
             recentMatches.forEach(m => {
                 let placementHtml = '';
-                if (m.placement === 1) {
-                    placementHtml = `<span class="bg-yellow-500/20 text-yellow-400 border border-yellow-500 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>#1</span>`;
-                } else if (m.placement === 2) {
-                    placementHtml = `<span class="bg-gray-500/20 text-gray-300 border border-gray-400 text-xs font-bold px-3 py-1 rounded-full">#2</span>`;
-                } else if (m.placement === 3) {
-                    placementHtml = `<span class="bg-orange-500/20 text-orange-400 border border-orange-500 text-xs font-bold px-3 py-1 rounded-full">#3</span>`;
-                } else {
-                    placementHtml = `<span class="bg-gray-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-full">#${m.placement}</span>`;
-                }
+                if (m.placement === 1) placementHtml = `<span class="bg-yellow-500/20 text-yellow-400 border border-yellow-500 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>#1</span>`;
+                else if (m.placement === 2) placementHtml = `<span class="bg-gray-500/20 text-gray-300 border border-gray-400 text-xs font-bold px-3 py-1 rounded-full">#2</span>`;
+                else if (m.placement === 3) placementHtml = `<span class="bg-orange-500/20 text-orange-400 border border-orange-500 text-xs font-bold px-3 py-1 rounded-full">#3</span>`;
+                else placementHtml = `<span class="bg-gray-800 text-gray-500 text-xs font-bold px-3 py-1 rounded-full">#${m.placement}</span>`;
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
@@ -297,17 +338,15 @@
             if (btn.innerHTML.includes('Follow')) {
                 btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Following';
                 btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                console.log("Now following player");
             } else {
                 btn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i>Follow';
                 btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                console.log("Unfollowed player");
             }
         }
 
         window.onload = function() {
+            checkUserStatus();
             renderMatches();
-            console.log("Recent matches rendered:", recentMatches.length);
         };
     </script>
 </body>
