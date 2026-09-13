@@ -28,7 +28,6 @@
         }
         .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .form-input::placeholder { color: #64748b; }
-        .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .form-input.valid { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
         .form-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
@@ -49,7 +48,46 @@
         }
         .validation-message.success { color: #4ade80; }
         .validation-message.error { color: #f87171; }
-        .validation-message.warning { color: #facc15; }
+
+        .upload-zone {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: rgba(30, 41, 59, 0.5);
+        }
+        .upload-zone:hover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
+        .upload-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        .upload-zone.has-image { border-style: solid; border-color: #22c55e; background-color: rgba(34, 197, 94, 0.05); }
+
+        /* QR code containers */
+        .qr-box {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            transition: transform 0.2s;
+        }
+        .qr-box:hover {
+            transform: scale(1.05);
+        }
+        .qr-box img {
+            width: 130px;
+            height: 130px;
+            display: block;
+        }
+
+        .copy-btn {
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .copy-btn.copied {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -123,7 +161,7 @@
         &copy; 2023 Nepal Gaming Platform. All rights reserved.
     </footer>
 
-    <!-- ============ REGISTRATION MODAL ============ -->
+    <!-- REGISTRATION MODAL -->
     <div id="registrationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
         <div class="glass-panel rounded-xl w-full max-w-lg modal-content max-h-[90vh] overflow-y-auto">
             
@@ -212,23 +250,87 @@
                     <div class="validation-message" id="phoneMessage"></div>
                 </div>
 
-                <!-- PAYMENT -->
+                <!-- ==================== PAYMENT SECTION ==================== -->
                 <div id="paymentSection" class="hidden">
                     <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                        <p class="text-sm text-red-300 font-bold mb-2">
+                        <p class="text-sm text-red-300 font-bold mb-3">
                             <i class="fa-solid fa-money-bill-wave mr-2"></i>Payment Required: Rs. <span id="paymentAmount">0</span>
                         </p>
-                        <p class="text-xs text-red-200 mb-3">Send the entry fee to confirm registration:</p>
-                        <div class="bg-slate-900/50 rounded-lg p-3 text-xs">
-                            <p class="mb-1"><strong>eSewa:</strong> 98XXXXXXXX (Nepal Gaming)</p>
-                            <p><strong>Khalti:</strong> 98XXXXXXXX</p>
+                        <p class="text-xs text-red-200 mb-4">
+                            Send Rs. <span id="paymentAmount3">0</span> using any method below:
+                        </p>
+
+                        <!-- QR Codes Row -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <!-- eSewa QR -->
+                            <div class="text-center">
+                                <p class="text-xs text-green-400 font-bold mb-2">
+                                    <i class="fa-solid fa-mobile-screen mr-1"></i>eSewa
+                                </p>
+                                <div class="qr-box mx-auto">
+                                    <img src="images/esewa-qr.png" alt="eSewa QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found<br>Check images/esewa-qr.png</div>'">
+                                </div>
+                                <button type="button" onclick="copyToClipboard('9748835184', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
+                                    <i class="fa-solid fa-copy mr-1"></i>9748835184
+                                </button>
+                            </div>
+
+                            <!-- Khalti QR -->
+                            <div class="text-center">
+                                <p class="text-xs text-purple-400 font-bold mb-2">
+                                    <i class="fa-solid fa-mobile-screen mr-1"></i>Khalti
+                                </p>
+                                <div class="qr-box mx-auto">
+                                    <img src="images/khalti-qr.png" alt="Khalti QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found<br>Check images/khalti-qr.png</div>'">
+                                </div>
+                                <button type="button" onclick="copyToClipboard('9766258368', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
+                                    <i class="fa-solid fa-copy mr-1"></i>9766258368
+                                </button>
+                            </div>
                         </div>
+
+                        <p class="text-xs text-gray-400 text-center">
+                            <i class="fa-solid fa-info-circle mr-1"></i>Scan the QR with your eSewa/Khalti app, or copy the number
+                        </p>
                     </div>
 
+                    <!-- Transaction ID -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Transaction ID <span class="text-red-400">*</span>
+                        </label>
+                        <input type="text" id="regTransactionId" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890 (from SMS)" maxlength="30" autocomplete="off">
+                        <p class="text-xs text-gray-500 mt-1">Found in the SMS/notification after payment</p>
+                        <div class="validation-message" id="transactionMessage"></div>
+                    </div>
+
+                    <!-- Payment Screenshot Upload -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Payment Screenshot <span class="text-red-400">*</span>
+                        </label>
+                        <div class="upload-zone" id="paymentUploadZone" onclick="document.getElementById('paymentScreenshotInput').click()">
+                            <input type="file" id="paymentScreenshotInput" accept="image/*" onchange="handlePaymentScreenshot(event)" class="hidden">
+                            <div id="paymentUploadPlaceholder">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 mb-2"></i>
+                                <p class="text-sm text-gray-400">Click to upload payment screenshot</p>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG (max 1MB)</p>
+                            </div>
+                            <div id="paymentUploadPreview" class="hidden">
+                                <img id="paymentScreenshotPreview" class="max-h-40 mx-auto rounded-lg mb-3" src="">
+                                <button type="button" onclick="event.stopPropagation(); removePaymentScreenshot()" class="text-red-400 hover:text-red-300 text-sm">
+                                    <i class="fa-solid fa-trash mr-1"></i>Remove Image
+                                </button>
+                            </div>
+                        </div>
+                        <div class="validation-message" id="screenshotMessage"></div>
+                    </div>
+
+                    <!-- Payment Confirmation -->
                     <label class="flex items-start gap-2 cursor-pointer mb-4">
                         <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded">
                         <span class="text-sm text-gray-300">
-                            I confirm that I have sent <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> to the account above.
+                            I confirm that I have paid <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> and the proof provided is accurate.
                         </span>
                     </label>
                 </div>
@@ -237,7 +339,7 @@
                 <label class="flex items-start gap-2 cursor-pointer mb-6">
                     <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded">
                     <span class="text-sm text-gray-300">
-                        I agree to the tournament rules and confirm that all information provided is accurate.
+                        I agree to the tournament rules and confirm all information provided is accurate.
                     </span>
                 </label>
 
@@ -267,7 +369,7 @@
             <div class="bg-gray-800/50 rounded-lg p-4 text-sm text-left mb-6">
                 <p class="text-gray-300 mb-2"><strong class="text-white">What happens next:</strong></p>
                 <ul class="text-gray-400 space-y-1 text-xs">
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will verify your details</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will verify your payment proof</li>
                     <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Room ID + password sent to your WhatsApp</li>
                     <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Join the match 10 min before start time</li>
                 </ul>
@@ -284,7 +386,7 @@
     </div>
 
     <script>
-        console.log("--- TOURNAMENTS PAGE LOADED (STRICT VALIDATION, 97/98 PHONE) ---");
+        console.log("--- TOURNAMENTS PAGE LOADED (QR + Payment Proof) ---");
 
         // ============ USER AUTH ============
         function checkUserStatus() {
@@ -309,6 +411,21 @@
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
 
+        // ============ COPY ============
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('copied');
+                }, 1500);
+            }).catch(err => {
+                alert("Copy failed. Number: " + text);
+            });
+        }
+
         // ============ VALIDATION RULES ============
         const UID_RULES = {
             freefire: { min: 8, max: 12, pattern: /^\d+$/, name: "Free Fire", hint: "8-12 digit number" },
@@ -324,22 +441,18 @@
             if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
             if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
             if (/^\d/.test(v)) return { valid: false, msg: "IGN cannot start with a number", type: "error" };
-            if (!/^[a-zA-Z][a-zA-Z0-9_.-]*$/.test(v)) {
-                return { valid: false, msg: "Only letters, numbers, _, ., - allowed", type: "error" };
-            }
-            if (v.includes('  ')) return { valid: false, msg: "No double spaces", type: "error" };
+            if (!/^[a-zA-Z][a-zA-Z0-9_.-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, _, ., - allowed", type: "error" };
             return { valid: true, msg: "✓ Looks good", type: "success" };
         }
 
         function validateUID(value, game) {
             const v = value.trim();
             const rule = UID_RULES[game] || { min: 6, max: 15, pattern: /^\d+$/, name: "Game", hint: "6-15 characters" };
-            
             if (!v) return { valid: false, msg: "Game UID is required", type: "error", hint: rule.hint };
-            if (v.length < rule.min) return { valid: false, msg: `Minimum ${rule.min} characters for ${rule.name}`, type: "error", hint: rule.hint };
-            if (v.length > rule.max) return { valid: false, msg: `Maximum ${rule.max} characters for ${rule.name}`, type: "error", hint: rule.hint };
+            if (v.length < rule.min) return { valid: false, msg: `Minimum ${rule.min} characters`, type: "error", hint: rule.hint };
+            if (v.length > rule.max) return { valid: false, msg: `Maximum ${rule.max} characters`, type: "error", hint: rule.hint };
             if (!rule.pattern.test(v)) {
-                const patternHint = rule.pattern.source === '^\\d+$' ? "Only numbers allowed" : "Only letters and numbers allowed";
+                const patternHint = rule.pattern.source === '^\\d+$' ? "Only numbers allowed" : "Only letters/numbers allowed";
                 return { valid: false, msg: patternHint, type: "error", hint: rule.hint };
             }
             return { valid: true, msg: `✓ Valid ${rule.name} UID`, type: "success" };
@@ -350,13 +463,10 @@
             if (!v) return { valid: false, msg: "Team name is required", type: "error" };
             if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
             if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
-            if (!/^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(v)) {
-                return { valid: false, msg: "Only letters, numbers, spaces, _ , - allowed", type: "error" };
-            }
+            if (!/^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, spaces, _ , - allowed", type: "error" };
             return { valid: true, msg: "✓ Team name is valid", type: "success" };
         }
 
-        // ⭐ UPDATED: Accept both 97 and 98 prefixes (Nepal mobile range)
         function validatePhone(value) {
             const v = value.trim();
             if (!v) return { valid: false, msg: "Phone number is required", type: "error" };
@@ -365,21 +475,22 @@
             return { valid: true, msg: "✓ Valid Nepal mobile number", type: "success" };
         }
 
-        // ============ DISPLAY VALIDATION ============
+        function validateTransactionId(value) {
+            const v = value.trim();
+            if (!v) return { valid: false, msg: "Transaction ID is required", type: "error" };
+            if (v.length < 6) return { valid: false, msg: "Must be at least 6 characters", type: "error" };
+            if (!/^[a-zA-Z0-9-]+$/.test(v)) return { valid: false, msg: "Only letters, numbers, and - allowed", type: "error" };
+            return { valid: true, msg: "✓ Transaction ID looks valid", type: "success" };
+        }
+
         function showValidation(fieldId, messageId, result) {
             const field = document.getElementById(fieldId);
             const msg = document.getElementById(messageId);
-            
             if (!field || !msg) return;
-
             field.classList.remove('valid', 'invalid');
-            msg.classList.remove('success', 'error', 'warning');
+            msg.classList.remove('success', 'error');
             msg.innerHTML = '';
-
-            if (field.value.trim() === '') {
-                return;
-            }
-
+            if (field.value.trim() === '') return;
             if (result.valid) {
                 field.classList.add('valid');
                 msg.classList.add('success');
@@ -509,13 +620,14 @@
             renderTournaments(game);
         }
 
-        // ============ REGISTRATION MODAL ============
+        // ============ REGISTRATION ============
         let currentTournament = null;
+        let paymentScreenshotData = null;
 
         function openRegistrationModal(tournamentId) {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
-                if (confirm("You need to login first to register for a tournament.\n\nGo to login page?")) {
+                if (confirm("You need to login first.\n\nGo to login page?")) {
                     window.location.href = 'member.html';
                 }
                 return;
@@ -523,22 +635,16 @@
 
             const allTournaments = getAllTournaments();
             const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (!tournament) {
-                alert("Tournament not found.");
-                return;
-            }
+            if (!tournament) { alert("Tournament not found."); return; }
 
             const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
             const alreadyRegistered = allRegistrations.some(
                 r => r.tournamentId === tournamentId && r.username.toLowerCase() === user.username.toLowerCase()
             );
-            
-            if (alreadyRegistered) {
-                alert("You have already registered for this tournament!");
-                return;
-            }
+            if (alreadyRegistered) { alert("You have already registered for this tournament!"); return; }
 
             currentTournament = tournament;
+            paymentScreenshotData = null;
 
             document.getElementById('modalTitle').textContent = tournament.name;
             document.getElementById('modalSubtitle').textContent = `${tournament.gameName} • ${tournament.mode} Mode`;
@@ -549,7 +655,6 @@
             document.getElementById('regTournamentId').value = tournament.id;
             document.getElementById('regTournamentGame').value = tournament.game;
 
-            // UID placeholder based on game
             const rule = UID_RULES[tournament.game] || { hint: "6-15 characters" };
             document.getElementById('regUid').placeholder = `e.g., ${rule.hint}`;
 
@@ -587,6 +692,7 @@
                 paymentSection.classList.remove('hidden');
                 document.getElementById('paymentAmount').textContent = tournament.entryFee;
                 document.getElementById('paymentAmount2').textContent = tournament.entryFee;
+                document.getElementById('paymentAmount3').textContent = tournament.entryFee;
             } else {
                 paymentSection.classList.add('hidden');
             }
@@ -596,29 +702,31 @@
             document.getElementById('regUid').value = '';
             document.getElementById('regTeamName').value = '';
             document.getElementById('regPhone').value = '';
+            document.getElementById('regTransactionId').value = '';
             document.getElementById('regPaymentConfirmed').checked = false;
             document.getElementById('regTerms').checked = false;
             document.getElementById('regError').classList.add('hidden');
             document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
             document.getElementById('regSubmitBtn').disabled = false;
 
-            // Reset validation UI
-            ['regIgn', 'regUid', 'regTeamName', 'regPhone'].forEach(id => {
+            // Reset upload
+            removePaymentScreenshot();
+
+            // Clear validation
+            ['regIgn', 'regUid', 'regTeamName', 'regPhone', 'regTransactionId'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.remove('valid', 'invalid');
             });
-            ['ignMessage', 'uidMessage', 'teamNameMessage', 'phoneMessage'].forEach(id => {
+            ['ignMessage', 'uidMessage', 'teamNameMessage', 'phoneMessage', 'transactionMessage', 'screenshotMessage'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = '';
             });
             document.getElementById('ignCount').textContent = '0/20';
             document.getElementById('teamCount').textContent = '0/20';
 
-            // Show modal
             document.getElementById('registrationModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
 
-            // Attach real-time validation listeners
             setTimeout(attachValidationListeners, 100);
         }
 
@@ -626,6 +734,7 @@
             document.getElementById('registrationModal').classList.add('hidden');
             document.body.style.overflow = '';
             currentTournament = null;
+            paymentScreenshotData = null;
         }
 
         function attachValidationListeners() {
@@ -633,51 +742,91 @@
             const uidField = document.getElementById('regUid');
             const teamField = document.getElementById('regTeamName');
             const phoneField = document.getElementById('regPhone');
+            const txField = document.getElementById('regTransactionId');
 
-            // Remove old listeners by cloning (simple approach)
-            [ignField, uidField, teamField, phoneField].forEach(field => {
-                if (!field) return;
-                field.oninput = null;
-            });
-
-            if (ignField) {
-                ignField.oninput = function() {
-                    document.getElementById('ignCount').textContent = this.value.length + '/20';
-                    showValidation('regIgn', 'ignMessage', validateIGN(this.value));
-                };
-            }
-
-            if (uidField) {
-                uidField.oninput = function() {
-                    if (!currentTournament) return;
-                    showValidation('regUid', 'uidMessage', validateUID(this.value, currentTournament.game));
-                };
-            }
-
-            if (teamField) {
-                teamField.oninput = function() {
-                    document.getElementById('teamCount').textContent = this.value.length + '/20';
-                    showValidation('regTeamName', 'teamNameMessage', validateTeamName(this.value));
-                };
-            }
-
-            if (phoneField) {
-                phoneField.oninput = function() {
-                    // Only allow digits
-                    this.value = this.value.replace(/\D/g, '');
-                    showValidation('regPhone', 'phoneMessage', validatePhone(this.value));
-                };
-            }
+            if (ignField) ignField.oninput = function() {
+                document.getElementById('ignCount').textContent = this.value.length + '/20';
+                showValidation('regIgn', 'ignMessage', validateIGN(this.value));
+            };
+            if (uidField) uidField.oninput = function() {
+                if (!currentTournament) return;
+                showValidation('regUid', 'uidMessage', validateUID(this.value, currentTournament.game));
+            };
+            if (teamField) teamField.oninput = function() {
+                document.getElementById('teamCount').textContent = this.value.length + '/20';
+                showValidation('regTeamName', 'teamNameMessage', validateTeamName(this.value));
+            };
+            if (phoneField) phoneField.oninput = function() {
+                this.value = this.value.replace(/\D/g, '');
+                showValidation('regPhone', 'phoneMessage', validatePhone(this.value));
+            };
+            if (txField) txField.oninput = function() {
+                showValidation('regTransactionId', 'transactionMessage', validateTransactionId(this.value));
+            };
         }
+
+        // ============ PAYMENT SCREENSHOT UPLOAD ============
+        function handlePaymentScreenshot(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 1024 * 1024) {
+                alert("Screenshot too large. Please use an image under 1MB.\n\nTip: Take a smaller screenshot or compress the image.");
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                paymentScreenshotData = e.target.result;
+                document.getElementById('paymentUploadPlaceholder').classList.add('hidden');
+                document.getElementById('paymentUploadPreview').classList.remove('hidden');
+                document.getElementById('paymentScreenshotPreview').src = paymentScreenshotData;
+                document.getElementById('paymentUploadZone').classList.add('has-image');
+                document.getElementById('screenshotMessage').innerHTML = '<i class="fa-solid fa-circle-check"></i> Screenshot uploaded';
+                document.getElementById('screenshotMessage').className = 'validation-message success';
+                console.log("Payment screenshot uploaded:", Math.round(file.size / 1024) + "KB");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePaymentScreenshot() {
+            paymentScreenshotData = null;
+            const input = document.getElementById('paymentScreenshotInput');
+            if (input) input.value = '';
+            const placeholder = document.getElementById('paymentUploadPlaceholder');
+            const preview = document.getElementById('paymentUploadPreview');
+            const zone = document.getElementById('paymentUploadZone');
+            if (placeholder) placeholder.classList.remove('hidden');
+            if (preview) preview.classList.add('hidden');
+            if (zone) zone.classList.remove('has-image');
+            const msg = document.getElementById('screenshotMessage');
+            if (msg) { msg.innerHTML = ''; msg.className = 'validation-message'; }
+        }
+
+        // Drag & drop for upload
+        document.addEventListener('DOMContentLoaded', function() {
+            const zone = document.getElementById('paymentUploadZone');
+            if (!zone) return;
+            ['dragenter', 'dragover'].forEach(ev => {
+                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+            });
+            ['dragleave', 'drop'].forEach(ev => {
+                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
+            });
+            zone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('paymentScreenshotInput').files = files;
+                    handlePaymentScreenshot({ target: { files: files } });
+                }
+            });
+        });
 
         function submitRegistration(event) {
             event.preventDefault();
-
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user || !currentTournament) {
-                alert("Error: User or tournament missing. Please try again.");
-                return;
-            }
+            if (!user || !currentTournament) { alert("Error: User or tournament missing."); return; }
 
             const btn = document.getElementById('regSubmitBtn');
             const errorEl = document.getElementById('regError');
@@ -686,98 +835,54 @@
             const uid = document.getElementById('regUid').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const teamName = document.getElementById('regTeamName').value.trim();
+            const txId = document.getElementById('regTransactionId') ? document.getElementById('regTransactionId').value.trim() : '';
 
-            // Validate all
+            // Validate all fields
             const ignResult = validateIGN(ign);
-            if (!ignResult.valid) {
-                errorEl.textContent = "❌ IGN: " + ignResult.msg;
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!ignResult.valid) { errorEl.textContent = "❌ IGN: " + ignResult.msg; errorEl.classList.remove('hidden'); return; }
 
             const uidResult = validateUID(uid, currentTournament.game);
-            if (!uidResult.valid) {
-                errorEl.textContent = "❌ UID: " + uidResult.msg;
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!uidResult.valid) { errorEl.textContent = "❌ UID: " + uidResult.msg; errorEl.classList.remove('hidden'); return; }
 
             const phoneResult = validatePhone(phone);
-            if (!phoneResult.valid) {
-                errorEl.textContent = "❌ Phone: " + phoneResult.msg;
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!phoneResult.valid) { errorEl.textContent = "❌ Phone: " + phoneResult.msg; errorEl.classList.remove('hidden'); return; }
 
             if (currentTournament.mode !== 'Solo') {
                 const teamResult = validateTeamName(teamName);
-                if (!teamResult.valid) {
-                    errorEl.textContent = "❌ Team: " + teamResult.msg;
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
+                if (!teamResult.valid) { errorEl.textContent = "❌ Team: " + teamResult.msg; errorEl.classList.remove('hidden'); return; }
             }
 
-            // Validate teammates
+            // Teammates
             const teammates = [];
             if (currentTournament.mode !== 'Solo') {
                 const ignInputs = document.querySelectorAll('.teammate-ign');
                 const uidInputs = document.querySelectorAll('.teammate-uid');
-                const teammateIGNs = new Set([ign.toLowerCase()]); // Add user's own IGN to detect duplicates
+                const teammateIGNs = new Set([ign.toLowerCase()]);
                 
                 for (let i = 0; i < ignInputs.length; i++) {
                     const tIgn = ignInputs[i].value.trim();
                     const tUid = uidInputs[i].value.trim();
-                    
-                    if (!tIgn || !tUid) {
-                        errorEl.textContent = `❌ Please fill teammate ${i + 1}'s details.`;
-                        errorEl.classList.remove('hidden');
-                        return;
-                    }
-                    
+                    if (!tIgn || !tUid) { errorEl.textContent = `❌ Fill teammate ${i + 1}'s details.`; errorEl.classList.remove('hidden'); return; }
                     const tIgnResult = validateIGN(tIgn);
-                    if (!tIgnResult.valid) {
-                        errorEl.textContent = `❌ Teammate ${i + 1} IGN: ${tIgnResult.msg}`;
-                        errorEl.classList.remove('hidden');
-                        return;
-                    }
-                    
+                    if (!tIgnResult.valid) { errorEl.textContent = `❌ Teammate ${i + 1} IGN: ${tIgnResult.msg}`; errorEl.classList.remove('hidden'); return; }
                     const tUidResult = validateUID(tUid, currentTournament.game);
-                    if (!tUidResult.valid) {
-                        errorEl.textContent = `❌ Teammate ${i + 1} UID: ${tUidResult.msg}`;
-                        errorEl.classList.remove('hidden');
-                        return;
-                    }
-                    
-                    // Check duplicates
-                    if (teammateIGNs.has(tIgn.toLowerCase())) {
-                        errorEl.textContent = `❌ Teammate ${i + 1}'s IGN is a duplicate. All IGNs must be unique.`;
-                        errorEl.classList.remove('hidden');
-                        return;
-                    }
+                    if (!tUidResult.valid) { errorEl.textContent = `❌ Teammate ${i + 1} UID: ${tUidResult.msg}`; errorEl.classList.remove('hidden'); return; }
+                    if (teammateIGNs.has(tIgn.toLowerCase())) { errorEl.textContent = `❌ Teammate ${i + 1}'s IGN is duplicate.`; errorEl.classList.remove('hidden'); return; }
                     teammateIGNs.add(tIgn.toLowerCase());
-                    
                     teammates.push({ ign: tIgn, uid: tUid });
                 }
             }
 
-            // Payment check
+            // Payment validation
             if (currentTournament.entryFee > 0) {
-                if (!document.getElementById('regPaymentConfirmed').checked) {
-                    errorEl.textContent = "❌ Please confirm you have sent the entry fee.";
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
+                const txResult = validateTransactionId(txId);
+                if (!txResult.valid) { errorEl.textContent = "❌ Transaction ID: " + txResult.msg; errorEl.classList.remove('hidden'); return; }
+                if (!paymentScreenshotData) { errorEl.textContent = "❌ Please upload a payment screenshot."; errorEl.classList.remove('hidden'); return; }
+                if (!document.getElementById('regPaymentConfirmed').checked) { errorEl.textContent = "❌ Please confirm you have sent the payment."; errorEl.classList.remove('hidden'); return; }
             }
 
-            // Terms check
-            if (!document.getElementById('regTerms').checked) {
-                errorEl.textContent = "❌ Please agree to the tournament rules.";
-                errorEl.classList.remove('hidden');
-                return;
-            }
+            if (!document.getElementById('regTerms').checked) { errorEl.textContent = "❌ Please agree to the tournament rules."; errorEl.classList.remove('hidden'); return; }
 
-            // Show loading
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Registering...';
             btn.disabled = true;
             errorEl.classList.add('hidden');
@@ -796,33 +901,42 @@
                 phone: phone,
                 teamName: currentTournament.mode !== 'Solo' ? teamName : null,
                 teammates: teammates,
+                transactionId: currentTournament.entryFee > 0 ? txId : null,
+                paymentScreenshot: currentTournament.entryFee > 0 ? paymentScreenshotData : null,
                 paymentConfirmed: currentTournament.entryFee > 0,
+                paymentStatus: currentTournament.entryFee > 0 ? 'pending-verification' : 'free',
                 status: 'registered',
                 registeredAt: new Date().toISOString()
             };
 
             setTimeout(() => {
-                const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-                allRegistrations.push(registration);
-                localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
+                try {
+                    const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+                    allRegistrations.push(registration);
+                    localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
 
-                updateTournamentSlots(currentTournament.id);
-                console.log("✅ Registration saved:", registration);
+                    updateTournamentSlots(currentTournament.id);
+                    console.log("✅ Registration saved:", registration);
 
-                closeRegistrationModal();
-                document.getElementById('successTournamentName').textContent = currentTournament.name;
-                document.getElementById('successModal').classList.remove('hidden');
+                    closeRegistrationModal();
+                    document.getElementById('successTournamentName').textContent = currentTournament.name;
+                    document.getElementById('successModal').classList.remove('hidden');
 
-                // Refresh grid
-                const activeFilter = document.querySelector('.filter-btn.active');
-                if (activeFilter) {
-                    const filterText = activeFilter.textContent.toLowerCase();
-                    let filter = 'all';
-                    if (filterText.includes('free')) filter = 'freefire';
-                    else if (filterText.includes('pubg')) filter = 'pubg';
-                    else if (filterText.includes('valorant')) filter = 'valorant';
-                    else if (filterText.includes('cod')) filter = 'cod';
-                    renderTournaments(filter);
+                    const activeFilter = document.querySelector('.filter-btn.active');
+                    if (activeFilter) {
+                        const filterText = activeFilter.textContent.toLowerCase();
+                        let filter = 'all';
+                        if (filterText.includes('free')) filter = 'freefire';
+                        else if (filterText.includes('pubg')) filter = 'pubg';
+                        else if (filterText.includes('valorant')) filter = 'valorant';
+                        else if (filterText.includes('cod')) filter = 'cod';
+                        renderTournaments(filter);
+                    }
+                } catch (e) {
+                    alert("Storage full! Cannot save registration. Please clear old data.");
+                    console.error(e);
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
+                    btn.disabled = false;
                 }
             }, 800);
         }
