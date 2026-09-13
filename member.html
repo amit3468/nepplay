@@ -13,6 +13,11 @@
         .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
         .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
         .status-upcoming { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -65,27 +70,72 @@
     <!-- ================= DASHBOARD SECTION ================= -->
     <div id="dashboard-container" class="hidden flex-grow flex flex-col">
         
-        <!-- NAVBAR 2 (Dashboard) -->
+        <!-- NAVBAR 2 (Dashboard with Profile Dropdown) -->
         <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+            
+            <!-- LEFT: Logo + User Profile -->
+            <div class="flex items-center gap-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                    <span class="text-xl font-bold text-white">Nepal Gaming</span>
+                </div>
+
+                <!-- User Profile -->
+                <div id="user-profile" class="relative">
+                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                            A
+                        </div>
+                        <span id="user-greeting" class="text-sm text-gray-300 hidden md:inline">
+                            Hi, <span id="user-name" class="font-bold text-white">User</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                        <div class="p-3 border-b border-gray-700">
+                            <p class="text-xs text-gray-500">Signed in as</p>
+                            <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
+                        </div>
+                        <div class="py-1">
+                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
+                                <i class="fa-solid fa-gauge w-4"></i> My Dashboard
+                            </a>
+                            <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
+                                <i class="fa-solid fa-user w-4"></i> My Profile
+                            </a>
+                            <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
+                                <i class="fa-solid fa-users w-4"></i> My Teams
+                            </a>
+                            <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition">
+                                <i class="fa-solid fa-trophy w-4"></i> Tournaments
+                            </a>
+                        </div>
+                        <div class="py-1 border-t border-gray-700">
+                            <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left">
+                                <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- RIGHT: Nav Links -->
             <div class="flex items-center gap-4">
                 <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
                 <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
                 <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
                 <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
                 <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-                <span class="text-sm text-gray-300">Welcome, <span id="username-display" class="font-bold text-white">Gamer</span></span>
-                <button onclick="logout()" class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">Logout</button>
             </div>
         </nav>
 
         <!-- Main Content -->
         <main class="flex-grow container mx-auto p-6">
             
-            <!-- 1. Stats Cards -->
+            <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
@@ -101,7 +151,7 @@
                 </div>
             </div>
 
-            <!-- 2. Announcements Section -->
+            <!-- Announcements -->
             <div class="glass-panel rounded-xl shadow-lg p-6 mb-8 border-l-4 border-yellow-500">
                 <h2 class="text-lg font-bold text-white mb-3"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Latest Announcements</h2>
                 <ul class="text-sm text-gray-300 space-y-3">
@@ -111,7 +161,7 @@
                 </ul>
             </div>
 
-            <!-- 3. Upcoming Registrations Table -->
+            <!-- Upcoming Tournaments -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -145,7 +195,7 @@
                 </div>
             </div>
 
-            <!-- 4. Past Tournament History -->
+            <!-- Tournament History -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
@@ -198,7 +248,12 @@
         function showDashboard(user) {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
-            document.getElementById('username-display').textContent = user.username;
+            
+            // Set profile info
+            document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+            document.getElementById('user-name').textContent = user.username;
+            document.getElementById('dropdown-username').textContent = user.email || user.username;
+            
             loadDashboardData();
         }
 
@@ -207,6 +262,19 @@
             if (currentUser) showDashboard(currentUser);
         }
 
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
         function loadDashboardData() {
             const mockHistory = [
                 { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
@@ -214,9 +282,7 @@
                 { name: "Clash of Clans War", date: "2023-11-01", rank: "#2", prize: 300, status: "Paid" },
                 { name: "Valorant Night Cup", date: "2023-11-05", rank: "#1", prize: 1500, status: "Paid" },
                 { name: "Ludo King Championship", date: "2023-11-10", rank: "#4", prize: 0, status: "Pending" },
-                { name: "COD Mobile Battle", date: "2023-11-12", rank: "#2", prize: 400, status: "Paid" },
-                { name: "Free Fire Duo Cup", date: "2023-11-15", rank: "#5", prize: 50, status: "Paid" },
-                { name: "PUBG Mobile Solo", date: "2023-11-18", rank: "#1", prize: 800, status: "Pending" }
+                { name: "COD Mobile Battle", date: "2023-11-12", rank: "#2", prize: 400, status: "Paid" }
             ];
 
             let totalEarnings = 0;
