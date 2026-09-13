@@ -6,8 +6,11 @@
 ============================================================
 
 Now includes:
-- Tournament details endpoint (standings + top killers)
-- Top Killer tracking per match + cumulative
+- Sessions stored in MongoDB (survive server restarts)
+- Tournament details endpoint
+- Top Killer tracking
+- Dynamic payments
+- Player profiles + Notifications
 ============================================================
 */
 
@@ -33,12 +36,10 @@ if (!MONGODB_URI) {
 }
 
 var DB_NAME = "nepplay";
-
 var ADMIN_USERNAME = "admin";
 var ADMIN_PASSWORD = "Npl@Amit2026!Ktm";
-
-var sessions = new Map();
 var SESSION_COOKIE = "nepplay_session";
+var SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 var MAX_BODY_SIZE = 8 * 1024 * 1024;
 
 var DEFAULT_PAYMENT_METHODS = [
@@ -82,6 +83,7 @@ function connectDB() {
         collections.announcements = db.collection("announcements");
         collections.notifications = db.collection("notifications");
         collections.settings = db.collection("settings");
+        collections.sessions = db.collection("sessions");
         return createIndexes();
     })
     .then(function () {
@@ -107,7 +109,10 @@ function createIndexes() {
         collections.tournaments.createIndex({ id: 1 }, { unique: true }),
         collections.announcements.createIndex({ createdAt: -1 }),
         collections.notifications.createIndex({ userId: 1, createdAt: -1 }),
-        collections.settings.createIndex({ key: 1 }, { unique: true })
+        collections.settings.createIndex({ key: 1 }, { unique: true }),
+        /* Sessions: auto-delete expired via TTL index */
+        collections.sessions.createIndex({ id: 1 }, { unique: true }),
+        collections.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
     ]);
 }
 
@@ -212,31 +217,88 @@ function parseCookies(req) {
     });
     return c;
 }
+
+/* ============ SESSIONS IN MONGODB ============ */
+
+function createSession(userId, role) {
+    var id = crypto.randomBytes(32).toString("hex");
+    var now = Date.now();
+    var session = {
+        id: id,
+        userId: userId,
+        role: role,
+        createdAt: new Date(now).toISOString(),
+        expiresAt: new Date(now + SESSION_DURATION_MS)
+    };
+    return collections.sessions.insertOne(session).then(function () {
+        return id;
+    });
+}
+
 function getSession(req) {
     var c = parseCookies(req);
     var id = c[SESSION_COOKIE];
-    if (!id) return null;
-    var s = sessions.get(id);
-    if (!s) return null;
-    if (s.expiresAt < Date.now()) { sessions.delete(id); return null; }
-    return s;
+    if (!id) return Promise.resolve(null);
+    return collections.sessions.findOne({ id: id })
+        .then(function (s) {
+            if (!s) return null;
+            if (new Date(s.expiresAt).getTime() < Date.now()) {
+                return collections.sessions.deleteOne({ id: id })
+                    .then(function () { return null; });
+            }
+            return s;
+        })
+        .catch(function () { return null; });
 }
-function createSession(userId, role) {
-    var id = crypto.randomBytes(32).toString("hex");
-    sessions.set(id, {
-        userId: userId, role: role,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000)
-    });
-    return id;
+
+function deleteSession(req) {
+    var c = parseCookies(req);
+    var id = c[SESSION_COOKIE];
+    if (!id) return Promise.resolve();
+    return collections.sessions.deleteOne({ id: id }).catch(function () {});
 }
+
 function setSessionCookie(h, id) {
     h["Set-Cookie"] = SESSION_COOKIE + "=" + encodeURIComponent(id) +
         "; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800";
 }
+
 function clearSessionCookie(h) {
     h["Set-Cookie"] = SESSION_COOKIE + "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
 }
+
+/* ============ AUTH ============ */
+
+function requireMemberAsync(req, res) {
+    return getSession(req).then(function (s) {
+        if (!s || s.role !== "member") {
+            sendError(res, 401, "Please login first.");
+            return null;
+        }
+        return collections.users.findOne({ id: s.userId })
+            .then(function (u) {
+                if (!u) { sendError(res, 401, "Please login first."); return null; }
+                return u;
+            })
+            .catch(function () {
+                sendError(res, 500, "Database error.");
+                return null;
+            });
+    });
+}
+
+function requireAdmin(req, res) {
+    /* Async check — returns Promise */
+    return getSession(req).then(function (s) {
+        if (!s || s.role !== "admin") {
+            sendError(res, 401, "Admin login required.");
+            return false;
+        }
+        return true;
+    });
+}
+
+/* ============ RESPONSE ============ */
 
 function sendJSON(res, code, data, extra) {
     var h = {
@@ -296,34 +358,6 @@ function createNotificationForTournament(tournamentId, type, title, message, lin
     }).catch(function (e) { console.log("Bulk notif err:", e.message); });
 }
 
-/* ============ AUTH ============ */
-
-function requireMemberAsync(req, res) {
-    var s = getSession(req);
-    if (!s || s.role !== "member") {
-        sendError(res, 401, "Please login first.");
-        return Promise.resolve(null);
-    }
-    return collections.users.findOne({ id: s.userId })
-        .then(function (u) {
-            if (!u) { sendError(res, 401, "Please login first."); return null; }
-            return u;
-        })
-        .catch(function () {
-            sendError(res, 500, "Database error.");
-            return null;
-        });
-}
-
-function requireAdmin(req, res) {
-    var s = getSession(req);
-    if (!s || s.role !== "admin") {
-        sendError(res, 401, "Admin login required.");
-        return false;
-    }
-    return true;
-}
-
 /* ============ TOURNAMENT HELPERS ============ */
 
 function tournamentForClient(t, registeredCount) {
@@ -353,7 +387,7 @@ function countTournamentRegistrations(tid) {
     });
 }
 
-/* ============ LEADERBOARD + WINNERS ============ */
+/* ============ LEADERBOARD ============ */
 
 function isCompletedMatch(m) {
     var s = String(m.status || "").toLowerCase().trim();
@@ -531,7 +565,6 @@ function buildWinners() {
                 if (teamKey(rt) === teamKey(runnerUp)) rCapt = cleanString(reg.captainName);
             });
 
-            /* Cumulative Top Killer for this tournament */
             var topKillerTotals = {};
             completed.forEach(function (mm) {
                 if (mm.topKiller) {
@@ -585,7 +618,7 @@ function buildWinners() {
     });
 }
 
-/* ============ TOURNAMENT DETAILS (NEW) ============ */
+/* ============ TOURNAMENT DETAILS ============ */
 
 function buildTournamentDetails(tournamentId) {
     var tour = null;
@@ -599,8 +632,7 @@ function buildTournamentDetails(tournamentId) {
 
         return Promise.all([
             collections.registrations.find({
-                tournamentId: tid,
-                status: "Approved"
+                tournamentId: tid, status: "Approved"
             }).toArray(),
             collections.matches.find({ tournamentId: tid }).toArray()
         ]);
@@ -610,22 +642,19 @@ function buildTournamentDetails(tournamentId) {
         var registrations = results[0];
         var matches = results[1];
 
-        /* Sort matches by date/time ascending */
         matches.sort(function (a, b) {
             var da = (a.date || "") + "T" + (a.time || "00:00");
             var db = (b.date || "") + "T" + (b.time || "00:00");
             return new Date(da) - new Date(db);
         });
 
-        /* ---- Build Team Standings ---- */
         var teamStats = {};
 
         function ensure(teamName, captainName) {
             var key = teamKey(teamName);
             if (!teamStats[key]) {
                 teamStats[key] = {
-                    name: teamName,
-                    captain: captainName || "",
+                    name: teamName, captain: captainName || "",
                     played: 0, wins: 0, losses: 0, ties: 0,
                     points: 0, kills: 0,
                     placements: { first: 0, second: 0, third: 0 }
@@ -637,27 +666,21 @@ function buildTournamentDetails(tournamentId) {
             return teamStats[key];
         }
 
-        /* Seed all approved teams (even those who haven't played) */
         registrations.forEach(function (r) {
             ensure(r.teamName || "", r.captainName || "");
         });
 
-        /* Process completed matches */
-        var completedCount = 0;
-        var liveCount = 0;
-        var upcomingCount = 0;
+        var completedCount = 0, liveCount = 0, upcomingCount = 0;
 
         matches.forEach(function (m) {
             var status = String(m.status || "").toLowerCase();
             var isCompleted = isCompletedMatch(m);
             var isLive = status === "live";
-            var isUpcoming = !isCompleted && !isLive;
 
             if (isCompleted) completedCount++;
             else if (isLive) liveCount++;
             else upcomingCount++;
 
-            /* Accumulate Top Killer kills regardless of status */
             if (isCompleted && m.topKiller) {
                 var tk = cleanString(m.topKiller);
                 if (tk) {
@@ -673,22 +696,14 @@ function buildTournamentDetails(tournamentId) {
             if (matchType === "battle-royale") {
                 var winnersArr = Array.isArray(m.winners) ? m.winners : [];
                 if (winnersArr.length === 0 && m.winner) winnersArr = [m.winner];
-
                 winnersArr.forEach(function (teamName, wi) {
                     teamName = cleanString(teamName);
                     if (!teamName) return;
                     var team = ensure(teamName);
                     team.played++;
-                    if (wi === 0) {
-                        team.wins++; team.points += 3;
-                        team.placements.first++;
-                    } else if (wi === 1) {
-                        team.points += 2;
-                        team.placements.second++;
-                    } else if (wi === 2) {
-                        team.points += 1;
-                        team.placements.third++;
-                    }
+                    if (wi === 0) { team.wins++; team.points += 3; team.placements.first++; }
+                    else if (wi === 1) { team.points += 2; team.placements.second++; }
+                    else if (wi === 2) { team.points += 1; team.placements.third++; }
                 });
                 return;
             }
@@ -718,7 +733,6 @@ function buildTournamentDetails(tournamentId) {
             }
         });
 
-        /* Convert to array & sort */
         var standings = Object.keys(teamStats).map(function (k) {
             return teamStats[k];
         });
@@ -730,7 +744,6 @@ function buildTournamentDetails(tournamentId) {
             return String(a.name).localeCompare(String(b.name));
         });
 
-        /* ---- Top Killers Leaderboard ---- */
         var killers = standings
             .filter(function (t) { return t.kills > 0; })
             .map(function (t) {
@@ -742,7 +755,6 @@ function buildTournamentDetails(tournamentId) {
             return String(a.name).localeCompare(String(b.name));
         });
 
-        /* ---- Tournament-level stats ---- */
         var totalKills = 0;
         killers.forEach(function (k) { totalKills += k.kills; });
 
@@ -813,15 +825,9 @@ function handleAPIPromise(req, res, pathname, query) {
     /* PUBLIC TOURNAMENT DETAILS */
     if (req.method === "GET" && pathname === "/api/tournament/details") {
         var tid = cleanString(query.get("id") || query.get("tournamentId") || query.get("tournament"));
-        if (!tid) {
-            sendError(res, 400, "Tournament ID required.");
-            return Promise.resolve(true);
-        }
+        if (!tid) { sendError(res, 400, "Tournament ID required."); return Promise.resolve(true); }
         return buildTournamentDetails(tid).then(function (data) {
-            if (!data) {
-                sendError(res, 404, "Tournament not found.");
-                return true;
-            }
+            if (!data) { sendError(res, 404, "Tournament not found."); return true; }
             sendJSON(res, 200, {
                 success: true,
                 tournament: data.tournament,
@@ -832,10 +838,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 matchesStats: data.matchesStats
             });
             return true;
-        }).catch(function (err) {
-            console.log("Tournament details error:", err.message);
-            sendError(res, 500, "Could not load tournament.");
-            return true;
         });
     }
 
@@ -843,8 +845,7 @@ function handleAPIPromise(req, res, pathname, query) {
     if (req.method === "GET" && pathname === "/api/payment-settings") {
         return collections.settings.findOne({ key: "payment" })
             .then(function (doc) {
-                var methods = (doc && Array.isArray(doc.methods))
-                    ? doc.methods : DEFAULT_PAYMENT_METHODS;
+                var methods = (doc && Array.isArray(doc.methods)) ? doc.methods : DEFAULT_PAYMENT_METHODS;
                 var enabled = methods
                     .filter(function (m) { return m.enabled !== false; })
                     .sort(function (a, b) { return (a.order || 99) - (b.order || 99); })
@@ -854,96 +855,85 @@ function handleAPIPromise(req, res, pathname, query) {
                             qrImage: m.qrImage || "", instructions: m.instructions || ""
                         };
                     });
-                sendJSON(res, 200, {
-                    success: true, methods: enabled,
-                    payment: {
-                        eSewa: { name: "eSewa", number: (enabled.find(function (m) { return m.id === "esewa"; }) || {}).number || "" },
-                        Khalti: { name: "Khalti", number: (enabled.find(function (m) { return m.id === "khalti"; }) || {}).number || "" }
-                    }
-                });
+                sendJSON(res, 200, { success: true, methods: enabled });
                 return true;
             })
             .catch(function () {
                 sendJSON(res, 200, {
                     success: true,
-                    methods: DEFAULT_PAYMENT_METHODS.filter(function (m) { return m.enabled; }),
-                    payment: {
-                        eSewa: { name: "eSewa", number: "9748835184" },
-                        Khalti: { name: "Khalti", number: "97766258368" }
-                    }
+                    methods: DEFAULT_PAYMENT_METHODS.filter(function (m) { return m.enabled; })
                 });
                 return true;
             });
     }
 
-    /* ADMIN GET PAYMENT SETTINGS */
+    /* ADMIN PAYMENT SETTINGS GET */
     if (req.method === "GET" && pathname === "/api/admin/payment-settings") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.settings.findOne({ key: "payment" })
-            .then(function (doc) {
-                var methods = (doc && Array.isArray(doc.methods))
-                    ? doc.methods : DEFAULT_PAYMENT_METHODS;
-                methods = methods.slice().sort(function (a, b) {
-                    return (a.order || 99) - (b.order || 99);
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.settings.findOne({ key: "payment" })
+                .then(function (doc) {
+                    var methods = (doc && Array.isArray(doc.methods)) ? doc.methods : DEFAULT_PAYMENT_METHODS;
+                    methods = methods.slice().sort(function (a, b) {
+                        return (a.order || 99) - (b.order || 99);
+                    });
+                    sendJSON(res, 200, { success: true, methods: methods });
+                    return true;
                 });
-                sendJSON(res, 200, { success: true, methods: methods });
-                return true;
-            })
-            .catch(function () {
-                sendJSON(res, 200, { success: true, methods: DEFAULT_PAYMENT_METHODS });
-                return true;
-            });
+        });
     }
 
-    /* ADMIN UPDATE PAYMENT SETTINGS */
+    /* ADMIN PAYMENT SETTINGS PUT */
     if (req.method === "PUT" && pathname === "/api/admin/payment-settings") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var methods = Array.isArray(body.methods) ? body.methods : null;
-                if (!methods) { sendError(res, 400, "methods array required."); return resolve(true); }
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var methods = Array.isArray(body.methods) ? body.methods : null;
+                    if (!methods) { sendError(res, 400, "methods array required."); return resolve(true); }
 
-                var clean = [];
-                var seenIds = {};
-                for (var i = 0; i < methods.length; i++) {
-                    var m = methods[i] || {};
-                    var id = cleanString(m.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
-                    if (!id) id = cleanString(m.name).toLowerCase().replace(/[^a-z0-9]/g, "");
-                    if (!id) continue;
-                    if (seenIds[id]) id = id + "-" + (Date.now() % 10000) + "-" + i;
-                    seenIds[id] = true;
-                    var name = cleanString(m.name);
-                    if (!name) continue;
-                    var qr = cleanString(m.qrImage);
-                    if (qr && qr.length > 1500000) {
-                        sendError(res, 400, "QR code too large. Max ~1MB.");
-                        return resolve(true);
+                    var clean = [];
+                    var seenIds = {};
+                    for (var i = 0; i < methods.length; i++) {
+                        var m = methods[i] || {};
+                        var id = cleanString(m.id).toLowerCase().replace(/[^a-z0-9-]/g, "");
+                        if (!id) id = cleanString(m.name).toLowerCase().replace(/[^a-z0-9]/g, "");
+                        if (!id) continue;
+                        if (seenIds[id]) id = id + "-" + (Date.now() % 10000) + "-" + i;
+                        seenIds[id] = true;
+                        var name = cleanString(m.name);
+                        if (!name) continue;
+                        var qr = cleanString(m.qrImage);
+                        if (qr && qr.length > 1500000) {
+                            sendError(res, 400, "QR too large. Max ~1MB.");
+                            return resolve(true);
+                        }
+                        clean.push({
+                            id: id, name: name,
+                            number: cleanString(m.number),
+                            enabled: m.enabled !== false,
+                            qrImage: qr,
+                            instructions: cleanString(m.instructions),
+                            order: safeNumber(m.order, i + 1)
+                        });
                     }
-                    clean.push({
-                        id: id, name: name,
-                        number: cleanString(m.number),
-                        enabled: m.enabled !== false,
-                        qrImage: qr,
-                        instructions: cleanString(m.instructions),
-                        order: safeNumber(m.order, i + 1)
-                    });
-                }
 
-                collections.settings.updateOne(
-                    { key: "payment" },
-                    { $set: { methods: clean, updatedAt: nowISO() } },
-                    { upsert: true }
-                ).then(function () {
-                    sendJSON(res, 200, {
-                        success: true,
-                        message: "Payment methods updated.",
-                        methods: clean
+                    collections.settings.updateOne(
+                        { key: "payment" },
+                        { $set: { methods: clean, updatedAt: nowISO() } },
+                        { upsert: true }
+                    ).then(function () {
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Payment methods updated.",
+                            methods: clean
+                        });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
                     });
-                    resolve(true);
-                }).catch(function () {
-                    sendError(res, 500, "Could not save.");
-                    resolve(true);
                 });
             });
         });
@@ -1008,25 +998,26 @@ function handleAPIPromise(req, res, pathname, query) {
                 }
                 collections.users.findOne({
                     $or: [
-                        { id: identifier }, { username: identifier },
+                        { id: identifier },
+                        { username: identifier },
                         { email: identifier.toLowerCase() }
                     ]
                 }).then(function (found) {
-                    if (!found) {
-                        sendError(res, 401, "Invalid username/email or password.");
-                        return resolve(true);
-                    }
+                    if (!found) { sendError(res, 401, "Invalid credentials."); return resolve(true); }
                     if (!verifyPassword(password, found)) {
-                        sendError(res, 401, "Invalid username/email or password.");
+                        sendError(res, 401, "Invalid credentials.");
                         return resolve(true);
                     }
-                    var sid = createSession(found.id, "member");
-                    var h = {};
-                    setSessionCookie(h, sid);
-                    sendJSON(res, 200, {
-                        success: true, message: "Login successful.", user: safeUser(found)
-                    }, h);
-                    resolve(true);
+                    return createSession(found.id, "member").then(function (sid) {
+                        var h = {};
+                        setSessionCookie(h, sid);
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Login successful.",
+                            user: safeUser(found)
+                        }, h);
+                        resolve(true);
+                    });
                 }).catch(function () {
                     sendError(res, 500, "Database error.");
                     resolve(true);
@@ -1049,12 +1040,12 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* LOGOUT */
     if (req.method === "POST" && pathname === "/api/users/logout") {
-        var c = parseCookies(req);
-        if (c[SESSION_COOKIE]) sessions.delete(c[SESSION_COOKIE]);
-        var h = {};
-        clearSessionCookie(h);
-        sendJSON(res, 200, { success: true, message: "Logged out." }, h);
-        return Promise.resolve(true);
+        return deleteSession(req).then(function () {
+            var h = {};
+            clearSessionCookie(h);
+            sendJSON(res, 200, { success: true, message: "Logged out." }, h);
+            return true;
+        });
     }
 
     /* MY REGISTRATIONS */
@@ -1106,34 +1097,36 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* CREATE TOURNAMENT */
     if (req.method === "POST" && pathname === "/api/tournaments") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var name = cleanString(body.name);
-                if (!name) { sendError(res, 400, "Tournament name required."); return resolve(true); }
-                var nt = {
-                    id: createId("tour"), name: name,
-                    game: cleanString(body.game) || "Free Fire",
-                    date: cleanString(body.date), time: cleanString(body.time),
-                    entryFee: safeNumber(body.entryFee, 0),
-                    teamSize: safeNumber(body.teamSize, 4),
-                    maxTeams: safeNumber(body.maxTeams, 16),
-                    prizePool: safeNumber(body.prizePool, 0),
-                    status: cleanString(body.status) || "Upcoming",
-                    createdAt: nowISO()
-                };
-                collections.tournaments.insertOne(nt)
-                    .then(function () {
-                        sendJSON(res, 201, {
-                            success: true, message: "Tournament created.", tournament: nt
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var name = cleanString(body.name);
+                    if (!name) { sendError(res, 400, "Tournament name required."); return resolve(true); }
+                    var nt = {
+                        id: createId("tour"), name: name,
+                        game: cleanString(body.game) || "Free Fire",
+                        date: cleanString(body.date), time: cleanString(body.time),
+                        entryFee: safeNumber(body.entryFee, 0),
+                        teamSize: safeNumber(body.teamSize, 4),
+                        maxTeams: safeNumber(body.maxTeams, 16),
+                        prizePool: safeNumber(body.prizePool, 0),
+                        status: cleanString(body.status) || "Upcoming",
+                        createdAt: nowISO()
+                    };
+                    collections.tournaments.insertOne(nt)
+                        .then(function () {
+                            sendJSON(res, 201, {
+                                success: true, message: "Tournament created.", tournament: nt
+                            });
+                            resolve(true);
+                        })
+                        .catch(function () {
+                            sendError(res, 500, "Could not save.");
+                            resolve(true);
                         });
-                        resolve(true);
-                    })
-                    .catch(function () {
-                        sendError(res, 500, "Could not save.");
-                        resolve(true);
-                    });
+                });
             });
         });
     }
@@ -1141,33 +1134,34 @@ function handleAPIPromise(req, res, pathname, query) {
     /* UPDATE TOURNAMENT */
     if (req.method === "PUT" && pathname.indexOf("/api/tournaments/") === 0 &&
         pathname.indexOf("/api/tournaments/one") !== 0) {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var upId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var updates = {};
-                ["name","game","date","time","status"].forEach(function (k) {
-                    if (body[k] !== undefined && body[k] !== null) updates[k] = cleanString(body[k]);
-                });
-                if (body.entryFee !== undefined) updates.entryFee = safeNumber(body.entryFee, 0);
-                if (body.teamSize !== undefined) updates.teamSize = safeNumber(body.teamSize, 4);
-                if (body.maxTeams !== undefined) updates.maxTeams = safeNumber(body.maxTeams, 16);
-                if (body.prizePool !== undefined) updates.prizePool = safeNumber(body.prizePool, 0);
-                updates.updatedAt = nowISO();
-                collections.tournaments.findOneAndUpdate(
-                    { id: upId },
-                    { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
-                    }
-                    sendJSON(res, 200, {
-                        success: true, message: "Tournament updated.", tournament: result.value
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var upId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var updates = {};
+                    ["name","game","date","time","status"].forEach(function (k) {
+                        if (body[k] !== undefined && body[k] !== null) updates[k] = cleanString(body[k]);
                     });
-                    resolve(true);
+                    if (body.entryFee !== undefined) updates.entryFee = safeNumber(body.entryFee, 0);
+                    if (body.teamSize !== undefined) updates.teamSize = safeNumber(body.teamSize, 4);
+                    if (body.maxTeams !== undefined) updates.maxTeams = safeNumber(body.maxTeams, 16);
+                    if (body.prizePool !== undefined) updates.prizePool = safeNumber(body.prizePool, 0);
+                    updates.updatedAt = nowISO();
+                    collections.tournaments.findOneAndUpdate(
+                        { id: upId }, { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+                        sendJSON(res, 200, {
+                            success: true, message: "Tournament updated.", tournament: result.value
+                        });
+                        resolve(true);
+                    });
                 });
             });
         });
@@ -1175,17 +1169,19 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* DELETE TOURNAMENT */
     if (req.method === "DELETE" && pathname.indexOf("/api/tournaments/") === 0) {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var delId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
-        return collections.tournaments.deleteOne({ id: delId })
-            .then(function (result) {
-                if (result.deletedCount === 0) {
-                    sendError(res, 404, "Not found.");
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var delId = decodeURIComponent(pathname.replace("/api/tournaments/", ""));
+            return collections.tournaments.deleteOne({ id: delId })
+                .then(function (result) {
+                    if (result.deletedCount === 0) {
+                        sendError(res, 404, "Not found.");
+                        return true;
+                    }
+                    sendJSON(res, 200, { success: true, message: "Deleted." });
                     return true;
-                }
-                sendJSON(res, 200, { success: true, message: "Deleted." });
-                return true;
-            });
+                });
+        });
     }
 
     /* CREATE REGISTRATION */
@@ -1216,7 +1212,7 @@ function handleAPIPromise(req, res, pathname, query) {
                                 (body.payment && body.payment.transactionId));
                             var fee = safeNumber(tour.entryFee, 0);
                             if (fee > 0) {
-                                if (!pm) { sendError(res, 400, "Select a payment method."); return resolve(true); }
+                                if (!pm) { sendError(res, 400, "Select payment method."); return resolve(true); }
                                 if (txId.length < 3 || txId.length > 100) {
                                     sendError(res, 400, "Invalid transaction ID."); return resolve(true);
                                 }
@@ -1251,12 +1247,12 @@ function handleAPIPromise(req, res, pathname, query) {
                                     createdAt: nowISO(), updatedAt: nowISO()
                                 };
                                 if (!reg.teamName) { sendError(res, 400, "Team name required."); return resolve(true); }
-                                if (!reg.captainName) { sendError(res, 400, "Captain name required."); return resolve(true); }
+                                if (!reg.captainName) { sendError(res, 400, "Captain required."); return resolve(true); }
                                 return collections.registrations.insertOne(reg)
                                     .then(function () {
                                         return createNotification(
                                             user.id, "info", "Registration submitted",
-                                            "Your registration for " + tour.name + " is pending admin approval.",
+                                            "Your registration for " + tour.name + " is pending.",
                                             "member.html"
                                         );
                                     })
@@ -1387,10 +1383,7 @@ function handleAPIPromise(req, res, pathname, query) {
     /* PLAYER PROFILE */
     if (req.method === "GET" && pathname === "/api/player") {
         var username = cleanString(query.get("username"));
-        if (!username) {
-            sendError(res, 400, "Username required.");
-            return Promise.resolve(true);
-        }
+        if (!username) { sendError(res, 400, "Username required."); return Promise.resolve(true); }
         var usernameLower = username.toLowerCase();
 
         return Promise.all([
@@ -1629,99 +1622,105 @@ function handleAPIPromise(req, res, pathname, query) {
                     sendError(res, 401, "Invalid admin credentials.");
                     return resolve(true);
                 }
-                var sid = createSession("admin", "admin");
-                var h = {};
-                setSessionCookie(h, sid);
-                sendJSON(res, 200, {
-                    success: true, message: "Admin login successful.",
-                    admin: { username: ADMIN_USERNAME }
-                }, h);
-                resolve(true);
+                return createSession("admin", "admin").then(function (sid) {
+                    var h = {};
+                    setSessionCookie(h, sid);
+                    sendJSON(res, 200, {
+                        success: true, message: "Admin login successful.",
+                        admin: { username: ADMIN_USERNAME }
+                    }, h);
+                    resolve(true);
+                });
             });
         });
     }
 
     /* ADMIN CHECK */
     if (req.method === "GET" && pathname === "/api/admin/check") {
-        var s = getSession(req);
-        if (!s || s.role !== "admin") {
-            sendJSON(res, 401, { success: false, loggedIn: false });
-            return Promise.resolve(true);
-        }
-        sendJSON(res, 200, {
-            success: true, loggedIn: true,
-            admin: { username: ADMIN_USERNAME }
+        return getSession(req).then(function (s) {
+            if (!s || s.role !== "admin") {
+                sendJSON(res, 401, { success: false, loggedIn: false });
+                return true;
+            }
+            sendJSON(res, 200, {
+                success: true, loggedIn: true,
+                admin: { username: ADMIN_USERNAME }
+            });
+            return true;
         });
-        return Promise.resolve(true);
     }
 
     /* ADMIN LOGOUT */
     if (req.method === "POST" && pathname === "/api/admin/logout") {
-        var c2 = parseCookies(req);
-        if (c2[SESSION_COOKIE]) sessions.delete(c2[SESSION_COOKIE]);
-        var h2 = {};
-        clearSessionCookie(h2);
-        sendJSON(res, 200, { success: true, message: "Admin logged out." }, h2);
-        return Promise.resolve(true);
+        return deleteSession(req).then(function () {
+            var h = {};
+            clearSessionCookie(h);
+            sendJSON(res, 200, { success: true, message: "Admin logged out." }, h);
+            return true;
+        });
     }
 
     /* ADMIN REGISTRATIONS */
     if (req.method === "GET" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.registrations.find({}).toArray()
-            .then(function (regs) {
-                sendJSON(res, 200, {
-                    success: true,
-                    registrations: regs.map(registrationForClient)
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.registrations.find({}).toArray()
+                .then(function (regs) {
+                    sendJSON(res, 200, {
+                        success: true,
+                        registrations: regs.map(registrationForClient)
+                    });
+                    return true;
                 });
-                return true;
-            });
+        });
     }
 
     /* ADMIN REG STATUS (body) */
     if (req.method === "PUT" && pathname === "/api/admin/registrations/status") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var rid = cleanString(body.registrationId || body.id);
-                var st = normalizeStatus(body.status);
-                if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
-                if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
-                    sendError(res, 400, "Invalid status."); return resolve(true);
-                }
-                var updates = { status: st, updatedAt: nowISO() };
-                if (st === "Approved") updates.paymentStatus = "Verified";
-                if (st === "Rejected") updates.paymentStatus = "Rejected";
-                collections.registrations.findOneAndUpdate(
-                    { id: rid }, { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var rid = cleanString(body.registrationId || body.id);
+                    var st = normalizeStatus(body.status);
+                    if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
+                    if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
+                        sendError(res, 400, "Invalid status."); return resolve(true);
                     }
-                    var reg = result.value;
-                    var notifPromise = Promise.resolve();
-                    if (st === "Approved") {
-                        notifPromise = createNotification(
-                            reg.userId, "success", "Registration Approved",
-                            "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
-                            "member.html"
-                        );
-                    } else if (st === "Rejected") {
-                        notifPromise = createNotification(
-                            reg.userId, "error", "Registration Rejected",
-                            "Your registration for " + reg.tournamentName + " was rejected.",
-                            "member.html"
-                        );
-                    }
-                    return notifPromise.then(function () {
-                        sendJSON(res, 200, {
-                            success: true, message: "Status updated.",
-                            registration: registrationForClient(reg)
+                    var updates = { status: st, updatedAt: nowISO() };
+                    if (st === "Approved") updates.paymentStatus = "Verified";
+                    if (st === "Rejected") updates.paymentStatus = "Rejected";
+                    collections.registrations.findOneAndUpdate(
+                        { id: rid }, { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+                        var reg = result.value;
+                        var notifPromise = Promise.resolve();
+                        if (st === "Approved") {
+                            notifPromise = createNotification(
+                                reg.userId, "success", "Registration Approved",
+                                "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
+                                "member.html"
+                            );
+                        } else if (st === "Rejected") {
+                            notifPromise = createNotification(
+                                reg.userId, "error", "Registration Rejected",
+                                "Your registration for " + reg.tournamentName + " was rejected.",
+                                "member.html"
+                            );
+                        }
+                        return notifPromise.then(function () {
+                            sendJSON(res, 200, {
+                                success: true, message: "Status updated.",
+                                registration: registrationForClient(reg)
+                            });
+                            resolve(true);
                         });
-                        resolve(true);
                     });
                 });
             });
@@ -1731,48 +1730,50 @@ function handleAPIPromise(req, res, pathname, query) {
     /* ADMIN REG STATUS (URL) */
     if (req.method === "PUT" && pathname.indexOf("/api/admin/registrations/") === 0 &&
         pathname.indexOf("/status") !== -1) {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var raw = pathname.replace("/api/admin/registrations/", "");
-        var rid = decodeURIComponent(raw.replace(/\/status$/, ""));
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var st = normalizeStatus(body.status);
-                if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
-                    sendError(res, 400, "Invalid status."); return resolve(true);
-                }
-                var updates = { status: st, updatedAt: nowISO() };
-                if (st === "Approved") updates.paymentStatus = "Verified";
-                if (st === "Rejected") updates.paymentStatus = "Rejected";
-                collections.registrations.findOneAndUpdate(
-                    { id: rid }, { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var raw = pathname.replace("/api/admin/registrations/", "");
+            var rid = decodeURIComponent(raw.replace(/\/status$/, ""));
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var st = normalizeStatus(body.status);
+                    if (st !== "Pending" && st !== "Approved" && st !== "Rejected") {
+                        sendError(res, 400, "Invalid status."); return resolve(true);
                     }
-                    var reg = result.value;
-                    var notifPromise = Promise.resolve();
-                    if (st === "Approved") {
-                        notifPromise = createNotification(
-                            reg.userId, "success", "Registration Approved",
-                            "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
-                            "member.html"
-                        );
-                    } else if (st === "Rejected") {
-                        notifPromise = createNotification(
-                            reg.userId, "error", "Registration Rejected",
-                            "Your registration for " + reg.tournamentName + " was rejected.",
-                            "member.html"
-                        );
-                    }
-                    return notifPromise.then(function () {
-                        sendJSON(res, 200, {
-                            success: true, message: "Status updated.",
-                            registration: registrationForClient(reg)
+                    var updates = { status: st, updatedAt: nowISO() };
+                    if (st === "Approved") updates.paymentStatus = "Verified";
+                    if (st === "Rejected") updates.paymentStatus = "Rejected";
+                    collections.registrations.findOneAndUpdate(
+                        { id: rid }, { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+                        var reg = result.value;
+                        var notifPromise = Promise.resolve();
+                        if (st === "Approved") {
+                            notifPromise = createNotification(
+                                reg.userId, "success", "Registration Approved",
+                                "Your team " + reg.teamName + " is approved for " + reg.tournamentName + ".",
+                                "member.html"
+                            );
+                        } else if (st === "Rejected") {
+                            notifPromise = createNotification(
+                                reg.userId, "error", "Registration Rejected",
+                                "Your registration for " + reg.tournamentName + " was rejected.",
+                                "member.html"
+                            );
+                        }
+                        return notifPromise.then(function () {
+                            sendJSON(res, 200, {
+                                success: true, message: "Status updated.",
+                                registration: registrationForClient(reg)
+                            });
+                            resolve(true);
                         });
-                        resolve(true);
                     });
                 });
             });
@@ -1781,32 +1782,34 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* ADMIN REG EDIT */
     if (req.method === "PUT" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var rid = cleanString(body.id || body.registrationId);
-                if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
-                var updates = {};
-                ["teamName","captainName","phone","player1","player2","player3",
-                    "player4","player5","player6","payerName","payerPhone","paymentMethod",
-                    "transactionId","message","status","paymentStatus"].forEach(function (f) {
-                    if (body[f] !== undefined && body[f] !== null) updates[f] = cleanString(body[f]);
-                });
-                updates.updatedAt = nowISO();
-                collections.registrations.findOneAndUpdate(
-                    { id: rid }, { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
-                    }
-                    sendJSON(res, 200, {
-                        success: true, message: "Updated.",
-                        registration: registrationForClient(result.value)
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var rid = cleanString(body.id || body.registrationId);
+                    if (!rid) { sendError(res, 400, "ID required."); return resolve(true); }
+                    var updates = {};
+                    ["teamName","captainName","phone","player1","player2","player3",
+                        "player4","player5","player6","payerName","payerPhone","paymentMethod",
+                        "transactionId","message","status","paymentStatus"].forEach(function (f) {
+                        if (body[f] !== undefined && body[f] !== null) updates[f] = cleanString(body[f]);
                     });
-                    resolve(true);
+                    updates.updatedAt = nowISO();
+                    collections.registrations.findOneAndUpdate(
+                        { id: rid }, { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+                        sendJSON(res, 200, {
+                            success: true, message: "Updated.",
+                            registration: registrationForClient(result.value)
+                        });
+                        resolve(true);
+                    });
                 });
             });
         });
@@ -1814,202 +1817,211 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* ADMIN REG DELETE */
     if (req.method === "DELETE" && pathname === "/api/admin/registrations") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var rid2 = cleanString(query.get("id") || query.get("registrationId"));
-        if (!rid2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.registrations.deleteOne({ id: rid2 })
-            .then(function (result) {
-                if (result.deletedCount === 0) {
-                    sendError(res, 404, "Not found.");
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var rid = cleanString(query.get("id") || query.get("registrationId"));
+            if (!rid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+            return collections.registrations.deleteOne({ id: rid })
+                .then(function (result) {
+                    if (result.deletedCount === 0) {
+                        sendError(res, 404, "Not found.");
+                        return true;
+                    }
+                    sendJSON(res, 200, { success: true, message: "Deleted." });
                     return true;
-                }
-                sendJSON(res, 200, { success: true, message: "Deleted." });
-                return true;
-            });
+                });
+        });
     }
 
     /* ADMIN TOURNAMENTS LIST */
     if (req.method === "GET" && pathname === "/api/admin/tournaments") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.tournaments.find({}).toArray()
-            .then(function (tournaments) {
-                return Promise.all(tournaments.map(function (t) {
-                    return countTournamentRegistrations(t.id)
-                        .then(function (cnt) { return tournamentForClient(t, cnt); });
-                }));
-            })
-            .then(function (list) {
-                sendJSON(res, 200, { success: true, tournaments: list });
-                return true;
-            });
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.tournaments.find({}).toArray()
+                .then(function (tournaments) {
+                    return Promise.all(tournaments.map(function (t) {
+                        return countTournamentRegistrations(t.id)
+                            .then(function (cnt) { return tournamentForClient(t, cnt); });
+                    }));
+                })
+                .then(function (list) {
+                    sendJSON(res, 200, { success: true, tournaments: list });
+                    return true;
+                });
+        });
     }
 
     /* ADMIN MATCHES LIST */
     if (req.method === "GET" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.matches.find({}).toArray()
-            .then(function (matches) {
-                sendJSON(res, 200, { success: true, matches: matches });
-                return true;
-            });
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.matches.find({}).toArray()
+                .then(function (matches) {
+                    sendJSON(res, 200, { success: true, matches: matches });
+                    return true;
+                });
+        });
     }
 
     /* CREATE MATCH */
     if (req.method === "POST" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var matchType = normalizeMatchType(body.matchType);
-                var winners = [];
-                if (Array.isArray(body.winners)) {
-                    winners = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
-                    winners = winners.slice(0, 3);
-                }
-                var screenshot = cleanString(body.screenshot);
-                if (screenshot && screenshot.length > 6000000) {
-                    sendError(res, 400, "Screenshot too large.");
-                    return resolve(true);
-                }
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var matchType = normalizeMatchType(body.matchType);
+                    var winners = [];
+                    if (Array.isArray(body.winners)) {
+                        winners = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
+                        winners = winners.slice(0, 3);
+                    }
+                    var screenshot = cleanString(body.screenshot);
+                    if (screenshot && screenshot.length > 6000000) {
+                        sendError(res, 400, "Screenshot too large.");
+                        return resolve(true);
+                    }
+                    var topKiller = cleanString(body.topKiller);
+                    var topKillerKills = safeNumber(body.topKillerKills, 0);
 
-                var topKiller = cleanString(body.topKiller);
-                var topKillerKills = safeNumber(body.topKillerKills, 0);
-
-                var match = {
-                    id: createId("match"),
-                    matchType: matchType,
-                    game: cleanString(body.game),
-                    tournamentId: cleanString(body.tournamentId),
-                    tournamentName: cleanString(body.tournamentName),
-                    team1: cleanString(body.team1),
-                    team2: cleanString(body.team2),
-                    scoreTeam1: cleanString(body.scoreTeam1 || body.score1),
-                    scoreTeam2: cleanString(body.scoreTeam2 || body.score2),
-                    winner: cleanString(body.winner || (winners[0] || "")),
-                    winners: winners,
-                    topKiller: topKiller,
-                    topKillerKills: topKillerKills,
-                    date: cleanString(body.date),
-                    time: cleanString(body.time),
-                    status: cleanString(body.status) || "Upcoming",
-                    roomId: cleanString(body.roomId),
-                    roomPassword: cleanString(body.roomPassword),
-                    result: cleanString(body.result),
-                    notes: cleanString(body.notes),
-                    screenshot: screenshot,
-                    screenshotUploadedAt: screenshot ? nowISO() : "",
-                    joinedUserIds: [],
-                    createdAt: nowISO(),
-                    updatedAt: nowISO()
-                };
-                collections.matches.insertOne(match)
-                    .then(function () {
-                        return createNotificationForTournament(
-                            match.tournamentId, "info", "New Match Scheduled",
-                            match.result + " for " + match.tournamentName +
-                            " on " + match.date + " at " + match.time,
-                            "member.html"
-                        );
-                    })
-                    .then(function () {
-                        sendJSON(res, 201, {
-                            success: true, message: "Match created.", match: match
+                    var match = {
+                        id: createId("match"),
+                        matchType: matchType,
+                        game: cleanString(body.game),
+                        tournamentId: cleanString(body.tournamentId),
+                        tournamentName: cleanString(body.tournamentName),
+                        team1: cleanString(body.team1),
+                        team2: cleanString(body.team2),
+                        scoreTeam1: cleanString(body.scoreTeam1 || body.score1),
+                        scoreTeam2: cleanString(body.scoreTeam2 || body.score2),
+                        winner: cleanString(body.winner || (winners[0] || "")),
+                        winners: winners,
+                        topKiller: topKiller,
+                        topKillerKills: topKillerKills,
+                        date: cleanString(body.date),
+                        time: cleanString(body.time),
+                        status: cleanString(body.status) || "Upcoming",
+                        roomId: cleanString(body.roomId),
+                        roomPassword: cleanString(body.roomPassword),
+                        result: cleanString(body.result),
+                        notes: cleanString(body.notes),
+                        screenshot: screenshot,
+                        screenshotUploadedAt: screenshot ? nowISO() : "",
+                        joinedUserIds: [],
+                        createdAt: nowISO(),
+                        updatedAt: nowISO()
+                    };
+                    collections.matches.insertOne(match)
+                        .then(function () {
+                            return createNotificationForTournament(
+                                match.tournamentId, "info", "New Match Scheduled",
+                                match.result + " for " + match.tournamentName +
+                                " on " + match.date + " at " + match.time,
+                                "member.html"
+                            );
+                        })
+                        .then(function () {
+                            sendJSON(res, 201, {
+                                success: true, message: "Match created.", match: match
+                            });
+                            resolve(true);
+                        })
+                        .catch(function () {
+                            sendError(res, 500, "Could not save.");
+                            resolve(true);
                         });
-                        resolve(true);
-                    })
-                    .catch(function () {
-                        sendError(res, 500, "Could not save.");
-                        resolve(true);
-                    });
+                });
             });
         });
     }
 
     /* UPDATE MATCH */
     if (req.method === "PUT" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var mid = cleanString(body.id || body.matchId);
-                if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
-                collections.matches.findOne({ id: mid }).then(function (oldMatch) {
-                    if (!oldMatch) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
-                    }
-                    var updates = {};
-                    if (body.matchType !== undefined) {
-                        updates.matchType = normalizeMatchType(body.matchType);
-                    }
-                    ["game","tournamentId","tournamentName","team1","team2",
-                        "scoreTeam1","scoreTeam2","winner","date","time",
-                        "status","roomId","roomPassword","result","notes",
-                        "topKiller"].forEach(function (f) {
-                        if (body[f] !== undefined && body[f] !== null) {
-                            updates[f] = cleanString(body[f]);
-                        }
-                    });
-                    if (body.topKillerKills !== undefined) {
-                        updates.topKillerKills = safeNumber(body.topKillerKills, 0);
-                    }
-                    if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
-                    if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
-                    if (Array.isArray(body.winners)) {
-                        var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
-                        updates.winners = ws.slice(0, 3);
-                        if (!updates.winner && ws.length > 0) updates.winner = ws[0];
-                    }
-                    if (body.screenshot !== undefined) {
-                        var sc = cleanString(body.screenshot);
-                        if (sc && sc.length > 6000000) {
-                            sendError(res, 400, "Screenshot too large.");
-                            return resolve(true);
-                        }
-                        updates.screenshot = sc;
-                        updates.screenshotUploadedAt = sc ? nowISO() : "";
-                    }
-                    updates.updatedAt = nowISO();
-                    return collections.matches.findOneAndUpdate(
-                        { id: mid }, { $set: updates },
-                        { returnDocument: "after" }
-                    ).then(function (result) {
-                        if (!result || !result.value) {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var mid = cleanString(body.id || body.matchId);
+                    if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
+                    collections.matches.findOne({ id: mid }).then(function (oldMatch) {
+                        if (!oldMatch) {
                             sendError(res, 404, "Not found.");
                             return resolve(true);
                         }
-                        var oldStatus = String(oldMatch.status || "").toLowerCase();
-                        var newStatus = String(result.value.status || "").toLowerCase();
-                        var notifPromises = [];
-
-                        if (newStatus === "live" && oldStatus !== "live" && result.value.roomId) {
-                            notifPromises.push(createNotificationForTournament(
-                                result.value.tournamentId, "urgent", "Room ID Released!",
-                                result.value.result + " is live now. Room ID: " + result.value.roomId +
-                                (result.value.roomPassword ? " Password: " + result.value.roomPassword : ""),
-                                "member.html"
-                            ));
+                        var updates = {};
+                        if (body.matchType !== undefined) {
+                            updates.matchType = normalizeMatchType(body.matchType);
                         }
-                        if ((newStatus === "completed" || newStatus === "finished") &&
-                            oldStatus !== "completed" && oldStatus !== "finished") {
-                            notifPromises.push(createNotificationForTournament(
-                                result.value.tournamentId, "success", "Match Completed",
-                                result.value.result + " has finished. Winner: " +
-                                (result.value.winner || (result.value.winners && result.value.winners[0]) || "TBD"),
-                                "member.html"
-                            ));
-                        }
-                        return Promise.all(notifPromises).then(function () {
-                            sendJSON(res, 200, {
-                                success: true, message: "Match updated.", match: result.value
-                            });
-                            resolve(true);
+                        ["game","tournamentId","tournamentName","team1","team2",
+                            "scoreTeam1","scoreTeam2","winner","date","time",
+                            "status","roomId","roomPassword","result","notes",
+                            "topKiller"].forEach(function (f) {
+                            if (body[f] !== undefined && body[f] !== null) {
+                                updates[f] = cleanString(body[f]);
+                            }
                         });
+                        if (body.topKillerKills !== undefined) {
+                            updates.topKillerKills = safeNumber(body.topKillerKills, 0);
+                        }
+                        if (body.score1 !== undefined) updates.scoreTeam1 = cleanString(body.score1);
+                        if (body.score2 !== undefined) updates.scoreTeam2 = cleanString(body.score2);
+                        if (Array.isArray(body.winners)) {
+                            var ws = body.winners.map(cleanString).filter(function (x) { return x !== ""; });
+                            updates.winners = ws.slice(0, 3);
+                            if (!updates.winner && ws.length > 0) updates.winner = ws[0];
+                        }
+                        if (body.screenshot !== undefined) {
+                            var sc = cleanString(body.screenshot);
+                            if (sc && sc.length > 6000000) {
+                                sendError(res, 400, "Screenshot too large.");
+                                return resolve(true);
+                            }
+                            updates.screenshot = sc;
+                            updates.screenshotUploadedAt = sc ? nowISO() : "";
+                        }
+                        updates.updatedAt = nowISO();
+                        return collections.matches.findOneAndUpdate(
+                            { id: mid }, { $set: updates },
+                            { returnDocument: "after" }
+                        ).then(function (result) {
+                            if (!result || !result.value) {
+                                sendError(res, 404, "Not found.");
+                                return resolve(true);
+                            }
+                            var oldStatus = String(oldMatch.status || "").toLowerCase();
+                            var newStatus = String(result.value.status || "").toLowerCase();
+                            var notifPromises = [];
+
+                            if (newStatus === "live" && oldStatus !== "live" && result.value.roomId) {
+                                notifPromises.push(createNotificationForTournament(
+                                    result.value.tournamentId, "urgent", "Room ID Released!",
+                                    result.value.result + " is live now. Room ID: " + result.value.roomId +
+                                    (result.value.roomPassword ? " Password: " + result.value.roomPassword : ""),
+                                    "member.html"
+                                ));
+                            }
+                            if ((newStatus === "completed" || newStatus === "finished") &&
+                                oldStatus !== "completed" && oldStatus !== "finished") {
+                                notifPromises.push(createNotificationForTournament(
+                                    result.value.tournamentId, "success", "Match Completed",
+                                    result.value.result + " has finished. Winner: " +
+                                    (result.value.winner || (result.value.winners && result.value.winners[0]) || "TBD"),
+                                    "member.html"
+                                ));
+                            }
+                            return Promise.all(notifPromises).then(function () {
+                                sendJSON(res, 200, {
+                                    success: true, message: "Match updated.", match: result.value
+                                });
+                                resolve(true);
+                            });
+                        });
+                    }).catch(function (e) {
+                        console.log("Update match error:", e.message);
+                        sendError(res, 500, "Could not update.");
+                        resolve(true);
                     });
-                }).catch(function (e) {
-                    console.log("Update match error:", e.message);
-                    sendError(res, 500, "Could not update.");
-                    resolve(true);
                 });
             });
         });
@@ -2017,152 +2029,164 @@ function handleAPIPromise(req, res, pathname, query) {
 
     /* DELETE MATCH */
     if (req.method === "DELETE" && pathname === "/api/admin/matches") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var mid2 = cleanString(query.get("id") || query.get("matchId"));
-        if (!mid2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.matches.deleteOne({ id: mid2 })
-            .then(function (result) {
-                if (result.deletedCount === 0) {
-                    sendError(res, 404, "Not found.");
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var mid = cleanString(query.get("id") || query.get("matchId"));
+            if (!mid) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+            return collections.matches.deleteOne({ id: mid })
+                .then(function (result) {
+                    if (result.deletedCount === 0) {
+                        sendError(res, 404, "Not found.");
+                        return true;
+                    }
+                    sendJSON(res, 200, { success: true, message: "Match deleted." });
                     return true;
-                }
-                sendJSON(res, 200, { success: true, message: "Match deleted." });
-                return true;
-            });
+                });
+        });
     }
 
     /* ADMIN ANNOUNCEMENTS */
     if (req.method === "GET" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.announcements.find({}).sort({ createdAt: -1 }).toArray()
-            .then(function (ann) {
-                sendJSON(res, 200, { success: true, announcements: ann });
-                return true;
-            });
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.announcements.find({}).sort({ createdAt: -1 }).toArray()
+                .then(function (ann) {
+                    sendJSON(res, 200, { success: true, announcements: ann });
+                    return true;
+                });
+        });
     }
 
     if (req.method === "POST" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var title = cleanString(body.title);
-                var message = cleanString(body.message);
-                if (!title) { sendError(res, 400, "Title required."); return resolve(true); }
-                if (!message) { sendError(res, 400, "Message required."); return resolve(true); }
-                var item = {
-                    id: createId("ann"), title: title, message: message,
-                    type: cleanString(body.type) || "info",
-                    pinned: body.pinned === true || body.pinned === "true",
-                    createdAt: nowISO(), updatedAt: nowISO()
-                };
-                collections.announcements.insertOne(item)
-                    .then(function () {
-                        return collections.users.find({}).toArray()
-                            .then(function (users) {
-                                var promises = users.map(function (u) {
-                                    return createNotification(
-                                        u.id,
-                                        item.type === "urgent" ? "error" : "info",
-                                        "Announcement: " + item.title,
-                                        item.message, "index.html"
-                                    );
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var title = cleanString(body.title);
+                    var message = cleanString(body.message);
+                    if (!title) { sendError(res, 400, "Title required."); return resolve(true); }
+                    if (!message) { sendError(res, 400, "Message required."); return resolve(true); }
+                    var item = {
+                        id: createId("ann"), title: title, message: message,
+                        type: cleanString(body.type) || "info",
+                        pinned: body.pinned === true || body.pinned === "true",
+                        createdAt: nowISO(), updatedAt: nowISO()
+                    };
+                    collections.announcements.insertOne(item)
+                        .then(function () {
+                            return collections.users.find({}).toArray()
+                                .then(function (users) {
+                                    var promises = users.map(function (u) {
+                                        return createNotification(
+                                            u.id,
+                                            item.type === "urgent" ? "error" : "info",
+                                            "Announcement: " + item.title,
+                                            item.message, "index.html"
+                                        );
+                                    });
+                                    return Promise.all(promises);
                                 });
-                                return Promise.all(promises);
+                        })
+                        .then(function () {
+                            sendJSON(res, 201, {
+                                success: true, message: "Created.", announcement: item
                             });
-                    })
-                    .then(function () {
-                        sendJSON(res, 201, {
-                            success: true, message: "Created.", announcement: item
+                            resolve(true);
+                        })
+                        .catch(function () {
+                            sendError(res, 500, "Could not save.");
+                            resolve(true);
                         });
-                        resolve(true);
-                    })
-                    .catch(function () {
-                        sendError(res, 500, "Could not save.");
-                        resolve(true);
-                    });
+                });
             });
         });
     }
 
     if (req.method === "PUT" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return new Promise(function (resolve) {
-            readBody(req, function (err, body) {
-                if (err) { sendError(res, 400, err.message); return resolve(true); }
-                var annId = cleanString(body.id || body.announcementId);
-                if (!annId) { sendError(res, 400, "ID required."); return resolve(true); }
-                var updates = {};
-                if (body.title !== undefined) updates.title = cleanString(body.title);
-                if (body.message !== undefined) updates.message = cleanString(body.message);
-                if (body.type !== undefined) updates.type = cleanString(body.type);
-                if (body.pinned !== undefined) {
-                    updates.pinned = body.pinned === true || body.pinned === "true";
-                }
-                updates.updatedAt = nowISO();
-                collections.announcements.findOneAndUpdate(
-                    { id: annId }, { $set: updates },
-                    { returnDocument: "after" }
-                ).then(function (result) {
-                    if (!result || !result.value) {
-                        sendError(res, 404, "Not found.");
-                        return resolve(true);
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var annId = cleanString(body.id || body.announcementId);
+                    if (!annId) { sendError(res, 400, "ID required."); return resolve(true); }
+                    var updates = {};
+                    if (body.title !== undefined) updates.title = cleanString(body.title);
+                    if (body.message !== undefined) updates.message = cleanString(body.message);
+                    if (body.type !== undefined) updates.type = cleanString(body.type);
+                    if (body.pinned !== undefined) {
+                        updates.pinned = body.pinned === true || body.pinned === "true";
                     }
-                    sendJSON(res, 200, {
-                        success: true, message: "Updated.", announcement: result.value
+                    updates.updatedAt = nowISO();
+                    collections.announcements.findOneAndUpdate(
+                        { id: annId }, { $set: updates },
+                        { returnDocument: "after" }
+                    ).then(function (result) {
+                        if (!result || !result.value) {
+                            sendError(res, 404, "Not found.");
+                            return resolve(true);
+                        }
+                        sendJSON(res, 200, {
+                            success: true, message: "Updated.", announcement: result.value
+                        });
+                        resolve(true);
                     });
-                    resolve(true);
                 });
             });
         });
     }
 
     if (req.method === "DELETE" && pathname === "/api/admin/announcements") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        var annId2 = cleanString(query.get("id") || query.get("announcementId"));
-        if (!annId2) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
-        return collections.announcements.deleteOne({ id: annId2 })
-            .then(function (result) {
-                if (result.deletedCount === 0) {
-                    sendError(res, 404, "Not found.");
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            var annId = cleanString(query.get("id") || query.get("announcementId"));
+            if (!annId) { sendError(res, 400, "ID required."); return Promise.resolve(true); }
+            return collections.announcements.deleteOne({ id: annId })
+                .then(function (result) {
+                    if (result.deletedCount === 0) {
+                        sendError(res, 404, "Not found.");
+                        return true;
+                    }
+                    sendJSON(res, 200, { success: true, message: "Deleted." });
                     return true;
-                }
-                sendJSON(res, 200, { success: true, message: "Deleted." });
-                return true;
-            });
+                });
+        });
     }
 
     /* CSV EXPORT */
     if (req.method === "GET" && pathname === "/api/admin/registrations.csv") {
-        if (!requireAdmin(req, res)) return Promise.resolve(true);
-        return collections.registrations.find({}).toArray()
-            .then(function (regs) {
-                var lines = [];
-                lines.push(["ID","Username","Email","Tournament","Game","Team","Captain","Phone",
-                    "Player 1","Player 2","Player 3","Player 4","Player 5","Player 6",
-                    "Payment Method","Transaction ID","Amount","Payment Status",
-                    "Registration Status","Created At"].join(","));
-                function csv(v) {
-                    var t = (v === undefined || v === null) ? "" : String(v);
-                    t = t.replace(/"/g, '""');
-                    return '"' + t + '"';
-                }
-                regs.forEach(function (it) {
-                    lines.push([
-                        it.id,it.username,it.email,it.tournamentName,it.game,
-                        it.teamName,it.captainName,it.phone,
-                        it.player1,it.player2,it.player3,it.player4,it.player5,it.player6,
-                        it.paymentMethod,it.transactionId,it.amount,
-                        it.paymentStatus,it.status,it.createdAt
-                    ].map(csv).join(","));
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return collections.registrations.find({}).toArray()
+                .then(function (regs) {
+                    var lines = [];
+                    lines.push(["ID","Username","Email","Tournament","Game","Team","Captain","Phone",
+                        "Player 1","Player 2","Player 3","Player 4","Player 5","Player 6",
+                        "Payment Method","Transaction ID","Amount","Payment Status",
+                        "Registration Status","Created At"].join(","));
+                    function csv(v) {
+                        var t = (v === undefined || v === null) ? "" : String(v);
+                        t = t.replace(/"/g, '""');
+                        return '"' + t + '"';
+                    }
+                    regs.forEach(function (it) {
+                        lines.push([
+                            it.id,it.username,it.email,it.tournamentName,it.game,
+                            it.teamName,it.captainName,it.phone,
+                            it.player1,it.player2,it.player3,it.player4,it.player5,it.player6,
+                            it.paymentMethod,it.transactionId,it.amount,
+                            it.paymentStatus,it.status,it.createdAt
+                        ].map(csv).join(","));
+                    });
+                    res.writeHead(200, {
+                        "Content-Type": "text/csv; charset=utf-8",
+                        "Content-Disposition": 'attachment; filename="nepplay-registrations.csv"'
+                    });
+                    res.end(lines.join("\r\n"));
+                    return true;
                 });
-                res.writeHead(200, {
-                    "Content-Type": "text/csv; charset=utf-8",
-                    "Content-Disposition": 'attachment; filename="nepplay-registrations.csv"'
-                });
-                res.end(lines.join("\r\n"));
-                return true;
-            });
+        });
     }
 
     if (pathname === "/favicon.ico") {
@@ -2206,7 +2230,7 @@ connectDB().then(function () {
     server.listen(PORT, HOST, function () {
         console.log("");
         console.log("==================================================");
-        console.log("     NEPPLAY SERVER STARTED (Tournament Details)");
+        console.log("     NEPPLAY SERVER STARTED (MongoDB Sessions)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
         console.log("Admin: " + ADMIN_USERNAME);
