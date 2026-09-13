@@ -1,6 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
+<head><!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournaments - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .tournament-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .tournament-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); }
+        .filter-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-blue-400 font-bold">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-6">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-3"></i>Active Tournaments</h1>
+            <p class="text-gray-400">Browse and register for upcoming esports tournaments. Win real cash prizes!</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <button class="filter-btn active px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('all', this)">All Games</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('freefire', this)">Free Fire</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('pubg', this)">PUBG Mobile</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('valorant', this)">Valorant</button>
+            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('cod', this)">COD Mobile</button>
+        </div>
+
+        <div id="tournament-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <div id="no-results" class="hidden text-center py-20">
+            <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-4"></i>
+            <p class="text-gray-500 text-lg">No tournaments found for this game.</p>
+        </div>
+    </main>
+
+    <footer class="glass-panel w-full p-4 text-center text-sm text-gray-500 mt-8">
+        &copy; 2023 Nepal Gaming Platform. All rights reserved.
+    </footer>
+
+    <script>
+        console.log("--- TOURNAMENTS PAGE LOADED ---");
+
+        const tournaments = [
+            { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo" },
+            { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad" },
+            { id: 3, game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", name: "Valorant Night Cup", date: "Nov 25, 2023", time: "09:00 PM", entryFee: 150, prizePool: 3000, slotsFilled: 12, slotsTotal: 20, mode: "5v5" },
+            { id: 4, game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", name: "COD Mobile Battle Royale", date: "Nov 27, 2023", time: "06:00 PM", entryFee: 75, prizePool: 1500, slotsFilled: 32, slotsTotal: 50, mode: "Squad" },
+            { id: 5, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Duo Cup", date: "Nov 29, 2023", time: "08:30 PM", entryFee: 40, prizePool: 1000, slotsFilled: 95, slotsTotal: 100, mode: "Duo" },
+            { id: 6, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Solo Showdown", date: "Dec 01, 2023", time: "07:00 PM", entryFee: 60, prizePool: 2500, slotsFilled: 20, slotsTotal: 100, mode: "Solo" }
+        ];
+
+        function renderTournaments(filter) {
+            const grid = document.getElementById('tournament-grid');
+            const noResults = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' ? tournaments : tournaments.filter(t => t.game === filter);
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            filtered.forEach(t => {
+                const percentage = Math.round((t.slotsFilled / t.slotsTotal) * 100);
+                const isFull = t.slotsFilled >= t.slotsTotal;
+                
+                const card = document.createElement('div');
+                card.className = "tournament-card glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
+                
+                card.innerHTML = `
+                    <div class="bg-gradient-to-br ${t.color} p-4 relative">
+                        <div class="flex justify-between items-start">
+                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
+                                <i class="fa-solid ${t.icon}"></i> ${t.gameName}
+                            </div>
+                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white">${t.mode}</div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mt-6 drop-shadow-lg">${t.name}</h3>
+                    </div>
+                    
+                    <div class="p-5 flex-grow">
+                        <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                            <div class="bg-gray-800/50 rounded-lg p-3">
+                                <p class="text-xs text-gray-400 mb-1">Entry Fee</p>
+                                <p class="text-white font-bold">Rs. ${t.entryFee}</p>
+                            </div>
+                            <div class="bg-gray-800/50 rounded-lg p-3">
+                                <p class="text-xs text-gray-400 mb-1">Prize Pool</p>
+                                <p class="text-green-400 font-bold">Rs. ${t.prizePool}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm mb-4">
+                            <span class="text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${t.date}</span>
+                            <span class="text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${t.time}</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>Slots Filled</span>
+                                <span>${t.slotsFilled}/${t.slotsTotal}</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 pt-0">
+                        <button onclick="registerForTournament('${t.name}')" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
+                            ${isFull ? 'Tournament Full' : 'Register Now'}
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterTournaments(game, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTournaments(game);
+        }
+
+        function registerForTournament(name) {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                alert("You need to login first to register for a tournament.");
+                window.location.href = 'member.html';
+                return;
+            }
+            alert(`Success! You have registered for "${name}".\n\nCheck your dashboard for updates.`);
+        }
+
+        window.onload = function() { renderTournaments('all'); };
+    </script>
+</body>
+</html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Winners - Nepal Gaming Platform</title>
