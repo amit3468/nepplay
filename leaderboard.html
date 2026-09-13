@@ -19,23 +19,57 @@
         .trend-down { color: #f87171; }
         .trend-flat { color: #94a3b8; }
         .highlight-you { background-color: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; }
+        
+        /* Profile Dropdown */
+        .profile-dropdown { display: none; }
+        .profile-dropdown.open { display: block; }
+        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        
+        <!-- LEFT: Logo + User Profile -->
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+            </div>
+
+            <div id="user-profile" class="hidden relative">
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
+                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                </button>
+                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
+                    <div class="p-3 border-b border-gray-700">
+                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
+                    </div>
+                    <div class="py-1">
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
+                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                    </div>
+                    <div class="py-1 border-t border-gray-700">
+                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-blue-400 font-bold">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
 
@@ -46,7 +80,6 @@
             <p class="text-gray-400">Top players ranked by total earnings and tournament wins.</p>
         </div>
 
-        <!-- Filter Tabs -->
         <div class="flex flex-wrap justify-center gap-3 mb-8">
             <button class="filter-btn active px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterLeaderboard('global', this)">
                 <i class="fa-solid fa-globe mr-1"></i> All Time
@@ -59,7 +92,6 @@
             </button>
         </div>
 
-        <!-- Top 3 Podium -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end max-w-4xl mx-auto">
             <div class="podium-card glass-panel rounded-xl p-6 text-center order-2 md:order-1 relative">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
@@ -104,7 +136,6 @@
             </div>
         </div>
 
-        <!-- Search Bar -->
         <div class="max-w-4xl mx-auto mb-4">
             <div class="glass-panel rounded-lg flex items-center px-4 py-2">
                 <i class="fa-solid fa-search text-gray-500 mr-3"></i>
@@ -112,7 +143,6 @@
             </div>
         </div>
 
-        <!-- Full Rankings Table -->
         <div class="glass-panel rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-400">
@@ -144,6 +174,35 @@
 
     <script>
         console.log("--- LEADERBOARD PAGE LOADED ---");
+
+        function checkUserStatus() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user && user.username) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+                document.getElementById('user-name').textContent = user.username;
+                document.getElementById('dropdown-username').textContent = user.email || user.username;
+                document.getElementById('nav-login-btn').classList.add('hidden');
+            } else {
+                document.getElementById('user-profile').classList.add('hidden');
+                document.getElementById('nav-login-btn').classList.remove('hidden');
+            }
+        }
+
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const profile = document.getElementById('user-profile');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.reload();
+        }
 
         const leaderboardData = [
             { rank: 1, name: "Rahul Sharma", wins: 72, earnings: 125500, trend: "up" },
@@ -181,7 +240,6 @@
         let currentData = leaderboardData;
 
         function renderLeaderboard(data) {
-            console.log("Rendering leaderboard with", data.length, "entries");
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = '';
 
@@ -198,13 +256,9 @@
                 row.className = rowClass;
 
                 let trendHtml = '';
-                if (player.trend === 'up') {
-                    trendHtml = '<span class="trend-up"><i class="fa-solid fa-arrow-up"></i> Up</span>';
-                } else if (player.trend === 'down') {
-                    trendHtml = '<span class="trend-down"><i class="fa-solid fa-arrow-down"></i> Down</span>';
-                } else {
-                    trendHtml = '<span class="trend-flat"><i class="fa-solid fa-minus"></i> Same</span>';
-                }
+                if (player.trend === 'up') trendHtml = '<span class="trend-up"><i class="fa-solid fa-arrow-up"></i> Up</span>';
+                else if (player.trend === 'down') trendHtml = '<span class="trend-down"><i class="fa-solid fa-arrow-down"></i> Down</span>';
+                else trendHtml = '<span class="trend-flat"><i class="fa-solid fa-minus"></i> Same</span>';
 
                 let rankClass = "text-gray-400 font-bold";
                 let rankIcon = '';
@@ -227,7 +281,6 @@
         }
 
         function filterLeaderboard(period, btn) {
-            console.log("Filtering leaderboard by:", period);
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
@@ -245,6 +298,7 @@
         });
 
         window.onload = function() {
+            checkUserStatus();
             renderLeaderboard(leaderboardData);
         };
     </script>
