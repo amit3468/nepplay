@@ -1,567 +1,532 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Teams</title>
-
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #080b12;
-    color: white;
-    min-height: 100vh;
-}
-
-header {
-    background: #0d111b;
-    border-bottom: 1px solid #202634;
-    padding: 18px 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.logo { font-size: 27px; font-weight: 800; letter-spacing: 1px; }
-.logo span { color: #ff3b30; }
-nav { display: flex; align-items: center; gap: 28px; }
-nav a {
-    color: #c7ccd7; text-decoration: none;
-    font-size: 15px; font-weight: 600;
-}
-nav a:hover, nav a.active { color: #ff4438; }
-.login-btn {
-    background: #ff3b30; color: white !important;
-    padding: 10px 20px; border-radius: 7px;
-}
-
-.hero { text-align: center; padding: 60px 20px 30px; }
-.hero h1 { font-size: 46px; margin-bottom: 15px; }
-.hero h1 span { color: #ff3b30; }
-.hero p { color: #9299a8; font-size: 17px; max-width: 600px; margin: 0 auto; }
-
-.controls {
-    width: 88%; max-width: 1200px;
-    margin: 30px auto 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 15px; flex-wrap: wrap;
-}
-.game-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
-.game-tab {
-    padding: 10px 18px;
-    background: #111621; border: 1px solid #293141;
-    border-radius: 7px; color: #c5cbd6;
-    cursor: pointer; font-weight: 600; font-size: 14px;
-}
-.game-tab.active, .game-tab:hover {
-    background: #ff3b30; border-color: #ff3b30; color: white;
-}
-.search-input {
-    background: #111621; border: 1px solid #293141;
-    border-radius: 7px; padding: 10px 15px;
-    color: white; outline: none; min-width: 240px; font-size: 14px;
-}
-.search-input:focus { border-color: #ff3b30; }
-
-.container {
-    width: 88%; max-width: 1200px;
-    margin: auto; padding-bottom: 70px;
-}
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
-}
-.team-card {
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; padding: 20px;
-    cursor: pointer; transition: 0.2s;
-    display: flex; flex-direction: column;
-}
-.team-card:hover {
-    border-color: #ff3b30; transform: translateY(-3px);
-}
-.team-header {
-    display: flex; align-items: center;
-    gap: 14px; margin-bottom: 16px;
-}
-.team-avatar {
-    width: 52px; height: 52px; border-radius: 12px;
-    background: linear-gradient(135deg, #ff3b30, #b91c1c);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 900;
-    flex-shrink: 0; letter-spacing: 0.5px;
-}
-.team-info { flex: 1; min-width: 0; }
-.team-name {
-    font-size: 17px; font-weight: bold;
-    margin-bottom: 3px; word-break: break-word;
-}
-.team-captain { color: #9299a8; font-size: 12px; }
-.team-captain a {
-    color: #9299a8; text-decoration: none;
-}
-.team-captain a:hover { color: #ff4438; text-decoration: underline; }
-.team-rank-badge {
-    display: inline-block; padding: 4px 10px;
-    border-radius: 20px; font-size: 11px;
-    font-weight: bold; margin-top: 4px;
-}
-.rank-1 { background: rgba(255,212,59,0.15); color: #ffd43b; }
-.rank-2 { background: rgba(184,190,199,0.15); color: #b8bec7; }
-.rank-3 { background: rgba(205,127,50,0.15); color: #cd7f32; }
-
-.team-stats {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 8px; margin-top: auto;
-    padding-top: 16px; border-top: 1px solid #1e293b;
-}
-.team-stat { text-align: center; }
-.team-stat-value {
-    font-size: 18px; font-weight: bold; color: white;
-}
-.team-stat-value.points { color: #ff4438; }
-.team-stat-value.wins { color: #5bed8e; }
-.team-stat-label {
-    color: #64748b; font-size: 10px;
-    text-transform: uppercase; margin-top: 2px;
-    letter-spacing: 0.4px;
-}
-.team-games {
-    margin-top: 12px;
-    display: flex; flex-wrap: wrap; gap: 6px;
-}
-.game-chip {
-    background: #1a2233; border: 1px solid #2d3a55;
-    color: #a8b6d1; padding: 3px 8px;
-    border-radius: 5px; font-size: 10px; font-weight: 600;
-}
-
-.empty, .loading {
-    text-align: center; padding: 70px 20px;
-    color: #8993a2; font-size: 14px; line-height: 1.7;
-    background: #111621; border: 1px solid #242b39;
-    border-radius: 12px; grid-column: 1 / -1;
-}
-.loading-spinner {
-    display: inline-block;
-    width: 30px; height: 30px;
-    border: 3px solid #242b39;
-    border-top-color: #ff3b30;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 15px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.modal {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.8); z-index: 200;
-    align-items: center; justify-content: center;
-    padding: 20px; overflow-y: auto;
-}
-.modal.show { display: flex; }
-.modal-box {
-    width: 100%; max-width: 600px;
-    max-height: 90vh; overflow-y: auto;
-    background: #111621; border: 1px solid #334155;
-    border-radius: 14px; padding: 25px;
-}
-.modal-header {
-    display: flex; justify-content: space-between;
-    align-items: flex-start; gap: 15px;
-    margin-bottom: 22px;
-}
-.modal-team-name { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
-.modal-captain { color: #9299a8; font-size: 13px; }
-.modal-captain a {
-    color: #ff4438; text-decoration: none; font-weight: bold;
-}
-.modal-captain a:hover { text-decoration: underline; }
-.close-btn {
-    border: none; background: transparent;
-    color: #94a3b8; font-size: 26px;
-    cursor: pointer; line-height: 1; padding: 0 5px;
-}
-.close-btn:hover { color: white; }
-.modal-stats {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 12px; margin-bottom: 22px;
-}
-.modal-stat {
-    background: #0b1220; border: 1px solid #1e293b;
-    border-radius: 10px; padding: 16px; text-align: center;
-}
-.modal-stat-value {
-    font-size: 26px; font-weight: bold;
-    color: #ff4438; margin-bottom: 4px;
-}
-.modal-stat-label {
-    color: #9299a8; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-}
-.match-history-title {
-    font-size: 15px; font-weight: bold;
-    margin-bottom: 12px; color: #c5cbd6;
-}
-.match-history { display: grid; gap: 8px; }
-.match-row {
-    background: #0b1220; border: 1px solid #1e293b;
-    border-radius: 8px; padding: 11px 14px;
-    display: flex; justify-content: space-between;
-    align-items: center; gap: 12px; font-size: 13px;
-}
-.match-row.win { border-left: 3px solid #5bed8e; }
-.match-row.loss { border-left: 3px solid #ff7d76; }
-.match-row.tie { border-left: 3px solid #ffd75a; }
-.match-opponent {
-    flex: 1; color: #c5cbd6;
-    min-width: 0; word-break: break-word;
-}
-.match-result-badge {
-    font-weight: bold; font-size: 11px;
-    padding: 3px 8px; border-radius: 4px;
-}
-.result-win { background: rgba(91,237,142,0.15); color: #5bed8e; }
-.result-loss { background: rgba(255,125,118,0.15); color: #ff7d76; }
-.result-tie { background: rgba(255,215,90,0.15); color: #ffd75a; }
-
-footer {
-    border-top: 1px solid #202634;
-    text-align: center; padding: 25px;
-    color: #717887; font-size: 13px;
-}
-
-@media (max-width: 750px) {
-    header { flex-direction: column; gap: 15px; }
-    nav { flex-wrap: wrap; justify-content: center; gap: 14px; }
-    .hero h1 { font-size: 34px; }
-    .controls { flex-direction: column; align-items: stretch; }
-    .search-input { width: 100%; }
-    .team-grid { grid-template-columns: 1fr; }
-    .modal-stats { grid-template-columns: 1fr 1fr; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .team-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .team-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); }
+        .tab-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
+        .role-captain { background-color: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
+        .role-member { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+    </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<header>
-    <div class="logo">NEP<span>PLAY</span></div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="tournaments.html">Tournaments</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="teams.html" class="active">Teams</a>
-        <a href="winners.html">Winners</a>
-        <a href="login.html" class="login-btn">Login</a>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-blue-400 font-bold">Teams</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
+        </div>
     </nav>
-</header>
 
-<section class="hero">
-    <h1>NEPPLAY <span>Teams</span></h1>
-    <p>Discover competitive gaming teams from Nepal, follow their progress and compete in NEPPLAY tournaments.</p>
-</section>
+    <main class="flex-grow container mx-auto p-6">
+        
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-users-rays text-blue-500 mr-3"></i>Teams</h1>
+            <p class="text-gray-400">Create a team, invite friends, and dominate together.</p>
+        </div>
 
-<div class="controls">
-    <div class="game-tabs">
-        <button class="game-tab active" data-game="all" onclick="changeGame('all', this)">All Games</button>
-        <button class="game-tab" data-game="Free Fire" onclick="changeGame('Free Fire', this)">Free Fire</button>
-        <button class="game-tab" data-game="PUBG Mobile" onclick="changeGame('PUBG Mobile', this)">PUBG Mobile</button>
-        <button class="game-tab" data-game="Mobile Legends" onclick="changeGame('Mobile Legends', this)">Mobile Legends</button>
-        <button class="game-tab" data-game="eFootball" onclick="changeGame('eFootball', this)">eFootball</button>
-    </div>
-    <input type="text" class="search-input" id="searchBox" placeholder="Search team or captain..." oninput="renderTeams()">
-</div>
+        <!-- Toggle Tabs -->
+        <div class="flex justify-center gap-3 mb-8">
+            <button id="tabMyTeams" class="tab-btn active px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="showView('my', this)">
+                <i class="fa-solid fa-user-group mr-1"></i> My Teams
+            </button>
+            <button id="tabBrowse" class="tab-btn px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="showView('browse', this)">
+                <i class="fa-solid fa-globe mr-1"></i> Browse Teams
+            </button>
+            <button onclick="openCreateModal()" class="px-6 py-2 rounded-full bg-green-600 hover:bg-green-700 text-sm font-semibold text-white transition">
+                <i class="fa-solid fa-plus mr-1"></i> Create Team
+            </button>
+        </div>
 
-<main class="container">
-    <div class="team-grid" id="teamGrid">
-        <div class="loading">
-            <div class="loading-spinner"></div>
-            <div>Loading teams...</div>
+        <!-- Empty State (shows when user has no teams) -->
+        <div id="empty-my-teams" class="hidden text-center py-20">
+            <i class="fa-solid fa-users-slash text-6xl text-gray-600 mb-4"></i>
+            <h2 class="text-xl font-bold text-white mb-2">You're not in any team yet</h2>
+            <p class="text-gray-400 mb-6">Create your own team or browse existing ones to join.</p>
+            <button onclick="openCreateModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition">
+                <i class="fa-solid fa-plus mr-2"></i> Create My Team
+            </button>
+        </div>
+
+        <!-- Teams Grid -->
+        <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Team cards injected via JS -->
+        </div>
+
+    </main>
+
+    <!-- Create Team Modal -->
+    <div id="createModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Team</h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="createTeamForm" onsubmit="createTeam(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Team Name *</label>
+                    <input type="text" id="teamName" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="e.g., Kathmandu Kings" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Tagline</label>
+                    <input type="text" id="teamTagline" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="e.g., Born to win" maxlength="50">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
+                        <select id="teamGame" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" required>
+                            <option value="">Select</option>
+                            <option value="freefire">Free Fire</option>
+                            <option value="pubg">PUBG Mobile</option>
+                            <option value="valorant">Valorant</option>
+                            <option value="cod">COD Mobile</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Max Members *</label>
+                        <input type="number" id="teamMax" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" min="2" max="10" value="4" required>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="teamPublic" class="w-4 h-4 rounded">
+                        <span class="text-sm text-gray-300">Make team public (others can request to join)</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+                        <i class="fa-solid fa-check mr-2"></i>Create Team
+                    </button>
+                    <button type="button" onclick="closeCreateModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</main>
 
-<div id="teamModal" class="modal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div>
-                <div class="modal-team-name" id="modalTeamName">Team Name</div>
-                <div class="modal-captain" id="modalCaptain">Captain</div>
+    <!-- Team Details Modal -->
+    <div id="detailsModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white" id="detailsTitle">Team Details</h2>
+                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
-            <button class="close-btn" onclick="closeModal()">×</button>
-        </div>
-        <div class="modal-stats">
-            <div class="modal-stat">
-                <div class="modal-stat-value" id="modalPoints">0</div>
-                <div class="modal-stat-label">Points</div>
-            </div>
-            <div class="modal-stat">
-                <div class="modal-stat-value" id="modalWins">0</div>
-                <div class="modal-stat-label">Wins</div>
-            </div>
-            <div class="modal-stat">
-                <div class="modal-stat-value" id="modalPlayed">0</div>
-                <div class="modal-stat-label">Matches Played</div>
-            </div>
-            <div class="modal-stat">
-                <div class="modal-stat-value" id="modalWinRate">0%</div>
-                <div class="modal-stat-label">Win Rate</div>
+            <div id="detailsContent">
+                <!-- Content injected via JS -->
             </div>
         </div>
-        <div class="match-history-title">Recent Matches</div>
-        <div class="match-history" id="modalMatchHistory">Loading...</div>
     </div>
-</div>
 
-<footer>
-    © 2026 NEPPLAY — Nepal Gaming Community
-</footer>
+    <!-- Footer -->
+    <footer class="glass-panel w-full p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
+            </div>
+            <div class="text-sm text-gray-500">&copy; 2023 Nepal Gaming. All rights reserved.</div>
+        </div>
+    </footer>
 
-<script>
+    <!-- Scripts -->
+    <script>
+        console.log("--- TEAMS PAGE LOADED ---");
 
-var allTeams = [];
-var allMatches = [];
-var currentGame = "all";
-
-function esc(value) {
-    if (value === undefined || value === null) return "";
-    return String(value)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function teamInitials(name) {
-    var words = String(name || "?").trim().split(/\s+/).filter(function (w) { return w.length > 0; });
-    if (words.length === 0) return "?";
-    if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
-    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
-}
-
-function loadTeams() {
-    fetch("/api/leaderboard", { cache: "no-store" })
-    .then(function (response) {
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        return response.json();
-    })
-    .then(function (data) {
-        var teams = [];
-        if (Array.isArray(data)) teams = data;
-        else if (data && Array.isArray(data.teams)) teams = data.teams;
-        allTeams = teams;
-        renderTeams();
-    })
-    .catch(function (error) {
-        console.error("Teams error:", error);
-        document.getElementById("teamGrid").innerHTML =
-            '<div class="empty">Could not load teams.<br>Make sure the server is running.</div>';
-    });
-}
-
-function loadMatches() {
-    return fetch("/api/matches", { cache: "no-store" })
-    .then(function (response) { return response.json(); })
-    .then(function (data) {
-        var matches = [];
-        if (Array.isArray(data)) matches = data;
-        else if (data && Array.isArray(data.matches)) matches = data.matches;
-        allMatches = matches;
-    })
-    .catch(function () { allMatches = []; });
-}
-
-function getFilteredTeams() {
-    var teams = allTeams.slice();
-    if (currentGame !== "all") {
-        teams = teams.filter(function (t) {
-            var games = t.games || [];
-            if (Array.isArray(games) && games.length > 0) {
-                return games.indexOf(currentGame) !== -1;
+        // 1. Sample Teams Data
+        const allTeams = [
+            {
+                id: 1,
+                name: "Kathmandu Kings",
+                tagline: "Born to win",
+                game: "pubg",
+                gameName: "PUBG Mobile",
+                icon: "fa-crosshairs",
+                color: "from-yellow-500 to-orange-600",
+                isPublic: true,
+                maxMembers: 4,
+                earnings: 45000,
+                wins: 12,
+                createdBy: "rahul_sharma",
+                members: [
+                    { name: "Rahul Sharma", role: "Captain", isCurrentUser: false },
+                    { name: "Sujal Thapa", role: "Member", isCurrentUser: false },
+                    { name: "Bibek Gurung", role: "Member", isCurrentUser: false }
+                ]
+            },
+            {
+                id: 2,
+                name: "Pokhara Warriors",
+                tagline: "Fear the warriors",
+                game: "freefire",
+                gameName: "Free Fire",
+                icon: "fa-fire",
+                color: "from-orange-500 to-red-600",
+                isPublic: true,
+                maxMembers: 4,
+                earnings: 32000,
+                wins: 9,
+                createdBy: "sujal_thapa",
+                members: [
+                    { name: "Sujal Thapa", role: "Captain", isCurrentUser: false },
+                    { name: "Anish Rai", role: "Member", isCurrentUser: false }
+                ]
+            },
+            {
+                id: 3,
+                name: "Everest Esports",
+                tagline: "Reach the peak",
+                game: "valorant",
+                gameName: "Valorant",
+                icon: "fa-bullseye",
+                color: "from-red-500 to-pink-600",
+                isPublic: false,
+                maxMembers: 5,
+                earnings: 78000,
+                wins: 21,
+                createdBy: "bibek_gurung",
+                members: [
+                    { name: "Bibek Gurung", role: "Captain", isCurrentUser: false },
+                    { name: "Kiran Shah", role: "Member", isCurrentUser: false },
+                    { name: "Rita Shrestha", role: "Member", isCurrentUser: false },
+                    { name: "Hari Bahadur", role: "Member", isCurrentUser: false },
+                    { name: "Sita Karki", role: "Member", isCurrentUser: false }
+                ]
+            },
+            {
+                id: 4,
+                name: "Lalitpur Legends",
+                tagline: "Legends never die",
+                game: "cod",
+                gameName: "COD Mobile",
+                icon: "fa-gun",
+                color: "from-green-500 to-emerald-700",
+                isPublic: true,
+                maxMembers: 4,
+                earnings: 18500,
+                wins: 6,
+                createdBy: "anish_rai",
+                members: [
+                    { name: "Anish Rai", role: "Captain", isCurrentUser: false },
+                    { name: "Nabin Magar", role: "Member", isCurrentUser: false },
+                    { name: "Deepak Lama", role: "Member", isCurrentUser: false }
+                ]
             }
-            return String(t.game || "") === currentGame;
-        });
-    }
-    var search = (document.getElementById("searchBox").value || "").toLowerCase().trim();
-    if (search) {
-        teams = teams.filter(function (t) {
-            var text = ((t.name || "") + " " + (t.captain || "")).toLowerCase();
-            return text.indexOf(search) !== -1;
-        });
-    }
-    return teams;
-}
+        ];
 
-function renderTeams() {
-    var grid = document.getElementById("teamGrid");
-    var teams = getFilteredTeams();
-
-    if (teams.length === 0) {
-        grid.innerHTML =
-            '<div class="empty">' +
-                'No teams found.<br>' +
-                'Complete matches to start ranking teams.' +
-            '</div>';
-        return;
-    }
-
-    teams.sort(function (a, b) {
-        if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-        if ((b.wins || 0) !== (a.wins || 0)) return (b.wins || 0) - (a.wins || 0);
-        return String(a.name || "").localeCompare(String(b.name || ""));
-    });
-
-    grid.innerHTML = teams.map(function (team, index) {
-        var rank = index + 1;
-        var rankBadge = "";
-        if (rank === 1) rankBadge = '<span class="team-rank-badge rank-1">Rank #1</span>';
-        else if (rank === 2) rankBadge = '<span class="team-rank-badge rank-2">Rank #2</span>';
-        else if (rank === 3) rankBadge = '<span class="team-rank-badge rank-3">Rank #3</span>';
-
-        var gamesHtml = "";
-        if (Array.isArray(team.games) && team.games.length > 0) {
-            gamesHtml = '<div class="team-games">' +
-                team.games.map(function (g) {
-                    return '<span class="game-chip">' + esc(g) + '</span>';
-                }).join("") +
-            '</div>';
+        // Load custom-created teams from localStorage
+        function loadAllTeams() {
+            const custom = JSON.parse(localStorage.getItem('customTeams') || '[]');
+            return [...allTeams, ...custom];
         }
 
-        var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
+        // 2. View switching
+        let currentView = 'my';
 
-        var captainHtml = "-";
-        if (team.captain) {
-            captainHtml = 'Captain: <a href="player.html?username=' +
-                encodeURIComponent(team.captain) + '">' +
-                esc(team.captain) + '</a>';
+        function showView(view, btn) {
+            currentView = view;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTeams();
         }
 
-        var escapedTeamName = String(team.name || "").replace(/'/g, "\\'");
+        // 3. Render Teams
+        function renderTeams() {
+            const grid = document.getElementById('teams-grid');
+            const emptyState = document.getElementById('empty-my-teams');
+            const teams = loadAllTeams();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        return (
-            '<div class="team-card" onclick="openTeamModal(\'' + escapedTeamName + '\')">' +
-                '<div class="team-header">' +
-                    '<div class="team-avatar">' + teamInitials(team.name) + '</div>' +
-                    '<div class="team-info">' +
-                        '<div class="team-name">' + esc(team.name || "Unknown") + '</div>' +
-                        '<div class="team-captain">' + captainHtml + '</div>' +
-                        rankBadge +
-                    '</div>' +
-                '</div>' +
-                gamesHtml +
-                '<div class="team-stats">' +
-                    '<div class="team-stat"><div class="team-stat-value">' + (team.played || 0) + '</div><div class="team-stat-label">Played</div></div>' +
-                    '<div class="team-stat"><div class="team-stat-value wins">' + (team.wins || 0) + '</div><div class="team-stat-label">Wins</div></div>' +
-                    '<div class="team-stat"><div class="team-stat-value">' + winRate + '%</div><div class="team-stat-label">Win Rate</div></div>' +
-                    '<div class="team-stat"><div class="team-stat-value points">' + (team.points || 0) + '</div><div class="team-stat-label">Points</div></div>' +
-                '</div>' +
-            '</div>'
-        );
-    }).join("");
-}
+            console.log("Rendering", currentView, "view with", teams.length, "total teams");
 
-function openTeamModal(teamName) {
-    var team = allTeams.find(function (t) {
-        return String(t.name || "") === String(teamName);
-    });
-    if (!team) return;
+            // Filter teams based on view
+            let displayTeams = teams;
+            if (currentView === 'my') {
+                if (!currentUser) {
+                    displayTeams = [];
+                } else {
+                    displayTeams = teams.filter(t => t.createdBy === currentUser.username);
+                }
+            } else {
+                // Browse view - show only public teams
+                displayTeams = teams.filter(t => t.isPublic);
+            }
 
-    document.getElementById("modalTeamName").textContent = team.name || "Unknown";
+            grid.innerHTML = '';
 
-    var captEl = document.getElementById("modalCaptain");
-    if (team.captain) {
-        captEl.innerHTML = 'Captain: <a href="player.html?username=' +
-            encodeURIComponent(team.captain) + '">' +
-            esc(team.captain) + '</a>';
-    } else {
-        captEl.textContent = "Captain: Not set";
-    }
+            if (displayTeams.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                if (currentView === 'browse') {
+                    emptyState.innerHTML = `
+                        <i class="fa-solid fa-globe text-6xl text-gray-600 mb-4"></i>
+                        <h2 class="text-xl font-bold text-white mb-2">No public teams available</h2>
+                        <p class="text-gray-400 mb-6">Check back later or create your own team!</p>
+                    `;
+                    emptyState.classList.remove('hidden');
+                }
+                return;
+            }
 
-    document.getElementById("modalPoints").textContent = team.points || 0;
-    document.getElementById("modalWins").textContent = team.wins || 0;
-    document.getElementById("modalPlayed").textContent = team.played || 0;
-    var winRate = team.played > 0 ? Math.round((team.wins / team.played) * 100) : 0;
-    document.getElementById("modalWinRate").textContent = winRate + "%";
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
 
-    renderMatchHistory(team.name);
-    document.getElementById("teamModal").classList.add("show");
-}
+            displayTeams.forEach(team => {
+                const fillPercent = (team.members.length / team.maxMembers) * 100;
+                const isFull = team.members.length >= team.maxMembers;
+                const isOwner = currentUser && team.createdBy === currentUser.username;
 
-function renderMatchHistory(teamName) {
-    var container = document.getElementById("modalMatchHistory");
+                const card = document.createElement('div');
+                card.className = "team-card glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
 
-    if (allMatches.length === 0) {
-        container.innerHTML =
-            '<div style="color:#8993a2;padding:20px;text-align:center;">No match history available.</div>';
-        return;
-    }
+                card.innerHTML = `
+                    <div class="bg-gradient-to-br ${team.color} p-5 relative">
+                        <div class="flex justify-between items-start">
+                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
+                                <i class="fa-solid ${team.icon}"></i> ${team.gameName}
+                            </div>
+                            ${team.isPublic ? 
+                                '<div class="bg-green-500/30 rounded-full px-3 py-1 text-xs font-bold text-green-300 border border-green-500">Public</div>' :
+                                '<div class="bg-gray-500/30 rounded-full px-3 py-1 text-xs font-bold text-gray-300 border border-gray-500">Private</div>'}
+                        </div>
+                        <div class="flex items-center gap-3 mt-5">
+                            <div class="w-14 h-14 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
+                                <span class="text-2xl font-bold text-white">${team.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white drop-shadow">${team.name}</h3>
+                                <p class="text-xs text-white/80 italic">"${team.tagline}"</p>
+                            </div>
+                        </div>
+                    </div>
 
-    var key = String(teamName || "").toLowerCase().trim();
-    var teamMatches = allMatches.filter(function (m) {
-        var t1 = String(m.team1 || "").toLowerCase().trim();
-        var t2 = String(m.team2 || "").toLowerCase().trim();
-        if (t1 !== key && t2 !== key) return false;
-        var s = String(m.status || "").toLowerCase();
-        return s === "completed" || s === "complete" || s === "finished" || s === "finish";
-    });
+                    <div class="p-5 flex-grow">
+                        <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+                            <div class="bg-gray-800/50 rounded-lg p-3">
+                                <p class="text-xs text-gray-400 mb-1">Total Earnings</p>
+                                <p class="text-green-400 font-bold">Rs. ${team.earnings.toLocaleString()}</p>
+                            </div>
+                            <div class="bg-gray-800/50 rounded-lg p-3">
+                                <p class="text-xs text-gray-400 mb-1">Wins</p>
+                                <p class="text-yellow-400 font-bold">${team.wins}</p>
+                            </div>
+                        </div>
 
-    if (teamMatches.length === 0) {
-        container.innerHTML =
-            '<div style="color:#8993a2;padding:20px;text-align:center;">This team has no completed matches yet.</div>';
-        return;
-    }
+                        <div class="mb-4">
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>Members</span>
+                                <span>${team.members.length}/${team.maxMembers}</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: ${fillPercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
 
-    teamMatches = teamMatches.slice(-10).reverse();
+                    <div class="p-5 pt-0 flex gap-2">
+                        <button onclick="viewTeamDetails(${team.id})" class="flex-grow glass-panel hover:bg-gray-800/50 text-white font-bold py-2 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-eye mr-1"></i> View
+                        </button>
+                        ${isOwner ? 
+                            '<button onclick="manageTeam(' + team.id + ')" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fa-solid fa-gear mr-1"></i> Manage</button>' :
+                            (isFull ?
+                                '<button disabled class="flex-grow bg-gray-600 text-white font-bold py-2 rounded-lg text-sm cursor-not-allowed"><i class="fa-solid fa-lock mr-1"></i> Full</button>' :
+                                '<button onclick="joinTeam(' + team.id + ')" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Join</button>'
+                            )}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-    container.innerHTML = teamMatches.map(function (m) {
-        var t1 = String(m.team1 || "").toLowerCase().trim();
-        var isTeam1 = t1 === key;
-        var opponent = isTeam1 ? (m.team2 || "Unknown") : (m.team1 || "Unknown");
-        var winner = String(m.winner || "").toLowerCase().trim();
+        // 4. Create Team Modal
+        function openCreateModal() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                alert("You need to login first to create a team.");
+                window.location.href = 'member.html';
+                return;
+            }
+            document.getElementById('createModal').classList.remove('hidden');
+        }
 
-        var result, resultClass;
-        if (!winner) { result = "TIE"; resultClass = "result-tie"; }
-        else if (winner === key) { result = "WIN"; resultClass = "result-win"; }
-        else { result = "LOSS"; resultClass = "result-loss"; }
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+            document.getElementById('createTeamForm').reset();
+        }
 
-        var rowClass = result === "WIN" ? "match-row win"
-            : result === "LOSS" ? "match-row loss"
-            : "match-row tie";
+        function createTeam(event) {
+            event.preventDefault();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            const name = document.getElementById('teamName').value.trim();
+            const tagline = document.getElementById('teamTagline').value.trim() || "Ready to battle!";
+            const game = document.getElementById('teamGame').value;
+            const max = parseInt(document.getElementById('teamMax').value);
+            const isPublic = document.getElementById('teamPublic').checked;
 
-        return (
-            '<div class="' + rowClass + '">' +
-                '<div class="match-opponent">vs ' + esc(opponent) + '</div>' +
-                '<span class="match-result-badge ' + resultClass + '">' + result + '</span>' +
-            '</div>'
-        );
-    }).join("");
-}
+            if (!name || !game) {
+                alert("Please fill in all required fields.");
+                return;
+            }
 
-function closeModal() {
-    document.getElementById("teamModal").classList.remove("show");
-}
+            const gameMap = {
+                freefire: { name: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600" },
+                pubg: { name: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
+                valorant: { name: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
+                cod: { name: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" }
+            };
 
-function changeGame(game, button) {
-    currentGame = game;
-    document.querySelectorAll(".game-tab").forEach(function (btn) {
-        btn.classList.remove("active");
-    });
-    button.classList.add("active");
-    renderTeams();
-}
+            const newTeam = {
+                id: Date.now(),
+                name: name,
+                tagline: tagline,
+                game: game,
+                gameName: gameMap[game].name,
+                icon: gameMap[game].icon,
+                color: gameMap[game].color,
+                isPublic: isPublic,
+                maxMembers: max,
+                earnings: 0,
+                wins: 0,
+                createdBy: currentUser.username,
+                members: [
+                    { name: currentUser.username, role: "Captain", isCurrentUser: true }
+                ]
+            };
 
-document.getElementById("teamModal").addEventListener("click", function (e) {
-    if (e.target === this) closeModal();
-});
+            const existing = JSON.parse(localStorage.getItem('customTeams') || '[]');
+            existing.push(newTeam);
+            localStorage.setItem('customTeams', JSON.stringify(existing));
 
-loadMatches().then(function () { loadTeams(); });
+            console.log("Team created:", newTeam);
 
-</script>
+            closeCreateModal();
+            alert(`✅ Team "${name}" created successfully!\n\nYou are now the captain.`);
+            
+            // Switch to "My Teams" view
+            document.getElementById('tabMyTeams').click();
+        }
 
+        // 5. View Team Details
+        function viewTeamDetails(teamId) {
+            const teams = loadAllTeams();
+            const team = teams.find(t => t.id === teamId);
+            if (!team) return;
+
+            document.getElementById('detailsTitle').innerHTML = `<i class="fa-solid ${team.icon} mr-2"></i>${team.name}`;
+            
+            const membersHtml = team.members.map(m => `
+                <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg mb-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                        ${m.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-white text-sm">${m.name}</p>
+                        <span class="text-xs px-2 py-0.5 rounded-full ${m.role === 'Captain' ? 'role-captain' : 'role-member'}">
+                            ${m.role === 'Captain' ? '<i class="fa-solid fa-crown mr-1"></i>' : ''}${m.role}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('detailsContent').innerHTML = `
+                <div class="bg-gradient-to-br ${team.color} rounded-lg p-4 mb-4 text-center">
+                    <div class="w-20 h-20 mx-auto rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 mb-2">
+                        <span class="text-3xl font-bold text-white">${team.name.charAt(0)}</span>
+                    </div>
+                    <p class="text-white/80 text-sm italic">"${team.tagline}"</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-4 text-center">
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400">Earnings</p>
+                        <p class="text-green-400 font-bold text-sm">Rs. ${team.earnings.toLocaleString()}</p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400">Wins</p>
+                        <p class="text-yellow-400 font-bold text-sm">${team.wins}</p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400">Members</p>
+                        <p class="text-blue-400 font-bold text-sm">${team.members.length}/${team.maxMembers}</p>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-white mb-3"><i class="fa-solid fa-users mr-2"></i>Team Members</h3>
+                ${membersHtml}
+
+                <div class="mt-4 flex gap-2">
+                    <button onclick="closeDetailsModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition text-sm">Close</button>
+                </div>
+            `;
+
+            document.getElementById('detailsModal').classList.remove('hidden');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.add('hidden');
+        }
+
+        // 6. Join Team
+        function joinTeam(teamId) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                alert("Please login first to join a team.");
+                window.location.href = 'member.html';
+                return;
+            }
+            const teams = loadAllTeams();
+            const team = teams.find(t => t.id === teamId);
+            if (team) {
+                alert(`✅ Join request sent to "${team.name}"!\n\nThe captain will review your request.`);
+            }
+        }
+
+        // 7. Manage Team (owner only)
+        function manageTeam(teamId) {
+            alert("Team management panel coming soon! You'll be able to invite, kick, and edit your team.");
+        }
+
+        // 8. Modal backdrop click to close
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCreateModal();
+        });
+        document.getElementById('detailsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDetailsModal();
+        });
+
+        // Initialize
+        window.onload = function() {
+            renderTeams();
+        };
+    </script>
 </body>
 </html>
