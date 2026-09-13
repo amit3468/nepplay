@@ -32,7 +32,6 @@
         .period-tab.active { background-color: #3b82f6; border-color: #3b82f6; color: white; }
         .period-tab:hover:not(.active) { border-color: #3b82f6; }
         
-        /* Login Screen */
         #loginScreen {
             position: fixed;
             inset: 0;
@@ -44,17 +43,35 @@
             padding: 20px;
         }
         
-        /* Payout status badge */
         .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         
-        /* Shake animation for wrong password */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
         .shake { animation: shake 0.3s; }
+
+        /* Image Upload Area */
+        .upload-zone {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-zone:hover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
+        .upload-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+
+        /* Announcement Preview */
+        .announcement-preview {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 10px;
+            overflow: hidden;
+            border-left: 4px solid;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -92,10 +109,9 @@
         </div>
     </div>
 
-    <!-- ============ MAIN ADMIN PANEL (hidden until login) ============ -->
+    <!-- ============ MAIN ADMIN PANEL ============ -->
     <div id="mainPanel" class="hidden min-h-screen flex flex-col">
 
-        <!-- Admin Navbar -->
         <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-700">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-3">
@@ -138,7 +154,6 @@
 
         <div class="flex-grow flex">
             
-            <!-- Sidebar -->
             <aside class="hidden md:flex flex-col w-64 glass-panel border-r border-gray-700 p-4 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
                 <div class="mb-6">
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
@@ -152,7 +167,7 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p>v1.3.0</p>
+                    <p>v1.4.0</p>
                     <p>&copy; 2023 Nepal Gaming</p>
                 </div>
             </aside>
@@ -296,7 +311,7 @@
                                         <span class="text-green-400 font-bold" id="source-commission">Rs. 0</span>
                                     </div>
                                     <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div class="bg-green-500 h-2 rounded-full" id="source-commission-bar" style="width: 20%"></div>
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 20%"></div>
                                     </div>
                                 </div>
                                 <div>
@@ -305,7 +320,7 @@
                                         <span class="text-red-400 font-bold" id="source-payouts">Rs. 0</span>
                                     </div>
                                     <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div class="bg-red-500 h-2 rounded-full" id="source-payouts-bar" style="width: 80%"></div>
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 80%"></div>
                                     </div>
                                 </div>
                             </div>
@@ -526,41 +541,100 @@
                     </div>
                 </div>
 
-                <!-- ============ ANNOUNCEMENTS ============ -->
+                <!-- ============ ANNOUNCEMENTS (WITH IMAGE UPLOAD!) ============ -->
                 <div id="tab-announcements" class="tab-content">
                     <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-white">Announcements</h1>
-                        <p class="text-gray-400 mt-1">Post a new announcement that appears on all member dashboards.</p>
+                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
+                        <p class="text-gray-400 mt-1">Post announcements with optional images. They'll appear on all member dashboards.</p>
                     </div>
 
-                    <div class="glass-panel rounded-xl p-6 max-w-3xl">
-                        <form id="announcementForm" onsubmit="createAnnouncement(event)">
-                            <div class="mb-5">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Announcement Title *</label>
-                                <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., New Tournament Announcement" required>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
+                        
+                        <!-- LEFT: Form -->
+                        <div class="glass-panel rounded-xl p-6">
+                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Create Announcement</h2>
+                            <form id="announcementForm" onsubmit="createAnnouncement(event)">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                                    <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., New Tournament Announced!" required oninput="updatePreview()">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
+                                    <textarea id="a-message" rows="3" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Type your announcement here..." required oninput="updatePreview()"></textarea>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                                    <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg" onchange="updatePreview()">
+                                        <option value="normal">Normal (Blue)</option>
+                                        <option value="high">High (Yellow)</option>
+                                        <option value="urgent">Urgent (Red)</option>
+                                    </select>
+                                </div>
+
+                                <!-- IMAGE UPLOAD AREA -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        Announcement Image (Optional)
+                                    </label>
+                                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+                                        <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                                        <div id="uploadPlaceholder">
+                                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 mb-2"></i>
+                                            <p class="text-sm text-gray-400">Click to upload or drag & drop</p>
+                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (max 2MB)</p>
+                                        </div>
+                                        <div id="uploadPreview" class="hidden">
+                                            <img id="previewImage" class="max-h-40 mx-auto rounded-lg mb-3" src="">
+                                            <button type="button" onclick="event.stopPropagation(); removeImage()" class="text-red-400 hover:text-red-300 text-sm">
+                                                <i class="fa-solid fa-trash mr-1"></i>Remove Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p id="image-size-warning" class="hidden text-yellow-400 text-xs mt-2">
+                                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>Image is large. Recommended: under 500KB for best performance.
+                                    </p>
+                                </div>
+
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                                    <i class="fa-solid fa-bullhorn mr-2"></i> Publish Announcement
+                                </button>
+                                <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
+                            </form>
+                        </div>
+
+                        <!-- RIGHT: Live Preview -->
+                        <div class="glass-panel rounded-xl p-6">
+                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-eye text-green-500 mr-2"></i>Live Preview</h2>
+                            <p class="text-xs text-gray-500 mb-4">This is how it will appear on member dashboards.</p>
+                            
+                            <div id="livePreview" class="announcement-preview border-blue-500">
+                                <div id="previewImageContainer" class="hidden">
+                                    <img id="previewImg" class="w-full h-40 object-cover" src="">
+                                </div>
+                                <div class="p-4">
+                                    <h3 id="previewTitle" class="font-bold text-white text-sm">Your Announcement Title</h3>
+                                    <p id="previewMessage" class="text-xs text-gray-400 mt-1">Your announcement message will appear here...</p>
+                                </div>
                             </div>
-                            <div class="mb-5">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
-                                <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Type your announcement here..." required></textarea>
+
+                            <div class="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                <p class="text-xs text-blue-300">
+                                    <i class="fa-solid fa-lightbulb mr-1"></i>
+                                    <strong>Tip:</strong> Announcements with images get 3x more attention. Use them for tournament banners, winner celebrations, or important updates.
+                                </p>
                             </div>
-                            <div class="mb-5">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                                <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg">
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High (shows in yellow)</option>
-                                    <option value="urgent">Urgent (shows in red)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
-                                <i class="fa-solid fa-bullhorn mr-2"></i> Publish Announcement
+                        </div>
+                    </div>
+
+                    <!-- RECENT ANNOUNCEMENTS -->
+                    <div class="mt-8 max-w-6xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-white">Recent Announcements</h2>
+                            <button onclick="clearAllAnnouncements()" class="text-red-400 hover:text-red-300 text-sm">
+                                <i class="fa-solid fa-trash mr-1"></i>Clear All
                             </button>
-                            <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
-                        </form>
-                    </div>
-
-                    <div class="mt-8 max-w-3xl">
-                        <h2 class="text-lg font-bold text-white mb-4">Recent Announcements</h2>
-                        <div id="announcements-list" class="space-y-3"></div>
+                        </div>
+                        <div id="announcements-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                     </div>
                 </div>
 
@@ -635,7 +709,6 @@
 
             if (password === ADMIN_PASSWORD) {
                 sessionStorage.setItem(SESSION_KEY, 'authenticated');
-                console.log("Admin authenticated");
                 showAdminPanel();
             } else {
                 errorEl.textContent = "❌ Incorrect password. Try again.";
@@ -672,7 +745,6 @@
             }
         }
 
-        // ============ INITIAL AUTH CHECK ============
         function checkAuthOnLoad() {
             if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') {
                 showAdminPanel();
@@ -883,9 +955,7 @@
         function renderEarnings() {
             const periodRegs = filterRegistrationsByPeriod(currentPeriod);
             
-            let totalEarnings = 0;
-            let totalCommission = 0;
-            let totalPayouts = 0;
+            let totalEarnings = 0, totalCommission = 0, totalPayouts = 0;
             const tournamentEarnings = {};
 
             periodRegs.forEach(r => {
@@ -980,19 +1050,14 @@
             periodRegs.forEach(r => {
                 const date = new Date(r.registeredAt).toLocaleString();
                 const fee = getEntryFeeForTournament(r.tournamentName);
-                const commission = Math.round(fee * 0.20);
-                const payout = Math.round(fee * 0.80);
-                csv += `"${date}","${r.username}","${r.tournamentName}","${fee}","${commission}","${payout}"\n`;
+                csv += `"${date}","${r.username}","${r.tournamentName}","${fee}","${Math.round(fee * 0.20)}","${Math.round(fee * 0.80)}"\n`;
             });
 
             let totalFees = periodRegs.reduce((s, r) => s + getEntryFeeForTournament(r.tournamentName), 0);
-            let totalCommission = Math.round(totalFees * 0.20);
-            let totalPayouts = Math.round(totalFees * 0.80);
-
             csv += `\n"SUMMARY",,,,,\n`;
             csv += `"Total Entry Fees Collected","","","${totalFees}","",""\n`;
-            csv += `"Total Platform Commission","","","","${totalCommission}",""\n`;
-            csv += `"Total Prize Pool Reserved","","","","","${totalPayouts}"\n`;
+            csv += `"Total Platform Commission","","","","${Math.round(totalFees * 0.20)}",""\n`;
+            csv += `"Total Prize Pool Reserved","","","","","${Math.round(totalFees * 0.80)}"\n`;
             csv += `"Period","${currentPeriod}","","","",""\n`;
 
             downloadCSV(csv, `nepplay-earnings-${currentPeriod}-${new Date().toISOString().split('T')[0]}.csv`);
@@ -1002,15 +1067,11 @@
         function getPayouts() { return JSON.parse(localStorage.getItem('payouts') || '[]'); }
         function savePayouts(payouts) { localStorage.setItem('payouts', JSON.stringify(payouts)); }
 
-        function openAddPayoutModal() {
-            document.getElementById('addPayoutModal').classList.remove('hidden');
-        }
-
+        function openAddPayoutModal() { document.getElementById('addPayoutModal').classList.remove('hidden'); }
         function closeAddPayoutModal() {
             document.getElementById('addPayoutModal').classList.add('hidden');
             document.getElementById('addPayoutForm').reset();
         }
-
         document.getElementById('addPayoutModal').addEventListener('click', function(e) {
             if (e.target === this) closeAddPayoutModal();
         });
@@ -1067,7 +1128,6 @@
             if (search) filtered = filtered.filter(p => p.username.toLowerCase().includes(search));
             filtered = [...filtered].reverse();
 
-            // Stats
             const totalPaid = allPayouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.prize, 0);
             const totalPending = allPayouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.prize, 0);
             document.getElementById('payout-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
@@ -1121,7 +1181,101 @@
             }
         }
 
-        // ============ ANNOUNCEMENTS ============
+        // ============ ANNOUNCEMENTS (WITH IMAGES!) ============
+        let currentImageData = null;
+
+        // Handle image upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Image too large. Please choose an image under 2MB.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImageData = e.target.result; // base64 data URL
+                
+                // Show preview
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+                document.getElementById('uploadPreview').classList.remove('hidden');
+                document.getElementById('previewImage').src = currentImageData;
+                
+                // Show size warning if > 500KB
+                if (file.size > 500 * 1024) {
+                    document.getElementById('image-size-warning').classList.remove('hidden');
+                } else {
+                    document.getElementById('image-size-warning').classList.add('hidden');
+                }
+
+                updatePreview();
+                console.log("Image uploaded:", file.name, "Size:", Math.round(file.size / 1024) + "KB");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove image
+        function removeImage() {
+            currentImageData = null;
+            document.getElementById('imageInput').value = '';
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('uploadPreview').classList.add('hidden');
+            document.getElementById('image-size-warning').classList.add('hidden');
+            updatePreview();
+        }
+
+        // Drag and drop
+        const uploadZone = document.getElementById('uploadZone');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            });
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('imageInput').files = files;
+                handleImageUpload({ target: { files: files } });
+            }
+        });
+
+        // Live preview update
+        function updatePreview() {
+            const title = document.getElementById('a-title').value || 'Your Announcement Title';
+            const message = document.getElementById('a-message').value || 'Your announcement message will appear here...';
+            const priority = document.getElementById('a-priority').value;
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewMessage').textContent = message;
+
+            // Border color
+            const preview = document.getElementById('livePreview');
+            preview.className = 'announcement-preview';
+            if (priority === 'normal') preview.classList.add('border-blue-500');
+            else if (priority === 'high') preview.classList.add('border-yellow-500');
+            else preview.classList.add('border-red-500');
+
+            // Image
+            const imgContainer = document.getElementById('previewImageContainer');
+            if (currentImageData) {
+                imgContainer.classList.remove('hidden');
+                document.getElementById('previewImg').src = currentImageData;
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+        }
+
+        // Create announcement
         function createAnnouncement(event) {
             event.preventDefault();
             const title = document.getElementById('a-title').value.trim();
@@ -1136,35 +1290,98 @@
                 return;
             }
 
-            const newAnnouncement = { id: Date.now(), title, message, priority, createdAt: new Date().toISOString() };
+            const newAnnouncement = {
+                id: Date.now(),
+                title,
+                message,
+                priority,
+                image: currentImageData, // base64 or null
+                createdAt: new Date().toISOString()
+            };
+
             const existing = JSON.parse(localStorage.getItem('announcements') || '[]');
             existing.push(newAnnouncement);
-            localStorage.setItem('announcements', JSON.stringify(existing));
+            
+            try {
+                localStorage.setItem('announcements', JSON.stringify(existing));
+            } catch (e) {
+                alert("Storage full! Please use smaller images or clear old announcements.");
+                return;
+            }
 
             msgBox.classList.remove('hidden');
             msgBox.className = "text-center text-sm mt-4 text-green-400";
             msgBox.textContent = `✅ Announcement "${title}" published!`;
+            
             addAnnouncementCard(newAnnouncement);
+            
+            // Reset form
             document.getElementById('announcementForm').reset();
+            removeImage();
+            updatePreview();
+            
             setTimeout(() => msgBox.classList.add('hidden'), 4000);
         }
 
+        // Add announcement card to the grid
         function addAnnouncementCard(a) {
             const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
             const list = document.getElementById('announcements-list');
+            
+            // Remove the "no announcements" message if present
+            if (list.querySelector('.no-announcements')) {
+                list.querySelector('.no-announcements').remove();
+            }
+            
             const card = document.createElement('div');
-            card.className = `glass-panel p-4 rounded-lg border-l-4 ${colorMap[a.priority]}`;
-            const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colorMap[a.priority]}`;
+            
+            const date = new Date(a.createdAt).toLocaleString('en-US', { 
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+            });
+
+            const imageHtml = a.image 
+                ? `<img src="${a.image}" class="w-full h-32 object-cover" alt="Announcement image">` 
+                : '';
+
             card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="font-bold text-white text-sm">${a.title}</h3>
-                        <p class="text-xs text-gray-400 mt-1">${a.message}</p>
+                ${imageHtml}
+                <div class="p-4">
+                    <div class="flex justify-between items-start gap-2">
+                        <h3 class="font-bold text-white text-sm flex-grow">${a.title}</h3>
+                        <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 hover:text-red-300 text-xs flex-shrink-0">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
-                    <span class="text-xs text-gray-500 whitespace-nowrap ml-3">${date}</span>
+                    <p class="text-xs text-gray-400 mt-2">${a.message}</p>
+                    <p class="text-xs text-gray-500 mt-3">${date}</p>
                 </div>
             `;
             list.prepend(card);
+        }
+
+        // Delete announcement
+        function deleteAnnouncement(id) {
+            if (!confirm("Delete this announcement?")) return;
+            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]').filter(a => a.id !== id);
+            localStorage.setItem('announcements', JSON.stringify(announcements));
+            
+            // Re-render list
+            document.getElementById('announcements-list').innerHTML = '';
+            announcements.reverse().forEach(a => addAnnouncementCard(a));
+            
+            if (announcements.length === 0) {
+                document.getElementById('announcements-list').innerHTML = 
+                    '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
+            }
+        }
+
+        // Clear all announcements
+        function clearAllAnnouncements() {
+            if (!confirm("Delete ALL announcements? This cannot be undone.")) return;
+            localStorage.removeItem('announcements');
+            document.getElementById('announcements-list').innerHTML = 
+                '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
         }
 
         // ============ DASHBOARD ============
@@ -1198,13 +1415,18 @@
             window.URL.revokeObjectURL(url);
         }
 
-        // ============ INITIALIZE PANEL ============
+        // ============ INITIALIZE ============
         function initializePanel() {
             const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             existing.reverse().forEach(t => addToCreatedList(t));
 
             const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-            announcements.reverse().forEach(a => addAnnouncementCard(a));
+            if (announcements.length === 0) {
+                document.getElementById('announcements-list').innerHTML = 
+                    '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet. Create your first one above!</p>';
+            } else {
+                announcements.reverse().forEach(a => addAnnouncementCard(a));
+            }
 
             updateDashboardStats();
             updatePayoutBadge();
@@ -1212,7 +1434,6 @@
             renderPayouts();
         }
 
-        // ============ ON PAGE LOAD ============
         window.onload = function() {
             checkAuthOnLoad();
         };
