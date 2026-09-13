@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member Dashboard - Nepal Gaming Platform</title>
-    <!-- Using Tailwind CSS for styling to match modern look -->
+    <!-- Using Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -17,114 +17,151 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-300">Welcome, <span id="username-display" class="font-bold text-white">Gamer</span></span>
-            <button onclick="logout()" class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">Logout</button>
-        </div>
-    </nav>
+    <!-- ================= LOGIN SECTION ================= -->
+    <div id="login-container" class="flex-grow flex items-center justify-center p-6">
+        <div class="glass-panel w-full max-w-md p-8 rounded-xl shadow-2xl">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
+                <p class="text-gray-400">Member Login</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="test_amit" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••" required>
+                </div>
+                
+                <button type="submit" id="login-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">
+                    Login
+                </button>
+                
+                <!-- Message Box for Errors/Success -->
+                <p id="login-message" class="hidden text-center text-sm mt-4"></p>
+            </form>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto p-6">
+            <div class="text-center mt-6">
+                <a href="#" class="text-sm text-red-400 hover:text-red-300">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DASHBOARD SECTION ================= -->
+    <div id="dashboard-container" class="hidden flex-grow flex flex-col">
         
-        <!-- Dashboard Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-panel p-6 rounded-xl shadow-lg">
-                <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
-                <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
+        <!-- Navbar -->
+        <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold text-white">Nepal Gaming</span>
             </div>
-            <div class="glass-panel p-6 rounded-xl shadow-lg">
-                <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
-                <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-300">Welcome, <span id="username-display" class="font-bold text-white">Gamer</span></span>
+                <button onclick="logout()" class="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">Logout</button>
             </div>
-            <div class="glass-panel p-6 rounded-xl shadow-lg">
-                <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
-                <p class="text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
-            </div>
-        </div>
+        </nav>
 
-        <!-- Tournament History & Prize Status -->
-        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-700">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
-                <p class="text-sm text-gray-400 mt-1">Track your participation and prize payment status.</p>
-            </div>
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-6">
             
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Tournament Name</th>
-                            <th scope="col" class="px-6 py-3">Date</th>
-                            <th scope="col" class="px-6 py-3">Rank</th>
-                            <th scope="col" class="px-6 py-3">Prize Amount</th>
-                            <th scope="col" class="px-6 py-3">Payment Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body" class="divide-y divide-gray-700">
-                        <!-- Data will be injected here via JS -->
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 font-medium text-white">Free Fire Solo Cup</td>
-                            <td class="px-6 py-4">2023-10-25</td>
-                            <td class="px-6 py-4">#1</td>
-                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 500</td>
-                            <td class="px-6 py-4">
-                                <span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 font-medium text-white">PUBG Mobile Squad</td>
-                            <td class="px-6 py-4">2023-10-28</td>
-                            <td class="px-6 py-4">#3</td>
-                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 200</td>
-                            <td class="px-6 py-4">
-                                <span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 font-medium text-white">Clash of Clans War</td>
-                            <td class="px-6 py-4">2023-11-01</td>
-                            <td class="px-6 py-4">#2</td>
-                            <td class="px-6 py-4 text-green-400 font-bold">Rs. 300</td>
-                            <td class="px-6 py-4">
-                                <span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Dashboard Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
+                    <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
+                </div>
+                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
+                    <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
+                </div>
+                <div class="glass-panel p-6 rounded-xl shadow-lg">
+                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
+                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">1</p>
+                </div>
             </div>
-            
-            <!-- Empty State (Hidden by default) -->
-            <div id="empty-state" class="hidden p-10 text-center text-gray-500">
-                <i class="fa-solid fa-ghost text-4xl mb-3"></i>
-                <p>No tournament history found.</p>
+
+            <!-- Tournament History & Prize Status -->
+            <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 border-b border-gray-700">
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Tournament History</h2>
+                    <p class="text-sm text-gray-400 mt-1">Track your participation and prize payment status.</p>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Tournament Name</th>
+                                <th scope="col" class="px-6 py-3">Date</th>
+                                <th scope="col" class="px-6 py-3">Rank</th>
+                                <th scope="col" class="px-6 py-3">Prize Amount</th>
+                                <th scope="col" class="px-6 py-3">Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-gray-700">
+                            <!-- Data will be injected here via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <!-- Scripts -->
     <script>
-        // Check authentication
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        // 1. Handle Login Form Submission
+        function handleLogin(event) {
+            event.preventDefault(); // Stop page refresh
+            
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const msgBox = document.getElementById('login-message');
+            const btn = document.getElementById('login-btn');
 
-        if (!currentUser) {
-            // If not logged in, redirect to login page
-            window.location.href = 'login.html';
-        } else {
-            document.getElementById('username-display').textContent = currentUser.username;
+            if (usernameInput && passwordInput) {
+                // Show loading state
+                btn.innerHTML = "Logging in...";
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-green-400";
+                msgBox.innerText = "Login successful. Opening member dashboard...";
+
+                // Save user to localStorage
+                const user = { username: usernameInput };
+                localStorage.setItem('currentUser', JSON.stringify(user));
+
+                // Wait 1 second, then load the dashboard WITHOUT redirecting
+                setTimeout(() => {
+                    showDashboard(user);
+                }, 1000);
+            } else {
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.innerText = "Please enter username and password.";
+            }
+        }
+
+        // 2. Hide login form and show dashboard
+        function showDashboard(user) {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            document.getElementById('username-display').textContent = user.username;
             loadDashboardData();
         }
 
+        // 3. Check if user is already logged in when page loads
+        window.onload = function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                // If already logged in, skip the form
+                showDashboard(currentUser);
+            }
+        }
+
+        // 4. Load the mock dashboard data
         function loadDashboardData() {
-            // In a real app, this would fetch from a database.
-            // Here we simulate loading data based on the user.
-            
-            // Mock Data for display
             const mockHistory = [
                 { name: "Free Fire Solo Cup", date: "2023-10-25", rank: "#1", prize: 500, status: "Paid" },
                 { name: "PUBG Mobile Squad", date: "2023-10-28", rank: "#3", prize: 200, status: "Pending" },
@@ -132,29 +169,18 @@
             ];
 
             let totalEarnings = 0;
-            let paidCount = 0;
-
             const tableBody = document.getElementById('history-table-body');
             tableBody.innerHTML = ''; // Clear existing static rows
 
             mockHistory.forEach(item => {
-                // Calculate stats
-                if(item.status === "Paid") {
-                    totalEarnings += item.prize;
-                    paidCount++;
-                }
+                if(item.status === "Paid") { totalEarnings += item.prize; }
 
-                // Create Row
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 
-                // Status Badge Logic
-                let statusHtml = '';
-                if (item.status === "Paid") {
-                    statusHtml = `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`;
-                } else {
-                    statusHtml = `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
-                }
+                let statusHtml = item.status === "Paid" 
+                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i> Paid</span>`
+                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i> Pending</span>`;
 
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${item.name}</td>
@@ -166,15 +192,14 @@
                 tableBody.appendChild(row);
             });
 
-            // Update Stats Cards
             document.getElementById('total-earnings').textContent = totalEarnings;
             document.getElementById('matches-played').textContent = mockHistory.length;
-            document.getElementById('active-tournaments').textContent = "1"; // Example static number
         }
 
+        // 5. Logout function
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            window.location.reload(); // Reload page to show login form again
         }
     </script>
 </body>
