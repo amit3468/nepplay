@@ -4,13 +4,12 @@
 ============================================================
                     NEPPLAY SERVER
 ============================================================
-
 Now includes:
-- Sessions stored in MongoDB (survive server restarts)
-- Tournament details endpoint
-- Top Killer tracking
+- Sessions in MongoDB
+- Tournament details + Top Killer
 - Dynamic payments
-- Player profiles + Notifications
+- Backups (export/import)
+- Prize payment tracking
 ============================================================
 */
 
@@ -28,7 +27,6 @@ var BASE_DIR = __dirname;
 var MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-    console.log("");
     console.log("==================================================");
     console.log("ERROR: MONGODB_URI environment variable not set!");
     console.log("==================================================");
@@ -63,8 +61,6 @@ var DEFAULT_TOURNAMENTS = [
       maxTeams: 24, prizePool: 12000, status: "Open" }
 ];
 
-/* ============ MONGODB ============ */
-
 var db = null;
 var collections = {};
 
@@ -86,10 +82,7 @@ function connectDB() {
         collections.sessions = db.collection("sessions");
         return createIndexes();
     })
-    .then(function () {
-        console.log("Indexes created");
-        return seedTournaments();
-    })
+    .then(function () { console.log("Indexes created"); return seedTournaments(); })
     .then(function () { return seedPaymentSettings(); })
     .then(function () { console.log("Database ready"); })
     .catch(function (err) {
@@ -110,7 +103,6 @@ function createIndexes() {
         collections.announcements.createIndex({ createdAt: -1 }),
         collections.notifications.createIndex({ userId: 1, createdAt: -1 }),
         collections.settings.createIndex({ key: 1 }, { unique: true }),
-        /* Sessions: auto-delete expired via TTL index */
         collections.sessions.createIndex({ id: 1 }, { unique: true }),
         collections.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
     ]);
@@ -136,8 +128,6 @@ function seedPaymentSettings() {
             });
         });
 }
-
-/* ============ HELPERS ============ */
 
 function createId(prefix) {
     return prefix + "_" + Date.now().toString(36) + "_" +
@@ -187,10 +177,7 @@ function verifyPassword(password, user) {
         var b = Buffer.from(storedHash, "hex");
         if (a.length !== b.length) return false;
         return crypto.timingSafeEqual(a, b);
-    } catch (e) {
-        console.log("Password verify error:", e.message);
-        return false;
-    }
+    } catch (e) { return false; }
 }
 
 function safeUser(u) {
@@ -218,21 +205,15 @@ function parseCookies(req) {
     return c;
 }
 
-/* ============ SESSIONS IN MONGODB ============ */
-
 function createSession(userId, role) {
     var id = crypto.randomBytes(32).toString("hex");
     var now = Date.now();
     var session = {
-        id: id,
-        userId: userId,
-        role: role,
+        id: id, userId: userId, role: role,
         createdAt: new Date(now).toISOString(),
         expiresAt: new Date(now + SESSION_DURATION_MS)
     };
-    return collections.sessions.insertOne(session).then(function () {
-        return id;
-    });
+    return collections.sessions.insertOne(session).then(function () { return id; });
 }
 
 function getSession(req) {
@@ -267,8 +248,6 @@ function clearSessionCookie(h) {
     h["Set-Cookie"] = SESSION_COOKIE + "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
 }
 
-/* ============ AUTH ============ */
-
 function requireMemberAsync(req, res) {
     return getSession(req).then(function (s) {
         if (!s || s.role !== "member") {
@@ -280,15 +259,11 @@ function requireMemberAsync(req, res) {
                 if (!u) { sendError(res, 401, "Please login first."); return null; }
                 return u;
             })
-            .catch(function () {
-                sendError(res, 500, "Database error.");
-                return null;
-            });
+            .catch(function () { sendError(res, 500, "Database error."); return null; });
     });
 }
 
 function requireAdmin(req, res) {
-    /* Async check — returns Promise */
     return getSession(req).then(function (s) {
         if (!s || s.role !== "admin") {
             sendError(res, 401, "Admin login required.");
@@ -297,8 +272,6 @@ function requireAdmin(req, res) {
         return true;
     });
 }
-
-/* ============ RESPONSE ============ */
 
 function sendJSON(res, code, data, extra) {
     var h = {
@@ -335,8 +308,6 @@ function readBody(req, cb) {
     req.on("error", function () { if (tooLarge) cb(new Error("Body too large.")); });
 }
 
-/* ============ NOTIFICATIONS ============ */
-
 function createNotification(userId, type, title, message, link) {
     if (!userId) return Promise.resolve();
     return collections.notifications.insertOne({
@@ -344,21 +315,18 @@ function createNotification(userId, type, title, message, link) {
         type: type || "info", title: title || "",
         message: message || "", link: link || "",
         read: false, createdAt: nowISO()
-    }).catch(function (e) { console.log("Notif err:", e.message); });
+    }).catch(function () {});
 }
 
 function createNotificationForTournament(tournamentId, type, title, message, link) {
     return collections.registrations.find({
         tournamentId: tournamentId, status: "Approved"
     }).toArray().then(function (regs) {
-        var promises = regs.map(function (reg) {
+        return Promise.all(regs.map(function (reg) {
             return createNotification(reg.userId, type, title, message, link);
-        });
-        return Promise.all(promises);
-    }).catch(function (e) { console.log("Bulk notif err:", e.message); });
+        }));
+    }).catch(function () {});
 }
-
-/* ============ TOURNAMENT HELPERS ============ */
 
 function tournamentForClient(t, registeredCount) {
     var reg = registeredCount || 0;
@@ -382,12 +350,9 @@ function registrationForClient(reg) {
 
 function countTournamentRegistrations(tid) {
     return collections.registrations.countDocuments({
-        tournamentId: tid,
-        status: { $ne: "Rejected" }
+        tournamentId: tid, status: { $ne: "Rejected" }
     });
 }
-
-/* ============ LEADERBOARD ============ */
 
 function isCompletedMatch(m) {
     var s = String(m.status || "").toLowerCase().trim();
@@ -403,8 +368,7 @@ function buildLeaderboard(gameFilter) {
     return Promise.all([
         collections.matches.find({}).toArray(),
         collections.tournaments.find({}).toArray()
-    ])
-    .then(function (results) {
+    ]).then(function (results) {
         var matches = results[0];
         var tournaments = results[1];
         var tGames = {};
@@ -508,8 +472,7 @@ function buildWinners() {
         collections.matches.find({}).toArray(),
         collections.tournaments.find({}).toArray(),
         collections.registrations.find({}).toArray()
-    ])
-    .then(function (results) {
+    ]).then(function (results) {
         var matches = results[0];
         var tournaments = results[1];
         var regs = results[2];
@@ -583,6 +546,16 @@ function buildWinners() {
                 }
             });
 
+            /* Count paid vs pending prizes */
+            var prizesPaid = 0;
+            var prizesPending = 0;
+            completed.forEach(function (mm) {
+                if (mm.topKiller) {
+                    if (mm.prizePaid) prizesPaid++;
+                    else prizesPending++;
+                }
+            });
+
             winners.push({
                 tournamentId: tour.id || "",
                 tournamentName: tour.name || "Tournament",
@@ -604,7 +577,9 @@ function buildWinners() {
                 totalMatches: completed.length,
                 screenshot: final.screenshot || "",
                 topKiller: cumTopKiller,
-                topKillerKills: cumTopKills
+                topKillerKills: cumTopKills,
+                prizesPaid: prizesPaid,
+                prizesPending: prizesPending
             });
         });
 
@@ -618,8 +593,6 @@ function buildWinners() {
     });
 }
 
-/* ============ TOURNAMENT DETAILS ============ */
-
 function buildTournamentDetails(tournamentId) {
     var tour = null;
 
@@ -629,7 +602,6 @@ function buildTournamentDetails(tournamentId) {
         if (!t) return null;
         tour = t;
         var tid = String(t.id || "");
-
         return Promise.all([
             collections.registrations.find({
                 tournamentId: tid, status: "Approved"
@@ -671,6 +643,7 @@ function buildTournamentDetails(tournamentId) {
         });
 
         var completedCount = 0, liveCount = 0, upcomingCount = 0;
+        var prizesPaid = 0, prizesPending = 0;
 
         matches.forEach(function (m) {
             var status = String(m.status || "").toLowerCase();
@@ -687,6 +660,9 @@ function buildTournamentDetails(tournamentId) {
                     var team = ensure(tk);
                     team.kills += safeNumber(m.topKillerKills, 0);
                 }
+
+                if (m.prizePaid) prizesPaid++;
+                else prizesPending++;
             }
 
             if (!isCompleted) return;
@@ -764,6 +740,8 @@ function buildTournamentDetails(tournamentId) {
             killers: killers,
             matches: matches,
             totalKills: totalKills,
+            prizesPaid: prizesPaid,
+            prizesPending: prizesPending,
             matchesStats: {
                 total: matches.length,
                 completed: completedCount,
@@ -774,11 +752,8 @@ function buildTournamentDetails(tournamentId) {
     });
 }
 
-/* ============ STATIC ============ */
-
 var MIME = {
-    ".html": "text/html; charset=utf-8",
-    ".htm": "text/html; charset=utf-8",
+    ".html": "text/html; charset=utf-8", ".htm": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
     ".js": "application/javascript; charset=utf-8",
     ".json": "application/json; charset=utf-8",
@@ -810,8 +785,6 @@ function serveStatic(req, res, pathname) {
     });
 }
 
-/* ============ API ============ */
-
 function handleAPI(req, res, pathname, query) {
     return handleAPIPromise(req, res, pathname, query).catch(function (err) {
         console.log("API error:", err.message);
@@ -821,6 +794,219 @@ function handleAPI(req, res, pathname, query) {
 }
 
 function handleAPIPromise(req, res, pathname, query) {
+
+    /* ============ BACKUP EXPORT ============ */
+    if (req.method === "GET" && pathname === "/api/admin/backup/export") {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return Promise.all([
+                collections.users.find({}).toArray(),
+                collections.registrations.find({}).toArray(),
+                collections.matches.find({}).toArray(),
+                collections.tournaments.find({}).toArray(),
+                collections.announcements.find({}).toArray(),
+                collections.settings.find({}).toArray()
+            ]).then(function (results) {
+                var backup = {
+                    version: 1,
+                    exportedAt: nowISO(),
+                    users: results[0],
+                    registrations: results[1],
+                    matches: results[2],
+                    tournaments: results[3],
+                    announcements: results[4],
+                    settings: results[5]
+                };
+                var json = JSON.stringify(backup, null, 2);
+                var filename = "nepplay-backup-" + new Date().toISOString().split("T")[0] + ".json";
+                res.writeHead(200, {
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Content-Disposition": 'attachment; filename="' + filename + '"',
+                    "Cache-Control": "no-store"
+                });
+                res.end(json);
+                return true;
+            }).catch(function (err) {
+                console.log("Backup export error:", err.message);
+                sendError(res, 500, "Could not export backup.");
+                return true;
+            });
+        });
+    }
+
+    /* ============ BACKUP IMPORT ============ */
+    if (req.method === "POST" && pathname === "/api/admin/backup/import") {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                var body = "";
+                var tooLarge = false;
+                req.on("data", function (chunk) {
+                    body += chunk.toString();
+                    if (body.length > 50 * 1024 * 1024) {
+                        tooLarge = true;
+                        try { req.destroy(); } catch (e) {}
+                    }
+                });
+                req.on("end", function () {
+                    if (tooLarge) {
+                        sendError(res, 400, "Backup file too large. Max 50MB.");
+                        return resolve(true);
+                    }
+                    var data = null;
+                    try { data = JSON.parse(body); }
+                    catch (e) {
+                        sendError(res, 400, "Invalid JSON.");
+                        return resolve(true);
+                    }
+
+                    if (!data || typeof data !== "object") {
+                        sendError(res, 400, "Invalid backup structure.");
+                        return resolve(true);
+                    }
+
+                    var users = Array.isArray(data.users) ? data.users : [];
+                    var registrations = Array.isArray(data.registrations) ? data.registrations : [];
+                    var matches = Array.isArray(data.matches) ? data.matches : [];
+                    var tournaments = Array.isArray(data.tournaments) ? data.tournaments : [];
+                    var announcements = Array.isArray(data.announcements) ? data.announcements : [];
+                    var settings = Array.isArray(data.settings) ? data.settings : [];
+
+                    Promise.all([
+                        users.length > 0 ? replaceCollection("users", users) : Promise.resolve(),
+                        registrations.length > 0 ? replaceCollection("registrations", registrations) : Promise.resolve(),
+                        matches.length > 0 ? replaceCollection("matches", matches) : Promise.resolve(),
+                        tournaments.length > 0 ? replaceCollection("tournaments", tournaments) : Promise.resolve(),
+                        announcements.length > 0 ? replaceCollection("announcements", announcements) : Promise.resolve(),
+                        settings.length > 0 ? replaceCollection("settings", settings) : Promise.resolve()
+                    ]).then(function () {
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: "Backup restored successfully.",
+                            counts: {
+                                users: users.length,
+                                registrations: registrations.length,
+                                matches: matches.length,
+                                tournaments: tournaments.length,
+                                announcements: announcements.length,
+                                settings: settings.length
+                            }
+                        });
+                        resolve(true);
+                    }).catch(function (err) {
+                        console.log("Backup import error:", err.message);
+                        sendError(res, 500, "Restore failed: " + err.message);
+                        resolve(true);
+                    });
+                });
+                req.on("error", function () {
+                    if (tooLarge) { sendError(res, 400, "Backup file too large."); resolve(true); }
+                });
+            });
+        });
+    }
+
+    /* ============ BACKUP STATS ============ */
+    if (req.method === "GET" && pathname === "/api/admin/backup/stats") {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return Promise.all([
+                collections.users.countDocuments(),
+                collections.registrations.countDocuments(),
+                collections.matches.countDocuments(),
+                collections.tournaments.countDocuments(),
+                collections.announcements.countDocuments(),
+                collections.sessions.countDocuments()
+            ]).then(function (counts) {
+                sendJSON(res, 200, {
+                    success: true,
+                    counts: {
+                        users: counts[0],
+                        registrations: counts[1],
+                        matches: counts[2],
+                        tournaments: counts[3],
+                        announcements: counts[4],
+                        sessions: counts[5]
+                    }
+                });
+                return true;
+            });
+        });
+    }
+
+    /* ============ MARK MATCH PRIZE PAID ============ */
+    if (req.method === "PUT" && pathname === "/api/admin/matches/mark-paid") {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var mid = cleanString(body.id || body.matchId);
+                    if (!mid) { sendError(res, 400, "ID required."); return resolve(true); }
+
+                    var paid = body.paid === true || body.paid === "true";
+                    var updates = {
+                        prizePaid: paid,
+                        prizePaidAt: paid ? nowISO() : "",
+                        updatedAt: nowISO()
+                    };
+
+                    collections.matches.updateOne(
+                        { id: mid }, { $set: updates }
+                    ).then(function (result) {
+                        if (result.matchedCount === 0) {
+                            sendError(res, 404, "Match not found.");
+                            return resolve(true);
+                        }
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: paid ? "Prize marked as paid." : "Prize marked as unpaid.",
+                            prizePaid: paid
+                        });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+                });
+            });
+        });
+    }
+
+    /* ============ MARK ALL TOURNAMENT PRIZES PAID ============ */
+    if (req.method === "PUT" && pathname === "/api/admin/matches/mark-all-paid") {
+        return requireAdmin(req, res).then(function (ok) {
+            if (!ok) return true;
+            return new Promise(function (resolve) {
+                readBody(req, function (err, body) {
+                    if (err) { sendError(res, 400, err.message); return resolve(true); }
+                    var tid = cleanString(body.tournamentId || body.tournament);
+                    if (!tid) { sendError(res, 400, "Tournament ID required."); return resolve(true); }
+
+                    var paid = body.paid === true || body.paid === "true";
+
+                    collections.matches.updateMany(
+                        { tournamentId: tid, topKiller: { $ne: "" } },
+                        { $set: {
+                            prizePaid: paid,
+                            prizePaidAt: paid ? nowISO() : "",
+                            updatedAt: nowISO()
+                        } }
+                    ).then(function (result) {
+                        sendJSON(res, 200, {
+                            success: true,
+                            message: paid ? "All prizes marked as paid." : "All prizes marked as unpaid.",
+                            modified: result.modifiedCount
+                        });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
+                });
+            });
+        });
+    }
 
     /* PUBLIC TOURNAMENT DETAILS */
     if (req.method === "GET" && pathname === "/api/tournament/details") {
@@ -835,6 +1021,8 @@ function handleAPIPromise(req, res, pathname, query) {
                 killers: data.killers,
                 matches: data.matches,
                 totalKills: data.totalKills,
+                prizesPaid: data.prizesPaid,
+                prizesPending: data.prizesPending,
                 matchesStats: data.matchesStats
             });
             return true;
@@ -867,7 +1055,7 @@ function handleAPIPromise(req, res, pathname, query) {
             });
     }
 
-    /* ADMIN PAYMENT SETTINGS GET */
+    /* ADMIN PAYMENT GET */
     if (req.method === "GET" && pathname === "/api/admin/payment-settings") {
         return requireAdmin(req, res).then(function (ok) {
             if (!ok) return true;
@@ -883,7 +1071,7 @@ function handleAPIPromise(req, res, pathname, query) {
         });
     }
 
-    /* ADMIN PAYMENT SETTINGS PUT */
+    /* ADMIN PAYMENT PUT */
     if (req.method === "PUT" && pathname === "/api/admin/payment-settings") {
         return requireAdmin(req, res).then(function (ok) {
             if (!ok) return true;
@@ -906,7 +1094,7 @@ function handleAPIPromise(req, res, pathname, query) {
                         if (!name) continue;
                         var qr = cleanString(m.qrImage);
                         if (qr && qr.length > 1500000) {
-                            sendError(res, 400, "QR too large. Max ~1MB.");
+                            sendError(res, 400, "QR too large.");
                             return resolve(true);
                         }
                         clean.push({
@@ -947,9 +1135,9 @@ function handleAPIPromise(req, res, pathname, query) {
                 var username = cleanString(body.username);
                 var email = cleanString(body.email).toLowerCase();
                 var password = cleanString(body.password);
-                if (!username) { sendError(res, 400, "Username is required."); return resolve(true); }
-                if (!email) { sendError(res, 400, "Email is required."); return resolve(true); }
-                if (!password) { sendError(res, 400, "Password is required."); return resolve(true); }
+                if (!username) { sendError(res, 400, "Username required."); return resolve(true); }
+                if (!email) { sendError(res, 400, "Email required."); return resolve(true); }
+                if (!password) { sendError(res, 400, "Password required."); return resolve(true); }
                 if (password.length < 4) { sendError(res, 400, "Password min 4 chars."); return resolve(true); }
 
                 collections.users.findOne({
@@ -966,15 +1154,14 @@ function handleAPIPromise(req, res, pathname, query) {
                         passwordHash: pd.passwordHash, passwordSalt: pd.passwordSalt,
                         createdAt: nowISO()
                     };
-                    return collections.users.insertOne(user)
-                        .then(function () {
-                            sendJSON(res, 201, {
-                                success: true,
-                                message: "Account created successfully.",
-                                user: safeUser(user)
-                            });
-                            resolve(true);
+                    return collections.users.insertOne(user).then(function () {
+                        sendJSON(res, 201, {
+                            success: true,
+                            message: "Account created successfully.",
+                            user: safeUser(user)
                         });
+                        resolve(true);
+                    });
                 }).catch(function () {
                     sendError(res, 500, "Database error.");
                     resolve(true);
@@ -1115,17 +1302,17 @@ function handleAPIPromise(req, res, pathname, query) {
                         status: cleanString(body.status) || "Upcoming",
                         createdAt: nowISO()
                     };
-                    collections.tournaments.insertOne(nt)
-                        .then(function () {
-                            sendJSON(res, 201, {
-                                success: true, message: "Tournament created.", tournament: nt
-                            });
-                            resolve(true);
-                        })
-                        .catch(function () {
-                            sendError(res, 500, "Could not save.");
-                            resolve(true);
+                    collections.tournaments.insertOne(nt).then(function () {
+                        sendJSON(res, 201, {
+                            success: true,
+                            message: "Tournament created.",
+                            tournament: nt
                         });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
                 });
             });
         });
@@ -1158,7 +1345,9 @@ function handleAPIPromise(req, res, pathname, query) {
                             return resolve(true);
                         }
                         sendJSON(res, 200, {
-                            success: true, message: "Tournament updated.", tournament: result.value
+                            success: true,
+                            message: "Tournament updated.",
+                            tournament: result.value
                         });
                         resolve(true);
                     });
@@ -1192,7 +1381,6 @@ function handleAPIPromise(req, res, pathname, query) {
                 readBody(req, function (err, body) {
                     if (err) { sendError(res, 400, err.message); return resolve(true); }
                     var tid = cleanString(body.tournamentId || body.tournament);
-
                     collections.tournaments.findOne({ id: tid }).then(function (tour) {
                         if (!tour) { sendError(res, 404, "Tournament not found."); return resolve(true); }
                         var ts = cleanString(tour.status).toLowerCase();
@@ -1248,26 +1436,23 @@ function handleAPIPromise(req, res, pathname, query) {
                                 };
                                 if (!reg.teamName) { sendError(res, 400, "Team name required."); return resolve(true); }
                                 if (!reg.captainName) { sendError(res, 400, "Captain required."); return resolve(true); }
-                                return collections.registrations.insertOne(reg)
-                                    .then(function () {
-                                        return createNotification(
-                                            user.id, "info", "Registration submitted",
-                                            "Your registration for " + tour.name + " is pending.",
-                                            "member.html"
-                                        );
-                                    })
-                                    .then(function () {
-                                        sendJSON(res, 201, {
-                                            success: true,
-                                            message: "Registration submitted.",
-                                            registration: registrationForClient(reg)
-                                        });
-                                        resolve(true);
+                                return collections.registrations.insertOne(reg).then(function () {
+                                    return createNotification(
+                                        user.id, "info", "Registration submitted",
+                                        "Your registration for " + tour.name + " is pending.",
+                                        "member.html"
+                                    );
+                                }).then(function () {
+                                    sendJSON(res, 201, {
+                                        success: true,
+                                        message: "Registration submitted.",
+                                        registration: registrationForClient(reg)
                                     });
+                                    resolve(true);
+                                });
                             });
                         });
-                    }).catch(function (e) {
-                        console.log("Reg error:", e.message);
+                    }).catch(function () {
                         sendError(res, 500, "Database error.");
                         resolve(true);
                     });
@@ -1279,8 +1464,7 @@ function handleAPIPromise(req, res, pathname, query) {
     /* PUBLIC REGISTRATIONS */
     if (req.method === "GET" && pathname === "/api/registrations") {
         return collections.registrations.find({ status: { $ne: "Rejected" } })
-            .toArray()
-            .then(function (regs) {
+            .toArray().then(function (regs) {
                 sendJSON(res, 200, {
                     success: true,
                     registrations: regs.map(registrationForClient)
@@ -1304,8 +1488,7 @@ function handleAPIPromise(req, res, pathname, query) {
             if (!mem) return true;
             return collections.registrations.find({
                 userId: mem.id, status: "Approved"
-            }).toArray()
-            .then(function (regs) {
+            }).toArray().then(function (regs) {
                 var myTids = {};
                 regs.forEach(function (r) { myTids[String(r.tournamentId || "")] = true; });
 
@@ -1522,8 +1705,7 @@ function handleAPIPromise(req, res, pathname, query) {
                 }
             });
             return true;
-        }).catch(function (err) {
-            console.log("Player error:", err.message);
+        }).catch(function () {
             sendError(res, 500, "Could not load player profile.");
             return true;
         });
@@ -1558,8 +1740,7 @@ function handleAPIPromise(req, res, pathname, query) {
     if (req.method === "GET" && pathname === "/api/announcements") {
         return collections.announcements.find({})
             .sort({ createdAt: -1 })
-            .toArray()
-            .then(function (ann) {
+            .toArray().then(function (ann) {
                 var lim = query.get("limit");
                 if (lim) {
                     var ln = safeNumber(lim, 0);
@@ -1578,11 +1759,14 @@ function handleAPIPromise(req, res, pathname, query) {
                 .find({ userId: mem.id })
                 .sort({ createdAt: -1 })
                 .limit(50)
-                .toArray()
-                .then(function (list) {
+                .toArray().then(function (list) {
                     var unread = 0;
                     list.forEach(function (n) { if (!n.read) unread++; });
-                    sendJSON(res, 200, { success: true, notifications: list, unread: unread });
+                    sendJSON(res, 200, {
+                        success: true,
+                        notifications: list,
+                        unread: unread
+                    });
                     return true;
                 });
         });
@@ -1626,7 +1810,8 @@ function handleAPIPromise(req, res, pathname, query) {
                     var h = {};
                     setSessionCookie(h, sid);
                     sendJSON(res, 200, {
-                        success: true, message: "Admin login successful.",
+                        success: true,
+                        message: "Admin login successful.",
                         admin: { username: ADMIN_USERNAME }
                     }, h);
                     resolve(true);
@@ -1907,29 +2092,28 @@ function handleAPIPromise(req, res, pathname, query) {
                         notes: cleanString(body.notes),
                         screenshot: screenshot,
                         screenshotUploadedAt: screenshot ? nowISO() : "",
+                        prizePaid: false,
+                        prizePaidAt: "",
                         joinedUserIds: [],
                         createdAt: nowISO(),
                         updatedAt: nowISO()
                     };
-                    collections.matches.insertOne(match)
-                        .then(function () {
-                            return createNotificationForTournament(
-                                match.tournamentId, "info", "New Match Scheduled",
-                                match.result + " for " + match.tournamentName +
-                                " on " + match.date + " at " + match.time,
-                                "member.html"
-                            );
-                        })
-                        .then(function () {
-                            sendJSON(res, 201, {
-                                success: true, message: "Match created.", match: match
-                            });
-                            resolve(true);
-                        })
-                        .catch(function () {
-                            sendError(res, 500, "Could not save.");
-                            resolve(true);
+                    collections.matches.insertOne(match).then(function () {
+                        return createNotificationForTournament(
+                            match.tournamentId, "info", "New Match Scheduled",
+                            match.result + " for " + match.tournamentName +
+                            " on " + match.date + " at " + match.time,
+                            "member.html"
+                        );
+                    }).then(function () {
+                        sendJSON(res, 201, {
+                            success: true, message: "Match created.", match: match
                         });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
                 });
             });
         });
@@ -2017,8 +2201,7 @@ function handleAPIPromise(req, res, pathname, query) {
                                 resolve(true);
                             });
                         });
-                    }).catch(function (e) {
-                        console.log("Update match error:", e.message);
+                    }).catch(function () {
                         sendError(res, 500, "Could not update.");
                         resolve(true);
                     });
@@ -2073,31 +2256,28 @@ function handleAPIPromise(req, res, pathname, query) {
                         pinned: body.pinned === true || body.pinned === "true",
                         createdAt: nowISO(), updatedAt: nowISO()
                     };
-                    collections.announcements.insertOne(item)
-                        .then(function () {
-                            return collections.users.find({}).toArray()
-                                .then(function (users) {
-                                    var promises = users.map(function (u) {
-                                        return createNotification(
-                                            u.id,
-                                            item.type === "urgent" ? "error" : "info",
-                                            "Announcement: " + item.title,
-                                            item.message, "index.html"
-                                        );
-                                    });
-                                    return Promise.all(promises);
+                    collections.announcements.insertOne(item).then(function () {
+                        return collections.users.find({}).toArray()
+                            .then(function (users) {
+                                var promises = users.map(function (u) {
+                                    return createNotification(
+                                        u.id,
+                                        item.type === "urgent" ? "error" : "info",
+                                        "Announcement: " + item.title,
+                                        item.message, "index.html"
+                                    );
                                 });
-                        })
-                        .then(function () {
-                            sendJSON(res, 201, {
-                                success: true, message: "Created.", announcement: item
+                                return Promise.all(promises);
                             });
-                            resolve(true);
-                        })
-                        .catch(function () {
-                            sendError(res, 500, "Could not save.");
-                            resolve(true);
+                    }).then(function () {
+                        sendJSON(res, 201, {
+                            success: true, message: "Created.", announcement: item
                         });
+                        resolve(true);
+                    }).catch(function () {
+                        sendError(res, 500, "Could not save.");
+                        resolve(true);
+                    });
                 });
             });
         });
@@ -2198,7 +2378,12 @@ function handleAPIPromise(req, res, pathname, query) {
     return Promise.resolve(false);
 }
 
-/* ============ HTTP SERVER ============ */
+function replaceCollection(name, items) {
+    return collections[name].deleteMany({}).then(function () {
+        if (items.length === 0) return;
+        return collections[name].insertMany(items);
+    });
+}
 
 var server = http.createServer(function (req, res) {
     if (req.method === "OPTIONS") {
@@ -2230,7 +2415,7 @@ connectDB().then(function () {
     server.listen(PORT, HOST, function () {
         console.log("");
         console.log("==================================================");
-        console.log("     NEPPLAY SERVER STARTED (MongoDB Sessions)");
+        console.log("     NEPPLAY SERVER (Backups + Prizes)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
         console.log("Admin: " + ADMIN_USERNAME);
