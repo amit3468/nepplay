@@ -1,425 +1,302 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>NEPPLAY - Create Account</title>
-
+    <title>Create Account - Nepal Gaming Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .form-input { 
+            background-color: #f1f5f9; 
+            color: #0f172a; 
+            transition: all 0.2s;
         }
-
-        body {
-            min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
-            background:
-                radial-gradient(circle at top left, #263a70 0%, transparent 35%),
-                radial-gradient(circle at bottom right, #531f69 0%, transparent 35%),
-                #080b16;
-            color: white;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 30px 15px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
-
-        .logo {
-            text-align: center;
-            font-size: 34px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-
-        .logo span {
-            color: #ff3d81;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #aeb6cc;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background: rgba(18, 23, 40, 0.96);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            padding: 32px;
-
-            box-shadow:
-                0 25px 70px rgba(0,0,0,0.45);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: 27px;
-        }
-
-        .description {
-            text-align: center;
-            color: #9099b2;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 7px;
-            color: #dce2f2;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 13px 14px;
-
-            background: #0d1221;
-            color: white;
-
-            border: 1px solid #30384f;
-            border-radius: 9px;
-
-            outline: none;
-            font-size: 15px;
-        }
-
-        input:focus {
-            border-color: #ff3d81;
-            box-shadow: 0 0 0 3px rgba(255,61,129,0.10);
-        }
-
-        .password-note {
-            margin-top: 6px;
-            color: #777f96;
-            font-size: 12px;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-
-            border: none;
-            border-radius: 9px;
-
-            background: linear-gradient(135deg, #ff3d81, #8d4dff);
-            color: white;
-
-            font-size: 16px;
-            font-weight: bold;
-
-            cursor: pointer;
-            margin-top: 8px;
-
-            transition: 0.2s;
-        }
-
-        button:hover {
+        .form-input:focus { 
+            outline: none; 
+            box-shadow: 0 0 0 2px #3b82f6;
             transform: translateY(-1px);
-            filter: brightness(1.08);
         }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .message {
-            display: none;
-            margin-top: 17px;
-            padding: 12px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .error {
-            display: block;
-            background: rgba(255, 60, 80, 0.12);
-            border: 1px solid rgba(255, 60, 80, 0.3);
-            color: #ff8f9b;
-        }
-
-        .success {
-            display: block;
-            background: rgba(50, 220, 130, 0.10);
-            border: 1px solid rgba(50, 220, 130, 0.3);
-            color: #70e6a1;
-        }
-
-        .bottom {
-            text-align: center;
-            margin-top: 22px;
-            color: #858da3;
-            font-size: 14px;
-        }
-
-        .bottom a {
-            color: #ff5c96;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .bottom a:hover {
-            text-decoration: underline;
-        }
-
-        .home {
-            display: block;
-            text-align: center;
-            margin-top: 18px;
-            color: #777f96;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .home:hover {
-            color: white;
-        }
+        .strength-bar { height: 4px; border-radius: 2px; transition: all 0.3s; }
+        .strength-weak { background-color: #ef4444; }
+        .strength-medium { background-color: #eab308; }
+        .strength-strong { background-color: #22c55e; }
     </style>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body>
-
-<div class="container">
-
-    <div class="logo">
-        NEP<span>PLAY</span>
-    </div>
-
-    <div class="subtitle">
-        Nepal Gaming Community
-    </div>
-
-    <div class="card">
-
-        <h1>Create Account</h1>
-
-        <p class="description">
-            Create your NEPPLAY gaming account
-        </p>
-
-        <form id="registerForm">
-
-            <div class="form-group">
-                <label for="username">Username</label>
-
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Choose a username"
-                    minlength="3"
-                    maxlength="30"
-                    required
-                    autocomplete="username"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email</label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    maxlength="100"
-                    required
-                    autocomplete="email"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Create a password"
-                    minlength="6"
-                    maxlength="100"
-                    required
-                    autocomplete="new-password"
-                >
-
-                <div class="password-note">
-                    Password must contain at least 6 characters.
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="Enter password again"
-                    minlength="6"
-                    maxlength="100"
-                    required
-                    autocomplete="new-password"
-                >
-            </div>
-
-            <button type="submit" id="registerButton">
-                Create Account
-            </button>
-
-            <div id="message" class="message"></div>
-
-        </form>
-
-        <div class="bottom">
-            Already have an account?
-            <a href="login.html">Login</a>
+    <!-- Navbar -->
+    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold text-white">Nepal Gaming</span>
         </div>
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+        </div>
+    </nav>
 
-        <a class="home" href="index.html">
-            ← Back to NEPPLAY
-        </a>
+    <!-- Registration Container -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="glass-panel w-full max-w-lg p-8 rounded-xl shadow-2xl">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
+                <h2 class="text-xl font-semibold text-white">Create Your Account</h2>
+                <p class="text-gray-400 text-sm mt-1">Join thousands of gamers across Nepal</p>
+            </div>
 
-    </div>
+            <!-- Registration Form -->
+            <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+                
+                <!-- Full Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <input type="text" id="fullName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Amit Sharma">
+                    <p id="error-fullName" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
 
-</div>
+                <!-- Username -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                    <input type="text" id="username" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., amit_ff">
+                    <p id="error-username" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
 
-<script>
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <input type="email" id="email" class="form-input w-full px-4 py-3 rounded-lg" placeholder="you@example.com">
+                    <p id="error-email" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
 
-const form = document.getElementById("registerForm");
-const message = document.getElementById("message");
-const button = document.getElementById("registerButton");
+                <!-- Password -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Minimum 6 characters" oninput="checkPasswordStrength()">
+                    
+                    <!-- Password Strength Indicator -->
+                    <div class="flex gap-1 mt-2">
+                        <div id="strength-1" class="strength-bar flex-grow bg-gray-700"></div>
+                        <div id="strength-2" class="strength-bar flex-grow bg-gray-700"></div>
+                        <div id="strength-3" class="strength-bar flex-grow bg-gray-700"></div>
+                        <div id="strength-4" class="strength-bar flex-grow bg-gray-700"></div>
+                    </div>
+                    <p id="strength-text" class="text-xs text-gray-500 mt-1">Password strength</p>
+                    <p id="error-password" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
 
-function showMessage(text, type) {
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Re-enter password">
+                    <p id="error-confirmPassword" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
 
-    message.textContent = text;
+                <!-- Terms Checkbox -->
+                <div class="mb-6 flex items-start gap-2">
+                    <input type="checkbox" id="terms" class="mt-1 w-4 h-4 rounded text-blue-500">
+                    <label for="terms" class="text-sm text-gray-300">
+                        I agree to the <a href="#" class="text-blue-400 hover:underline">Terms of Service</a> and <a href="#" class="text-blue-400 hover:underline">Privacy Policy</a>
+                    </label>
+                </div>
+                <p id="error-terms" class="text-red-400 text-xs mt-1 mb-4 hidden"></p>
 
-    message.className = "message " + type;
-}
+                <!-- Submit Button -->
+                <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">
+                    Create Account
+                </button>
+                
+                <!-- Global Message -->
+                <p id="register-message" class="hidden text-center text-sm mt-4"></p>
+            </form>
 
-form.addEventListener("submit", async function(event) {
+            <!-- Login Link -->
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-400">Already have an account? 
+                    <a href="member.html" class="text-red-400 hover:text-red-300 font-semibold">Login here</a>
+                </p>
+            </div>
+        </div>
+    </main>
 
-    event.preventDefault();
+    <!-- Scripts -->
+    <script>
+        console.log("--- REGISTER PAGE LOADED ---");
 
-    const username =
-        document.getElementById("username").value.trim();
+        // 1. Password strength checker
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const bars = [
+                document.getElementById('strength-1'),
+                document.getElementById('strength-2'),
+                document.getElementById('strength-3'),
+                document.getElementById('strength-4')
+            ];
+            const text = document.getElementById('strength-text');
 
-    const email =
-        document.getElementById("email").value.trim();
+            // Reset all bars
+            bars.forEach(bar => {
+                bar.className = 'strength-bar flex-grow bg-gray-700';
+            });
 
-    const password =
-        document.getElementById("password").value;
+            if (password.length === 0) {
+                text.textContent = 'Password strength';
+                text.className = 'text-xs text-gray-500 mt-1';
+                return 0;
+            }
 
-    const confirmPassword =
-        document.getElementById("confirmPassword").value;
+            // Calculate strength
+            let score = 0;
+            if (password.length >= 6) score++;
+            if (password.length >= 10) score++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (password !== confirmPassword) {
+            // Cap at 4
+            if (score > 4) score = 4;
 
-        showMessage(
-            "Passwords do not match.",
-            "error"
-        );
+            // Apply visuals
+            const colorClass = score <= 1 ? 'strength-weak' : score === 2 ? 'strength-medium' : 'strength-strong';
+            for (let i = 0; i < score; i++) {
+                bars[i].classList.remove('bg-gray-700');
+                bars[i].classList.add(colorClass);
+            }
 
-        return;
-    }
+            // Text
+            if (score <= 1) text.textContent = 'Weak password';
+            else if (score === 2) text.textContent = 'Medium password';
+            else if (score >= 3) text.textContent = 'Strong password';
+            
+            text.className = `text-xs mt-1 ${score <= 1 ? 'text-red-400' : score === 2 ? 'text-yellow-400' : 'text-green-400'}`;
 
-    if (password.length < 6) {
-
-        showMessage(
-            "Password must contain at least 6 characters.",
-            "error"
-        );
-
-        return;
-    }
-
-    button.disabled = true;
-    button.textContent = "Creating Account...";
-
-    message.className = "message";
-    message.textContent = "";
-
-    try {
-
-        const response = await fetch("/api/users/register", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            credentials: "include",
-
-            body: JSON.stringify({
-                username: username,
-                email: email,
-                password: password
-            })
-
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-
-            showMessage(
-                data.message || "Registration failed.",
-                "error"
-            );
-
-            button.disabled = false;
-            button.textContent = "Create Account";
-
-            return;
+            return score;
         }
 
-        showMessage(
-            "Account created successfully! Redirecting to login...",
-            "success"
-        );
+        // 2. Show/hide error message
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById('error-' + fieldId);
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
 
-        setTimeout(function() {
+        function clearError(fieldId) {
+            const errorEl = document.getElementById('error-' + fieldId);
+            errorEl.classList.add('hidden');
+        }
 
-            window.location.href = "login.html";
+        // 3. Handle form submission
+        function handleRegister(event) {
+            event.preventDefault();
+            console.log("Registration form submitted");
 
-        }, 1200);
+            // Clear all previous errors
+            ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
 
-    } catch (error) {
+            // Get values
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('terms').checked;
+            const msgBox = document.getElementById('register-message');
+            const btn = document.getElementById('register-btn');
 
-        console.error(error);
+            let hasError = false;
 
-        showMessage(
-            "Could not connect to the server. Make sure Node.js is running.",
-            "error"
-        );
+            // Validate Full Name
+            if (fullName.length < 2) {
+                showError('fullName', 'Please enter your full name (at least 2 characters)');
+                hasError = true;
+            }
 
-        button.disabled = false;
-        button.textContent = "Create Account";
-    }
+            // Validate Username
+            if (username.length < 3) {
+                showError('username', 'Username must be at least 3 characters');
+                hasError = true;
+            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError('username', 'Username can only contain letters, numbers, and underscores');
+                hasError = true;
+            }
 
-});
+            // Validate Email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('email', 'Please enter a valid email address');
+                hasError = true;
+            }
 
-</script>
+            // Validate Password
+            if (password.length < 6) {
+                showError('password', 'Password must be at least 6 characters');
+                hasError = true;
+            }
 
+            // Validate Confirm Password
+            if (password !== confirmPassword) {
+                showError('confirmPassword', 'Passwords do not match');
+                hasError = true;
+            }
+
+            // Validate Terms
+            if (!terms) {
+                showError('terms', 'You must accept the Terms of Service');
+                hasError = true;
+            }
+
+            if (hasError) {
+                console.log("Registration failed: validation errors");
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.textContent = "Please fix the errors above and try again.";
+                return;
+            }
+
+            // Success flow
+            console.log("Validation passed. Creating account...");
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating account...';
+            btn.disabled = true;
+
+            // Simulate saving to database (1.5 second delay)
+            setTimeout(() => {
+                const newUser = {
+                    fullName: fullName,
+                    username: username,
+                    email: email,
+                    createdAt: new Date().toISOString()
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                console.log("User saved to localStorage:", newUser);
+
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-green-400";
+                msgBox.textContent = "Account created successfully! Redirecting to dashboard...";
+
+                setTimeout(() => {
+                    window.location.href = 'member.html';
+                }, 1500);
+            }, 1500);
+        }
+
+        // 4. Real-time validation clearing (as user types)
+        document.getElementById('fullName').addEventListener('input', () => clearError('fullName'));
+        document.getElementById('username').addEventListener('input', () => clearError('username'));
+        document.getElementById('email').addEventListener('input', () => clearError('email'));
+        document.getElementById('password').addEventListener('input', () => clearError('password'));
+        document.getElementById('confirmPassword').addEventListener('input', () => clearError('confirmPassword'));
+        document.getElementById('terms').addEventListener('change', () => clearError('terms'));
+
+        console.log("Real-time validation listeners attached");
+    </script>
 </body>
 </html>
