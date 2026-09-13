@@ -330,7 +330,6 @@ tr:hover { background: #151b26; }
     font-size: 12px;
 }
 
-/* TOP KILLER — UPDATED with prize */
 .tk-match-row {
     background: linear-gradient(135deg, #2a1408, #1a0e08);
     border: 1px solid #ff9f43;
@@ -342,6 +341,10 @@ tr:hover { background: #151b26; }
     gap: 12px;
     flex-wrap: wrap;
 }
+.tk-match-row.paid {
+    background: linear-gradient(135deg, #0c3621, #0a2818);
+    border-color: #176b3c;
+}
 .tk-icon {
     width: 28px; height: 28px;
     border-radius: 50%;
@@ -349,6 +352,9 @@ tr:hover { background: #151b26; }
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 900; color: #0d111b;
     flex-shrink: 0;
+}
+.tk-match-row.paid .tk-icon {
+    background: linear-gradient(135deg, #5bed8e, #16a34a);
 }
 .tk-content { flex: 1; min-width: 120px; }
 .tk-label {
@@ -358,11 +364,13 @@ tr:hover { background: #151b26; }
     letter-spacing: 1px;
     font-weight: bold;
 }
+.tk-match-row.paid .tk-label { color: #5bed8e; }
 .tk-team {
     color: #ff9f43;
     font-weight: bold;
     font-size: 13px;
 }
+.tk-match-row.paid .tk-team { color: #5bed8e; }
 .tk-right {
     display: flex;
     align-items: center;
@@ -384,6 +392,9 @@ tr:hover { background: #151b26; }
     border-radius: 5px;
     letter-spacing: 0.5px;
     white-space: nowrap;
+}
+.tk-prize.paid {
+    background: linear-gradient(135deg, #5bed8e, #16a34a);
 }
 
 .match-screenshot {
@@ -582,6 +593,9 @@ function render() {
     var matches = tournamentData.matches || [];
     var stats = tournamentData.matchesStats || {};
     var totalKills = tournamentData.totalKills || 0;
+    var prizesPaidCount = tournamentData.prizesPaid || 0;
+    var prizesPendingCount = tournamentData.prizesPending || 0;
+    var allPrizesPaid = prizesPendingCount === 0 && prizesPaidCount > 0;
 
     var statusClass = String(t.status || "Open").toLowerCase();
 
@@ -654,6 +668,7 @@ function render() {
                         (t.prizePool > 0 ? "Rs. " + num(t.prizePool, 0) : "—") +
                     '</span></div>' +
                     '<div class="overview-item"><span class="overview-label">Top Killer Bonus</span><span class="overview-value" style="color:#ff9f43;">Rs. ' + TK_PRIZE + '</span></div>' +
+                    '<div class="overview-item"><span class="overview-label">Prizes Paid</span><span class="overview-value" style="color:' + (allPrizesPaid ? '#5bed8e' : '#ffd75a') + ';">' + prizesPaidCount + ' / ' + (prizesPaidCount + prizesPendingCount) + '</span></div>' +
                     '<div class="overview-item"><span class="overview-label">Total Kills Logged</span><span class="overview-value" style="color:#ff9f43;">' + totalKills + '</span></div>' +
                     '<div class="overview-item"><span class="overview-label">Registered Teams</span><span class="overview-value">' + (t.registeredTeams || 0) + '</span></div>' +
                 '</div>' +
@@ -714,13 +729,21 @@ function render() {
             var captainHtml = k.captain
                 ? '<a href="player.html?username=' + encodeURIComponent(k.captain) + '">' + esc(k.captain) + '</a>'
                 : "—";
+            var prizeHtml = "—";
+            if (rank === 1) {
+                if (allPrizesPaid) {
+                    prizeHtml = '<span class="tk-prize paid">PAID — Rs. ' + TK_PRIZE + '</span>';
+                } else {
+                    prizeHtml = '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>';
+                }
+            }
             killersHtml += '<tr>' +
                 '<td class="rank-cell ' + rankCls + '">' + rank + '</td>' +
                 '<td class="team-cell">' + esc(k.name) +
                     '<div class="captain">Captain: ' + captainHtml + '</div>' +
                 '</td>' +
                 '<td class="kills-cell" style="font-size:16px;">' + (k.kills || 0) + '</td>' +
-                '<td>' + (rank === 1 ? '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' : '—') + '</td>' +
+                '<td>' + prizeHtml + '</td>' +
             '</tr>';
         });
         killersHtml += '</tbody></table></div>';
@@ -761,7 +784,7 @@ function render() {
             winnersHtml += '<div style="color:#ff9f43;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Top Killer of Tournament</div>';
             winnersHtml += '<div style="font-size:20px;font-weight:900;color:#ff9f43;">' + esc(killers[0].name) + '</div>';
             winnersHtml += '<div style="color:#cbd5e1;font-size:14px;margin-top:4px;">' + (killers[0].kills || 0) + ' total kills</div>';
-            winnersHtml += '<div style="margin-top:8px;"><span class="tk-prize">Rs. ' + TK_PRIZE + ' Bonus</span></div>';
+            winnersHtml += '<div style="margin-top:8px;"><span class="tk-prize' + (allPrizesPaid ? ' paid' : '') + '">' + (allPrizesPaid ? 'PAID — ' : '') + 'Rs. ' + TK_PRIZE + ' Bonus</span></div>';
             winnersHtml += '</div>';
         }
 
@@ -819,15 +842,18 @@ function renderMatchCard(m) {
 
     var tkHtml = "";
     if (m.topKiller) {
-        tkHtml = '<div class="tk-match-row">' +
+        var paid = !!m.prizePaid;
+        tkHtml = '<div class="tk-match-row' + (paid ? ' paid' : '') + '">' +
             '<div class="tk-icon">TK</div>' +
             '<div class="tk-content">' +
-                '<div class="tk-label">Top Killer</div>' +
+                '<div class="tk-label">' + (paid ? 'Top Killer — Paid' : 'Top Killer') + '</div>' +
                 '<div class="tk-team">' + esc(m.topKiller) + '</div>' +
             '</div>' +
             '<div class="tk-right">' +
                 '<div class="tk-kills">' + num(m.topKillerKills, 0) + ' kills</div>' +
-                '<span class="tk-prize">Rs. ' + TK_PRIZE + '</span>' +
+                '<span class="tk-prize' + (paid ? ' paid' : '') + '">' +
+                    (paid ? 'PAID — Rs. ' + TK_PRIZE : 'Rs. ' + TK_PRIZE) +
+                '</span>' +
             '</div>' +
         '</div>';
     }
