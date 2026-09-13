@@ -39,7 +39,6 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-2">
             <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
@@ -50,25 +49,22 @@
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
             <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
         </div>
     </nav>
 
     <main class="flex-grow">
         
-        <!-- Profile Banner -->
         <div class="profile-banner"></div>
 
-        <!-- Profile Header -->
         <div class="container mx-auto px-6 -mt-24 relative z-10">
             <div class="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8">
                 
-                <!-- Avatar -->
                 <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring">
                     <span class="text-5xl md:text-6xl font-bold text-white">R</span>
                 </div>
                 
-                <!-- Name & Details -->
                 <div class="flex-grow text-center md:text-left">
                     <div class="flex items-center gap-2 justify-center md:justify-start flex-wrap mb-2">
                         <h1 class="text-3xl md:text-4xl font-bold text-white">Rahul Sharma</h1>
@@ -85,7 +81,6 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="flex gap-3">
                     <button onclick="challengePlayer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
                         <i class="fa-solid fa-hand-fist mr-2"></i>Challenge
@@ -96,7 +91,6 @@
                 </div>
             </div>
 
-            <!-- Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
                     <p class="text-xs text-gray-400 uppercase mb-1">Total Earnings</p>
@@ -120,15 +114,11 @@
                 </div>
             </div>
 
-            <!-- Two Column Layout -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 
-                <!-- Achievements (Left, 2 cols) -->
                 <div class="lg:col-span-2 glass-panel rounded-xl p-6">
                     <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-medal text-yellow-500 mr-2"></i>Achievements</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        
-                        <!-- Earned Badges -->
                         <div class="achievement-card text-center p-4 rounded-lg badge-earned">
                             <i class="fa-solid fa-crown text-3xl mb-2"></i>
                             <p class="text-xs font-bold">Tournament King</p>
@@ -149,8 +139,6 @@
                             <p class="text-xs font-bold">Survivor</p>
                             <p class="text-[10px] opacity-80">Top 10 x 100</p>
                         </div>
-                        
-                        <!-- Locked Badges -->
                         <div class="achievement-card text-center p-4 rounded-lg badge-locked">
                             <i class="fa-solid fa-diamond text-3xl mb-2"></i>
                             <p class="text-xs font-bold">Legend</p>
@@ -174,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Favorite Games (Right, 1 col) -->
                 <div class="glass-panel rounded-xl p-6">
                     <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-gamepad text-blue-500 mr-2"></i>Favorite Games</h2>
                     <div class="space-y-3">
@@ -218,7 +205,6 @@
                 </div>
             </div>
 
-            <!-- Recent Matches -->
             <div class="glass-panel rounded-xl overflow-hidden mb-8">
                 <div class="p-6 border-b border-gray-700 flex justify-between items-center">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i>Recent Matches</h2>
@@ -235,16 +221,13 @@
                                 <th class="px-6 py-3">Prize</th>
                             </tr>
                         </thead>
-                        <tbody id="matches-body" class="divide-y divide-gray-700">
-                            <!-- Data injected via JS -->
-                        </tbody>
+                        <tbody id="matches-body" class="divide-y divide-gray-700"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="glass-panel w-full p-6 mt-8">
         <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2">
@@ -255,11 +238,9 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
         console.log("--- PLAYER PROFILE PAGE LOADED ---");
 
-        // Recent matches data
         const recentMatches = [
             { tournament: "PUBG Squad Championship", date: "Nov 18, 2023", placement: 1, kills: 12, prize: 800 },
             { tournament: "Free Fire Solo Cup #11", date: "Nov 15, 2023", placement: 3, kills: 8, prize: 200 },
@@ -277,7 +258,6 @@
             const tbody = document.getElementById('matches-body');
 
             recentMatches.forEach(m => {
-                // Placement badge
                 let placementHtml = '';
                 if (m.placement === 1) {
                     placementHtml = `<span class="bg-yellow-500/20 text-yellow-400 border border-yellow-500 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i>#1</span>`;
@@ -302,7 +282,6 @@
             });
         }
 
-        // Challenge Button
         function challengePlayer() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
@@ -313,7 +292,6 @@
             alert("Challenge request sent to Rahul Sharma! You'll be notified when they accept.");
         }
 
-        // Follow Button
         function followPlayer() {
             const btn = document.getElementById('followBtn');
             if (btn.innerHTML.includes('Follow')) {
@@ -327,7 +305,6 @@
             }
         }
 
-        // Initialize
         window.onload = function() {
             renderMatches();
             console.log("Recent matches rendered:", recentMatches.length);
