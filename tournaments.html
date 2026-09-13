@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +12,8 @@
         .tournament-card { transition: transform 0.2s, box-shadow 0.2s; }
         .tournament-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); }
         .filter-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .new-badge { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -29,6 +29,7 @@
             <a href="tournaments.html" class="text-sm text-blue-400 font-bold">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
             <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
         </div>
     </nav>
@@ -66,21 +67,82 @@
     <script>
         console.log("--- TOURNAMENTS PAGE LOADED ---");
 
-        const tournaments = [
-            { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo" },
-            { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad" },
-            { id: 3, game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", name: "Valorant Night Cup", date: "Nov 25, 2023", time: "09:00 PM", entryFee: 150, prizePool: 3000, slotsFilled: 12, slotsTotal: 20, mode: "5v5" },
-            { id: 4, game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", name: "COD Mobile Battle Royale", date: "Nov 27, 2023", time: "06:00 PM", entryFee: 75, prizePool: 1500, slotsFilled: 32, slotsTotal: 50, mode: "Squad" },
-            { id: 5, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Duo Cup", date: "Nov 29, 2023", time: "08:30 PM", entryFee: 40, prizePool: 1000, slotsFilled: 95, slotsTotal: 100, mode: "Duo" },
-            { id: 6, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Solo Showdown", date: "Dec 01, 2023", time: "07:00 PM", entryFee: 60, prizePool: 2500, slotsFilled: 20, slotsTotal: 100, mode: "Solo" }
+        // Default (static) tournaments
+        const defaultTournaments = [
+            { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo", isNew: false },
+            { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad", isNew: false },
+            { id: 3, game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", name: "Valorant Night Cup", date: "Nov 25, 2023", time: "09:00 PM", entryFee: 150, prizePool: 3000, slotsFilled: 12, slotsTotal: 20, mode: "5v5", isNew: false },
+            { id: 4, game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", name: "COD Mobile Battle Royale", date: "Nov 27, 2023", time: "06:00 PM", entryFee: 75, prizePool: 1500, slotsFilled: 32, slotsTotal: 50, mode: "Squad", isNew: false },
+            { id: 5, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Duo Cup", date: "Nov 29, 2023", time: "08:30 PM", entryFee: 40, prizePool: 1000, slotsFilled: 95, slotsTotal: 100, mode: "Duo", isNew: false },
+            { id: 6, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Solo Showdown", date: "Dec 01, 2023", time: "07:00 PM", entryFee: 60, prizePool: 2500, slotsFilled: 20, slotsTotal: 100, mode: "Solo", isNew: false }
         ];
+
+        // Game config for admin-created tournaments
+        const gameConfig = {
+            freefire: { gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600" },
+            pubg: { gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
+            valorant: { gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
+            cod: { gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" },
+            ludo: { gameName: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600" }
+        };
+
+        // Merge default tournaments + admin-created tournaments from localStorage
+        function getAllTournaments() {
+            const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+            console.log("Found", custom.length, "custom tournaments from admin");
+
+            // Convert custom tournaments to display format
+            const formattedCustom = custom.map(t => {
+                const config = gameConfig[t.game] || { gameName: t.game, icon: "fa-gamepad", color: "from-gray-500 to-gray-700" };
+                
+                // Format date
+                let dateStr = t.date;
+                try {
+                    const d = new Date(t.date);
+                    dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                } catch(e) {}
+                
+                // Format time
+                let timeStr = t.time;
+                try {
+                    const [hours, minutes] = t.time.split(':');
+                    const hour24 = parseInt(hours);
+                    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+                    const ampm = hour24 >= 12 ? 'PM' : 'AM';
+                    timeStr = `${hour12}:${minutes} ${ampm}`;
+                } catch(e) {}
+
+                return {
+                    id: t.id,
+                    game: t.game,
+                    gameName: config.gameName,
+                    icon: config.icon,
+                    color: config.color,
+                    name: t.name,
+                    date: dateStr,
+                    time: timeStr,
+                    entryFee: t.entryFee,
+                    prizePool: t.prizePool,
+                    slotsFilled: t.slotsFilled || 0,
+                    slotsTotal: t.slotsTotal,
+                    mode: t.mode,
+                    isNew: true // Mark as "new" so we can badge it
+                };
+            });
+
+            // Custom tournaments appear first
+            return [...formattedCustom, ...defaultTournaments];
+        }
 
         function renderTournaments(filter) {
             const grid = document.getElementById('tournament-grid');
             const noResults = document.getElementById('no-results');
             grid.innerHTML = '';
 
-            const filtered = filter === 'all' ? tournaments : tournaments.filter(t => t.game === filter);
+            const allTournaments = getAllTournaments();
+            const filtered = filter === 'all' 
+                ? allTournaments 
+                : allTournaments.filter(t => t.game === filter);
 
             if (filtered.length === 0) {
                 noResults.classList.remove('hidden');
@@ -102,7 +164,10 @@
                             <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
                                 <i class="fa-solid ${t.icon}"></i> ${t.gameName}
                             </div>
-                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white">${t.mode}</div>
+                            <div class="flex gap-1">
+                                ${t.isNew ? '<div class="new-badge bg-red-600 rounded-full px-2 py-1 text-xs font-bold text-white">NEW</div>' : ''}
+                                <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white">${t.mode}</div>
+                            </div>
                         </div>
                         <h3 class="text-xl font-bold text-white mt-6 drop-shadow-lg">${t.name}</h3>
                     </div>
@@ -136,7 +201,7 @@
                     </div>
 
                     <div class="p-5 pt-0">
-                        <button onclick="registerForTournament('${t.name}')" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
+                        <button onclick="registerForTournament('${t.name}', ${t.id})" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
                             ${isFull ? 'Tournament Full' : 'Register Now'}
                         </button>
                     </div>
@@ -151,141 +216,37 @@
             renderTournaments(game);
         }
 
-        function registerForTournament(name) {
+        function registerForTournament(name, id) {
+            console.log("Registering for:", name, "ID:", id);
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
                 alert("You need to login first to register for a tournament.");
                 window.location.href = 'member.html';
                 return;
             }
-            alert(`Success! You have registered for "${name}".\n\nCheck your dashboard for updates.`);
-        }
+            
+            // Save registration
+            const registrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+            if (registrations.some(r => r.tournamentId === id && r.username === user.username)) {
+                alert("You have already registered for this tournament!");
+                return;
+            }
 
-        window.onload = function() { renderTournaments('all'); };
-    </script>
-</body>
-</html>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Winners - Nepal Gaming Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
-        .rank-2 { color: #94a3b8; }
-        .rank-3 { color: #b45309; }
-        .winner-card { transition: transform 0.2s; }
-        .winner-card:hover { transform: translateY(-5px); }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="winners.html" class="text-sm text-blue-400 font-bold">Winners</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Dashboard</a>
-        </div>
-    </nav>
-
-    <main class="flex-grow container mx-auto p-6">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-3"></i>Hall of Winners</h1>
-            <p class="text-gray-400">Celebrating the top players and their prize winnings.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end">
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-2 md:order-1 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400"><i class="fa-solid fa-user text-2xl text-gray-300"></i></div>
-                <h3 class="text-xl font-bold text-white">Sujal Thapa</h3>
-                <p class="text-sm text-gray-400 mb-2">Free Fire Solo Cup</p>
-                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 300</div>
-            </div>
-            <div class="glass-panel winner-card rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
-                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
-                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2"><i class="fa-solid fa-crown text-3xl text-yellow-500"></i></div>
-                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500"><i class="fa-solid fa-user text-3xl text-yellow-500"></i></div>
-                <h3 class="text-2xl font-bold text-white">Rahul Sharma</h3>
-                <p class="text-sm text-gray-400 mb-2">PUBG Mobile Squad</p>
-                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
-                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500">Rs. 1,000</div>
-            </div>
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-3 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700"><i class="fa-solid fa-user text-2xl text-orange-400"></i></div>
-                <h3 class="text-xl font-bold text-white">Bibek Gurung</h3>
-                <p class="text-sm text-gray-400 mb-2">Clash of Clans War</p>
-                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 200</div>
-            </div>
-        </div>
-
-        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recent Winners</h2>
-                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Updated Live</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                        <tr>
-                            <th class="px-6 py-3">Player</th>
-                            <th class="px-6 py-3">Tournament</th>
-                            <th class="px-6 py-3">Rank</th>
-                            <th class="px-6 py-3">Prize Won</th>
-                            <th class="px-6 py-3">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winners-table-body" class="divide-y divide-gray-700"></tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        const winnersData = [
-            { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
-            { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
-            { player: "Bibek Gurung", tournament: "Clash of Clans War", rank: "#3", prize: 200, date: "2023-10-25" },
-            { player: "Anish Rai", tournament: "Free Fire Solo Cup", rank: "#1", prize: 500, date: "2023-10-20" },
-            { player: "Kiran Shah", tournament: "Valorant Night Cup", rank: "#1", prize: 1500, date: "2023-10-15" },
-            { player: "Sita Karki", tournament: "Ludo King Championship", rank: "#2", prize: 400, date: "2023-10-10" }
-        ];
-
-        function loadWinners() {
-            const tableBody = document.getElementById('winners-table-body');
-            winnersData.forEach(winner => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
-                let rankClass = "text-gray-300";
-                let rankIcon = "";
-                if(winner.rank === "#1") { rankClass = "text-yellow-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                else if(winner.rank === "#2") { rankClass = "text-gray-300 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                else if(winner.rank === "#3") { rankClass = "text-orange-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">${winner.player.charAt(0)}</div>
-                        ${winner.player}
-                    </td>
-                    <td class="px-6 py-4">${winner.tournament}</td>
-                    <td class="px-6 py-4 ${rankClass}">${rankIcon}${winner.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${winner.prize}</td>
-                    <td class="px-6 py-4 text-gray-500">${winner.date}</td>
-                `;
-                tableBody.appendChild(row);
+            registrations.push({
+                username: user.username,
+                tournamentId: id,
+                tournamentName: name,
+                registeredAt: new Date().toISOString()
             });
+            localStorage.setItem('userRegistrations', JSON.stringify(registrations));
+
+            alert(`✅ Success! You have registered for "${name}".\n\nCheck your dashboard for updates.`);
         }
-        document.addEventListener('DOMContentLoaded', loadWinners);
+
+        window.onload = function() { 
+            console.log("Rendering tournaments...");
+            renderTournaments('all'); 
+        };
     </script>
 </body>
 </html>
