@@ -41,32 +41,28 @@
             padding: 20px;
         }
         
-        .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
-        .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
-        
         .status-verified { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-pending-verify { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-rejected { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-free { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+
+        /* Support ticket statuses */
+        .ticket-open { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+        .ticket-resolved { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+
+        .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+        .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
 
         .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(100, 116, 139, 0.3); }
         .detail-row:last-child { border-bottom: none; }
         .detail-label { color: #94a3b8; font-size: 0.75rem; }
         .detail-value { color: #e2e8f0; font-weight: 600; font-size: 0.8rem; }
 
-        .calc-result-card {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15));
-            border: 2px solid; border-radius: 12px; padding: 16px; transition: all 0.3s;
-        }
+        .calc-result-card { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15)); border: 2px solid; border-radius: 12px; padding: 16px; transition: all 0.3s; }
         .calc-result-card.profit { border-color: #22c55e; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1)); }
         .calc-result-card.prizepool { border-color: #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)); }
         .calc-result-card.total { border-color: #facc15; background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.1)); }
-        .prize-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 14px; background: rgba(30, 41, 59, 0.6);
-            border-radius: 8px; margin-bottom: 8px;
-            border-left: 3px solid #64748b; transition: all 0.2s;
-        }
+        .prize-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(30, 41, 59, 0.6); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #64748b; transition: all 0.2s; }
         .prize-row:hover { background: rgba(30, 41, 59, 0.9); transform: translateX(4px); }
         .prize-row.rank-1 { border-left-color: #facc15; }
         .prize-row.rank-2 { border-left-color: #94a3b8; }
@@ -87,71 +83,37 @@
         }
         .copy-toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* Tournament card in admin list */
-        .tournament-admin-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 16px; background: rgba(30, 41, 59, 0.6);
-            border-radius: 10px; margin-bottom: 8px;
-            border-left: 3px solid #3b82f6;
-            transition: all 0.2s;
-        }
-        .tournament-admin-item:hover {
-            background: rgba(30, 41, 59, 0.9);
-            transform: translateX(4px);
-        }
-        .delete-btn {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .delete-btn:hover {
-            background-color: rgba(239, 68, 68, 0.4);
-            transform: scale(1.1);
-        }
+        .tournament-admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #3b82f6; transition: all 0.2s; }
+        .tournament-admin-item:hover { background: rgba(30, 41, 59, 0.9); transform: translateX(4px); }
+        .delete-btn { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .delete-btn:hover { background-color: rgba(239, 68, 68, 0.4); transform: scale(1.1); }
 
-        /* Mobile menu */
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
-        .mobile-nav-menu.open {
-            display: flex; flex-direction: column;
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; gap: 8px; z-index: 60;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        @media (min-width: 768px) {
-            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
-        /* Admin sidebar mobile */
         @media (max-width: 767px) {
             .admin-sidebar { display: none; }
-            .admin-sidebar.mobile-open {
-                display: flex;
-                position: fixed;
-                top: 60px;
-                left: 0;
-                bottom: 0;
-                width: 250px;
-                z-index: 45;
-                background: #1e293b;
-            }
+            .admin-sidebar.mobile-open { display: flex; position: fixed; top: 60px; left: 0; bottom: 0; width: 250px; z-index: 45; background: #1e293b; }
         }
+
+        /* Support ticket card */
+        .ticket-card {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 16px; background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px; margin-bottom: 8px;
+            border-left: 3px solid #facc15;
+            transition: all 0.2s;
+        }
+        .ticket-card.resolved { border-left-color: #22c55e; opacity: 0.8; }
+        .ticket-card:hover { background: rgba(30, 41, 59, 0.9); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginScreen">
         <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-xl shadow-2xl">
             <div class="text-center mb-6 sm:mb-8">
@@ -159,13 +121,12 @@
                     <i class="fa-solid fa-shield-halved text-red-500 text-2xl sm:text-3xl"></i>
                 </div>
                 <h1 class="text-xl sm:text-2xl font-bold text-white mb-2">Admin Access</h1>
-                <p class="text-gray-400 text-xs sm:text-sm">Enter password to continue</p>
+                <p class="text-gray-400 text-xs sm:text-sm">Enter password</p>
             </div>
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Admin Password</label>
                     <div class="relative">
-                        <input type="password" id="adminPassword" class="w-full px-4 py-3 pr-12 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter password" required autofocus>
+                        <input type="password" id="adminPassword" class="w-full px-4 py-3 pr-12 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password" required autofocus>
                         <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                             <i id="eyeIcon" class="fa-solid fa-eye"></i>
                         </button>
@@ -173,91 +134,64 @@
                     <p id="loginError" class="hidden text-red-400 text-sm mt-3 text-center"></p>
                 </div>
                 <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
-                    <i class="fa-solid fa-lock-open mr-2"></i>Access Admin Panel
+                    <i class="fa-solid fa-lock-open mr-2"></i>Access Admin
                 </button>
             </form>
             <div class="text-center mt-6">
-                <a href="index.html" class="text-sm text-gray-400 hover:text-white transition">
-                    <i class="fa-solid fa-arrow-left mr-1"></i>Back to Site
-                </a>
+                <a href="index.html" class="text-sm text-gray-400 hover:text-white transition"><i class="fa-solid fa-arrow-left mr-1"></i>Back to Site</a>
             </div>
         </div>
     </div>
 
-    <!-- MAIN PANEL -->
+    <!-- MAIN -->
     <div id="mainPanel" class="hidden min-h-screen flex flex-col">
 
-        <!-- Admin Navbar -->
         <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-gray-700 relative">
             <div class="flex items-center gap-3 min-w-0">
                 <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
                 <span class="text-lg font-bold text-white whitespace-nowrap hidden sm:inline">Nepal Gaming</span>
                 <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
-
-                <div id="user-profile" class="hidden relative ml-2">
-                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
-                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
-                        <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
-                    </button>
-                    <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
-                        <div class="p-3 border-b border-gray-700">
-                            <p class="text-xs text-gray-500">Signed in as</p>
-                            <p id="dropdown-username" class="font-bold text-white text-sm truncate">admin@nepplay.com</p>
-                            <p class="text-xs text-red-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Administrator</p>
-                        </div>
-                        <div class="py-1">
-                            <a href="index.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-globe w-4"></i> View Public Site</a>
-                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> Member View</a>
-                        </div>
-                        <div class="py-1 border-t border-gray-700">
-                            <button onclick="adminLogout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Exit Admin</button>
-                        </div>
-                    </div>
-                </div>
             </div>
-
             <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
                 <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
             </button>
-
             <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
-                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
-                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
-                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
-                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+                <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+                <a href="teams.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
                 <button onclick="adminLogout()" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 md:py-1 rounded transition text-center">Exit</button>
             </div>
         </nav>
 
-        <div class="flex-grow flex flex-col md:flex-row relative">
+        <div class="flex-grow flex flex-col md:flex-row">
             
-            <!-- Sidebar -->
             <aside id="adminSidebar" class="admin-sidebar hidden md:flex flex-col w-full md:w-64 glass-panel border-r border-gray-700 p-4 md:sticky md:top-[60px] md:h-[calc(100vh-60px)] overflow-y-auto">
                 <div class="mb-6">
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
                     <ul class="space-y-1">
                         <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
-                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator</a></li>
+                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Calculator</a></li>
                         <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
                         <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
                         <li><a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-plus-circle w-5"></i> Tournaments</a></li>
                         <li><a href="#" onclick="switchTab('registrations', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-clipboard-list w-5"></i> Registrations <span id="reg-count-badge" class="ml-auto bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
+                        <li><a href="#" onclick="switchTab('support', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-headset w-5"></i> Support <span id="support-badge" class="ml-auto bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
                         <li><a href="#" onclick="switchTab('announcements', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-bullhorn w-5"></i> Announcements</a></li>
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p>v2.0.0 • 2026</p>
-                    <p>&copy; Nepal Gaming</p>
+                    <p>v2.1 • 2026</p>
                 </div>
             </aside>
 
             <main class="flex-grow p-4 sm:p-6 overflow-y-auto">
 
-                <!-- ============ DASHBOARD ============ -->
+                <!-- DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content active">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Welcome, Admin. Manage your platform from here.</p>
+                        <p class="text-gray-400 mt-1 text-sm">Welcome, Admin</p>
                     </div>
 
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
@@ -273,9 +207,9 @@
                             <p class="text-xs text-gray-400 uppercase">Registrations</p>
                             <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="total-registrations">0</p>
                         </div>
-                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-400 uppercase">Pending</p>
-                            <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="pending-payouts-count">0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-pink-500">
+                            <p class="text-xs text-gray-400 uppercase">Open Tickets</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-pink-400 mt-1" id="open-tickets-count">0</p>
                         </div>
                     </div>
 
@@ -286,7 +220,7 @@
                         <div class="p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
                                 <i class="fa-solid fa-plus-circle text-green-500 text-xl sm:text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-xs sm:text-sm">Add Tournament</p>
+                                <p class="font-bold text-white text-xs sm:text-sm">Tournaments</p>
                             </button>
                             <button onclick="switchTab('calculator', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
                                 <i class="fa-solid fa-calculator text-purple-500 text-xl sm:text-2xl mb-2"></i>
@@ -296,15 +230,15 @@
                                 <i class="fa-solid fa-clipboard-list text-blue-500 text-xl sm:text-2xl mb-2"></i>
                                 <p class="font-bold text-white text-xs sm:text-sm">Registrations</p>
                             </button>
-                            <button onclick="switchTab('announcements', document.querySelectorAll('.sidebar-item')[6])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-bullhorn text-yellow-500 text-xl sm:text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-xs sm:text-sm">Announce</p>
+                            <button onclick="switchTab('support', document.querySelectorAll('.sidebar-item')[6])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-headset text-pink-500 text-xl sm:text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-xs sm:text-sm">Support</p>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ============ CALCULATOR ============ -->
+                <!-- CALCULATOR -->
                 <div id="tab-calculator" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-calculator text-purple-500 mr-2"></i>Prize Calculator</h1>
@@ -351,28 +285,19 @@
                         <div class="space-y-4">
                             <div class="calc-result-card total">
                                 <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-xs text-yellow-300 uppercase">Total Collected</p>
-                                        <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p>
-                                    </div>
+                                    <div><p class="text-xs text-yellow-300 uppercase">Total Collected</p><p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p></div>
                                     <i class="fa-solid fa-money-bill-wave text-3xl text-yellow-500 opacity-50"></i>
                                 </div>
                             </div>
                             <div class="calc-result-card prizepool">
                                 <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-xs text-blue-300 uppercase">Prize Pool</p>
-                                        <p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p>
-                                    </div>
+                                    <div><p class="text-xs text-blue-300 uppercase">Prize Pool</p><p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p></div>
                                     <i class="fa-solid fa-trophy text-3xl text-blue-500 opacity-50"></i>
                                 </div>
                             </div>
                             <div class="calc-result-card profit">
                                 <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="text-xs text-green-300 uppercase">💰 Your Profit</p>
-                                        <p class="text-3xl sm:text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p>
-                                    </div>
+                                    <div><p class="text-xs text-green-300 uppercase">💰 Your Profit</p><p class="text-3xl sm:text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p></div>
                                     <i class="fa-solid fa-hand-holding-dollar text-3xl text-green-500 opacity-50"></i>
                                 </div>
                             </div>
@@ -384,12 +309,11 @@
                     </div>
                 </div>
 
-                <!-- ============ EARNINGS ============ -->
+                <!-- EARNINGS -->
                 <div id="tab-earnings" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Track revenue in real time</p>
                         </div>
                         <div class="flex gap-2 flex-wrap">
                             <button class="period-tab active text-xs sm:text-sm" onclick="setEarningsPeriod('today', this)">Today</button>
@@ -424,12 +348,11 @@
                     </div>
                 </div>
 
-                <!-- ============ PAYOUTS ============ -->
+                <!-- PAYOUTS -->
                 <div id="tab-payouts" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payouts</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Manage winner payments</p>
                         </div>
                         <button onclick="openAddPayoutModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
                             <i class="fa-solid fa-plus mr-2"></i>Add Winner
@@ -454,30 +377,29 @@
                         <div id="empty-payouts" class="p-8 text-center text-gray-500">
                             <i class="fa-solid fa-money-bill-transfer text-4xl mb-3"></i>
                             <p class="font-bold text-white mb-1">No payouts yet</p>
-                            <p class="text-xs">Add winners after your first tournament.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ============ ADD TOURNAMENT (with delete button) ============ -->
+                <!-- TOURNAMENTS -->
                 <div id="tab-add-tournament" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white">Tournaments</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Create and manage your tournaments</p>
+                        <p class="text-gray-400 mt-1 text-sm">Create and manage tournaments</p>
                     </div>
 
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
-                        <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Tournament</h2>
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New</h2>
                         <form id="tournamentForm" onsubmit="createTournament(event)">
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Name *</label>
                                 <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #1" required>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
                                     <select id="t-game" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                        <option value="">Select Game</option>
+                                        <option value="">Select</option>
                                         <option value="freefire">🔥 Free Fire</option>
                                         <option value="pubg">🎯 PUBG Mobile</option>
                                         <option value="cod">💣 COD Mobile</option>
@@ -488,13 +410,13 @@
                                         <option value="chess">♟️ Chess</option>
                                         <option value="clashroyale">👑 Clash Royale</option>
                                         <option value="pool">🎱 8 Ball Pool</option>
-                                        <option value="other">🎮 Other Game</option>
+                                        <option value="other">🎮 Other</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Mode *</label>
                                     <select id="t-mode" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                        <option value="">Select Mode</option>
+                                        <option value="">Select</option>
                                         <option value="Solo">Solo</option>
                                         <option value="Duo">Duo</option>
                                         <option value="Squad">Squad</option>
@@ -516,16 +438,16 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
-                                    <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="0" value="0" required>
+                                    <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="0" min="0" value="0" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Prize Pool (Rs.) *</label>
-                                    <input type="number" id="t-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="2000" min="0" required>
+                                    <input type="number" id="t-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="500" min="0" required>
                                 </div>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
-                                <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="2" required>
+                                <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="20" min="2" required>
                             </div>
                             <div class="flex gap-3">
                                 <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
@@ -537,29 +459,24 @@
                         </form>
                     </div>
 
-                    <!-- Existing Tournaments with DELETE -->
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Active Tournaments</h2>
                             <span class="text-xs text-gray-500" id="active-tournament-count">0 total</span>
                         </div>
-                        <div id="admin-tournaments-list">
-                            <!-- Tournaments injected via JS with delete buttons -->
-                        </div>
+                        <div id="admin-tournaments-list"></div>
                         <div id="no-tournaments-admin" class="text-center py-8 text-gray-500">
                             <i class="fa-solid fa-clipboard text-4xl mb-3 opacity-50"></i>
                             <p class="text-sm">No tournaments created yet</p>
-                            <p class="text-xs mt-1">Create your first tournament above</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ============ REGISTRATIONS ============ -->
+                <!-- REGISTRATIONS -->
                 <div id="tab-registrations" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-blue-500 mr-2"></i>Registrations</h1>
-                            <p class="text-gray-400 mt-1 text-sm">View and manage sign-ups</p>
                         </div>
                         <button onclick="downloadRegistrationsCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
                             <i class="fa-solid fa-download mr-2"></i>CSV
@@ -587,33 +504,78 @@
                     </div>
                 </div>
 
-                <!-- ============ ANNOUNCEMENTS ============ -->
+                <!-- SUPPORT (NEW!) -->
+                <div id="tab-support" class="tab-content">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-headset text-pink-500 mr-2"></i>Support Tickets</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Messages from users via support form</p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-3 sm:gap-6 mb-6">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Open</p>
+                            <p class="text-xl sm:text-2xl font-bold text-yellow-400 mt-1" id="open-tickets">0</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Resolved</p>
+                            <p class="text-xl sm:text-2xl font-bold text-green-400 mt-1" id="resolved-tickets">0</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-pink-500">
+                            <p class="text-xs text-gray-400 uppercase">Total</p>
+                            <p class="text-xl sm:text-2xl font-bold text-pink-400 mt-1" id="total-tickets">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center">
+                        <div class="flex-grow min-w-[180px]">
+                            <select id="ticket-filter" class="form-input w-full px-3 py-2 rounded-lg text-sm" onchange="renderSupportTickets()">
+                                <option value="all">All Tickets</option>
+                                <option value="open">Open Only</option>
+                                <option value="resolved">Resolved Only</option>
+                            </select>
+                        </div>
+                        <div class="flex-grow min-w-[180px]">
+                            <input type="text" id="ticket-search" class="form-input w-full px-3 py-2 rounded-lg text-sm" placeholder="Search name/phone..." oninput="renderSupportTickets()">
+                        </div>
+                    </div>
+
+                    <!-- Ticket List -->
+                    <div id="support-tickets-list"></div>
+                    <div id="empty-tickets" class="glass-panel rounded-xl p-12 text-center text-gray-500">
+                        <i class="fa-solid fa-headset text-5xl mb-4 opacity-30"></i>
+                        <p class="font-bold text-white mb-1">No support tickets yet</p>
+                        <p class="text-sm">Messages sent through the support form will appear here.</p>
+                    </div>
+                </div>
+
+                <!-- ANNOUNCEMENTS -->
                 <div id="tab-announcements" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Post updates for all members</p>
                     </div>
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl">
                         <form id="announcementForm" onsubmit="createAnnouncement(event)">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
-                                <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Launching Soon!" required oninput="updatePreview()">
+                                <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" required>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
-                                <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Write your announcement..." required oninput="updatePreview()"></textarea>
+                                <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" required></textarea>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                                <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg" onchange="updatePreview()">
-                                    <option value="normal">Normal (Blue)</option>
-                                    <option value="high">High (Yellow)</option>
-                                    <option value="urgent">Urgent (Red)</option>
+                                <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
                                 </select>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Image (Optional)</label>
-                                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()" style="border: 2px dashed #334155; border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;">
+                                <div onclick="document.getElementById('imageInput').click()" style="border: 2px dashed #334155; border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;">
                                     <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
                                     <div id="uploadPlaceholder">
                                         <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-500 mb-2"></i>
@@ -621,7 +583,7 @@
                                     </div>
                                     <div id="uploadPreview" class="hidden">
                                         <img id="previewImage" class="max-h-32 mx-auto rounded-lg mb-2" src="">
-                                        <button type="button" onclick="event.stopPropagation(); removeImage()" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash mr-1"></i>Remove</button>
+                                        <button type="button" onclick="event.stopPropagation(); removeImage()" class="text-red-400 text-sm">Remove</button>
                                     </div>
                                 </div>
                             </div>
@@ -632,7 +594,7 @@
                         </form>
                     </div>
                     <div class="mt-6 max-w-3xl">
-                        <h2 class="text-base sm:text-lg font-bold text-white mb-4">Recent Announcements</h2>
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-4">Recent</h2>
                         <div id="announcements-list" class="space-y-3"></div>
                     </div>
                 </div>
@@ -643,9 +605,9 @@
 
     <!-- PAYOUT MODAL -->
     <div id="addPayoutModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.75); backdrop-filter: blur(4px);">
-        <div class="glass-panel rounded-xl w-full max-w-md p-6">
+        <div class="glass-panel rounded-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Add Winner</h2>
+                <h2 class="text-xl font-bold text-white">Add Winner</h2>
                 <button onclick="closeAddPayoutModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <form id="addPayoutForm" onsubmit="addPayout(event)">
@@ -664,8 +626,6 @@
                             <option value="#1">#1</option>
                             <option value="#2">#2</option>
                             <option value="#3">#3</option>
-                            <option value="#4">#4</option>
-                            <option value="#5">#5</option>
                         </select>
                     </div>
                     <div>
@@ -674,20 +634,20 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">Add</button>
-                    <button type="button" onclick="closeAddPayoutModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
+                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Add</button>
+                    <button type="button" onclick="closeAddPayoutModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- COPY TOAST -->
+    <!-- TOAST -->
     <div id="copyToast" class="copy-toast">
-        <i class="fa-solid fa-check mr-2"></i>Copied!
+        <i class="fa-solid fa-check mr-2"></i>Done!
     </div>
 
     <script>
-        console.log("--- ADMIN PANEL v2.0 (2026) ---");
+        console.log("--- ADMIN v2.1 (2026 + Support Tickets) ---");
 
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
@@ -713,7 +673,6 @@
         function showAdminPanel() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainPanel').classList.remove('hidden');
-            showAdminIdentity();
             initializePanel();
             calculate();
         }
@@ -724,28 +683,15 @@
         }
 
         function togglePasswordVisibility() {
-            const input = document.getElementById('adminPassword');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') { input.type = 'text'; icon.className = 'fa-solid fa-eye-slash'; }
-            else { input.type = 'password'; icon.className = 'fa-solid fa-eye'; }
+            const i = document.getElementById('adminPassword');
+            const ic = document.getElementById('eyeIcon');
+            if (i.type === 'password') { i.type = 'text'; ic.className = 'fa-solid fa-eye-slash'; }
+            else { i.type = 'password'; ic.className = 'fa-solid fa-eye'; }
         }
 
         function checkAuthOnLoad() {
             if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') showAdminPanel();
         }
-
-        function showAdminIdentity() {
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('user-avatar').textContent = 'A';
-            document.getElementById('dropdown-username').textContent = 'admin@nepplay.com';
-        }
-
-        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
-        document.addEventListener('click', function(e) {
-            const profile = document.getElementById('user-profile');
-            const dropdown = document.getElementById('profile-dropdown');
-            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
-        });
 
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
@@ -771,12 +717,11 @@
             if (tabName === 'payouts') renderPayouts();
             if (tabName === 'calculator') calculate();
             if (tabName === 'add-tournament') renderAdminTournaments();
+            if (tabName === 'support') renderSupportTickets();
         }
 
-        // ============ TOURNAMENT MANAGEMENT ============
-        function getCustomTournaments() {
-            return JSON.parse(localStorage.getItem('customTournaments') || '[]');
-        }
+        // ============ TOURNAMENTS ============
+        function getCustomTournaments() { return JSON.parse(localStorage.getItem('customTournaments') || '[]'); }
 
         function createTournament(event) {
             event.preventDefault();
@@ -793,10 +738,9 @@
                 slotsTotal: parseInt(document.getElementById('t-slots').value),
                 createdAt: new Date().toISOString()
             };
-
-            const existing = getCustomTournaments();
-            existing.push(newT);
-            localStorage.setItem('customTournaments', JSON.stringify(existing));
+            const ex = getCustomTournaments();
+            ex.push(newT);
+            localStorage.setItem('customTournaments', JSON.stringify(ex));
 
             const msg = document.getElementById('tournament-msg');
             msg.classList.remove('hidden');
@@ -809,10 +753,10 @@
         }
 
         function renderAdminTournaments() {
-            const tournaments = getCustomTournaments();
             const list = document.getElementById('admin-tournaments-list');
             const empty = document.getElementById('no-tournaments-admin');
             const count = document.getElementById('active-tournament-count');
+            const tournaments = getCustomTournaments();
 
             count.textContent = `${tournaments.length} total`;
 
@@ -821,15 +765,10 @@
                 empty.classList.remove('hidden');
                 return;
             }
-
             empty.classList.add('hidden');
             list.innerHTML = '';
 
-            const gameEmojis = {
-                freefire: '🔥', pubg: '🎯', cod: '💣', efootball: '⚽',
-                ecricket: '🏏', valorant: '⚔️', ludo: '🎲', chess: '♟️',
-                clashroyale: '👑', pool: '🎱', other: '🎮'
-            };
+            const gameEmojis = { freefire: '🔥', pubg: '🎯', cod: '💣', efootball: '⚽', ecricket: '🏏', valorant: '⚔️', ludo: '🎲', chess: '♟️', clashroyale: '👑', pool: '🎱', other: '🎮' };
 
             tournaments.reverse().forEach(t => {
                 const item = document.createElement('div');
@@ -838,9 +777,9 @@
                 item.innerHTML = `
                     <div class="flex-grow min-w-0">
                         <p class="font-bold text-white text-sm truncate">${t.name}</p>
-                        <p class="text-xs text-gray-400 mt-1">${gameEmojis[t.game] || '🎮'} ${t.game} • ${t.mode} • ${dateStr} • Rs. ${t.entryFee} entry</p>
+                        <p class="text-xs text-gray-400 mt-1">${gameEmojis[t.game] || '🎮'} ${t.game} • ${t.mode} • ${dateStr} • ${t.entryFee === 0 ? 'FREE' : 'Rs.' + t.entryFee}</p>
                     </div>
-                    <button onclick="deleteTournament(${t.id}, '${t.name.replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete Tournament">
+                    <button onclick="deleteTournament(${t.id}, '${t.name.replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 `;
@@ -849,23 +788,18 @@
         }
 
         function deleteTournament(id, name) {
-            if (!confirm(`⚠️ Delete "${name}"?\n\nThis will remove it from the public tournaments page and cannot be undone.`)) return;
-
-            const tournaments = getCustomTournaments().filter(t => t.id !== id);
-            localStorage.setItem('customTournaments', JSON.stringify(tournaments));
-            
-            console.log("🗑️ Deleted tournament:", id);
+            if (!confirm(`⚠️ Delete "${name}"?\n\nIt will be removed permanently.`)) return;
+            localStorage.setItem('customTournaments', JSON.stringify(getCustomTournaments().filter(t => t.id !== id)));
             renderAdminTournaments();
             updateDashboardStats();
+            showToast('Tournament deleted');
+        }
 
-            // Show toast
-            const toast = document.getElementById('copyToast');
-            toast.innerHTML = '<i class="fa-solid fa-trash mr-2"></i>Tournament deleted';
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Copied!';
-            }, 2000);
+        function showToast(msg) {
+            const t = document.getElementById('copyToast');
+            t.innerHTML = `<i class="fa-solid fa-check mr-2"></i>${msg}`;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
         }
 
         // ============ CALCULATOR ============
@@ -874,12 +808,12 @@
         function applyPreset(preset, btn) {
             document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const players = document.getElementById('calc-players');
-            const fee = document.getElementById('calc-fee');
-            const profit = document.getElementById('calc-profit');
-            if (preset === 'solo') { players.value = 20; fee.value = 150; profit.value = 30; }
-            else if (preset === 'duo') { players.value = 20; fee.value = 200; profit.value = 25; }
-            else if (preset === 'squad') { players.value = 24; fee.value = 250; profit.value = 25; }
+            const p = document.getElementById('calc-players');
+            const f = document.getElementById('calc-fee');
+            const pr = document.getElementById('calc-profit');
+            if (preset === 'solo') { p.value = 20; f.value = 150; pr.value = 30; }
+            else if (preset === 'duo') { p.value = 20; f.value = 200; pr.value = 25; }
+            else if (preset === 'squad') { p.value = 24; f.value = 250; pr.value = 25; }
             updateProfitLabel();
             calculate();
         }
@@ -925,14 +859,14 @@
             }
 
             let html = '';
-            html += `<div class="prize-row rank-1"><div class="flex items-center gap-3"><span class="text-2xl">🥇</span><div><p class="font-bold text-white text-sm">1st Place</p></div></div><p class="text-lg font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p></div>`;
-            html += `<div class="prize-row rank-2"><div class="flex items-center gap-3"><span class="text-2xl">🥈</span><div><p class="font-bold text-white text-sm">2nd Place</p></div></div><p class="text-lg font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p></div>`;
-            html += `<div class="prize-row rank-3"><div class="flex items-center gap-3"><span class="text-2xl">🥉</span><div><p class="font-bold text-white text-sm">3rd Place</p></div></div><p class="text-lg font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-1"><div class="flex items-center gap-3"><span class="text-2xl">🥇</span><p class="font-bold text-white text-sm">1st Place</p></div><p class="text-lg font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-2"><div class="flex items-center gap-3"><span class="text-2xl">🥈</span><p class="font-bold text-white text-sm">2nd Place</p></div><p class="text-lg font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-3"><div class="flex items-center gap-3"><span class="text-2xl">🥉</span><p class="font-bold text-white text-sm">3rd Place</p></div><p class="text-lg font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p></div>`;
             if (topKillPrize > 0) {
-                html += `<div class="prize-row kills"><div class="flex items-center gap-3"><span class="text-2xl">🎯</span><div><p class="font-bold text-white text-sm">Top Killer</p></div></div><p class="text-lg font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p></div>`;
+                html += `<div class="prize-row kills"><div class="flex items-center gap-3"><span class="text-2xl">🎯</span><p class="font-bold text-white text-sm">Top Killer</p></div><p class="text-lg font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p></div>`;
             }
             const sum = prizes['1st'] + prizes['2nd'] + prizes['3rd'] + topKillPrize;
-            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between"><div><p class="text-xs text-gray-400">Total</p></div><div class="text-right"><p class="text-xl font-bold text-blue-400">Rs. ${sum.toLocaleString()}</p></div></div>`;
+            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between"><p class="text-xs text-gray-400">Total</p><p class="text-xl font-bold text-blue-400">Rs. ${sum.toLocaleString()}</p></div>`;
             document.getElementById('prize-breakdown').innerHTML = html;
             calcResult = { players, fee, profitPercent, total, prizePool, profit, prizes, topKillPrize, style, includeTopKill, sum };
         }
@@ -940,12 +874,8 @@
         function copyBreakdown() {
             if (!calcResult) { alert("Calculate first!"); return; }
             const r = calcResult;
-            const text = `🔥 TOURNAMENT PRIZE BREAKDOWN\n\n👥 Players: ${r.players}\n💰 Entry Fee: Rs. ${r.fee}\n💵 Total: Rs. ${r.total.toLocaleString()}\n\n🏆 PRIZES:\n🥇 1st: Rs. ${r.prizes['1st'].toLocaleString()}\n🥈 2nd: Rs. ${r.prizes['2nd'].toLocaleString()}\n🥉 3rd: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Killer: Rs. ${r.topKillPrize.toLocaleString()}` : ''}\n\n📊 Prize Pool: Rs. ${r.sum.toLocaleString()}\n\nRegister: nepplay.onrender.com`;
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('copyToast');
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 2000);
-            });
+            const text = `🔥 TOURNAMENT PRIZES\n\n👥 Players: ${r.players}\n💰 Entry: Rs. ${r.fee}\n💵 Total: Rs. ${r.total.toLocaleString()}\n\n🏆 PRIZES:\n🥇 1st: Rs. ${r.prizes['1st'].toLocaleString()}\n🥈 2nd: Rs. ${r.prizes['2nd'].toLocaleString()}\n🥉 3rd: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Kill: Rs. ${r.topKillPrize.toLocaleString()}` : ''}\n\n📊 Pool: Rs. ${r.sum.toLocaleString()}\n\nRegister: nepplay.onrender.com`;
+            navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
         }
 
         // ============ EARNINGS ============
@@ -962,14 +892,14 @@
         function filterByPeriod(period) {
             const all = getRegistrations();
             const now = new Date();
-            const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const startWeek = new Date(startToday); startWeek.setDate(startWeek.getDate() - 7);
-            const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const sToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const sWeek = new Date(sToday); sWeek.setDate(sWeek.getDate() - 7);
+            const sMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             return all.filter(r => {
                 const d = new Date(r.registeredAt);
-                if (period === 'today') return d >= startToday;
-                if (period === 'week') return d >= startWeek;
-                if (period === 'month') return d >= startMonth;
+                if (period === 'today') return d >= sToday;
+                if (period === 'week') return d >= sWeek;
+                if (period === 'month') return d >= sMonth;
                 return true;
             });
         }
@@ -1053,7 +983,7 @@
         }
 
         function deletePayout(id) {
-            if (!confirm("Delete this payout record?")) return;
+            if (!confirm("Delete?")) return;
             savePayouts(getPayouts().filter(p => p.id !== id));
             renderPayouts();
             updatePayoutBadge();
@@ -1076,9 +1006,7 @@
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 const badge = p.status === 'paid' ? '<span class="payout-paid">Paid</span>' : '<span class="payout-pending">Pending</span>';
-                const action = p.status === 'pending'
-                    ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">Paid</button>`
-                    : `<span class="text-xs text-gray-500">${new Date(p.paidAt).toLocaleDateString()}</span>`;
+                const action = p.status === 'pending' ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">Paid</button>` : `<span class="text-xs text-gray-500">${new Date(p.paidAt).toLocaleDateString()}</span>`;
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-white text-sm">${p.username}</td>
                     <td class="px-4 py-3 text-gray-300 text-xs">${p.tournament}</td>
@@ -1137,25 +1065,12 @@
             const reg = getRegistrations().find(r => r.id === id);
             if (!reg) return;
             const status = reg.paymentStatus || 'free';
-            const statusBadge = status === 'verified' ? '<span class="status-verified">Verified</span>' : status === 'pending-verification' ? '<span class="status-pending-verify">Pending</span>' : status === 'rejected' ? '<span class="status-rejected">Rejected</span>' : '<span class="status-free">Free</span>';
-            const screenshot = reg.paymentScreenshot ? `<img src="${reg.paymentScreenshot}" class="w-full max-w-md mx-auto rounded-lg cursor-pointer" onclick="window.open(this.src)">` : '<p class="text-gray-500 text-sm text-center py-4">No screenshot</p>';
-            
-            let teammates = '';
-            if (reg.teammates && reg.teammates.length > 0) {
-                teammates = `<div class="mt-4"><h3 class="text-sm font-bold text-white mb-2">Teammates</h3><div class="bg-gray-800/50 rounded-lg p-3">${reg.teammates.map((t, i) => `<div class="flex justify-between py-1"><span class="text-xs text-gray-400">#${i + 1}</span><span class="text-white text-sm">${t.ign}</span><span class="text-blue-400 text-xs font-mono">${t.uid}</span></div>`).join('')}</div></div>`;
-            }
-
-            const actionBtns = (reg.entryFee > 0 && status === 'pending-verification') 
-                ? `<div class="grid grid-cols-2 gap-3 mt-4"><button onclick="approvePayment(${reg.id})" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-sm">✓ Approve</button><button onclick="rejectPayment(${reg.id})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg text-sm">✗ Reject</button></div>` 
-                : '';
-
-            const contactBtn = reg.phone ? `<a href="https://wa.me/977${reg.phone}" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm text-center mt-4"><i class="fa-brands fa-whatsapp mr-2"></i>Contact</a>` : '';
-
-            alert(`📋 REGISTRATION DETAILS\n\n👤 ${reg.username}\n🎮 ${reg.tournamentName}\n🎯 IGN: ${reg.ign}\n🆔 UID: ${reg.uid}\n📱 Phone: ${reg.phone}\n💰 Fee: Rs. ${reg.entryFee || 0}\n${reg.transactionId ? '🧾 TxID: ' + reg.transactionId : ''}\n\nStatus: ${status}`);
+            let statusText = status === 'verified' ? '✅ Verified' : status === 'pending-verification' ? '⏳ Pending' : status === 'rejected' ? '❌ Rejected' : '🆓 Free';
+            alert(`📋 REGISTRATION DETAILS\n\n👤 ${reg.username}\n🎮 ${reg.tournamentName}\n🎯 IGN: ${reg.ign}\n🆔 UID: ${reg.uid}\n📱 Phone: ${reg.phone}\n💰 Fee: Rs. ${reg.entryFee || 0}\n${reg.transactionId ? '🧾 TxID: ' + reg.transactionId : ''}\n\nStatus: ${statusText}`);
         }
 
         function approvePayment(id) {
-            if (!confirm("Approve this payment?")) return;
+            if (!confirm("Approve?")) return;
             const regs = getRegistrations();
             const r = regs.find(x => x.id === id);
             if (!r) return;
@@ -1165,7 +1080,7 @@
         }
 
         function rejectPayment(id) {
-            if (!confirm("Reject this payment?")) return;
+            if (!confirm("Reject?")) return;
             const regs = getRegistrations();
             const r = regs.find(x => x.id === id);
             if (!r) return;
@@ -1188,20 +1103,106 @@
             a.click();
         }
 
+        // ============ SUPPORT TICKETS (NEW!) ============
+        function getSupportTickets() { return JSON.parse(localStorage.getItem('supportTickets') || '[]'); }
+
+        function renderSupportTickets() {
+            const list = document.getElementById('support-tickets-list');
+            const empty = document.getElementById('empty-tickets');
+            const filter = document.getElementById('ticket-filter').value;
+            const search = document.getElementById('ticket-search').value.toLowerCase();
+
+            let tickets = getSupportTickets();
+
+            // Stats
+            document.getElementById('open-tickets').textContent = tickets.filter(t => t.status === 'open').length;
+            document.getElementById('resolved-tickets').textContent = tickets.filter(t => t.status === 'resolved').length;
+            document.getElementById('total-tickets').textContent = tickets.length;
+
+            // Filter
+            if (filter !== 'all') tickets = tickets.filter(t => t.status === filter);
+            if (search) tickets = tickets.filter(t => 
+                t.name.toLowerCase().includes(search) || 
+                t.phone.includes(search) ||
+                (t.email && t.email.toLowerCase().includes(search))
+            );
+
+            // Sort by newest first
+            tickets = [...tickets].reverse();
+
+            if (tickets.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            list.innerHTML = '';
+
+            const catEmoji = { launch: '🚀', registration: '📝', payment: '💳', tournament: '🎮', bug: '🐛', suggestion: '💡', other: '❓' };
+
+            tickets.forEach(t => {
+                const card = document.createElement('div');
+                card.className = `ticket-card ${t.status === 'resolved' ? 'resolved' : ''}`;
+                const date = new Date(t.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const statusBadge = t.status === 'open' ? '<span class="ticket-open">Open</span>' : '<span class="ticket-resolved">Resolved</span>';
+                const emoji = catEmoji[t.category] || '❓';
+
+                card.innerHTML = `
+                    <div class="flex-grow min-w-0 pr-3">
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                            <span class="text-base">${emoji}</span>
+                            <p class="font-bold text-white text-sm">${t.name}</p>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-xs text-gray-400 mb-1"><i class="fa-solid fa-phone mr-1"></i>${t.phone}${t.email ? ' • ' + t.email : ''}</p>
+                        <p class="text-sm text-gray-300 line-clamp-2">${t.message}</p>
+                        <p class="text-xs text-gray-500 mt-2">${date}</p>
+                    </div>
+                    <div class="flex flex-col gap-2 flex-shrink-0">
+                        <a href="https://wa.me/977${t.phone}?text=${encodeURIComponent(`Hi ${t.name}, regarding your support ticket:\n\n${t.message}\n\n— Nepal Gaming Team`)}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition text-center whitespace-nowrap">
+                            <i class="fa-brands fa-whatsapp mr-1"></i>Reply
+                        </a>
+                        ${t.status === 'open' ? `<button onclick="resolveTicket(${t.id})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap"><i class="fa-solid fa-check mr-1"></i>Resolve</button>` : ''}
+                        <button onclick="deleteTicket(${t.id})" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function resolveTicket(id) {
+            const tickets = getSupportTickets();
+            const t = tickets.find(x => x.id === id);
+            if (!t) return;
+            t.status = 'resolved';
+            t.resolvedAt = new Date().toISOString();
+            localStorage.setItem('supportTickets', JSON.stringify(tickets));
+            renderSupportTickets();
+            updateDashboardStats();
+        }
+
+        function deleteTicket(id) {
+            if (!confirm("Delete this ticket?")) return;
+            localStorage.setItem('supportTickets', JSON.stringify(getSupportTickets().filter(t => t.id !== id)));
+            renderSupportTickets();
+            updateDashboardStats();
+        }
+
         // ============ ANNOUNCEMENTS ============
         let currentImageData = null;
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.size > 2 * 1024 * 1024) { alert("Image too large (max 2MB)"); return; }
+            if (file.size > 2 * 1024 * 1024) { alert("Image too large"); return; }
             const reader = new FileReader();
             reader.onload = e => {
                 currentImageData = e.target.result;
                 document.getElementById('uploadPlaceholder').classList.add('hidden');
                 document.getElementById('uploadPreview').classList.remove('hidden');
                 document.getElementById('previewImage').src = currentImageData;
-                updatePreview();
             };
             reader.readAsDataURL(file);
         }
@@ -1211,12 +1212,6 @@
             document.getElementById('imageInput').value = '';
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             document.getElementById('uploadPreview').classList.add('hidden');
-        }
-
-        function updatePreview() {
-            const title = document.getElementById('a-title').value || 'Title';
-            const msg = document.getElementById('a-message').value || 'Message...';
-            // Just update for form, not visible preview
         }
 
         function createAnnouncement(event) {
@@ -1232,7 +1227,6 @@
                 msg.textContent = "Title and message required.";
                 return;
             }
-
             const a = { id: Date.now(), title, message, priority, image: currentImageData, createdAt: new Date().toISOString() };
             const all = JSON.parse(localStorage.getItem('announcements') || '[]');
             all.push(a);
@@ -1287,14 +1281,21 @@
         function updateDashboardStats() {
             const t = getCustomTournaments();
             const r = getRegistrations();
-            const p = getPayouts().filter(x => x.status === 'pending');
+            const openTickets = getSupportTickets().filter(x => x.status === 'open').length;
             document.getElementById('active-tournaments-count').textContent = t.length;
             document.getElementById('total-registrations').textContent = r.length;
-            document.getElementById('pending-payouts-count').textContent = p.length;
+            document.getElementById('open-tickets-count').textContent = openTickets;
+
             const total = r.reduce((s, x) => s + (x.entryFee || 0), 0);
             document.getElementById('dash-total-earnings').textContent = `Rs. ${total.toLocaleString()}`;
-            const badge = document.getElementById('reg-count-badge');
-            if (r.length > 0) { badge.textContent = r.length; badge.classList.remove('hidden'); }
+
+            const regBadge = document.getElementById('reg-count-badge');
+            if (r.length > 0) { regBadge.textContent = r.length; regBadge.classList.remove('hidden'); }
+            else regBadge.classList.add('hidden');
+
+            const supportBadge = document.getElementById('support-badge');
+            if (openTickets > 0) { supportBadge.textContent = openTickets; supportBadge.classList.remove('hidden'); }
+            else supportBadge.classList.add('hidden');
         }
 
         function initializePanel() {
@@ -1304,6 +1305,7 @@
             renderEarnings();
             renderPayouts();
             renderAnnouncements();
+            renderSupportTickets();
         }
 
         window.onload = checkAuthOnLoad;
