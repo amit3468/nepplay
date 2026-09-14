@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
     <title>Member Dashboard - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -15,9 +16,16 @@
         .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
         .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
         .status-upcoming { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        .announcement-card { transition: all 0.3s; }
+        .announcement-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2); }
+
+        .empty-state { text-align: center; padding: 30px 15px; color: #64748b; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
 
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
         .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
@@ -37,12 +45,16 @@
         .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
-        .empty-state { text-align: center; padding: 30px 15px; color: #64748b; }
-        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+        .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- Floating Support Button -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
@@ -64,10 +76,18 @@
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- LOGIN -->
-    <div id="login-container" class="flex-grow flex flex-col">
+    <!-- LOADING SCREEN (shown while checking auth) -->
+    <div id="loading-screen" class="loading-screen flex-grow">
+        <div class="text-center">
+            <div class="loader mx-auto"></div>
+            <p class="text-gray-400 text-sm mt-4">Checking your session...</p>
+        </div>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-container" class="hidden flex-grow flex flex-col">
         <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 min-w-0">
                 <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
                 <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
             </div>
@@ -77,6 +97,8 @@
             <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
                 <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
                 <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+                <a href="winners.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Winners</a>
+                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
                 <a href="support.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
                 <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
             </div>
@@ -90,18 +112,22 @@
                 </div>
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                        <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter username" required>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="email" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="you@example.com" autocomplete="email" required>
                     </div>
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••" required>
+                        <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••" autocomplete="current-password" required>
                     </div>
-                    <button type="submit" id="login-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Login</button>
+                    <button type="submit" id="login-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-60">
+                        Login
+                    </button>
                     <p id="login-message" class="hidden text-center text-sm mt-4"></p>
                 </form>
                 <div class="text-center mt-5">
                     <a href="register.html" class="text-sm text-red-400 hover:text-red-300">Create Account</a>
+                    <span class="text-gray-500 mx-2">•</span>
+                    <a href="#" onclick="forgotPassword(event)" class="text-sm text-gray-400 hover:text-gray-300">Forgot Password?</a>
                 </div>
             </div>
         </div>
@@ -115,12 +141,12 @@
                 <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
                 <div id="user-profile" class="relative">
                     <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
-                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">?</div>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                     </button>
                     <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
                         <div class="p-3 border-b border-gray-700">
-                            <p class="text-xs text-gray-500">Signed in</p>
+                            <p class="text-xs text-gray-500">Signed in as</p>
                             <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
                         </div>
                         <div class="py-1">
@@ -146,6 +172,11 @@
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
             
+            <div class="mb-6">
+                <h1 class="text-xl sm:text-2xl font-bold text-white">Welcome back, <span id="welcome-name">Player</span>! 👋</h1>
+                <p class="text-sm text-gray-400 mt-1">Here's your activity overview</p>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
@@ -168,14 +199,19 @@
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
                 </div>
-                <div id="announcements-container" class="p-5 space-y-3"></div>
+                <div id="announcements-container" class="p-5 space-y-3">
+                    <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
+                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
+                        <span class="text-sm text-gray-300">Welcome! We're launching soon. Check back for updates.</span>
+                    </div>
+                </div>
             </div>
 
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" id="upcoming-table-wrapper">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
@@ -202,7 +238,7 @@
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings</h2>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" id="history-table-wrapper">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
@@ -224,96 +260,215 @@
         </main>
     </div>
 
-    <script>
-        function toggleMobileNav() {
+    <script type="module">
+        // ============================================================
+        // FIREBASE IMPORTS
+        // ============================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+            measurementId: "G-3PXN38XFG9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        console.log("🔥 Member page initialized");
+
+        let currentUser = null;
+        let currentUserProfile = null;
+
+        // ============================================================
+        // MOBILE NAV
+        // ============================================================
+        window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
-            if (!nav) return;
             nav.classList.toggle('open');
             icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-        }
-        function toggleMobileNav2() {
+        };
+        window.toggleMobileNav2 = function() {
             const nav = document.getElementById('mobileNav2');
             const icon = document.getElementById('hamburgerIcon2');
-            if (!nav) return;
             nav.classList.toggle('open');
             icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-        }
-        function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
+        };
+        window.toggleSupportMenu = function() {
+            document.getElementById('supportMenu').classList.toggle('open');
+        };
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('supportMenu');
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
-        let currentUser = null;
+        // ============================================================
+        // AUTH STATE CHECK ON LOAD
+        // ============================================================
+        onAuthStateChanged(auth, async (user) => {
+            console.log("🔥 Auth state changed:", user ? "logged in" : "logged out");
+            
+            // Hide loading screen
+            document.getElementById('loading-screen').classList.add('hidden');
 
-        function handleLogin(event) {
+            if (user) {
+                currentUser = user;
+                console.log("✅ User logged in:", user.uid);
+                await showDashboard(user);
+            } else {
+                console.log("ℹ️ No user session — showing login form");
+                showLoginScreen();
+            }
+        });
+
+        function showLoginScreen() {
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('dashboard-container').classList.add('hidden');
+        }
+
+        // ============================================================
+        // LOGIN HANDLER
+        // ============================================================
+        window.handleLogin = async function(event) {
             event.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            const msg = document.getElementById('login-message');
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const msgBox = document.getElementById('login-message');
             const btn = document.getElementById('login-btn');
 
-            if (u && p) {
-                btn.innerHTML = "Logging in...";
-                msg.classList.remove('hidden');
-                msg.className = "text-center text-sm mt-4 text-green-400";
-                msg.innerText = "Login successful...";
-                const user = { username: u, email: u + "@gmail.com", loginAt: new Date().toISOString() };
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                setTimeout(() => showDashboard(user), 800);
-            } else {
-                msg.classList.remove('hidden');
-                msg.className = "text-center text-sm mt-4 text-red-400";
-                msg.innerText = "Enter username and password.";
+            if (!email || !password) {
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.textContent = "Please enter email and password.";
+                return;
             }
-        }
 
-        function showDashboard(user) {
-            currentUser = user;
+            btn.innerHTML = '<span class="spinner"></span>Logging in...';
+            btn.disabled = true;
+            msgBox.classList.add('hidden');
+
+            try {
+                console.log("🔥 Attempting login:", email);
+                await signInWithEmailAndPassword(auth, email, password);
+                console.log("✅ Login successful");
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error("❌ Login error:", error);
+                let errorMsg = "Login failed. Please try again.";
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                    errorMsg = "Invalid email or password.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = "Too many failed attempts. Try again later.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = "Please enter a valid email.";
+                }
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.textContent = "❌ " + errorMsg;
+                btn.innerHTML = 'Login';
+                btn.disabled = false;
+            }
+        };
+
+        // ============================================================
+        // FORGOT PASSWORD
+        // ============================================================
+        window.forgotPassword = async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                alert("Enter your email above first, then click Forgot Password.");
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("📧 Password reset email sent to " + email + "\n\nCheck your inbox and click the link to reset your password.");
+            } catch (error) {
+                console.error("Reset error:", error);
+                alert("Could not send reset email. Please check the email and try again.");
+            }
+        };
+
+        // ============================================================
+        // SHOW DASHBOARD
+        // ============================================================
+        async function showDashboard(user) {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
-            document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-            document.getElementById('dropdown-username').textContent = user.email || user.username;
-            loadDashboardData();
-            loadAnnouncements();
+
+            // Load user profile from Firestore
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    currentUserProfile = userDoc.data();
+                    console.log("✅ User profile loaded:", currentUserProfile);
+                } else {
+                    console.warn("⚠️ No user profile found, using defaults");
+                    currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
+                }
+            } catch (error) {
+                console.error("Error loading profile:", error);
+                currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
+            }
+
+            // Update UI
+            const displayName = currentUserProfile.fullName || currentUserProfile.username || 'Player';
+            document.getElementById('welcome-name').textContent = displayName.split(' ')[0];
+            document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
+
+            // Load dashboard data
+            await Promise.all([
+                loadRegistrations(user.uid),
+                loadPayouts(user.uid),
+                loadAnnouncements(),
+                loadActiveTournaments()
+            ]);
         }
 
-        function loadDashboardData() {
-            if (!currentUser) return;
-            const uname = currentUser.username.toLowerCase();
-            const allReg = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-            const myReg = allReg.filter(r => r.username.toLowerCase() === uname);
-            const allPay = JSON.parse(localStorage.getItem('payouts') || '[]');
-            const myPay = allPay.filter(p => p.username.toLowerCase() === uname);
-            const paidWins = myPay.filter(p => p.status === 'paid');
-            const totalEarn = paidWins.reduce((s, p) => s + p.prize, 0);
-            const uniqueT = new Set(myReg.map(r => r.tournamentName));
+        // ============================================================
+        // LOAD USER'S REGISTRATIONS
+        // ============================================================
+        async function loadRegistrations(uid) {
+            try {
+                const q = query(collection(db, "registrations"), where("userId", "==", uid));
+                const snapshot = await getDocs(q);
+                const regs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                console.log("✅ Loaded", regs.length, "registrations");
 
-            document.getElementById('total-earnings').textContent = totalEarn.toLocaleString();
-            document.getElementById('matches-played').textContent = uniqueT.size;
+                // Update matches played
+                const uniqueTournaments = new Set(regs.map(r => r.tournamentName));
+                document.getElementById('matches-played').textContent = uniqueTournaments.size;
 
-            const eSub = document.getElementById('earnings-subtitle');
-            if (totalEarn > 0) { eSub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize(s) won`; eSub.className = "text-xs text-green-400 mt-2"; }
-            else if (myPay.length > 0) { eSub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${myPay.length} pending`; eSub.className = "text-xs text-yellow-400 mt-2"; }
-            else { eSub.textContent = "No winnings yet"; eSub.className = "text-xs text-gray-500 mt-2"; }
+                const mSub = document.getElementById('matches-subtitle');
+                if (uniqueTournaments.size > 0) {
+                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueTournaments.size} tournament(s)`;
+                    mSub.className = "text-xs text-blue-400 mt-2";
+                }
 
-            const mSub = document.getElementById('matches-subtitle');
-            if (uniqueT.size > 0) { mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueT.size} tournament(s)`; mSub.className = "text-xs text-blue-400 mt-2"; }
-            else { mSub.textContent = "No registrations yet"; mSub.className = "text-xs text-gray-500 mt-2"; }
-
-            const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            document.getElementById('active-tournaments').textContent = custom.length;
-
-            renderUpcoming(myReg);
-            renderHistory(myPay);
+                renderUpcoming(regs);
+            } catch (error) {
+                console.error("Error loading registrations:", error);
+                renderUpcoming([]);
+            }
         }
 
         function renderUpcoming(regs) {
             const tbody = document.getElementById('upcoming-table-body');
             const empty = document.getElementById('empty-upcoming');
-            const tableWrap = tbody.closest('.overflow-x-auto');
+            const tableWrap = document.getElementById('upcoming-table-wrapper');
 
             if (regs.length === 0) {
                 tableWrap.style.display = 'none';
@@ -328,23 +483,53 @@
             [...regs].reverse().forEach(r => {
                 if (seen.has(r.tournamentName)) return;
                 seen.add(r.tournamentName);
-                const d = new Date(r.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const d = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 row.innerHTML = `
-                    <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentName}</td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentName || '—'}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">${d}</td>
-                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${r.entryFee || 0}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">${r.entryFee === 0 ? 'FREE' : 'Rs. ' + (r.entryFee || 0)}</td>
                     <td class="px-4 py-3"><span class="status-badge status-upcoming">Upcoming</span></td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
+        // ============================================================
+        // LOAD USER'S PAYOUTS
+        // ============================================================
+        async function loadPayouts(uid) {
+            try {
+                const q = query(collection(db, "payouts"), where("userId", "==", uid));
+                const snapshot = await getDocs(q);
+                const payouts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                console.log("✅ Loaded", payouts.length, "payouts");
+
+                const paidWins = payouts.filter(p => p.status === 'paid');
+                const totalEarn = paidWins.reduce((sum, p) => sum + (p.prize || 0), 0);
+                document.getElementById('total-earnings').textContent = totalEarn.toLocaleString();
+
+                const eSub = document.getElementById('earnings-subtitle');
+                if (totalEarn > 0) {
+                    eSub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize(s) won`;
+                    eSub.className = "text-xs text-green-400 mt-2";
+                } else if (payouts.length > 0) {
+                    eSub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${payouts.length} pending`;
+                    eSub.className = "text-xs text-yellow-400 mt-2";
+                }
+
+                renderHistory(payouts);
+            } catch (error) {
+                console.error("Error loading payouts:", error);
+                renderHistory([]);
+            }
+        }
+
         function renderHistory(pays) {
             const tbody = document.getElementById('history-table-body');
             const empty = document.getElementById('empty-history');
-            const tableWrap = tbody.closest('.overflow-x-auto');
+            const tableWrap = document.getElementById('history-table-wrapper');
 
             if (pays.length === 0) {
                 tableWrap.style.display = 'none';
@@ -360,52 +545,100 @@
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 row.innerHTML = `
-                    <td class="px-4 py-3 font-medium text-white text-sm">${p.tournament}</td>
-                    <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank}</td>
-                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize}</td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${p.tournament || '—'}</td>
+                    <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank || '—'}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize || 0}</td>
                     <td class="px-4 py-3">${status}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        function loadAnnouncements() {
-            const c = document.getElementById('announcements-container');
-            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
-            if (all.length === 0) {
-                c.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Welcome! We're launching soon. Check back for updates.</span></div>`;
-                return;
+        // ============================================================
+        // LOAD ANNOUNCEMENTS
+        // ============================================================
+        async function loadAnnouncements() {
+            const container = document.getElementById('announcements-container');
+            try {
+                const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(5));
+                const snapshot = await getDocs(q);
+                const announcements = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                console.log("✅ Loaded", announcements.length, "announcements");
+
+                if (announcements.length === 0) {
+                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Welcome! We're launching soon. Check back for updates.</span></div>`;
+                    return;
+                }
+
+                const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
+                const icons = { normal: 'fa-info-circle text-blue-400', high: 'fa-exclamation-triangle text-yellow-400', urgent: 'fa-exclamation-circle text-red-400' };
+
+                container.innerHTML = '';
+                announcements.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = `announcement-card bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colors[a.priority] || 'border-blue-500'}`;
+                    const date = a.createdAt ? new Date(a.createdAt.seconds * 1000 || a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                    const imageHtml = a.imageUrl ? `<img src="${a.imageUrl}" class="w-full h-40 object-cover" alt="">` : '';
+                    card.innerHTML = `
+                        ${imageHtml}
+                        <div class="p-4">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid ${icons[a.priority] || 'fa-info-circle'} mt-0.5"></i>
+                                <div class="flex-grow">
+                                    <h3 class="font-bold text-white text-sm">${a.title || ''}</h3>
+                                    <p class="text-sm text-gray-300 mt-2">${a.message || ''}</p>
+                                    ${date ? `<p class="text-xs text-gray-500 mt-2">${date}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading announcements:", error);
+                container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Could not load announcements.</span></div>`;
             }
-            const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
-            c.innerHTML = '';
-            [...all].reverse().forEach(a => {
-                const card = document.createElement('div');
-                card.className = `bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colors[a.priority]}`;
-                const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                card.innerHTML = `
-                    ${a.image ? `<img src="${a.image}" class="w-full h-40 object-cover">` : ''}
-                    <div class="p-4">
-                        <h3 class="font-bold text-white text-sm">${a.title}</h3>
-                        <p class="text-sm text-gray-300 mt-2">${a.message}</p>
-                        <p class="text-xs text-gray-500 mt-2">${date}</p>
-                    </div>
-                `;
-                c.appendChild(card);
-            });
         }
 
-        window.onload = function() {
-            const u = JSON.parse(localStorage.getItem('currentUser'));
-            if (u) showDashboard(u);
+        // ============================================================
+        // LOAD ACTIVE TOURNAMENTS COUNT
+        // ============================================================
+        async function loadActiveTournaments() {
+            try {
+                const snapshot = await getDocs(collection(db, "tournaments"));
+                document.getElementById('active-tournaments').textContent = snapshot.size;
+            } catch (error) {
+                console.error("Error loading tournaments:", error);
+                document.getElementById('active-tournaments').textContent = '0';
+            }
+        }
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        window.logout = async function() {
+            if (!confirm("Log out from your account?")) return;
+            try {
+                await signOut(auth);
+                localStorage.removeItem('currentUser');
+                console.log("✅ Logged out");
+                window.location.reload();
+            } catch (error) {
+                console.error("Logout error:", error);
+            }
         };
 
-        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
+        // ============================================================
+        // PROFILE DROPDOWN
+        // ============================================================
+        window.toggleProfileDropdown = function() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        };
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
     </script>
 </body>
 </html>
