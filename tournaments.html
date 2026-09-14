@@ -368,7 +368,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, doc, getDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
+
+        // ============================================================
+        // ⚠️ CLOUDINARY CONFIG — REPLACE WITH YOUR CLOUD NAME
+        // ============================================================
+        const CLOUDINARY_CLOUD_NAME = "rjmtpzdx"; // ← CHANGE THIS
+        const CLOUDINARY_UPLOAD_PRESET = "nepplay_uploads";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -383,15 +388,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const storage = getStorage(app);
 
-        console.log("🔥 Tournaments page initialized");
+        console.log("🔥 Tournaments page initialized (Cloudinary mode)");
+        console.log("☁️ Cloudinary Cloud:", CLOUDINARY_CLOUD_NAME);
 
         let allTournaments = [];
         let currentFilter = 'all';
         let currentUser = null;
         let currentUserProfile = null;
-        let userRegistrations = []; // This user's registrations
+        let userRegistrations = [];
 
         // ============================================================
         // MOBILE NAV
@@ -437,6 +442,37 @@
             ludo: { name: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600", emoji: "🎲" },
             chess: { name: "Chess", icon: "fa-chess", color: "from-gray-500 to-slate-700", emoji: "♟️" }
         };
+
+        // ============================================================
+        // CLOUDINARY UPLOAD FUNCTION
+        // ============================================================
+        async function uploadToCloudinary(file) {
+            if (CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME") {
+                throw new Error("Cloudinary Cloud Name not set! Please update the code.");
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("Cloudinary error:", data);
+                throw new Error(data.error?.message || "Upload failed");
+            }
+
+            console.log("✅ Cloudinary upload success:", data.secure_url);
+            return data.secure_url;
+        }
 
         // ============================================================
         // LOAD TOURNAMENTS FROM FIRESTORE
@@ -497,10 +533,7 @@
                 const percentage = t.slotsTotal > 0 ? Math.round(((t.slotsFilled || 0) / t.slotsTotal) * 100) : 0;
                 const isFull = t.slotsFilled >= t.slotsTotal;
 
-                // Check if THIS user already registered for THIS tournament
                 const alreadyRegisteredForThis = userRegistrations.some(r => r.tournamentId === t.firestoreId);
-                
-                // NEW LOGIC: Allow 1 Free AND 1 Paid
                 const hasFreeReg = userRegistrations.some(r => r.entryFee === 0);
                 const hasPaidReg = userRegistrations.some(r => r.entryFee > 0);
                 
@@ -521,7 +554,6 @@
                     blockReason = "Tournament Full";
                 }
 
-                // Button logic
                 let buttonHtml = '';
                 if (!canRegister) {
                     buttonHtml = `<button disabled class="w-full bg-gray-600/50 text-gray-300 font-bold py-3 rounded-lg cursor-not-allowed text-sm">
@@ -591,7 +623,6 @@
         // OPEN REGISTRATION MODAL
         // ============================================================
         window.openRegistrationModal = function(tournamentId) {
-            // Check login
             if (!currentUser) {
                 if (confirm("You need to login first.\n\nGo to login page?")) {
                     window.location.href = 'member.html';
@@ -605,7 +636,6 @@
                 return;
             }
 
-            // NEW LOGIC: Allow 1 Free AND 1 Paid
             const hasFreeReg = userRegistrations.some(r => r.entryFee === 0);
             const hasPaidReg = userRegistrations.some(r => r.entryFee > 0);
             const alreadyRegisteredForThis = userRegistrations.some(r => r.tournamentId === tournamentId);
@@ -628,7 +658,6 @@
                 return;
             }
 
-            // Populate modal
             document.getElementById('modalTitle').textContent = tournament.name;
             document.getElementById('modalSubtitle').textContent = `Register to compete on ${tournament.date}`;
             document.getElementById('regTournamentName').textContent = tournament.name;
@@ -639,7 +668,6 @@
             document.getElementById('regTournamentGame').value = tournament.game;
             document.getElementById('regTournamentMode_h').value = tournament.mode;
 
-            // Show/Hide Payment Section
             const paymentSection = document.getElementById('paymentSection');
             const regAmount = document.getElementById('regAmount');
             
@@ -650,7 +678,6 @@
                 paymentSection.classList.add('hidden');
             }
 
-            // Clear form
             document.getElementById('regIgn').value = '';
             document.getElementById('regUid').value = '';
             document.getElementById('regPhone').value = '';
@@ -662,11 +689,9 @@
             document.getElementById('ignCount').textContent = '0/20';
             document.getElementById('teamCount').textContent = '0/20';
             
-            // Clear payment fields
             if (document.getElementById('regTransactionId')) document.getElementById('regTransactionId').value = '';
             if (document.getElementById('regScreenshot')) document.getElementById('regScreenshot').value = '';
 
-            // Clear validation UI
             ['regIgn', 'regUid', 'regPhone', 'regTeamName'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.remove('valid', 'invalid');
@@ -676,7 +701,6 @@
                 if (el) el.innerHTML = '';
             });
 
-            // Team section
             const teamSection = document.getElementById('teamSection');
             const teammatesContainer = document.getElementById('teammatesContainer');
             const modeLower = tournament.mode.toLowerCase();
@@ -705,7 +729,6 @@
                 }
             }
 
-            // Show modal
             document.getElementById('registrationModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
 
@@ -813,7 +836,7 @@
         }
 
         // ============================================================
-        // SUBMIT REGISTRATION
+        // SUBMIT REGISTRATION (WITH CLOUDINARY UPLOAD)
         // ============================================================
         window.submitRegistration = async function(event) {
             event.preventDefault();
@@ -841,7 +864,6 @@
             const phone = document.getElementById('regPhone').value.trim();
             const teamName = document.getElementById('regTeamName').value.trim();
             
-            // Payment fields
             const transactionId = document.getElementById('regTransactionId') ? document.getElementById('regTransactionId').value.trim() : '';
             const screenshotFile = document.getElementById('regScreenshot') ? document.getElementById('regScreenshot').files[0] : null;
 
@@ -865,9 +887,15 @@
                     err.classList.remove('hidden');
                     return;
                 }
+                // Check file size (max 2MB)
+                if (screenshotFile.size > 2 * 1024 * 1024) {
+                    err.textContent = "❌ Screenshot too large. Max 2MB.";
+                    err.classList.remove('hidden');
+                    return;
+                }
             }
 
-            // Team validation (existing logic)
+            // Team validation
             const teammates = [];
             const modeLower = mode.toLowerCase();
             if (modeLower === 'duo' || modeLower === 'squad' || modeLower === '5v5') {
@@ -901,15 +929,14 @@
             try {
                 let screenshotUrl = null;
 
-                // Upload screenshot to Firebase Storage if paid
+                // Upload screenshot to Cloudinary if paid
                 if (tournament.entryFee > 0 && screenshotFile) {
-                    const storageRef = ref(storage, `payment_screenshots/${currentUser.uid}_${Date.now()}_${screenshotFile.name}`);
-                    const snapshot = await uploadBytes(storageRef, screenshotFile);
-                    screenshotUrl = await getDownloadURL(snapshot.ref);
-                    console.log("✅ Screenshot uploaded:", screenshotUrl);
+                    btn.innerHTML = '<span class="spinner"></span>Uploading screenshot...';
+                    screenshotUrl = await uploadToCloudinary(screenshotFile);
                 }
 
-                // Create registration document
+                btn.innerHTML = '<span class="spinner"></span>Saving registration...';
+
                 const registration = {
                     userId: currentUser.uid,
                     username: currentUserProfile?.username || currentUser.email.split('@')[0],
@@ -954,7 +981,7 @@
 
             } catch (error) {
                 console.error("Registration error:", error);
-                err.textContent = "❌ Registration failed: " + error.message;
+                err.textContent = "❌ " + error.message;
                 err.classList.remove('hidden');
                 btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
                 btn.disabled = false;
@@ -973,7 +1000,6 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Fetch user profile
                 try {
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
@@ -981,24 +1007,20 @@
                     }
                 } catch (e) {}
                 
-                // Update navbar
                 document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('nav-login-btn').classList.add('hidden');
                 const displayName = currentUserProfile?.fullName || currentUserProfile?.username || user.email.split('@')[0];
                 document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
                 document.getElementById('dropdown-username').textContent = user.email;
 
-                // Load user's registrations
                 await loadUserRegistrations(user.uid);
             } else {
                 document.getElementById('user-profile').classList.add('hidden');
                 document.getElementById('nav-login-btn').classList.remove('hidden');
             }
-            // Load tournaments (with user registrations already loaded)
             loadTournaments();
         });
 
-        // Modal backdrop click to close
         document.getElementById('registrationModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegistrationModal();
         });
