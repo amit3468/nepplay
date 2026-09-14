@@ -91,6 +91,64 @@
         }
         .floating-whatsapp:hover .tooltip { opacity: 1; }
 
+        /* Floating Support Button */
+        .floating-support {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+        }
+        .support-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse-support 2s infinite;
+        }
+        .support-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6);
+        }
+        @keyframes pulse-support {
+            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
+        }
+        .support-menu {
+            display: none;
+            position: absolute;
+            bottom: 75px;
+            left: 0;
+            width: 260px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .support-menu.open { display: block; }
+        .support-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .support-menu-item:last-child { border-bottom: none; }
+        .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
+        .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
+        .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
+
         /* QR Code Display */
         .qr-box {
             background: white;
@@ -109,11 +167,51 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating WhatsApp Button -->
+    <!-- Floating WhatsApp Button (bottom-right) -->
     <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="floating-whatsapp" title="Join WhatsApp Group">
         <i class="fa-brands fa-whatsapp"></i>
         <span class="tooltip">💬 Join our WhatsApp Group</span>
     </a>
+
+    <!-- Floating Support Button (bottom-left) -->
+    <div class="floating-support">
+        <div id="supportMenu" class="support-menu">
+            <div class="p-3 border-b border-gray-700 bg-slate-800/50">
+                <p class="text-white font-bold text-sm">Need Help? 🆘</p>
+                <p class="text-xs text-gray-400">Choose how to reach us</p>
+            </div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-brands fa-whatsapp text-green-400 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Chat Privately</p>
+                    <p class="text-xs text-gray-500">1-on-1 with admin</p>
+                </div>
+            </a>
+            <a href="support.html" class="support-menu-item">
+                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-headset text-pink-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Support Page</p>
+                    <p class="text-xs text-gray-500">Full help center</p>
+                </div>
+            </a>
+            <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-users text-purple-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Join Community</p>
+                    <p class="text-xs text-gray-500">Public group chat</p>
+                </div>
+            </a>
+        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()">
+            <i class="fa-solid fa-headset"></i>
+        </div>
+    </div>
 
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
@@ -139,7 +237,7 @@
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
                         <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
-                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                        <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
                         <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
@@ -154,6 +252,7 @@
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
             <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
@@ -257,7 +356,6 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     
-                    <!-- LEFT: Text -->
                     <div class="text-center md:text-left">
                         <div class="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/40 rounded-full px-4 py-1 text-xs font-bold text-green-400 mb-4">
                             <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Community
@@ -276,7 +374,6 @@
                         </a>
                     </div>
 
-                    <!-- RIGHT: QR Code -->
                     <div class="text-center">
                         <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Or scan to join</p>
                         <div class="qr-box mx-auto">
@@ -316,11 +413,12 @@
                     <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
                     <span class="font-bold text-white">Nepal Gaming</span>
                 </div>
-                <div class="flex items-center gap-4 text-sm text-gray-400">
+                <div class="flex items-center gap-4 text-sm text-gray-400 flex-wrap justify-center">
                     <a href="index.html" class="hover:text-white transition">Home</a>
                     <a href="tournaments.html" class="hover:text-white transition">Tournaments</a>
                     <a href="winners.html" class="hover:text-white transition">Winners</a>
                     <a href="teams.html" class="hover:text-white transition">Teams</a>
+                    <a href="support.html" class="hover:text-white transition text-pink-400">Support</a>
                     <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="text-green-400 hover:text-green-300 transition flex items-center gap-1">
                         <i class="fa-brands fa-whatsapp"></i> WhatsApp
                     </a>
@@ -333,7 +431,19 @@
     </footer>
 
     <script>
-        console.log("--- HOMEPAGE LOADED (WhatsApp + QR) ---");
+        console.log("--- HOMEPAGE LOADED (with floating support) ---");
+
+        // Floating Support Menu
+        function toggleSupportMenu() {
+            document.getElementById('supportMenu').classList.toggle('open');
+        }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('supportMenu');
+            const btn = document.querySelector('.support-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
 
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
