@@ -30,6 +30,7 @@
         .status-verified { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-pending-verify { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-free { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+        .status-paid-badge { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
 
         .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
         .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
@@ -44,6 +45,8 @@
         .tournament-admin-item:hover { background: rgba(30, 41, 59, 0.9); transform: translateX(4px); }
         .delete-btn { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
         .delete-btn:hover { background-color: rgba(239, 68, 68, 0.4); transform: scale(1.1); }
+        .edit-btn { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .edit-btn:hover { background-color: rgba(59, 130, 246, 0.4); transform: scale(1.1); }
 
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
@@ -119,8 +122,8 @@
 
         .stat-badge { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
 
-        .copy-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #22c55e; color: white; padding: 12px 24px; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; z-index: 10000; transition: transform 0.3s; box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4); }
-        .copy-toast.show { transform: translateX(-50%) translateY(0); }
+        .payment-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #22c55e; transition: all 0.2s; }
+        .payment-row:hover { background: rgba(30, 41, 59, 0.9); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -206,6 +209,7 @@
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
                     <ul class="space-y-1">
                         <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
+                        <li><a href="#" onclick="switchTab('payments', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-credit-card w-5"></i> Payments <span id="payments-count-badge" class="ml-auto bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span></a></li>
                         <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator</a></li>
                         <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
                         <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
@@ -217,7 +221,7 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.2 • 2026</p>
+                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.3 • 2026</p>
                 </div>
             </aside>
 
@@ -247,36 +251,79 @@
                             <p class="text-2xl sm:text-3xl font-bold text-green-400 mt-1" id="real-reg-count">0</p>
                             <p class="text-xs text-gray-500 mt-1">Tournament sign-ups</p>
                         </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase font-semibold">Total Paid</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="dash-total-paid">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">From registrations</p>
+                        </div>
                         <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-purple-500">
                             <p class="text-xs text-gray-400 uppercase font-semibold">Tournaments</p>
                             <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="tournament-count">0</p>
                             <p class="text-xs text-gray-500 mt-1">Active events</p>
-                        </div>
-                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-pink-500">
-                            <p class="text-xs text-gray-400 uppercase font-semibold">Support</p>
-                            <p class="text-2xl sm:text-3xl font-bold text-pink-400 mt-1" id="ticket-count">0</p>
-                            <p class="text-xs text-gray-500 mt-1">Open tickets</p>
                         </div>
                     </div>
 
                     <div class="glass-panel rounded-xl shadow-lg mb-6">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-users text-blue-500 mr-2"></i>Recent Users</h2>
-                            <button onclick="switchTab('users', document.querySelectorAll('.sidebar-item')[4])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
+                            <button onclick="switchTab('users', document.querySelectorAll('.sidebar-item')[5])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
                         </div>
                         <div id="recent-users-list" class="p-4">
                             <p class="text-center text-gray-500 text-sm py-4">Loading...</p>
                         </div>
                     </div>
 
-                    <div class="glass-panel rounded-xl shadow-lg mb-6">
+                    <div class="glass-panel rounded-xl shadow-lg">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-clipboard-list text-green-500 mr-2"></i>Recent Registrations</h2>
-                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[5])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
+                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[6])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
                         </div>
                         <div id="recent-regs-list" class="p-4">
                             <p class="text-center text-gray-500 text-sm py-4">Loading...</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ============ PAYMENTS TAB (NEW!) ============ -->
+                <div id="tab-payments" class="tab-content">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-credit-card text-green-500 mr-2"></i>Member Payments</h1>
+                            <p class="text-gray-400 mt-1 text-sm">All payments from tournament registrations</p>
+                        </div>
+                        <button onclick="exportPaymentsCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-download mr-2"></i>Export CSV
+                        </button>
+                    </div>
+
+                    <!-- Stats row -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase font-semibold">Total Collected</p>
+                            <p class="text-2xl font-bold text-green-400 mt-1" id="pay-total-collected">Rs. 0</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase font-semibold">Platform Cut (20%)</p>
+                            <p class="text-2xl font-bold text-blue-400 mt-1" id="pay-total-commission">Rs. 0</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase font-semibold">Prize Pool (80%)</p>
+                            <p class="text-2xl font-bold text-purple-400 mt-1" id="pay-total-prize">Rs. 0</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase font-semibold">Transactions</p>
+                            <p class="text-2xl font-bold text-yellow-400 mt-1" id="pay-total-count">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter -->
+                    <div class="glass-panel rounded-xl p-3 mb-4">
+                        <input type="text" id="payment-search" class="form-input w-full px-4 py-2 rounded-lg text-sm" placeholder="Search by username, tournament, transaction ID..." oninput="filterPayments()">
+                    </div>
+
+                    <!-- Payments list -->
+                    <div id="payments-list">
+                        <p class="text-center text-gray-500 text-sm py-8">Loading payments...</p>
                     </div>
                 </div>
 
@@ -378,16 +425,8 @@
                     </div>
 
                     <div class="glass-panel rounded-xl p-6 mt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
-                        </div>
+                        <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
                         <div id="prize-breakdown"></div>
-                        <div class="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                            <p class="text-xs text-purple-300">
-                                <i class="fa-solid fa-lightbulb mr-1"></i>
-                                <strong>Tip:</strong> Distribute prizes within 24 hours after the match ends. Post the payment screenshots in your WhatsApp group for transparency.
-                            </p>
-                        </div>
                     </div>
                 </div>
 
@@ -396,7 +435,7 @@
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Track your platform's revenue in real time</p>
+                            <p class="text-gray-400 mt-1 text-sm">Track your platform's revenue</p>
                         </div>
                         <div class="flex gap-2 flex-wrap">
                             <button class="period-tab active text-xs sm:text-sm" onclick="setEarningsPeriod('today', this)">Today</button>
@@ -413,25 +452,22 @@
                             <p class="text-xs text-gray-500 mt-1" id="period-label">Today</p>
                         </div>
                         <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-400 uppercase">Platform Commission</p>
+                            <p class="text-xs text-gray-400 uppercase">Commission (20%)</p>
                             <p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
-                            <p class="text-xs text-gray-500 mt-1">20% of entry fees</p>
                         </div>
                         <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-purple-500">
                             <p class="text-xs text-gray-400 uppercase">Registrations</p>
                             <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
-                            <p class="text-xs text-gray-500 mt-1">Paid sign-ups</p>
                         </div>
                         <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-400 uppercase">Pending Payouts</p>
+                            <p class="text-xs text-gray-400 uppercase">Payouts (80%)</p>
                             <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
-                            <p class="text-xs text-gray-500 mt-1">To be distributed</p>
                         </div>
                     </div>
 
                     <div class="flex justify-end mb-4">
                         <button onclick="exportEarnings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-download mr-2"></i>Export Earnings CSV
+                            <i class="fa-solid fa-download mr-2"></i>Export CSV
                         </button>
                     </div>
 
@@ -443,49 +479,12 @@
                         <div class="bar-container" id="bar-chart"></div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="glass-panel rounded-xl overflow-hidden">
-                            <div class="p-6 border-b border-gray-700">
-                                <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Earning Tournaments</h2>
-                            </div>
-                            <div class="p-4">
-                                <div id="top-tournaments-list" class="space-y-3"></div>
-                            </div>
+                    <div class="glass-panel rounded-xl overflow-hidden">
+                        <div class="p-6 border-b border-gray-700">
+                            <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Earning Tournaments</h2>
                         </div>
-
-                        <div class="glass-panel rounded-xl overflow-hidden">
-                            <div class="p-6 border-b border-gray-700">
-                                <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-purple-500 mr-2"></i>Revenue Sources</h2>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="text-gray-300">Entry Fees (100%)</span>
-                                        <span class="text-white font-bold" id="source-entry-total">Rs. 0</span>
-                                    </div>
-                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="text-gray-300">Platform Commission (20%)</span>
-                                        <span class="text-green-400 font-bold" id="source-commission">Rs. 0</span>
-                                    </div>
-                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div class="bg-green-500 h-2 rounded-full" style="width: 20%"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="text-gray-300">Prize Payouts (80%)</span>
-                                        <span class="text-red-400 font-bold" id="source-payouts">Rs. 0</span>
-                                    </div>
-                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div class="bg-red-500 h-2 rounded-full" style="width: 80%"></div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="p-4">
+                            <div id="top-tournaments-list" class="space-y-3"></div>
                         </div>
                     </div>
                 </div>
@@ -495,7 +494,7 @@
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payout Tracker</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Track which winners you've paid and which are pending</p>
+                            <p class="text-gray-400 mt-1 text-sm">Track winner payouts</p>
                         </div>
                         <button onclick="openAddPayoutModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
                             <i class="fa-solid fa-plus mr-2"></i>Add Winner
@@ -514,19 +513,6 @@
                         <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
                             <p class="text-xs text-gray-400 uppercase">Total Winners</p>
                             <p class="text-xl sm:text-3xl font-bold text-blue-400 mt-1" id="payout-total-winners">0</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center">
-                        <div class="flex-grow min-w-[200px]">
-                            <select id="payout-status-filter" onchange="renderPayouts()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending Only</option>
-                                <option value="paid">Paid Only</option>
-                            </select>
-                        </div>
-                        <div class="flex-grow min-w-[200px]">
-                            <input type="text" id="payout-search" oninput="renderPayouts()" placeholder="Search winner..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
                         </div>
                     </div>
 
@@ -549,7 +535,6 @@
                         <div id="empty-payouts" class="p-8 text-center text-gray-500">
                             <i class="fa-solid fa-money-bill-transfer text-4xl mb-3"></i>
                             <p class="font-bold text-white mb-1">No payouts yet</p>
-                            <p class="text-xs">Add winners after tournaments end.</p>
                         </div>
                     </div>
                 </div>
@@ -559,7 +544,7 @@
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-users text-blue-500 mr-2"></i>All Users</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Real accounts registered on your platform</p>
+                            <p class="text-gray-400 mt-1 text-sm">Real accounts registered</p>
                         </div>
                         <button onclick="loadUsers()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
                             <i class="fa-solid fa-rotate mr-1"></i>Refresh
@@ -577,8 +562,8 @@
                 <div id="tab-registrations" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
                         <div>
-                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-green-500 mr-2"></i>Tournament Registrations</h1>
-                            <p class="text-gray-400 mt-1 text-sm">Users who registered for tournaments</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-green-500 mr-2"></i>Registrations</h1>
+                            <p class="text-gray-400 mt-1 text-sm">Who registered for what</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="loadRegistrations()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
@@ -601,7 +586,6 @@
                 <div id="tab-support" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-headset text-pink-500 mr-2"></i>Support Tickets</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Messages from users</p>
                     </div>
                     <div id="support-list"></div>
                 </div>
@@ -610,24 +594,7 @@
                 <div id="tab-add-tournament" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white">Manage Tournaments</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Create and manage tournaments (saved to Firestore)</p>
-                    </div>
-
-                    <!-- ONE-CLICK SEED BUTTON -->
-                    <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(234, 88, 12, 0.15)); border: 2px solid rgba(251, 191, 36, 0.5);">
-                        <div class="flex items-start gap-4">
-                            <div class="w-14 h-14 rounded-xl bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                                <i class="fa-solid fa-rocket text-yellow-400 text-2xl"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <h2 class="text-lg font-bold text-white mb-2">Quick Setup — 22 September Tournaments</h2>
-                                <p class="text-sm text-gray-300 mb-4">Click below to instantly create all 8 tournaments (one per game) for 22 Sept 2026, 1:00 PM NPT. Free entry, Rs. 500 prize each.</p>
-                                <button onclick="seedTournaments()" id="seedBtn" class="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold py-3 px-6 rounded-lg transition">
-                                    <i class="fa-solid fa-bolt mr-2"></i>Create All 8 Tournaments Now
-                                </button>
-                                <p id="seed-msg" class="hidden text-sm mt-4"></p>
-                            </div>
-                        </div>
+                        <p class="text-gray-400 mt-1 text-sm">Create, edit, and manage tournaments</p>
                     </div>
 
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
@@ -715,7 +682,6 @@
                 <div id="tab-announcements" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Post announcements for all users</p>
                     </div>
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
                         <form id="announcementForm" onsubmit="createAnnouncement(event)">
@@ -752,6 +718,85 @@
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <!-- EDIT TOURNAMENT MODAL -->
+    <div id="editTournamentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.85); backdrop-filter: blur(6px);">
+        <div class="glass-panel rounded-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Edit Tournament</h2>
+                <button onclick="closeEditTournamentModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="editTournamentForm" onsubmit="saveTournamentChanges(event)">
+                <input type="hidden" id="edit-t-id">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Name *</label>
+                    <input type="text" id="edit-t-name" class="form-input w-full px-4 py-3 rounded-lg" required>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
+                        <select id="edit-t-game" class="form-input w-full px-4 py-3 rounded-lg" required>
+                            <option value="freefire">🔥 Free Fire</option>
+                            <option value="pubg">🎯 PUBG Mobile</option>
+                            <option value="cod">💣 COD Mobile</option>
+                            <option value="efootball">⚽ eFootball</option>
+                            <option value="ecricket">🏏 eCricket</option>
+                            <option value="valorant">⚔️ Valorant</option>
+                            <option value="ludo">🎲 Ludo King</option>
+                            <option value="chess">♟️ Chess</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Mode *</label>
+                        <select id="edit-t-mode" class="form-input w-full px-4 py-3 rounded-lg" required>
+                            <option value="Solo">Solo</option>
+                            <option value="Duo">Duo</option>
+                            <option value="Squad">Squad</option>
+                            <option value="1v1">1v1</option>
+                            <option value="5v5">5v5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
+                        <input type="date" id="edit-t-date" class="form-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Time *</label>
+                        <input type="time" id="edit-t-time" class="form-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
+                        <input type="number" id="edit-t-fee" class="form-input w-full px-4 py-3 rounded-lg" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Prize Pool (Rs.) *</label>
+                        <input type="number" id="edit-t-prize" class="form-input w-full px-4 py-3 rounded-lg" min="0" required>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
+                    <input type="number" id="edit-t-slots" class="form-input w-full px-4 py-3 rounded-lg" min="2" required>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                        <i class="fa-solid fa-save mr-2"></i>Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditTournamentModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
+                </div>
+                <p id="edit-tournament-msg" class="hidden text-center text-sm mt-4"></p>
+            </form>
         </div>
     </div>
 
@@ -797,7 +842,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, addDoc, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -812,7 +857,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        console.log("🔥 Admin panel initialized v3.2");
+        console.log("🔥 Admin panel v3.3 initialized");
 
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
@@ -880,12 +925,11 @@
             if (tabName === 'registrations') loadRegistrations();
             if (tabName === 'support') loadSupportTickets();
             if (tabName === 'announcements') loadAnnouncements();
-            if (tabName === 'add-tournament') {
-                loadTournamentsFromFirestore().then(renderAdminTournaments);
-            }
+            if (tabName === 'add-tournament') loadTournamentsFromFirestore().then(renderAdminTournaments);
             if (tabName === 'calculator') calculate();
             if (tabName === 'earnings') renderEarnings();
             if (tabName === 'payouts') renderPayouts();
+            if (tabName === 'payments') renderPayments();
         };
 
         // ==================== NOTIFICATIONS ====================
@@ -985,13 +1029,16 @@
         }
 
         // ==================== LOAD DASHBOARD ====================
+        let allUsers = [];
+        let allRegs = [];
+
         async function loadDashboardData() {
             try {
                 const usersSnap = await getDocs(collection(db, "users"));
-                const users = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allUsers = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 const regsSnap = await getDocs(collection(db, "registrations"));
-                const regs = regsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allRegs = regsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 const tSnap = await getDocs(collection(db, "tournaments"));
                 const tournaments = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -999,13 +1046,18 @@
                 const tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
                 const openTickets = tickets.filter(t => t.status === 'open').length;
 
-                document.getElementById('real-user-count').textContent = users.length;
-                document.getElementById('real-reg-count').textContent = regs.length;
-                document.getElementById('tournament-count').textContent = tournaments.length;
-                document.getElementById('ticket-count').textContent = openTickets;
+                // Total paid from registrations
+                const totalPaid = allRegs.reduce((sum, r) => sum + (r.entryFee || 0), 0);
 
-                document.getElementById('users-count-badge').textContent = users.length;
-                document.getElementById('regs-count-badge').textContent = regs.length;
+                document.getElementById('real-user-count').textContent = allUsers.length;
+                document.getElementById('real-reg-count').textContent = allRegs.length;
+                document.getElementById('dash-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
+                document.getElementById('tournament-count').textContent = tournaments.length;
+
+                document.getElementById('users-count-badge').textContent = allUsers.length;
+                document.getElementById('regs-count-badge').textContent = allRegs.length;
+                document.getElementById('payments-count-badge').textContent = allRegs.filter(r => (r.entryFee || 0) > 0).length;
+
                 if (openTickets > 0) {
                     document.getElementById('support-count-badge').textContent = openTickets;
                     document.getElementById('support-count-badge').classList.remove('hidden');
@@ -1013,24 +1065,25 @@
                     document.getElementById('support-count-badge').classList.add('hidden');
                 }
 
+                // Detect new users/regs
                 if (lastUserCount !== null) {
-                    const newUsers = users.filter(u => !previousUserIds.has(u.id));
+                    const newUsers = allUsers.filter(u => !previousUserIds.has(u.id));
                     newUsers.forEach(u => addNotification('user', '🎉 New User Registered!', `${u.fullName || u.username || u.email} just signed up`));
                 }
-                previousUserIds = new Set(users.map(u => u.id));
-                lastUserCount = users.length;
+                previousUserIds = new Set(allUsers.map(u => u.id));
+                lastUserCount = allUsers.length;
 
                 if (lastRegCount !== null) {
-                    const newRegs = regs.filter(r => !previousRegIds.has(r.id));
-                    newRegs.forEach(r => addNotification('reg', '🏆 New Tournament Registration!', `${r.username || 'User'} registered for ${r.tournamentName || 'a tournament'}`));
+                    const newRegs = allRegs.filter(r => !previousRegIds.has(r.id));
+                    newRegs.forEach(r => addNotification('reg', '🏆 New Registration!', `${r.username || 'User'} registered for ${r.tournamentName || 'a tournament'}`));
                 }
-                previousRegIds = new Set(regs.map(r => r.id));
-                lastRegCount = regs.length;
+                previousRegIds = new Set(allRegs.map(r => r.id));
+                lastRegCount = allRegs.length;
 
-                renderRecentUsers(users);
-                renderRecentRegs(regs);
+                renderRecentUsers(allUsers);
+                renderRecentRegs(allRegs);
 
-                console.log("✅ Dashboard updated - Users:", users.length, "Regs:", regs.length, "Tournaments:", tournaments.length);
+                console.log("✅ Dashboard updated - Users:", allUsers.length, "Regs:", allRegs.length, "Tournaments:", tournaments.length);
             } catch (error) {
                 console.error("Dashboard error:", error);
             }
@@ -1079,7 +1132,7 @@
                         </div>
                         <div class="flex-grow min-w-0">
                             <p class="text-white font-bold text-sm truncate">${r.username || 'User'}</p>
-                            <p class="text-gray-400 text-xs truncate">${r.tournamentName || 'Tournament'}</p>
+                            <p class="text-gray-400 text-xs truncate">${r.tournamentName || 'Tournament'} • ${r.entryFee === 0 ? 'FREE' : 'Rs.' + r.entryFee}</p>
                         </div>
                         <div class="text-right"><p class="text-gray-500 text-xs">${date}</p></div>
                     </div>
@@ -1087,9 +1140,96 @@
             }).join('');
         }
 
-        // ==================== USERS TAB ====================
-        let allUsers = [];
+        // ==================== PAYMENTS TAB ====================
+        async function renderPayments() {
+            // Reload registrations
+            try {
+                const snap = await getDocs(collection(db, "registrations"));
+                allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.error(e); }
 
+            // Filter only paid registrations
+            const paidRegs = allRegs.filter(r => (r.entryFee || 0) > 0);
+
+            // Stats
+            const totalCollected = paidRegs.reduce((sum, r) => sum + (r.entryFee || 0), 0);
+            const commission = Math.round(totalCollected * 0.20);
+            const prizePool = Math.round(totalCollected * 0.80);
+
+            document.getElementById('pay-total-collected').textContent = `Rs. ${totalCollected.toLocaleString()}`;
+            document.getElementById('pay-total-commission').textContent = `Rs. ${commission.toLocaleString()}`;
+            document.getElementById('pay-total-prize').textContent = `Rs. ${prizePool.toLocaleString()}`;
+            document.getElementById('pay-total-count').textContent = paidRegs.length;
+
+            filterPayments();
+        }
+
+        window.filterPayments = function() {
+            const q = (document.getElementById('payment-search').value || '').toLowerCase();
+            const paidRegs = allRegs.filter(r => (r.entryFee || 0) > 0);
+            const filtered = paidRegs.filter(r => {
+                return (r.username || '').toLowerCase().includes(q) ||
+                       (r.tournamentName || '').toLowerCase().includes(q) ||
+                       (r.transactionId || '').toLowerCase().includes(q) ||
+                       (r.paymentMethod || '').toLowerCase().includes(q);
+            });
+
+            const container = document.getElementById('payments-list');
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel rounded-xl p-12 text-center text-gray-500">
+                        <i class="fa-solid fa-credit-card text-5xl mb-4 opacity-30"></i>
+                        <p class="font-bold text-white mb-1">No payments found</p>
+                        <p class="text-sm">${paidRegs.length === 0 ? 'All 8 tournaments are FREE — no payments expected yet.' : 'Try a different search term.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            [...filtered].reverse().forEach(r => {
+                const date = r.registeredAt ? new Date(r.registeredAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+                const status = r.paymentStatus === 'verified' ? '<span class="status-verified">Verified</span>' : r.paymentStatus === 'pending' ? '<span class="status-pending-verify">Pending</span>' : '<span class="status-free">Free</span>';
+
+                const row = document.createElement('div');
+                row.className = 'payment-row';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3 flex-grow min-w-0">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-white font-bold text-sm truncate">${r.username || 'User'}</p>
+                            <p class="text-gray-400 text-xs truncate">${r.tournamentName || 'Tournament'}</p>
+                            ${r.transactionId ? `<p class="text-blue-400 text-xs mt-1">TxID: <span class="font-mono">${r.transactionId}</span></p>` : ''}
+                            ${r.paymentMethod ? `<p class="text-gray-500 text-xs">Method: ${r.paymentMethod}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <p class="text-green-400 font-bold text-lg">Rs. ${r.entryFee || 0}</p>
+                        <p class="text-gray-500 text-xs mt-1">${date}</p>
+                        <div class="mt-1">${status}</div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        };
+
+        window.exportPaymentsCSV = function() {
+            const paidRegs = allRegs.filter(r => (r.entryFee || 0) > 0);
+            if (paidRegs.length === 0) { alert("No payments to export yet."); return; }
+            let csv = "Username,Email,Tournament,IGN,Phone,Entry Fee,Payment Method,Transaction ID,Status,Date\n";
+            paidRegs.forEach(r => {
+                csv += `"${r.username || ''}","${r.email || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.phone || ''}","${r.entryFee || 0}","${r.paymentMethod || ''}","${r.transactionId || ''}","${r.paymentStatus || ''}","${r.registeredAt || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `payments-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        };
+
+        // ==================== USERS TAB ====================
         window.loadUsers = async function() {
             const container = document.getElementById('users-list');
             container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Loading...</p>';
@@ -1140,8 +1280,6 @@
         };
 
         // ==================== REGISTRATIONS TAB ====================
-        let allRegs = [];
-
         window.loadRegistrations = async function() {
             const container = document.getElementById('regs-list');
             container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Loading...</p>';
@@ -1166,6 +1304,7 @@
                 const date = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
                 const teammateCount = r.teammates ? r.teammates.length : 0;
                 const teamInfo = r.teamName ? `<span class="text-yellow-400">🎮 ${r.teamName}</span> (+${teammateCount})` : '';
+                const paidBadge = (r.entryFee || 0) > 0 ? `<span class="status-paid-badge">Paid Rs.${r.entryFee}</span>` : '<span class="status-free">Free</span>';
                 return `
                     <div class="reg-row">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
@@ -1180,7 +1319,7 @@
                             </p>
                         </div>
                         <div class="text-right flex-shrink-0 ml-2">
-                            <span class="status-free">${r.status || 'pending'}</span>
+                            ${paidBadge}
                             <p class="text-gray-500 text-xs mt-1">${date}</p>
                         </div>
                     </div>
@@ -1201,10 +1340,10 @@
 
         window.downloadRegsCSV = function() {
             if (allRegs.length === 0) { alert("No registrations to download."); return; }
-            let csv = "Username,Tournament,IGN,UID,Phone,Team,Teammates,Entry Fee,Status,Registered At\n";
+            let csv = "Username,Tournament,IGN,UID,Phone,Team,Teammates,Entry Fee,Payment Method,Transaction ID,Status,Registered At\n";
             allRegs.forEach(r => {
                 const teammates = r.teammates ? r.teammates.map(t => `${t.ign}(${t.uid})`).join(' | ') : '';
-                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.teamName || ''}","${teammates}","${r.entryFee || 0}","${r.status || 'pending'}","${r.registeredAt || ''}"\n`;
+                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.teamName || ''}","${teammates}","${r.entryFee || 0}","${r.paymentMethod || ''}","${r.transactionId || ''}","${r.status || 'pending'}","${r.registeredAt || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');
@@ -1369,7 +1508,6 @@
         }
 
         async function renderEarnings() {
-            // Ensure we have registrations
             if (allRegs.length === 0) {
                 try {
                     const snap = await getDocs(collection(db, "registrations"));
@@ -1392,10 +1530,6 @@
 
             const labels = { today: 'Today', week: 'Last 7 Days', month: 'This Month', all: 'All Time' };
             document.getElementById('period-label').textContent = labels[currentPeriod];
-
-            document.getElementById('source-entry-total').textContent = `Rs. ${total.toLocaleString()}`;
-            document.getElementById('source-commission').textContent = `Rs. ${Math.round(commission).toLocaleString()}`;
-            document.getElementById('source-payouts').textContent = `Rs. ${Math.round(payouts).toLocaleString()}`;
 
             renderBarChart();
 
@@ -1527,14 +1661,7 @@
             empty.classList.add('hidden');
             tbody.innerHTML = '';
 
-            const statusFilter = document.getElementById('payout-status-filter')?.value || 'all';
-            const search = (document.getElementById('payout-search')?.value || '').toLowerCase();
-
-            let filtered = all;
-            if (statusFilter !== 'all') filtered = filtered.filter(p => p.status === statusFilter);
-            if (search) filtered = filtered.filter(p => p.username.toLowerCase().includes(search));
-
-            [...filtered].reverse().forEach(p => {
+            [...all].reverse().forEach(p => {
                 const badge = p.status === 'paid' ? '<span class="payout-paid">Paid</span>' : '<span class="payout-pending">Pending</span>';
                 const action = p.status === 'pending'
                     ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">Paid</button>`
@@ -1552,7 +1679,6 @@
                 tbody.appendChild(row);
             });
 
-            // Update stats
             const totalPaid = all.filter(p => p.status === 'paid').reduce((s, p) => s + p.prize, 0);
             const totalPending = all.filter(p => p.status === 'pending').reduce((s, p) => s + p.prize, 0);
             document.getElementById('payout-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
@@ -1584,62 +1710,6 @@
                 cachedTournaments = [];
             }
         }
-
-        // SEED BUTTON
-        window.seedTournaments = async function() {
-            const btn = document.getElementById('seedBtn');
-            const msg = document.getElementById('seed-msg');
-
-            const existing = await getDocs(collection(db, "tournaments"));
-            if (existing.size > 0) {
-                if (!confirm(`⚠️ There are already ${existing.size} tournaments in the database.\n\nClick OK to ADD 8 more (will create duplicates), or Cancel to abort.`)) {
-                    return;
-                }
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating tournaments...';
-            msg.classList.remove('hidden');
-            msg.className = "text-sm mt-4 text-yellow-300";
-            msg.textContent = "Adding tournaments to Firestore...";
-
-            const tournaments = [
-                { name: "Free Fire Solo Cup",       game: "freefire",   mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
-                { name: "PUBG Mobile Solo Cup",     game: "pubg",       mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
-                { name: "COD Mobile Solo Cup",      game: "cod",        mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
-                { name: "eFootball 1v1 Cup",        game: "efootball",  mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
-                { name: "eCricket 1v1 Cup",         game: "ecricket",   mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
-                { name: "Valorant 5v5 Cup",         game: "valorant",   mode: "5v5",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 10 },
-                { name: "Ludo King Championship",   game: "ludo",       mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
-                { name: "Chess Championship",       game: "chess",      mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 }
-            ];
-
-            try {
-                let success = 0;
-                for (let i = 0; i < tournaments.length; i++) {
-                    const t = tournaments[i];
-                    t.createdAt = new Date(Date.now() + i * 1000).toISOString();
-                    await addDoc(collection(db, "tournaments"), t);
-                    success++;
-                    msg.textContent = `Creating ${success}/${tournaments.length}...`;
-                }
-
-                msg.className = "text-sm mt-4 text-green-300";
-                msg.innerHTML = `✅ <strong>All ${tournaments.length} tournaments created!</strong><br><span class="text-xs">They are now visible on tournaments.html and here in admin.</span>`;
-
-                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>All 8 Tournaments Created!';
-
-                await loadTournamentsFromFirestore();
-                renderAdminTournaments();
-                loadDashboardData();
-            } catch (error) {
-                console.error("Seed error:", error);
-                msg.className = "text-sm mt-4 text-red-300";
-                msg.textContent = "❌ Error: " + error.message;
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>Create All 8 Tournaments Now';
-            }
-        };
 
         window.createTournament = async function(event) {
             event.preventDefault();
@@ -1715,7 +1785,10 @@
                         <p class="font-bold text-white text-sm truncate">${gameEmojis[t.game] || '🎮'} ${t.name}</p>
                         <p class="text-xs text-gray-400 mt-1">${t.mode} • ${dateStr} • ${t.entryFee === 0 ? 'FREE' : 'Rs.' + t.entryFee} • ${t.slotsFilled || 0}/${t.slotsTotal} slots</p>
                     </div>
-                    <button onclick="deleteTournament('${t.firestoreId}', '${(t.name || '').replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex gap-2 ml-3">
+                        <button onclick="openEditTournamentModal('${t.firestoreId}')" class="edit-btn" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteTournament('${t.firestoreId}', '${(t.name || '').replace(/'/g, "\\'")}')" class="delete-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 `;
                 list.appendChild(item);
             });
@@ -1732,6 +1805,72 @@
                 alert("Failed to delete: " + error.message);
             }
         };
+
+        // ==================== EDIT TOURNAMENT ====================
+        window.openEditTournamentModal = function(firestoreId) {
+            const t = cachedTournaments.find(x => x.firestoreId === firestoreId);
+            if (!t) { alert("Tournament not found."); return; }
+
+            document.getElementById('edit-t-id').value = firestoreId;
+            document.getElementById('edit-t-name').value = t.name || '';
+            document.getElementById('edit-t-game').value = t.game || 'freefire';
+            document.getElementById('edit-t-mode').value = t.mode || 'Solo';
+            document.getElementById('edit-t-date').value = t.date || '';
+            document.getElementById('edit-t-time').value = t.time || '13:00';
+            document.getElementById('edit-t-fee').value = t.entryFee || 0;
+            document.getElementById('edit-t-prize').value = t.prizePool || 500;
+            document.getElementById('edit-t-slots').value = t.slotsTotal || 50;
+
+            document.getElementById('edit-tournament-msg').classList.add('hidden');
+            document.getElementById('editTournamentModal').classList.remove('hidden');
+        };
+
+        window.closeEditTournamentModal = function() {
+            document.getElementById('editTournamentModal').classList.add('hidden');
+        };
+
+        window.saveTournamentChanges = async function(event) {
+            event.preventDefault();
+            const msg = document.getElementById('edit-tournament-msg');
+            const firestoreId = document.getElementById('edit-t-id').value;
+
+            const updates = {
+                name: document.getElementById('edit-t-name').value.trim(),
+                game: document.getElementById('edit-t-game').value,
+                mode: document.getElementById('edit-t-mode').value,
+                date: document.getElementById('edit-t-date').value,
+                time: document.getElementById('edit-t-time').value,
+                entryFee: parseInt(document.getElementById('edit-t-fee').value),
+                prizePool: parseInt(document.getElementById('edit-t-prize').value),
+                slotsTotal: parseInt(document.getElementById('edit-t-slots').value),
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-yellow-400";
+                msg.textContent = "Saving changes...";
+
+                await updateDoc(doc(db, "tournaments", firestoreId), updates);
+
+                msg.className = "text-center text-sm mt-4 text-green-400";
+                msg.textContent = `✅ Changes saved!`;
+
+                await loadTournamentsFromFirestore();
+                renderAdminTournaments();
+                loadDashboardData();
+
+                setTimeout(() => closeEditTournamentModal(), 1200);
+            } catch (error) {
+                console.error("Save error:", error);
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.textContent = "❌ Failed: " + error.message;
+            }
+        };
+
+        document.getElementById('editTournamentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditTournamentModal();
+        });
 
         // ==================== ANNOUNCEMENTS ====================
         window.createAnnouncement = async function(event) {
@@ -1825,15 +1964,7 @@
             loadSupportTickets();
             renderPayouts();
             updatePayoutBadge();
-
-            // Ensure registrations loaded for earnings
-            if (allRegs.length === 0) {
-                try {
-                    const snap = await getDocs(collection(db, "registrations"));
-                    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                } catch (e) {}
-            }
-            renderEarnings();
+            renderPayments();
 
             setInterval(loadDashboardData, 10000);
 
