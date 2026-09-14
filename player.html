@@ -19,24 +19,78 @@
         .stat-card { transition: all 0.2s; }
         .stat-card:hover { border-color: #3b82f6; }
         
-        /* Profile Dropdown */
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
+        .support-btn {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 26px;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+            cursor: pointer; transition: all 0.3s;
+            animation: pulse-support 2s infinite;
+        }
+        .support-btn:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6); }
+        @keyframes pulse-support {
+            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
+        }
+        .support-menu {
+            display: none; position: absolute; bottom: 75px; left: 0; width: 260px;
+            background: #1e293b; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .support-menu.open { display: block; }
+        .support-menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; color: #e2e8f0;
+            text-decoration: none; transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .support-menu-item:last-child { border-bottom: none; }
+        .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
+        .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
+        .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- Floating Support Button -->
+    <div class="floating-support">
+        <div id="supportMenu" class="support-menu">
+            <div class="p-3 border-b border-gray-700 bg-slate-800/50">
+                <p class="text-white font-bold text-sm">Need Help? 🆘</p>
+                <p class="text-xs text-gray-400">Choose how to reach us</p>
+            </div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-green-400 text-lg"></i></div>
+                <div><p class="text-sm font-bold">Chat Privately</p><p class="text-xs text-gray-500">1-on-1 with admin</p></div>
+            </a>
+            <a href="support.html" class="support-menu-item">
+                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center"><i class="fa-solid fa-headset text-pink-400"></i></div>
+                <div><p class="text-sm font-bold">Support Page</p><p class="text-xs text-gray-500">Full help center</p></div>
+            </a>
+            <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"><i class="fa-solid fa-users text-purple-400"></i></div>
+                <div><p class="text-sm font-bold">Join Community</p><p class="text-xs text-gray-500">Public group chat</p></div>
+            </a>
+        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
+    </div>
+
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        
-        <!-- LEFT: Logo + User Profile -->
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
                 <span class="text-xl font-bold text-white">Nepal Gaming</span>
             </div>
-
             <div id="user-profile" class="hidden relative">
                 <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
                     <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
@@ -52,7 +106,7 @@
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
                         <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
-                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                        <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
                         <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
@@ -60,36 +114,29 @@
                 </div>
             </div>
         </div>
-
-        <!-- RIGHT: Nav Links -->
         <div class="flex items-center gap-4">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
             <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
 
     <main class="flex-grow">
-        
         <div class="profile-banner"></div>
-
         <div class="container mx-auto px-6 -mt-24 relative z-10">
             <div class="flex flex-col md:flex-row items-center md:items-end gap-6 mb-8">
-                
                 <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring">
                     <span class="text-5xl md:text-6xl font-bold text-white">R</span>
                 </div>
-                
                 <div class="flex-grow text-center md:text-left">
                     <div class="flex items-center gap-2 justify-center md:justify-start flex-wrap mb-2">
                         <h1 class="text-3xl md:text-4xl font-bold text-white">Rahul Sharma</h1>
-                        <i class="fa-solid fa-circle-check text-blue-500 text-xl" title="Verified Player"></i>
-                        <span class="bg-yellow-500/20 border border-yellow-500 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full">
-                            <i class="fa-solid fa-crown mr-1"></i> #1 RANK
-                        </span>
+                        <i class="fa-solid fa-circle-check text-blue-500 text-xl"></i>
+                        <span class="bg-yellow-500/20 border border-yellow-500 text-yellow-400 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i> #1 RANK</span>
                     </div>
                     <p class="text-gray-400 mb-2">@rahul_sharma</p>
                     <div class="flex items-center gap-4 justify-center md:justify-start text-sm text-gray-400 flex-wrap">
@@ -98,14 +145,9 @@
                         <span><i class="fa-solid fa-gamepad mr-1"></i> PUBG Specialist</span>
                     </div>
                 </div>
-                
                 <div class="flex gap-3">
-                    <button onclick="challengePlayer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
-                        <i class="fa-solid fa-hand-fist mr-2"></i>Challenge
-                    </button>
-                    <button onclick="followPlayer()" id="followBtn" class="glass-panel hover:bg-gray-800/50 text-white font-bold py-3 px-6 rounded-lg transition">
-                        <i class="fa-solid fa-user-plus mr-2"></i>Follow
-                    </button>
+                    <button onclick="challengePlayer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition"><i class="fa-solid fa-hand-fist mr-2"></i>Challenge</button>
+                    <button onclick="followPlayer()" id="followBtn" class="glass-panel hover:bg-gray-800/50 text-white font-bold py-3 px-6 rounded-lg transition"><i class="fa-solid fa-user-plus mr-2"></i>Follow</button>
                 </div>
             </div>
 
@@ -113,70 +155,33 @@
                 <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
                     <p class="text-xs text-gray-400 uppercase mb-1">Total Earnings</p>
                     <p class="text-2xl font-bold text-green-400">Rs. 1,25,500</p>
-                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-arrow-up text-green-500"></i> +Rs. 5,200 this month</p>
                 </div>
                 <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
                     <p class="text-xs text-gray-400 uppercase mb-1">Tournaments</p>
                     <p class="text-2xl font-bold text-blue-400">87</p>
-                    <p class="text-xs text-gray-500 mt-1">12 active registrations</p>
                 </div>
                 <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
                     <p class="text-xs text-gray-400 uppercase mb-1">Wins</p>
                     <p class="text-2xl font-bold text-yellow-400">72</p>
-                    <p class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-crown text-yellow-500"></i> 15 solo victories</p>
                 </div>
                 <div class="stat-card glass-panel rounded-xl p-5 border border-gray-700">
                     <p class="text-xs text-gray-400 uppercase mb-1">Win Rate</p>
                     <p class="text-2xl font-bold text-purple-400">82%</p>
-                    <p class="text-xs text-gray-500 mt-1">Top 1% in Nepal</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                
                 <div class="lg:col-span-2 glass-panel rounded-xl p-6">
                     <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-medal text-yellow-500 mr-2"></i>Achievements</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
-                            <i class="fa-solid fa-crown text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Tournament King</p>
-                            <p class="text-[10px] opacity-80">50+ wins</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
-                            <i class="fa-solid fa-fire text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">On Fire</p>
-                            <p class="text-[10px] opacity-80">5-win streak</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
-                            <i class="fa-solid fa-bolt text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Speed Demon</p>
-                            <p class="text-[10px] opacity-80">Fastest finalist</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-earned">
-                            <i class="fa-solid fa-shield-halved text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Survivor</p>
-                            <p class="text-[10px] opacity-80">Top 10 x 100</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
-                            <i class="fa-solid fa-diamond text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Legend</p>
-                            <p class="text-[10px] opacity-80">100+ wins</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
-                            <i class="fa-solid fa-star text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">MVP</p>
-                            <p class="text-[10px] opacity-80">10 MVPs</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
-                            <i class="fa-solid fa-trophy text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Champion</p>
-                            <p class="text-[10px] opacity-80">Win monthly cup</p>
-                        </div>
-                        <div class="achievement-card text-center p-4 rounded-lg badge-locked">
-                            <i class="fa-solid fa-rocket text-3xl mb-2"></i>
-                            <p class="text-xs font-bold">Rising Star</p>
-                            <p class="text-[10px] opacity-80">Win 3 in a row</p>
-                        </div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned"><i class="fa-solid fa-crown text-3xl mb-2"></i><p class="text-xs font-bold">Tournament King</p><p class="text-[10px] opacity-80">50+ wins</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned"><i class="fa-solid fa-fire text-3xl mb-2"></i><p class="text-xs font-bold">On Fire</p><p class="text-[10px] opacity-80">5-win streak</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned"><i class="fa-solid fa-bolt text-3xl mb-2"></i><p class="text-xs font-bold">Speed Demon</p><p class="text-[10px] opacity-80">Fastest finalist</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-earned"><i class="fa-solid fa-shield-halved text-3xl mb-2"></i><p class="text-xs font-bold">Survivor</p><p class="text-[10px] opacity-80">Top 10 x 100</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked"><i class="fa-solid fa-diamond text-3xl mb-2"></i><p class="text-xs font-bold">Legend</p><p class="text-[10px] opacity-80">100+ wins</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked"><i class="fa-solid fa-star text-3xl mb-2"></i><p class="text-xs font-bold">MVP</p><p class="text-[10px] opacity-80">10 MVPs</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked"><i class="fa-solid fa-trophy text-3xl mb-2"></i><p class="text-xs font-bold">Champion</p><p class="text-[10px] opacity-80">Win monthly cup</p></div>
+                        <div class="achievement-card text-center p-4 rounded-lg badge-locked"><i class="fa-solid fa-rocket text-3xl mb-2"></i><p class="text-xs font-bold">Rising Star</p><p class="text-[10px] opacity-80">Win 3 in a row</p></div>
                     </div>
                 </div>
 
@@ -184,39 +189,18 @@
                     <h2 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-gamepad text-blue-500 mr-2"></i>Favorite Games</h2>
                     <div class="space-y-3">
                         <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
-                                <i class="fa-solid fa-crosshairs text-white"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-bold text-white text-sm">PUBG Mobile</p>
-                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
-                                    <div class="bg-yellow-500 h-1.5 rounded-full" style="width: 85%"></div>
-                                </div>
-                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center"><i class="fa-solid fa-crosshairs text-white"></i></div>
+                            <div class="flex-grow"><p class="font-bold text-white text-sm">PUBG Mobile</p><div class="w-full bg-gray-700 rounded-full h-1.5 mt-2"><div class="bg-yellow-500 h-1.5 rounded-full" style="width: 85%"></div></div></div>
                             <span class="text-xs text-gray-400">85%</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                                <i class="fa-solid fa-fire text-white"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-bold text-white text-sm">Free Fire</p>
-                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
-                                    <div class="bg-orange-500 h-1.5 rounded-full" style="width: 62%"></div>
-                                </div>
-                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"><i class="fa-solid fa-fire text-white"></i></div>
+                            <div class="flex-grow"><p class="font-bold text-white text-sm">Free Fire</p><div class="w-full bg-gray-700 rounded-full h-1.5 mt-2"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 62%"></div></div></div>
                             <span class="text-xs text-gray-400">62%</span>
                         </div>
                         <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
-                                <i class="fa-solid fa-bullseye text-white"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <p class="font-bold text-white text-sm">Valorant</p>
-                                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
-                                    <div class="bg-red-500 h-1.5 rounded-full" style="width: 45%"></div>
-                                </div>
-                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center"><i class="fa-solid fa-bullseye text-white"></i></div>
+                            <div class="flex-grow"><p class="font-bold text-white text-sm">Valorant</p><div class="w-full bg-gray-700 rounded-full h-1.5 mt-2"><div class="bg-red-500 h-1.5 rounded-full" style="width: 45%"></div></div></div>
                             <span class="text-xs text-gray-400">45%</span>
                         </div>
                     </div>
@@ -246,18 +230,15 @@
         </div>
     </main>
 
-    <footer class="glass-panel w-full p-6 mt-8">
-        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
-                <span class="font-bold text-white">Nepal Gaming</span>
-            </div>
-            <div class="text-sm text-gray-500">&copy; 2023 Nepal Gaming. All rights reserved.</div>
-        </div>
-    </footer>
-
     <script>
-        console.log("--- PLAYER PROFILE PAGE LOADED ---");
+        console.log("--- PLAYER PROFILE LOADED (with support) ---");
+
+        function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('supportMenu');
+            const btn = document.querySelector('.support-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
+        });
 
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
@@ -273,20 +254,13 @@
             }
         }
 
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
-        }
-
+        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.reload();
-        }
+        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
 
         const recentMatches = [
             { tournament: "PUBG Squad Championship", date: "Nov 18, 2023", placement: 1, kills: 12, prize: 800 },
@@ -325,12 +299,8 @@
 
         function challengePlayer() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) {
-                alert("You need to login first to challenge this player.");
-                window.location.href = 'member.html';
-                return;
-            }
-            alert("Challenge request sent to Rahul Sharma! You'll be notified when they accept.");
+            if (!user) { alert("You need to login first."); window.location.href = 'member.html'; return; }
+            alert("Challenge request sent to Rahul Sharma!");
         }
 
         function followPlayer() {
