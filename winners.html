@@ -2,18 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Winners - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Winners - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
-        .rank-2 { color: #94a3b8; }
-        .rank-3 { color: #b45309; }
-        .winner-card { transition: transform 0.2s; }
-        .winner-card:hover { transform: translateY(-5px); }
         
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
@@ -21,22 +19,19 @@
 
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
         .support-btn {
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 26px;
-            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer; transition: all 0.3s;
-            animation: pulse-support 2s infinite;
+            width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+            cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite;
         }
-        .support-btn:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6); }
+        .support-btn:hover { transform: scale(1.1); }
         @keyframes pulse-support {
             0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
             50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
         }
         .support-menu {
-            display: none; position: absolute; bottom: 75px; left: 0; width: 260px;
+            display: none; position: absolute; bottom: 68px; left: 0;
+            width: 240px; max-width: calc(100vw - 48px);
             background: #1e293b; border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
@@ -45,52 +40,81 @@
         .support-menu.open { display: block; }
         .support-menu-item {
             display: flex; align-items: center; gap: 12px;
-            padding: 14px 18px; color: #e2e8f0;
+            padding: 12px 16px; color: #e2e8f0;
             text-decoration: none; transition: all 0.2s;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
         }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
+
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open {
+            display: flex; flex-direction: column;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px; gap: 8px; z-index: 60;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        @media (min-width: 768px) {
+            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+        }
+
+        .empty-state-box {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px dashed rgba(148, 163, 184, 0.3);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .podium-slot {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px dashed rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .podium-slot:hover {
+            border-color: rgba(148, 163, 184, 0.5);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support Button -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
                 <p class="text-white font-bold text-sm">Need Help? 🆘</p>
                 <p class="text-xs text-gray-400">Choose how to reach us</p>
             </div>
-            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
-                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-green-400 text-lg"></i></div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20have%20a%20question." target="_blank" class="support-menu-item wa">
+                <div class="w-9 h-9 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-whatsapp text-green-400"></i></div>
                 <div><p class="text-sm font-bold">Chat Privately</p><p class="text-xs text-gray-500">1-on-1 with admin</p></div>
             </a>
             <a href="support.html" class="support-menu-item">
-                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center"><i class="fa-solid fa-headset text-pink-400"></i></div>
+                <div class="w-9 h-9 rounded-full bg-pink-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-pink-400"></i></div>
                 <div><p class="text-sm font-bold">Support Page</p><p class="text-xs text-gray-500">Full help center</p></div>
             </a>
             <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
-                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"><i class="fa-solid fa-users text-purple-400"></i></div>
+                <div class="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-users text-purple-400"></i></div>
                 <div><p class="text-sm font-bold">Join Community</p><p class="text-xs text-gray-500">Public group chat</p></div>
             </a>
         </div>
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
-            </div>
+    <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-50 relative">
+        <div class="flex items-center gap-3 min-w-0">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+            <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
             <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
+                    <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
                     <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                 </button>
                 <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
@@ -100,8 +124,6 @@
                     </div>
                     <div class="py-1">
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -110,89 +132,114 @@
                 </div>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="winners.html" class="text-sm text-blue-400 font-bold">Winners</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
-            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+            <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+        </button>
+        <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+            <a href="winners.html" class="text-sm text-blue-400 font-bold px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Support</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
         </div>
     </nav>
 
-    <main class="flex-grow container mx-auto p-6">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-3"></i>Hall of Winners</h1>
-            <p class="text-gray-400">Celebrating the top players and their prize winnings.</p>
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
+        
+        <div class="text-center mb-6 sm:mb-10">
+            <div class="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-3 py-1 text-xs font-bold text-yellow-400 mb-3">
+                <i class="fa-solid fa-crown mr-1"></i> Launching Soon
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-2"></i>Hall of Winners</h1>
+            <p class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto">Our first winners will be announced right here after our launch tournament.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 items-end">
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-2 md:order-1 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gray-400 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-gray-400"><i class="fa-solid fa-user text-2xl text-gray-300"></i></div>
-                <h3 class="text-xl font-bold text-white">Sujal Thapa</h3>
-                <p class="text-sm text-gray-400 mb-2">Free Fire Solo Cup</p>
-                <div class="text-2xl font-bold rank-2 mb-2">#2</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 300</div>
+        <!-- Podium placeholder -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
+            <div class="podium-slot order-2 md:order-1">
+                <div class="text-5xl mb-3">🥈</div>
+                <p class="text-2xl font-bold text-gray-300 mb-1">#2</p>
+                <p class="text-sm text-gray-500">Waiting for winner</p>
             </div>
-            <div class="glass-panel winner-card rounded-xl p-8 text-center order-1 md:order-2 relative transform md:scale-110 z-10 shadow-2xl shadow-yellow-500/20">
-                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500 rounded-t-xl"></div>
-                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2"><i class="fa-solid fa-crown text-3xl text-yellow-500"></i></div>
-                <div class="w-24 h-24 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-yellow-500"><i class="fa-solid fa-user text-3xl text-yellow-500"></i></div>
-                <h3 class="text-2xl font-bold text-white">Rahul Sharma</h3>
-                <p class="text-sm text-gray-400 mb-2">PUBG Mobile Squad</p>
-                <div class="text-3xl font-bold rank-1 mb-2">#1</div>
-                <div class="inline-block bg-yellow-500/20 px-6 py-2 rounded-full text-yellow-400 font-bold border border-yellow-500">Rs. 1,000</div>
+            <div class="podium-slot order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10 border-yellow-500/30">
+                <div class="text-6xl mb-3">🥇</div>
+                <p class="text-3xl font-bold rank-1 mb-1">#1</p>
+                <p class="text-sm text-gray-500">Champion will be crowned soon</p>
             </div>
-            <div class="glass-panel winner-card rounded-xl p-6 text-center order-3 relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-orange-700 rounded-t-xl"></div>
-                <div class="w-20 h-20 mx-auto bg-gray-700 rounded-full flex items-center justify-center mb-4 border-4 border-orange-700"><i class="fa-solid fa-user text-2xl text-orange-400"></i></div>
-                <h3 class="text-xl font-bold text-white">Bibek Gurung</h3>
-                <p class="text-sm text-gray-400 mb-2">Clash of Clans War</p>
-                <div class="text-2xl font-bold rank-3 mb-2">#3</div>
-                <div class="inline-block bg-gray-800 px-4 py-1 rounded-full text-green-400 font-bold border border-gray-600">Rs. 200</div>
+            <div class="podium-slot order-3">
+                <div class="text-5xl mb-3">🥉</div>
+                <p class="text-2xl font-bold text-orange-400 mb-1">#3</p>
+                <p class="text-sm text-gray-500">Waiting for winner</p>
             </div>
         </div>
 
-        <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recent Winners</h2>
-                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">Updated Live</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                        <tr>
-                            <th class="px-6 py-3">Player</th>
-                            <th class="px-6 py-3">Tournament</th>
-                            <th class="px-6 py-3">Rank</th>
-                            <th class="px-6 py-3">Prize Won</th>
-                            <th class="px-6 py-3">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winners-table-body" class="divide-y divide-gray-700"></tbody>
-                </table>
+        <!-- Empty state info box -->
+        <div class="empty-state-box max-w-2xl mx-auto">
+            <div class="text-5xl sm:text-6xl mb-4">🏆</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Winners Yet</h2>
+            <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Once our first tournament finishes, the winners will be displayed here with their prizes. Sign up now to be among the first to compete!</p>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="register.html" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-user-plus"></i> Register Early
+                </a>
+                <a href="tournaments.html" class="glass-panel hover:bg-gray-800/50 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-eye"></i> View Tournaments
+                </a>
             </div>
         </div>
+
+        <!-- Prizes section -->
+        <div class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto text-center">
+            <h3 class="text-base sm:text-lg font-bold text-white mb-4">💰 Prize Distribution</h3>
+            <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
+                <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                    <p class="text-yellow-400 font-bold mb-1">🥇 1st</p>
+                    <p class="text-white text-xs">Top Prize</p>
+                </div>
+                <div class="bg-gray-500/10 border border-gray-400/30 rounded-lg p-3">
+                    <p class="text-gray-300 font-bold mb-1">🥈 2nd</p>
+                    <p class="text-white text-xs">Runner-up</p>
+                </div>
+                <div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
+                    <p class="text-orange-400 font-bold mb-1">🥉 3rd</p>
+                    <p class="text-white text-xs">Third Place</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">Exact prize amounts will be announced with each tournament.</p>
+        </div>
+
     </main>
 
-    <script>
-        console.log("--- WINNERS PAGE LOADED (with support) ---");
+    <footer class="glass-panel w-full p-5 sm:p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
+            </div>
+            <div class="text-xs sm:text-sm text-gray-500 text-center">© 2026 Nepal Gaming. All rights reserved.</div>
+        </div>
+    </footer>
 
+    <script>
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
         function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('supportMenu');
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
-
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (user && user.username) {
                 document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('user-name').textContent = user.username;
                 document.getElementById('dropdown-username').textContent = user.email || user.username;
                 document.getElementById('nav-login-btn').classList.add('hidden');
             } else {
@@ -200,7 +247,6 @@
                 document.getElementById('nav-login-btn').classList.remove('hidden');
             }
         }
-
         function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
@@ -208,44 +254,7 @@
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
-
-        const winnersData = [
-            { player: "Rahul Sharma", tournament: "PUBG Mobile Squad", rank: "#1", prize: 1000, date: "2023-11-01" },
-            { player: "Sujal Thapa", tournament: "Free Fire Solo Cup", rank: "#2", prize: 300, date: "2023-10-28" },
-            { player: "Bibek Gurung", tournament: "Clash of Clans War", rank: "#3", prize: 200, date: "2023-10-25" },
-            { player: "Anish Rai", tournament: "Free Fire Solo Cup", rank: "#1", prize: 500, date: "2023-10-20" },
-            { player: "Kiran Shah", tournament: "Valorant Night Cup", rank: "#1", prize: 1500, date: "2023-10-15" },
-            { player: "Sita Karki", tournament: "Ludo King Championship", rank: "#2", prize: 400, date: "2023-10-10" }
-        ];
-
-        function loadWinners() {
-            const tableBody = document.getElementById('winners-table-body');
-            winnersData.forEach(winner => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
-                let rankClass = "text-gray-300";
-                let rankIcon = "";
-                if(winner.rank === "#1") { rankClass = "text-yellow-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                else if(winner.rank === "#2") { rankClass = "text-gray-300 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                else if(winner.rank === "#3") { rankClass = "text-orange-400 font-bold"; rankIcon = '<i class="fa-solid fa-medal mr-1"></i>'; }
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs">${winner.player.charAt(0)}</div>
-                        ${winner.player}
-                    </td>
-                    <td class="px-6 py-4">${winner.tournament}</td>
-                    <td class="px-6 py-4 ${rankClass}">${rankIcon}${winner.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${winner.prize}</td>
-                    <td class="px-6 py-4 text-gray-500">${winner.date}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        window.onload = function() {
-            checkUserStatus();
-            loadWinners();
-        };
+        window.onload = function() { checkUserStatus(); };
     </script>
 </body>
 </html>
