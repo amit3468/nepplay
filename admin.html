@@ -19,16 +19,7 @@
         .sidebar-item:hover { background-color: rgba(59, 130, 246, 0.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .profile-dropdown { display: none; }
-        .profile-dropdown.open { display: block; }
-        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
         .stat-badge { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-
-        .bar-container { display: flex; align-items: flex-end; gap: 8px; height: 180px; padding: 20px 0; }
-        .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
-        .bar { width: 100%; max-width: 60px; border-radius: 6px 6px 0 0; transition: all 0.3s; position: relative; min-height: 4px; background: linear-gradient(to top, #3b82f6, #8b5cf6); }
-        .bar-label { font-size: 0.7rem; color: #94a3b8; margin-top: 8px; text-align: center; }
-        .bar-value { font-size: 0.7rem; color: #e2e8f0; font-weight: 600; margin-bottom: 4px; }
 
         #loginScreen {
             position: fixed; inset: 0;
@@ -63,167 +54,39 @@
             .admin-sidebar.mobile-open { display: flex; position: fixed; top: 60px; left: 0; bottom: 0; width: 250px; z-index: 45; background: #1e293b; }
         }
 
-        /* ==================== NOTIFICATIONS ==================== */
-        .notif-bell {
-            position: relative;
-            cursor: pointer;
-            color: #e2e8f0;
-            font-size: 1.25rem;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
+        /* Notifications */
+        .notif-bell { position: relative; cursor: pointer; color: #e2e8f0; font-size: 1.25rem; padding: 8px; border-radius: 8px; transition: all 0.2s; }
         .notif-bell:hover { background: rgba(59, 130, 246, 0.1); color: white; }
-        .notif-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 800;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 4px;
-            box-shadow: 0 0 0 2px #0f172a;
-            animation: badgePulse 2s infinite;
-        }
-        @keyframes badgePulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 2px #0f172a, 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            50% { transform: scale(1.1); box-shadow: 0 0 0 2px #0f172a, 0 0 0 8px rgba(239, 68, 68, 0); }
-        }
+        .notif-badge { position: absolute; top: 2px; right: 2px; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-size: 0.6rem; font-weight: 800; min-width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 0 0 2px #0f172a; animation: badgePulse 2s infinite; }
+        @keyframes badgePulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 2px #0f172a, 0 0 0 0 rgba(239, 68, 68, 0.6); } 50% { transform: scale(1.1); box-shadow: 0 0 0 2px #0f172a, 0 0 0 8px rgba(239, 68, 68, 0); } }
 
-        .notif-dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            width: 340px;
-            max-width: calc(100vw - 32px);
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
-            z-index: 100;
-            max-height: 500px;
-            display: none;
-        }
+        .notif-dropdown { display: none; position: absolute; top: 100%; right: 0; width: 340px; max-width: calc(100vw - 32px); background: #1e293b; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); overflow: hidden; z-index: 100; max-height: 500px; }
         .notif-dropdown.open { display: block; }
-        .notif-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            transition: all 0.2s;
-        }
+        .notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: flex-start; gap: 12px; transition: all 0.2s; }
         .notif-item:hover { background: rgba(59, 130, 246, 0.08); }
         .notif-item:last-child { border-bottom: none; }
-        .notif-item-icon {
-            width: 36px; height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 0.9rem;
-        }
+        .notif-item-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; }
         .notif-icon-user { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
         .notif-icon-reg { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
         .notif-icon-ticket { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
 
-        /* Toast notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 380px;
-            width: calc(100% - 48px);
-        }
-        .toast {
-            background: #1e293b;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 14px 18px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            animation: toastSlide 0.4s ease-out;
-            border-left: 4px solid #3b82f6;
-        }
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; max-width: 380px; width: calc(100% - 48px); }
+        .toast { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 14px 18px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); display: flex; align-items: flex-start; gap: 12px; animation: toastSlide 0.4s ease-out; border-left: 4px solid #3b82f6; }
         .toast.new-user { border-left-color: #3b82f6; }
         .toast.new-reg { border-left-color: #22c55e; }
         .toast.new-ticket { border-left-color: #ec4899; }
-        @keyframes toastSlide {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .toast.closing {
-            animation: toastSlideOut 0.3s ease-in forwards;
-        }
-        @keyframes toastSlideOut {
-            to { transform: translateX(400px); opacity: 0; }
-        }
+        @keyframes toastSlide { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast.closing { animation: toastSlideOut 0.3s ease-in forwards; }
+        @keyframes toastSlideOut { to { transform: translateX(400px); opacity: 0; } }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            display: inline-block;
-            animation: livePulse 1.5s infinite;
-        }
-        @keyframes livePulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); }
-            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-        }
+        .live-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; animation: livePulse 1.5s infinite; }
+        @keyframes livePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); } 50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
 
-        .user-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            background: rgba(30, 41, 59, 0.6);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border-left: 3px solid #3b82f6;
-            transition: all 0.2s;
-        }
+        .user-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #3b82f6; transition: all 0.2s; }
         .user-row:hover { background: rgba(30, 41, 59, 0.9); }
-        .avatar-circle {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
+        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
 
-        .reg-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            background: rgba(30, 41, 59, 0.6);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border-left: 3px solid #22c55e;
-            transition: all 0.2s;
-        }
+        .reg-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #22c55e; transition: all 0.2s; }
         .reg-row:hover { background: rgba(30, 41, 59, 0.9); }
     </style>
 </head>
@@ -270,7 +133,6 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- NOTIFICATION BELL -->
                 <div class="relative">
                     <div class="notif-bell" onclick="toggleNotifDropdown(event)">
                         <i class="fa-solid fa-bell"></i>
@@ -319,7 +181,7 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.0 • 2026</p>
+                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.1 • 2026</p>
                 </div>
             </aside>
 
@@ -361,7 +223,6 @@
                         </div>
                     </div>
 
-                    <!-- Recent Users -->
                     <div class="glass-panel rounded-xl shadow-lg mb-6">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-users text-blue-500 mr-2"></i>Recent Users</h2>
@@ -372,7 +233,6 @@
                         </div>
                     </div>
 
-                    <!-- Recent Registrations -->
                     <div class="glass-panel rounded-xl shadow-lg mb-6">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-clipboard-list text-green-500 mr-2"></i>Recent Registrations</h2>
@@ -440,7 +300,7 @@
                 <div id="tab-add-tournament" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white">Manage Tournaments</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Create and manage tournaments</p>
+                        <p class="text-gray-400 mt-1 text-sm">Create and manage tournaments (saved to Firestore)</p>
                     </div>
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
                         <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Tournament</h2>
@@ -549,7 +409,7 @@
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Image URL (optional)</label>
                                 <input type="url" id="a-image" class="form-input w-full px-4 py-3 rounded-lg" placeholder="https://i.imgur.com/yourimage.png">
-                                <p class="text-xs text-gray-500 mt-1">Upload image to imgur.com, paste direct link here</p>
+                                <p class="text-xs text-gray-500 mt-1">Upload to imgur.com, paste direct link here</p>
                             </div>
                             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
                                 <i class="fa-solid fa-bullhorn mr-2"></i>Publish Announcement
@@ -567,15 +427,14 @@
         </div>
     </div>
 
-    <!-- TOAST CONTAINER -->
     <div id="toastContainer" class="toast-container"></div>
 
     <script type="module">
         // ============================================================
-        // FIREBASE IMPORTS
+        // FIREBASE IMPORTS (with addDoc)
         // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, query, orderBy, limit, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -590,10 +449,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        console.log("🔥 Admin panel initialized (Firebase)");
+        console.log("🔥 Admin panel initialized (Firestore tournaments)");
 
         // ============================================================
-        // ADMIN AUTH (local password - Firebase auth for admin comes later)
+        // AUTH
         // ============================================================
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
@@ -666,15 +525,17 @@
             if (tabName === 'registrations') loadRegistrations();
             if (tabName === 'support') loadSupportTickets();
             if (tabName === 'announcements') loadAnnouncements();
+            if (tabName === 'add-tournament') {
+                loadTournamentsFromFirestore().then(renderAdminTournaments);
+            }
         };
 
         // ============================================================
-        // NOTIFICATION SYSTEM
+        // NOTIFICATIONS
         // ============================================================
         let notifications = [];
         let lastUserCount = null;
         let lastRegCount = null;
-        let lastTicketCount = null;
         let previousUserIds = new Set();
         let previousRegIds = new Set();
 
@@ -700,9 +561,7 @@
         function addNotification(type, title, message) {
             const notif = {
                 id: Date.now() + Math.random(),
-                type,
-                title,
-                message,
+                type, title, message,
                 time: new Date().toISOString(),
                 read: false
             };
@@ -787,33 +646,27 @@
         }
 
         // ============================================================
-        // LOAD DASHBOARD DATA
+        // LOAD DASHBOARD
         // ============================================================
         async function loadDashboardData() {
             try {
-                // Fetch users
                 const usersSnap = await getDocs(collection(db, "users"));
                 const users = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Fetch registrations
                 const regsSnap = await getDocs(collection(db, "registrations"));
                 const regs = regsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Fetch tournaments
                 const tSnap = await getDocs(collection(db, "tournaments"));
                 const tournaments = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Fetch support tickets (localStorage)
                 const tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
                 const openTickets = tickets.filter(t => t.status === 'open').length;
 
-                // Update stats
                 document.getElementById('real-user-count').textContent = users.length;
                 document.getElementById('real-reg-count').textContent = regs.length;
                 document.getElementById('tournament-count').textContent = tournaments.length;
                 document.getElementById('ticket-count').textContent = openTickets;
 
-                // Update sidebar badges
                 document.getElementById('users-count-badge').textContent = users.length;
                 document.getElementById('regs-count-badge').textContent = regs.length;
                 if (openTickets > 0) {
@@ -823,7 +676,6 @@
                     document.getElementById('support-count-badge').classList.add('hidden');
                 }
 
-                // Detect new users (notifications)
                 if (lastUserCount !== null) {
                     const newUsers = users.filter(u => !previousUserIds.has(u.id));
                     newUsers.forEach(u => {
@@ -833,7 +685,6 @@
                 previousUserIds = new Set(users.map(u => u.id));
                 lastUserCount = users.length;
 
-                // Detect new registrations
                 if (lastRegCount !== null) {
                     const newRegs = regs.filter(r => !previousRegIds.has(r.id));
                     newRegs.forEach(r => {
@@ -843,11 +694,10 @@
                 previousRegIds = new Set(regs.map(r => r.id));
                 lastRegCount = regs.length;
 
-                // Update recent users list
                 renderRecentUsers(users);
                 renderRecentRegs(regs);
 
-                console.log("✅ Dashboard updated - Users:", users.length, "Regs:", regs.length);
+                console.log("✅ Dashboard updated - Users:", users.length, "Regs:", regs.length, "Tournaments:", tournaments.length);
             } catch (error) {
                 console.error("Dashboard error:", error);
             }
@@ -860,9 +710,9 @@
                 return;
             }
             const recent = [...users].sort((a, b) => {
-                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return dateB - dateA;
+                const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const db_ = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return db_ - da;
             }).slice(0, 5);
 
             container.innerHTML = recent.map(u => {
@@ -891,9 +741,9 @@
                 return;
             }
             const recent = [...regs].sort((a, b) => {
-                const dateA = a.registeredAt ? new Date(a.registeredAt).getTime() : 0;
-                const dateB = b.registeredAt ? new Date(b.registeredAt).getTime() : 0;
-                return dateB - dateA;
+                const da = a.registeredAt ? new Date(a.registeredAt).getTime() : 0;
+                const db_ = b.registeredAt ? new Date(b.registeredAt).getTime() : 0;
+                return db_ - da;
             }).slice(0, 5);
 
             container.innerHTML = recent.map(r => {
@@ -1008,12 +858,6 @@
             }
             container.innerHTML = regs.map(r => {
                 const date = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
-                const paymentStatus = r.paymentStatus || 'free';
-                let badge = '';
-                if (paymentStatus === 'verified') badge = '<span class="status-verified">Verified</span>';
-                else if (paymentStatus === 'pending-verification') badge = '<span class="status-pending-verify">Pending</span>';
-                else badge = '<span class="status-free">Free</span>';
-
                 return `
                     <div class="reg-row">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
@@ -1027,7 +871,7 @@
                             </p>
                         </div>
                         <div class="text-right flex-shrink-0 ml-2">
-                            ${badge}
+                            <span class="status-free">Free</span>
                             <p class="text-gray-500 text-xs mt-1">${date}</p>
                         </div>
                     </div>
@@ -1051,9 +895,9 @@
                 alert("No registrations to download.");
                 return;
             }
-            let csv = "Username,Tournament,IGN,UID,Phone,Entry Fee,Payment Status,Registered At\n";
+            let csv = "Username,Tournament,IGN,UID,Phone,Entry Fee,Registered At\n";
             allRegs.forEach(r => {
-                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.entryFee || 0}","${r.paymentStatus || 'free'}","${r.registeredAt || ''}"\n`;
+                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.entryFee || 0}","${r.registeredAt || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');
@@ -1063,7 +907,7 @@
         };
 
         // ============================================================
-        // SUPPORT TICKETS (localStorage still)
+        // SUPPORT TICKETS
         // ============================================================
         window.loadSupportTickets = function() {
             const container = document.getElementById('support-list');
@@ -1117,16 +961,31 @@
         };
 
         // ============================================================
-        // TOURNAMENTS (localStorage still - will migrate to Firestore later)
+        // TOURNAMENTS (Firestore-backed!)
         // ============================================================
-        function getCustomTournaments() {
-            return JSON.parse(localStorage.getItem('customTournaments') || '[]');
+        let cachedTournaments = [];
+
+        async function loadTournamentsFromFirestore() {
+            try {
+                const snap = await getDocs(collection(db, "tournaments"));
+                cachedTournaments = snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+                cachedTournaments.sort((a, b) => {
+                    const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const db_ = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return db_ - da;
+                });
+                console.log("✅ Loaded", cachedTournaments.length, "tournaments from Firestore");
+            } catch (error) {
+                console.error("Error loading tournaments:", error);
+                cachedTournaments = [];
+            }
         }
 
-        window.createTournament = function(event) {
+        window.createTournament = async function(event) {
             event.preventDefault();
+            const msg = document.getElementById('tournament-msg');
+
             const newT = {
-                id: Date.now(),
                 name: document.getElementById('t-name').value.trim(),
                 game: document.getElementById('t-game').value,
                 mode: document.getElementById('t-mode').value,
@@ -1138,25 +997,46 @@
                 slotsTotal: parseInt(document.getElementById('t-slots').value),
                 createdAt: new Date().toISOString()
             };
-            const ex = getCustomTournaments();
-            ex.push(newT);
-            localStorage.setItem('customTournaments', JSON.stringify(ex));
 
-            const msg = document.getElementById('tournament-msg');
-            msg.classList.remove('hidden');
-            msg.className = "text-center text-sm mt-4 text-green-400";
-            msg.textContent = `✅ "${newT.name}" created!`;
-            document.getElementById('tournamentForm').reset();
-            renderAdminTournaments();
-            setTimeout(() => msg.classList.add('hidden'), 4000);
+            if (!newT.name || !newT.game || !newT.mode || !newT.date) {
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.textContent = "Please fill all required fields.";
+                return;
+            }
+
+            try {
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-yellow-400";
+                msg.textContent = "Saving to Firestore...";
+
+                const docRef = await addDoc(collection(db, "tournaments"), newT);
+                console.log("✅ Tournament saved to Firestore with ID:", docRef.id);
+
+                msg.className = "text-center text-sm mt-4 text-green-400";
+                msg.textContent = `✅ "${newT.name}" created successfully!`;
+
+                document.getElementById('tournamentForm').reset();
+                await loadTournamentsFromFirestore();
+                renderAdminTournaments();
+                loadDashboardData();
+                setTimeout(() => msg.classList.add('hidden'), 4000);
+            } catch (error) {
+                console.error("Save tournament error:", error);
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.textContent = "❌ Failed to save: " + error.message;
+            }
         };
 
         function renderAdminTournaments() {
             const list = document.getElementById('admin-tournaments-list');
             const empty = document.getElementById('no-tournaments-admin');
             const count = document.getElementById('active-tournament-count');
-            const tournaments = getCustomTournaments();
+            const tournaments = cachedTournaments;
+
             count.textContent = `${tournaments.length} total`;
+
             if (tournaments.length === 0) {
                 list.innerHTML = '';
                 empty.classList.remove('hidden');
@@ -1164,31 +1044,46 @@
             }
             empty.classList.add('hidden');
             list.innerHTML = '';
-            tournaments.reverse().forEach(t => {
+
+            const gameEmojis = {
+                freefire: '🔥', pubg: '🎯', cod: '💣',
+                efootball: '⚽', ecricket: '🏏', valorant: '⚔️',
+                ludo: '🎲', chess: '♟️'
+            };
+
+            tournaments.forEach(t => {
                 const item = document.createElement('div');
                 item.className = 'tournament-admin-item';
                 const dateStr = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
                 item.innerHTML = `
                     <div class="flex-grow min-w-0">
-                        <p class="font-bold text-white text-sm truncate">${t.name}</p>
-                        <p class="text-xs text-gray-400 mt-1">🎮 ${t.game} • ${t.mode} • ${dateStr} • ${t.entryFee === 0 ? 'FREE' : 'Rs.' + t.entryFee}</p>
+                        <p class="font-bold text-white text-sm truncate">${gameEmojis[t.game] || '🎮'} ${t.name}</p>
+                        <p class="text-xs text-gray-400 mt-1">${t.mode} • ${dateStr} • ${t.entryFee === 0 ? 'FREE' : 'Rs.' + t.entryFee} • ${t.slotsFilled || 0}/${t.slotsTotal} slots</p>
                     </div>
-                    <button onclick="deleteTournament(${t.id}, '${t.name.replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteTournament('${t.firestoreId}', '${(t.name || '').replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete"><i class="fa-solid fa-trash"></i></button>
                 `;
                 list.appendChild(item);
             });
         }
 
-        window.deleteTournament = function(id, name) {
-            if (!confirm(`⚠️ Delete "${name}"?`)) return;
-            localStorage.setItem('customTournaments', JSON.stringify(getCustomTournaments().filter(t => t.id !== id)));
-            renderAdminTournaments();
+        window.deleteTournament = async function(firestoreId, name) {
+            if (!confirm(`⚠️ Delete "${name}"?\n\nThis cannot be undone.`)) return;
+            try {
+                await deleteDoc(doc(db, "tournaments", firestoreId));
+                console.log("🗑️ Deleted tournament:", firestoreId);
+                await loadTournamentsFromFirestore();
+                renderAdminTournaments();
+                loadDashboardData();
+            } catch (error) {
+                console.error("Delete error:", error);
+                alert("Failed to delete: " + error.message);
+            }
         };
 
         // ============================================================
-        // ANNOUNCEMENTS (localStorage still)
+        // ANNOUNCEMENTS
         // ============================================================
-        window.createAnnouncement = function(event) {
+        window.createAnnouncement = async function(event) {
             event.preventDefault();
             const title = document.getElementById('a-title').value.trim();
             const message = document.getElementById('a-message').value.trim();
@@ -1202,57 +1097,76 @@
                 msg.textContent = "Title and message required.";
                 return;
             }
-            const a = { id: Date.now(), title, message, priority, imageUrl: imageUrl || null, createdAt: new Date().toISOString() };
-            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
-            all.push(a);
-            try {
-                localStorage.setItem('announcements', JSON.stringify(all));
-            } catch(e) {
-                alert("Storage full!");
-                return;
-            }
 
-            msg.classList.remove('hidden');
-            msg.className = "text-center text-sm mt-4 text-green-400";
-            msg.textContent = `✅ Published!`;
-            document.getElementById('announcementForm').reset();
-            loadAnnouncements();
-            setTimeout(() => msg.classList.add('hidden'), 3000);
+            try {
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-yellow-400";
+                msg.textContent = "Saving to Firestore...";
+
+                await addDoc(collection(db, "announcements"), {
+                    title,
+                    message,
+                    priority,
+                    imageUrl: imageUrl || null,
+                    createdAt: new Date()
+                });
+
+                msg.className = "text-center text-sm mt-4 text-green-400";
+                msg.textContent = `✅ Published!`;
+                document.getElementById('announcementForm').reset();
+                loadAnnouncements();
+                setTimeout(() => msg.classList.add('hidden'), 3000);
+            } catch (error) {
+                console.error("Announcement error:", error);
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.textContent = "❌ Failed: " + error.message;
+            }
         };
 
-        function loadAnnouncements() {
+        async function loadAnnouncements() {
             const list = document.getElementById('announcements-list');
-            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
-            if (all.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-500 text-sm py-6">No announcements yet.</p>';
-                return;
-            }
-            const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
-            list.innerHTML = '';
-            [...all].reverse().forEach(a => {
-                const card = document.createElement('div');
-                card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colors[a.priority]}`;
-                const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                card.innerHTML = `
-                    ${a.imageUrl ? `<img src="${a.imageUrl}" class="w-full h-24 object-cover">` : ''}
-                    <div class="p-3">
-                        <div class="flex justify-between items-start gap-2">
-                            <h3 class="font-bold text-white text-sm">${a.title}</h3>
-                            <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+            try {
+                const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(20));
+                const snap = await getDocs(q);
+                const anns = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                if (anns.length === 0) {
+                    list.innerHTML = '<p class="text-center text-gray-500 text-sm py-6">No announcements yet.</p>';
+                    return;
+                }
+                const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
+                list.innerHTML = '';
+                anns.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colors[a.priority] || 'border-blue-500'}`;
+                    const date = a.createdAt ? new Date(a.createdAt.seconds ? a.createdAt.seconds * 1000 : a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                    card.innerHTML = `
+                        ${a.imageUrl ? `<img src="${a.imageUrl}" class="w-full h-24 object-cover">` : ''}
+                        <div class="p-3">
+                            <div class="flex justify-between items-start gap-2">
+                                <h3 class="font-bold text-white text-sm">${a.title}</h3>
+                                <button onclick="deleteAnnouncement('${a.id}')" class="text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">${a.message}</p>
+                            <p class="text-xs text-gray-500 mt-2">${date}</p>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">${a.message}</p>
-                        <p class="text-xs text-gray-500 mt-2">${date}</p>
-                    </div>
-                `;
-                list.appendChild(card);
-            });
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Load announcements error:", error);
+                list.innerHTML = '<p class="text-center text-red-400 text-sm py-6">Error loading announcements.</p>';
+            }
         }
 
-        window.deleteAnnouncement = function(id) {
+        window.deleteAnnouncement = async function(id) {
             if (!confirm("Delete?")) return;
-            const all = JSON.parse(localStorage.getItem('announcements') || '[]').filter(a => a.id !== id);
-            localStorage.setItem('announcements', JSON.stringify(all));
-            loadAnnouncements();
+            try {
+                await deleteDoc(doc(db, "announcements", id));
+                loadAnnouncements();
+            } catch (error) {
+                alert("Failed to delete: " + error.message);
+            }
         };
 
         // ============================================================
@@ -1260,18 +1174,17 @@
         // ============================================================
         async function initializePanel() {
             await loadDashboardData();
+            await loadTournamentsFromFirestore();
             renderAdminTournaments();
             loadAnnouncements();
             loadSupportTickets();
 
-            // Auto-refresh every 10 seconds
             setInterval(loadDashboardData, 10000);
 
-            // Also refresh on visibility change (when admin comes back to tab)
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
-                    console.log("👁️ Tab focused — refreshing dashboard");
                     loadDashboardData();
+                    loadTournamentsFromFirestore().then(renderAdminTournaments);
                 }
             });
         }
