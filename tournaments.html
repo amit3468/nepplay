@@ -147,7 +147,7 @@
                 <i class="fa-solid fa-bolt mr-1"></i> Registration Open
             </div>
             <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Tournaments</h1>
-            <p class="text-sm sm:text-base text-gray-400">Pick ONE tournament. Free entry. Real prizes.</p>
+            <p class="text-sm sm:text-base text-gray-400">Join Free & Paid Tournaments. Real Prizes.</p>
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 mb-6">
@@ -276,11 +276,51 @@
                     <div class="validation-message" id="phoneMessage"></div>
                 </div>
 
+                <!-- PAYMENT SECTION (Only shows if entryFee > 0) -->
+                <div id="paymentSection" class="hidden">
+                    <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-5">
+                        <h3 class="text-sm font-bold text-green-400 mb-3"><i class="fa-solid fa-wallet mr-2"></i>Payment Required (Rs. <span id="regAmount">150</span>)</h3>
+                        
+                        <!-- QR Codes -->
+                        <div class="flex gap-4 justify-center mb-4 flex-wrap">
+                            <div class="text-center">
+                                <img src="esewa-qr.png" alt="eSewa QR" class="w-24 h-24 rounded-lg border-2 border-green-500/50 bg-white p-1 object-contain">
+                                <p class="text-xs text-gray-400 mt-1 font-bold text-green-400">eSewa</p>
+                                <p class="text-xs text-gray-300">9748835184</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="khalti-qr.png" alt="Khalti QR" class="w-24 h-24 rounded-lg border-2 border-purple-500/50 bg-white p-1 object-contain">
+                                <p class="text-xs text-gray-400 mt-1 font-bold text-purple-400">Khalti</p>
+                                <p class="text-xs text-gray-300">9766258368</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Other Payment Options -->
+                        <div class="bg-slate-800/50 rounded-lg p-3 mb-4 text-xs text-gray-300">
+                            <p class="mb-1"><i class="fa-solid fa-mobile-screen-button text-blue-400 mr-2"></i><strong>IME Pay:</strong> 9766258368</p>
+                            <p><i class="fa-solid fa-building-columns text-yellow-400 mr-2"></i><strong>Bank Transfer:</strong> Contact Admin for details</p>
+                        </div>
+
+                        <!-- Transaction ID -->
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Transaction ID <span class="text-red-400">*</span></label>
+                            <input type="text" id="regTransactionId" class="form-input w-full px-3 py-2 rounded-lg text-sm" placeholder="Enter eSewa/Khalti/IME Transaction ID">
+                        </div>
+
+                        <!-- Screenshot Upload -->
+                        <div class="mb-2">
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Upload Payment Screenshot <span class="text-red-400">*</span></label>
+                            <input type="file" id="regScreenshot" accept="image/*" class="form-input w-full px-3 py-2 rounded-lg text-sm text-gray-400">
+                            <p class="text-xs text-gray-500 mt-1">Max size: 2MB. Format: JPG, PNG</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TERMS -->
                 <label class="flex items-start gap-2 cursor-pointer mb-5">
                     <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded flex-shrink-0">
                     <span class="text-xs sm:text-sm text-gray-300">
-                        I agree to the tournament rules and confirm all information provided is accurate. I understand only ONE tournament per player is allowed.
+                        I agree to the tournament rules and confirm all information provided is accurate. I understand only ONE free and ONE paid tournament per player is allowed.
                     </span>
                 </label>
 
@@ -308,9 +348,9 @@
             <div class="bg-gray-800/50 rounded-lg p-4 text-sm text-left mb-6">
                 <p class="text-gray-300 mb-2"><strong class="text-white">What happens next:</strong></p>
                 <ul class="text-gray-400 space-y-1 text-xs">
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will review your registration</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will review your registration/payment</li>
                     <li><i class="fa-solid fa-check text-green-500 mr-2"></i>You'll get match details on WhatsApp</li>
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Join the match at 1:00 PM on 22 September</li>
+                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Join the match at the scheduled time</li>
                 </ul>
             </div>
             <div class="flex gap-3">
@@ -328,6 +368,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, doc, getDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -342,6 +383,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         console.log("🔥 Tournaments page initialized");
 
@@ -457,27 +499,39 @@
 
                 // Check if THIS user already registered for THIS tournament
                 const alreadyRegisteredForThis = userRegistrations.some(r => r.tournamentId === t.firestoreId);
-                // Check if THIS user registered for ANY tournament
-                const hasAnyRegistration = userRegistrations.length > 0;
-                const registeredTournamentName = hasAnyRegistration ? userRegistrations[0].tournamentName : '';
+                
+                // NEW LOGIC: Allow 1 Free AND 1 Paid
+                const hasFreeReg = userRegistrations.some(r => r.entryFee === 0);
+                const hasPaidReg = userRegistrations.some(r => r.entryFee > 0);
+                
+                let canRegister = true;
+                let blockReason = '';
+                
+                if (alreadyRegisteredForThis) {
+                    canRegister = false;
+                    blockReason = "You're Registered";
+                } else if (t.entryFee === 0 && hasFreeReg) {
+                    canRegister = false;
+                    blockReason = "Free Tournament Already Joined";
+                } else if (t.entryFee > 0 && hasPaidReg) {
+                    canRegister = false;
+                    blockReason = "Paid Tournament Already Joined";
+                } else if (isFull) {
+                    canRegister = false;
+                    blockReason = "Tournament Full";
+                }
 
                 // Button logic
                 let buttonHtml = '';
-                if (alreadyRegisteredForThis) {
-                    buttonHtml = `<button disabled class="w-full bg-blue-600/50 text-white font-bold py-3 rounded-lg cursor-not-allowed text-sm">
-                        <i class="fa-solid fa-check-circle mr-2"></i>You're Registered
-                    </button>`;
-                } else if (hasAnyRegistration) {
-                    buttonHtml = `<button disabled class="w-full bg-gray-600/50 text-gray-300 font-bold py-3 rounded-lg cursor-not-allowed text-sm" title="You already registered for ${registeredTournamentName}">
-                        <i class="fa-solid fa-lock mr-2"></i>Only 1 Tournament Allowed
-                    </button>`;
-                } else if (isFull) {
-                    buttonHtml = `<button disabled class="w-full bg-gray-600 text-white font-bold py-3 rounded-lg cursor-not-allowed text-sm">
-                        <i class="fa-solid fa-lock mr-2"></i>Tournament Full
+                if (!canRegister) {
+                    buttonHtml = `<button disabled class="w-full bg-gray-600/50 text-gray-300 font-bold py-3 rounded-lg cursor-not-allowed text-sm">
+                        <i class="fa-solid fa-lock mr-2"></i>${blockReason}
                     </button>`;
                 } else {
-                    buttonHtml = `<button onclick="openRegistrationModal('${t.firestoreId}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm">
-                        Register Now
+                    const btnColor = t.entryFee === 0 ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
+                    const btnText = t.entryFee === 0 ? 'Register Now (FREE)' : `Pay & Register (Rs. ${t.entryFee})`;
+                    buttonHtml = `<button onclick="openRegistrationModal('${t.firestoreId}')" class="w-full ${btnColor} text-white font-bold py-3 rounded-lg transition text-sm">
+                        ${btnText}
                     </button>`;
                 }
 
@@ -545,15 +599,27 @@
                 return;
             }
 
-            // Check rule: only one tournament allowed
-            if (userRegistrations.length > 0) {
-                alert(`⚠️ You have already registered for "${userRegistrations[0].tournamentName}".\n\nOnly ONE tournament per player is allowed.`);
-                return;
-            }
-
             const tournament = allTournaments.find(t => t.firestoreId === tournamentId);
             if (!tournament) {
                 alert("Tournament not found.");
+                return;
+            }
+
+            // NEW LOGIC: Allow 1 Free AND 1 Paid
+            const hasFreeReg = userRegistrations.some(r => r.entryFee === 0);
+            const hasPaidReg = userRegistrations.some(r => r.entryFee > 0);
+            const alreadyRegisteredForThis = userRegistrations.some(r => r.tournamentId === tournamentId);
+            
+            if (alreadyRegisteredForThis) {
+                alert("⚠️ You have already registered for this tournament.");
+                return;
+            }
+            if (tournament.entryFee === 0 && hasFreeReg) {
+                alert("⚠️ You have already joined a FREE tournament. You can only join 1 free tournament.");
+                return;
+            }
+            if (tournament.entryFee > 0 && hasPaidReg) {
+                alert("⚠️ You have already joined a PAID tournament. You can only join 1 paid tournament.");
                 return;
             }
 
@@ -573,6 +639,17 @@
             document.getElementById('regTournamentGame').value = tournament.game;
             document.getElementById('regTournamentMode_h').value = tournament.mode;
 
+            // Show/Hide Payment Section
+            const paymentSection = document.getElementById('paymentSection');
+            const regAmount = document.getElementById('regAmount');
+            
+            if (tournament.entryFee > 0) {
+                paymentSection.classList.remove('hidden');
+                regAmount.textContent = tournament.entryFee;
+            } else {
+                paymentSection.classList.add('hidden');
+            }
+
             // Clear form
             document.getElementById('regIgn').value = '';
             document.getElementById('regUid').value = '';
@@ -584,6 +661,10 @@
             document.getElementById('regSubmitBtn').disabled = false;
             document.getElementById('ignCount').textContent = '0/20';
             document.getElementById('teamCount').textContent = '0/20';
+            
+            // Clear payment fields
+            if (document.getElementById('regTransactionId')) document.getElementById('regTransactionId').value = '';
+            if (document.getElementById('regScreenshot')) document.getElementById('regScreenshot').value = '';
 
             // Clear validation UI
             ['regIgn', 'regUid', 'regPhone', 'regTeamName'].forEach(id => {
@@ -759,8 +840,12 @@
             const uid = document.getElementById('regUid').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const teamName = document.getElementById('regTeamName').value.trim();
+            
+            // Payment fields
+            const transactionId = document.getElementById('regTransactionId') ? document.getElementById('regTransactionId').value.trim() : '';
+            const screenshotFile = document.getElementById('regScreenshot') ? document.getElementById('regScreenshot').files[0] : null;
 
-            // Validate
+            // Validate basic fields
             let r = validateIGN(ign);
             if (!r.valid) { err.textContent = "❌ IGN: " + r.msg; err.classList.remove('hidden'); return; }
             r = validateUID(uid, game);
@@ -768,7 +853,21 @@
             r = validatePhone(phone);
             if (!r.valid) { err.textContent = "❌ Phone: " + r.msg; err.classList.remove('hidden'); return; }
 
-            // Team validation
+            // Validate Payment if entryFee > 0
+            if (tournament.entryFee > 0) {
+                if (!transactionId) {
+                    err.textContent = "❌ Please enter the Transaction ID.";
+                    err.classList.remove('hidden');
+                    return;
+                }
+                if (!screenshotFile) {
+                    err.textContent = "❌ Please upload the payment screenshot.";
+                    err.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Team validation (existing logic)
             const teammates = [];
             const modeLower = mode.toLowerCase();
             if (modeLower === 'duo' || modeLower === 'squad' || modeLower === '5v5') {
@@ -795,11 +894,21 @@
                 return;
             }
 
-            btn.innerHTML = '<span class="spinner"></span>Registering...';
+            btn.innerHTML = '<span class="spinner"></span>Processing...';
             btn.disabled = true;
             err.classList.add('hidden');
 
             try {
+                let screenshotUrl = null;
+
+                // Upload screenshot to Firebase Storage if paid
+                if (tournament.entryFee > 0 && screenshotFile) {
+                    const storageRef = ref(storage, `payment_screenshots/${currentUser.uid}_${Date.now()}_${screenshotFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, screenshotFile);
+                    screenshotUrl = await getDownloadURL(snapshot.ref);
+                    console.log("✅ Screenshot uploaded:", screenshotUrl);
+                }
+
                 // Create registration document
                 const registration = {
                     userId: currentUser.uid,
@@ -816,30 +925,29 @@
                     phone: phone,
                     teamName: (modeLower === 'solo' || modeLower === '1v1') ? null : teamName,
                     teammates: teammates,
-                    status: 'pending',
+                    status: tournament.entryFee === 0 ? 'confirmed' : 'pending',
                     paymentStatus: tournament.entryFee === 0 ? 'not-required' : 'pending',
+                    transactionId: transactionId || null,
+                    screenshotUrl: screenshotUrl,
                     registeredAt: new Date().toISOString()
                 };
 
                 await addDoc(collection(db, "registrations"), registration);
                 console.log("✅ Registration saved to Firestore");
 
-                // Update tournament's slotsFilled count
+                // Update tournament slots
                 try {
                     const tournamentRef = doc(db, "tournaments", tournamentId);
                     await updateDoc(tournamentRef, {
                         slotsFilled: (tournament.slotsFilled || 0) + 1
                     });
-                    console.log("✅ Tournament slot count updated");
                 } catch (e) {
                     console.warn("Could not update slot count:", e.message);
                 }
 
-                // Update local cache
                 await loadUserRegistrations(currentUser.uid);
                 await loadTournaments();
 
-                // Show success
                 closeRegistrationModal();
                 document.getElementById('successTournamentName').textContent = tournament.name;
                 document.getElementById('successModal').classList.remove('hidden');
