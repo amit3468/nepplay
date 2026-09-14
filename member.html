@@ -56,7 +56,6 @@
             position: relative;
             background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%);
             border-radius: 24px;
-            padding: 0;
             overflow: hidden;
             box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4);
             animation: launchSlide 0.7s ease-out;
@@ -91,31 +90,110 @@
             .launch-inner { padding: 40px 36px; }
         }
 
-        .launch-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid rgba(251, 191, 36, 0.5);
-            border-radius: 9999px;
-            padding: 6px 16px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #fbbf24;
+        /* GRAND OPENING BANNER */
+        .grand-opening-banner {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: grandPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes grandPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.9)); }
+        }
+        .grand-opening-title {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #ec4899 70%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            line-height: 1.1;
         }
-        .launch-tag .dot {
-            width: 8px; height: 8px;
-            background: #fbbf24;
-            border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
+        @media (min-width: 640px) {
+            .grand-opening-title { font-size: 3.5rem; letter-spacing: 6px; }
         }
-        @keyframes blink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6); }
-            50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+        @media (min-width: 1024px) {
+            .grand-opening-title { font-size: 4.5rem; letter-spacing: 8px; }
+        }
+        .grand-opening-subtitle {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        @media (min-width: 640px) {
+            .grand-opening-subtitle { font-size: 1rem; letter-spacing: 5px; }
+        }
+        .grand-opening-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .grand-opening-divider .line {
+            height: 2px;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+        }
+        @media (min-width: 640px) {
+            .grand-opening-divider .line { width: 100px; }
+        }
+        .grand-opening-divider .star {
+            color: #fbbf24;
+            font-size: 18px;
+            animation: starSpin 3s linear infinite;
+        }
+        @keyframes starSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            opacity: 0.8;
+            animation: confettiFall 5s linear infinite;
+            border-radius: 2px;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(700px) rotate(720deg); opacity: 0; }
         }
 
+        /* LIVE INDICATOR - GREEN for OPEN registration */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.25);
+            border: 1px solid rgba(34, 197, 94, 0.6);
+            border-radius: 9999px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #4ade80;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .live-indicator .pulse {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse-live 1.5s infinite;
+        }
+        @keyframes pulse-live {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); }
+            50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+        }
+
+        /* Countdown */
         .countdown-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -191,13 +269,15 @@
             font-weight: 700;
             color: white;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .game-chip:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(251, 191, 36, 0.3);
             transform: scale(1.05);
+            border-color: #fbbf24;
         }
 
-        /* ========== RULE NOTICE BOX ========== */
+        /* Rule notice */
         .rule-notice {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15));
             border: 2px solid rgba(239, 68, 68, 0.4);
@@ -237,22 +317,28 @@
             color: #4ade80;
         }
 
+        /* CTA Buttons */
         .launch-cta-primary {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: #000000;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #ffffff;
             font-weight: 800;
-            padding: 14px 26px;
-            border-radius: 12px;
+            padding: 16px 32px;
+            border-radius: 14px;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
-            font-size: 0.9rem;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5);
+            font-size: 1rem;
+            animation: ctaPulse 2s ease-in-out infinite;
+        }
+        @keyframes ctaPulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 10px 45px rgba(34, 197, 94, 0.8); }
         }
         .launch-cta-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(34, 197, 94, 0.7);
         }
         .launch-cta-secondary {
             background: rgba(255, 255, 255, 0.1);
@@ -260,8 +346,8 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
             color: white;
             font-weight: 700;
-            padding: 14px 26px;
-            border-radius: 12px;
+            padding: 16px 28px;
+            border-radius: 14px;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
@@ -294,47 +380,33 @@
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
         .date-badge .month {
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.7rem; font-weight: 800; letter-spacing: 2px;
+            text-transform: uppercase; color: rgba(255, 255, 255, 0.9);
         }
         .date-badge .day {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: white;
-            line-height: 1;
-            margin: 2px 0;
+            font-size: 2.5rem; font-weight: 900; color: white;
+            line-height: 1; margin: 2px 0;
         }
         .date-badge .year {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8);
         }
 
-        .live-indicator {
-            display: inline-flex;
+        /* Spots filled indicator */
+        .spots-indicator {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin: 16px 0;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.5);
-            border-radius: 9999px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
+            justify-content: center;
+            gap: 10px;
+        }
+        .spots-indicator .number {
+            font-size: 1.5rem;
+            font-weight: 900;
             color: #4ade80;
-        }
-        .live-indicator .pulse {
-            width: 6px;
-            height: 6px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse-live 1.5s infinite;
-        }
-        @keyframes pulse-live {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
         }
     </style>
 </head>
@@ -467,6 +539,24 @@
 
                 <div class="launch-inner">
                     
+                    <!-- GRAND OPENING BANNER -->
+                    <div class="grand-opening-banner">
+                        <h1 class="grand-opening-title">🎉 Grand Opening 🎉</h1>
+                        <p class="grand-opening-subtitle">NEPPLAY Esports Platform</p>
+                        <div class="grand-opening-divider">
+                            <div class="line"></div>
+                            <i class="fa-solid fa-star star"></i>
+                            <div class="line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Confetti -->
+                    <div class="confetti" style="left: 10%; background: #fbbf24; animation-delay: 0s;"></div>
+                    <div class="confetti" style="left: 25%; background: #ec4899; animation-delay: 0.7s;"></div>
+                    <div class="confetti" style="left: 45%; background: #3b82f6; animation-delay: 1.4s;"></div>
+                    <div class="confetti" style="left: 65%; background: #22c55e; animation-delay: 2.1s;"></div>
+                    <div class="confetti" style="left: 85%; background: #f97316; animation-delay: 0.4s;"></div>
+                    
                     <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
                         <div class="flex flex-col gap-3">
                             <div class="launch-tag">
@@ -475,7 +565,7 @@
                             </div>
                             <div class="live-indicator">
                                 <span class="pulse"></span>
-                                Registration Opens Soon
+                                ✅ REGISTRATION OPEN NOW
                             </div>
                         </div>
                         
@@ -496,10 +586,19 @@
                     </h2>
 
                     <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-4 max-w-3xl">
-                        We're launching <strong class="text-yellow-300">8 tournaments — one for every game</strong> — all at once on <strong class="text-white">22nd September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Free entry with real cash prizes! 🚀
+                        🎉 <strong class="text-green-300">Registration is now OPEN!</strong> We're launching <strong class="text-yellow-300">8 tournaments — one for every game</strong> on <strong class="text-white">22nd September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Free entry with real cash prizes — <strong class="text-yellow-300">claim your slot now before it fills up!</strong> 🚀
                     </p>
 
-                    <!-- ==================== RULE NOTICE ==================== -->
+                    <!-- SPOTS INDICATOR -->
+                    <div class="spots-indicator">
+                        <i class="fa-solid fa-users text-green-400 text-xl"></i>
+                        <div>
+                            <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Live Registration</p>
+                            <p class="text-sm text-white"><span class="number" id="total-registered">0</span> players registered so far</p>
+                        </div>
+                    </div>
+
+                    <!-- RULE NOTICE -->
                     <div id="rule-notice" class="rule-notice">
                         <div class="flex items-start gap-3">
                             <div class="rule-icon">
@@ -517,7 +616,7 @@
                         </div>
                     </div>
 
-                    <!-- COUNTDOWN TIMER -->
+                    <!-- COUNTDOWN -->
                     <div class="countdown-grid">
                         <div class="countdown-box">
                             <div class="countdown-number" id="cd-days">00</div>
@@ -568,35 +667,36 @@
                             <i class="fa-solid fa-gamepad mr-1"></i> 8 Games • 8 Tournaments • Pick One
                         </p>
                         <div class="flex flex-wrap gap-2">
-                            <span class="game-chip">🔥 Free Fire</span>
-                            <span class="game-chip">🎯 PUBG Mobile</span>
-                            <span class="game-chip">💣 COD Mobile</span>
-                            <span class="game-chip">⚽ eFootball</span>
-                            <span class="game-chip">🏏 eCricket</span>
-                            <span class="game-chip">⚔️ Valorant</span>
-                            <span class="game-chip">🎲 Ludo King</span>
-                            <span class="game-chip">♟️ Chess</span>
+                            <a href="tournaments.html" class="game-chip">🔥 Free Fire</a>
+                            <a href="tournaments.html" class="game-chip">🎯 PUBG Mobile</a>
+                            <a href="tournaments.html" class="game-chip">💣 COD Mobile</a>
+                            <a href="tournaments.html" class="game-chip">⚽ eFootball</a>
+                            <a href="tournaments.html" class="game-chip">🏏 eCricket</a>
+                            <a href="tournaments.html" class="game-chip">⚔️ Valorant</a>
+                            <a href="tournaments.html" class="game-chip">🎲 Ludo King</a>
+                            <a href="tournaments.html" class="game-chip">♟️ Chess</a>
                         </div>
                     </div>
 
                     <p class="text-white/85 text-sm mb-6 italic">
-                        💜 So keep in touch. Mark your calendar. Thank you — see you on 22nd September! 🚀
+                        💜 Register now to lock your slot. See you on 22nd September! 🚀
                     </p>
 
+                    <!-- CTAs -->
                     <div class="flex flex-wrap gap-3">
-                        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="launch-cta-primary">
-                            <i class="fa-brands fa-whatsapp text-lg"></i>
-                            Get Notified on WhatsApp
+                        <a href="tournaments.html" class="launch-cta-primary">
+                            <i class="fa-solid fa-gamepad text-xl"></i>
+                            Register for a Tournament
                         </a>
-                        <a href="tournaments.html" class="launch-cta-secondary">
-                            <i class="fa-solid fa-eye"></i>
-                            Preview Tournaments
+                        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="launch-cta-secondary">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            Join Community
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== STATS CARDS ==================== -->
+            <!-- STATS CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
@@ -615,7 +715,7 @@
                 </div>
             </div>
 
-            <!-- ==================== ANNOUNCEMENTS ==================== -->
+            <!-- ANNOUNCEMENTS -->
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
@@ -623,12 +723,12 @@
                 <div id="announcements-container" class="p-5 space-y-3">
                     <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
                         <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">Welcome! We're launching soon. Check back for updates.</span>
+                        <span class="text-sm text-gray-300">Welcome! Registration is OPEN. Check tournaments to claim your slot.</span>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== UPCOMING TOURNAMENTS ==================== -->
+            <!-- UPCOMING TOURNAMENTS -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -650,13 +750,13 @@
                     <i class="fa-solid fa-clipboard-list"></i>
                     <p class="text-base font-bold text-white mb-1">No upcoming tournaments</p>
                     <p class="text-sm mb-4">Register to see them here.</p>
-                    <a href="tournaments.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm">
-                        <i class="fa-solid fa-trophy mr-2"></i>Browse
+                    <a href="tournaments.html" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg text-sm">
+                        <i class="fa-solid fa-gamepad mr-2"></i>Register Now
                     </a>
                 </div>
             </div>
 
-            <!-- ==================== WINNINGS ==================== -->
+            <!-- WINNINGS -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings</h2>
@@ -702,19 +802,15 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // LAUNCH DATE: 22 September 2026, 1:00 PM NPT (UTC+5:45)
-        // UTC = NPT - 5:45 → 1:00 PM NPT = 7:15 AM UTC
+        // Launch: 22 Sept 2026, 1:00 PM NPT = 7:15 AM UTC
         const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 22, 7, 15, 0));
 
-        console.log("🔥 Member page initialized. Launch:", LAUNCH_DATE.toISOString());
+        console.log("🔥 Member page initialized");
 
         let currentUser = null;
         let currentUserProfile = null;
-        let userHasRegistered = false;
 
-        // ============================================================
-        // MOBILE NAV / SUPPORT
-        // ============================================================
+        // Mobile nav / support
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -738,50 +834,38 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
-        // ============================================================
-        // COUNTDOWN TIMER
-        // ============================================================
+        // COUNTDOWN
         function updateCountdown() {
             const now = new Date();
             const diff = LAUNCH_DATE - now;
-
             if (diff <= 0) {
-                // Launch has happened
                 document.getElementById('cd-days').textContent = '00';
                 document.getElementById('cd-hours').textContent = '00';
                 document.getElementById('cd-minutes').textContent = '00';
                 document.getElementById('cd-seconds').textContent = '00';
-                // Update the tag
                 const tag = document.querySelector('.launch-tag');
                 if (tag) tag.innerHTML = '<span class="dot"></span> LIVE NOW';
                 return;
             }
-
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
             document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
             document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
             document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
             document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
         }
-
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // ============================================================
-        // AUTH STATE
-        // ============================================================
+        // AUTH
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
                 currentUser = user;
-                console.log("✅ Logged in:", user.uid);
                 await showDashboard(user);
             } else {
-                console.log("ℹ️ No session");
                 showLoginScreen();
             }
         });
@@ -791,36 +875,29 @@
             document.getElementById('dashboard-container').classList.add('hidden');
         }
 
-        // ============================================================
-        // LOGIN
-        // ============================================================
         window.handleLogin = async function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const msgBox = document.getElementById('login-message');
             const btn = document.getElementById('login-btn');
-
             if (!email || !password) {
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.textContent = "Please enter email and password.";
                 return;
             }
-
             btn.innerHTML = '<span class="spinner"></span>Logging in...';
             btn.disabled = true;
             msgBox.classList.add('hidden');
-
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                console.log("✅ Login successful");
             } catch (error) {
                 let errorMsg = "Login failed. Please try again.";
                 if (['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found'].includes(error.code)) {
                     errorMsg = "Invalid email or password.";
                 } else if (error.code === 'auth/too-many-requests') {
-                    errorMsg = "Too many failed attempts. Try again later.";
+                    errorMsg = "Too many attempts. Try later.";
                 }
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
@@ -830,42 +907,33 @@
             }
         };
 
-        // ============================================================
-        // FORGOT PASSWORD
-        // ============================================================
         window.forgotPassword = async function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
             if (!email) {
-                alert("Enter your email above first, then click Forgot Password.");
+                alert("Enter your email above first.");
                 return;
             }
             try {
                 await sendPasswordResetEmail(auth, email);
                 alert("📧 Password reset email sent to " + email);
             } catch (error) {
-                alert("Could not send reset email. Check the email and try again.");
+                alert("Could not send reset email.");
             }
         };
 
-        // ============================================================
-        // SHOW DASHBOARD
-        // ============================================================
         async function showDashboard(user) {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
 
-            // Load user profile
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     currentUserProfile = userDoc.data();
-                    console.log("✅ Profile loaded:", currentUserProfile);
                 } else {
                     currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
                 }
             } catch (error) {
-                console.error("Profile error:", error);
                 currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
             }
 
@@ -876,33 +944,28 @@
             document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
 
-            // Load data
             await Promise.all([
                 checkUserRegistration(user.uid),
                 loadPayouts(user.uid),
                 loadAnnouncements(),
-                loadActiveTournaments()
+                loadActiveTournaments(),
+                loadTotalRegistered()
             ]);
         }
 
-        // ============================================================
-        // CHECK IF USER ALREADY REGISTERED FOR A TOURNAMENT
-        // ============================================================
+        // CHECK REGISTRATION
         async function checkUserRegistration(uid) {
             try {
                 const q = query(collection(db, "registrations"), where("userId", "==", uid));
                 const snapshot = await getDocs(q);
                 const regs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                userHasRegistered = regs.length > 0;
-
-                // Update rule notice
                 const ruleBox = document.getElementById('rule-notice');
                 const ruleStatus = document.getElementById('rule-status');
                 const ruleIcon = ruleBox.querySelector('.rule-icon');
                 const ruleTitle = ruleBox.querySelector('.text-white.font-bold');
 
-                if (userHasRegistered) {
+                if (regs.length > 0) {
                     ruleBox.classList.add('rule-ok');
                     ruleIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
                     ruleTitle.innerHTML = '✅ Registration Locked';
@@ -911,16 +974,14 @@
                     ruleStatus.innerHTML = `You are already registered for <strong>${regs[0].tournamentName || 'one tournament'}</strong>. You cannot register for another tournament.`;
                 }
 
-                // Update matches played
-                const uniqueTournaments = new Set(regs.map(r => r.tournamentName));
-                document.getElementById('matches-played').textContent = uniqueTournaments.size;
+                const uniqueT = new Set(regs.map(r => r.tournamentName));
+                document.getElementById('matches-played').textContent = uniqueT.size;
 
                 const mSub = document.getElementById('matches-subtitle');
-                if (uniqueTournaments.size > 0) {
-                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueTournaments.size} tournament(s)`;
+                if (uniqueT.size > 0) {
+                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueT.size} tournament(s)`;
                     mSub.className = "text-xs text-blue-400 mt-2";
                 }
-
                 renderUpcoming(regs);
             } catch (error) {
                 console.error("Registrations error:", error);
@@ -932,7 +993,6 @@
             const tbody = document.getElementById('upcoming-table-body');
             const empty = document.getElementById('empty-upcoming');
             const tableWrap = document.getElementById('upcoming-table-wrapper');
-
             if (regs.length === 0) {
                 tableWrap.style.display = 'none';
                 empty.classList.remove('hidden');
@@ -941,7 +1001,6 @@
             tableWrap.style.display = 'block';
             empty.classList.add('hidden');
             tbody.innerHTML = '';
-
             const seen = new Set();
             [...regs].reverse().forEach(r => {
                 if (seen.has(r.tournamentName)) return;
@@ -959,19 +1018,15 @@
             });
         }
 
-        // ============================================================
-        // LOAD PAYOUTS
-        // ============================================================
+        // PAYOUTS
         async function loadPayouts(uid) {
             try {
                 const q = query(collection(db, "payouts"), where("userId", "==", uid));
                 const snapshot = await getDocs(q);
                 const payouts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-
                 const paidWins = payouts.filter(p => p.status === 'paid');
                 const totalEarn = paidWins.reduce((sum, p) => sum + (p.prize || 0), 0);
                 document.getElementById('total-earnings').textContent = totalEarn.toLocaleString();
-
                 const eSub = document.getElementById('earnings-subtitle');
                 if (totalEarn > 0) {
                     eSub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize(s) won`;
@@ -980,10 +1035,8 @@
                     eSub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${payouts.length} pending`;
                     eSub.className = "text-xs text-yellow-400 mt-2";
                 }
-
                 renderHistory(payouts);
             } catch (error) {
-                console.error("Payouts error:", error);
                 renderHistory([]);
             }
         }
@@ -992,7 +1045,6 @@
             const tbody = document.getElementById('history-table-body');
             const empty = document.getElementById('empty-history');
             const tableWrap = document.getElementById('history-table-wrapper');
-
             if (pays.length === 0) {
                 tableWrap.style.display = 'none';
                 empty.classList.remove('hidden');
@@ -1001,7 +1053,6 @@
             tableWrap.style.display = 'block';
             empty.classList.add('hidden');
             tbody.innerHTML = '';
-
             [...pays].reverse().forEach(p => {
                 const status = p.status === 'paid' ? '<span class="status-badge status-paid">Paid</span>' : '<span class="status-badge status-pending">Pending</span>';
                 const row = document.createElement('tr');
@@ -1016,24 +1067,19 @@
             });
         }
 
-        // ============================================================
-        // LOAD ANNOUNCEMENTS
-        // ============================================================
+        // ANNOUNCEMENTS
         async function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             try {
                 const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(5));
                 const snapshot = await getDocs(q);
                 const announcements = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-
                 if (announcements.length === 0) {
-                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Welcome! We're launching on 22 September 2026. Check back for updates.</span></div>`;
+                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Registration is OPEN! Head to Tournaments to claim your slot for 22 September.</span></div>`;
                     return;
                 }
-
                 const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
                 const icons = { normal: 'fa-info-circle text-blue-400', high: 'fa-exclamation-triangle text-yellow-400', urgent: 'fa-exclamation-circle text-red-400' };
-
                 container.innerHTML = '';
                 announcements.forEach(a => {
                     const card = document.createElement('div');
@@ -1061,22 +1107,27 @@
             }
         }
 
-        // ============================================================
-        // LOAD ACTIVE TOURNAMENTS
-        // ============================================================
+        // ACTIVE TOURNAMENTS
         async function loadActiveTournaments() {
             try {
                 const snapshot = await getDocs(collection(db, "tournaments"));
                 document.getElementById('active-tournaments').textContent = snapshot.size;
             } catch (error) {
-                console.error("Tournaments error:", error);
                 document.getElementById('active-tournaments').textContent = '0';
             }
         }
 
-        // ============================================================
+        // TOTAL REGISTERED COUNT
+        async function loadTotalRegistered() {
+            try {
+                const snapshot = await getDocs(collection(db, "registrations"));
+                document.getElementById('total-registered').textContent = snapshot.size;
+            } catch (error) {
+                document.getElementById('total-registered').textContent = '0';
+            }
+        }
+
         // LOGOUT
-        // ============================================================
         window.logout = async function() {
             if (!confirm("Log out from your account?")) return;
             try {
@@ -1088,9 +1139,7 @@
             }
         };
 
-        // ============================================================
         // PROFILE DROPDOWN
-        // ============================================================
         window.toggleProfileDropdown = function() {
             document.getElementById('profile-dropdown').classList.toggle('open');
         };
