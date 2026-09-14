@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teams - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Teams - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .team-card { transition: transform 0.2s, box-shadow 0.2s; }
@@ -15,94 +17,70 @@
         .modal-overlay { background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
         .role-captain { background-color: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
         .role-member { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
-        
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
-        .support-btn {
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 26px;
-            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer; transition: all 0.3s;
-            animation: pulse-support 2s infinite;
-        }
-        .support-btn:hover { transform: scale(1.1); box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6); }
-        @keyframes pulse-support {
-            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
-            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
-        }
-        .support-menu {
-            display: none; position: absolute; bottom: 75px; left: 0; width: 260px;
-            background: #1e293b; border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
+        .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
+        .support-btn:hover { transform: scale(1.1); }
+        @keyframes pulse-support { 0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); } 50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); } }
+        .support-menu { display: none; position: absolute; bottom: 68px; left: 0; width: 240px; max-width: calc(100vw - 48px); background: #1e293b; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); overflow: hidden; }
         .support-menu.open { display: block; }
-        .support-menu-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 14px 18px; color: #e2e8f0;
-            text-decoration: none; transition: all 0.2s;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .support-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e2e8f0; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
+
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
+
+        .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 40px 20px; text-align: center; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support Button -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
                 <p class="text-white font-bold text-sm">Need Help? 🆘</p>
-                <p class="text-xs text-gray-400">Choose how to reach us</p>
             </div>
-            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
-                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-green-400 text-lg"></i></div>
-                <div><p class="text-sm font-bold">Chat Privately</p><p class="text-xs text-gray-500">1-on-1 with admin</p></div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20have%20a%20question." target="_blank" class="support-menu-item wa">
+                <div class="w-9 h-9 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-whatsapp text-green-400"></i></div>
+                <div><p class="text-sm font-bold">Chat Privately</p></div>
             </a>
             <a href="support.html" class="support-menu-item">
-                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center"><i class="fa-solid fa-headset text-pink-400"></i></div>
-                <div><p class="text-sm font-bold">Support Page</p><p class="text-xs text-gray-500">Full help center</p></div>
+                <div class="w-9 h-9 rounded-full bg-pink-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-pink-400"></i></div>
+                <div><p class="text-sm font-bold">Support Page</p></div>
             </a>
             <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
-                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"><i class="fa-solid fa-users text-purple-400"></i></div>
-                <div><p class="text-sm font-bold">Join Community</p><p class="text-xs text-gray-500">Public group chat</p></div>
+                <div class="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-users text-purple-400"></i></div>
+                <div><p class="text-sm font-bold">Join Community</p></div>
             </a>
         </div>
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
-            </div>
+    <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
+        <div class="flex items-center gap-3 min-w-0">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+            <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
             <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
+                    <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
                     <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                 </button>
                 <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
                     <div class="p-3 border-b border-gray-700">
-                        <p class="text-xs text-gray-500">Signed in as</p>
+                        <p class="text-xs text-gray-500">Signed in</p>
                         <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
                     </div>
                     <div class="py-1">
-                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Dashboard</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -111,112 +89,129 @@
                 </div>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="teams.html" class="text-sm text-blue-400 font-bold">Teams</a>
-            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
-            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+            <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+        </button>
+        <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-blue-400 font-bold px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
         </div>
     </nav>
 
-    <main class="flex-grow container mx-auto p-6">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-users-rays text-blue-500 mr-3"></i>Teams</h1>
-            <p class="text-gray-400">Create a team, invite friends, and dominate together.</p>
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="inline-block bg-purple-500/20 border border-purple-500/40 rounded-full px-3 py-1 text-xs font-bold text-purple-400 mb-3">
+                <i class="fa-solid fa-users mr-1"></i> Launching Soon
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-users-rays text-blue-500 mr-2"></i>Teams</h1>
+            <p class="text-sm sm:text-base text-gray-400">Create teams and compete together. Feature opens with our first tournament.</p>
         </div>
 
-        <div class="flex justify-center gap-3 mb-8">
-            <button id="tabMyTeams" class="tab-btn active px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="showView('my', this)"><i class="fa-solid fa-user-group mr-1"></i> My Teams</button>
-            <button id="tabBrowse" class="tab-btn px-6 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="showView('browse', this)"><i class="fa-solid fa-globe mr-1"></i> Browse Teams</button>
-            <button onclick="openCreateModal()" class="px-6 py-2 rounded-full bg-green-600 hover:bg-green-700 text-sm font-semibold text-white transition"><i class="fa-solid fa-plus mr-1"></i> Create Team</button>
+        <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <button id="tabMyTeams" class="tab-btn active px-4 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="showView('my', this)">My Teams</button>
+            <button id="tabBrowse" class="tab-btn px-4 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="showView('browse', this)">Browse</button>
+            <button onclick="openCreateModal()" class="px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-xs sm:text-sm font-semibold text-white transition"><i class="fa-solid fa-plus mr-1"></i> Create</button>
         </div>
 
-        <div id="empty-my-teams" class="hidden text-center py-20">
-            <i class="fa-solid fa-users-slash text-6xl text-gray-600 mb-4"></i>
-            <h2 class="text-xl font-bold text-white mb-2">You're not in any team yet</h2>
-            <p class="text-gray-400 mb-6">Create your own team or browse existing ones to join.</p>
-            <button onclick="openCreateModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition"><i class="fa-solid fa-plus mr-2"></i> Create My Team</button>
+        <div id="empty-teams" class="empty-state-box max-w-2xl mx-auto">
+            <div class="text-5xl sm:text-6xl mb-4">👥</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Teams Yet</h2>
+            <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Team creation will be fully enabled when we launch our first tournament. Register your account now to be ready.</p>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="register.html" class="btn-primary text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                    <i class="fa-solid fa-user-plus"></i> Register Early
+                </a>
+                <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                    <i class="fa-brands fa-whatsapp"></i> Get Notified
+                </a>
+            </div>
         </div>
 
-        <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="teams-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6"></div>
     </main>
 
-    <!-- Create Team Modal -->
-    <div id="createModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
-        <div class="glass-panel rounded-xl w-full max-w-md p-6">
+    <div id="createModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="glass-panel rounded-xl w-full max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Team</h2>
-                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h2 class="text-lg sm:text-xl font-bold text-white"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create Team</h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <form id="createTeamForm" onsubmit="createTeam(event)">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Team Name *</label>
-                    <input type="text" id="teamName" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" required>
+                    <input type="text" id="teamName" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" required maxlength="20">
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Tagline</label>
                     <input type="text" id="teamTagline" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" maxlength="50">
                 </div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-2 gap-3 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
-                        <select id="teamGame" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" required>
+                        <select id="teamGame" class="w-full px-3 py-3 rounded-lg bg-gray-800 text-white border border-gray-600" required>
                             <option value="">Select</option>
                             <option value="freefire">Free Fire</option>
-                            <option value="pubg">PUBG Mobile</option>
+                            <option value="pubg">PUBG</option>
+                            <option value="cod">COD</option>
                             <option value="valorant">Valorant</option>
-                            <option value="cod">COD Mobile</option>
+                            <option value="efootball">eFootball</option>
+                            <option value="ecricket">eCricket</option>
+                            <option value="ludo">Ludo</option>
+                            <option value="chess">Chess</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Max Members *</label>
-                        <input type="number" id="teamMax" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" min="2" max="10" value="4" required>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Max *</label>
+                        <input type="number" id="teamMax" class="w-full px-3 py-3 rounded-lg bg-gray-800 text-white border border-gray-600" min="2" max="10" value="4" required>
                     </div>
                 </div>
-                <div class="mb-6">
+                <div class="mb-5">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" id="teamPublic" class="w-4 h-4 rounded">
                         <span class="text-sm text-gray-300">Make team public</span>
                     </label>
                 </div>
-                <div class="flex gap-3">
-                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition"><i class="fa-solid fa-check mr-2"></i>Create Team</button>
-                    <button type="button" onclick="closeCreateModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-sm">Create</button>
+                    <button type="button" onclick="closeCreateModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-5 rounded-lg text-sm">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Team Details Modal -->
-    <div id="detailsModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4">
-        <div class="glass-panel rounded-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-white" id="detailsTitle">Team Details</h2>
-                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <footer class="glass-panel w-full p-5 sm:p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
             </div>
-            <div id="detailsContent"></div>
+            <div class="text-xs sm:text-sm text-gray-500">© 2026 Nepal Gaming. All rights reserved.</div>
         </div>
-    </div>
+    </footer>
 
     <script>
-        console.log("--- TEAMS PAGE LOADED (with support) ---");
-
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
         function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('supportMenu');
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
-
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (user && user.username) {
                 document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('user-name').textContent = user.username;
                 document.getElementById('dropdown-username').textContent = user.email || user.username;
                 document.getElementById('nav-login-btn').classList.add('hidden');
             } else {
@@ -224,7 +219,6 @@
                 document.getElementById('nav-login-btn').classList.remove('hidden');
             }
         }
-
         function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
@@ -233,12 +227,7 @@
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
 
-        const allTeams = [
-            { id: 1, name: "Kathmandu Kings", tagline: "Born to win", game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", isPublic: true, maxMembers: 4, earnings: 45000, wins: 12, createdBy: "rahul_sharma", members: [ { name: "Rahul Sharma", role: "Captain" }, { name: "Sujal Thapa", role: "Member" }, { name: "Bibek Gurung", role: "Member" } ] },
-            { id: 2, name: "Pokhara Warriors", tagline: "Fear the warriors", game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", isPublic: true, maxMembers: 4, earnings: 32000, wins: 9, createdBy: "sujal_thapa", members: [ { name: "Sujal Thapa", role: "Captain" }, { name: "Anish Rai", role: "Member" } ] },
-            { id: 3, name: "Everest Esports", tagline: "Reach the peak", game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", isPublic: false, maxMembers: 5, earnings: 78000, wins: 21, createdBy: "bibek_gurung", members: [ { name: "Bibek Gurung", role: "Captain" } ] },
-            { id: 4, name: "Lalitpur Legends", tagline: "Legends never die", game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", isPublic: true, maxMembers: 4, earnings: 18500, wins: 6, createdBy: "anish_rai", members: [ { name: "Anish Rai", role: "Captain" } ] }
-        ];
+        const allTeams = []; // Empty for fresh start
 
         function loadAllTeams() {
             const custom = JSON.parse(localStorage.getItem('customTeams') || '[]');
@@ -256,61 +245,57 @@
 
         function renderTeams() {
             const grid = document.getElementById('teams-grid');
-            const emptyState = document.getElementById('empty-my-teams');
+            const emptyBox = document.getElementById('empty-teams');
             const teams = loadAllTeams();
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-            let displayTeams = teams;
+            let display = teams;
             if (currentView === 'my') {
-                if (!currentUser) displayTeams = [];
-                else displayTeams = teams.filter(t => t.createdBy === currentUser.username);
+                if (!currentUser) display = [];
+                else display = teams.filter(t => t.createdBy === currentUser.username);
             } else {
-                displayTeams = teams.filter(t => t.isPublic);
+                display = teams.filter(t => t.isPublic);
             }
 
             grid.innerHTML = '';
-            if (displayTeams.length === 0) {
-                emptyState.classList.remove('hidden');
+            if (display.length === 0) {
+                emptyBox.classList.remove('hidden');
                 grid.classList.add('hidden');
-                if (currentView === 'browse') {
-                    emptyState.innerHTML = `<i class="fa-solid fa-globe text-6xl text-gray-600 mb-4"></i><h2 class="text-xl font-bold text-white mb-2">No public teams available</h2><p class="text-gray-400 mb-6">Check back later or create your own team!</p>`;
-                }
                 return;
             }
-            emptyState.classList.add('hidden');
+            emptyBox.classList.add('hidden');
             grid.classList.remove('hidden');
 
-            displayTeams.forEach(team => {
-                const fillPercent = (team.members.length / team.maxMembers) * 100;
+            display.forEach(team => {
+                const fill = (team.members.length / team.maxMembers) * 100;
                 const isFull = team.members.length >= team.maxMembers;
                 const isOwner = currentUser && team.createdBy === currentUser.username;
-
                 const card = document.createElement('div');
                 card.className = "team-card glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
                 card.innerHTML = `
-                    <div class="bg-gradient-to-br ${team.color} p-5 relative">
-                        <div class="flex justify-between items-start">
-                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1"><i class="fa-solid ${team.icon}"></i> ${team.gameName}</div>
-                            ${team.isPublic ? '<div class="bg-green-500/30 rounded-full px-3 py-1 text-xs font-bold text-green-300 border border-green-500">Public</div>' : '<div class="bg-gray-500/30 rounded-full px-3 py-1 text-xs font-bold text-gray-300 border border-gray-500">Private</div>'}
+                    <div class="bg-gradient-to-br ${team.color} p-5">
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1 truncate"><i class="fa-solid ${team.icon}"></i> ${team.gameName}</div>
+                            ${team.isPublic ? '<div class="bg-green-500/30 rounded-full px-2 py-1 text-xs font-bold text-green-300 border border-green-500 flex-shrink-0">Public</div>' : '<div class="bg-gray-500/30 rounded-full px-2 py-1 text-xs font-bold text-gray-300 border border-gray-500 flex-shrink-0">Private</div>'}
                         </div>
-                        <div class="flex items-center gap-3 mt-5">
-                            <div class="w-14 h-14 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30"><span class="text-2xl font-bold text-white">${team.name.charAt(0)}</span></div>
-                            <div><h3 class="text-lg font-bold text-white drop-shadow">${team.name}</h3><p class="text-xs text-white/80 italic">"${team.tagline}"</p></div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center border-2 border-white/30 flex-shrink-0"><span class="text-2xl font-bold text-white">${team.name.charAt(0)}</span></div>
+                            <div class="min-w-0"><h3 class="text-base font-bold text-white truncate">${team.name}</h3><p class="text-xs text-white/80 italic truncate">"${team.tagline}"</p></div>
                         </div>
                     </div>
-                    <div class="p-5 flex-grow">
+                    <div class="p-4 flex-grow">
                         <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
                             <div class="bg-gray-800/50 rounded-lg p-3"><p class="text-xs text-gray-400 mb-1">Earnings</p><p class="text-green-400 font-bold">Rs. ${team.earnings.toLocaleString()}</p></div>
                             <div class="bg-gray-800/50 rounded-lg p-3"><p class="text-xs text-gray-400 mb-1">Wins</p><p class="text-yellow-400 font-bold">${team.wins}</p></div>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Members</span><span>${team.members.length}/${team.maxMembers}</span></div>
-                            <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden"><div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: ${fillPercent}%"></div></div>
+                            <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden"><div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: ${fill}%"></div></div>
                         </div>
                     </div>
-                    <div class="p-5 pt-0 flex gap-2">
-                        <button onclick="viewTeamDetails(${team.id})" class="flex-grow glass-panel hover:bg-gray-800/50 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fa-solid fa-eye mr-1"></i> View</button>
-                        ${isOwner ? '<button onclick="manageTeam(' + team.id + ')" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fa-solid fa-gear mr-1"></i> Manage</button>' : (isFull ? '<button disabled class="flex-grow bg-gray-600 text-white font-bold py-2 rounded-lg text-sm cursor-not-allowed"><i class="fa-solid fa-lock mr-1"></i> Full</button>' : '<button onclick="joinTeam(' + team.id + ')" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fa-solid fa-plus mr-1"></i> Join</button>')}
+                    <div class="p-4 pt-0 flex gap-2">
+                        <button onclick="viewTeamDetails(${team.id})" class="flex-grow glass-panel hover:bg-gray-800/50 text-white font-bold py-2 rounded-lg text-sm">View</button>
+                        ${isOwner ? '<button onclick="manageTeam()" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm">Manage</button>' : (isFull ? '<button disabled class="flex-grow bg-gray-600 text-white font-bold py-2 rounded-lg text-sm">Full</button>' : '<button onclick="joinTeam(' + team.id + ')" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm">Join</button>')}
                     </div>
                 `;
                 grid.appendChild(card);
@@ -319,106 +304,65 @@
 
         function openCreateModal() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) {
-                alert("You need to login first to create a team.");
-                window.location.href = 'member.html';
-                return;
-            }
+            if (!user) { alert("Login first."); window.location.href = 'member.html'; return; }
             document.getElementById('createModal').classList.remove('hidden');
         }
-
-        function closeCreateModal() {
-            document.getElementById('createModal').classList.add('hidden');
-            document.getElementById('createTeamForm').reset();
-        }
+        function closeCreateModal() { document.getElementById('createModal').classList.add('hidden'); document.getElementById('createTeamForm').reset(); }
 
         function createTeam(event) {
             event.preventDefault();
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const user = JSON.parse(localStorage.getItem('currentUser'));
             const name = document.getElementById('teamName').value.trim();
             const tagline = document.getElementById('teamTagline').value.trim() || "Ready to battle!";
             const game = document.getElementById('teamGame').value;
             const max = parseInt(document.getElementById('teamMax').value);
             const isPublic = document.getElementById('teamPublic').checked;
 
-            if (!name || !game) { alert("Please fill in all required fields."); return; }
-
             const gameMap = {
                 freefire: { name: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600" },
                 pubg: { name: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
                 valorant: { name: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
-                cod: { name: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" }
+                cod: { name: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" },
+                efootball: { name: "eFootball", icon: "fa-futbol", color: "from-blue-500 to-cyan-600" },
+                ecricket: { name: "eCricket", icon: "fa-baseball", color: "from-green-600 to-emerald-800" },
+                ludo: { name: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600" },
+                chess: { name: "Chess", icon: "fa-chess", color: "from-gray-500 to-slate-700" }
             };
 
+            const gm = gameMap[game] || { name: game, icon: "fa-gamepad", color: "from-gray-500 to-gray-700" };
             const newTeam = {
                 id: Date.now(), name, tagline, game,
-                gameName: gameMap[game].name, icon: gameMap[game].icon, color: gameMap[game].color,
+                gameName: gm.name, icon: gm.icon, color: gm.color,
                 isPublic, maxMembers: max, earnings: 0, wins: 0,
-                createdBy: currentUser.username,
-                members: [{ name: currentUser.username, role: "Captain" }]
+                createdBy: user.username,
+                members: [{ name: user.username, role: "Captain" }]
             };
-
-            const existing = JSON.parse(localStorage.getItem('customTeams') || '[]');
-            existing.push(newTeam);
-            localStorage.setItem('customTeams', JSON.stringify(existing));
-
+            const ex = JSON.parse(localStorage.getItem('customTeams') || '[]');
+            ex.push(newTeam);
+            localStorage.setItem('customTeams', JSON.stringify(ex));
             closeCreateModal();
-            alert(`✅ Team "${name}" created successfully!`);
+            alert(`✅ Team "${name}" created!`);
             document.getElementById('tabMyTeams').click();
         }
 
-        function viewTeamDetails(teamId) {
-            const teams = loadAllTeams();
-            const team = teams.find(t => t.id === teamId);
+        function viewTeamDetails(id) {
+            const team = loadAllTeams().find(t => t.id === id);
             if (!team) return;
-
-            document.getElementById('detailsTitle').innerHTML = `<i class="fa-solid ${team.icon} mr-2"></i>${team.name}`;
-            
-            const membersHtml = team.members.map(m => `
-                <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg mb-2">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">${m.name.charAt(0).toUpperCase()}</div>
-                    <div class="flex-grow">
-                        <p class="font-bold text-white text-sm">${m.name}</p>
-                        <span class="text-xs px-2 py-0.5 rounded-full ${m.role === 'Captain' ? 'role-captain' : 'role-member'}">${m.role === 'Captain' ? '<i class="fa-solid fa-crown mr-1"></i>' : ''}${m.role}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('detailsContent').innerHTML = `
-                <div class="bg-gradient-to-br ${team.color} rounded-lg p-4 mb-4 text-center">
-                    <div class="w-20 h-20 mx-auto rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30 mb-2"><span class="text-3xl font-bold text-white">${team.name.charAt(0)}</span></div>
-                    <p class="text-white/80 text-sm italic">"${team.tagline}"</p>
-                </div>
-                <div class="grid grid-cols-3 gap-3 mb-4 text-center">
-                    <div class="bg-gray-800/50 rounded-lg p-3"><p class="text-xs text-gray-400">Earnings</p><p class="text-green-400 font-bold text-sm">Rs. ${team.earnings.toLocaleString()}</p></div>
-                    <div class="bg-gray-800/50 rounded-lg p-3"><p class="text-xs text-gray-400">Wins</p><p class="text-yellow-400 font-bold text-sm">${team.wins}</p></div>
-                    <div class="bg-gray-800/50 rounded-lg p-3"><p class="text-xs text-gray-400">Members</p><p class="text-blue-400 font-bold text-sm">${team.members.length}/${team.maxMembers}</p></div>
-                </div>
-                <h3 class="font-bold text-white mb-3"><i class="fa-solid fa-users mr-2"></i>Team Members</h3>
-                ${membersHtml}
-                <button onclick="closeDetailsModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition text-sm mt-4">Close</button>
-            `;
-            document.getElementById('detailsModal').classList.remove('hidden');
+            const membersHtml = team.members.map(m => `<div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg mb-2"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">${m.name.charAt(0).toUpperCase()}</div><div class="flex-grow min-w-0"><p class="font-bold text-white text-sm truncate">${m.name}</p><span class="text-xs px-2 py-0.5 rounded-full ${m.role === 'Captain' ? 'role-captain' : 'role-member'}">${m.role}</span></div></div>`).join('');
+            alert(`Team: ${team.name}\n\nMembers (${team.members.length}/${team.maxMembers}):\n${team.members.map(m => `• ${m.name} (${m.role})`).join('\n')}`);
         }
 
-        function closeDetailsModal() { document.getElementById('detailsModal').classList.add('hidden'); }
-
-        function joinTeam(teamId) {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (!currentUser) { alert("Please login first."); window.location.href = 'member.html'; return; }
-            const team = loadAllTeams().find(t => t.id === teamId);
+        function joinTeam(id) {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) { alert("Login first."); window.location.href = 'member.html'; return; }
+            const team = loadAllTeams().find(t => t.id === id);
             if (team) alert(`✅ Join request sent to "${team.name}"!`);
         }
-
-        function manageTeam(teamId) { alert("Team management panel coming soon!"); }
+        function manageTeam() { alert("Team management coming soon!"); }
 
         document.getElementById('createModal').addEventListener('click', function(e) { if (e.target === this) closeCreateModal(); });
-        document.getElementById('detailsModal').addEventListener('click', function(e) { if (e.target === this) closeDetailsModal(); });
 
-        window.onload = function() {
-            checkUserStatus();
-            renderTeams();
-        };
+        window.onload = function() { checkUserStatus(); renderTeams(); };
     </script>
 </body>
 </html>
