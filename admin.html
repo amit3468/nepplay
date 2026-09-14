@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
+    <title>Admin Panel - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .form-input { background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155; transition: all 0.2s; }
@@ -32,13 +35,9 @@
         .period-tab:hover:not(.active) { border-color: #3b82f6; }
         
         #loginScreen {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
             padding: 20px;
         }
         
@@ -55,89 +54,98 @@
         .detail-label { color: #94a3b8; font-size: 0.75rem; }
         .detail-value { color: #e2e8f0; font-weight: 600; font-size: 0.8rem; }
 
-        /* Calculator Styles */
         .calc-result-card {
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15));
-            border: 2px solid;
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s;
+            border: 2px solid; border-radius: 12px; padding: 16px; transition: all 0.3s;
         }
-        .calc-result-card.profit {
-            border-color: #22c55e;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1));
-        }
-        .calc-result-card.prizepool {
-            border-color: #3b82f6;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
-        }
-        .calc-result-card.total {
-            border-color: #facc15;
-            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.1));
-        }
+        .calc-result-card.profit { border-color: #22c55e; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1)); }
+        .calc-result-card.prizepool { border-color: #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)); }
+        .calc-result-card.total { border-color: #facc15; background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.1)); }
         .prize-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 14px;
-            background: rgba(30, 41, 59, 0.6);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 3px solid #64748b;
-            transition: all 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background: rgba(30, 41, 59, 0.6);
+            border-radius: 8px; margin-bottom: 8px;
+            border-left: 3px solid #64748b; transition: all 0.2s;
         }
-        .prize-row:hover {
-            background: rgba(30, 41, 59, 0.9);
-            transform: translateX(4px);
-        }
+        .prize-row:hover { background: rgba(30, 41, 59, 0.9); transform: translateX(4px); }
         .prize-row.rank-1 { border-left-color: #facc15; }
         .prize-row.rank-2 { border-left-color: #94a3b8; }
         .prize-row.rank-3 { border-left-color: #ea580c; }
         .prize-row.kills { border-left-color: #ec4899; }
-        .preset-btn {
-            padding: 6px 14px;
-            border-radius: 9999px;
-            border: 1px solid #334155;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            color: #94a3b8;
-        }
-        .preset-btn:hover {
-            border-color: #3b82f6;
-            color: #60a5fa;
-        }
-        .preset-btn.active {
-            background-color: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-            color: #60a5fa;
-        }
+        .preset-btn { padding: 6px 14px; border-radius: 9999px; border: 1px solid #334155; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; color: #94a3b8; }
+        .preset-btn:hover { border-color: #3b82f6; color: #60a5fa; }
+        .preset-btn.active { background-color: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         .shake { animation: shake 0.3s; }
 
         .copy-toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #22c55e;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 9999px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            z-index: 10000;
-            transition: transform 0.3s;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: #22c55e; color: white; padding: 12px 24px; border-radius: 9999px;
+            font-weight: 600; font-size: 0.875rem; z-index: 10000; transition: transform 0.3s;
             box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
         }
-        .copy-toast.show {
-            transform: translateX(-50%) translateY(0);
+        .copy-toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Tournament card in admin list */
+        .tournament-admin-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px; margin-bottom: 8px;
+            border-left: 3px solid #3b82f6;
+            transition: all 0.2s;
+        }
+        .tournament-admin-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+            transform: translateX(4px);
+        }
+        .delete-btn {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .delete-btn:hover {
+            background-color: rgba(239, 68, 68, 0.4);
+            transform: scale(1.1);
+        }
+
+        /* Mobile menu */
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open {
+            display: flex; flex-direction: column;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px; gap: 8px; z-index: 60;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        @media (min-width: 768px) {
+            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+        }
+
+        /* Admin sidebar mobile */
+        @media (max-width: 767px) {
+            .admin-sidebar { display: none; }
+            .admin-sidebar.mobile-open {
+                display: flex;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                bottom: 0;
+                width: 250px;
+                z-index: 45;
+                background: #1e293b;
+            }
         }
     </style>
 </head>
@@ -145,13 +153,13 @@
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen">
-        <div class="glass-panel w-full max-w-md p-8 rounded-xl shadow-2xl">
-            <div class="text-center mb-8">
-                <div class="inline-block bg-red-500/20 rounded-full p-4 mb-4">
-                    <i class="fa-solid fa-shield-halved text-red-500 text-3xl"></i>
+        <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-xl shadow-2xl">
+            <div class="text-center mb-6 sm:mb-8">
+                <div class="inline-block bg-red-500/20 rounded-full p-3 sm:p-4 mb-4">
+                    <i class="fa-solid fa-shield-halved text-red-500 text-2xl sm:text-3xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-white mb-2">Admin Access</h1>
-                <p class="text-gray-400 text-sm">Enter password to continue</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-white mb-2">Admin Access</h1>
+                <p class="text-gray-400 text-xs sm:text-sm">Enter password to continue</p>
             </div>
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
                 <div class="mb-4">
@@ -179,18 +187,16 @@
     <!-- MAIN PANEL -->
     <div id="mainPanel" class="hidden min-h-screen flex flex-col">
 
-        <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40 border-b border-gray-700">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                    <span class="text-xl font-bold text-white">Nepal Gaming</span>
-                    <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
-                </div>
+        <!-- Admin Navbar -->
+        <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-gray-700 relative">
+            <div class="flex items-center gap-3 min-w-0">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+                <span class="text-lg font-bold text-white whitespace-nowrap hidden sm:inline">Nepal Gaming</span>
+                <span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">ADMIN</span>
 
-                <div id="user-profile" class="hidden relative">
-                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                        <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">Admin</span></span>
+                <div id="user-profile" class="hidden relative ml-2">
+                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                     </button>
                     <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
@@ -201,7 +207,7 @@
                         </div>
                         <div class="py-1">
                             <a href="index.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-globe w-4"></i> View Public Site</a>
-                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Member View</a>
+                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> Member View</a>
                         </div>
                         <div class="py-1 border-t border-gray-700">
                             <button onclick="adminLogout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Exit Admin</button>
@@ -210,377 +216,294 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-                <button onclick="adminLogout()" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded transition">Exit</button>
+            <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+                <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+            </button>
+
+            <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+                <button onclick="adminLogout()" class="text-sm bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 md:py-1 rounded transition text-center">Exit</button>
             </div>
         </nav>
 
-        <div class="flex-grow flex">
+        <div class="flex-grow flex flex-col md:flex-row relative">
             
-            <aside class="hidden md:flex flex-col w-64 glass-panel border-r border-gray-700 p-4 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
+            <!-- Sidebar -->
+            <aside id="adminSidebar" class="admin-sidebar hidden md:flex flex-col w-full md:w-64 glass-panel border-r border-gray-700 p-4 md:sticky md:top-[60px] md:h-[calc(100vh-60px)] overflow-y-auto">
                 <div class="mb-6">
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
                     <ul class="space-y-1">
                         <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
-                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator <span class="ml-auto bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">NEW</span></a></li>
+                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator</a></li>
                         <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
                         <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
-                        <li><a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-plus-circle w-5"></i> Add Tournament</a></li>
+                        <li><a href="#" onclick="switchTab('add-tournament', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-plus-circle w-5"></i> Tournaments</a></li>
                         <li><a href="#" onclick="switchTab('registrations', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-clipboard-list w-5"></i> Registrations <span id="reg-count-badge" class="ml-auto bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
                         <li><a href="#" onclick="switchTab('announcements', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-bullhorn w-5"></i> Announcements</a></li>
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p>v1.6.0</p>
-                    <p>&copy; 2023 Nepal Gaming</p>
+                    <p>v2.0.0 • 2026</p>
+                    <p>&copy; Nepal Gaming</p>
                 </div>
             </aside>
 
-            <main class="flex-grow p-6 overflow-y-auto">
+            <main class="flex-grow p-4 sm:p-6 overflow-y-auto">
 
-                <!-- DASHBOARD -->
+                <!-- ============ DASHBOARD ============ -->
                 <div id="tab-dashboard" class="tab-content active">
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-white">Dashboard Overview</h1>
-                        <p class="text-gray-400 mt-1">Welcome back, Admin. Here's what's happening today.</p>
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Welcome, Admin. Manage your platform from here.</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-400 uppercase">Total Users</p>
-                            <p class="text-3xl font-bold text-white mt-1">1,247</p>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Tournaments</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-white mt-1" id="active-tournaments-count">0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
-                            <p class="text-xs text-gray-400 uppercase">Total Earnings</p>
-                            <p class="text-3xl font-bold text-green-400 mt-1" id="dash-total-earnings">Rs. 0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Earnings</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-green-400 mt-1" id="dash-total-earnings">Rs. 0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
-                            <p class="text-xs text-gray-400 uppercase">Active Tournaments</p>
-                            <p class="text-3xl font-bold text-purple-400 mt-1" id="active-tournaments-count">0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase">Registrations</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="total-registrations">0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-400 uppercase">Total Registrations</p>
-                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="total-registrations">0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Pending</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="pending-payouts-count">0</p>
                         </div>
                     </div>
 
                     <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                        <div class="p-6 border-b border-gray-700">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick Actions</h2>
+                        <div class="p-4 sm:p-6 border-b border-gray-700">
+                            <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Quick Actions</h2>
                         </div>
-                        <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <button onclick="switchTab('calculator', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-calculator text-purple-500 text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-sm">Prize Calculator</p>
+                        <div class="p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-plus-circle text-green-500 text-xl sm:text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-xs sm:text-sm">Add Tournament</p>
                             </button>
-                            <button onclick="switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-plus-circle text-green-500 text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-sm">Add Tournament</p>
+                            <button onclick="switchTab('calculator', document.querySelectorAll('.sidebar-item')[1])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-calculator text-purple-500 text-xl sm:text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-xs sm:text-sm">Calculator</p>
                             </button>
-                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-clipboard-list text-blue-500 text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-sm">View Registrations</p>
+                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[5])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-clipboard-list text-blue-500 text-xl sm:text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-xs sm:text-sm">Registrations</p>
                             </button>
-                            <button onclick="switchTab('earnings', document.querySelectorAll('.sidebar-item')[2])" class="glass-panel p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
-                                <i class="fa-solid fa-coins text-yellow-500 text-2xl mb-2"></i>
-                                <p class="font-bold text-white text-sm">View Earnings</p>
+                            <button onclick="switchTab('announcements', document.querySelectorAll('.sidebar-item')[6])" class="glass-panel p-3 sm:p-4 rounded-lg hover:bg-gray-800/50 transition text-left">
+                                <i class="fa-solid fa-bullhorn text-yellow-500 text-xl sm:text-2xl mb-2"></i>
+                                <p class="font-bold text-white text-xs sm:text-sm">Announce</p>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ============ CALCULATOR (NEW!) ============ -->
+                <!-- ============ CALCULATOR ============ -->
                 <div id="tab-calculator" class="tab-content">
                     <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-calculator text-purple-500 mr-2"></i>Prize Pool Calculator</h1>
-                        <p class="text-gray-400 mt-1">Enter numbers → get instant prize breakdown + your profit</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-calculator text-purple-500 mr-2"></i>Prize Calculator</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Calculate prize distribution instantly</p>
                     </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        
-                        <!-- INPUT SIDE -->
                         <div class="glass-panel rounded-xl p-6">
-                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Enter Tournament Details</h2>
-                            
-                            <!-- Preset Buttons -->
                             <div class="mb-5">
                                 <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider">Quick Presets</label>
                                 <div class="flex flex-wrap gap-2">
-                                    <button class="preset-btn active" onclick="applyPreset('solo', this)">🎯 Solo (20p, Rs. 150)</button>
-                                    <button class="preset-btn" onclick="applyPreset('duo', this)">👥 Duo (20p, Rs. 200)</button>
-                                    <button class="preset-btn" onclick="applyPreset('squad', this)">👨‍👩‍👧‍👦 Squad (24p, Rs. 250)</button>
-                                    <button class="preset-btn" onclick="applyPreset('custom', this)">⚙️ Custom</button>
+                                    <button class="preset-btn active" onclick="applyPreset('solo', this)">🎯 Solo</button>
+                                    <button class="preset-btn" onclick="applyPreset('duo', this)">👥 Duo</button>
+                                    <button class="preset-btn" onclick="applyPreset('squad', this)">👨‍👩‍👧‍👦 Squad</button>
                                 </div>
                             </div>
-
-                            <!-- Players -->
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Number of Players <span class="text-red-400">*</span></label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Players</label>
                                 <input type="number" id="calc-players" class="form-input w-full px-4 py-3 rounded-lg" value="20" min="2" max="100" oninput="calculate()">
-                                <p class="text-xs text-gray-500 mt-1">Free Fire Solo: max 50. Duo/Squad: 24-48 players.</p>
                             </div>
-
-                            <!-- Entry Fee -->
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee per Player (Rs.) <span class="text-red-400">*</span></label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.)</label>
                                 <input type="number" id="calc-fee" class="form-input w-full px-4 py-3 rounded-lg" value="150" min="0" oninput="calculate()">
                             </div>
-
-                            <!-- Profit % -->
                             <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Your Profit % 
-                                    <span class="text-purple-400 font-bold" id="profitPercentLabel">30%</span>
-                                </label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Profit % <span class="text-purple-400 font-bold" id="profitPercentLabel">30%</span></label>
                                 <input type="range" id="calc-profit" min="10" max="50" value="30" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateProfitLabel(); calculate()">
-                                <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>10% (generous)</span>
-                                    <span>30% (recommended)</span>
-                                    <span>50% (aggressive)</span>
-                                </div>
-                                <p class="text-xs text-yellow-400 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Recommended: 25-30% for first tournaments. Increase later.</p>
                             </div>
-
-                            <!-- Top Kill Toggle -->
                             <div class="mb-4 flex items-center gap-3">
                                 <input type="checkbox" id="calc-topkill" checked class="w-4 h-4 rounded" onchange="calculate()">
-                                <label for="calc-topkill" class="text-sm text-gray-300 cursor-pointer">Include separate Top Killer prize</label>
+                                <label for="calc-topkill" class="text-sm text-gray-300 cursor-pointer">Include Top Killer prize</label>
                             </div>
-
-                            <!-- Distribution Style -->
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Prize Distribution Style</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Style</label>
                                 <select id="calc-style" class="form-input w-full px-4 py-3 rounded-lg" onchange="calculate()">
-                                    <option value="balanced" selected>Balanced (recommended for new organizers)</option>
-                                    <option value="winner">Winner Focused (bigger 1st prize)</option>
-                                    <option value="top3">Top 3 Only (no top kill)</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="winner">Winner Focused</option>
+                                    <option value="top3">Top 3 Only</option>
                                 </select>
                             </div>
-
                             <button onclick="copyBreakdown()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
-                                <i class="fa-solid fa-copy mr-2"></i>Copy Breakdown for WhatsApp
+                                <i class="fa-solid fa-copy mr-2"></i>Copy Breakdown
                             </button>
                         </div>
-
-                        <!-- RESULT SIDE -->
                         <div class="space-y-4">
-
-                            <!-- Total Collected -->
                             <div class="calc-result-card total">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-xs text-yellow-300 uppercase tracking-wider">Total Collected</p>
-                                        <p class="text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p>
-                                        <p class="text-xs text-gray-400 mt-1" id="calc-total-formula">20 players × Rs. 150</p>
+                                        <p class="text-xs text-yellow-300 uppercase">Total Collected</p>
+                                        <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p>
                                     </div>
-                                    <i class="fa-solid fa-money-bill-wave text-4xl text-yellow-500 opacity-50"></i>
+                                    <i class="fa-solid fa-money-bill-wave text-3xl text-yellow-500 opacity-50"></i>
                                 </div>
                             </div>
-
-                            <!-- Prize Pool -->
                             <div class="calc-result-card prizepool">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-xs text-blue-300 uppercase tracking-wider">Prize Pool (Winners)</p>
-                                        <p class="text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p>
-                                        <p class="text-xs text-gray-400 mt-1" id="calc-prizepool-formula">70% of total collection</p>
+                                        <p class="text-xs text-blue-300 uppercase">Prize Pool</p>
+                                        <p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p>
                                     </div>
-                                    <i class="fa-solid fa-trophy text-4xl text-blue-500 opacity-50"></i>
+                                    <i class="fa-solid fa-trophy text-3xl text-blue-500 opacity-50"></i>
                                 </div>
                             </div>
-
-                            <!-- Your Profit -->
                             <div class="calc-result-card profit">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-xs text-green-300 uppercase tracking-wider">💰 Your Profit</p>
-                                        <p class="text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p>
-                                        <p class="text-xs text-gray-400 mt-1" id="calc-profit-formula">30% commission</p>
+                                        <p class="text-xs text-green-300 uppercase">💰 Your Profit</p>
+                                        <p class="text-3xl sm:text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p>
                                     </div>
-                                    <i class="fa-solid fa-hand-holding-dollar text-4xl text-green-500 opacity-50"></i>
+                                    <i class="fa-solid fa-hand-holding-dollar text-3xl text-green-500 opacity-50"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- PRIZE BREAKDOWN -->
                     <div class="glass-panel rounded-xl p-6 mt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
-                            <button onclick="pushToTournamentForm()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg transition">
-                                <i class="fa-solid fa-plus mr-2"></i>Create This Tournament
-                            </button>
-                        </div>
-                        <div id="prize-breakdown">
-                            <!-- Injected via JS -->
-                        </div>
-
-                        <div class="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                            <p class="text-xs text-purple-300">
-                                <i class="fa-solid fa-lightbulb mr-1"></i>
-                                <strong>Tip:</strong> Distribute prizes within 24 hours after the match ends. Post the payment screenshots in your WhatsApp group for transparency.
-                            </p>
-                        </div>
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
+                        <div id="prize-breakdown"></div>
                     </div>
-
                 </div>
 
-                <!-- EARNINGS -->
+                <!-- ============ EARNINGS ============ -->
                 <div id="tab-earnings" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
-                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
-                            <p class="text-gray-400 mt-1">Track your platform's revenue in real time.</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
+                            <p class="text-gray-400 mt-1 text-sm">Track revenue in real time</p>
                         </div>
                         <div class="flex gap-2 flex-wrap">
-                            <button class="period-tab active" onclick="setEarningsPeriod('today', this)">Today</button>
-                            <button class="period-tab" onclick="setEarningsPeriod('week', this)">This Week</button>
-                            <button class="period-tab" onclick="setEarningsPeriod('month', this)">This Month</button>
-                            <button class="period-tab" onclick="setEarningsPeriod('all', this)">All Time</button>
+                            <button class="period-tab active text-xs sm:text-sm" onclick="setEarningsPeriod('today', this)">Today</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('week', this)">Week</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('month', this)">Month</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('all', this)">All</button>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
-                            <p class="text-xs text-gray-400 uppercase">Period Earnings</p>
-                            <p class="text-3xl font-bold text-green-400 mt-1" id="period-earnings">Rs. 0</p>
-                            <p class="text-xs text-gray-500 mt-1" id="period-label">Today</p>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Earnings</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-green-400 mt-1" id="period-earnings">Rs. 0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-400 uppercase">Platform Commission</p>
-                            <p class="text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Commission</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
-                            <p class="text-xs text-gray-400 uppercase">Registrations</p>
-                            <p class="text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase">Sign-ups</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
                         </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-400 uppercase">Pending Payouts</p>
-                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Payouts</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
                         </div>
                     </div>
-
-                    <div class="flex justify-end mb-4">
-                        <button onclick="exportEarnings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-download mr-2"></i>Export Earnings CSV
-                        </button>
-                    </div>
-
-                    <div class="glass-panel rounded-xl p-6 mb-8">
+                    <div class="glass-panel rounded-xl p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i>Last 7 Days</h2>
-                            <span class="text-xs text-gray-500" id="chart-total-label">Total: Rs. 0</span>
+                            <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i>Last 7 Days</h2>
                         </div>
                         <div class="bar-container" id="bar-chart"></div>
                     </div>
                 </div>
 
-                <!-- PAYOUTS -->
+                <!-- ============ PAYOUTS ============ -->
                 <div id="tab-payouts" class="tab-content">
-                    <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
-                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payout Tracker</h1>
-                            <p class="text-gray-400 mt-1">Track which winners you've paid and which are pending.</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payouts</h1>
+                            <p class="text-gray-400 mt-1 text-sm">Manage winner payments</p>
                         </div>
                         <button onclick="openAddPayoutModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
                             <i class="fa-solid fa-plus mr-2"></i>Add Winner
                         </button>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
-                            <p class="text-xs text-gray-400 uppercase">Total Paid</p>
-                            <p class="text-3xl font-bold text-green-400 mt-1" id="payout-total-paid">Rs. 0</p>
-                        </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-400 uppercase">Pending</p>
-                            <p class="text-3xl font-bold text-yellow-400 mt-1" id="payout-total-pending">Rs. 0</p>
-                        </div>
-                        <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-400 uppercase">Total Winners</p>
-                            <p class="text-3xl font-bold text-blue-400 mt-1" id="payout-total-winners">0</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center">
-                        <div class="flex-grow min-w-[200px]">
-                            <label class="block text-xs text-gray-400 mb-1">Filter</label>
-                            <select id="payout-status-filter" onchange="renderPayouts()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                                <option value="all">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="paid">Paid</option>
-                            </select>
-                        </div>
-                        <div class="flex-grow min-w-[200px]">
-                            <label class="block text-xs text-gray-400 mb-1">Search Winner</label>
-                            <input type="text" id="payout-search" oninput="renderPayouts()" placeholder="Search..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                        </div>
-                    </div>
-
                     <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-400">
                                 <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                                     <tr>
-                                        <th class="px-6 py-3">Winner</th>
-                                        <th class="px-6 py-3">Tournament</th>
-                                        <th class="px-6 py-3">Rank</th>
-                                        <th class="px-6 py-3">Prize</th>
-                                        <th class="px-6 py-3">Status</th>
-                                        <th class="px-6 py-3">Actions</th>
+                                        <th class="px-4 py-3">Winner</th>
+                                        <th class="px-4 py-3">Tournament</th>
+                                        <th class="px-4 py-3">Rank</th>
+                                        <th class="px-4 py-3">Prize</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="payouts-body" class="divide-y divide-gray-700"></tbody>
                             </table>
                         </div>
-                        <div id="empty-payouts" class="hidden p-10 text-center text-gray-500">
+                        <div id="empty-payouts" class="p-8 text-center text-gray-500">
                             <i class="fa-solid fa-money-bill-transfer text-4xl mb-3"></i>
                             <p class="font-bold text-white mb-1">No payouts yet</p>
+                            <p class="text-xs">Add winners after your first tournament.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ADD TOURNAMENT -->
+                <!-- ============ ADD TOURNAMENT (with delete button) ============ -->
                 <div id="tab-add-tournament" class="tab-content">
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-white">Add New Tournament</h1>
-                        <p class="text-gray-400 mt-1">Create a new tournament. It will appear immediately.</p>
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Tournaments</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Create and manage your tournaments</p>
                     </div>
 
-                    <div class="glass-panel rounded-xl p-6 max-w-3xl">
+                    <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Tournament</h2>
                         <form id="tournamentForm" onsubmit="createTournament(event)">
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Tournament Name *</label>
-                                <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" required>
+                                <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #1" required>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Game *</label>
                                     <select id="t-game" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                        <option value="">Select</option>
-                                        <option value="freefire">Free Fire</option>
-                                        <option value="pubg">PUBG Mobile</option>
-                                        <option value="valorant">Valorant</option>
-                                        <option value="cod">COD Mobile</option>
-                                        <option value="ludo">Ludo King</option>
+                                        <option value="">Select Game</option>
+                                        <option value="freefire">🔥 Free Fire</option>
+                                        <option value="pubg">🎯 PUBG Mobile</option>
+                                        <option value="cod">💣 COD Mobile</option>
+                                        <option value="efootball">⚽ eFootball</option>
+                                        <option value="ecricket">🏏 eCricket</option>
+                                        <option value="valorant">⚔️ Valorant</option>
+                                        <option value="ludo">🎲 Ludo King</option>
+                                        <option value="chess">♟️ Chess</option>
+                                        <option value="clashroyale">👑 Clash Royale</option>
+                                        <option value="pool">🎱 8 Ball Pool</option>
+                                        <option value="other">🎮 Other Game</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Mode *</label>
                                     <select id="t-mode" class="form-input w-full px-4 py-3 rounded-lg" required>
-                                        <option value="">Select</option>
+                                        <option value="">Select Mode</option>
                                         <option value="Solo">Solo</option>
                                         <option value="Duo">Duo</option>
                                         <option value="Squad">Squad</option>
                                         <option value="5v5">5v5</option>
+                                        <option value="1v1">1v1</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Date *</label>
                                     <input type="date" id="t-date" class="form-input w-full px-4 py-3 rounded-lg" required>
@@ -590,19 +513,19 @@
                                     <input type="time" id="t-time" class="form-input w-full px-4 py-3 rounded-lg" required>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee (Rs.) *</label>
-                                    <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="0" required>
+                                    <input type="number" id="t-fee" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="0" value="0" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-300 mb-2">Prize Pool (Rs.) *</label>
                                     <input type="number" id="t-prize" class="form-input w-full px-4 py-3 rounded-lg" placeholder="2000" min="0" required>
                                 </div>
                             </div>
-                            <div class="mb-6">
+                            <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Total Slots *</label>
-                                <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="100" min="2" required>
+                                <input type="number" id="t-slots" class="form-input w-full px-4 py-3 rounded-lg" placeholder="50" min="2" required>
                             </div>
                             <div class="flex gap-3">
                                 <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
@@ -614,77 +537,42 @@
                         </form>
                     </div>
 
-                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden mt-8 max-w-3xl">
-                        <div class="p-6 border-b border-gray-700">
-                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Recently Created</h2>
+                    <!-- Existing Tournaments with DELETE -->
+                    <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Active Tournaments</h2>
+                            <span class="text-xs text-gray-500" id="active-tournament-count">0 total</span>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-gray-400">
-                                <thead class="bg-gray-800 text-xs uppercase text-gray-400">
-                                    <tr>
-                                        <th class="px-6 py-3">Name</th>
-                                        <th class="px-6 py-3">Game</th>
-                                        <th class="px-6 py-3">Date</th>
-                                        <th class="px-6 py-3">Prize</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="created-list" class="divide-y divide-gray-700">
-                                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500 text-xs">No tournaments created yet.</td></tr>
-                                </tbody>
-                            </table>
+                        <div id="admin-tournaments-list">
+                            <!-- Tournaments injected via JS with delete buttons -->
+                        </div>
+                        <div id="no-tournaments-admin" class="text-center py-8 text-gray-500">
+                            <i class="fa-solid fa-clipboard text-4xl mb-3 opacity-50"></i>
+                            <p class="text-sm">No tournaments created yet</p>
+                            <p class="text-xs mt-1">Create your first tournament above</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- REGISTRATIONS -->
+                <!-- ============ REGISTRATIONS ============ -->
                 <div id="tab-registrations" class="tab-content">
-                    <div class="mb-8 flex justify-between items-start flex-wrap gap-4">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
-                            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-blue-500 mr-2"></i>Registrations</h1>
-                            <p class="text-gray-400 mt-1">View all registration details with payment proofs.</p>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-clipboard-list text-blue-500 mr-2"></i>Registrations</h1>
+                            <p class="text-gray-400 mt-1 text-sm">View and manage sign-ups</p>
                         </div>
                         <button onclick="downloadRegistrationsCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-download mr-2"></i>Download CSV
+                            <i class="fa-solid fa-download mr-2"></i>CSV
                         </button>
                     </div>
-
-                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center">
-                        <div class="flex-grow min-w-[180px]">
-                            <label class="block text-xs text-gray-400 mb-1">Tournament</label>
-                            <select id="filter-tournament" onchange="renderRegistrations()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                                <option value="all">All Tournaments</option>
-                            </select>
-                        </div>
-                        <div class="flex-grow min-w-[180px]">
-                            <label class="block text-xs text-gray-400 mb-1">Payment Status</label>
-                            <select id="filter-payment-status" onchange="renderRegistrations()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                                <option value="all">All</option>
-                                <option value="pending-verification">Pending Verification</option>
-                                <option value="verified">Verified</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="free">Free</option>
-                            </select>
-                        </div>
-                        <div class="flex-grow min-w-[180px]">
-                            <label class="block text-xs text-gray-400 mb-1">Search</label>
-                            <input type="text" id="search-user" oninput="renderRegistrations()" placeholder="Username/IGN..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Total</label>
-                            <span id="reg-total-count" class="stat-badge">0</span>
-                        </div>
-                    </div>
-
                     <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-400">
                                 <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                                     <tr>
-                                        <th class="px-4 py-3">#</th>
                                         <th class="px-4 py-3">Player</th>
                                         <th class="px-4 py-3">Tournament</th>
                                         <th class="px-4 py-3">IGN</th>
-                                        <th class="px-4 py-3">Entry Fee</th>
                                         <th class="px-4 py-3">Payment</th>
                                         <th class="px-4 py-3">Actions</th>
                                     </tr>
@@ -692,102 +580,64 @@
                                 <tbody id="registrations-body" class="divide-y divide-gray-700"></tbody>
                             </table>
                         </div>
-                        <div id="empty-registrations" class="hidden p-10 text-center text-gray-500">
+                        <div id="empty-registrations" class="p-8 text-center text-gray-500">
                             <i class="fa-solid fa-clipboard text-4xl mb-3"></i>
                             <p class="font-bold text-white mb-1">No registrations yet</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ANNOUNCEMENTS -->
+                <!-- ============ ANNOUNCEMENTS ============ -->
                 <div id="tab-announcements" class="tab-content">
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
-                        <p class="text-gray-400 mt-1">Post announcements with images.</p>
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Post updates for all members</p>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl">
-                        <div class="glass-panel rounded-xl p-6">
-                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Create Announcement</h2>
-                            <form id="announcementForm" onsubmit="createAnnouncement(event)">
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
-                                    <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" required oninput="updatePreview()">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
-                                    <textarea id="a-message" rows="3" class="form-input w-full px-4 py-3 rounded-lg" required oninput="updatePreview()"></textarea>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                                    <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg" onchange="updatePreview()">
-                                        <option value="normal">Normal (Blue)</option>
-                                        <option value="high">High (Yellow)</option>
-                                        <option value="urgent">Urgent (Red)</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Image (Optional)</label>
-                                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()" style="border: 2px dashed #334155; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer;">
-                                        <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
-                                        <div id="uploadPlaceholder">
-                                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 mb-2"></i>
-                                            <p class="text-sm text-gray-400">Click to upload</p>
-                                        </div>
-                                        <div id="uploadPreview" class="hidden">
-                                            <img id="previewImage" class="max-h-40 mx-auto rounded-lg mb-3" src="">
-                                            <button type="button" onclick="event.stopPropagation(); removeImage()" class="text-red-400 hover:text-red-300 text-sm">
-                                                <i class="fa-solid fa-trash mr-1"></i>Remove
-                                            </button>
-                                        </div>
+                    <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl">
+                        <form id="announcementForm" onsubmit="createAnnouncement(event)">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                                <input type="text" id="a-title" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Launching Soon!" required oninput="updatePreview()">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Message *</label>
+                                <textarea id="a-message" rows="4" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Write your announcement..." required oninput="updatePreview()"></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                                <select id="a-priority" class="form-input w-full px-4 py-3 rounded-lg" onchange="updatePreview()">
+                                    <option value="normal">Normal (Blue)</option>
+                                    <option value="high">High (Yellow)</option>
+                                    <option value="urgent">Urgent (Red)</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Image (Optional)</label>
+                                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()" style="border: 2px dashed #334155; border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;">
+                                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                                    <div id="uploadPlaceholder">
+                                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-500 mb-2"></i>
+                                        <p class="text-sm text-gray-400">Click to upload</p>
+                                    </div>
+                                    <div id="uploadPreview" class="hidden">
+                                        <img id="previewImage" class="max-h-32 mx-auto rounded-lg mb-2" src="">
+                                        <button type="button" onclick="event.stopPropagation(); removeImage()" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash mr-1"></i>Remove</button>
                                     </div>
                                 </div>
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
-                                    <i class="fa-solid fa-bullhorn mr-2"></i>Publish
-                                </button>
-                                <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
-                            </form>
-                        </div>
-
-                        <div class="glass-panel rounded-xl p-6">
-                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-eye text-green-500 mr-2"></i>Live Preview</h2>
-                            <div id="livePreview" style="background: rgba(30, 41, 59, 0.9); border-radius: 10px; overflow: hidden; border-left: 4px solid #3b82f6;">
-                                <div id="previewImageContainer" class="hidden">
-                                    <img id="previewImg" class="w-full h-40 object-cover" src="">
-                                </div>
-                                <div class="p-4">
-                                    <h3 id="previewTitle" class="font-bold text-white text-sm">Your Title</h3>
-                                    <p id="previewMessage" class="text-xs text-gray-400 mt-1">Your message...</p>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 max-w-6xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-white">Recent Announcements</h2>
-                            <button onclick="clearAllAnnouncements()" class="text-red-400 hover:text-red-300 text-sm">
-                                <i class="fa-solid fa-trash mr-1"></i>Clear All
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                                <i class="fa-solid fa-bullhorn mr-2"></i>Publish
                             </button>
-                        </div>
-                        <div id="announcements-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                            <p id="announcement-msg" class="hidden text-center text-sm mt-4"></p>
+                        </form>
+                    </div>
+                    <div class="mt-6 max-w-3xl">
+                        <h2 class="text-base sm:text-lg font-bold text-white mb-4">Recent Announcements</h2>
+                        <div id="announcements-list" class="space-y-3"></div>
                     </div>
                 </div>
 
             </main>
-        </div>
-    </div>
-
-    <!-- REGISTRATION DETAILS MODAL -->
-    <div id="detailsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.85); backdrop-filter: blur(6px);">
-        <div class="glass-panel rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-700 sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-user-check text-blue-500 mr-2"></i>Registration Details</h2>
-                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-            <div id="detailsContent" class="p-6"></div>
         </div>
     </div>
 
@@ -823,17 +673,8 @@
                         <input type="number" id="p-prize" class="form-input w-full px-4 py-3 rounded-lg" required>
                     </div>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Method</label>
-                    <select id="p-method" class="form-input w-full px-4 py-3 rounded-lg">
-                        <option value="eSewa">eSewa</option>
-                        <option value="Khalti">Khalti</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Cash">Cash</option>
-                    </select>
-                </div>
                 <div class="flex gap-3">
-                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">Add Winner</button>
+                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">Add</button>
                     <button type="button" onclick="closeAddPayoutModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
                 </div>
             </form>
@@ -842,27 +683,27 @@
 
     <!-- COPY TOAST -->
     <div id="copyToast" class="copy-toast">
-        <i class="fa-solid fa-check mr-2"></i>Copied to clipboard!
+        <i class="fa-solid fa-check mr-2"></i>Copied!
     </div>
 
     <script>
-        console.log("--- ADMIN PANEL LOADED v1.6 ---");
+        console.log("--- ADMIN PANEL v2.0 (2026) ---");
 
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
 
         function handleAdminLogin(event) {
             event.preventDefault();
-            const password = document.getElementById('adminPassword').value;
-            const errorEl = document.getElementById('loginError');
+            const pwd = document.getElementById('adminPassword').value;
+            const err = document.getElementById('loginError');
             const form = document.getElementById('adminLoginForm');
 
-            if (password === ADMIN_PASSWORD) {
+            if (pwd === ADMIN_PASSWORD) {
                 sessionStorage.setItem(SESSION_KEY, 'authenticated');
                 showAdminPanel();
             } else {
-                errorEl.textContent = "❌ Incorrect password.";
-                errorEl.classList.remove('hidden');
+                err.textContent = "❌ Incorrect password.";
+                err.classList.remove('hidden');
                 form.classList.add('shake');
                 setTimeout(() => form.classList.remove('shake'), 400);
                 document.getElementById('adminPassword').value = '';
@@ -896,7 +737,6 @@
         function showAdminIdentity() {
             document.getElementById('user-profile').classList.remove('hidden');
             document.getElementById('user-avatar').textContent = 'A';
-            document.getElementById('user-name').textContent = 'Admin';
             document.getElementById('dropdown-username').textContent = 'admin@nepplay.com';
         }
 
@@ -907,57 +747,139 @@
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
 
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            const sidebar = document.getElementById('adminSidebar');
+            nav.classList.toggle('open');
+            if (window.innerWidth < 768) sidebar.classList.toggle('mobile-open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
+
         function switchTab(tabName, linkElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             if (linkElement) linkElement.classList.add('active');
-
-            if (tabName === 'registrations') { renderRegistrations(); populateTournamentFilter(); }
+            if (window.innerWidth < 768) {
+                document.getElementById('mobileNav').classList.remove('open');
+                document.getElementById('adminSidebar').classList.remove('mobile-open');
+                document.getElementById('hamburgerIcon').className = 'fa-solid fa-bars';
+            }
+            if (tabName === 'registrations') renderRegistrations();
             if (tabName === 'earnings') renderEarnings();
             if (tabName === 'payouts') renderPayouts();
             if (tabName === 'calculator') calculate();
+            if (tabName === 'add-tournament') renderAdminTournaments();
         }
 
-        // ==================== CALCULATOR ====================
+        // ============ TOURNAMENT MANAGEMENT ============
+        function getCustomTournaments() {
+            return JSON.parse(localStorage.getItem('customTournaments') || '[]');
+        }
+
+        function createTournament(event) {
+            event.preventDefault();
+            const newT = {
+                id: Date.now(),
+                name: document.getElementById('t-name').value.trim(),
+                game: document.getElementById('t-game').value,
+                mode: document.getElementById('t-mode').value,
+                date: document.getElementById('t-date').value,
+                time: document.getElementById('t-time').value,
+                entryFee: parseInt(document.getElementById('t-fee').value),
+                prizePool: parseInt(document.getElementById('t-prize').value),
+                slotsFilled: 0,
+                slotsTotal: parseInt(document.getElementById('t-slots').value),
+                createdAt: new Date().toISOString()
+            };
+
+            const existing = getCustomTournaments();
+            existing.push(newT);
+            localStorage.setItem('customTournaments', JSON.stringify(existing));
+
+            const msg = document.getElementById('tournament-msg');
+            msg.classList.remove('hidden');
+            msg.className = "text-center text-sm mt-4 text-green-400";
+            msg.textContent = `✅ "${newT.name}" created!`;
+            document.getElementById('tournamentForm').reset();
+            renderAdminTournaments();
+            updateDashboardStats();
+            setTimeout(() => msg.classList.add('hidden'), 4000);
+        }
+
+        function renderAdminTournaments() {
+            const tournaments = getCustomTournaments();
+            const list = document.getElementById('admin-tournaments-list');
+            const empty = document.getElementById('no-tournaments-admin');
+            const count = document.getElementById('active-tournament-count');
+
+            count.textContent = `${tournaments.length} total`;
+
+            if (tournaments.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            list.innerHTML = '';
+
+            const gameEmojis = {
+                freefire: '🔥', pubg: '🎯', cod: '💣', efootball: '⚽',
+                ecricket: '🏏', valorant: '⚔️', ludo: '🎲', chess: '♟️',
+                clashroyale: '👑', pool: '🎱', other: '🎮'
+            };
+
+            tournaments.reverse().forEach(t => {
+                const item = document.createElement('div');
+                item.className = 'tournament-admin-item';
+                const dateStr = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+                item.innerHTML = `
+                    <div class="flex-grow min-w-0">
+                        <p class="font-bold text-white text-sm truncate">${t.name}</p>
+                        <p class="text-xs text-gray-400 mt-1">${gameEmojis[t.game] || '🎮'} ${t.game} • ${t.mode} • ${dateStr} • Rs. ${t.entryFee} entry</p>
+                    </div>
+                    <button onclick="deleteTournament(${t.id}, '${t.name.replace(/'/g, "\\'")}')" class="delete-btn ml-3" title="Delete Tournament">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function deleteTournament(id, name) {
+            if (!confirm(`⚠️ Delete "${name}"?\n\nThis will remove it from the public tournaments page and cannot be undone.`)) return;
+
+            const tournaments = getCustomTournaments().filter(t => t.id !== id);
+            localStorage.setItem('customTournaments', JSON.stringify(tournaments));
+            
+            console.log("🗑️ Deleted tournament:", id);
+            renderAdminTournaments();
+            updateDashboardStats();
+
+            // Show toast
+            const toast = document.getElementById('copyToast');
+            toast.innerHTML = '<i class="fa-solid fa-trash mr-2"></i>Tournament deleted';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Copied!';
+            }, 2000);
+        }
+
+        // ============ CALCULATOR ============
         let calcResult = null;
 
         function applyPreset(preset, btn) {
             document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             const players = document.getElementById('calc-players');
             const fee = document.getElementById('calc-fee');
             const profit = document.getElementById('calc-profit');
-            const style = document.getElementById('calc-style');
-            const topkill = document.getElementById('calc-topkill');
-
-            switch(preset) {
-                case 'solo':
-                    players.value = 20;
-                    fee.value = 150;
-                    profit.value = 30;
-                    style.value = 'balanced';
-                    topkill.checked = true;
-                    break;
-                case 'duo':
-                    players.value = 20;
-                    fee.value = 200;
-                    profit.value = 25;
-                    style.value = 'balanced';
-                    topkill.checked = true;
-                    break;
-                case 'squad':
-                    players.value = 24;
-                    fee.value = 250;
-                    profit.value = 25;
-                    style.value = 'winner';
-                    topkill.checked = true;
-                    break;
-                case 'custom':
-                    // Don't change values
-                    break;
-            }
+            if (preset === 'solo') { players.value = 20; fee.value = 150; profit.value = 30; }
+            else if (preset === 'duo') { players.value = 20; fee.value = 200; profit.value = 25; }
+            else if (preset === 'squad') { players.value = 24; fee.value = 250; profit.value = 25; }
             updateProfitLabel();
             calculate();
         }
@@ -978,479 +900,55 @@
             const prizePool = Math.round(total * (prizePoolPercent / 100));
             const profit = total - prizePool;
 
-            // Update summary
             document.getElementById('calc-total').textContent = `Rs. ${total.toLocaleString()}`;
-            document.getElementById('calc-total-formula').textContent = `${players} players × Rs. ${fee}`;
             document.getElementById('calc-prizepool').textContent = `Rs. ${prizePool.toLocaleString()}`;
-            document.getElementById('calc-prizepool-formula').textContent = `${prizePoolPercent}% of total collection`;
             document.getElementById('calc-profit-amount').textContent = `Rs. ${profit.toLocaleString()}`;
-            document.getElementById('calc-profit-formula').textContent = `${profitPercent}% commission`;
 
-            // Calculate prize distribution
             let prizes = {};
             let topKillPrize = 0;
-            let topKillPercent = 0;
-
             if (style === 'balanced') {
-                // Balanced: 1st=40%, 2nd=25%, 3rd=15%, TopKill=20%
                 if (includeTopKill) {
-                    prizes = {
-                        '1st': Math.round(prizePool * 0.40),
-                        '2nd': Math.round(prizePool * 0.25),
-                        '3rd': Math.round(prizePool * 0.15)
-                    };
-                    topKillPercent = 20;
+                    prizes = { '1st': Math.round(prizePool * 0.40), '2nd': Math.round(prizePool * 0.25), '3rd': Math.round(prizePool * 0.15) };
                     topKillPrize = Math.round(prizePool * 0.20);
                 } else {
-                    prizes = {
-                        '1st': Math.round(prizePool * 0.50),
-                        '2nd': Math.round(prizePool * 0.30),
-                        '3rd': Math.round(prizePool * 0.20)
-                    };
+                    prizes = { '1st': Math.round(prizePool * 0.50), '2nd': Math.round(prizePool * 0.30), '3rd': Math.round(prizePool * 0.20) };
                 }
             } else if (style === 'winner') {
-                // Winner Focused: 1st=60%, 2nd=20%, 3rd=10%, TopKill=10%
                 if (includeTopKill) {
-                    prizes = {
-                        '1st': Math.round(prizePool * 0.60),
-                        '2nd': Math.round(prizePool * 0.20),
-                        '3rd': Math.round(prizePool * 0.10)
-                    };
-                    topKillPercent = 10;
+                    prizes = { '1st': Math.round(prizePool * 0.60), '2nd': Math.round(prizePool * 0.20), '3rd': Math.round(prizePool * 0.10) };
                     topKillPrize = Math.round(prizePool * 0.10);
                 } else {
-                    prizes = {
-                        '1st': Math.round(prizePool * 0.65),
-                        '2nd': Math.round(prizePool * 0.25),
-                        '3rd': Math.round(prizePool * 0.10)
-                    };
+                    prizes = { '1st': Math.round(prizePool * 0.65), '2nd': Math.round(prizePool * 0.25), '3rd': Math.round(prizePool * 0.10) };
                 }
-            } else if (style === 'top3') {
-                // Top 3 only, no top kill
-                prizes = {
-                    '1st': Math.round(prizePool * 0.55),
-                    '2nd': Math.round(prizePool * 0.30),
-                    '3rd': Math.round(prizePool * 0.15)
-                };
-                topKillPercent = 0;
-                topKillPrize = 0;
+            } else {
+                prizes = { '1st': Math.round(prizePool * 0.55), '2nd': Math.round(prizePool * 0.30), '3rd': Math.round(prizePool * 0.15) };
             }
 
-            // Render breakdown
-            const breakdown = document.getElementById('prize-breakdown');
             let html = '';
-
-            html += `<div class="prize-row rank-1">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🥇</span>
-                    <div>
-                        <p class="font-bold text-white text-sm">1st Place</p>
-                        <p class="text-xs text-gray-500">Winner takes the top prize</p>
-                    </div>
-                </div>
-                <p class="text-xl font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p>
-            </div>`;
-
-            html += `<div class="prize-row rank-2">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🥈</span>
-                    <div>
-                        <p class="font-bold text-white text-sm">2nd Place</p>
-                        <p class="text-xs text-gray-500">Runner-up prize</p>
-                    </div>
-                </div>
-                <p class="text-xl font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p>
-            </div>`;
-
-            html += `<div class="prize-row rank-3">
-                <div class="flex items-center gap-3">
-                    <span class="text-2xl">🥉</span>
-                    <div>
-                        <p class="font-bold text-white text-sm">3rd Place</p>
-                        <p class="text-xs text-gray-500">Third place reward</p>
-                    </div>
-                </div>
-                <p class="text-xl font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p>
-            </div>`;
-
+            html += `<div class="prize-row rank-1"><div class="flex items-center gap-3"><span class="text-2xl">🥇</span><div><p class="font-bold text-white text-sm">1st Place</p></div></div><p class="text-lg font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-2"><div class="flex items-center gap-3"><span class="text-2xl">🥈</span><div><p class="font-bold text-white text-sm">2nd Place</p></div></div><p class="text-lg font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-3"><div class="flex items-center gap-3"><span class="text-2xl">🥉</span><div><p class="font-bold text-white text-sm">3rd Place</p></div></div><p class="text-lg font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p></div>`;
             if (topKillPrize > 0) {
-                html += `<div class="prize-row kills">
-                    <div class="flex items-center gap-3">
-                        <span class="text-2xl">🎯</span>
-                        <div>
-                            <p class="font-bold text-white text-sm">Top Killer</p>
-                            <p class="text-xs text-gray-500">Most kills in the match (${topKillPercent}% of pool)</p>
-                        </div>
-                    </div>
-                    <p class="text-xl font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p>
-                </div>`;
+                html += `<div class="prize-row kills"><div class="flex items-center gap-3"><span class="text-2xl">🎯</span><div><p class="font-bold text-white text-sm">Top Killer</p></div></div><p class="text-lg font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p></div>`;
             }
-
-            const sumPrizes = prizes['1st'] + prizes['2nd'] + prizes['3rd'] + topKillPrize;
-            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-gray-400 uppercase">Total Prize Distribution</p>
-                    <p class="text-xs text-gray-500">Sum of all prizes above</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-2xl font-bold text-blue-400">Rs. ${sumPrizes.toLocaleString()}</p>
-                    <p class="text-xs text-gray-500">= Prize Pool (Rs. ${prizePool.toLocaleString()})</p>
-                </div>
-            </div>`;
-
-            breakdown.innerHTML = html;
-
-            // Save result for copy function
-            calcResult = {
-                players, fee, profitPercent, total, prizePool, profit,
-                prizes, topKillPrize, topKillPercent, style, includeTopKill,
-                sumPrizes
-            };
+            const sum = prizes['1st'] + prizes['2nd'] + prizes['3rd'] + topKillPrize;
+            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between"><div><p class="text-xs text-gray-400">Total</p></div><div class="text-right"><p class="text-xl font-bold text-blue-400">Rs. ${sum.toLocaleString()}</p></div></div>`;
+            document.getElementById('prize-breakdown').innerHTML = html;
+            calcResult = { players, fee, profitPercent, total, prizePool, profit, prizes, topKillPrize, style, includeTopKill, sum };
         }
 
         function copyBreakdown() {
-            if (!calcResult) {
-                alert("Calculate first!");
-                return;
-            }
-
+            if (!calcResult) { alert("Calculate first!"); return; }
             const r = calcResult;
-            const text = `🔥 TOURNAMENT PRIZE BREAKDOWN 🔥
-
-👥 Players: ${r.players}
-💰 Entry Fee: Rs. ${r.fee}
-💵 Total Collection: Rs. ${r.total.toLocaleString()}
-
-🏆 PRIZES:
-🥇 1st Place: Rs. ${r.prizes['1st'].toLocaleString()}
-🥈 2nd Place: Rs. ${r.prizes['2nd'].toLocaleString()}
-🥉 3rd Place: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Killer: Rs. ${r.topKillPrize.toLocaleString()}` : ''}
-
-📊 Total Prize Pool: Rs. ${r.sumPrizes.toLocaleString()}
-
-Register: nepplay.onrender.com`;
-
+            const text = `🔥 TOURNAMENT PRIZE BREAKDOWN\n\n👥 Players: ${r.players}\n💰 Entry Fee: Rs. ${r.fee}\n💵 Total: Rs. ${r.total.toLocaleString()}\n\n🏆 PRIZES:\n🥇 1st: Rs. ${r.prizes['1st'].toLocaleString()}\n🥈 2nd: Rs. ${r.prizes['2nd'].toLocaleString()}\n🥉 3rd: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Killer: Rs. ${r.topKillPrize.toLocaleString()}` : ''}\n\n📊 Prize Pool: Rs. ${r.sum.toLocaleString()}\n\nRegister: nepplay.onrender.com`;
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('copyToast');
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 2000);
-            }).catch(err => {
-                alert("Copy failed. Please copy manually.");
             });
         }
 
-        function pushToTournamentForm() {
-            if (!calcResult) {
-                alert("Calculate first!");
-                return;
-            }
-            const r = calcResult;
-            document.getElementById('t-fee').value = r.fee;
-            document.getElementById('t-prize').value = r.prizes['1st'] + r.prizes['2nd'] + r.prizes['3rd'] + r.topKillPrize;
-            document.getElementById('t-slots').value = r.players;
-
-            // Scroll to form and switch tabs
-            switchTab('add-tournament', document.querySelectorAll('.sidebar-item')[4]);
-            setTimeout(() => {
-                document.getElementById('t-name').focus();
-                document.getElementById('tournament-msg').classList.remove('hidden');
-                document.getElementById('tournament-msg').className = "text-center text-sm mt-4 text-green-400";
-                document.getElementById('tournament-msg').textContent = "✅ Numbers from calculator filled in! Complete the form above.";
-            }, 300);
-        }
-
-        // ==================== TOURNAMENT CREATION ====================
-        function createTournament(event) {
-            event.preventDefault();
-            const newTournament = {
-                id: Date.now(),
-                name: document.getElementById('t-name').value.trim(),
-                game: document.getElementById('t-game').value,
-                mode: document.getElementById('t-mode').value,
-                date: document.getElementById('t-date').value,
-                time: document.getElementById('t-time').value,
-                entryFee: parseInt(document.getElementById('t-fee').value),
-                prizePool: parseInt(document.getElementById('t-prize').value),
-                slotsFilled: 0,
-                slotsTotal: parseInt(document.getElementById('t-slots').value),
-                createdAt: new Date().toISOString()
-            };
-
-            const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            existing.push(newTournament);
-            localStorage.setItem('customTournaments', JSON.stringify(existing));
-
-            const msgBox = document.getElementById('tournament-msg');
-            msgBox.classList.remove('hidden');
-            msgBox.className = "text-center text-sm mt-4 text-green-400";
-            msgBox.textContent = `✅ "${newTournament.name}" created!`;
-            addToCreatedList(newTournament);
-            document.getElementById('tournamentForm').reset();
-            updateDashboardStats();
-            setTimeout(() => msgBox.classList.add('hidden'), 4000);
-        }
-
-        function addToCreatedList(t) {
-            const list = document.getElementById('created-list');
-            if (list.querySelector('td[colspan]')) list.innerHTML = '';
-            const row = document.createElement('tr');
-            row.className = "hover:bg-gray-800/50 transition";
-            row.innerHTML = `
-                <td class="px-6 py-4 text-white font-medium">${t.name}</td>
-                <td class="px-6 py-4 capitalize">${t.game}</td>
-                <td class="px-6 py-4">${t.date} ${t.time}</td>
-                <td class="px-6 py-4 text-green-400 font-bold">Rs. ${t.prizePool}</td>
-            `;
-            list.prepend(row);
-        }
-
-        // ==================== REGISTRATIONS ====================
-        function getRegistrations() { return JSON.parse(localStorage.getItem('userRegistrations') || '[]'); }
-
-        function populateTournamentFilter() {
-            const registrations = getRegistrations();
-            const tournaments = [...new Set(registrations.map(r => r.tournamentName))];
-            const select = document.getElementById('filter-tournament');
-            select.innerHTML = '<option value="all">All Tournaments</option>';
-            tournaments.forEach(t => {
-                const option = document.createElement('option');
-                option.value = t; option.textContent = t;
-                select.appendChild(option);
-            });
-        }
-
-        function renderRegistrations() {
-            const allRegistrations = getRegistrations();
-            const filterTournament = document.getElementById('filter-tournament').value;
-            const filterPayment = document.getElementById('filter-payment-status').value;
-            const searchUser = document.getElementById('search-user').value.toLowerCase();
-
-            let filtered = allRegistrations;
-            if (filterTournament !== 'all') filtered = filtered.filter(r => r.tournamentName === filterTournament);
-            if (filterPayment !== 'all') filtered = filtered.filter(r => (r.paymentStatus || 'free') === filterPayment);
-            if (searchUser) filtered = filtered.filter(r => 
-                r.username.toLowerCase().includes(searchUser) || 
-                (r.ign && r.ign.toLowerCase().includes(searchUser))
-            );
-            filtered = [...filtered].reverse();
-
-            document.getElementById('reg-total-count').textContent = filtered.length;
-
-            const tbody = document.getElementById('registrations-body');
-            const emptyState = document.getElementById('empty-registrations');
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
-            tbody.innerHTML = '';
-
-            filtered.forEach((reg, index) => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
-                
-                let paymentBadge = '';
-                const status = reg.paymentStatus || 'free';
-                if (status === 'verified') paymentBadge = '<span class="status-verified"><i class="fa-solid fa-check-circle mr-1"></i>Verified</span>';
-                else if (status === 'pending-verification') paymentBadge = '<span class="status-pending-verify"><i class="fa-solid fa-clock mr-1"></i>Pending</span>';
-                else if (status === 'rejected') paymentBadge = '<span class="status-rejected"><i class="fa-solid fa-times-circle mr-1"></i>Rejected</span>';
-                else paymentBadge = '<span class="status-free"><i class="fa-solid fa-gift mr-1"></i>Free</span>';
-
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-gray-500 text-xs">#${index + 1}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
-                                ${reg.username.charAt(0).toUpperCase()}
-                            </div>
-                            <span class="font-medium text-white">${reg.username}</span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-gray-300 text-xs">${reg.tournamentName}</td>
-                    <td class="px-4 py-3 text-blue-400 font-bold">${reg.ign || '—'}</td>
-                    <td class="px-4 py-3 text-green-400 font-bold">${reg.entryFee === 0 ? 'FREE' : 'Rs. ' + reg.entryFee}</td>
-                    <td class="px-4 py-3">${paymentBadge}</td>
-                    <td class="px-4 py-3">
-                        <button onclick="viewDetails(${reg.id})" class="text-blue-400 hover:text-blue-300 text-xs font-bold">
-                            <i class="fa-solid fa-eye mr-1"></i>View
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function viewDetails(regId) {
-            const registrations = getRegistrations();
-            const reg = registrations.find(r => r.id === regId);
-            if (!reg) { alert("Registration not found."); return; }
-
-            const status = reg.paymentStatus || 'free';
-            let statusBadge = '';
-            if (status === 'verified') statusBadge = '<span class="status-verified"><i class="fa-solid fa-check-circle mr-1"></i>Verified</span>';
-            else if (status === 'pending-verification') statusBadge = '<span class="status-pending-verify"><i class="fa-solid fa-clock mr-1"></i>Pending Verification</span>';
-            else if (status === 'rejected') statusBadge = '<span class="status-rejected"><i class="fa-solid fa-times-circle mr-1"></i>Rejected</span>';
-            else statusBadge = '<span class="status-free"><i class="fa-solid fa-gift mr-1"></i>Free Tournament</span>';
-
-            const screenshotHtml = reg.paymentScreenshot 
-                ? `<img src="${reg.paymentScreenshot}" class="w-full max-w-md mx-auto rounded-lg border-2 border-green-500/30 cursor-pointer" onclick="window.open(this.src)" alt="Payment Proof">` 
-                : '<p class="text-gray-500 text-sm text-center py-4">No screenshot provided</p>';
-
-            let teammatesHtml = '';
-            if (reg.teammates && reg.teammates.length > 0) {
-                teammatesHtml = `
-                    <div class="mt-4">
-                        <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-users mr-2"></i>Teammates</h3>
-                        <div class="bg-gray-800/50 rounded-lg p-3">
-                            ${reg.teammates.map((t, i) => `
-                                <div class="flex justify-between items-center py-2 border-b border-gray-700 last:border-0">
-                                    <div>
-                                        <p class="text-xs text-gray-400">Teammate ${i + 1}</p>
-                                        <p class="text-white font-bold text-sm">${t.ign}</p>
-                                    </div>
-                                    <p class="text-blue-400 text-xs font-mono">UID: ${t.uid}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            const teamNameHtml = reg.teamName 
-                ? `<div class="detail-row"><span class="detail-label">Team Name</span><span class="detail-value text-yellow-400">${reg.teamName}</span></div>` 
-                : '';
-
-            const txIdHtml = reg.transactionId 
-                ? `<div class="detail-row"><span class="detail-label">Transaction ID</span><span class="detail-value text-green-400 font-mono">${reg.transactionId}</span></div>` 
-                : '';
-
-            const registered = new Date(reg.registeredAt).toLocaleString('en-US', { 
-                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
-            });
-
-            const actionButtonsHtml = (reg.entryFee > 0 && status === 'pending-verification') 
-                ? `
-                    <div class="mt-4 pt-4 border-t border-gray-700 grid grid-cols-2 gap-3">
-                        <button onclick="approvePayment(${reg.id})" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-check-circle mr-1"></i>Approve Payment
-                        </button>
-                        <button onclick="rejectPayment(${reg.id})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition text-sm">
-                            <i class="fa-solid fa-times-circle mr-1"></i>Reject
-                        </button>
-                    </div>
-                ` : '';
-
-            const contactHtml = reg.phone 
-                ? `<a href="https://wa.me/977${reg.phone}" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm text-center mt-4">
-                        <i class="fa-brands fa-whatsapp mr-2"></i>Contact via WhatsApp
-                    </a>` 
-                : '';
-
-            document.getElementById('detailsContent').innerHTML = `
-                <div class="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-4 mb-4 border border-blue-500/30">
-                    <div class="flex justify-between items-center flex-wrap gap-2">
-                        <div>
-                            <p class="text-xs text-gray-400">Registered Player</p>
-                            <p class="font-bold text-white text-lg">${reg.username}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-gray-400">Payment Status</p>
-                            ${statusBadge}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Tournament</h3>
-                    <div class="bg-gray-800/50 rounded-lg p-3">
-                        <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${reg.tournamentName}</span></div>
-                        <div class="detail-row"><span class="detail-label">Game</span><span class="detail-value capitalize">${reg.tournamentGame || '—'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Mode</span><span class="detail-value">${reg.mode || '—'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Entry Fee</span><span class="detail-value text-green-400">${reg.entryFee === 0 ? 'FREE' : 'Rs. ' + reg.entryFee}</span></div>
-                        <div class="detail-row"><span class="detail-label">Registered</span><span class="detail-value text-xs">${registered}</span></div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-user mr-2"></i>Player Details</h3>
-                    <div class="bg-gray-800/50 rounded-lg p-3">
-                        <div class="detail-row"><span class="detail-label">In-Game Name (IGN)</span><span class="detail-value text-blue-400">${reg.ign || '—'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Game UID</span><span class="detail-value text-green-400 font-mono">${reg.uid || '—'}</span></div>
-                        <div class="detail-row"><span class="detail-label">WhatsApp</span><span class="detail-value">${reg.phone || '—'}</span></div>
-                        ${teamNameHtml}
-                    </div>
-                </div>
-
-                ${teammatesHtml}
-
-                ${reg.entryFee > 0 ? `
-                    <div class="mb-4 mt-4">
-                        <h3 class="text-sm font-bold text-white mb-2"><i class="fa-solid fa-money-bill-wave mr-2"></i>Payment Details</h3>
-                        <div class="bg-gray-800/50 rounded-lg p-3 mb-3">${txIdHtml}</div>
-                        <div class="bg-gray-800/50 rounded-lg p-3">
-                            <p class="text-xs text-gray-400 mb-2 text-center">Payment Screenshot</p>
-                            ${screenshotHtml}
-                        </div>
-                    </div>
-                ` : ''}
-
-                ${actionButtonsHtml}
-                ${contactHtml}
-
-                <button onclick="closeDetailsModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition text-sm mt-3">Close</button>
-            `;
-
-            document.getElementById('detailsModal').classList.remove('hidden');
-        }
-
-        function closeDetailsModal() { document.getElementById('detailsModal').classList.add('hidden'); }
-
-        function approvePayment(regId) {
-            if (!confirm("Mark this payment as VERIFIED?")) return;
-            const registrations = getRegistrations();
-            const reg = registrations.find(r => r.id === regId);
-            if (!reg) return;
-            reg.paymentStatus = 'verified';
-            reg.verifiedAt = new Date().toISOString();
-            localStorage.setItem('userRegistrations', JSON.stringify(registrations));
-            alert(`✅ Payment verified for ${reg.username}`);
-            closeDetailsModal();
-            renderRegistrations();
-        }
-
-        function rejectPayment(regId) {
-            if (!confirm("Reject this payment?")) return;
-            const registrations = getRegistrations();
-            const reg = registrations.find(r => r.id === regId);
-            if (!reg) return;
-            reg.paymentStatus = 'rejected';
-            reg.rejectedAt = new Date().toISOString();
-            localStorage.setItem('userRegistrations', JSON.stringify(registrations));
-            alert(`❌ Payment rejected for ${reg.username}`);
-            closeDetailsModal();
-            renderRegistrations();
-        }
-
-        function downloadRegistrationsCSV() {
-            const allRegistrations = getRegistrations();
-            if (allRegistrations.length === 0) { alert("No registrations to download."); return; }
-            let csv = "Username,Email,Phone,Tournament,Game,Mode,IGN,UID,Team Name,Teammates,Entry Fee,Transaction ID,Payment Status,Registered At\n";
-            allRegistrations.forEach(r => {
-                const teammates = r.teammates ? r.teammates.map(t => `${t.ign}(${t.uid})`).join(' | ') : '';
-                const date = new Date(r.registeredAt).toLocaleString();
-                csv += `"${r.username}","${r.email || ''}","${r.phone || ''}","${r.tournamentName}","${r.tournamentGame || ''}","${r.mode || ''}","${r.ign || ''}","${r.uid || ''}","${r.teamName || ''}","${teammates}","${r.entryFee || 0}","${r.transactionId || ''}","${r.paymentStatus || 'free'}","${date}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `nepplay-registrations-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        // ==================== EARNINGS ====================
+        // ============ EARNINGS ============
         let currentPeriod = 'today';
         function setEarningsPeriod(period, btn) {
             currentPeriod = period;
@@ -1459,45 +957,36 @@ Register: nepplay.onrender.com`;
             renderEarnings();
         }
 
-        function filterRegistrationsByPeriod(period) {
-            const allRegs = getRegistrations();
+        function getRegistrations() { return JSON.parse(localStorage.getItem('userRegistrations') || '[]'); }
+
+        function filterByPeriod(period) {
+            const all = getRegistrations();
             const now = new Date();
-            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const startOfWeek = new Date(startOfToday);
-            startOfWeek.setDate(startOfWeek.getDate() - 7);
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            return allRegs.filter(r => {
-                const regDate = new Date(r.registeredAt);
-                if (period === 'today') return regDate >= startOfToday;
-                if (period === 'week') return regDate >= startOfWeek;
-                if (period === 'month') return regDate >= startOfMonth;
+            const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startWeek = new Date(startToday); startWeek.setDate(startWeek.getDate() - 7);
+            const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            return all.filter(r => {
+                const d = new Date(r.registeredAt);
+                if (period === 'today') return d >= startToday;
+                if (period === 'week') return d >= startWeek;
+                if (period === 'month') return d >= startMonth;
                 return true;
             });
         }
 
-        function getEntryFeeForTournament(tournamentName) {
-            const defaults = { "Free Fire Solo Cup #12": 50, "PUBG Squad Championship": 100, "Valorant Night Cup": 150, "COD Mobile Battle Royale": 75, "Free Fire Duo Cup": 40, "PUBG Solo Showdown": 60 };
-            if (defaults[tournamentName]) return defaults[tournamentName];
-            const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            const found = custom.find(t => t.name === tournamentName);
-            return found ? found.entryFee : 0;
-        }
-
         function renderEarnings() {
-            const periodRegs = filterRegistrationsByPeriod(currentPeriod);
-            let totalEarnings = 0, totalCommission = 0, totalPayouts = 0;
-            periodRegs.forEach(r => {
-                const fee = r.entryFee || getEntryFeeForTournament(r.tournamentName);
-                totalEarnings += fee;
-                totalCommission += fee * 0.20;
-                totalPayouts += fee * 0.80;
+            const regs = filterByPeriod(currentPeriod);
+            let total = 0, commission = 0, payouts = 0;
+            regs.forEach(r => {
+                const fee = r.entryFee || 0;
+                total += fee;
+                commission += fee * 0.20;
+                payouts += fee * 0.80;
             });
-            document.getElementById('period-earnings').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
-            document.getElementById('period-commission').textContent = `Rs. ${Math.round(totalCommission).toLocaleString()}`;
-            document.getElementById('period-registrations').textContent = periodRegs.length;
-            document.getElementById('period-payouts').textContent = `Rs. ${Math.round(totalPayouts).toLocaleString()}`;
-            const labels = { today: 'Today', week: 'Last 7 Days', month: 'This Month', all: 'All Time' };
-            document.getElementById('period-label').textContent = labels[currentPeriod];
+            document.getElementById('period-earnings').textContent = `Rs. ${total.toLocaleString()}`;
+            document.getElementById('period-commission').textContent = `Rs. ${Math.round(commission).toLocaleString()}`;
+            document.getElementById('period-registrations').textContent = regs.length;
+            document.getElementById('period-payouts').textContent = `Rs. ${Math.round(payouts).toLocaleString()}`;
             renderBarChart();
         }
 
@@ -1506,157 +995,200 @@ Register: nepplay.onrender.com`;
             chart.innerHTML = '';
             const days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const allRegs = getRegistrations();
+            const all = getRegistrations();
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
-                const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-                const dayEarnings = allRegs.filter(r => { const regDate = new Date(r.registeredAt); return regDate >= dayStart && regDate < dayEnd; })
-                    .reduce((sum, r) => sum + (r.entryFee || getEntryFeeForTournament(r.tournamentName)), 0);
-                days.push({ label: i === 0 ? 'Today' : dayNames[d.getDay()], value: dayEarnings });
+                const s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const e = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+                const earnings = all.filter(r => { const rd = new Date(r.registeredAt); return rd >= s && rd < e; }).reduce((sum, r) => sum + (r.entryFee || 0), 0);
+                days.push({ label: i === 0 ? 'Today' : dayNames[d.getDay()], value: earnings });
             }
-            const maxValue = Math.max(...days.map(d => d.value), 1);
-            let total = 0;
+            const max = Math.max(...days.map(d => d.value), 1);
             days.forEach(day => {
-                total += day.value;
-                const heightPercent = (day.value / maxValue) * 100;
-                const wrapper = document.createElement('div');
-                wrapper.className = 'bar-wrapper';
-                wrapper.innerHTML = `
-                    <span class="bar-value">${day.value > 0 ? 'Rs. ' + day.value : ''}</span>
-                    <div class="bar" style="height: ${Math.max(heightPercent, 3)}%"></div>
-                    <span class="bar-label">${day.label}</span>
-                `;
-                chart.appendChild(wrapper);
+                const hp = (day.value / max) * 100;
+                const w = document.createElement('div');
+                w.className = 'bar-wrapper';
+                w.innerHTML = `<span class="bar-value">${day.value > 0 ? 'Rs.' + day.value : ''}</span><div class="bar" style="height: ${Math.max(hp, 3)}%"></div><span class="bar-label">${day.label}</span>`;
+                chart.appendChild(w);
             });
-            document.getElementById('chart-total-label').textContent = `Total (7 days): Rs. ${total.toLocaleString()}`;
         }
 
-        function exportEarnings() {
-            const periodRegs = filterRegistrationsByPeriod(currentPeriod);
-            if (periodRegs.length === 0) { alert("No earnings data."); return; }
-            let csv = "Date,Username,Tournament,Entry Fee,Commission 20%,Prize Pool 80%\n";
-            periodRegs.forEach(r => {
-                const date = new Date(r.registeredAt).toLocaleString();
-                const fee = r.entryFee || getEntryFeeForTournament(r.tournamentName);
-                csv += `"${date}","${r.username}","${r.tournamentName}","${fee}","${Math.round(fee * 0.20)}","${Math.round(fee * 0.80)}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `nepplay-earnings-${currentPeriod}-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        }
-
-        // ==================== PAYOUTS ====================
+        // ============ PAYOUTS ============
         function getPayouts() { return JSON.parse(localStorage.getItem('payouts') || '[]'); }
-        function savePayouts(payouts) { localStorage.setItem('payouts', JSON.stringify(payouts)); }
+        function savePayouts(p) { localStorage.setItem('payouts', JSON.stringify(p)); }
         function openAddPayoutModal() { document.getElementById('addPayoutModal').classList.remove('hidden'); }
-        function closeAddPayoutModal() {
-            document.getElementById('addPayoutModal').classList.add('hidden');
-            document.getElementById('addPayoutForm').reset();
-        }
-        document.getElementById('addPayoutModal').addEventListener('click', function(e) {
-            if (e.target === this) closeAddPayoutModal();
-        });
+        function closeAddPayoutModal() { document.getElementById('addPayoutModal').classList.add('hidden'); document.getElementById('addPayoutForm').reset(); }
+        document.getElementById('addPayoutModal').addEventListener('click', function(e) { if (e.target === this) closeAddPayoutModal(); });
 
         function addPayout(event) {
             event.preventDefault();
             const payouts = getPayouts();
-            const newPayout = {
+            const newP = {
                 id: Date.now(),
                 username: document.getElementById('p-username').value.trim(),
                 tournament: document.getElementById('p-tournament').value.trim(),
                 rank: document.getElementById('p-rank').value,
                 prize: parseInt(document.getElementById('p-prize').value),
-                method: document.getElementById('p-method').value,
                 status: 'pending',
-                createdAt: new Date().toISOString(),
-                paidAt: null
+                createdAt: new Date().toISOString()
             };
-            payouts.push(newPayout);
+            payouts.push(newP);
             savePayouts(payouts);
             closeAddPayoutModal();
             renderPayouts();
             updatePayoutBadge();
-            alert(`✅ Winner "${newPayout.username}" added!`);
+            alert(`✅ Winner "${newP.username}" added!`);
         }
 
-        function markAsPaid(payoutId) {
+        function markAsPaid(id) {
             const payouts = getPayouts();
-            const payout = payouts.find(p => p.id === payoutId);
-            if (!payout) return;
-            if (!confirm(`Mark Rs. ${payout.prize} to ${payout.username} as PAID?`)) return;
-            payout.status = 'paid';
-            payout.paidAt = new Date().toISOString();
+            const p = payouts.find(x => x.id === id);
+            if (!p || !confirm(`Mark Rs. ${p.prize} to ${p.username} as PAID?`)) return;
+            p.status = 'paid';
+            p.paidAt = new Date().toISOString();
             savePayouts(payouts);
             renderPayouts();
             updatePayoutBadge();
         }
 
-        function deletePayout(payoutId) {
+        function deletePayout(id) {
             if (!confirm("Delete this payout record?")) return;
-            const payouts = getPayouts().filter(p => p.id !== payoutId);
-            savePayouts(payouts);
+            savePayouts(getPayouts().filter(p => p.id !== id));
             renderPayouts();
             updatePayoutBadge();
         }
 
         function renderPayouts() {
-            const allPayouts = getPayouts();
-            const statusFilter = document.getElementById('payout-status-filter').value;
-            const search = document.getElementById('payout-search').value.toLowerCase();
-
-            let filtered = allPayouts;
-            if (statusFilter !== 'all') filtered = filtered.filter(p => p.status === statusFilter);
-            if (search) filtered = filtered.filter(p => p.username.toLowerCase().includes(search));
-            filtered = [...filtered].reverse();
-
-            const totalPaid = allPayouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.prize, 0);
-            const totalPending = allPayouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.prize, 0);
-            document.getElementById('payout-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
-            document.getElementById('payout-total-pending').textContent = `Rs. ${totalPending.toLocaleString()}`;
-            document.getElementById('payout-total-winners').textContent = allPayouts.length;
-
+            const all = getPayouts();
             const tbody = document.getElementById('payouts-body');
-            const emptyState = document.getElementById('empty-payouts');
-            if (filtered.length === 0) {
+            const empty = document.getElementById('empty-payouts');
+
+            if (all.length === 0) {
                 tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
+                empty.classList.remove('hidden');
                 return;
             }
-            emptyState.classList.add('hidden');
+            empty.classList.add('hidden');
             tbody.innerHTML = '';
-            filtered.forEach(p => {
+
+            [...all].reverse().forEach(p => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
-                const statusBadge = p.status === 'paid' 
-                    ? `<span class="payout-paid"><i class="fa-solid fa-check-circle mr-1"></i>Paid</span>` 
-                    : `<span class="payout-pending"><i class="fa-solid fa-clock mr-1"></i>Pending</span>`;
-                const actionBtn = p.status === 'pending'
-                    ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1 rounded transition"><i class="fa-solid fa-check mr-1"></i>Mark Paid</button>`
+                const badge = p.status === 'paid' ? '<span class="payout-paid">Paid</span>' : '<span class="payout-pending">Pending</span>';
+                const action = p.status === 'pending'
+                    ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">Paid</button>`
                     : `<span class="text-xs text-gray-500">${new Date(p.paidAt).toLocaleDateString()}</span>`;
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white">${p.username}</td>
-                    <td class="px-6 py-4 text-gray-300">${p.tournament}</td>
-                    <td class="px-6 py-4 text-yellow-400 font-bold">${p.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${p.prize}</td>
-                    <td class="px-6 py-4">${statusBadge}</td>
-                    <td class="px-6 py-4 flex items-center gap-2">${actionBtn}<button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${p.username}</td>
+                    <td class="px-4 py-3 text-gray-300 text-xs">${p.tournament}</td>
+                    <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize}</td>
+                    <td class="px-4 py-3">${badge}</td>
+                    <td class="px-4 py-3 flex items-center gap-2 flex-wrap">${action}<button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
         function updatePayoutBadge() {
-            const pendingCount = getPayouts().filter(p => p.status === 'pending').length;
+            const pending = getPayouts().filter(p => p.status === 'pending').length;
             const badge = document.getElementById('payout-badge');
-            if (pendingCount > 0) { badge.textContent = pendingCount; badge.classList.remove('hidden'); }
+            if (pending > 0) { badge.textContent = pending; badge.classList.remove('hidden'); }
             else badge.classList.add('hidden');
         }
 
-        // ==================== ANNOUNCEMENTS ====================
+        // ============ REGISTRATIONS ============
+        function renderRegistrations() {
+            const all = getRegistrations();
+            const tbody = document.getElementById('registrations-body');
+            const empty = document.getElementById('empty-registrations');
+
+            if (all.length === 0) {
+                tbody.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            tbody.innerHTML = '';
+
+            [...all].reverse().forEach(reg => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                const status = reg.paymentStatus || 'free';
+                let badge = '';
+                if (status === 'verified') badge = '<span class="status-verified">Verified</span>';
+                else if (status === 'pending-verification') badge = '<span class="status-pending-verify">Pending</span>';
+                else if (status === 'rejected') badge = '<span class="status-rejected">Rejected</span>';
+                else badge = '<span class="status-free">Free</span>';
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-white text-sm font-medium">${reg.username}</td>
+                    <td class="px-4 py-3 text-gray-300 text-xs">${reg.tournamentName}</td>
+                    <td class="px-4 py-3 text-blue-400 font-bold text-sm">${reg.ign || '—'}</td>
+                    <td class="px-4 py-3">${badge}</td>
+                    <td class="px-4 py-3"><button onclick="viewDetails(${reg.id})" class="text-blue-400 hover:text-blue-300 text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i>View</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function viewDetails(id) {
+            const reg = getRegistrations().find(r => r.id === id);
+            if (!reg) return;
+            const status = reg.paymentStatus || 'free';
+            const statusBadge = status === 'verified' ? '<span class="status-verified">Verified</span>' : status === 'pending-verification' ? '<span class="status-pending-verify">Pending</span>' : status === 'rejected' ? '<span class="status-rejected">Rejected</span>' : '<span class="status-free">Free</span>';
+            const screenshot = reg.paymentScreenshot ? `<img src="${reg.paymentScreenshot}" class="w-full max-w-md mx-auto rounded-lg cursor-pointer" onclick="window.open(this.src)">` : '<p class="text-gray-500 text-sm text-center py-4">No screenshot</p>';
+            
+            let teammates = '';
+            if (reg.teammates && reg.teammates.length > 0) {
+                teammates = `<div class="mt-4"><h3 class="text-sm font-bold text-white mb-2">Teammates</h3><div class="bg-gray-800/50 rounded-lg p-3">${reg.teammates.map((t, i) => `<div class="flex justify-between py-1"><span class="text-xs text-gray-400">#${i + 1}</span><span class="text-white text-sm">${t.ign}</span><span class="text-blue-400 text-xs font-mono">${t.uid}</span></div>`).join('')}</div></div>`;
+            }
+
+            const actionBtns = (reg.entryFee > 0 && status === 'pending-verification') 
+                ? `<div class="grid grid-cols-2 gap-3 mt-4"><button onclick="approvePayment(${reg.id})" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-sm">✓ Approve</button><button onclick="rejectPayment(${reg.id})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg text-sm">✗ Reject</button></div>` 
+                : '';
+
+            const contactBtn = reg.phone ? `<a href="https://wa.me/977${reg.phone}" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm text-center mt-4"><i class="fa-brands fa-whatsapp mr-2"></i>Contact</a>` : '';
+
+            alert(`📋 REGISTRATION DETAILS\n\n👤 ${reg.username}\n🎮 ${reg.tournamentName}\n🎯 IGN: ${reg.ign}\n🆔 UID: ${reg.uid}\n📱 Phone: ${reg.phone}\n💰 Fee: Rs. ${reg.entryFee || 0}\n${reg.transactionId ? '🧾 TxID: ' + reg.transactionId : ''}\n\nStatus: ${status}`);
+        }
+
+        function approvePayment(id) {
+            if (!confirm("Approve this payment?")) return;
+            const regs = getRegistrations();
+            const r = regs.find(x => x.id === id);
+            if (!r) return;
+            r.paymentStatus = 'verified';
+            localStorage.setItem('userRegistrations', JSON.stringify(regs));
+            renderRegistrations();
+        }
+
+        function rejectPayment(id) {
+            if (!confirm("Reject this payment?")) return;
+            const regs = getRegistrations();
+            const r = regs.find(x => x.id === id);
+            if (!r) return;
+            r.paymentStatus = 'rejected';
+            localStorage.setItem('userRegistrations', JSON.stringify(regs));
+            renderRegistrations();
+        }
+
+        function downloadRegistrationsCSV() {
+            const all = getRegistrations();
+            if (all.length === 0) { alert("No registrations."); return; }
+            let csv = "Username,Tournament,IGN,UID,Phone,Entry Fee,Status,Date\n";
+            all.forEach(r => {
+                csv += `"${r.username}","${r.tournamentName}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.entryFee || 0}","${r.paymentStatus || 'free'}","${new Date(r.registeredAt).toLocaleString()}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `registrations-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // ============ ANNOUNCEMENTS ============
         let currentImageData = null;
 
         function handleImageUpload(event) {
@@ -1664,7 +1196,7 @@ Register: nepplay.onrender.com`;
             if (!file) return;
             if (file.size > 2 * 1024 * 1024) { alert("Image too large (max 2MB)"); return; }
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = e => {
                 currentImageData = e.target.result;
                 document.getElementById('uploadPlaceholder').classList.add('hidden');
                 document.getElementById('uploadPreview').classList.remove('hidden');
@@ -1679,27 +1211,12 @@ Register: nepplay.onrender.com`;
             document.getElementById('imageInput').value = '';
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             document.getElementById('uploadPreview').classList.add('hidden');
-            updatePreview();
         }
 
         function updatePreview() {
-            const title = document.getElementById('a-title').value || 'Your Title';
-            const message = document.getElementById('a-message').value || 'Your message...';
-            const priority = document.getElementById('a-priority').value;
-            document.getElementById('previewTitle').textContent = title;
-            document.getElementById('previewMessage').textContent = message;
-            const preview = document.getElementById('livePreview');
-            let borderColor = '#3b82f6';
-            if (priority === 'high') borderColor = '#facc15';
-            else if (priority === 'urgent') borderColor = '#ef4444';
-            preview.style.borderLeftColor = borderColor;
-            const imgContainer = document.getElementById('previewImageContainer');
-            if (currentImageData) {
-                imgContainer.classList.remove('hidden');
-                document.getElementById('previewImg').src = currentImageData;
-            } else {
-                imgContainer.classList.add('hidden');
-            }
+            const title = document.getElementById('a-title').value || 'Title';
+            const msg = document.getElementById('a-message').value || 'Message...';
+            // Just update for form, not visible preview
         }
 
         function createAnnouncement(event) {
@@ -1707,96 +1224,89 @@ Register: nepplay.onrender.com`;
             const title = document.getElementById('a-title').value.trim();
             const message = document.getElementById('a-message').value.trim();
             const priority = document.getElementById('a-priority').value;
-            const msgBox = document.getElementById('announcement-msg');
+            const msg = document.getElementById('announcement-msg');
+
             if (!title || !message) {
-                msgBox.classList.remove('hidden');
-                msgBox.className = "text-center text-sm mt-4 text-red-400";
-                msgBox.textContent = "Title and message required.";
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.textContent = "Title and message required.";
                 return;
             }
-            const newAnnouncement = { id: Date.now(), title, message, priority, image: currentImageData, createdAt: new Date().toISOString() };
-            const existing = JSON.parse(localStorage.getItem('announcements') || '[]');
-            existing.push(newAnnouncement);
-            try { localStorage.setItem('announcements', JSON.stringify(existing)); }
-            catch (e) { alert("Storage full! Use smaller images."); return; }
-            msgBox.classList.remove('hidden');
-            msgBox.className = "text-center text-sm mt-4 text-green-400";
-            msgBox.textContent = `✅ "${title}" published!`;
-            addAnnouncementCard(newAnnouncement);
+
+            const a = { id: Date.now(), title, message, priority, image: currentImageData, createdAt: new Date().toISOString() };
+            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
+            all.push(a);
+            try { localStorage.setItem('announcements', JSON.stringify(all)); }
+            catch(e) { alert("Storage full!"); return; }
+
+            msg.classList.remove('hidden');
+            msg.className = "text-center text-sm mt-4 text-green-400";
+            msg.textContent = `✅ Published!`;
             document.getElementById('announcementForm').reset();
             removeImage();
-            updatePreview();
-            setTimeout(() => msgBox.classList.add('hidden'), 4000);
+            renderAnnouncements();
+            setTimeout(() => msg.classList.add('hidden'), 3000);
         }
 
-        function addAnnouncementCard(a) {
-            const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
+        function renderAnnouncements() {
             const list = document.getElementById('announcements-list');
-            if (list.querySelector('.no-announcements')) list.querySelector('.no-announcements').remove();
-            const card = document.createElement('div');
-            card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colorMap[a.priority]}`;
-            const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            const imageHtml = a.image ? `<img src="${a.image}" class="w-full h-32 object-cover" alt="">` : '';
-            card.innerHTML = `
-                ${imageHtml}
-                <div class="p-4">
-                    <div class="flex justify-between items-start gap-2">
-                        <h3 class="font-bold text-white text-sm flex-grow">${a.title}</h3>
-                        <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
+            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
+            if (all.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-500 text-sm py-6">No announcements yet.</p>';
+                return;
+            }
+            const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
+            list.innerHTML = '';
+            [...all].reverse().forEach(a => {
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-lg overflow-hidden border-l-4 ${colors[a.priority]}`;
+                const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                card.innerHTML = `
+                    ${a.image ? `<img src="${a.image}" class="w-full h-24 object-cover">` : ''}
+                    <div class="p-3">
+                        <div class="flex justify-between items-start gap-2">
+                            <h3 class="font-bold text-white text-sm">${a.title}</h3>
+                            <button onclick="deleteAnnouncement(${a.id})" class="text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">${a.message}</p>
+                        <p class="text-xs text-gray-500 mt-2">${date}</p>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">${a.message}</p>
-                    <p class="text-xs text-gray-500 mt-3">${date}</p>
-                </div>
-            `;
-            list.prepend(card);
+                `;
+                list.appendChild(card);
+            });
         }
 
         function deleteAnnouncement(id) {
-            if (!confirm("Delete this announcement?")) return;
-            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]').filter(a => a.id !== id);
-            localStorage.setItem('announcements', JSON.stringify(announcements));
-            document.getElementById('announcements-list').innerHTML = '';
-            announcements.reverse().forEach(a => addAnnouncementCard(a));
-            if (announcements.length === 0) {
-                document.getElementById('announcements-list').innerHTML = '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
-            }
+            if (!confirm("Delete?")) return;
+            const all = JSON.parse(localStorage.getItem('announcements') || '[]').filter(a => a.id !== id);
+            localStorage.setItem('announcements', JSON.stringify(all));
+            renderAnnouncements();
         }
 
-        function clearAllAnnouncements() {
-            if (!confirm("Delete ALL announcements?")) return;
-            localStorage.removeItem('announcements');
-            document.getElementById('announcements-list').innerHTML = '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
-        }
-
-        // ==================== DASHBOARD ====================
+        // ============ DASHBOARD ============
         function updateDashboardStats() {
-            const tournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            const registrations = getRegistrations();
-            document.getElementById('active-tournaments-count').textContent = tournaments.length;
-            document.getElementById('total-registrations').textContent = registrations.length;
-            const totalEarnings = registrations.reduce((sum, r) => sum + (r.entryFee || getEntryFeeForTournament(r.tournamentName)), 0);
-            document.getElementById('dash-total-earnings').textContent = `Rs. ${totalEarnings.toLocaleString()}`;
+            const t = getCustomTournaments();
+            const r = getRegistrations();
+            const p = getPayouts().filter(x => x.status === 'pending');
+            document.getElementById('active-tournaments-count').textContent = t.length;
+            document.getElementById('total-registrations').textContent = r.length;
+            document.getElementById('pending-payouts-count').textContent = p.length;
+            const total = r.reduce((s, x) => s + (x.entryFee || 0), 0);
+            document.getElementById('dash-total-earnings').textContent = `Rs. ${total.toLocaleString()}`;
             const badge = document.getElementById('reg-count-badge');
-            if (registrations.length > 0) { badge.textContent = registrations.length; badge.classList.remove('hidden'); }
+            if (r.length > 0) { badge.textContent = r.length; badge.classList.remove('hidden'); }
         }
 
-        // ==================== INIT ====================
         function initializePanel() {
-            const existing = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            existing.reverse().forEach(t => addToCreatedList(t));
-            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-            if (announcements.length === 0) {
-                document.getElementById('announcements-list').innerHTML = '<p class="no-announcements text-center text-gray-500 text-sm col-span-full py-8">No announcements yet.</p>';
-            } else {
-                announcements.reverse().forEach(a => addAnnouncementCard(a));
-            }
+            renderAdminTournaments();
             updateDashboardStats();
             updatePayoutBadge();
             renderEarnings();
             renderPayouts();
+            renderAnnouncements();
         }
 
-        window.onload = function() { checkAuthOnLoad(); };
+        window.onload = checkAuthOnLoad;
     </script>
 </body>
 </html>
