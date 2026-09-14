@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournaments - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
+    <title>Tournaments - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .tournament-card { transition: transform 0.2s, box-shadow 0.2s; }
@@ -20,175 +23,124 @@
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
         .modal-overlay { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
-        .form-input {
-            background-color: #1e293b;
-            color: #e2e8f0;
-            border: 2px solid #334155;
-            transition: all 0.2s;
-        }
+        .form-input { background-color: #1e293b; color: #e2e8f0; border: 2px solid #334155; transition: all 0.2s; }
         .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .form-input::placeholder { color: #64748b; }
         .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
-        
         .form-input.valid { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
         .form-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .modal-content { animation: slideUp 0.3s ease-out; }
 
-        .validation-message {
-            font-size: 0.7rem;
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            min-height: 16px;
-        }
+        .validation-message { font-size: 0.7rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; min-height: 16px; }
         .validation-message.success { color: #4ade80; }
         .validation-message.error { color: #f87171; }
 
-        .upload-zone {
-            border: 2px dashed #334155;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: rgba(30, 41, 59, 0.5);
-        }
+        .upload-zone { border: 2px dashed #334155; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; background-color: rgba(30, 41, 59, 0.5); }
         .upload-zone:hover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
-        .upload-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
         .upload-zone.has-image { border-style: solid; border-color: #22c55e; background-color: rgba(34, 197, 94, 0.05); }
 
-        .qr-box {
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            transition: transform 0.2s;
-        }
+        .qr-box { background: white; border-radius: 12px; padding: 10px; transition: transform 0.2s; }
         .qr-box:hover { transform: scale(1.05); }
         .qr-box img { width: 130px; height: 130px; display: block; }
+        @media (max-width: 400px) { .qr-box img { width: 110px; height: 110px; } }
 
         .copy-btn { transition: all 0.2s; }
         .copy-btn:hover { background-color: rgba(59, 130, 246, 0.2); }
         .copy-btn.copied { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
-        /* Floating Support Button */
-        .floating-support {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            z-index: 100;
-        }
+        .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
         .support-btn {
-            width: 60px;
-            height: 60px;
+            width: 56px; height: 56px;
             background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 26px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 24px;
             box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer;
-            transition: all 0.3s;
+            cursor: pointer; transition: all 0.3s;
             animation: pulse-support 2s infinite;
         }
-        .support-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6);
-        }
+        .support-btn:hover { transform: scale(1.1); }
         @keyframes pulse-support {
             0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
             50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
         }
         .support-menu {
-            display: none;
-            position: absolute;
-            bottom: 75px;
-            left: 0;
-            width: 260px;
-            background: #1e293b;
-            border-radius: 12px;
+            display: none; position: absolute; bottom: 68px; left: 0;
+            width: 240px; max-width: calc(100vw - 48px);
+            background: #1e293b; border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             overflow: hidden;
         }
         .support-menu.open { display: block; }
         .support-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            color: #e2e8f0;
-            text-decoration: none;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; color: #e2e8f0;
+            text-decoration: none; transition: all 0.2s;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
         }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
+
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open {
+            display: flex; flex-direction: column;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px; gap: 8px; z-index: 60;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        @media (min-width: 768px) {
+            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+        }
+
+        .empty-state-box {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px dashed rgba(148, 163, 184, 0.3);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support Button -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
                 <p class="text-white font-bold text-sm">Need Help? 🆘</p>
                 <p class="text-xs text-gray-400">Choose how to reach us</p>
             </div>
-            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
-                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <i class="fa-brands fa-whatsapp text-green-400 text-lg"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Chat Privately</p>
-                    <p class="text-xs text-gray-500">1-on-1 with admin</p>
-                </div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20have%20a%20question%20about%20Nepal%20Gaming." target="_blank" class="support-menu-item wa">
+                <div class="w-9 h-9 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-whatsapp text-green-400"></i></div>
+                <div><p class="text-sm font-bold">Chat Privately</p><p class="text-xs text-gray-500">1-on-1 with admin</p></div>
             </a>
             <a href="support.html" class="support-menu-item">
-                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
-                    <i class="fa-solid fa-headset text-pink-400"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Support Page</p>
-                    <p class="text-xs text-gray-500">Full help center</p>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-pink-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-pink-400"></i></div>
+                <div><p class="text-sm font-bold">Support Page</p><p class="text-xs text-gray-500">Full help center</p></div>
             </a>
             <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
-                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <i class="fa-solid fa-users text-purple-400"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Join Community</p>
-                    <p class="text-xs text-gray-500">Public group chat</p>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-users text-purple-400"></i></div>
+                <div><p class="text-sm font-bold">Join Community</p><p class="text-xs text-gray-500">Public group chat</p></div>
             </a>
         </div>
-        <div class="support-btn" onclick="toggleSupportMenu()">
-            <i class="fa-solid fa-headset"></i>
-        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
-            </div>
+    <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
+        <div class="flex items-center gap-3 min-w-0">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+            <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
 
             <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                    <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                    <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
+                    <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
                     <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                 </button>
                 <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
@@ -198,8 +150,6 @@
                     </div>
                     <div class="py-1">
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                        <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -209,74 +159,114 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-blue-400 font-bold">Tournaments</a>
-            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
-            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+            <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+        </button>
+
+        <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+            <a href="tournaments.html" class="text-sm text-blue-400 font-bold px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+            <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Support</a>
+            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
         </div>
     </nav>
 
-    <main class="flex-grow container mx-auto p-6">
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
         
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-3"></i>Active Tournaments</h1>
-            <p class="text-gray-400">Browse and register for upcoming esports tournaments. Win real cash prizes!</p>
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="inline-block bg-blue-500/20 border border-blue-500/40 rounded-full px-3 py-1 text-xs font-bold text-blue-400 mb-3">
+                <i class="fa-solid fa-calendar-day mr-1"></i> Launching Soon
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Tournaments</h1>
+            <p class="text-sm sm:text-base text-gray-400">Our first tournaments are opening very soon. Register now to be notified!</p>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-3 mb-8">
-            <button class="filter-btn active px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('all', this)">All Games</button>
-            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('freefire', this)">Free Fire</button>
-            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('pubg', this)">PUBG Mobile</button>
-            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('valorant', this)">Valorant</button>
-            <button class="filter-btn px-4 py-2 rounded-full border border-gray-600 text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('cod', this)">COD Mobile</button>
+        <div class="flex flex-wrap justify-center gap-2 mb-6 sm:mb-8">
+            <button class="filter-btn active px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('all', this)">All Games</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('freefire', this)">Free Fire</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('pubg', this)">PUBG</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('cod', this)">COD</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('efootball', this)">eFootball</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('ecricket', this)">eCricket</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('valorant', this)">Valorant</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('ludo', this)">Ludo</button>
+            <button class="filter-btn px-3 py-2 rounded-full border border-gray-600 text-xs sm:text-sm font-semibold hover:border-blue-500 transition" onclick="filterTournaments('chess', this)">Chess</button>
         </div>
 
-        <div id="tournament-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="tournament-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
 
-        <div id="no-results" class="hidden text-center py-20">
-            <i class="fa-solid fa-ghost text-5xl text-gray-600 mb-4"></i>
-            <p class="text-gray-500 text-lg">No tournaments found for this game.</p>
+        <div id="empty-state" class="empty-state-box max-w-2xl mx-auto mt-4">
+            <div class="text-5xl sm:text-6xl mb-4">🎮</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Tournaments Yet</h2>
+            <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">We're preparing our first tournaments with FREE entry and real prizes. Register your account now and you'll be the first to know when slots open.</p>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="register.html" class="btn-primary text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-user-plus"></i> Register Now
+                </a>
+                <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-whatsapp text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                    <i class="fa-brands fa-whatsapp"></i> Join WhatsApp
+                </a>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-700">
+                <p class="text-xs text-gray-500 mb-3">Games coming soon:</p>
+                <div class="flex flex-wrap gap-2 justify-center text-xs">
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">🔥 Free Fire</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">🎯 PUBG</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">💣 COD</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">⚽ eFootball</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">🏏 eCricket</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">⚔️ Valorant</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">🎲 Ludo</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full text-gray-300">♟️ Chess</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-results" class="hidden text-center py-16">
+            <i class="fa-solid fa-ghost text-4xl sm:text-5xl text-gray-600 mb-4"></i>
+            <p class="text-gray-500 text-sm sm:text-base">No tournaments found for this game yet.</p>
         </div>
     </main>
 
-    <footer class="glass-panel w-full p-4 text-center text-sm text-gray-500 mt-8">
-        &copy; 2023 Nepal Gaming Platform. All rights reserved.
+    <footer class="glass-panel w-full p-5 sm:p-6 mt-8">
+        <div class="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-blue-500 text-xl"></i>
+                <span class="font-bold text-white">Nepal Gaming</span>
+            </div>
+            <div class="text-xs sm:text-sm text-gray-500 text-center">© 2026 Nepal Gaming. All rights reserved.</div>
+        </div>
     </footer>
 
     <!-- REGISTRATION MODAL -->
-    <div id="registrationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+    <div id="registrationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-overlay">
         <div class="glass-panel rounded-xl w-full max-w-lg modal-content max-h-[90vh] overflow-y-auto">
             
-            <div class="p-6 border-b border-gray-700 sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 class="text-xl font-bold text-white" id="modalTitle">Register for Tournament</h2>
-                        <p class="text-sm text-gray-400 mt-1" id="modalSubtitle">Fill in your details to confirm registration</p>
+            <div class="p-4 sm:p-6 border-b border-gray-700 sticky top-0 bg-slate-800/95 backdrop-blur-sm z-10">
+                <div class="flex justify-between items-start gap-2">
+                    <div class="min-w-0">
+                        <h2 class="text-lg sm:text-xl font-bold text-white" id="modalTitle">Register for Tournament</h2>
+                        <p class="text-xs sm:text-sm text-gray-400 mt-1" id="modalSubtitle">Fill in your details to confirm registration</p>
                     </div>
-                    <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-white transition">
+                    <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-white transition flex-shrink-0">
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="registrationForm" onsubmit="submitRegistration(event)" class="p-6" novalidate>
+            <form id="registrationForm" onsubmit="submitRegistration(event)" class="p-4 sm:p-6" novalidate>
                 
-                <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-5">
+                <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 sm:p-4 mb-4">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-gray-400 uppercase">Tournament</span>
                         <span class="text-xs text-gray-400 uppercase">Entry Fee</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-white" id="regTournamentName">Tournament Name</span>
-                        <span class="font-bold text-green-400" id="regTournamentFee">Rs. 0</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-1">
-                        <span class="text-xs text-gray-400"><i class="fa-solid fa-gamepad mr-1"></i><span id="regTournamentMode">Mode</span></span>
-                        <span class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i><span id="regTournamentTime">Time</span></span>
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="font-bold text-white text-sm truncate" id="regTournamentName">Tournament Name</span>
+                        <span class="font-bold text-green-400 text-sm flex-shrink-0" id="regTournamentFee">Rs. 0</span>
                     </div>
                 </div>
 
@@ -285,9 +275,7 @@
 
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-2">
-                        <label class="text-sm font-medium text-gray-300">
-                            In-Game Name (IGN) <span class="text-red-400">*</span>
-                        </label>
+                        <label class="text-sm font-medium text-gray-300">In-Game Name (IGN) <span class="text-red-400">*</span></label>
                         <span class="text-xs text-gray-500" id="ignCount">0/20</span>
                     </div>
                     <input type="text" id="regIgn" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., AmitOP123" maxlength="20" autocomplete="off">
@@ -295,177 +283,109 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Game UID <span class="text-red-400">*</span>
-                    </label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Game UID <span class="text-red-400">*</span></label>
                     <input type="text" id="regUid" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Loading..." maxlength="15" autocomplete="off">
                     <div class="validation-message" id="uidMessage"></div>
                 </div>
 
                 <div id="teamSection" class="hidden">
                     <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-yellow-300">
-                            <i class="fa-solid fa-users mr-1"></i>
-                            <strong id="modeName">Team</strong> tournament — You must provide your team details.
-                        </p>
+                        <p class="text-xs text-yellow-300"><i class="fa-solid fa-users mr-1"></i><strong id="modeName">Team</strong> tournament</p>
                     </div>
-
                     <div class="mb-4">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="text-sm font-medium text-gray-300">
-                                Team Name <span class="text-red-400">*</span>
-                            </label>
+                            <label class="text-sm font-medium text-gray-300">Team Name <span class="text-red-400">*</span></label>
                             <span class="text-xs text-gray-500" id="teamCount">0/20</span>
                         </div>
                         <input type="text" id="regTeamName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Kathmandu Kings" maxlength="20" autocomplete="off">
                         <div class="validation-message" id="teamNameMessage"></div>
                     </div>
-
                     <div id="teammatesContainer"></div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        WhatsApp Number <span class="text-red-400">*</span>
-                    </label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">WhatsApp Number <span class="text-red-400">*</span></label>
                     <input type="tel" id="regPhone" class="form-input w-full px-4 py-3 rounded-lg" placeholder="97XXXXXXXX or 98XXXXXXXX" maxlength="10" autocomplete="off">
                     <div class="validation-message" id="phoneMessage"></div>
                 </div>
 
                 <div id="paymentSection" class="hidden">
-                    <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                        <p class="text-sm text-red-300 font-bold mb-3">
-                            <i class="fa-solid fa-money-bill-wave mr-2"></i>Payment Required: Rs. <span id="paymentAmount">0</span>
-                        </p>
-                        <p class="text-xs text-red-200 mb-4">
-                            Send Rs. <span id="paymentAmount3">0</span> using any method below:
-                        </p>
-
-                        <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 sm:p-4 mb-4">
+                        <p class="text-sm text-red-300 font-bold mb-3"><i class="fa-solid fa-money-bill-wave mr-2"></i>Payment: Rs. <span id="paymentAmount">0</span></p>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
                             <div class="text-center">
-                                <p class="text-xs text-green-400 font-bold mb-2">
-                                    <i class="fa-solid fa-mobile-screen mr-1"></i>eSewa
-                                </p>
+                                <p class="text-xs text-green-400 font-bold mb-2">eSewa</p>
                                 <div class="qr-box mx-auto">
-                                    <img src="images/esewa-qr.png" alt="eSewa QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found</div>'">
+                                    <img src="images/esewa-qr.png" alt="eSewa QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:15px;font-size:11px;text-align:center;\'>QR not found</div>'">
                                 </div>
-                                <button type="button" onclick="copyToClipboard('9748835184', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
-                                    <i class="fa-solid fa-copy mr-1"></i>9748835184
-                                </button>
+                                <button type="button" onclick="copyToClipboard('9748835184', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition"><i class="fa-solid fa-copy mr-1"></i>9748835184</button>
                             </div>
-
                             <div class="text-center">
-                                <p class="text-xs text-purple-400 font-bold mb-2">
-                                    <i class="fa-solid fa-mobile-screen mr-1"></i>Khalti
-                                </p>
+                                <p class="text-xs text-purple-400 font-bold mb-2">Khalti</p>
                                 <div class="qr-box mx-auto">
-                                    <img src="images/khalti-qr.png" alt="Khalti QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found</div>'">
+                                    <img src="images/khalti-qr.png" alt="Khalti QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:15px;font-size:11px;text-align:center;\'>QR not found</div>'">
                                 </div>
-                                <button type="button" onclick="copyToClipboard('9766258368', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
-                                    <i class="fa-solid fa-copy mr-1"></i>9766258368
-                                </button>
+                                <button type="button" onclick="copyToClipboard('9766258368', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition"><i class="fa-solid fa-copy mr-1"></i>9766258368</button>
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">
-                            Transaction ID <span class="text-red-400">*</span>
-                        </label>
-                        <input type="text" id="regTransactionId" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890 (from SMS)" maxlength="30" autocomplete="off">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Transaction ID <span class="text-red-400">*</span></label>
+                        <input type="text" id="regTransactionId" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890" maxlength="30" autocomplete="off">
                         <div class="validation-message" id="transactionMessage"></div>
                     </div>
-
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">
-                            Payment Screenshot <span class="text-red-400">*</span>
-                        </label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Payment Screenshot <span class="text-red-400">*</span></label>
                         <div class="upload-zone" id="paymentUploadZone" onclick="document.getElementById('paymentScreenshotInput').click()">
                             <input type="file" id="paymentScreenshotInput" accept="image/*" onchange="handlePaymentScreenshot(event)" class="hidden">
                             <div id="paymentUploadPlaceholder">
-                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-500 mb-2"></i>
-                                <p class="text-sm text-gray-400">Click to upload payment screenshot</p>
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-500 mb-2"></i>
+                                <p class="text-sm text-gray-400">Click to upload</p>
                                 <p class="text-xs text-gray-500 mt-1">PNG, JPG (max 1MB)</p>
                             </div>
                             <div id="paymentUploadPreview" class="hidden">
                                 <img id="paymentScreenshotPreview" class="max-h-40 mx-auto rounded-lg mb-3" src="">
-                                <button type="button" onclick="event.stopPropagation(); removePaymentScreenshot()" class="text-red-400 hover:text-red-300 text-sm">
-                                    <i class="fa-solid fa-trash mr-1"></i>Remove Image
-                                </button>
+                                <button type="button" onclick="event.stopPropagation(); removePaymentScreenshot()" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash mr-1"></i>Remove</button>
                             </div>
                         </div>
                         <div class="validation-message" id="screenshotMessage"></div>
                     </div>
-
                     <label class="flex items-start gap-2 cursor-pointer mb-4">
-                        <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded">
-                        <span class="text-sm text-gray-300">
-                            I confirm that I have paid <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong> and the proof provided is accurate.
-                        </span>
+                        <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded flex-shrink-0">
+                        <span class="text-xs sm:text-sm text-gray-300">I confirm I paid <strong class="text-red-400">Rs. <span id="paymentAmount2">0</span></strong></span>
                     </label>
                 </div>
 
-                <label class="flex items-start gap-2 cursor-pointer mb-6">
-                    <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded">
-                    <span class="text-sm text-gray-300">
-                        I agree to the tournament rules and confirm all information provided is accurate.
-                    </span>
+                <label class="flex items-start gap-2 cursor-pointer mb-5">
+                    <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded flex-shrink-0">
+                    <span class="text-xs sm:text-sm text-gray-300">I agree to the tournament rules</span>
                 </label>
 
                 <p id="regError" class="hidden text-center text-sm mb-4 text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3"></p>
 
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeRegistrationModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
-                        Cancel
-                    </button>
-                    <button type="submit" id="regSubmitBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
-                        <i class="fa-solid fa-check mr-2"></i>Confirm Registration
-                    </button>
+                <div class="flex gap-2 sm:gap-3">
+                    <button type="button" onclick="closeRegistrationModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition text-sm">Cancel</button>
+                    <button type="submit" id="regSubmitBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition text-sm"><i class="fa-solid fa-check mr-2"></i>Confirm</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SUCCESS MODAL -->
-    <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
-        <div class="glass-panel rounded-xl w-full max-w-md p-8 text-center modal-content">
-            <div class="w-20 h-20 mx-auto bg-green-500/20 border-4 border-green-500 rounded-full flex items-center justify-center mb-4">
-                <i class="fa-solid fa-check text-3xl text-green-500"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
-            <p class="text-gray-400 mb-2">You're registered for:</p>
-            <p class="font-bold text-green-400 text-lg mb-4" id="successTournamentName">Tournament</p>
-            <div class="bg-gray-800/50 rounded-lg p-4 text-sm text-left mb-6">
-                <p class="text-gray-300 mb-2"><strong class="text-white">What happens next:</strong></p>
-                <ul class="text-gray-400 space-y-1 text-xs">
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Admin will verify your payment proof</li>
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Room ID + password sent to your WhatsApp</li>
-                    <li><i class="fa-solid fa-check text-green-500 mr-2"></i>Join the match 10 min before start time</li>
-                </ul>
-            </div>
-            <div class="flex gap-3">
-                <a href="member.html" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
-                    <i class="fa-solid fa-gauge mr-2"></i>Dashboard
-                </a>
-                <button onclick="closeSuccessModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition">
-                    Register More
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        console.log("--- TOURNAMENTS PAGE LOADED (with floating support) ---");
+        console.log("--- TOURNAMENTS PAGE 2026 ---");
 
-        function toggleSupportMenu() {
-            document.getElementById('supportMenu').classList.toggle('open');
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
         }
+
+        function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('supportMenu');
             const btn = document.querySelector('.support-btn');
-            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.remove('open');
-            }
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
         function checkUserStatus() {
@@ -473,7 +393,6 @@
             if (user && user.username) {
                 document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('user-name').textContent = user.username;
                 document.getElementById('dropdown-username').textContent = user.email || user.username;
                 document.getElementById('nav-login-btn').classList.add('hidden');
             } else {
@@ -492,108 +411,30 @@
 
         function copyToClipboard(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
-                const originalHtml = btn.innerHTML;
+                const orig = btn.innerHTML;
                 btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Copied!';
                 btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.classList.remove('copied');
-                }, 1500);
-            }).catch(err => alert("Copy failed. Number: " + text));
+                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+            });
         }
 
-        const UID_RULES = {
-            freefire: { min: 8, max: 12, pattern: /^\d+$/, name: "Free Fire", hint: "8-12 digit number" },
-            pubg: { min: 9, max: 12, pattern: /^\d+$/, name: "PUBG Mobile", hint: "9-12 digit number" },
-            valorant: { min: 6, max: 12, pattern: /^[a-zA-Z0-9]+$/, name: "Valorant", hint: "6-12 letters/numbers" },
-            cod: { min: 8, max: 15, pattern: /^\d+$/, name: "COD Mobile", hint: "8-15 digit number" },
-            ludo: { min: 6, max: 20, pattern: /^[a-zA-Z0-9]+$/, name: "Ludo King", hint: "6-20 letters/numbers" }
-        };
-
-        function validateIGN(value) {
-            const v = value.trim();
-            if (!v) return { valid: false, msg: "In-Game Name is required", type: "error" };
-            if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
-            if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
-            if (/^\d/.test(v)) return { valid: false, msg: "IGN cannot start with a number", type: "error" };
-            if (!/^[a-zA-Z][a-zA-Z0-9_.-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, _, ., - allowed", type: "error" };
-            return { valid: true, msg: "✓ Looks good", type: "success" };
-        }
-
-        function validateUID(value, game) {
-            const v = value.trim();
-            const rule = UID_RULES[game] || { min: 6, max: 15, pattern: /^\d+$/, name: "Game", hint: "6-15 characters" };
-            if (!v) return { valid: false, msg: "Game UID is required", type: "error", hint: rule.hint };
-            if (v.length < rule.min) return { valid: false, msg: `Minimum ${rule.min} characters`, type: "error", hint: rule.hint };
-            if (v.length > rule.max) return { valid: false, msg: `Maximum ${rule.max} characters`, type: "error", hint: rule.hint };
-            if (!rule.pattern.test(v)) {
-                const patternHint = rule.pattern.source === '^\\d+$' ? "Only numbers allowed" : "Only letters/numbers allowed";
-                return { valid: false, msg: patternHint, type: "error", hint: rule.hint };
-            }
-            return { valid: true, msg: `✓ Valid ${rule.name} UID`, type: "success" };
-        }
-
-        function validateTeamName(value) {
-            const v = value.trim();
-            if (!v) return { valid: false, msg: "Team name is required", type: "error" };
-            if (v.length < 2) return { valid: false, msg: "Minimum 2 characters required", type: "error" };
-            if (v.length > 20) return { valid: false, msg: "Maximum 20 characters allowed", type: "error" };
-            if (!/^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, spaces, _ , - allowed", type: "error" };
-            return { valid: true, msg: "✓ Team name is valid", type: "success" };
-        }
-
-        function validatePhone(value) {
-            const v = value.trim();
-            if (!v) return { valid: false, msg: "Phone number is required", type: "error" };
-            if (!/^\d{10}$/.test(v)) return { valid: false, msg: "Must be exactly 10 digits", type: "error" };
-            if (!/^(97|98)/.test(v)) return { valid: false, msg: "Nepal mobile must start with 97 or 98", type: "error" };
-            return { valid: true, msg: "✓ Valid Nepal mobile number", type: "success" };
-        }
-
-        function validateTransactionId(value) {
-            const v = value.trim();
-            if (!v) return { valid: false, msg: "Transaction ID is required", type: "error" };
-            if (v.length < 6) return { valid: false, msg: "Must be at least 6 characters", type: "error" };
-            if (!/^[a-zA-Z0-9-]+$/.test(v)) return { valid: false, msg: "Only letters, numbers, and - allowed", type: "error" };
-            return { valid: true, msg: "✓ Transaction ID looks valid", type: "success" };
-        }
-
-        function showValidation(fieldId, messageId, result) {
-            const field = document.getElementById(fieldId);
-            const msg = document.getElementById(messageId);
-            if (!field || !msg) return;
-            field.classList.remove('valid', 'invalid');
-            msg.classList.remove('success', 'error');
-            msg.innerHTML = '';
-            if (field.value.trim() === '') return;
-            if (result.valid) {
-                field.classList.add('valid');
-                msg.classList.add('success');
-                msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${result.msg}`;
-            } else {
-                field.classList.add('invalid');
-                msg.classList.add('error');
-                const hint = result.hint ? ` <span class="text-gray-500">(${result.hint})</span>` : '';
-                msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${result.msg}${hint}`;
-            }
-        }
-
-        const defaultTournaments = [
-            { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo", isNew: false },
-            { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad", isNew: false },
-            { id: 3, game: "valorant", gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600", name: "Valorant Night Cup", date: "Nov 25, 2023", time: "09:00 PM", entryFee: 150, prizePool: 3000, slotsFilled: 12, slotsTotal: 20, mode: "5v5", isNew: false },
-            { id: 4, game: "cod", gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700", name: "COD Mobile Battle Royale", date: "Nov 27, 2023", time: "06:00 PM", entryFee: 75, prizePool: 1500, slotsFilled: 32, slotsTotal: 50, mode: "Squad", isNew: false },
-            { id: 5, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Duo Cup", date: "Nov 29, 2023", time: "08:30 PM", entryFee: 40, prizePool: 1000, slotsFilled: 95, slotsTotal: 100, mode: "Duo", isNew: false },
-            { id: 6, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Solo Showdown", date: "Dec 01, 2023", time: "07:00 PM", entryFee: 60, prizePool: 2500, slotsFilled: 20, slotsTotal: 100, mode: "Solo", isNew: false }
-        ];
-
+        // GAME CONFIG FOR ALL NEW GAMES
         const gameConfig = {
             freefire: { gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600" },
             pubg: { gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
-            valorant: { gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
             cod: { gameName: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" },
-            ludo: { gameName: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600" }
+            efootball: { gameName: "eFootball", icon: "fa-futbol", color: "from-blue-500 to-cyan-600" },
+            ecricket: { gameName: "eCricket", icon: "fa-baseball", color: "from-green-600 to-emerald-800" },
+            valorant: { gameName: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
+            ludo: { gameName: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600" },
+            chess: { gameName: "Chess", icon: "fa-chess", color: "from-gray-500 to-slate-700" },
+            clashroyale: { gameName: "Clash Royale", icon: "fa-chess-king", color: "from-blue-500 to-indigo-600" },
+            pool: { gameName: "8 Ball Pool", icon: "fa-circle-dot", color: "from-red-600 to-yellow-500" },
+            other: { gameName: "Other Game", icon: "fa-gamepad", color: "from-gray-500 to-gray-700" }
         };
+
+        // NO default tournaments - only admin-created ones appear
+        const defaultTournaments = [];
 
         function getAllTournaments() {
             const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
@@ -616,6 +457,7 @@
 
         function renderTournaments(filter) {
             const grid = document.getElementById('tournament-grid');
+            const emptyState = document.getElementById('empty-state');
             const noResults = document.getElementById('no-results');
             grid.innerHTML = '';
 
@@ -623,34 +465,38 @@
             const filtered = filter === 'all' ? allTournaments : allTournaments.filter(t => t.game === filter);
 
             if (filtered.length === 0) {
-                noResults.classList.remove('hidden');
+                if (filter === 'all') {
+                    emptyState.classList.remove('hidden');
+                    noResults.classList.add('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    noResults.classList.remove('hidden');
+                }
                 return;
-            } else {
-                noResults.classList.add('hidden');
             }
+
+            emptyState.classList.add('hidden');
+            noResults.classList.add('hidden');
 
             filtered.forEach(t => {
                 const percentage = Math.round((t.slotsFilled / t.slotsTotal) * 100);
                 const isFull = t.slotsFilled >= t.slotsTotal;
-                
                 const card = document.createElement('div');
                 card.className = "tournament-card glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
-                
                 card.innerHTML = `
                     <div class="bg-gradient-to-br ${t.color} p-4 relative">
-                        <div class="flex justify-between items-start">
-                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white flex items-center gap-1 truncate">
                                 <i class="fa-solid ${t.icon}"></i> ${t.gameName}
                             </div>
-                            <div class="flex gap-1">
+                            <div class="flex gap-1 flex-shrink-0">
                                 ${t.isNew ? '<div class="new-badge bg-red-600 rounded-full px-2 py-1 text-xs font-bold text-white">NEW</div>' : ''}
                                 <div class="bg-black/40 rounded-full px-3 py-1 text-xs font-bold text-white">${t.mode}</div>
                             </div>
                         </div>
-                        <h3 class="text-xl font-bold text-white mt-6 drop-shadow-lg">${t.name}</h3>
+                        <h3 class="text-lg sm:text-xl font-bold text-white mt-5 drop-shadow-lg">${t.name}</h3>
                     </div>
-                    
-                    <div class="p-5 flex-grow">
+                    <div class="p-4 sm:p-5 flex-grow">
                         <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
                             <div class="bg-gray-800/50 rounded-lg p-3">
                                 <p class="text-xs text-gray-400 mb-1">Entry Fee</p>
@@ -661,24 +507,20 @@
                                 <p class="text-green-400 font-bold">Rs. ${t.prizePool}</p>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between text-sm mb-4">
+                        <div class="flex items-center justify-between text-xs sm:text-sm mb-4 flex-wrap gap-1">
                             <span class="text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${t.date}</span>
                             <span class="text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${t.time}</span>
                         </div>
-
                         <div class="mb-4">
                             <div class="flex justify-between text-xs text-gray-400 mb-1">
-                                <span>Slots Filled</span>
-                                <span>${t.slotsFilled}/${t.slotsTotal}</span>
+                                <span>Slots Filled</span><span>${t.slotsFilled}/${t.slotsTotal}</span>
                             </div>
                             <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                                 <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: ${percentage}%"></div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="p-5 pt-0">
+                    <div class="p-4 sm:p-5 pt-0">
                         <button onclick="openRegistrationModal(${t.id})" class="w-full ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white font-bold py-3 rounded-lg transition" ${isFull ? 'disabled' : ''}>
                             ${isFull ? 'Tournament Full' : 'Register Now'}
                         </button>
@@ -697,64 +539,127 @@
         let currentTournament = null;
         let paymentScreenshotData = null;
 
+        const UID_RULES = {
+            freefire: { min: 8, max: 12, pattern: /^\d+$/, name: "Free Fire", hint: "8-12 digit number" },
+            pubg: { min: 9, max: 12, pattern: /^\d+$/, name: "PUBG Mobile", hint: "9-12 digit number" },
+            valorant: { min: 6, max: 12, pattern: /^[a-zA-Z0-9]+$/, name: "Valorant", hint: "6-12 letters/numbers" },
+            cod: { min: 8, max: 15, pattern: /^\d+$/, name: "COD Mobile", hint: "8-15 digit number" },
+            efootball: { min: 6, max: 20, pattern: /^[a-zA-Z0-9]+$/, name: "eFootball", hint: "6-20 letters/numbers" },
+            ecricket: { min: 6, max: 20, pattern: /^[a-zA-Z0-9]+$/, name: "eCricket", hint: "6-20 letters/numbers" },
+            ludo: { min: 6, max: 20, pattern: /^[a-zA-Z0-9]+$/, name: "Ludo King", hint: "6-20 letters/numbers" },
+            chess: { min: 4, max: 20, pattern: /^[a-zA-Z0-9_.-]+$/, name: "Chess", hint: "4-20 characters" }
+        };
+
+        function validateIGN(v) {
+            v = v.trim();
+            if (!v) return { valid: false, msg: "IGN required" };
+            if (v.length < 2) return { valid: false, msg: "Min 2 chars" };
+            if (v.length > 20) return { valid: false, msg: "Max 20 chars" };
+            if (/^\d/.test(v)) return { valid: false, msg: "Cannot start with number" };
+            if (!/^[a-zA-Z][a-zA-Z0-9_.-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, _, ., -" };
+            return { valid: true, msg: "✓ Looks good" };
+        }
+
+        function validateUID(v, game) {
+            v = v.trim();
+            const rule = UID_RULES[game] || { min: 6, max: 15, pattern: /^\d+$/, name: "Game", hint: "6-15 chars" };
+            if (!v) return { valid: false, msg: "UID required", hint: rule.hint };
+            if (v.length < rule.min) return { valid: false, msg: `Min ${rule.min} chars`, hint: rule.hint };
+            if (v.length > rule.max) return { valid: false, msg: `Max ${rule.max} chars`, hint: rule.hint };
+            if (!rule.pattern.test(v)) return { valid: false, msg: "Invalid format", hint: rule.hint };
+            return { valid: true, msg: `✓ Valid ${rule.name} UID` };
+        }
+
+        function validateTeamName(v) {
+            v = v.trim();
+            if (!v) return { valid: false, msg: "Team name required" };
+            if (v.length < 2) return { valid: false, msg: "Min 2 chars" };
+            if (v.length > 20) return { valid: false, msg: "Max 20 chars" };
+            if (!/^[a-zA-Z0-9][a-zA-Z0-9 _-]*$/.test(v)) return { valid: false, msg: "Only letters, numbers, spaces, _, -" };
+            return { valid: true, msg: "✓ Team name valid" };
+        }
+
+        function validatePhone(v) {
+            v = v.trim();
+            if (!v) return { valid: false, msg: "Phone required" };
+            if (!/^\d{10}$/.test(v)) return { valid: false, msg: "Must be 10 digits" };
+            if (!/^(97|98)/.test(v)) return { valid: false, msg: "Must start with 97 or 98" };
+            return { valid: true, msg: "✓ Valid Nepal number" };
+        }
+
+        function validateTransactionId(v) {
+            v = v.trim();
+            if (!v) return { valid: false, msg: "Transaction ID required" };
+            if (v.length < 6) return { valid: false, msg: "Min 6 chars" };
+            if (!/^[a-zA-Z0-9-]+$/.test(v)) return { valid: false, msg: "Only letters, numbers, -" };
+            return { valid: true, msg: "✓ Valid transaction ID" };
+        }
+
+        function showValidation(fieldId, msgId, result) {
+            const field = document.getElementById(fieldId);
+            const msg = document.getElementById(msgId);
+            if (!field || !msg) return;
+            field.classList.remove('valid', 'invalid');
+            msg.classList.remove('success', 'error');
+            msg.innerHTML = '';
+            if (field.value.trim() === '') return;
+            if (result.valid) {
+                field.classList.add('valid');
+                msg.classList.add('success');
+                msg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${result.msg}`;
+            } else {
+                field.classList.add('invalid');
+                msg.classList.add('error');
+                const hint = result.hint ? ` <span class="text-gray-500">(${result.hint})</span>` : '';
+                msg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${result.msg}${hint}`;
+            }
+        }
+
         function openRegistrationModal(tournamentId) {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (!user) {
-                if (confirm("You need to login first.\n\nGo to login page?")) {
-                    window.location.href = 'member.html';
-                }
+                if (confirm("Login required. Go to login page?")) window.location.href = 'member.html';
                 return;
             }
 
-            const allTournaments = getAllTournaments();
-            const tournament = allTournaments.find(t => t.id === tournamentId);
+            const tournament = getAllTournaments().find(t => t.id === tournamentId);
             if (!tournament) { alert("Tournament not found."); return; }
 
             const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-            const alreadyRegistered = allRegistrations.some(
-                r => r.tournamentId === tournamentId && r.username.toLowerCase() === user.username.toLowerCase()
-            );
-            if (alreadyRegistered) { alert("You have already registered for this tournament!"); return; }
+            const already = allRegistrations.some(r => r.tournamentId === tournamentId && r.username.toLowerCase() === user.username.toLowerCase());
+            if (already) { alert("You have already registered for this tournament!"); return; }
 
             currentTournament = tournament;
             paymentScreenshotData = null;
 
             document.getElementById('modalTitle').textContent = tournament.name;
-            document.getElementById('modalSubtitle').textContent = `${tournament.gameName} • ${tournament.mode} Mode`;
+            document.getElementById('modalSubtitle').textContent = `${tournament.gameName} • ${tournament.mode}`;
             document.getElementById('regTournamentName').textContent = tournament.name;
             document.getElementById('regTournamentFee').textContent = tournament.entryFee === 0 ? 'FREE' : 'Rs. ' + tournament.entryFee;
-            document.getElementById('regTournamentMode').textContent = tournament.mode;
-            document.getElementById('regTournamentTime').textContent = tournament.date + ' • ' + tournament.time;
             document.getElementById('regTournamentId').value = tournament.id;
             document.getElementById('regTournamentGame').value = tournament.game;
 
-            const rule = UID_RULES[tournament.game] || { hint: "6-15 characters" };
+            const rule = UID_RULES[tournament.game] || { hint: "6-15 chars" };
             document.getElementById('regUid').placeholder = `e.g., ${rule.hint}`;
 
             const teamSection = document.getElementById('teamSection');
             const teammatesContainer = document.getElementById('teammatesContainer');
-            
+
             if (tournament.mode === 'Solo') {
                 teamSection.classList.add('hidden');
             } else {
                 teamSection.classList.remove('hidden');
-                document.getElementById('modeName').textContent = tournament.mode === 'Duo' ? 'Duo (2 players)' : tournament.mode === 'Squad' ? 'Squad (4 players)' : 'Team';
-
-                let teammateCount = 0;
-                if (tournament.mode === 'Duo') teammateCount = 1;
-                else if (tournament.mode === 'Squad') teammateCount = 3;
-                else if (tournament.mode === '5v5') teammateCount = 4;
-
+                document.getElementById('modeName').textContent = tournament.mode;
+                let count = tournament.mode === 'Duo' ? 1 : tournament.mode === 'Squad' ? 3 : 4;
                 teammatesContainer.innerHTML = '';
-                for (let i = 1; i <= teammateCount; i++) {
-                    const teammateHtml = `
+                for (let i = 1; i <= count; i++) {
+                    teammatesContainer.insertAdjacentHTML('beforeend', `
                         <div class="bg-gray-800/50 rounded-lg p-3 mb-3 border border-gray-700">
-                            <p class="text-xs text-gray-400 mb-2 font-bold"><i class="fa-solid fa-user mr-1"></i>Teammate ${i}</p>
-                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg mb-2 teammate-ign" placeholder="In-Game Name (IGN)" maxlength="20">
-                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg teammate-uid" placeholder="Game UID" maxlength="15">
+                            <p class="text-xs text-gray-400 mb-2 font-bold">Teammate ${i}</p>
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg mb-2 teammate-ign" placeholder="IGN" maxlength="20">
+                            <input type="text" class="form-input w-full px-3 py-2 rounded-lg teammate-uid" placeholder="UID" maxlength="15">
                         </div>
-                    `;
-                    teammatesContainer.insertAdjacentHTML('beforeend', teammateHtml);
+                    `);
                 }
             }
 
@@ -763,7 +668,6 @@
                 paymentSection.classList.remove('hidden');
                 document.getElementById('paymentAmount').textContent = tournament.entryFee;
                 document.getElementById('paymentAmount2').textContent = tournament.entryFee;
-                document.getElementById('paymentAmount3').textContent = tournament.entryFee;
             } else {
                 paymentSection.classList.add('hidden');
             }
@@ -776,26 +680,13 @@
             document.getElementById('regPaymentConfirmed').checked = false;
             document.getElementById('regTerms').checked = false;
             document.getElementById('regError').classList.add('hidden');
-            document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
+            document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm';
             document.getElementById('regSubmitBtn').disabled = false;
-
             removePaymentScreenshot();
-
-            ['regIgn', 'regUid', 'regTeamName', 'regPhone', 'regTransactionId'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('valid', 'invalid');
-            });
-            ['ignMessage', 'uidMessage', 'teamNameMessage', 'phoneMessage', 'transactionMessage', 'screenshotMessage'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = '';
-            });
-            document.getElementById('ignCount').textContent = '0/20';
-            document.getElementById('teamCount').textContent = '0/20';
 
             document.getElementById('registrationModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-
-            setTimeout(attachValidationListeners, 100);
+            setTimeout(attachValidation, 100);
         }
 
         function closeRegistrationModal() {
@@ -805,30 +696,29 @@
             paymentScreenshotData = null;
         }
 
-        function attachValidationListeners() {
-            const ignField = document.getElementById('regIgn');
-            const uidField = document.getElementById('regUid');
-            const teamField = document.getElementById('regTeamName');
-            const phoneField = document.getElementById('regPhone');
-            const txField = document.getElementById('regTransactionId');
+        function attachValidation() {
+            const ign = document.getElementById('regIgn');
+            const uid = document.getElementById('regUid');
+            const team = document.getElementById('regTeamName');
+            const phone = document.getElementById('regPhone');
+            const tx = document.getElementById('regTransactionId');
 
-            if (ignField) ignField.oninput = function() {
+            if (ign) ign.oninput = function() {
                 document.getElementById('ignCount').textContent = this.value.length + '/20';
                 showValidation('regIgn', 'ignMessage', validateIGN(this.value));
             };
-            if (uidField) uidField.oninput = function() {
-                if (!currentTournament) return;
-                showValidation('regUid', 'uidMessage', validateUID(this.value, currentTournament.game));
+            if (uid) uid.oninput = function() {
+                if (currentTournament) showValidation('regUid', 'uidMessage', validateUID(this.value, currentTournament.game));
             };
-            if (teamField) teamField.oninput = function() {
+            if (team) team.oninput = function() {
                 document.getElementById('teamCount').textContent = this.value.length + '/20';
                 showValidation('regTeamName', 'teamNameMessage', validateTeamName(this.value));
             };
-            if (phoneField) phoneField.oninput = function() {
+            if (phone) phone.oninput = function() {
                 this.value = this.value.replace(/\D/g, '');
                 showValidation('regPhone', 'phoneMessage', validatePhone(this.value));
             };
-            if (txField) txField.oninput = function() {
+            if (tx) tx.oninput = function() {
                 showValidation('regTransactionId', 'transactionMessage', validateTransactionId(this.value));
             };
         }
@@ -836,13 +726,7 @@
         function handlePaymentScreenshot(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            if (file.size > 1024 * 1024) {
-                alert("Screenshot too large. Please use an image under 1MB.");
-                event.target.value = '';
-                return;
-            }
-
+            if (file.size > 1024 * 1024) { alert("Image too large (max 1MB)"); return; }
             const reader = new FileReader();
             reader.onload = function(e) {
                 paymentScreenshotData = e.target.result;
@@ -850,7 +734,7 @@
                 document.getElementById('paymentUploadPreview').classList.remove('hidden');
                 document.getElementById('paymentScreenshotPreview').src = paymentScreenshotData;
                 document.getElementById('paymentUploadZone').classList.add('has-image');
-                document.getElementById('screenshotMessage').innerHTML = '<i class="fa-solid fa-circle-check"></i> Screenshot uploaded';
+                document.getElementById('screenshotMessage').innerHTML = '<i class="fa-solid fa-circle-check"></i> Uploaded';
                 document.getElementById('screenshotMessage').className = 'validation-message success';
             };
             reader.readAsDataURL(file);
@@ -860,41 +744,23 @@
             paymentScreenshotData = null;
             const input = document.getElementById('paymentScreenshotInput');
             if (input) input.value = '';
-            const placeholder = document.getElementById('paymentUploadPlaceholder');
-            const preview = document.getElementById('paymentUploadPreview');
-            const zone = document.getElementById('paymentUploadZone');
-            if (placeholder) placeholder.classList.remove('hidden');
-            if (preview) preview.classList.add('hidden');
-            if (zone) zone.classList.remove('has-image');
+            const ph = document.getElementById('paymentUploadPlaceholder');
+            const pv = document.getElementById('paymentUploadPreview');
+            const zn = document.getElementById('paymentUploadZone');
+            if (ph) ph.classList.remove('hidden');
+            if (pv) pv.classList.add('hidden');
+            if (zn) zn.classList.remove('has-image');
             const msg = document.getElementById('screenshotMessage');
             if (msg) { msg.innerHTML = ''; msg.className = 'validation-message'; }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const zone = document.getElementById('paymentUploadZone');
-            if (!zone) return;
-            ['dragenter', 'dragover'].forEach(ev => {
-                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-            });
-            ['dragleave', 'drop'].forEach(ev => {
-                zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
-            });
-            zone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    document.getElementById('paymentScreenshotInput').files = files;
-                    handlePaymentScreenshot({ target: { files: files } });
-                }
-            });
-        });
-
         function submitRegistration(event) {
             event.preventDefault();
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user || !currentTournament) { alert("Error: User or tournament missing."); return; }
+            if (!user || !currentTournament) return;
 
             const btn = document.getElementById('regSubmitBtn');
-            const errorEl = document.getElementById('regError');
+            const err = document.getElementById('regError');
 
             const ign = document.getElementById('regIgn').value.trim();
             const uid = document.getElementById('regUid').value.trim();
@@ -902,52 +768,45 @@
             const teamName = document.getElementById('regTeamName').value.trim();
             const txId = document.getElementById('regTransactionId') ? document.getElementById('regTransactionId').value.trim() : '';
 
-            const ignResult = validateIGN(ign);
-            if (!ignResult.valid) { errorEl.textContent = "❌ IGN: " + ignResult.msg; errorEl.classList.remove('hidden'); return; }
-
-            const uidResult = validateUID(uid, currentTournament.game);
-            if (!uidResult.valid) { errorEl.textContent = "❌ UID: " + uidResult.msg; errorEl.classList.remove('hidden'); return; }
-
-            const phoneResult = validatePhone(phone);
-            if (!phoneResult.valid) { errorEl.textContent = "❌ Phone: " + phoneResult.msg; errorEl.classList.remove('hidden'); return; }
+            let r = validateIGN(ign);
+            if (!r.valid) { err.textContent = "❌ IGN: " + r.msg; err.classList.remove('hidden'); return; }
+            r = validateUID(uid, currentTournament.game);
+            if (!r.valid) { err.textContent = "❌ UID: " + r.msg; err.classList.remove('hidden'); return; }
+            r = validatePhone(phone);
+            if (!r.valid) { err.textContent = "❌ Phone: " + r.msg; err.classList.remove('hidden'); return; }
 
             if (currentTournament.mode !== 'Solo') {
-                const teamResult = validateTeamName(teamName);
-                if (!teamResult.valid) { errorEl.textContent = "❌ Team: " + teamResult.msg; errorEl.classList.remove('hidden'); return; }
+                r = validateTeamName(teamName);
+                if (!r.valid) { err.textContent = "❌ Team: " + r.msg; err.classList.remove('hidden'); return; }
             }
 
             const teammates = [];
             if (currentTournament.mode !== 'Solo') {
-                const ignInputs = document.querySelectorAll('.teammate-ign');
-                const uidInputs = document.querySelectorAll('.teammate-uid');
-                const teammateIGNs = new Set([ign.toLowerCase()]);
-                
-                for (let i = 0; i < ignInputs.length; i++) {
-                    const tIgn = ignInputs[i].value.trim();
-                    const tUid = uidInputs[i].value.trim();
-                    if (!tIgn || !tUid) { errorEl.textContent = `❌ Fill teammate ${i + 1}'s details.`; errorEl.classList.remove('hidden'); return; }
-                    const tIgnResult = validateIGN(tIgn);
-                    if (!tIgnResult.valid) { errorEl.textContent = `❌ Teammate ${i + 1} IGN: ${tIgnResult.msg}`; errorEl.classList.remove('hidden'); return; }
-                    const tUidResult = validateUID(tUid, currentTournament.game);
-                    if (!tUidResult.valid) { errorEl.textContent = `❌ Teammate ${i + 1} UID: ${tUidResult.msg}`; errorEl.classList.remove('hidden'); return; }
-                    if (teammateIGNs.has(tIgn.toLowerCase())) { errorEl.textContent = `❌ Teammate ${i + 1}'s IGN is duplicate.`; errorEl.classList.remove('hidden'); return; }
-                    teammateIGNs.add(tIgn.toLowerCase());
+                const ignIn = document.querySelectorAll('.teammate-ign');
+                const uidIn = document.querySelectorAll('.teammate-uid');
+                const seen = new Set([ign.toLowerCase()]);
+                for (let i = 0; i < ignIn.length; i++) {
+                    const tIgn = ignIn[i].value.trim();
+                    const tUid = uidIn[i].value.trim();
+                    if (!tIgn || !tUid) { err.textContent = `❌ Fill teammate ${i + 1}`; err.classList.remove('hidden'); return; }
+                    if (seen.has(tIgn.toLowerCase())) { err.textContent = `❌ Teammate ${i + 1} IGN duplicate`; err.classList.remove('hidden'); return; }
+                    seen.add(tIgn.toLowerCase());
                     teammates.push({ ign: tIgn, uid: tUid });
                 }
             }
 
             if (currentTournament.entryFee > 0) {
-                const txResult = validateTransactionId(txId);
-                if (!txResult.valid) { errorEl.textContent = "❌ Transaction ID: " + txResult.msg; errorEl.classList.remove('hidden'); return; }
-                if (!paymentScreenshotData) { errorEl.textContent = "❌ Please upload a payment screenshot."; errorEl.classList.remove('hidden'); return; }
-                if (!document.getElementById('regPaymentConfirmed').checked) { errorEl.textContent = "❌ Please confirm you have sent the payment."; errorEl.classList.remove('hidden'); return; }
+                r = validateTransactionId(txId);
+                if (!r.valid) { err.textContent = "❌ TxID: " + r.msg; err.classList.remove('hidden'); return; }
+                if (!paymentScreenshotData) { err.textContent = "❌ Upload payment screenshot"; err.classList.remove('hidden'); return; }
+                if (!document.getElementById('regPaymentConfirmed').checked) { err.textContent = "❌ Confirm payment"; err.classList.remove('hidden'); return; }
             }
 
-            if (!document.getElementById('regTerms').checked) { errorEl.textContent = "❌ Please agree to the tournament rules."; errorEl.classList.remove('hidden'); return; }
+            if (!document.getElementById('regTerms').checked) { err.textContent = "❌ Agree to rules"; err.classList.remove('hidden'); return; }
 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Registering...';
             btn.disabled = true;
-            errorEl.classList.add('hidden');
+            err.classList.add('hidden');
 
             const registration = {
                 id: Date.now(),
@@ -958,11 +817,9 @@
                 entryFee: currentTournament.entryFee,
                 username: user.username,
                 email: user.email || '',
-                ign: ign,
-                uid: uid,
-                phone: phone,
+                ign, uid, phone,
                 teamName: currentTournament.mode !== 'Solo' ? teamName : null,
-                teammates: teammates,
+                teammates,
                 transactionId: currentTournament.entryFee > 0 ? txId : null,
                 paymentScreenshot: currentTournament.entryFee > 0 ? paymentScreenshotData : null,
                 paymentConfirmed: currentTournament.entryFee > 0,
@@ -973,66 +830,37 @@
 
             setTimeout(() => {
                 try {
-                    const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-                    allRegistrations.push(registration);
-                    localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
-
+                    const all = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+                    all.push(registration);
+                    localStorage.setItem('userRegistrations', JSON.stringify(all));
                     updateTournamentSlots(currentTournament.id);
-
                     closeRegistrationModal();
-                    document.getElementById('successTournamentName').textContent = currentTournament.name;
-                    document.getElementById('successModal').classList.remove('hidden');
-
-                    const activeFilter = document.querySelector('.filter-btn.active');
-                    if (activeFilter) {
-                        const filterText = activeFilter.textContent.toLowerCase();
-                        let filter = 'all';
-                        if (filterText.includes('free')) filter = 'freefire';
-                        else if (filterText.includes('pubg')) filter = 'pubg';
-                        else if (filterText.includes('valorant')) filter = 'valorant';
-                        else if (filterText.includes('cod')) filter = 'cod';
-                        renderTournaments(filter);
-                    }
+                    alert(`✅ Successfully registered for "${currentTournament.name}"!\n\nCheck your dashboard for updates.`);
+                    renderTournaments('all');
                 } catch (e) {
-                    alert("Storage full! Cannot save registration. Please clear old data.");
-                    console.error(e);
-                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
+                    alert("Storage full!");
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm';
                     btn.disabled = false;
                 }
             }, 800);
         }
 
-        function updateTournamentSlots(tournamentId) {
-            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            const custom = customTournaments.find(t => t.id === tournamentId);
-            if (custom) {
-                custom.slotsFilled = (custom.slotsFilled || 0) + 1;
-                localStorage.setItem('customTournaments', JSON.stringify(customTournaments));
+        function updateTournamentSlots(id) {
+            const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+            const t = custom.find(x => x.id === id);
+            if (t) {
+                t.slotsFilled = (t.slotsFilled || 0) + 1;
+                localStorage.setItem('customTournaments', JSON.stringify(custom));
             }
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-            document.body.style.overflow = '';
         }
 
         document.getElementById('registrationModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegistrationModal();
         });
-        document.getElementById('successModal').addEventListener('click', function(e) {
-            if (e.target === this) closeSuccessModal();
-        });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (!document.getElementById('registrationModal').classList.contains('hidden')) closeRegistrationModal();
-                if (!document.getElementById('successModal').classList.contains('hidden')) closeSuccessModal();
-            }
-        });
-
-        window.onload = function() { 
+        window.onload = function() {
             checkUserStatus();
-            renderTournaments('all'); 
+            renderTournaments('all');
         };
     </script>
 </body>
