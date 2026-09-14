@@ -18,12 +18,13 @@
         .strength-weak { background-color: #ef4444; }
         .strength-medium { background-color: #eab308; }
         .strength-strong { background-color: #22c55e; }
-
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
         .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -63,25 +64,26 @@
                 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
-                    <input type="text" id="fullName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Amit Sharma">
+                    <input type="text" id="fullName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Amit Sharma" autocomplete="name">
                     <p id="error-fullName" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Username *</label>
-                    <input type="text" id="username" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., amit_ff">
+                    <input type="text" id="username" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., amit_ff" autocomplete="username">
+                    <p class="text-xs text-gray-500 mt-1">Letters, numbers, underscores only</p>
                     <p id="error-username" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-                    <input type="email" id="email" class="form-input w-full px-4 py-3 rounded-lg" placeholder="you@example.com">
+                    <input type="email" id="email" class="form-input w-full px-4 py-3 rounded-lg" placeholder="you@example.com" autocomplete="email">
                     <p id="error-email" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
-                    <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Min 6 characters" oninput="checkPasswordStrength()">
+                    <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Min 6 characters" oninput="checkPasswordStrength()" autocomplete="new-password">
                     <div class="flex gap-1 mt-2">
                         <div id="strength-1" class="strength-bar flex-grow bg-gray-700"></div>
                         <div id="strength-2" class="strength-bar flex-grow bg-gray-700"></div>
@@ -94,7 +96,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password *</label>
-                    <input type="password" id="confirmPassword" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Re-enter password">
+                    <input type="password" id="confirmPassword" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Re-enter password" autocomplete="new-password">
                     <p id="error-confirmPassword" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
@@ -106,7 +108,7 @@
                 </div>
                 <p id="error-terms" class="text-red-400 text-xs mt-1 mb-4 hidden"></p>
 
-                <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
+                <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
                     Create Free Account
                 </button>
 
@@ -118,18 +120,57 @@
                     <a href="member.html" class="text-red-400 hover:text-red-300 font-semibold">Login here</a>
                 </p>
             </div>
+
+            <!-- Debug info (only shown if Firebase fails) -->
+            <div id="debug-info" class="hidden mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p class="text-xs text-red-400 font-bold mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Setup Error</p>
+                <p id="debug-message" class="text-xs text-red-300"></p>
+            </div>
         </div>
     </main>
 
-    <script>
-        function toggleMobileNav() {
+    <script type="module">
+        // ============================================================
+        // FIREBASE IMPORTS
+        // ============================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+            measurementId: "G-3PXN38XFG9"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        console.log("🔥 Firebase initialized for register page");
+
+        // ============================================================
+        // MOBILE NAV
+        // ============================================================
+        window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
             nav.classList.toggle('open');
             icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-        }
+        };
 
-        function checkPasswordStrength() {
+        // ============================================================
+        // PASSWORD STRENGTH
+        // ============================================================
+        window.checkPasswordStrength = function() {
             const password = document.getElementById('password').value;
             const bars = [document.getElementById('strength-1'), document.getElementById('strength-2'), document.getElementById('strength-3'), document.getElementById('strength-4')];
             const text = document.getElementById('strength-text');
@@ -161,8 +202,11 @@
             else text.textContent = 'Strong';
             text.className = `text-xs mt-1 ${score <= 1 ? 'text-red-400' : score === 2 ? 'text-yellow-400' : 'text-green-400'}`;
             return score;
-        }
+        };
 
+        // ============================================================
+        // HELPERS
+        // ============================================================
         function showError(id, msg) {
             const el = document.getElementById('error-' + id);
             el.textContent = msg;
@@ -171,11 +215,22 @@
         function clearError(id) {
             document.getElementById('error-' + id).classList.add('hidden');
         }
+        function showDebugError(msg) {
+            document.getElementById('debug-message').textContent = msg;
+            document.getElementById('debug-info').classList.remove('hidden');
+        }
 
-        function handleRegister(event) {
+        // ============================================================
+        // MAIN REGISTER HANDLER
+        // ============================================================
+        window.handleRegister = async function(event) {
             event.preventDefault();
-            ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
 
+            // Clear all errors
+            ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
+            document.getElementById('debug-info').classList.add('hidden');
+
+            // Get values
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -185,8 +240,8 @@
             const msgBox = document.getElementById('register-message');
             const btn = document.getElementById('register-btn');
 
+            // Validation
             let hasError = false;
-
             if (fullName.length < 2) { showError('fullName', 'Please enter your full name'); hasError = true; }
             if (username.length < 3) { showError('username', 'Username must be at least 3 characters'); hasError = true; }
             else if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('username', 'Letters, numbers, underscores only'); hasError = true; }
@@ -202,26 +257,91 @@
                 return;
             }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating account...';
+            // Show loading state
+            btn.innerHTML = '<span class="spinner"></span>Creating your account...';
             btn.disabled = true;
+            msgBox.classList.add('hidden');
 
-            setTimeout(() => {
-                const newUser = { fullName, username, email, createdAt: new Date().toISOString() };
-                localStorage.setItem('currentUser', JSON.stringify(newUser));
+            try {
+                // STEP 1: Create Firebase Auth account
+                console.log("🔥 Creating Firebase account for:", email);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log("✅ Firebase account created. UID:", user.uid);
 
+                // STEP 2: Save user profile to Firestore
+                const userProfile = {
+                    uid: user.uid,
+                    fullName: fullName,
+                    username: username,
+                    email: email,
+                    createdAt: new Date().toISOString(),
+                    role: 'member',
+                    status: 'active',
+                    totalEarnings: 0,
+                    tournamentsPlayed: 0,
+                    tournamentsWon: 0
+                };
+
+                console.log("🔥 Saving user profile to Firestore...");
+                await setDoc(doc(db, "users", user.uid), userProfile);
+                console.log("✅ User profile saved to Firestore");
+
+                // Success!
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
-                msgBox.innerHTML = '✅ <strong>Account created!</strong><br><span class="text-xs text-gray-400">Redirecting to dashboard...</span>';
+                msgBox.innerHTML = '✅ <strong>Account created successfully!</strong><br><span class="text-xs text-gray-400">Redirecting to dashboard...</span>';
 
-                setTimeout(() => { window.location.href = 'member.html'; }, 1200);
-            }, 1200);
-        }
+                // Clear localStorage (we're now using Firebase)
+                localStorage.removeItem('currentUser');
 
+                // Redirect after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = 'member.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error("❌ Registration error:", error);
+
+                let errorMessage = "Registration failed. Please try again.";
+                let debugMessage = error.message;
+
+                // Handle common Firebase errors
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "This email is already registered. Try logging in instead.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "Password is too weak. Use at least 6 characters.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "Please enter a valid email address.";
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = "Email/Password signup is disabled. Enable it in Firebase Console.";
+                    debugMessage = "Go to Firebase Console → Authentication → Sign-in method → Enable Email/Password";
+                } else if (error.code === 'permission-denied') {
+                    errorMessage = "Database permission denied. Check Firestore rules.";
+                }
+
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.textContent = "❌ " + errorMessage;
+
+                showDebugError(debugMessage);
+
+                // Reset button
+                btn.innerHTML = 'Create Free Account';
+                btn.disabled = false;
+            }
+        };
+
+        // Real-time error clearing
         ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', () => clearError(id));
-            if (el) el.addEventListener('change', () => clearError(id));
+            if (el) {
+                el.addEventListener('input', () => clearError(id));
+                el.addEventListener('change', () => clearError(id));
+            }
         });
+
+        console.log("🔥 Register page ready");
     </script>
 </body>
 </html>
