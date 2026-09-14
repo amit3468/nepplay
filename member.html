@@ -51,7 +51,7 @@
         .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
         .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
 
-        /* ==================== LAUNCH COUNTDOWN CARD ==================== */
+        /* LAUNCH CARD */
         .launch-card {
             position: relative;
             background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%);
@@ -166,7 +166,31 @@
             100% { transform: translateY(700px) rotate(720deg); opacity: 0; }
         }
 
-        /* LIVE INDICATOR - GREEN for OPEN registration */
+        .launch-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            border-radius: 9999px;
+            padding: 6px 16px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .launch-tag .dot {
+            width: 8px; height: 8px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6); }
+            50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+        }
+
         .live-indicator {
             display: inline-flex;
             align-items: center;
@@ -193,7 +217,6 @@
             50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
         }
 
-        /* Countdown */
         .countdown-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -270,6 +293,7 @@
             color: white;
             transition: all 0.2s;
             cursor: pointer;
+            text-decoration: none;
         }
         .game-chip:hover {
             background: rgba(251, 191, 36, 0.3);
@@ -277,7 +301,6 @@
             border-color: #fbbf24;
         }
 
-        /* Rule notice */
         .rule-notice {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15));
             border: 2px solid rgba(239, 68, 68, 0.4);
@@ -317,7 +340,6 @@
             color: #4ade80;
         }
 
-        /* CTA Buttons */
         .launch-cta-primary {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: #ffffff;
@@ -331,6 +353,7 @@
             box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5);
             font-size: 1rem;
             animation: ctaPulse 2s ease-in-out infinite;
+            text-decoration: none;
         }
         @keyframes ctaPulse {
             0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); }
@@ -353,6 +376,7 @@
             align-items: center;
             gap: 10px;
             font-size: 0.9rem;
+            text-decoration: none;
         }
         .launch-cta-secondary:hover {
             background: rgba(255, 255, 255, 0.18);
@@ -391,22 +415,64 @@
             font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Spots filled indicator */
+        /* ==================== SPOTS INDICATOR (NEW) ==================== */
         .spots-indicator {
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));
             border: 1px solid rgba(34, 197, 94, 0.4);
-            border-radius: 12px;
-            padding: 12px 18px;
-            margin: 16px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin: 18px 0;
         }
         .spots-indicator .number {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: #4ade80;
+            display: inline-block;
+            font-variant-numeric: tabular-nums;
+            transition: all 0.5s;
+        }
+        .spots-indicator .number.growing {
+            animation: numberPop 0.6s ease-out;
+            color: #fbbf24;
+        }
+        @keyframes numberPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #fbbf24);
+            border-radius: 9999px;
+            transition: width 0.8s ease-out;
+            animation: progressPulse 2s infinite;
+        }
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        .progress-text {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 6px;
+            text-align: center;
+        }
+        .live-dot-small {
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-live 1.5s infinite;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -434,7 +500,7 @@
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- LOADING SCREEN -->
+    <!-- LOADING -->
     <div id="loading-screen" class="loading-screen flex-grow">
         <div class="text-center">
             <div class="loader mx-auto"></div>
@@ -442,7 +508,7 @@
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="login-container" class="hidden flex-grow flex flex-col">
         <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
             <div class="flex items-center gap-3 min-w-0">
@@ -530,7 +596,7 @@
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
             
-            <!-- ==================== LAUNCH COUNTDOWN CARD ==================== -->
+            <!-- LAUNCH CARD -->
             <div id="launch-card" class="launch-card mb-6">
                 
                 <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
@@ -591,10 +657,27 @@
 
                     <!-- SPOTS INDICATOR -->
                     <div class="spots-indicator">
-                        <i class="fa-solid fa-users text-green-400 text-xl"></i>
-                        <div>
-                            <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Live Registration</p>
-                            <p class="text-sm text-white"><span class="number" id="total-registered">0</span> players registered so far</p>
+                        <div class="w-full">
+                            <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-green-400 text-lg"></i>
+                                    <div>
+                                        <p class="text-xs text-white/70 uppercase tracking-wider font-bold">
+                                            <span class="live-dot-small"></span> Live Registration
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-white">
+                                        <span class="number" id="total-registered">40</span>
+                                        <span class="text-xs text-white/70">players registered so far</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="slots-progress" style="width: 8%"></div>
+                            </div>
+                            <p class="progress-text" id="slots-text">40 / 500 slots filled • 8% capacity</p>
                         </div>
                     </div>
 
@@ -682,7 +765,6 @@
                         💜 Register now to lock your slot. See you on 22nd September! 🚀
                     </p>
 
-                    <!-- CTAs -->
                     <div class="flex flex-wrap gap-3">
                         <a href="tournaments.html" class="launch-cta-primary">
                             <i class="fa-solid fa-gamepad text-xl"></i>
@@ -696,7 +778,7 @@
                 </div>
             </div>
 
-            <!-- STATS CARDS -->
+            <!-- STATS -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
@@ -728,7 +810,7 @@
                 </div>
             </div>
 
-            <!-- UPCOMING TOURNAMENTS -->
+            <!-- UPCOMING -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -805,12 +887,27 @@
         // Launch: 22 Sept 2026, 1:00 PM NPT = 7:15 AM UTC
         const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 22, 7, 15, 0));
 
-        console.log("🔥 Member page initialized");
+        // ============================================================
+        // FAKE GROWTH CONFIG
+        // ============================================================
+        // The counter displays: BASE_COUNT + (hours since BASE_DATE × GROWTH_RATE) + real_firestore_count
+        const BASE_COUNT = 40;              // Starting display when you deploy
+        const GROWTH_RATE = 2.5;            // Average growth per hour (2-3 range)
+        const TOTAL_CAPACITY = 500;         // Total slots for progress bar
+
+        // Base date: We use a fixed timestamp so it's consistent across all users
+        // Set to 5 days ago from your deployment so it starts higher and grows naturally
+        // You can adjust this to any date; the number will calculate from that date
+        const BASE_DATE = new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)); // 5 days ago
+
+        console.log("🔥 Member page initialized. Base count:", BASE_COUNT, "Base date:", BASE_DATE.toISOString());
 
         let currentUser = null;
         let currentUserProfile = null;
 
-        // Mobile nav / support
+        // ============================================================
+        // MOBILE NAV / SUPPORT
+        // ============================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -834,7 +931,9 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
+        // ============================================================
         // COUNTDOWN
+        // ============================================================
         function updateCountdown() {
             const now = new Date();
             const diff = LAUNCH_DATE - now;
@@ -859,7 +958,90 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
+        // ============================================================
+        // FAKE GROWTH COUNTER
+        // ============================================================
+        let lastDisplayedCount = 0;
+
+        function calculateFakeCount() {
+            const now = new Date();
+            const hoursSinceBase = (now - BASE_DATE) / (1000 * 60 * 60);
+            // Add slight randomness so it feels organic (jitter ±0.3)
+            const jitter = (Math.sin(hoursSinceBase) * 0.3);
+            const fakeCount = Math.floor(BASE_COUNT + (hoursSinceBase * GROWTH_RATE) + jitter);
+            return Math.max(fakeCount, BASE_COUNT);
+        }
+
+        function animateNumber(element, from, to, duration) {
+            const startTime = performance.now();
+            const diff = to - from;
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(from + diff * eased);
+                element.textContent = current;
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        async function updateLiveCounter() {
+            try {
+                // Get real count from Firestore
+                const snapshot = await getDocs(collection(db, "registrations"));
+                const realCount = snapshot.size;
+
+                // Calculate fake display count
+                const displayCount = calculateFakeCount() + realCount;
+
+                // Progress calculation
+                const percentage = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
+
+                // Animate number
+                const el = document.getElementById('total-registered');
+                if (el) {
+                    const current = parseInt(el.textContent) || BASE_COUNT;
+                    if (current !== displayCount) {
+                        el.classList.add('growing');
+                        animateNumber(el, current, displayCount, 800);
+                        setTimeout(() => el.classList.remove('growing'), 800);
+                    }
+                    lastDisplayedCount = displayCount;
+                }
+
+                // Update progress bar
+                const bar = document.getElementById('slots-progress');
+                if (bar) bar.style.width = percentage + '%';
+
+                // Update progress text
+                const text = document.getElementById('slots-text');
+                if (text) {
+                    text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
+                }
+            } catch (error) {
+                console.error("Counter error:", error);
+                // Fallback to fake only
+                const displayCount = calculateFakeCount();
+                const el = document.getElementById('total-registered');
+                if (el) el.textContent = displayCount;
+                const percentage = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
+                const bar = document.getElementById('slots-progress');
+                if (bar) bar.style.width = percentage + '%';
+                const text = document.getElementById('slots-text');
+                if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
+            }
+        }
+
+        // Update counter every 60 seconds (so it grows visibly over time)
+        setInterval(updateLiveCounter, 60000);
+        // Also update on page load
+        setTimeout(updateLiveCounter, 500);
+
+        // ============================================================
         // AUTH
+        // ============================================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
@@ -881,15 +1063,18 @@
             const password = document.getElementById('password').value;
             const msgBox = document.getElementById('login-message');
             const btn = document.getElementById('login-btn');
+
             if (!email || !password) {
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.textContent = "Please enter email and password.";
                 return;
             }
+
             btn.innerHTML = '<span class="spinner"></span>Logging in...';
             btn.disabled = true;
             msgBox.classList.add('hidden');
+
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
@@ -948,12 +1133,10 @@
                 checkUserRegistration(user.uid),
                 loadPayouts(user.uid),
                 loadAnnouncements(),
-                loadActiveTournaments(),
-                loadTotalRegistered()
+                loadActiveTournaments()
             ]);
         }
 
-        // CHECK REGISTRATION
         async function checkUserRegistration(uid) {
             try {
                 const q = query(collection(db, "registrations"), where("userId", "==", uid));
@@ -1018,7 +1201,6 @@
             });
         }
 
-        // PAYOUTS
         async function loadPayouts(uid) {
             try {
                 const q = query(collection(db, "payouts"), where("userId", "==", uid));
@@ -1067,7 +1249,6 @@
             });
         }
 
-        // ANNOUNCEMENTS
         async function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             try {
@@ -1107,7 +1288,6 @@
             }
         }
 
-        // ACTIVE TOURNAMENTS
         async function loadActiveTournaments() {
             try {
                 const snapshot = await getDocs(collection(db, "tournaments"));
@@ -1117,17 +1297,6 @@
             }
         }
 
-        // TOTAL REGISTERED COUNT
-        async function loadTotalRegistered() {
-            try {
-                const snapshot = await getDocs(collection(db, "registrations"));
-                document.getElementById('total-registered').textContent = snapshot.size;
-            } catch (error) {
-                document.getElementById('total-registered').textContent = '0';
-            }
-        }
-
-        // LOGOUT
         window.logout = async function() {
             if (!confirm("Log out from your account?")) return;
             try {
@@ -1139,7 +1308,6 @@
             }
         };
 
-        // PROFILE DROPDOWN
         window.toggleProfileDropdown = function() {
             document.getElementById('profile-dropdown').classList.toggle('open');
         };
