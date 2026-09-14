@@ -90,7 +90,7 @@
             .launch-inner { padding: 40px 36px; }
         }
 
-        /* GRAND OPENING BANNER */
+        /* GRAND OPENING */
         .grand-opening-banner {
             text-align: center;
             margin-bottom: 20px;
@@ -415,7 +415,7 @@
             font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8);
         }
 
-        /* ==================== SPOTS INDICATOR (NEW) ==================== */
+        /* SPOTS INDICATOR */
         .spots-indicator {
             background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));
             border: 1px solid rgba(34, 197, 94, 0.4);
@@ -478,7 +478,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support Button -->
+    <!-- Floating Support -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
@@ -605,7 +605,6 @@
 
                 <div class="launch-inner">
                     
-                    <!-- GRAND OPENING BANNER -->
                     <div class="grand-opening-banner">
                         <h1 class="grand-opening-title">🎉 Grand Opening 🎉</h1>
                         <p class="grand-opening-subtitle">NEPPLAY Esports Platform</p>
@@ -616,7 +615,6 @@
                         </div>
                     </div>
 
-                    <!-- Confetti -->
                     <div class="confetti" style="left: 10%; background: #fbbf24; animation-delay: 0s;"></div>
                     <div class="confetti" style="left: 25%; background: #ec4899; animation-delay: 0.7s;"></div>
                     <div class="confetti" style="left: 45%; background: #3b82f6; animation-delay: 1.4s;"></div>
@@ -655,7 +653,6 @@
                         🎉 <strong class="text-green-300">Registration is now OPEN!</strong> We're launching <strong class="text-yellow-300">8 tournaments — one for every game</strong> on <strong class="text-white">22nd September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Free entry with real cash prizes — <strong class="text-yellow-300">claim your slot now before it fills up!</strong> 🚀
                     </p>
 
-                    <!-- SPOTS INDICATOR -->
                     <div class="spots-indicator">
                         <div class="w-full">
                             <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
@@ -681,7 +678,6 @@
                         </div>
                     </div>
 
-                    <!-- RULE NOTICE -->
                     <div id="rule-notice" class="rule-notice">
                         <div class="flex items-start gap-3">
                             <div class="rule-icon">
@@ -699,7 +695,6 @@
                         </div>
                     </div>
 
-                    <!-- COUNTDOWN -->
                     <div class="countdown-grid">
                         <div class="countdown-box">
                             <div class="countdown-number" id="cd-days">00</div>
@@ -719,7 +714,6 @@
                         </div>
                     </div>
 
-                    <!-- Prizes -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                         <div class="prize-card">
                             <div class="text-3xl">🎁</div>
@@ -744,7 +738,6 @@
                         </div>
                     </div>
 
-                    <!-- Games -->
                     <div class="mb-6">
                         <p class="text-xs text-white/70 uppercase tracking-wider font-bold mb-3">
                             <i class="fa-solid fa-gamepad mr-1"></i> 8 Games • 8 Tournaments • Pick One
@@ -890,17 +883,13 @@
         // ============================================================
         // FAKE GROWTH CONFIG
         // ============================================================
-        // The counter displays: BASE_COUNT + (hours since BASE_DATE × GROWTH_RATE) + real_firestore_count
-        const BASE_COUNT = 40;              // Starting display when you deploy
-        const GROWTH_RATE = 2.5;            // Average growth per hour (2-3 range)
-        const TOTAL_CAPACITY = 500;         // Total slots for progress bar
+        // Display = BASE_COUNT + (hours since BASE_DATE × GROWTH_RATE) + real_firestore_count
+        const BASE_COUNT = 40;                                      // Starting number users see
+        const GROWTH_RATE = 0.1;                                    // +2.4/day (+1 every ~10h)
+        const TOTAL_CAPACITY = 500;                                 // For progress bar
+        const BASE_DATE = new Date("2026-09-14T08:00:00.000Z");    // Fixed start date
 
-        // Base date: We use a fixed timestamp so it's consistent across all users
-        // Set to 5 days ago from your deployment so it starts higher and grows naturally
-        // You can adjust this to any date; the number will calculate from that date
-        const BASE_DATE = new Date(Date.now() - (5 * 24 * 60 * 60 * 1000)); // 5 days ago
-
-        console.log("🔥 Member page initialized. Base count:", BASE_COUNT, "Base date:", BASE_DATE.toISOString());
+        console.log("🔥 Member page initialized. Base:", BASE_COUNT, "Rate:", GROWTH_RATE, "/hour");
 
         let currentUser = null;
         let currentUserProfile = null;
@@ -961,13 +950,10 @@
         // ============================================================
         // FAKE GROWTH COUNTER
         // ============================================================
-        let lastDisplayedCount = 0;
-
         function calculateFakeCount() {
             const now = new Date();
             const hoursSinceBase = (now - BASE_DATE) / (1000 * 60 * 60);
-            // Add slight randomness so it feels organic (jitter ±0.3)
-            const jitter = (Math.sin(hoursSinceBase) * 0.3);
+            const jitter = (Math.sin(hoursSinceBase) * 0.2);
             const fakeCount = Math.floor(BASE_COUNT + (hoursSinceBase * GROWTH_RATE) + jitter);
             return Math.max(fakeCount, BASE_COUNT);
         }
@@ -978,7 +964,6 @@
             function update(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                // Ease out cubic
                 const eased = 1 - Math.pow(1 - progress, 3);
                 const current = Math.round(from + diff * eased);
                 element.textContent = current;
@@ -989,17 +974,11 @@
 
         async function updateLiveCounter() {
             try {
-                // Get real count from Firestore
                 const snapshot = await getDocs(collection(db, "registrations"));
                 const realCount = snapshot.size;
-
-                // Calculate fake display count
                 const displayCount = calculateFakeCount() + realCount;
-
-                // Progress calculation
                 const percentage = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
 
-                // Animate number
                 const el = document.getElementById('total-registered');
                 if (el) {
                     const current = parseInt(el.textContent) || BASE_COUNT;
@@ -1008,21 +987,17 @@
                         animateNumber(el, current, displayCount, 800);
                         setTimeout(() => el.classList.remove('growing'), 800);
                     }
-                    lastDisplayedCount = displayCount;
                 }
 
-                // Update progress bar
                 const bar = document.getElementById('slots-progress');
                 if (bar) bar.style.width = percentage + '%';
 
-                // Update progress text
                 const text = document.getElementById('slots-text');
                 if (text) {
                     text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
                 }
             } catch (error) {
                 console.error("Counter error:", error);
-                // Fallback to fake only
                 const displayCount = calculateFakeCount();
                 const el = document.getElementById('total-registered');
                 if (el) el.textContent = displayCount;
@@ -1034,9 +1009,7 @@
             }
         }
 
-        // Update counter every 60 seconds (so it grows visibly over time)
         setInterval(updateLiveCounter, 60000);
-        // Also update on page load
         setTimeout(updateLiveCounter, 500);
 
         // ============================================================
