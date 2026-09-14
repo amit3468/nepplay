@@ -2,87 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
+    <title>Create Account - Nepal Gaming 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .form-input { 
-            background-color: #f1f5f9; 
-            color: #0f172a; 
-            transition: all 0.2s;
-        }
-        .form-input:focus { 
-            outline: none; 
-            box-shadow: 0 0 0 2px #3b82f6;
-            transform: translateY(-1px);
-        }
+        .form-input { background-color: #f1f5f9; color: #0f172a; transition: all 0.2s; }
+        .form-input:focus { outline: none; box-shadow: 0 0 0 2px #3b82f6; transform: translateY(-1px); }
         .strength-bar { height: 4px; border-radius: 2px; transition: all 0.3s; }
         .strength-weak { background-color: #ef4444; }
         .strength-medium { background-color: #eab308; }
         .strength-strong { background-color: #22c55e; }
+
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
-    <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold text-white">Nepal Gaming</span>
+    <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-50 relative">
+        <div class="flex items-center gap-3 min-w-0">
+            <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+            <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
         </div>
-        <div class="flex items-center gap-4">
-            <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-            <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
-            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+            <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+        </button>
+        <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+            <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+            <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+            <a href="winners.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Winners</a>
+            <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
+            <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
         </div>
     </nav>
 
-    <!-- Registration Container -->
-    <main class="flex-grow flex items-center justify-center p-6">
-        <div class="glass-panel w-full max-w-lg p-8 rounded-xl shadow-2xl">
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+        <div class="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-xl shadow-2xl">
             
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
-                <h2 class="text-xl font-semibold text-white">Create Your Account</h2>
-                <p class="text-gray-400 text-sm mt-1">Join thousands of gamers across Nepal</p>
+            <div class="text-center mb-6">
+                <div class="inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block mr-1"></span>
+                    Launching Soon — 2026
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
+                <h2 class="text-lg sm:text-xl font-semibold text-white">Create Your Free Account</h2>
+                <p class="text-gray-400 text-xs sm:text-sm mt-1">Register now to be notified when we launch tournaments</p>
             </div>
 
-            <!-- Registration Form -->
             <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
                 
-                <!-- Full Name -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
                     <input type="text" id="fullName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Amit Sharma">
                     <p id="error-fullName" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <!-- Username -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Username *</label>
                     <input type="text" id="username" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., amit_ff">
                     <p id="error-username" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <!-- Email -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
                     <input type="email" id="email" class="form-input w-full px-4 py-3 rounded-lg" placeholder="you@example.com">
                     <p id="error-email" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <!-- Password -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                    <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Minimum 6 characters" oninput="checkPasswordStrength()">
-                    
-                    <!-- Password Strength Indicator -->
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
+                    <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Min 6 characters" oninput="checkPasswordStrength()">
                     <div class="flex gap-1 mt-2">
                         <div id="strength-1" class="strength-bar flex-grow bg-gray-700"></div>
                         <div id="strength-2" class="strength-bar flex-grow bg-gray-700"></div>
@@ -93,32 +92,27 @@
                     <p id="error-password" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <!-- Confirm Password -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password *</label>
                     <input type="password" id="confirmPassword" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Re-enter password">
                     <p id="error-confirmPassword" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <!-- Terms Checkbox -->
-                <div class="mb-6 flex items-start gap-2">
-                    <input type="checkbox" id="terms" class="mt-1 w-4 h-4 rounded text-blue-500">
-                    <label for="terms" class="text-sm text-gray-300">
+                <div class="mb-5 flex items-start gap-2">
+                    <input type="checkbox" id="terms" class="mt-1 w-4 h-4 rounded flex-shrink-0">
+                    <label for="terms" class="text-xs sm:text-sm text-gray-300">
                         I agree to the <a href="#" class="text-blue-400 hover:underline">Terms of Service</a> and <a href="#" class="text-blue-400 hover:underline">Privacy Policy</a>
                     </label>
                 </div>
                 <p id="error-terms" class="text-red-400 text-xs mt-1 mb-4 hidden"></p>
 
-                <!-- Submit Button -->
-                <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">
-                    Create Account
+                <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
+                    Create Free Account
                 </button>
-                
-                <!-- Global Message -->
+
                 <p id="register-message" class="hidden text-center text-sm mt-4"></p>
             </form>
 
-            <!-- Login Link -->
             <div class="text-center mt-6">
                 <p class="text-sm text-gray-400">Already have an account? 
                     <a href="member.html" class="text-red-400 hover:text-red-300 font-semibold">Login here</a>
@@ -127,25 +121,20 @@
         </div>
     </main>
 
-    <!-- Scripts -->
     <script>
-        console.log("--- REGISTER PAGE LOADED ---");
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
 
-        // 1. Password strength checker
         function checkPasswordStrength() {
             const password = document.getElementById('password').value;
-            const bars = [
-                document.getElementById('strength-1'),
-                document.getElementById('strength-2'),
-                document.getElementById('strength-3'),
-                document.getElementById('strength-4')
-            ];
+            const bars = [document.getElementById('strength-1'), document.getElementById('strength-2'), document.getElementById('strength-3'), document.getElementById('strength-4')];
             const text = document.getElementById('strength-text');
 
-            // Reset all bars
-            bars.forEach(bar => {
-                bar.className = 'strength-bar flex-grow bg-gray-700';
-            });
+            bars.forEach(bar => bar.className = 'strength-bar flex-grow bg-gray-700');
 
             if (password.length === 0) {
                 text.textContent = 'Password strength';
@@ -153,55 +142,40 @@
                 return 0;
             }
 
-            // Calculate strength
             let score = 0;
             if (password.length >= 6) score++;
             if (password.length >= 10) score++;
             if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
             if (/[0-9]/.test(password)) score++;
             if (/[^A-Za-z0-9]/.test(password)) score++;
-
-            // Cap at 4
             if (score > 4) score = 4;
 
-            // Apply visuals
             const colorClass = score <= 1 ? 'strength-weak' : score === 2 ? 'strength-medium' : 'strength-strong';
             for (let i = 0; i < score; i++) {
                 bars[i].classList.remove('bg-gray-700');
                 bars[i].classList.add(colorClass);
             }
 
-            // Text
-            if (score <= 1) text.textContent = 'Weak password';
-            else if (score === 2) text.textContent = 'Medium password';
-            else if (score >= 3) text.textContent = 'Strong password';
-            
+            if (score <= 1) text.textContent = 'Weak';
+            else if (score === 2) text.textContent = 'Medium';
+            else text.textContent = 'Strong';
             text.className = `text-xs mt-1 ${score <= 1 ? 'text-red-400' : score === 2 ? 'text-yellow-400' : 'text-green-400'}`;
-
             return score;
         }
 
-        // 2. Show/hide error message
-        function showError(fieldId, message) {
-            const errorEl = document.getElementById('error-' + fieldId);
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
+        function showError(id, msg) {
+            const el = document.getElementById('error-' + id);
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+        function clearError(id) {
+            document.getElementById('error-' + id).classList.add('hidden');
         }
 
-        function clearError(fieldId) {
-            const errorEl = document.getElementById('error-' + fieldId);
-            errorEl.classList.add('hidden');
-        }
-
-        // 3. Handle form submission
         function handleRegister(event) {
             event.preventDefault();
-            console.log("Registration form submitted");
-
-            // Clear all previous errors
             ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
 
-            // Get values
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -213,90 +187,41 @@
 
             let hasError = false;
 
-            // Validate Full Name
-            if (fullName.length < 2) {
-                showError('fullName', 'Please enter your full name (at least 2 characters)');
-                hasError = true;
-            }
-
-            // Validate Username
-            if (username.length < 3) {
-                showError('username', 'Username must be at least 3 characters');
-                hasError = true;
-            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                showError('username', 'Username can only contain letters, numbers, and underscores');
-                hasError = true;
-            }
-
-            // Validate Email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showError('email', 'Please enter a valid email address');
-                hasError = true;
-            }
-
-            // Validate Password
-            if (password.length < 6) {
-                showError('password', 'Password must be at least 6 characters');
-                hasError = true;
-            }
-
-            // Validate Confirm Password
-            if (password !== confirmPassword) {
-                showError('confirmPassword', 'Passwords do not match');
-                hasError = true;
-            }
-
-            // Validate Terms
-            if (!terms) {
-                showError('terms', 'You must accept the Terms of Service');
-                hasError = true;
-            }
+            if (fullName.length < 2) { showError('fullName', 'Please enter your full name'); hasError = true; }
+            if (username.length < 3) { showError('username', 'Username must be at least 3 characters'); hasError = true; }
+            else if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('username', 'Letters, numbers, underscores only'); hasError = true; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('email', 'Please enter a valid email'); hasError = true; }
+            if (password.length < 6) { showError('password', 'Password must be at least 6 characters'); hasError = true; }
+            if (password !== confirmPassword) { showError('confirmPassword', 'Passwords do not match'); hasError = true; }
+            if (!terms) { showError('terms', 'You must accept the terms'); hasError = true; }
 
             if (hasError) {
-                console.log("Registration failed: validation errors");
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
-                msgBox.textContent = "Please fix the errors above and try again.";
+                msgBox.textContent = "Please fix the errors above.";
                 return;
             }
 
-            // Success flow
-            console.log("Validation passed. Creating account...");
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating account...';
             btn.disabled = true;
 
-            // Simulate saving to database (1.5 second delay)
             setTimeout(() => {
-                const newUser = {
-                    fullName: fullName,
-                    username: username,
-                    email: email,
-                    createdAt: new Date().toISOString()
-                };
-                
+                const newUser = { fullName, username, email, createdAt: new Date().toISOString() };
                 localStorage.setItem('currentUser', JSON.stringify(newUser));
-                console.log("User saved to localStorage:", newUser);
 
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
-                msgBox.textContent = "Account created successfully! Redirecting to dashboard...";
+                msgBox.innerHTML = '✅ <strong>Account created!</strong><br><span class="text-xs text-gray-400">Redirecting to dashboard...</span>';
 
-                setTimeout(() => {
-                    window.location.href = 'member.html';
-                }, 1500);
-            }, 1500);
+                setTimeout(() => { window.location.href = 'member.html'; }, 1200);
+            }, 1200);
         }
 
-        // 4. Real-time validation clearing (as user types)
-        document.getElementById('fullName').addEventListener('input', () => clearError('fullName'));
-        document.getElementById('username').addEventListener('input', () => clearError('username'));
-        document.getElementById('email').addEventListener('input', () => clearError('email'));
-        document.getElementById('password').addEventListener('input', () => clearError('password'));
-        document.getElementById('confirmPassword').addEventListener('input', () => clearError('confirmPassword'));
-        document.getElementById('terms').addEventListener('change', () => clearError('terms'));
-
-        console.log("Real-time validation listeners attached");
+        ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => clearError(id));
+            if (el) el.addEventListener('change', () => clearError(id));
+        });
     </script>
 </body>
 </html>
