@@ -2,198 +2,129 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Dashboard - Nepal Gaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Member Dashboard - Nepal Gaming Platform 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; display: inline-block; }
         .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
         .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
         .status-upcoming { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
-        
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
-        .announcement-card { transition: all 0.3s; }
-        .announcement-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2); }
-
-        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
-        .empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
-
-        /* Floating Support Button */
-        .floating-support {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            z-index: 100;
-        }
-        .support-btn {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 26px;
-            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer;
-            transition: all 0.3s;
-            animation: pulse-support 2s infinite;
-        }
-        .support-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6);
-        }
-        @keyframes pulse-support {
-            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
-            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
-        }
-        .support-menu {
-            display: none;
-            position: absolute;
-            bottom: 75px;
-            left: 0;
-            width: 260px;
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
+        .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
+        .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
+        .support-btn:hover { transform: scale(1.1); }
+        @keyframes pulse-support { 0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); } 50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); } }
+        .support-menu { display: none; position: absolute; bottom: 68px; left: 0; width: 240px; max-width: calc(100vw - 48px); background: #1e293b; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); overflow: hidden; }
         .support-menu.open { display: block; }
-        .support-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            color: #e2e8f0;
-            text-decoration: none;
-            transition: all 0.2s;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .support-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e2e8f0; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
+
+        .mobile-menu-toggle { display: flex; }
+        @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
+        .mobile-nav-menu { display: none; }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
+
+        .empty-state { text-align: center; padding: 30px 15px; color: #64748b; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support Button -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
                 <p class="text-white font-bold text-sm">Need Help? 🆘</p>
-                <p class="text-xs text-gray-400">Choose how to reach us</p>
             </div>
-            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
-                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <i class="fa-brands fa-whatsapp text-green-400 text-lg"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Chat Privately</p>
-                    <p class="text-xs text-gray-500">1-on-1 with admin</p>
-                </div>
+            <a href="https://wa.me/9779816023400?text=Hi." target="_blank" class="support-menu-item wa">
+                <div class="w-9 h-9 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-whatsapp text-green-400"></i></div>
+                <div><p class="text-sm font-bold">Chat Privately</p></div>
             </a>
             <a href="support.html" class="support-menu-item">
-                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
-                    <i class="fa-solid fa-headset text-pink-400"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Support Page</p>
-                    <p class="text-xs text-gray-500">Full help center</p>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-pink-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-pink-400"></i></div>
+                <div><p class="text-sm font-bold">Support Page</p></div>
             </a>
             <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
-                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <i class="fa-solid fa-users text-purple-400"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-bold">Join Community</p>
-                    <p class="text-xs text-gray-500">Public group chat</p>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-users text-purple-400"></i></div>
+                <div><p class="text-sm font-bold">Community</p></div>
             </a>
         </div>
-        <div class="support-btn" onclick="toggleSupportMenu()">
-            <i class="fa-solid fa-headset"></i>
-        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- ================= LOGIN SECTION ================= -->
+    <!-- LOGIN -->
     <div id="login-container" class="flex-grow flex flex-col">
-        
-        <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold text-white">Nepal Gaming</span>
+        <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+                <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-                <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
-                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-                <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
-                <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
+            <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
+                <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+            </button>
+            <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+                <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+                <a href="support.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
+                <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
             </div>
         </nav>
 
-        <div class="flex-grow flex items-center justify-center p-6">
-            <div class="glass-panel w-full max-w-md p-8 rounded-xl shadow-2xl">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
-                    <p class="text-gray-400">Member Login</p>
+        <div class="flex-grow flex items-center justify-center p-4 sm:p-6">
+            <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-xl shadow-2xl">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
+                    <p class="text-gray-400 text-sm">Member Login</p>
                 </div>
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
-                        <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="test_amit" required>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                        <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter username" required>
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                         <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••" required>
                     </div>
-                    <button type="submit" id="login-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">Login</button>
+                    <button type="submit" id="login-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">Login</button>
                     <p id="login-message" class="hidden text-center text-sm mt-4"></p>
                 </form>
-                <div class="text-center mt-6">
+                <div class="text-center mt-5">
                     <a href="register.html" class="text-sm text-red-400 hover:text-red-300">Create Account</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ================= DASHBOARD SECTION ================= -->
+    <!-- DASHBOARD -->
     <div id="dashboard-container" class="hidden flex-grow flex flex-col">
-        
-        <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-gamepad text-blue-500 text-2xl"></i>
-                    <span class="text-xl font-bold text-white">Nepal Gaming</span>
-                </div>
-
+        <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
+            <div class="flex items-center gap-3 min-w-0">
+                <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
+                <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
                 <div id="user-profile" class="relative">
-                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg transition">
-                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                        <span class="text-sm text-gray-300 hidden md:inline">Hi, <span id="user-name" class="font-bold text-white">User</span></span>
+                    <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
                     </button>
                     <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
                         <div class="p-3 border-b border-gray-700">
-                            <p class="text-xs text-gray-500">Signed in as</p>
+                            <p class="text-xs text-gray-500">Signed in</p>
                             <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
                         </div>
                         <div class="py-1">
-                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
-                            <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                            <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
+                            <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Dashboard</a>
                             <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                         </div>
                         <div class="py-1 border-t border-gray-700">
@@ -202,58 +133,56 @@
                     </div>
                 </div>
             </div>
-
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="text-sm text-gray-300 hover:text-white transition">Home</a>
-                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition">Tournaments</a>
-                <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
-                <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
-                <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
-                <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
+            <button onclick="toggleMobileNav2()" class="mobile-menu-toggle text-white text-2xl p-1">
+                <i class="fa-solid fa-bars" id="hamburgerIcon2"></i>
+            </button>
+            <div id="mobileNav2" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
+                <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
+                <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
+                <a href="teams.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+                <a href="support.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
             </div>
         </nav>
 
-        <main class="flex-grow container mx-auto p-6">
+        <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-green-500">
-                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
-                    <p class="text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
+                    <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
+                    <p class="text-2xl sm:text-3xl font-bold text-green-400">Rs. <span id="total-earnings">0</span></p>
                     <p class="text-xs text-gray-500 mt-2" id="earnings-subtitle">No winnings yet</p>
                 </div>
-                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
-                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Matches Played</h3>
-                    <p class="text-3xl font-bold text-blue-400" id="matches-played">0</p>
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
+                    <h3 class="text-gray-400 text-xs font-semibold mb-1">Matches Played</h3>
+                    <p class="text-2xl sm:text-3xl font-bold text-blue-400" id="matches-played">0</p>
                     <p class="text-xs text-gray-500 mt-2" id="matches-subtitle">No registrations yet</p>
                 </div>
-                <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
-                    <h3 class="text-gray-400 text-sm font-semibold mb-1">Active Tournaments</h3>
-                    <p class="text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
-                    <p class="text-xs text-gray-500 mt-2">Ongoing events</p>
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-purple-500">
+                    <h3 class="text-gray-400 text-xs font-semibold mb-1">Active Tournaments</h3>
+                    <p class="text-2xl sm:text-3xl font-bold text-purple-400" id="active-tournaments">0</p>
+                    <p class="text-xs text-gray-500 mt-2">Available to join</p>
                 </div>
             </div>
 
-            <div class="glass-panel rounded-xl shadow-lg mb-8 border-l-4 border-yellow-500 overflow-hidden">
-                <div class="p-6 border-b border-gray-700 bg-gray-800/30">
-                    <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Latest Announcements</h2>
-                    <p class="text-xs text-gray-400 mt-1">Stay updated with the latest news from Nepal Gaming</p>
+            <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
+                <div class="p-5 border-b border-gray-700 bg-gray-800/30">
+                    <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
                 </div>
-                <div id="announcements-container" class="p-6 space-y-4"></div>
+                <div id="announcements-container" class="p-5 space-y-3"></div>
             </div>
 
-            <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-8">
-                <div class="p-6 border-b border-gray-700 bg-gray-800/30">
-                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
-                    <p class="text-sm text-gray-400 mt-1">Tournaments you have registered for.</p>
+            <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
+                <div class="p-5 border-b border-gray-700 bg-gray-800/30">
+                    <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
-                                <th class="px-6 py-3">Tournament Name</th>
-                                <th class="px-6 py-3">Registered</th>
-                                <th class="px-6 py-3">Entry Fee</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="px-4 py-3">Tournament</th>
+                                <th class="px-4 py-3">Registered</th>
+                                <th class="px-4 py-3">Fee</th>
+                                <th class="px-4 py-3">Status</th>
                             </tr>
                         </thead>
                         <tbody id="upcoming-table-body" class="divide-y divide-gray-700"></tbody>
@@ -261,27 +190,26 @@
                 </div>
                 <div id="empty-upcoming" class="empty-state hidden">
                     <i class="fa-solid fa-clipboard-list"></i>
-                    <p class="text-lg font-bold text-white mb-1">No upcoming tournaments</p>
-                    <p class="text-sm mb-4">Register for a tournament to see it here.</p>
-                    <a href="tournaments.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition text-sm">
-                        <i class="fa-solid fa-trophy mr-2"></i>Browse Tournaments
+                    <p class="text-base font-bold text-white mb-1">No upcoming tournaments</p>
+                    <p class="text-sm mb-4">Register to see them here.</p>
+                    <a href="tournaments.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm">
+                        <i class="fa-solid fa-trophy mr-2"></i>Browse
                     </a>
                 </div>
             </div>
 
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
-                <div class="p-6 border-b border-gray-700 bg-gray-800/30">
-                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings History</h2>
-                    <p class="text-sm text-gray-400 mt-1">Tournaments you've won prizes in and their payment status.</p>
+                <div class="p-5 border-b border-gray-700 bg-gray-800/30">
+                    <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400">
                         <thead class="bg-gray-800 text-xs uppercase text-gray-400">
                             <tr>
-                                <th class="px-6 py-3">Tournament</th>
-                                <th class="px-6 py-3">Rank</th>
-                                <th class="px-6 py-3">Prize Amount</th>
-                                <th class="px-6 py-3">Payment Status</th>
+                                <th class="px-4 py-3">Tournament</th>
+                                <th class="px-4 py-3">Rank</th>
+                                <th class="px-4 py-3">Prize</th>
+                                <th class="px-4 py-3">Status</th>
                             </tr>
                         </thead>
                         <tbody id="history-table-body" class="divide-y divide-gray-700"></tbody>
@@ -289,7 +217,7 @@
                 </div>
                 <div id="empty-history" class="empty-state hidden">
                     <i class="fa-solid fa-trophy"></i>
-                    <p class="text-lg font-bold text-white mb-1">No winnings yet</p>
+                    <p class="text-base font-bold text-white mb-1">No winnings yet</p>
                     <p class="text-sm">Win a tournament to see your prize history here.</p>
                 </div>
             </div>
@@ -297,45 +225,48 @@
     </div>
 
     <script>
-        console.log("--- MEMBER PAGE LOADED (with floating support) ---");
-
-        // Floating Support Menu
-        function toggleSupportMenu() {
-            document.getElementById('supportMenu').classList.toggle('open');
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobileNav');
+            const icon = document.getElementById('hamburgerIcon');
+            if (!nav) return;
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
         }
+        function toggleMobileNav2() {
+            const nav = document.getElementById('mobileNav2');
+            const icon = document.getElementById('hamburgerIcon2');
+            if (!nav) return;
+            nav.classList.toggle('open');
+            icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
+        function toggleSupportMenu() { document.getElementById('supportMenu').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('supportMenu');
             const btn = document.querySelector('.support-btn');
-            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.remove('open');
-            }
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
         let currentUser = null;
 
         function handleLogin(event) {
             event.preventDefault();
-            const usernameInput = document.getElementById('username').value;
-            const passwordInput = document.getElementById('password').value;
-            const msgBox = document.getElementById('login-message');
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const msg = document.getElementById('login-message');
             const btn = document.getElementById('login-btn');
 
-            if (usernameInput && passwordInput) {
+            if (u && p) {
                 btn.innerHTML = "Logging in...";
-                msgBox.classList.remove('hidden');
-                msgBox.className = "text-center text-sm mt-4 text-green-400";
-                msgBox.innerText = "Login successful. Opening dashboard...";
-                const user = { 
-                    username: usernameInput,
-                    email: usernameInput + "@gmail.com",
-                    loginAt: new Date().toISOString()
-                };
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-green-400";
+                msg.innerText = "Login successful...";
+                const user = { username: u, email: u + "@gmail.com", loginAt: new Date().toISOString() };
                 localStorage.setItem('currentUser', JSON.stringify(user));
                 setTimeout(() => showDashboard(user), 800);
             } else {
-                msgBox.classList.remove('hidden');
-                msgBox.className = "text-center text-sm mt-4 text-red-400";
-                msgBox.innerText = "Please enter username and password.";
+                msg.classList.remove('hidden');
+                msg.className = "text-center text-sm mt-4 text-red-400";
+                msg.innerText = "Enter username and password.";
             }
         }
 
@@ -343,212 +274,138 @@
             currentUser = user;
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
-            
             document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-            document.getElementById('user-name').textContent = user.username;
             document.getElementById('dropdown-username').textContent = user.email || user.username;
-            
             loadDashboardData();
             loadAnnouncements();
         }
 
         function loadDashboardData() {
             if (!currentUser) return;
+            const uname = currentUser.username.toLowerCase();
+            const allReg = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
+            const myReg = allReg.filter(r => r.username.toLowerCase() === uname);
+            const allPay = JSON.parse(localStorage.getItem('payouts') || '[]');
+            const myPay = allPay.filter(p => p.username.toLowerCase() === uname);
+            const paidWins = myPay.filter(p => p.status === 'paid');
+            const totalEarn = paidWins.reduce((s, p) => s + p.prize, 0);
+            const uniqueT = new Set(myReg.map(r => r.tournamentName));
 
-            const username = currentUser.username.toLowerCase();
-            const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-            const userRegistrations = allRegistrations.filter(r => r.username.toLowerCase() === username);
+            document.getElementById('total-earnings').textContent = totalEarn.toLocaleString();
+            document.getElementById('matches-played').textContent = uniqueT.size;
 
-            const allPayouts = JSON.parse(localStorage.getItem('payouts') || '[]');
-            const userPayouts = allPayouts.filter(p => p.username.toLowerCase() === username);
+            const eSub = document.getElementById('earnings-subtitle');
+            if (totalEarn > 0) { eSub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize(s) won`; eSub.className = "text-xs text-green-400 mt-2"; }
+            else if (myPay.length > 0) { eSub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${myPay.length} pending`; eSub.className = "text-xs text-yellow-400 mt-2"; }
+            else { eSub.textContent = "No winnings yet"; eSub.className = "text-xs text-gray-500 mt-2"; }
 
-            const paidWins = userPayouts.filter(p => p.status === 'paid');
-            const totalEarnings = paidWins.reduce((sum, p) => sum + p.prize, 0);
+            const mSub = document.getElementById('matches-subtitle');
+            if (uniqueT.size > 0) { mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueT.size} tournament(s)`; mSub.className = "text-xs text-blue-400 mt-2"; }
+            else { mSub.textContent = "No registrations yet"; mSub.className = "text-xs text-gray-500 mt-2"; }
 
-            const uniqueTournaments = new Set(userRegistrations.map(r => r.tournamentName));
-            const matchesPlayed = uniqueTournaments.size;
+            const custom = JSON.parse(localStorage.getItem('customTournaments') || '[]');
+            document.getElementById('active-tournaments').textContent = custom.length;
 
-            document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
-            document.getElementById('matches-played').textContent = matchesPlayed;
-
-            const earningsSubtitle = document.getElementById('earnings-subtitle');
-            const matchesSubtitle = document.getElementById('matches-subtitle');
-
-            if (totalEarnings > 0) {
-                earningsSubtitle.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize${paidWins.length > 1 ? 's' : ''} won`;
-                earningsSubtitle.className = "text-xs text-green-400 mt-2";
-            } else if (userPayouts.length > 0) {
-                earningsSubtitle.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${userPayouts.length} pending payout${userPayouts.length > 1 ? 's' : ''}`;
-                earningsSubtitle.className = "text-xs text-yellow-400 mt-2";
-            } else {
-                earningsSubtitle.textContent = "No winnings yet";
-                earningsSubtitle.className = "text-xs text-gray-500 mt-2";
-            }
-
-            if (matchesPlayed > 0) {
-                matchesSubtitle.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> Registered for ${matchesPlayed} tournament${matchesPlayed > 1 ? 's' : ''}`;
-                matchesSubtitle.className = "text-xs text-blue-400 mt-2";
-            } else {
-                matchesSubtitle.textContent = "No registrations yet";
-                matchesSubtitle.className = "text-xs text-gray-500 mt-2";
-            }
-
-            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-            document.getElementById('active-tournaments').textContent = customTournaments.length;
-
-            renderUpcomingTournaments(userRegistrations);
-            renderWinningsHistory(userPayouts);
+            renderUpcoming(myReg);
+            renderHistory(myPay);
         }
 
-        function renderUpcomingTournaments(registrations) {
+        function renderUpcoming(regs) {
             const tbody = document.getElementById('upcoming-table-body');
-            const emptyState = document.getElementById('empty-upcoming');
-            const tableContainer = tbody.closest('.overflow-x-auto');
+            const empty = document.getElementById('empty-upcoming');
+            const tableWrap = tbody.closest('.overflow-x-auto');
 
-            if (registrations.length === 0) {
-                tableContainer.style.display = 'none';
-                emptyState.classList.remove('hidden');
+            if (regs.length === 0) {
+                tableWrap.style.display = 'none';
+                empty.classList.remove('hidden');
                 return;
             }
-
-            tableContainer.style.display = 'block';
-            emptyState.classList.add('hidden');
+            tableWrap.style.display = 'block';
+            empty.classList.add('hidden');
             tbody.innerHTML = '';
 
-            const uniqueRegs = [];
             const seen = new Set();
-            [...registrations].reverse().forEach(r => {
-                if (!seen.has(r.tournamentName)) {
-                    seen.add(r.tournamentName);
-                    uniqueRegs.push(r);
-                }
-            });
-
-            uniqueRegs.forEach(reg => {
-                const regDate = new Date(reg.registeredAt);
-                const dateStr = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
+            [...regs].reverse().forEach(r => {
+                if (seen.has(r.tournamentName)) return;
+                seen.add(r.tournamentName);
+                const d = new Date(r.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white">${reg.tournamentName}</td>
-                    <td class="px-6 py-4 text-gray-500 text-xs">${dateStr}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${reg.entryFee || 0}</td>
-                    <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i>Upcoming</span></td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentName}</td>
+                    <td class="px-4 py-3 text-gray-500 text-xs">${d}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${r.entryFee || 0}</td>
+                    <td class="px-4 py-3"><span class="status-badge status-upcoming">Upcoming</span></td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        function renderWinningsHistory(payouts) {
+        function renderHistory(pays) {
             const tbody = document.getElementById('history-table-body');
-            const emptyState = document.getElementById('empty-history');
-            const tableContainer = tbody.closest('.overflow-x-auto');
+            const empty = document.getElementById('empty-history');
+            const tableWrap = tbody.closest('.overflow-x-auto');
 
-            if (payouts.length === 0) {
-                tableContainer.style.display = 'none';
-                emptyState.classList.remove('hidden');
+            if (pays.length === 0) {
+                tableWrap.style.display = 'none';
+                empty.classList.remove('hidden');
                 return;
             }
-
-            tableContainer.style.display = 'block';
-            emptyState.classList.add('hidden');
+            tableWrap.style.display = 'block';
+            empty.classList.add('hidden');
             tbody.innerHTML = '';
 
-            [...payouts].reverse().forEach(p => {
+            [...pays].reverse().forEach(p => {
+                const status = p.status === 'paid' ? '<span class="status-badge status-paid">Paid</span>' : '<span class="status-badge status-pending">Pending</span>';
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-800/50 transition";
-                
-                const statusHtml = p.status === 'paid'
-                    ? `<span class="status-badge status-paid"><i class="fa-solid fa-check-circle mr-1"></i>Paid</span>`
-                    : `<span class="status-badge status-pending"><i class="fa-solid fa-clock mr-1"></i>Pending</span>`;
-
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-white">${p.tournament}</td>
-                    <td class="px-6 py-4 text-yellow-400 font-bold">${p.rank}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${p.prize}</td>
-                    <td class="px-6 py-4">${statusHtml}</td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${p.tournament}</td>
+                    <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize}</td>
+                    <td class="px-4 py-3">${status}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
         function loadAnnouncements() {
-            const container = document.getElementById('announcements-container');
-            if (!container) return;
-
-            const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-            
-            if (announcements.length === 0) {
-                container.innerHTML = `
-                    <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
-                        <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">Welcome to Nepal Gaming! Check back soon for tournament announcements.</span>
-                    </div>
-                `;
+            const c = document.getElementById('announcements-container');
+            const all = JSON.parse(localStorage.getItem('announcements') || '[]');
+            if (all.length === 0) {
+                c.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Welcome! We're launching soon. Check back for updates.</span></div>`;
                 return;
             }
-
-            const colorMap = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
-            const iconMap = {
-                normal: 'fa-info-circle text-blue-400',
-                high: 'fa-exclamation-triangle text-yellow-400',
-                urgent: 'fa-exclamation-circle text-red-400'
-            };
-
-            container.innerHTML = '';
-            [...announcements].reverse().forEach(a => {
+            const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
+            c.innerHTML = '';
+            [...all].reverse().forEach(a => {
                 const card = document.createElement('div');
-                card.className = `announcement-card bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colorMap[a.priority] || 'border-blue-500'}`;
-                
-                const imageHtml = a.image 
-                    ? `<img src="${a.image}" class="w-full h-56 object-cover" alt="Announcement" onerror="this.style.display='none'">` 
-                    : '';
-
-                const date = new Date(a.createdAt).toLocaleString('en-US', { 
-                    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
-                });
-
+                card.className = `bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colors[a.priority]}`;
+                const date = new Date(a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 card.innerHTML = `
-                    ${imageHtml}
+                    ${a.image ? `<img src="${a.image}" class="w-full h-40 object-cover">` : ''}
                     <div class="p-4">
-                        <div class="flex items-start gap-3">
-                            <i class="fa-solid ${iconMap[a.priority] || 'fa-info-circle'} mt-0.5"></i>
-                            <div class="flex-grow">
-                                <h3 class="font-bold text-white text-sm">${a.title}</h3>
-                                <p class="text-sm text-gray-300 mt-2 leading-relaxed">${a.message}</p>
-                                <p class="text-xs text-gray-500 mt-3"><i class="fa-regular fa-clock mr-1"></i>${date}</p>
-                            </div>
-                        </div>
+                        <h3 class="font-bold text-white text-sm">${a.title}</h3>
+                        <p class="text-sm text-gray-300 mt-2">${a.message}</p>
+                        <p class="text-xs text-gray-500 mt-2">${date}</p>
                     </div>
                 `;
-                container.appendChild(card);
+                c.appendChild(card);
             });
         }
 
         window.onload = function() {
-            const storedUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (storedUser) {
-                showDashboard(storedUser);
-            }
+            const u = JSON.parse(localStorage.getItem('currentUser'));
+            if (u) showDashboard(u);
         };
 
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
-        }
-
+        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
-            if (profile && !profile.contains(e.target)) {
-                dropdown.classList.remove('open');
-            }
+            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.reload();
-        }
+        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
     </script>
 </body>
 </html>
