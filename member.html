@@ -23,9 +23,107 @@
 
         .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
         .empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
+
+        /* Floating Support Button */
+        .floating-support {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+        }
+        .support-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse-support 2s infinite;
+        }
+        .support-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6);
+        }
+        @keyframes pulse-support {
+            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
+        }
+        .support-menu {
+            display: none;
+            position: absolute;
+            bottom: 75px;
+            left: 0;
+            width: 260px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .support-menu.open { display: block; }
+        .support-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .support-menu-item:last-child { border-bottom: none; }
+        .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
+        .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
+        .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+    <!-- Floating Support Button -->
+    <div class="floating-support">
+        <div id="supportMenu" class="support-menu">
+            <div class="p-3 border-b border-gray-700 bg-slate-800/50">
+                <p class="text-white font-bold text-sm">Need Help? 🆘</p>
+                <p class="text-xs text-gray-400">Choose how to reach us</p>
+            </div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-brands fa-whatsapp text-green-400 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Chat Privately</p>
+                    <p class="text-xs text-gray-500">1-on-1 with admin</p>
+                </div>
+            </a>
+            <a href="support.html" class="support-menu-item">
+                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-headset text-pink-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Support Page</p>
+                    <p class="text-xs text-gray-500">Full help center</p>
+                </div>
+            </a>
+            <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-users text-purple-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Join Community</p>
+                    <p class="text-xs text-gray-500">Public group chat</p>
+                </div>
+            </a>
+        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()">
+            <i class="fa-solid fa-headset"></i>
+        </div>
+    </div>
 
     <!-- ================= LOGIN SECTION ================= -->
     <div id="login-container" class="flex-grow flex flex-col">
@@ -41,6 +139,7 @@
                 <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
                 <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
                 <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+                <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
                 <a href="member.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
             </div>
         </nav>
@@ -95,7 +194,7 @@
                             <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
                             <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                             <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
-                            <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                            <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                         </div>
                         <div class="py-1 border-t border-gray-700">
                             <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
@@ -110,12 +209,12 @@
                 <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
                 <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
                 <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+                <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
             </div>
         </nav>
 
         <main class="flex-grow container mx-auto p-6">
             
-            <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="glass-panel p-6 rounded-xl shadow-lg border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-sm font-semibold mb-1">Total Earnings</h3>
@@ -134,7 +233,6 @@
                 </div>
             </div>
 
-            <!-- Announcements -->
             <div class="glass-panel rounded-xl shadow-lg mb-8 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Latest Announcements</h2>
@@ -143,7 +241,6 @@
                 <div id="announcements-container" class="p-6 space-y-4"></div>
             </div>
 
-            <!-- Upcoming Tournaments (Real User Data) -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -172,7 +269,6 @@
                 </div>
             </div>
 
-            <!-- Tournament History (Real User Wins) -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-6 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings History</h2>
@@ -201,12 +297,22 @@
     </div>
 
     <script>
-        console.log("--- MEMBER PAGE LOADED ---");
+        console.log("--- MEMBER PAGE LOADED (with floating support) ---");
 
-        // Store current user globally
+        // Floating Support Menu
+        function toggleSupportMenu() {
+            document.getElementById('supportMenu').classList.toggle('open');
+        }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('supportMenu');
+            const btn = document.querySelector('.support-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+
         let currentUser = null;
 
-        // ================= LOGIN =================
         function handleLogin(event) {
             event.preventDefault();
             const usernameInput = document.getElementById('username').value;
@@ -219,15 +325,12 @@
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
                 msgBox.innerText = "Login successful. Opening dashboard...";
-                
-                // Create user object with unique ID for this user
                 const user = { 
                     username: usernameInput,
-                    email: usernameInput + "@gmail.com", // Default email if not provided
+                    email: usernameInput + "@gmail.com",
                     loginAt: new Date().toISOString()
                 };
                 localStorage.setItem('currentUser', JSON.stringify(user));
-                
                 setTimeout(() => showDashboard(user), 800);
             } else {
                 msgBox.classList.remove('hidden');
@@ -249,38 +352,25 @@
             loadAnnouncements();
         }
 
-        // ================= LOAD REAL USER DATA =================
         function loadDashboardData() {
             if (!currentUser) return;
 
             const username = currentUser.username.toLowerCase();
-            console.log("Loading real data for user:", username);
-
-            // 1. Get this user's registrations
             const allRegistrations = JSON.parse(localStorage.getItem('userRegistrations') || '[]');
-            const userRegistrations = allRegistrations.filter(
-                r => r.username.toLowerCase() === username
-            );
+            const userRegistrations = allRegistrations.filter(r => r.username.toLowerCase() === username);
 
-            // 2. Get this user's payouts (wins)
             const allPayouts = JSON.parse(localStorage.getItem('payouts') || '[]');
-            const userPayouts = allPayouts.filter(
-                p => p.username.toLowerCase() === username
-            );
+            const userPayouts = allPayouts.filter(p => p.username.toLowerCase() === username);
 
-            // 3. Calculate total earnings (only PAID wins)
             const paidWins = userPayouts.filter(p => p.status === 'paid');
             const totalEarnings = paidWins.reduce((sum, p) => sum + p.prize, 0);
 
-            // 4. Count matches played (unique tournaments registered)
             const uniqueTournaments = new Set(userRegistrations.map(r => r.tournamentName));
             const matchesPlayed = uniqueTournaments.size;
 
-            // 5. Update stats cards
             document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
             document.getElementById('matches-played').textContent = matchesPlayed;
 
-            // Update subtitles with real context
             const earningsSubtitle = document.getElementById('earnings-subtitle');
             const matchesSubtitle = document.getElementById('matches-subtitle');
 
@@ -303,20 +393,13 @@
                 matchesSubtitle.className = "text-xs text-gray-500 mt-2";
             }
 
-            // 6. Count active tournaments from admin (available to register)
             const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
             document.getElementById('active-tournaments').textContent = customTournaments.length;
 
-            // 7. Render upcoming tournaments (this user's registrations)
             renderUpcomingTournaments(userRegistrations);
-
-            // 8. Render winnings history (this user's payouts)
             renderWinningsHistory(userPayouts);
-
-            console.log(`Stats loaded: Rs. ${totalEarnings}, ${matchesPlayed} matches, ${userPayouts.length} payouts`);
         }
 
-        // ================= RENDER UPCOMING TOURNAMENTS =================
         function renderUpcomingTournaments(registrations) {
             const tbody = document.getElementById('upcoming-table-body');
             const emptyState = document.getElementById('empty-upcoming');
@@ -332,18 +415,6 @@
             emptyState.classList.add('hidden');
             tbody.innerHTML = '';
 
-            // Get entry fees for tournaments
-            const defaultFees = {
-                "Free Fire Solo Cup #12": 50,
-                "PUBG Squad Championship": 100,
-                "Valorant Night Cup": 100,
-                "COD Mobile Battle Royale": 75,
-                "Free Fire Duo Cup": 40,
-                "PUBG Solo Showdown": 60
-            };
-            const customTournaments = JSON.parse(localStorage.getItem('customTournaments') || '[]');
-
-            // Remove duplicates (one row per tournament)
             const uniqueRegs = [];
             const seen = new Set();
             [...registrations].reverse().forEach(r => {
@@ -354,12 +425,6 @@
             });
 
             uniqueRegs.forEach(reg => {
-                let entryFee = defaultFees[reg.tournamentName];
-                if (!entryFee) {
-                    const custom = customTournaments.find(t => t.name === reg.tournamentName);
-                    entryFee = custom ? custom.entryFee : 0;
-                }
-
                 const regDate = new Date(reg.registeredAt);
                 const dateStr = regDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -368,14 +433,13 @@
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-white">${reg.tournamentName}</td>
                     <td class="px-6 py-4 text-gray-500 text-xs">${dateStr}</td>
-                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${entryFee}</td>
+                    <td class="px-6 py-4 text-green-400 font-bold">Rs. ${reg.entryFee || 0}</td>
                     <td class="px-6 py-4"><span class="status-badge status-upcoming"><i class="fa-solid fa-clock mr-1"></i>Upcoming</span></td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        // ================= RENDER WINNINGS HISTORY =================
         function renderWinningsHistory(payouts) {
             const tbody = document.getElementById('history-table-body');
             const emptyState = document.getElementById('empty-history');
@@ -409,7 +473,6 @@
             });
         }
 
-        // ================= ANNOUNCEMENTS =================
         function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             if (!container) return;
@@ -463,7 +526,6 @@
             });
         }
 
-        // ================= INIT =================
         window.onload = function() {
             const storedUser = JSON.parse(localStorage.getItem('currentUser'));
             if (storedUser) {
