@@ -19,7 +19,6 @@
         .sidebar-item:hover { background-color: rgba(59, 130, 246, 0.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .stat-badge { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
 
         #loginScreen {
             position: fixed; inset: 0;
@@ -31,6 +30,9 @@
         .status-verified { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-pending-verify { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .status-free { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+
+        .payout-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+        .payout-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
 
         .ticket-open { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
         .ticket-resolved { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 4px 12px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
@@ -88,14 +90,45 @@
 
         .reg-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(30, 41, 59, 0.6); border-radius: 10px; margin-bottom: 8px; border-left: 3px solid #22c55e; transition: all 0.2s; }
         .reg-row:hover { background: rgba(30, 41, 59, 0.9); }
+
+        /* Prize Calculator */
+        .calc-result-card { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15)); border: 2px solid; border-radius: 12px; padding: 16px; transition: all 0.3s; }
+        .calc-result-card.profit { border-color: #22c55e; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1)); }
+        .calc-result-card.prizepool { border-color: #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1)); }
+        .calc-result-card.total { border-color: #facc15; background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(234, 179, 8, 0.1)); }
+        .prize-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(30, 41, 59, 0.6); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #64748b; transition: all 0.2s; }
+        .prize-row:hover { background: rgba(30, 41, 59, 0.9); transform: translateX(4px); }
+        .prize-row.rank-1 { border-left-color: #facc15; }
+        .prize-row.rank-2 { border-left-color: #94a3b8; }
+        .prize-row.rank-3 { border-left-color: #ea580c; }
+        .prize-row.kills { border-left-color: #ec4899; }
+        .preset-btn { padding: 6px 14px; border-radius: 9999px; border: 1px solid #334155; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; color: #94a3b8; }
+        .preset-btn:hover { border-color: #3b82f6; color: #60a5fa; }
+        .preset-btn.active { background-color: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa; }
+
+        /* Earnings bars */
+        .bar-container { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 20px 0; }
+        .bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+        .bar { width: 100%; max-width: 60px; border-radius: 6px 6px 0 0; transition: all 0.3s; position: relative; min-height: 4px; background: linear-gradient(to top, #3b82f6, #8b5cf6); }
+        .bar-label { font-size: 0.7rem; color: #94a3b8; margin-top: 8px; text-align: center; }
+        .bar-value { font-size: 0.7rem; color: #e2e8f0; font-weight: 600; margin-bottom: 4px; }
+
+        .period-tab { padding: 8px 20px; border-radius: 9999px; border: 1px solid #334155; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; cursor: pointer; color: #94a3b8; }
+        .period-tab.active { background-color: #3b82f6; border-color: #3b82f6; color: white; }
+        .period-tab:hover:not(.active) { border-color: #3b82f6; }
+
+        .stat-badge { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+
+        .copy-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #22c55e; color: white; padding: 12px 24px; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; z-index: 10000; transition: transform 0.3s; box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4); }
+        .copy-toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginScreen">
         <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-xl shadow-2xl">
-            <div class="text-center mb-6 sm:mb-8">
+            <div class="text-center mb-6">
                 <div class="inline-block bg-red-500/20 rounded-full p-3 sm:p-4 mb-4">
                     <i class="fa-solid fa-shield-halved text-red-500 text-2xl sm:text-3xl"></i>
                 </div>
@@ -173,6 +206,9 @@
                     <p class="text-xs uppercase text-gray-500 font-bold tracking-wider mb-2 px-3">Main Menu</p>
                     <ul class="space-y-1">
                         <li><a href="#" onclick="switchTab('dashboard', this)" class="sidebar-item active flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
+                        <li><a href="#" onclick="switchTab('calculator', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-calculator w-5"></i> Prize Calculator</a></li>
+                        <li><a href="#" onclick="switchTab('earnings', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-coins w-5"></i> Earnings</a></li>
+                        <li><a href="#" onclick="switchTab('payouts', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-money-bill-transfer w-5"></i> Payouts <span id="payout-badge" class="ml-auto bg-yellow-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
                         <li><a href="#" onclick="switchTab('users', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-users w-5"></i> Users <span id="users-count-badge" class="ml-auto bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span></a></li>
                         <li><a href="#" onclick="switchTab('registrations', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-clipboard-list w-5"></i> Registrations <span id="regs-count-badge" class="ml-auto bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span></a></li>
                         <li><a href="#" onclick="switchTab('support', this)" class="sidebar-item flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-headset w-5"></i> Support <span id="support-count-badge" class="ml-auto bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span></a></li>
@@ -181,13 +217,13 @@
                     </ul>
                 </div>
                 <div class="mt-auto text-xs text-gray-500 px-3">
-                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.1 • 2026</p>
+                    <p class="flex items-center gap-2"><span class="live-dot"></span> Live • v3.2 • 2026</p>
                 </div>
             </aside>
 
             <main class="flex-grow p-4 sm:p-6 overflow-y-auto">
 
-                <!-- DASHBOARD -->
+                <!-- ============ DASHBOARD ============ -->
                 <div id="tab-dashboard" class="tab-content active">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
                         <div>
@@ -226,7 +262,7 @@
                     <div class="glass-panel rounded-xl shadow-lg mb-6">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-users text-blue-500 mr-2"></i>Recent Users</h2>
-                            <button onclick="switchTab('users', document.querySelectorAll('.sidebar-item')[1])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
+                            <button onclick="switchTab('users', document.querySelectorAll('.sidebar-item')[4])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
                         </div>
                         <div id="recent-users-list" class="p-4">
                             <p class="text-center text-gray-500 text-sm py-4">Loading...</p>
@@ -236,7 +272,7 @@
                     <div class="glass-panel rounded-xl shadow-lg mb-6">
                         <div class="p-4 sm:p-5 border-b border-gray-700 flex justify-between items-center">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-clipboard-list text-green-500 mr-2"></i>Recent Registrations</h2>
-                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[2])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
+                            <button onclick="switchTab('registrations', document.querySelectorAll('.sidebar-item')[5])" class="text-xs text-blue-400 hover:text-blue-300">View All →</button>
                         </div>
                         <div id="recent-regs-list" class="p-4">
                             <p class="text-center text-gray-500 text-sm py-4">Loading...</p>
@@ -244,7 +280,281 @@
                     </div>
                 </div>
 
-                <!-- USERS -->
+                <!-- ============ PRIZE CALCULATOR ============ -->
+                <div id="tab-calculator" class="tab-content">
+                    <div class="mb-6">
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-calculator text-purple-500 mr-2"></i>Prize Calculator</h1>
+                        <p class="text-gray-400 mt-1 text-sm">Calculate prize distribution + your profit instantly</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-panel rounded-xl p-6">
+                            <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-pen-to-square text-blue-500 mr-2"></i>Enter Tournament Details</h2>
+
+                            <div class="mb-5">
+                                <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider">Quick Presets</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="preset-btn active" onclick="applyPreset('solo', this)">🎯 Solo</button>
+                                    <button class="preset-btn" onclick="applyPreset('duo', this)">👥 Duo</button>
+                                    <button class="preset-btn" onclick="applyPreset('squad', this)">👨‍👩‍👧‍👦 Squad</button>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Number of Players *</label>
+                                <input type="number" id="calc-players" class="form-input w-full px-4 py-3 rounded-lg" value="20" min="2" max="100" oninput="calculate()">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Entry Fee per Player (Rs.) *</label>
+                                <input type="number" id="calc-fee" class="form-input w-full px-4 py-3 rounded-lg" value="150" min="0" oninput="calculate()">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Your Profit % <span class="text-purple-400 font-bold" id="profitPercentLabel">30%</span>
+                                </label>
+                                <input type="range" id="calc-profit" min="10" max="50" value="30" step="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateProfitLabel(); calculate()">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>10% (generous)</span>
+                                    <span>30% (recommended)</span>
+                                    <span>50% (aggressive)</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 flex items-center gap-3">
+                                <input type="checkbox" id="calc-topkill" checked class="w-4 h-4 rounded" onchange="calculate()">
+                                <label for="calc-topkill" class="text-sm text-gray-300 cursor-pointer">Include separate Top Killer prize</label>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Prize Distribution Style</label>
+                                <select id="calc-style" class="form-input w-full px-4 py-3 rounded-lg" onchange="calculate()">
+                                    <option value="balanced" selected>Balanced (recommended)</option>
+                                    <option value="winner">Winner Focused</option>
+                                    <option value="top3">Top 3 Only</option>
+                                </select>
+                            </div>
+
+                            <button onclick="copyBreakdown()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+                                <i class="fa-solid fa-copy mr-2"></i>Copy Breakdown for WhatsApp
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="calc-result-card total">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-yellow-300 uppercase tracking-wider">Total Collected</p>
+                                        <p class="text-3xl font-bold text-yellow-400 mt-1" id="calc-total">Rs. 3,000</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-total-formula">20 players × Rs. 150</p>
+                                    </div>
+                                    <i class="fa-solid fa-money-bill-wave text-4xl text-yellow-500 opacity-50"></i>
+                                </div>
+                            </div>
+
+                            <div class="calc-result-card prizepool">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-blue-300 uppercase tracking-wider">Prize Pool (Winners)</p>
+                                        <p class="text-3xl font-bold text-blue-400 mt-1" id="calc-prizepool">Rs. 2,100</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-prizepool-formula">70% of total collection</p>
+                                    </div>
+                                    <i class="fa-solid fa-trophy text-4xl text-blue-500 opacity-50"></i>
+                                </div>
+                            </div>
+
+                            <div class="calc-result-card profit">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-green-300 uppercase tracking-wider">💰 Your Profit</p>
+                                        <p class="text-4xl font-bold text-green-400 mt-1" id="calc-profit-amount">Rs. 900</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="calc-profit-formula">30% commission</p>
+                                    </div>
+                                    <i class="fa-solid fa-hand-holding-dollar text-4xl text-green-500 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 mt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list-ol text-yellow-500 mr-2"></i>Prize Breakdown</h2>
+                        </div>
+                        <div id="prize-breakdown"></div>
+                        <div class="mt-4 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                            <p class="text-xs text-purple-300">
+                                <i class="fa-solid fa-lightbulb mr-1"></i>
+                                <strong>Tip:</strong> Distribute prizes within 24 hours after the match ends. Post the payment screenshots in your WhatsApp group for transparency.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ EARNINGS ============ -->
+                <div id="tab-earnings" class="tab-content">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-coins text-yellow-500 mr-2"></i>Earnings</h1>
+                            <p class="text-gray-400 mt-1 text-sm">Track your platform's revenue in real time</p>
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <button class="period-tab active text-xs sm:text-sm" onclick="setEarningsPeriod('today', this)">Today</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('week', this)">This Week</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('month', this)">This Month</button>
+                            <button class="period-tab text-xs sm:text-sm" onclick="setEarningsPeriod('all', this)">All Time</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Period Earnings</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-green-400 mt-1" id="period-earnings">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1" id="period-label">Today</p>
+                        </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Platform Commission</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-blue-400 mt-1" id="period-commission">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">20% of entry fees</p>
+                        </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-400 uppercase">Registrations</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-purple-400 mt-1" id="period-registrations">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Paid sign-ups</p>
+                        </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Pending Payouts</p>
+                            <p class="text-2xl sm:text-3xl font-bold text-yellow-400 mt-1" id="period-payouts">Rs. 0</p>
+                            <p class="text-xs text-gray-500 mt-1">To be distributed</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mb-4">
+                        <button onclick="exportEarnings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-download mr-2"></i>Export Earnings CSV
+                        </button>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-chart-column text-blue-500 mr-2"></i>Last 7 Days</h2>
+                            <span class="text-xs text-gray-500" id="chart-total-label">Total: Rs. 0</span>
+                        </div>
+                        <div class="bar-container" id="bar-chart"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-panel rounded-xl overflow-hidden">
+                            <div class="p-6 border-b border-gray-700">
+                                <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Earning Tournaments</h2>
+                            </div>
+                            <div class="p-4">
+                                <div id="top-tournaments-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-xl overflow-hidden">
+                            <div class="p-6 border-b border-gray-700">
+                                <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-purple-500 mr-2"></i>Revenue Sources</h2>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Entry Fees (100%)</span>
+                                        <span class="text-white font-bold" id="source-entry-total">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Platform Commission (20%)</span>
+                                        <span class="text-green-400 font-bold" id="source-commission">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Prize Payouts (80%)</span>
+                                        <span class="text-red-400 font-bold" id="source-payouts">Rs. 0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ PAYOUTS ============ -->
+                <div id="tab-payouts" class="tab-content">
+                    <div class="mb-6 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-money-bill-transfer text-purple-500 mr-2"></i>Payout Tracker</h1>
+                            <p class="text-gray-400 mt-1 text-sm">Track which winners you've paid and which are pending</p>
+                        </div>
+                        <button onclick="openAddPayoutModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            <i class="fa-solid fa-plus mr-2"></i>Add Winner
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 sm:gap-6 mb-6">
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Paid</p>
+                            <p class="text-xl sm:text-3xl font-bold text-green-400 mt-1" id="payout-total-paid">Rs. 0</p>
+                        </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-400 uppercase">Pending</p>
+                            <p class="text-xl sm:text-3xl font-bold text-yellow-400 mt-1" id="payout-total-pending">Rs. 0</p>
+                        </div>
+                        <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-400 uppercase">Total Winners</p>
+                            <p class="text-xl sm:text-3xl font-bold text-blue-400 mt-1" id="payout-total-winners">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-4 mb-6 flex flex-wrap gap-3 items-center">
+                        <div class="flex-grow min-w-[200px]">
+                            <select id="payout-status-filter" onchange="renderPayouts()" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending Only</option>
+                                <option value="paid">Paid Only</option>
+                            </select>
+                        </div>
+                        <div class="flex-grow min-w-[200px]">
+                            <input type="text" id="payout-search" oninput="renderPayouts()" placeholder="Search winner..." class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-400">
+                                <thead class="bg-gray-800 text-xs uppercase text-gray-400">
+                                    <tr>
+                                        <th class="px-4 py-3">Winner</th>
+                                        <th class="px-4 py-3">Tournament</th>
+                                        <th class="px-4 py-3">Rank</th>
+                                        <th class="px-4 py-3">Prize</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payouts-body" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-payouts" class="p-8 text-center text-gray-500">
+                            <i class="fa-solid fa-money-bill-transfer text-4xl mb-3"></i>
+                            <p class="font-bold text-white mb-1">No payouts yet</p>
+                            <p class="text-xs">Add winners after tournaments end.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ USERS ============ -->
                 <div id="tab-users" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
                         <div>
@@ -263,7 +573,7 @@
                     </div>
                 </div>
 
-                <!-- REGISTRATIONS -->
+                <!-- ============ REGISTRATIONS ============ -->
                 <div id="tab-registrations" class="tab-content">
                     <div class="mb-6 flex justify-between items-start flex-wrap gap-3">
                         <div>
@@ -287,27 +597,45 @@
                     </div>
                 </div>
 
-                <!-- SUPPORT -->
+                <!-- ============ SUPPORT ============ -->
                 <div id="tab-support" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-headset text-pink-500 mr-2"></i>Support Tickets</h1>
-                        <p class="text-gray-400 mt-1 text-sm">Messages from users (localStorage-based)</p>
+                        <p class="text-gray-400 mt-1 text-sm">Messages from users</p>
                     </div>
                     <div id="support-list"></div>
                 </div>
 
-                <!-- TOURNAMENTS -->
+                <!-- ============ TOURNAMENTS ============ -->
                 <div id="tab-add-tournament" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white">Manage Tournaments</h1>
                         <p class="text-gray-400 mt-1 text-sm">Create and manage tournaments (saved to Firestore)</p>
                     </div>
+
+                    <!-- ONE-CLICK SEED BUTTON -->
+                    <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(234, 88, 12, 0.15)); border: 2px solid rgba(251, 191, 36, 0.5);">
+                        <div class="flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-xl bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-rocket text-yellow-400 text-2xl"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h2 class="text-lg font-bold text-white mb-2">Quick Setup — 22 September Tournaments</h2>
+                                <p class="text-sm text-gray-300 mb-4">Click below to instantly create all 8 tournaments (one per game) for 22 Sept 2026, 1:00 PM NPT. Free entry, Rs. 500 prize each.</p>
+                                <button onclick="seedTournaments()" id="seedBtn" class="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-bold py-3 px-6 rounded-lg transition">
+                                    <i class="fa-solid fa-bolt mr-2"></i>Create All 8 Tournaments Now
+                                </button>
+                                <p id="seed-msg" class="hidden text-sm mt-4"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl mb-6">
                         <h2 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-plus-circle text-green-500 mr-2"></i>Create New Tournament</h2>
                         <form id="tournamentForm" onsubmit="createTournament(event)">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Name *</label>
-                                <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup #1" required>
+                                <input type="text" id="t-name" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Free Fire Solo Cup" required>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                 <div>
@@ -369,6 +697,7 @@
                             <p id="tournament-msg" class="hidden text-center text-sm mt-4"></p>
                         </form>
                     </div>
+
                     <div class="glass-panel rounded-xl p-4 sm:p-6 max-w-3xl">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list text-blue-500 mr-2"></i>Active Tournaments</h2>
@@ -382,7 +711,7 @@
                     </div>
                 </div>
 
-                <!-- ANNOUNCEMENTS -->
+                <!-- ============ ANNOUNCEMENTS ============ -->
                 <div id="tab-announcements" class="tab-content">
                     <div class="mb-6">
                         <h1 class="text-2xl sm:text-3xl font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h1>
@@ -409,7 +738,6 @@
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Image URL (optional)</label>
                                 <input type="url" id="a-image" class="form-input w-full px-4 py-3 rounded-lg" placeholder="https://i.imgur.com/yourimage.png">
-                                <p class="text-xs text-gray-500 mt-1">Upload to imgur.com, paste direct link here</p>
                             </div>
                             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
                                 <i class="fa-solid fa-bullhorn mr-2"></i>Publish Announcement
@@ -427,12 +755,47 @@
         </div>
     </div>
 
+    <!-- ADD PAYOUT MODAL -->
+    <div id="addPayoutModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.75); backdrop-filter: blur(4px);">
+        <div class="glass-panel rounded-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Add Winner</h2>
+                <button onclick="closeAddPayoutModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="addPayoutForm" onsubmit="addPayout(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Username *</label>
+                    <input type="text" id="p-username" class="form-input w-full px-4 py-3 rounded-lg" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Tournament *</label>
+                    <input type="text" id="p-tournament" class="form-input w-full px-4 py-3 rounded-lg" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Rank *</label>
+                        <select id="p-rank" class="form-input w-full px-4 py-3 rounded-lg" required>
+                            <option value="#1">#1</option>
+                            <option value="#2">#2</option>
+                            <option value="#3">#3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Prize (Rs.) *</label>
+                        <input type="number" id="p-prize" class="form-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">Add</button>
+                    <button type="button" onclick="closeAddPayoutModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="toastContainer" class="toast-container"></div>
 
     <script type="module">
-        // ============================================================
-        // FIREBASE IMPORTS (with addDoc)
-        // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -449,11 +812,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        console.log("🔥 Admin panel initialized (Firestore tournaments)");
+        console.log("🔥 Admin panel initialized v3.2");
 
-        // ============================================================
-        // AUTH
-        // ============================================================
         const ADMIN_PASSWORD = "nepplay@123";
         const SESSION_KEY = "adminSession";
 
@@ -490,15 +850,13 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainPanel').classList.remove('hidden');
             initializePanel();
+            calculate();
         }
 
         function checkAuthOnLoad() {
             if (sessionStorage.getItem(SESSION_KEY) === 'authenticated') showAdminPanel();
         }
 
-        // ============================================================
-        // MOBILE NAV
-        // ============================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -508,9 +866,6 @@
             icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
         };
 
-        // ============================================================
-        // TABS
-        // ============================================================
         window.switchTab = function(tabName, linkElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
@@ -528,11 +883,12 @@
             if (tabName === 'add-tournament') {
                 loadTournamentsFromFirestore().then(renderAdminTournaments);
             }
+            if (tabName === 'calculator') calculate();
+            if (tabName === 'earnings') renderEarnings();
+            if (tabName === 'payouts') renderPayouts();
         };
 
-        // ============================================================
-        // NOTIFICATIONS
-        // ============================================================
+        // ==================== NOTIFICATIONS ====================
         let notifications = [];
         let lastUserCount = null;
         let lastRegCount = null;
@@ -559,13 +915,7 @@
         };
 
         function addNotification(type, title, message) {
-            const notif = {
-                id: Date.now() + Math.random(),
-                type, title, message,
-                time: new Date().toISOString(),
-                read: false
-            };
-            notifications.unshift(notif);
+            notifications.unshift({ id: Date.now() + Math.random(), type, title, message, time: new Date().toISOString(), read: false });
             if (notifications.length > 20) notifications = notifications.slice(0, 20);
             updateNotifUI();
             showToast(type, title, message);
@@ -613,16 +963,8 @@
             const toast = document.createElement('div');
             toast.className = `toast new-${type === 'user' ? 'user' : type === 'reg' ? 'reg' : 'ticket'}`;
 
-            const iconMap = {
-                user: 'fa-user-plus text-blue-400',
-                reg: 'fa-trophy text-green-400',
-                ticket: 'fa-headset text-pink-400'
-            };
-            const bgMap = {
-                user: 'bg-blue-500/20',
-                reg: 'bg-green-500/20',
-                ticket: 'bg-pink-500/20'
-            };
+            const iconMap = { user: 'fa-user-plus text-blue-400', reg: 'fa-trophy text-green-400', ticket: 'fa-headset text-pink-400' };
+            const bgMap = { user: 'bg-blue-500/20', reg: 'bg-green-500/20', ticket: 'bg-pink-500/20' };
 
             toast.innerHTML = `
                 <div class="w-10 h-10 rounded-lg ${bgMap[type] || 'bg-blue-500/20'} flex items-center justify-center flex-shrink-0">
@@ -632,22 +974,17 @@
                     <p class="text-white text-sm font-bold">${title}</p>
                     <p class="text-gray-400 text-xs mt-0.5">${message}</p>
                 </div>
-                <button onclick="this.parentElement.remove()" class="text-gray-500 hover:text-white text-sm">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button onclick="this.parentElement.remove()" class="text-gray-500 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
             `;
 
             container.appendChild(toast);
-
             setTimeout(() => {
                 toast.classList.add('closing');
                 setTimeout(() => toast.remove(), 300);
             }, 6000);
         }
 
-        // ============================================================
-        // LOAD DASHBOARD
-        // ============================================================
+        // ==================== LOAD DASHBOARD ====================
         async function loadDashboardData() {
             try {
                 const usersSnap = await getDocs(collection(db, "users"));
@@ -678,18 +1015,14 @@
 
                 if (lastUserCount !== null) {
                     const newUsers = users.filter(u => !previousUserIds.has(u.id));
-                    newUsers.forEach(u => {
-                        addNotification('user', '🎉 New User Registered!', `${u.fullName || u.username || u.email} just signed up`);
-                    });
+                    newUsers.forEach(u => addNotification('user', '🎉 New User Registered!', `${u.fullName || u.username || u.email} just signed up`));
                 }
                 previousUserIds = new Set(users.map(u => u.id));
                 lastUserCount = users.length;
 
                 if (lastRegCount !== null) {
                     const newRegs = regs.filter(r => !previousRegIds.has(r.id));
-                    newRegs.forEach(r => {
-                        addNotification('reg', '🏆 New Tournament Registration!', `${r.username || 'User'} registered for ${r.tournamentName || 'a tournament'}`);
-                    });
+                    newRegs.forEach(r => addNotification('reg', '🏆 New Tournament Registration!', `${r.username || 'User'} registered for ${r.tournamentName || 'a tournament'}`));
                 }
                 previousRegIds = new Set(regs.map(r => r.id));
                 lastRegCount = regs.length;
@@ -705,10 +1038,7 @@
 
         function renderRecentUsers(users) {
             const container = document.getElementById('recent-users-list');
-            if (users.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-4">No users yet</p>';
-                return;
-            }
+            if (users.length === 0) { container.innerHTML = '<p class="text-center text-gray-500 text-sm py-4">No users yet</p>'; return; }
             const recent = [...users].sort((a, b) => {
                 const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                 const db_ = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -717,18 +1047,15 @@
 
             container.innerHTML = recent.map(u => {
                 const name = u.fullName || u.username || 'User';
-                const initial = name.charAt(0).toUpperCase();
                 const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
                 return `
                     <div class="user-row">
-                        <div class="avatar-circle">${initial}</div>
+                        <div class="avatar-circle">${name.charAt(0).toUpperCase()}</div>
                         <div class="flex-grow min-w-0">
                             <p class="text-white font-bold text-sm truncate">${name}</p>
                             <p class="text-gray-400 text-xs truncate">${u.email || ''}</p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-gray-500 text-xs">${date}</p>
-                        </div>
+                        <div class="text-right"><p class="text-gray-500 text-xs">${date}</p></div>
                     </div>
                 `;
             }).join('');
@@ -736,10 +1063,7 @@
 
         function renderRecentRegs(regs) {
             const container = document.getElementById('recent-regs-list');
-            if (regs.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-4">No registrations yet</p>';
-                return;
-            }
+            if (regs.length === 0) { container.innerHTML = '<p class="text-center text-gray-500 text-sm py-4">No registrations yet</p>'; return; }
             const recent = [...regs].sort((a, b) => {
                 const da = a.registeredAt ? new Date(a.registeredAt).getTime() : 0;
                 const db_ = b.registeredAt ? new Date(b.registeredAt).getTime() : 0;
@@ -757,23 +1081,18 @@
                             <p class="text-white font-bold text-sm truncate">${r.username || 'User'}</p>
                             <p class="text-gray-400 text-xs truncate">${r.tournamentName || 'Tournament'}</p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-gray-500 text-xs">${date}</p>
-                        </div>
+                        <div class="text-right"><p class="text-gray-500 text-xs">${date}</p></div>
                     </div>
                 `;
             }).join('');
         }
 
-        // ============================================================
-        // USERS TAB
-        // ============================================================
+        // ==================== USERS TAB ====================
         let allUsers = [];
 
         window.loadUsers = async function() {
             const container = document.getElementById('users-list');
             container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Loading...</p>';
-
             try {
                 const snap = await getDocs(collection(db, "users"));
                 allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -784,24 +1103,19 @@
                 });
                 renderUsers(allUsers);
             } catch (error) {
-                console.error("Load users error:", error);
                 container.innerHTML = '<p class="text-center text-red-400 text-sm py-8">Error loading users</p>';
             }
         };
 
         function renderUsers(users) {
             const container = document.getElementById('users-list');
-            if (users.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No users yet</p>';
-                return;
-            }
+            if (users.length === 0) { container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No users yet</p>'; return; }
             container.innerHTML = users.map(u => {
                 const name = u.fullName || u.username || 'User';
-                const initial = name.charAt(0).toUpperCase();
                 const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
                 return `
                     <div class="user-row">
-                        <div class="avatar-circle">${initial}</div>
+                        <div class="avatar-circle">${name.charAt(0).toUpperCase()}</div>
                         <div class="flex-grow min-w-0">
                             <p class="text-white font-bold text-sm truncate">${name}</p>
                             <p class="text-gray-400 text-xs truncate">${u.email || ''}</p>
@@ -818,23 +1132,19 @@
         window.filterUsers = function() {
             const q = document.getElementById('user-search').value.toLowerCase();
             const filtered = allUsers.filter(u => {
-                const name = (u.fullName || '').toLowerCase();
-                const email = (u.email || '').toLowerCase();
-                const user = (u.username || '').toLowerCase();
-                return name.includes(q) || email.includes(q) || user.includes(q);
+                return (u.fullName || '').toLowerCase().includes(q) ||
+                       (u.email || '').toLowerCase().includes(q) ||
+                       (u.username || '').toLowerCase().includes(q);
             });
             renderUsers(filtered);
         };
 
-        // ============================================================
-        // REGISTRATIONS TAB
-        // ============================================================
+        // ==================== REGISTRATIONS TAB ====================
         let allRegs = [];
 
         window.loadRegistrations = async function() {
             const container = document.getElementById('regs-list');
             container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Loading...</p>';
-
             try {
                 const snap = await getDocs(collection(db, "registrations"));
                 allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -845,19 +1155,17 @@
                 });
                 renderRegs(allRegs);
             } catch (error) {
-                console.error("Load regs error:", error);
                 container.innerHTML = '<p class="text-center text-red-400 text-sm py-8">Error loading registrations</p>';
             }
         };
 
         function renderRegs(regs) {
             const container = document.getElementById('regs-list');
-            if (regs.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No registrations yet</p>';
-                return;
-            }
+            if (regs.length === 0) { container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No registrations yet</p>'; return; }
             container.innerHTML = regs.map(r => {
                 const date = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+                const teammateCount = r.teammates ? r.teammates.length : 0;
+                const teamInfo = r.teamName ? `<span class="text-yellow-400">🎮 ${r.teamName}</span> (+${teammateCount})` : '';
                 return `
                     <div class="reg-row">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
@@ -868,10 +1176,11 @@
                             <p class="text-gray-400 text-xs mt-1">
                                 IGN: <strong>${r.ign || '—'}</strong> • UID: ${r.uid || '—'}
                                 ${r.phone ? ' • 📱' + r.phone : ''}
+                                ${teamInfo ? ' • ' + teamInfo : ''}
                             </p>
                         </div>
                         <div class="text-right flex-shrink-0 ml-2">
-                            <span class="status-free">Free</span>
+                            <span class="status-free">${r.status || 'pending'}</span>
                             <p class="text-gray-500 text-xs mt-1">${date}</p>
                         </div>
                     </div>
@@ -882,22 +1191,20 @@
         window.filterRegistrations = function() {
             const q = document.getElementById('reg-search').value.toLowerCase();
             const filtered = allRegs.filter(r => {
-                return (r.username || '').toLowerCase().includes(q)
-                    || (r.tournamentName || '').toLowerCase().includes(q)
-                    || (r.ign || '').toLowerCase().includes(q)
-                    || (r.phone || '').includes(q);
+                return (r.username || '').toLowerCase().includes(q) ||
+                       (r.tournamentName || '').toLowerCase().includes(q) ||
+                       (r.ign || '').toLowerCase().includes(q) ||
+                       (r.phone || '').includes(q);
             });
             renderRegs(filtered);
         };
 
         window.downloadRegsCSV = function() {
-            if (allRegs.length === 0) {
-                alert("No registrations to download.");
-                return;
-            }
-            let csv = "Username,Tournament,IGN,UID,Phone,Entry Fee,Registered At\n";
+            if (allRegs.length === 0) { alert("No registrations to download."); return; }
+            let csv = "Username,Tournament,IGN,UID,Phone,Team,Teammates,Entry Fee,Status,Registered At\n";
             allRegs.forEach(r => {
-                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.entryFee || 0}","${r.registeredAt || ''}"\n`;
+                const teammates = r.teammates ? r.teammates.map(t => `${t.ign}(${t.uid})`).join(' | ') : '';
+                csv += `"${r.username || ''}","${r.tournamentName || ''}","${r.ign || ''}","${r.uid || ''}","${r.phone || ''}","${r.teamName || ''}","${teammates}","${r.entryFee || 0}","${r.status || 'pending'}","${r.registeredAt || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a');
@@ -906,17 +1213,12 @@
             a.click();
         };
 
-        // ============================================================
-        // SUPPORT TICKETS
-        // ============================================================
+        // ==================== SUPPORT TICKETS ====================
         window.loadSupportTickets = function() {
             const container = document.getElementById('support-list');
             const tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
-            if (tickets.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No support tickets yet</p>';
-                return;
-            }
-            container.innerHTML = tickets.reverse().map(t => {
+            if (tickets.length === 0) { container.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">No support tickets yet</p>'; return; }
+            container.innerHTML = [...tickets].reverse().map(t => {
                 const date = new Date(t.createdAt).toLocaleString();
                 const badge = t.status === 'open' ? '<span class="ticket-open">Open</span>' : '<span class="ticket-resolved">Resolved</span>';
                 return `
@@ -960,9 +1262,312 @@
             loadDashboardData();
         };
 
-        // ============================================================
-        // TOURNAMENTS (Firestore-backed!)
-        // ============================================================
+        // ==================== PRIZE CALCULATOR ====================
+        let calcResult = null;
+
+        window.applyPreset = function(preset, btn) {
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const p = document.getElementById('calc-players');
+            const f = document.getElementById('calc-fee');
+            const pr = document.getElementById('calc-profit');
+            if (preset === 'solo') { p.value = 20; f.value = 150; pr.value = 30; }
+            else if (preset === 'duo') { p.value = 20; f.value = 200; pr.value = 25; }
+            else if (preset === 'squad') { p.value = 24; f.value = 250; pr.value = 25; }
+            updateProfitLabel();
+            calculate();
+        };
+
+        window.updateProfitLabel = function() {
+            document.getElementById('profitPercentLabel').textContent = document.getElementById('calc-profit').value + '%';
+        };
+
+        window.calculate = function() {
+            const players = parseInt(document.getElementById('calc-players').value) || 0;
+            const fee = parseInt(document.getElementById('calc-fee').value) || 0;
+            const profitPercent = parseInt(document.getElementById('calc-profit').value) || 30;
+            const style = document.getElementById('calc-style').value;
+            const includeTopKill = document.getElementById('calc-topkill').checked;
+
+            const total = players * fee;
+            const prizePoolPercent = 100 - profitPercent;
+            const prizePool = Math.round(total * (prizePoolPercent / 100));
+            const profit = total - prizePool;
+
+            document.getElementById('calc-total').textContent = `Rs. ${total.toLocaleString()}`;
+            document.getElementById('calc-total-formula').textContent = `${players} players × Rs. ${fee}`;
+            document.getElementById('calc-prizepool').textContent = `Rs. ${prizePool.toLocaleString()}`;
+            document.getElementById('calc-prizepool-formula').textContent = `${prizePoolPercent}% of total collection`;
+            document.getElementById('calc-profit-amount').textContent = `Rs. ${profit.toLocaleString()}`;
+            document.getElementById('calc-profit-formula').textContent = `${profitPercent}% commission`;
+
+            let prizes = {};
+            let topKillPrize = 0;
+            if (style === 'balanced') {
+                if (includeTopKill) {
+                    prizes = { '1st': Math.round(prizePool * 0.40), '2nd': Math.round(prizePool * 0.25), '3rd': Math.round(prizePool * 0.15) };
+                    topKillPrize = Math.round(prizePool * 0.20);
+                } else {
+                    prizes = { '1st': Math.round(prizePool * 0.50), '2nd': Math.round(prizePool * 0.30), '3rd': Math.round(prizePool * 0.20) };
+                }
+            } else if (style === 'winner') {
+                if (includeTopKill) {
+                    prizes = { '1st': Math.round(prizePool * 0.60), '2nd': Math.round(prizePool * 0.20), '3rd': Math.round(prizePool * 0.10) };
+                    topKillPrize = Math.round(prizePool * 0.10);
+                } else {
+                    prizes = { '1st': Math.round(prizePool * 0.65), '2nd': Math.round(prizePool * 0.25), '3rd': Math.round(prizePool * 0.10) };
+                }
+            } else {
+                prizes = { '1st': Math.round(prizePool * 0.55), '2nd': Math.round(prizePool * 0.30), '3rd': Math.round(prizePool * 0.15) };
+            }
+
+            let html = '';
+            html += `<div class="prize-row rank-1"><div class="flex items-center gap-3"><span class="text-2xl">🥇</span><p class="font-bold text-white text-sm">1st Place</p></div><p class="text-lg font-bold text-yellow-400">Rs. ${prizes['1st'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-2"><div class="flex items-center gap-3"><span class="text-2xl">🥈</span><p class="font-bold text-white text-sm">2nd Place</p></div><p class="text-lg font-bold text-gray-300">Rs. ${prizes['2nd'].toLocaleString()}</p></div>`;
+            html += `<div class="prize-row rank-3"><div class="flex items-center gap-3"><span class="text-2xl">🥉</span><p class="font-bold text-white text-sm">3rd Place</p></div><p class="text-lg font-bold text-orange-400">Rs. ${prizes['3rd'].toLocaleString()}</p></div>`;
+            if (topKillPrize > 0) {
+                html += `<div class="prize-row kills"><div class="flex items-center gap-3"><span class="text-2xl">🎯</span><p class="font-bold text-white text-sm">Top Killer</p></div><p class="text-lg font-bold text-pink-400">Rs. ${topKillPrize.toLocaleString()}</p></div>`;
+            }
+            const sum = prizes['1st'] + prizes['2nd'] + prizes['3rd'] + topKillPrize;
+            html += `<div class="mt-4 pt-4 border-t border-gray-700 flex justify-between"><p class="text-xs text-gray-400">Total</p><p class="text-xl font-bold text-blue-400">Rs. ${sum.toLocaleString()}</p></div>`;
+            document.getElementById('prize-breakdown').innerHTML = html;
+            calcResult = { players, fee, profitPercent, total, prizePool, profit, prizes, topKillPrize, style, includeTopKill, sum };
+        };
+
+        window.copyBreakdown = function() {
+            if (!calcResult) { alert("Calculate first!"); return; }
+            const r = calcResult;
+            const text = `🔥 TOURNAMENT PRIZES\n\n👥 Players: ${r.players}\n💰 Entry: Rs. ${r.fee}\n💵 Total: Rs. ${r.total.toLocaleString()}\n\n🏆 PRIZES:\n🥇 1st: Rs. ${r.prizes['1st'].toLocaleString()}\n🥈 2nd: Rs. ${r.prizes['2nd'].toLocaleString()}\n🥉 3rd: Rs. ${r.prizes['3rd'].toLocaleString()}${r.topKillPrize > 0 ? `\n🎯 Top Kill: Rs. ${r.topKillPrize.toLocaleString()}` : ''}\n\n📊 Pool: Rs. ${r.sum.toLocaleString()}\n\nRegister: nepplay.onrender.com`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('reg', '✅ Copied!', 'Breakdown ready to paste on WhatsApp');
+            });
+        };
+
+        // ==================== EARNINGS ====================
+        let currentPeriod = 'today';
+
+        window.setEarningsPeriod = function(period, btn) {
+            currentPeriod = period;
+            document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderEarnings();
+        };
+
+        function filterByPeriod(period) {
+            const all = allRegs.length > 0 ? allRegs : [];
+            const now = new Date();
+            const sToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const sWeek = new Date(sToday); sWeek.setDate(sWeek.getDate() - 7);
+            const sMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            return all.filter(r => {
+                const d = r.registeredAt ? new Date(r.registeredAt) : new Date(0);
+                if (period === 'today') return d >= sToday;
+                if (period === 'week') return d >= sWeek;
+                if (period === 'month') return d >= sMonth;
+                return true;
+            });
+        }
+
+        async function renderEarnings() {
+            // Ensure we have registrations
+            if (allRegs.length === 0) {
+                try {
+                    const snap = await getDocs(collection(db, "registrations"));
+                    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } catch (e) { console.error(e); }
+            }
+
+            const regs = filterByPeriod(currentPeriod);
+            let total = 0, commission = 0, payouts = 0;
+            regs.forEach(r => {
+                const fee = r.entryFee || 0;
+                total += fee;
+                commission += fee * 0.20;
+                payouts += fee * 0.80;
+            });
+            document.getElementById('period-earnings').textContent = `Rs. ${total.toLocaleString()}`;
+            document.getElementById('period-commission').textContent = `Rs. ${Math.round(commission).toLocaleString()}`;
+            document.getElementById('period-registrations').textContent = regs.length;
+            document.getElementById('period-payouts').textContent = `Rs. ${Math.round(payouts).toLocaleString()}`;
+
+            const labels = { today: 'Today', week: 'Last 7 Days', month: 'This Month', all: 'All Time' };
+            document.getElementById('period-label').textContent = labels[currentPeriod];
+
+            document.getElementById('source-entry-total').textContent = `Rs. ${total.toLocaleString()}`;
+            document.getElementById('source-commission').textContent = `Rs. ${Math.round(commission).toLocaleString()}`;
+            document.getElementById('source-payouts').textContent = `Rs. ${Math.round(payouts).toLocaleString()}`;
+
+            renderBarChart();
+
+            // Top tournaments
+            const tourneyEarnings = {};
+            regs.forEach(r => {
+                const n = r.tournamentName || 'Unknown';
+                tourneyEarnings[n] = (tourneyEarnings[n] || 0) + (r.entryFee || 0);
+            });
+            const sorted = Object.entries(tourneyEarnings).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const topList = document.getElementById('top-tournaments-list');
+            if (sorted.length === 0) {
+                topList.innerHTML = '<p class="text-center text-gray-500 text-sm py-4">No earnings yet in this period.</p>';
+            } else {
+                const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+                topList.innerHTML = sorted.map(([name, amount], i) => `
+                    <div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
+                        <span class="text-2xl">${medals[i]}</span>
+                        <div class="flex-grow min-w-0">
+                            <p class="font-bold text-white text-sm truncate">${name}</p>
+                        </div>
+                        <span class="text-green-400 font-bold text-sm">Rs. ${amount.toLocaleString()}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderBarChart() {
+            const chart = document.getElementById('bar-chart');
+            chart.innerHTML = '';
+            const days = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+                const earnings = allRegs
+                    .filter(r => {
+                        const rd = r.registeredAt ? new Date(r.registeredAt) : new Date(0);
+                        return rd >= dayStart && rd < dayEnd;
+                    })
+                    .reduce((sum, r) => sum + (r.entryFee || 0), 0);
+                days.push({ label: i === 0 ? 'Today' : dayNames[d.getDay()], value: earnings });
+            }
+
+            const max = Math.max(...days.map(d => d.value), 1);
+            let total = 0;
+            days.forEach(day => {
+                total += day.value;
+                const hp = (day.value / max) * 100;
+                const w = document.createElement('div');
+                w.className = 'bar-wrapper';
+                w.innerHTML = `<span class="bar-value">${day.value > 0 ? 'Rs.' + day.value : ''}</span><div class="bar" style="height: ${Math.max(hp, 3)}%"></div><span class="bar-label">${day.label}</span>`;
+                chart.appendChild(w);
+            });
+            document.getElementById('chart-total-label').textContent = `Total (7 days): Rs. ${total.toLocaleString()}`;
+        }
+
+        window.exportEarnings = function() {
+            const regs = filterByPeriod(currentPeriod);
+            if (regs.length === 0) { alert("No earnings data."); return; }
+            let csv = "Date,Username,Tournament,Entry Fee,Commission 20%,Prize Pool 80%\n";
+            regs.forEach(r => {
+                const date = r.registeredAt ? new Date(r.registeredAt).toLocaleString() : '';
+                const fee = r.entryFee || 0;
+                csv += `"${date}","${r.username || ''}","${r.tournamentName || ''}","${fee}","${Math.round(fee * 0.20)}","${Math.round(fee * 0.80)}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `nepplay-earnings-${currentPeriod}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        };
+
+        // ==================== PAYOUTS ====================
+        function getPayouts() { return JSON.parse(localStorage.getItem('payouts') || '[]'); }
+        function savePayouts(p) { localStorage.setItem('payouts', JSON.stringify(p)); }
+
+        window.openAddPayoutModal = function() { document.getElementById('addPayoutModal').classList.remove('hidden'); };
+        window.closeAddPayoutModal = function() { document.getElementById('addPayoutModal').classList.add('hidden'); document.getElementById('addPayoutForm').reset(); };
+        document.getElementById('addPayoutModal').addEventListener('click', function(e) { if (e.target === this) closeAddPayoutModal(); });
+
+        window.addPayout = function(event) {
+            event.preventDefault();
+            const payouts = getPayouts();
+            const newP = {
+                id: Date.now(),
+                username: document.getElementById('p-username').value.trim(),
+                tournament: document.getElementById('p-tournament').value.trim(),
+                rank: document.getElementById('p-rank').value,
+                prize: parseInt(document.getElementById('p-prize').value),
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            payouts.push(newP);
+            savePayouts(payouts);
+            closeAddPayoutModal();
+            renderPayouts();
+            updatePayoutBadge();
+            alert(`✅ Winner "${newP.username}" added!`);
+        };
+
+        window.markAsPaid = function(id) {
+            const payouts = getPayouts();
+            const p = payouts.find(x => x.id === id);
+            if (!p || !confirm(`Mark Rs. ${p.prize} to ${p.username} as PAID?`)) return;
+            p.status = 'paid';
+            p.paidAt = new Date().toISOString();
+            savePayouts(payouts);
+            renderPayouts();
+            updatePayoutBadge();
+        };
+
+        window.deletePayout = function(id) {
+            if (!confirm("Delete?")) return;
+            savePayouts(getPayouts().filter(p => p.id !== id));
+            renderPayouts();
+            updatePayoutBadge();
+        };
+
+        function renderPayouts() {
+            const all = getPayouts();
+            const tbody = document.getElementById('payouts-body');
+            const empty = document.getElementById('empty-payouts');
+
+            if (all.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+            tbody.innerHTML = '';
+
+            const statusFilter = document.getElementById('payout-status-filter')?.value || 'all';
+            const search = (document.getElementById('payout-search')?.value || '').toLowerCase();
+
+            let filtered = all;
+            if (statusFilter !== 'all') filtered = filtered.filter(p => p.status === statusFilter);
+            if (search) filtered = filtered.filter(p => p.username.toLowerCase().includes(search));
+
+            [...filtered].reverse().forEach(p => {
+                const badge = p.status === 'paid' ? '<span class="payout-paid">Paid</span>' : '<span class="payout-pending">Pending</span>';
+                const action = p.status === 'pending'
+                    ? `<button onclick="markAsPaid(${p.id})" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">Paid</button>`
+                    : `<span class="text-xs text-gray-500">${p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''}</span>`;
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/50 transition";
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-white text-sm">${p.username}</td>
+                    <td class="px-4 py-3 text-gray-300 text-xs">${p.tournament}</td>
+                    <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize}</td>
+                    <td class="px-4 py-3">${badge}</td>
+                    <td class="px-4 py-3 flex items-center gap-2 flex-wrap">${action}<button onclick="deletePayout(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update stats
+            const totalPaid = all.filter(p => p.status === 'paid').reduce((s, p) => s + p.prize, 0);
+            const totalPending = all.filter(p => p.status === 'pending').reduce((s, p) => s + p.prize, 0);
+            document.getElementById('payout-total-paid').textContent = `Rs. ${totalPaid.toLocaleString()}`;
+            document.getElementById('payout-total-pending').textContent = `Rs. ${totalPending.toLocaleString()}`;
+            document.getElementById('payout-total-winners').textContent = all.length;
+        }
+
+        function updatePayoutBadge() {
+            const pending = getPayouts().filter(p => p.status === 'pending').length;
+            const badge = document.getElementById('payout-badge');
+            if (pending > 0) { badge.textContent = pending; badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
+        }
+
+        // ==================== TOURNAMENTS ====================
         let cachedTournaments = [];
 
         async function loadTournamentsFromFirestore() {
@@ -974,12 +1579,67 @@
                     const db_ = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                     return db_ - da;
                 });
-                console.log("✅ Loaded", cachedTournaments.length, "tournaments from Firestore");
             } catch (error) {
                 console.error("Error loading tournaments:", error);
                 cachedTournaments = [];
             }
         }
+
+        // SEED BUTTON
+        window.seedTournaments = async function() {
+            const btn = document.getElementById('seedBtn');
+            const msg = document.getElementById('seed-msg');
+
+            const existing = await getDocs(collection(db, "tournaments"));
+            if (existing.size > 0) {
+                if (!confirm(`⚠️ There are already ${existing.size} tournaments in the database.\n\nClick OK to ADD 8 more (will create duplicates), or Cancel to abort.`)) {
+                    return;
+                }
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating tournaments...';
+            msg.classList.remove('hidden');
+            msg.className = "text-sm mt-4 text-yellow-300";
+            msg.textContent = "Adding tournaments to Firestore...";
+
+            const tournaments = [
+                { name: "Free Fire Solo Cup",       game: "freefire",   mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
+                { name: "PUBG Mobile Solo Cup",     game: "pubg",       mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
+                { name: "COD Mobile Solo Cup",      game: "cod",        mode: "Solo", date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 50 },
+                { name: "eFootball 1v1 Cup",        game: "efootball",  mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
+                { name: "eCricket 1v1 Cup",         game: "ecricket",   mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
+                { name: "Valorant 5v5 Cup",         game: "valorant",   mode: "5v5",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 10 },
+                { name: "Ludo King Championship",   game: "ludo",       mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 },
+                { name: "Chess Championship",       game: "chess",      mode: "1v1",  date: "2026-09-22", time: "13:00", entryFee: 0, prizePool: 500, slotsFilled: 0, slotsTotal: 16 }
+            ];
+
+            try {
+                let success = 0;
+                for (let i = 0; i < tournaments.length; i++) {
+                    const t = tournaments[i];
+                    t.createdAt = new Date(Date.now() + i * 1000).toISOString();
+                    await addDoc(collection(db, "tournaments"), t);
+                    success++;
+                    msg.textContent = `Creating ${success}/${tournaments.length}...`;
+                }
+
+                msg.className = "text-sm mt-4 text-green-300";
+                msg.innerHTML = `✅ <strong>All ${tournaments.length} tournaments created!</strong><br><span class="text-xs">They are now visible on tournaments.html and here in admin.</span>`;
+
+                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>All 8 Tournaments Created!';
+
+                await loadTournamentsFromFirestore();
+                renderAdminTournaments();
+                loadDashboardData();
+            } catch (error) {
+                console.error("Seed error:", error);
+                msg.className = "text-sm mt-4 text-red-300";
+                msg.textContent = "❌ Error: " + error.message;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>Create All 8 Tournaments Now';
+            }
+        };
 
         window.createTournament = async function(event) {
             event.preventDefault();
@@ -1010,11 +1670,9 @@
                 msg.className = "text-center text-sm mt-4 text-yellow-400";
                 msg.textContent = "Saving to Firestore...";
 
-                const docRef = await addDoc(collection(db, "tournaments"), newT);
-                console.log("✅ Tournament saved to Firestore with ID:", docRef.id);
-
+                await addDoc(collection(db, "tournaments"), newT);
                 msg.className = "text-center text-sm mt-4 text-green-400";
-                msg.textContent = `✅ "${newT.name}" created successfully!`;
+                msg.textContent = `✅ "${newT.name}" created!`;
 
                 document.getElementById('tournamentForm').reset();
                 await loadTournamentsFromFirestore();
@@ -1022,8 +1680,6 @@
                 loadDashboardData();
                 setTimeout(() => msg.classList.add('hidden'), 4000);
             } catch (error) {
-                console.error("Save tournament error:", error);
-                msg.classList.remove('hidden');
                 msg.className = "text-center text-sm mt-4 text-red-400";
                 msg.textContent = "❌ Failed to save: " + error.message;
             }
@@ -1046,9 +1702,8 @@
             list.innerHTML = '';
 
             const gameEmojis = {
-                freefire: '🔥', pubg: '🎯', cod: '💣',
-                efootball: '⚽', ecricket: '🏏', valorant: '⚔️',
-                ludo: '🎲', chess: '♟️'
+                freefire: '🔥', pubg: '🎯', cod: '💣', efootball: '⚽',
+                ecricket: '🏏', valorant: '⚔️', ludo: '🎲', chess: '♟️'
             };
 
             tournaments.forEach(t => {
@@ -1070,19 +1725,15 @@
             if (!confirm(`⚠️ Delete "${name}"?\n\nThis cannot be undone.`)) return;
             try {
                 await deleteDoc(doc(db, "tournaments", firestoreId));
-                console.log("🗑️ Deleted tournament:", firestoreId);
                 await loadTournamentsFromFirestore();
                 renderAdminTournaments();
                 loadDashboardData();
             } catch (error) {
-                console.error("Delete error:", error);
                 alert("Failed to delete: " + error.message);
             }
         };
 
-        // ============================================================
-        // ANNOUNCEMENTS
-        // ============================================================
+        // ==================== ANNOUNCEMENTS ====================
         window.createAnnouncement = async function(event) {
             event.preventDefault();
             const title = document.getElementById('a-title').value.trim();
@@ -1104,9 +1755,7 @@
                 msg.textContent = "Saving to Firestore...";
 
                 await addDoc(collection(db, "announcements"), {
-                    title,
-                    message,
-                    priority,
+                    title, message, priority,
                     imageUrl: imageUrl || null,
                     createdAt: new Date()
                 });
@@ -1117,7 +1766,6 @@
                 loadAnnouncements();
                 setTimeout(() => msg.classList.add('hidden'), 3000);
             } catch (error) {
-                console.error("Announcement error:", error);
                 msg.className = "text-center text-sm mt-4 text-red-400";
                 msg.textContent = "❌ Failed: " + error.message;
             }
@@ -1154,7 +1802,6 @@
                     list.appendChild(card);
                 });
             } catch (error) {
-                console.error("Load announcements error:", error);
                 list.innerHTML = '<p class="text-center text-red-400 text-sm py-6">Error loading announcements.</p>';
             }
         }
@@ -1169,15 +1816,24 @@
             }
         };
 
-        // ============================================================
-        // INITIALIZE
-        // ============================================================
+        // ==================== INIT ====================
         async function initializePanel() {
             await loadDashboardData();
             await loadTournamentsFromFirestore();
             renderAdminTournaments();
             loadAnnouncements();
             loadSupportTickets();
+            renderPayouts();
+            updatePayoutBadge();
+
+            // Ensure registrations loaded for earnings
+            if (allRegs.length === 0) {
+                try {
+                    const snap = await getDocs(collection(db, "registrations"));
+                    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                } catch (e) {}
+            }
+            renderEarnings();
 
             setInterval(loadDashboardData, 10000);
 
