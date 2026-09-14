@@ -28,6 +28,7 @@
         }
         .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .form-input::placeholder { color: #64748b; }
+        .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .form-input.valid { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
         .form-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
@@ -62,35 +63,119 @@
         .upload-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
         .upload-zone.has-image { border-style: solid; border-color: #22c55e; background-color: rgba(34, 197, 94, 0.05); }
 
-        /* QR code containers */
         .qr-box {
             background: white;
             border-radius: 12px;
             padding: 10px;
             transition: transform 0.2s;
         }
-        .qr-box:hover {
-            transform: scale(1.05);
-        }
-        .qr-box img {
-            width: 130px;
-            height: 130px;
-            display: block;
-        }
+        .qr-box:hover { transform: scale(1.05); }
+        .qr-box img { width: 130px; height: 130px; display: block; }
 
-        .copy-btn {
+        .copy-btn { transition: all 0.2s; }
+        .copy-btn:hover { background-color: rgba(59, 130, 246, 0.2); }
+        .copy-btn.copied { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; }
+
+        /* Floating Support Button */
+        .floating-support {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+        }
+        .support-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse-support 2s infinite;
+        }
+        .support-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(236, 72, 153, 0.6);
+        }
+        @keyframes pulse-support {
+            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
+            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
+        }
+        .support-menu {
+            display: none;
+            position: absolute;
+            bottom: 75px;
+            left: 0;
+            width: 260px;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .support-menu.open { display: block; }
+        .support-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            color: #e2e8f0;
+            text-decoration: none;
             transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .copy-btn:hover {
-            background-color: rgba(59, 130, 246, 0.2);
-        }
-        .copy-btn.copied {
-            background-color: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-        }
+        .support-menu-item:last-child { border-bottom: none; }
+        .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
+        .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
+        .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+    <!-- Floating Support Button -->
+    <div class="floating-support">
+        <div id="supportMenu" class="support-menu">
+            <div class="p-3 border-b border-gray-700 bg-slate-800/50">
+                <p class="text-white font-bold text-sm">Need Help? 🆘</p>
+                <p class="text-xs text-gray-400">Choose how to reach us</p>
+            </div>
+            <a href="https://wa.me/9779816023400?text=Hi%2C%20I%20need%20help%20with%20Nepal%20Gaming%20Platform." target="_blank" class="support-menu-item wa">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-brands fa-whatsapp text-green-400 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Chat Privately</p>
+                    <p class="text-xs text-gray-500">1-on-1 with admin</p>
+                </div>
+            </a>
+            <a href="support.html" class="support-menu-item">
+                <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-headset text-pink-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Support Page</p>
+                    <p class="text-xs text-gray-500">Full help center</p>
+                </div>
+            </a>
+            <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="support-menu-item pr">
+                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-users text-purple-400"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Join Community</p>
+                    <p class="text-xs text-gray-500">Public group chat</p>
+                </div>
+            </a>
+        </div>
+        <div class="support-btn" onclick="toggleSupportMenu()">
+            <i class="fa-solid fa-headset"></i>
+        </div>
+    </div>
 
     <!-- Navbar -->
     <nav class="glass-panel w-full p-4 flex justify-between items-center sticky top-0 z-40">
@@ -115,7 +200,7 @@
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
                         <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="teams.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-users w-4"></i> My Teams</a>
-                        <a href="tournaments.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-trophy w-4"></i> Tournaments</a>
+                        <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
                         <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
@@ -130,6 +215,7 @@
             <a href="winners.html" class="text-sm text-gray-300 hover:text-white transition">Winners</a>
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition">Teams</a>
+            <a href="support.html" class="text-sm text-gray-300 hover:text-white transition">Support</a>
             <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">Login</a>
         </div>
     </nav>
@@ -197,7 +283,6 @@
                 <input type="hidden" id="regTournamentId">
                 <input type="hidden" id="regTournamentGame">
 
-                <!-- IGN -->
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-sm font-medium text-gray-300">
@@ -209,7 +294,6 @@
                     <div class="validation-message" id="ignMessage"></div>
                 </div>
 
-                <!-- UID -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         Game UID <span class="text-red-400">*</span>
@@ -218,7 +302,6 @@
                     <div class="validation-message" id="uidMessage"></div>
                 </div>
 
-                <!-- TEAM -->
                 <div id="teamSection" class="hidden">
                     <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
                         <p class="text-xs text-yellow-300">
@@ -241,7 +324,6 @@
                     <div id="teammatesContainer"></div>
                 </div>
 
-                <!-- PHONE -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">
                         WhatsApp Number <span class="text-red-400">*</span>
@@ -250,7 +332,6 @@
                     <div class="validation-message" id="phoneMessage"></div>
                 </div>
 
-                <!-- ==================== PAYMENT SECTION ==================== -->
                 <div id="paymentSection" class="hidden">
                     <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
                         <p class="text-sm text-red-300 font-bold mb-3">
@@ -260,51 +341,41 @@
                             Send Rs. <span id="paymentAmount3">0</span> using any method below:
                         </p>
 
-                        <!-- QR Codes Row -->
                         <div class="grid grid-cols-2 gap-3 mb-4">
-                            <!-- eSewa QR -->
                             <div class="text-center">
                                 <p class="text-xs text-green-400 font-bold mb-2">
                                     <i class="fa-solid fa-mobile-screen mr-1"></i>eSewa
                                 </p>
                                 <div class="qr-box mx-auto">
-                                    <img src="images/esewa-qr.png" alt="eSewa QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found<br>Check images/esewa-qr.png</div>'">
+                                    <img src="images/esewa-qr.png" alt="eSewa QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found</div>'">
                                 </div>
                                 <button type="button" onclick="copyToClipboard('9748835184', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
                                     <i class="fa-solid fa-copy mr-1"></i>9748835184
                                 </button>
                             </div>
 
-                            <!-- Khalti QR -->
                             <div class="text-center">
                                 <p class="text-xs text-purple-400 font-bold mb-2">
                                     <i class="fa-solid fa-mobile-screen mr-1"></i>Khalti
                                 </p>
                                 <div class="qr-box mx-auto">
-                                    <img src="images/khalti-qr.png" alt="Khalti QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found<br>Check images/khalti-qr.png</div>'">
+                                    <img src="images/khalti-qr.png" alt="Khalti QR" onerror="this.parentElement.innerHTML='<div style=\'color:#64748b;padding:20px;font-size:11px;text-align:center;\'>QR not found</div>'">
                                 </div>
                                 <button type="button" onclick="copyToClipboard('9766258368', this)" class="copy-btn mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-2 rounded-lg transition">
                                     <i class="fa-solid fa-copy mr-1"></i>9766258368
                                 </button>
                             </div>
                         </div>
-
-                        <p class="text-xs text-gray-400 text-center">
-                            <i class="fa-solid fa-info-circle mr-1"></i>Scan the QR with your eSewa/Khalti app, or copy the number
-                        </p>
                     </div>
 
-                    <!-- Transaction ID -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-300 mb-2">
                             Transaction ID <span class="text-red-400">*</span>
                         </label>
                         <input type="text" id="regTransactionId" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., 1234567890 (from SMS)" maxlength="30" autocomplete="off">
-                        <p class="text-xs text-gray-500 mt-1">Found in the SMS/notification after payment</p>
                         <div class="validation-message" id="transactionMessage"></div>
                     </div>
 
-                    <!-- Payment Screenshot Upload -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-300 mb-2">
                             Payment Screenshot <span class="text-red-400">*</span>
@@ -326,7 +397,6 @@
                         <div class="validation-message" id="screenshotMessage"></div>
                     </div>
 
-                    <!-- Payment Confirmation -->
                     <label class="flex items-start gap-2 cursor-pointer mb-4">
                         <input type="checkbox" id="regPaymentConfirmed" class="mt-1 w-4 h-4 rounded">
                         <span class="text-sm text-gray-300">
@@ -335,7 +405,6 @@
                     </label>
                 </div>
 
-                <!-- TERMS -->
                 <label class="flex items-start gap-2 cursor-pointer mb-6">
                     <input type="checkbox" id="regTerms" class="mt-1 w-4 h-4 rounded">
                     <span class="text-sm text-gray-300">
@@ -386,9 +455,19 @@
     </div>
 
     <script>
-        console.log("--- TOURNAMENTS PAGE LOADED (QR + Payment Proof) ---");
+        console.log("--- TOURNAMENTS PAGE LOADED (with floating support) ---");
 
-        // ============ USER AUTH ============
+        function toggleSupportMenu() {
+            document.getElementById('supportMenu').classList.toggle('open');
+        }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('supportMenu');
+            const btn = document.querySelector('.support-btn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+
         function checkUserStatus() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
             if (user && user.username) {
@@ -411,7 +490,6 @@
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
 
-        // ============ COPY ============
         function copyToClipboard(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 const originalHtml = btn.innerHTML;
@@ -421,12 +499,9 @@
                     btn.innerHTML = originalHtml;
                     btn.classList.remove('copied');
                 }, 1500);
-            }).catch(err => {
-                alert("Copy failed. Number: " + text);
-            });
+            }).catch(err => alert("Copy failed. Number: " + text));
         }
 
-        // ============ VALIDATION RULES ============
         const UID_RULES = {
             freefire: { min: 8, max: 12, pattern: /^\d+$/, name: "Free Fire", hint: "8-12 digit number" },
             pubg: { min: 9, max: 12, pattern: /^\d+$/, name: "PUBG Mobile", hint: "9-12 digit number" },
@@ -503,7 +578,6 @@
             }
         }
 
-        // ============ TOURNAMENTS DATA ============
         const defaultTournaments = [
             { id: 1, game: "freefire", gameName: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600", name: "Free Fire Solo Cup #12", date: "Nov 20, 2023", time: "08:00 PM", entryFee: 50, prizePool: 2000, slotsFilled: 78, slotsTotal: 100, mode: "Solo", isNew: false },
             { id: 2, game: "pubg", gameName: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600", name: "PUBG Squad Championship", date: "Nov 22, 2023", time: "07:30 PM", entryFee: 100, prizePool: 5000, slotsFilled: 45, slotsTotal: 100, mode: "Squad", isNew: false },
@@ -620,7 +694,6 @@
             renderTournaments(game);
         }
 
-        // ============ REGISTRATION ============
         let currentTournament = null;
         let paymentScreenshotData = null;
 
@@ -658,7 +731,6 @@
             const rule = UID_RULES[tournament.game] || { hint: "6-15 characters" };
             document.getElementById('regUid').placeholder = `e.g., ${rule.hint}`;
 
-            // Team section
             const teamSection = document.getElementById('teamSection');
             const teammatesContainer = document.getElementById('teammatesContainer');
             
@@ -686,7 +758,6 @@
                 }
             }
 
-            // Payment section
             const paymentSection = document.getElementById('paymentSection');
             if (tournament.entryFee > 0) {
                 paymentSection.classList.remove('hidden');
@@ -697,7 +768,6 @@
                 paymentSection.classList.add('hidden');
             }
 
-            // Reset form
             document.getElementById('regIgn').value = '';
             document.getElementById('regUid').value = '';
             document.getElementById('regTeamName').value = '';
@@ -709,10 +779,8 @@
             document.getElementById('regSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-2"></i>Confirm Registration';
             document.getElementById('regSubmitBtn').disabled = false;
 
-            // Reset upload
             removePaymentScreenshot();
 
-            // Clear validation
             ['regIgn', 'regUid', 'regTeamName', 'regPhone', 'regTransactionId'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.remove('valid', 'invalid');
@@ -765,13 +833,12 @@
             };
         }
 
-        // ============ PAYMENT SCREENSHOT UPLOAD ============
         function handlePaymentScreenshot(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             if (file.size > 1024 * 1024) {
-                alert("Screenshot too large. Please use an image under 1MB.\n\nTip: Take a smaller screenshot or compress the image.");
+                alert("Screenshot too large. Please use an image under 1MB.");
                 event.target.value = '';
                 return;
             }
@@ -785,7 +852,6 @@
                 document.getElementById('paymentUploadZone').classList.add('has-image');
                 document.getElementById('screenshotMessage').innerHTML = '<i class="fa-solid fa-circle-check"></i> Screenshot uploaded';
                 document.getElementById('screenshotMessage').className = 'validation-message success';
-                console.log("Payment screenshot uploaded:", Math.round(file.size / 1024) + "KB");
             };
             reader.readAsDataURL(file);
         }
@@ -804,7 +870,6 @@
             if (msg) { msg.innerHTML = ''; msg.className = 'validation-message'; }
         }
 
-        // Drag & drop for upload
         document.addEventListener('DOMContentLoaded', function() {
             const zone = document.getElementById('paymentUploadZone');
             if (!zone) return;
@@ -837,7 +902,6 @@
             const teamName = document.getElementById('regTeamName').value.trim();
             const txId = document.getElementById('regTransactionId') ? document.getElementById('regTransactionId').value.trim() : '';
 
-            // Validate all fields
             const ignResult = validateIGN(ign);
             if (!ignResult.valid) { errorEl.textContent = "❌ IGN: " + ignResult.msg; errorEl.classList.remove('hidden'); return; }
 
@@ -852,7 +916,6 @@
                 if (!teamResult.valid) { errorEl.textContent = "❌ Team: " + teamResult.msg; errorEl.classList.remove('hidden'); return; }
             }
 
-            // Teammates
             const teammates = [];
             if (currentTournament.mode !== 'Solo') {
                 const ignInputs = document.querySelectorAll('.teammate-ign');
@@ -873,7 +936,6 @@
                 }
             }
 
-            // Payment validation
             if (currentTournament.entryFee > 0) {
                 const txResult = validateTransactionId(txId);
                 if (!txResult.valid) { errorEl.textContent = "❌ Transaction ID: " + txResult.msg; errorEl.classList.remove('hidden'); return; }
@@ -916,7 +978,6 @@
                     localStorage.setItem('userRegistrations', JSON.stringify(allRegistrations));
 
                     updateTournamentSlots(currentTournament.id);
-                    console.log("✅ Registration saved:", registration);
 
                     closeRegistrationModal();
                     document.getElementById('successTournamentName').textContent = currentTournament.name;
