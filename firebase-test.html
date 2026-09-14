@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test - Nepal Gaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .status-ok { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+        .status-fail { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+        .status-wait { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; padding: 6px 14px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6">
+
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">🔥 Firebase Connection Test</h1>
+        <p class="text-gray-400 text-sm mb-6">Verifying your Firebase setup before we integrate it into the platform.</p>
+
+        <div class="space-y-4">
+
+            <!-- Test 1: Config Loaded -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 1: Config File Loaded</h2>
+                    <span id="t1-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t1-detail">Waiting...</p>
+            </div>
+
+            <!-- Test 2: Firebase SDK Loaded -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 2: Firebase SDK Loaded</h2>
+                    <span id="t2-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t2-detail">Waiting...</p>
+            </div>
+
+            <!-- Test 3: Firebase App Initialized -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 3: Firebase App Initialized</h2>
+                    <span id="t3-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t3-detail">Waiting...</p>
+            </div>
+
+            <!-- Test 4: Firestore Database Connected -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 4: Firestore Database</h2>
+                    <span id="t4-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t4-detail">Waiting...</p>
+            </div>
+
+            <!-- Test 5: Auth Enabled -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 5: Authentication</h2>
+                    <span id="t5-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t5-detail">Waiting...</p>
+            </div>
+
+            <!-- Test 6: Write & Read Test -->
+            <div class="glass-panel rounded-xl p-5">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-bold text-white text-sm">Test 6: Write & Read Firestore</h2>
+                    <span id="t6-status" class="status-wait">Checking...</span>
+                </div>
+                <p class="text-xs text-gray-400" id="t6-detail">Waiting...</p>
+            </div>
+
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <p class="text-xs text-blue-300">
+                <strong>Note:</strong> This is a temporary test page. Once all tests pass, we'll integrate Firebase into your actual platform pages.
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        console.log("🔥 Firebase test page loaded");
+
+        // Helper to update status
+        function setStatus(testNum, status, detail) {
+            const statusEl = document.getElementById(`t${testNum}-status`);
+            const detailEl = document.getElementById(`t${testNum}-detail`);
+
+            statusEl.className = status === 'ok' ? 'status-ok' : status === 'fail' ? 'status-fail' : 'status-wait';
+            statusEl.textContent = status === 'ok' ? '✓ Passed' : status === 'fail' ? '✗ Failed' : 'Checking...';
+            detailEl.textContent = detail || '';
+        }
+
+        // TEST 1: Config File Loaded
+        try {
+            const response = await fetch('firebase-config.js');
+            if (!response.ok) throw new Error('firebase-config.js not found (404)');
+            const text = await response.text();
+            if (!text.includes('firebaseConfig')) throw new Error('firebase-config.js exists but missing firebaseConfig');
+            setStatus(1, 'ok', 'firebase-config.js found and readable');
+        } catch (e) {
+            setStatus(1, 'fail', e.message);
+        }
+
+        // TEST 2: Firebase SDK Loaded (this script already imports it)
+        try {
+            if (typeof initializeApp === 'function') {
+                setStatus(2, 'ok', 'Firebase SDK v10.7.0 loaded successfully');
+            } else {
+                throw new Error('initializeApp not available');
+            }
+        } catch (e) {
+            setStatus(2, 'fail', e.message);
+        }
+
+        // Load config by evaluating the config file
+        let firebaseConfig;
+        try {
+            const configResponse = await fetch('firebase-config.js');
+            const configText = await configResponse.text();
+            // Extract the firebaseConfig object
+            const match = configText.match(/const firebaseConfig = ({[\s\S]*?});/);
+            if (!match) throw new Error('Could not parse firebaseConfig from file');
+            firebaseConfig = eval('(' + match[1] + ')');
+        } catch (e) {
+            setStatus(3, 'fail', 'Could not load config: ' + e.message);
+        }
+
+        // TEST 3: Firebase App Initialized
+        let app, db, auth;
+        try {
+            app = initializeApp(firebaseConfig);
+            setStatus(3, 'ok', `Project: ${firebaseConfig.projectId}`);
+        } catch (e) {
+            setStatus(3, 'fail', e.message);
+        }
+
+        // TEST 4: Firestore Database Connected
+        try {
+            db = getFirestore(app);
+            setStatus(4, 'ok', 'Firestore instance created');
+        } catch (e) {
+            setStatus(4, 'fail', e.message);
+        }
+
+        // TEST 5: Auth Enabled
+        try {
+            auth = getAuth(app);
+            setStatus(5, 'ok', 'Auth instance created');
+        } catch (e) {
+            setStatus(5, 'fail', e.message);
+        }
+
+        // TEST 6: Write & Read Firestore
+        try {
+            const testDocRef = doc(db, 'test', 'connection-test');
+            const testData = {
+                message: 'Firebase connected successfully!',
+                timestamp: new Date().toISOString(),
+                projectId: firebaseConfig.projectId
+            };
+
+            await setDoc(testDocRef, testData);
+            const readBack = await getDoc(testDocRef);
+
+            if (readBack.exists() && readBack.data().message === testData.message) {
+                setStatus(6, 'ok', `Write & read succeeded — data: "${readBack.data().message}"`);
+            } else {
+                throw new Error('Write succeeded but read failed');
+            }
+        } catch (e) {
+            setStatus(6, 'fail', 'Write/read error: ' + e.message + ' — Check Firestore rules and database location');
+        }
+
+        console.log("🔥 All Firebase tests completed");
+    </script>
+</body>
+</html>
