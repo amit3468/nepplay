@@ -10,6 +10,7 @@ Now includes:
 - Dynamic payments
 - Backups (export/import)
 - Prize payment tracking
+- Health check endpoint for Render
 ============================================================
 */
 
@@ -546,7 +547,6 @@ function buildWinners() {
                 }
             });
 
-            /* Count paid vs pending prizes */
             var prizesPaid = 0;
             var prizesPending = 0;
             completed.forEach(function (mm) {
@@ -2385,6 +2385,9 @@ function replaceCollection(name, items) {
     });
 }
 
+/* ============================================================
+   MAIN SERVER - handles all requests
+   ============================================================ */
 var server = http.createServer(function (req, res) {
     if (req.method === "OPTIONS") {
         res.writeHead(204, {
@@ -2396,11 +2399,21 @@ var server = http.createServer(function (req, res) {
         res.end();
         return;
     }
+
     var parsed;
     try { parsed = new URL(req.url, "http://localhost:" + PORT); }
     catch (e) { sendError(res, 400, "Invalid URL."); return; }
     var pathname = parsed.pathname;
     var query = parsed.searchParams;
+
+    /* ============================================================
+       HEALTH CHECK ENDPOINT (for Render)
+       ============================================================ */
+    if (pathname === "/health" || pathname === "/healthz") {
+        res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end("OK");
+        return;
+    }
 
     if (pathname.indexOf("/api/") === 0) {
         handleAPI(req, res, pathname, query).then(function (handled) {
@@ -2418,6 +2431,7 @@ connectDB().then(function () {
         console.log("     NEPPLAY SERVER (Backups + Prizes)");
         console.log("==================================================");
         console.log("Local: http://localhost:" + PORT);
+        console.log("Health: http://localhost:" + PORT + "/health");
         console.log("Admin: " + ADMIN_USERNAME);
         console.log("Database: " + DB_NAME);
         console.log("==================================================");
