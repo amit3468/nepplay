@@ -17,45 +17,45 @@
     </h2>
 
     <nav>
-      <a href="#dashboard" class="sidebar-link active" onclick="showSection('dashboard', this); return false;">
+      <a href="#dashboard" data-section="dashboard" class="sidebar-link active">
         <span>📊</span> Dashboard
       </a>
 
-      <a href="#payments" class="sidebar-link" onclick="showSection('payments', this); return false;">
+      <a href="#payments" data-section="payments" class="sidebar-link">
         <span>💰</span> Payments
         <span class="badge pending" id="pendingPayBadge">0</span>
       </a>
 
-      <a href="#prize" class="sidebar-link" onclick="showSection('prize', this); return false;">
+      <a href="#prize" data-section="prize" class="sidebar-link">
         <span>🧮</span> Prize Calculator
       </a>
 
-      <a href="#earnings" class="sidebar-link" onclick="showSection('earnings', this); return false;">
+      <a href="#earnings" data-section="earnings" class="sidebar-link">
         <span>💵</span> Earnings
       </a>
 
-      <a href="#payouts" class="sidebar-link" onclick="showSection('payouts', this); return false;">
+      <a href="#payouts" data-section="payouts" class="sidebar-link">
         <span>📤</span> Payouts
       </a>
 
-      <a href="#users" class="sidebar-link" onclick="showSection('users', this); return false;">
+      <a href="#users" data-section="users" class="sidebar-link">
         <span>👥</span> Users
       </a>
 
-      <a href="#registrations" class="sidebar-link" onclick="showSection('registrations', this); return false;">
+      <a href="#registrations" data-section="registrations" class="sidebar-link">
         <span>📋</span> Registrations
         <span class="badge" id="regsBadge">0</span>
       </a>
 
-      <a href="#support" class="sidebar-link" onclick="showSection('support', this); return false;">
+      <a href="#support" data-section="support" class="sidebar-link">
         <span>🎧</span> Support
       </a>
 
-      <a href="#tournaments" class="sidebar-link" onclick="showSection('tournaments', this); return false;">
+      <a href="#tournaments" data-section="tournaments" class="sidebar-link">
         <span>🏆</span> Tournaments
       </a>
 
-      <a href="#announcements" class="sidebar-link" onclick="showSection('announcements', this); return false;">
+      <a href="#announcements" data-section="announcements" class="sidebar-link">
         <span>📢</span> Announcements
       </a>
     </nav>
@@ -67,7 +67,7 @@
   <main class="admin-main">
 
     <!-- DASHBOARD -->
-    <section id="section-dashboard" class="admin-section">
+    <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
 
@@ -104,13 +104,13 @@
       </div>
 
       <div class="pay-status-tabs">
-        <button class="active" onclick="filterPayStatus('pending', this)">
+        <button class="active" data-status="pending"  onclick="filterPayStatus('pending', this)">
           ⏳ Pending <span class="cnt" id="cntPending">0</span>
         </button>
-        <button onclick="filterPayStatus('approved', this)">
+        <button data-status="approved" onclick="filterPayStatus('approved', this)">
           ✅ Approved <span class="cnt" id="cntApproved">0</span>
         </button>
-        <button onclick="filterPayStatus('rejected', this)">
+        <button data-status="rejected" onclick="filterPayStatus('rejected', this)">
           ❌ Rejected <span class="cnt" id="cntRejected">0</span>
         </button>
       </div>
@@ -183,6 +183,48 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
+<!-- ============ SECTION SWITCHER (runs first, always works) ============ -->
+<script>
+(function() {
+  function showSection(name, el) {
+    document.querySelectorAll('.admin-section').forEach(function(s) {
+      s.style.display = 'none';
+    });
+
+    var target = document.getElementById('section-' + name);
+    if (target) {
+      target.style.display = 'block';
+    } else {
+      console.warn('Section not found:', 'section-' + name);
+    }
+
+    document.querySelectorAll('.sidebar-link').forEach(function(a) {
+      a.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+
+    if (name === 'payments' && typeof window.loadPayments === 'function') {
+      try { window.loadPayments(); } catch (e) { console.error(e); }
+    }
+    if (name === 'registrations' && typeof window.loadRegistrations === 'function') {
+      try { window.loadRegistrations(); } catch (e) { console.error(e); }
+    }
+  }
+
+  window.showSection = showSection;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var section = this.dataset.section;
+        if (section) showSection(section, this);
+      });
+    });
+  });
+})();
+</script>
+
 <!-- ============ FIREBASE LOGIC ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -204,24 +246,9 @@ let currentMethodFilter = 'all';
 let currentSearchTerm   = '';
 
 // ================================================
-// NAV
-// ================================================
-window.showSection = function(name, el) {
-  document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
-  const target = document.getElementById('section-' + name);
-  if (target) target.style.display = 'block';
-
-  document.querySelectorAll('.sidebar-link').forEach(a => a.classList.remove('active'));
-  if (el) el.classList.add('active');
-
-  if (name === 'payments')      loadPayments();
-  if (name === 'registrations') loadRegistrations();
-};
-
-// ================================================
 // PAYMENTS
 // ================================================
-async function loadPayments() {
+window.loadPayments = async function() {
   const list = document.getElementById('payList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading payments...</div>';
@@ -233,9 +260,10 @@ async function loadPayments() {
     updateCounts();
     renderPayments();
   } catch (err) {
-    list.innerHTML = `<div class="empty-state"><span class="icon">❌</span>Failed: ${err.message}</div>`;
+    console.error('loadPayments error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
-}
+};
 
 function updateCounts() {
   const c = { pending:0, approved:0, rejected:0 };
@@ -269,7 +297,7 @@ function renderPayments() {
   });
 
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><span class="icon">🎉</span>No ${currentStatusFilter} payments here.</div>`;
+    list.innerHTML = '<div class="empty-state"><span class="icon">🎉</span>No ' + currentStatusFilter + ' payments here.</div>';
     return;
   }
 
@@ -281,13 +309,14 @@ function renderPayments() {
       ? p.submittedAt.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
       : '—';
     const showActions = p.status === 'pending';
+    const safeName = (p.username||'').replace(/'/g,'');
 
     return `
       <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
         <div class="pay-item-left">
           ${p.screenshotUrl
-            ? `<img src="${p.screenshotUrl}" class="pay-shot" onclick="openShot('${p.screenshotUrl}')">`
-            : `<div class="pay-shot-empty">No image</div>`}
+            ? '<img src="' + p.screenshotUrl + '" class="pay-shot" onclick="openShot(\'' + p.screenshotUrl + '\')">'
+            : '<div class="pay-shot-empty">No image</div>'}
         </div>
 
         <div class="pay-item-mid">
@@ -314,15 +343,15 @@ function renderPayments() {
           <span class="status-pill ${p.status}">${p.status.toUpperCase()}</span>
 
           ${showActions ? `
-            <button class="btn-approve" onclick="openReview('${p.id}','${(p.username||'').replace(/'/g,'')}','approve')">✔ Approve</button>
-            <button class="btn-reject"  onclick="openReview('${p.id}','${(p.username||'').replace(/'/g,'')}','reject')">✘ Reject</button>
+            <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve')">✔ Approve</button>
+            <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject')">✘ Reject</button>
           ` : ''}
 
           ${p.screenshotUrl
-            ? `<a href="${p.screenshotUrl}" target="_blank" class="link-view">🔍 View Full Screenshot</a>`
+            ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 View Full Screenshot</a>'
             : ''}
 
-          ${p.adminNote ? `<small style="color:#9ca3af;margin-top:6px;">📝 ${p.adminNote}</small>` : ''}
+          ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
         </div>
       </div>
     `;
@@ -349,7 +378,7 @@ window.filterPayments = function() {
 // ================================================
 // REGISTRATIONS
 // ================================================
-async function loadRegistrations() {
+window.loadRegistrations = async function() {
   const list = document.getElementById('regList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading registrations...</div>';
@@ -359,17 +388,18 @@ async function loadRegistrations() {
     allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
 
-    if (document.getElementById('dashRegs'))
-      document.getElementById('dashRegs').innerText = allRegs.length;
+    const dr = document.getElementById('dashRegs');
+    if (dr) dr.innerText = allRegs.length;
 
-    if (document.getElementById('regsBadge'))
-      document.getElementById('regsBadge').innerText = allRegs.length;
+    const rb = document.getElementById('regsBadge');
+    if (rb) rb.innerText = allRegs.length;
 
     renderRegistrations();
   } catch (err) {
-    list.innerHTML = `<div class="empty-state"><span class="icon">❌</span>Failed: ${err.message}</div>`;
+    console.error('loadRegistrations error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
-}
+};
 
 window.filterRegistrations = function() { renderRegistrations(); };
 
@@ -394,6 +424,7 @@ function renderRegistrations() {
       ? r.registeredAt.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
       : '—';
     const isPaid = r.entryType === 'paid';
+    const safeName = (r.username||'').replace(/'/g,'');
 
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
@@ -407,10 +438,10 @@ function renderRegistrations() {
           </div>
 
           <div class="reg-line-2">
-            ${r.ign ? `IGN: <b>${r.ign}</b> · ` : ''}
-            ${r.phone ? `📱 ${r.phone} · ` : ''}
-            ${isPaid ? `Txn: <code>${r.txnId||'—'}</code> · ` : ''}
-            ${isPaid ? `Rs. ${r.amount||0}` : 'Free Entry'}
+            ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
+            ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
+            ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
+            ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
           </div>
 
           ${isPaid && r.screenshotUrl ? `
@@ -419,8 +450,8 @@ function renderRegistrations() {
               <span class="method-tag">${(r.method||'').toUpperCase()}</span>
               <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
               ${r.status === 'pending' ? `
-                <button class="btn-approve small" onclick="openReview('${r.paymentId}','${(r.username||'').replace(/'/g,'')}','approve')">✔ Approve</button>
-                <button class="btn-reject small"  onclick="openReview('${r.paymentId}','${(r.username||'').replace(/'/g,'')}','reject')">✘ Reject</button>
+                <button class="btn-approve small" onclick="openReview('${r.paymentId}','${safeName}','approve')">✔ Approve</button>
+                <button class="btn-reject small"  onclick="openReview('${r.paymentId}','${safeName}','reject')">✘ Reject</button>
               ` : ''}
             </div>
           ` : ''}
@@ -469,7 +500,7 @@ window.confirmReview = async function(e) {
 
   try {
     await updateDoc(doc(db, 'tournament_payments', id), {
-      status,
+      status: status,
       adminNote: note,
       reviewedAt: serverTimestamp()
     });
@@ -484,7 +515,7 @@ window.confirmReview = async function(e) {
 
     closeReview();
     window.showToast('✅ Payment ' + status);
-    loadPayments();
+    window.loadPayments();
   } catch (err) {
     console.error(err);
     window.showToast('❌ ' + err.message);
@@ -507,8 +538,8 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
-// Auto-load on start
-loadPayments();
+// Auto-load counts on start
+window.loadPayments();
 </script>
 </body>
 </html>
