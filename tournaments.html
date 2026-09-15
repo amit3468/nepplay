@@ -155,6 +155,18 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
+<!-- FOOTER -->
+<footer class="landing-footer" style="margin-top:60px;">
+  <div style="margin-bottom:16px;font-size:16px;font-weight:700;color:#fff;">🎮 NEPPLAY</div>
+  <div style="margin-bottom:16px;">
+    <a href="terms.html">Terms of Service</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="refund.html">Refund Policy</a>
+    <a href="support.html">Support</a>
+  </div>
+  <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
+</footer>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc }
@@ -182,7 +194,7 @@ const auth    = getAuth(app);
 console.log("🔥 Firebase ready on tournaments page");
 
 // ================================================
-// AUTH — Firebase Auth (same session as member.html)
+// AUTH
 // ================================================
 let currentUser = null;
 let currentUid  = null;
@@ -206,7 +218,7 @@ await new Promise((resolve) => {
 });
 
 // ================================================
-// AUTO-SEED 8 PAID TOURNAMENTS
+// AUTO-SEED
 // ================================================
 async function seedPaidTournamentsIfNeeded() {
   try {
@@ -220,40 +232,24 @@ async function seedPaidTournamentsIfNeeded() {
       { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-28', time:'18:00' },
       { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-28', time:'19:00' }
     ];
-
     const snap = await getDocs(collection(db, 'tournaments'));
     const existingIds = new Set(snap.docs.map(d => d.id));
-    const existingTitles = new Set(
-      snap.docs.map(d => (d.data().title || '').toString().trim().toLowerCase())
-    );
-
+    const existingTitles = new Set(snap.docs.map(d => (d.data().title || '').toString().trim().toLowerCase()));
     let created = 0;
     for (const s of SEEDS) {
       if (existingIds.has(s.id)) continue;
       if (existingTitles.has(s.title.toLowerCase())) continue;
-
       await setDoc(doc(db, 'tournaments', s.id), {
-        title: s.title,
-        game: s.game,
-        mode: s.mode,
-        entryType: 'paid',
-        entryFee: 150,
-        prizePool: 1500,
-        topKillsPrize: 500,
-        date: s.date,
-        time: s.time,
-        filled: 0,
-        max: 100,
+        title: s.title, game: s.game, mode: s.mode,
+        entryType: 'paid', entryFee: 150, prizePool: 1500, topKillsPrize: 500,
+        date: s.date, time: s.time, filled: 0, max: 100,
         createdAt: serverTimestamp()
       });
       created++;
     }
-
     if (created > 0) console.log(`✅ Seeded ${created} new paid tournaments`);
-    else console.log("✅ All 8 paid tournaments already exist");
-  } catch (err) {
-    console.warn("⚠️ Seed failed:", err.message);
-  }
+    else console.log("✅ All paid tournaments exist");
+  } catch (err) { console.warn("⚠️ Seed failed:", err.message); }
 }
 
 // ================================================
@@ -264,17 +260,14 @@ let TOURNAMENTS = [];
 async function loadTournaments() {
   const grid = document.getElementById('tournamentGrid');
   grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
-
   try {
     await seedPaidTournamentsIfNeeded();
-
     const snap = await getDocs(collection(db, 'tournaments'));
     TOURNAMENTS = snap.docs.map(d => {
       const t = d.data();
       const entryTypeRaw = (t.entryType || t.entry_type || 'free').toString().toLowerCase();
       const feeValue = Number(t.entryFee || t.entry_fee || 0);
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
-
       const g = (t.game || '').toString().toLowerCase();
       let color = 'blue';
       if (g.includes('free fire')) color = 'orange';
@@ -285,7 +278,6 @@ async function loadTournaments() {
       else if (g.includes('football') || g.includes('efootball')) color = 'green';
       else if (g.includes('chess')) color = 'blue';
       else if (g.includes('cricket')) color = 'orange';
-
       return {
         id: d.id,
         title: t.title || t.name || 'Untitled Tournament',
@@ -300,21 +292,16 @@ async function loadTournaments() {
         filled: Number(t.filled || t.registered || 0),
         max:    Number(t.max || t.maxPlayers || t.max_players || 50),
         color,
-        roomId: t.roomId || '',
-        roomPassword: t.roomPassword || '',
-        roomFormat: t.roomFormat || '',
-        roomRounds: t.roomRounds || '',
-        roomOpenTime: t.roomOpenTime || '',
-        roomRules: t.roomRules || '',
+        roomId: t.roomId || '', roomPassword: t.roomPassword || '',
+        roomFormat: t.roomFormat || '', roomRounds: t.roomRounds || '',
+        roomOpenTime: t.roomOpenTime || '', roomRules: t.roomRules || '',
         roomRevealAt: t.roomRevealAt || null
       };
     });
-
     if (!TOURNAMENTS.length) {
       grid.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No tournaments yet.</div>';
       return;
     }
-
     console.log("✅ Loaded", TOURNAMENTS.length, "tournaments");
     renderTournaments();
     loadMyTournaments();
@@ -328,40 +315,27 @@ async function loadTournaments() {
 // MY TOURNAMENTS
 // ================================================
 async function loadMyTournaments() {
-  if (!currentUser || !currentUid) {
-    console.log("ℹ️ Not logged in — skipping My Tournaments");
-    return;
-  }
+  if (!currentUser || !currentUid) return;
   try {
-    const snap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('userId', '==', currentUid)
-    ));
+    const snap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', currentUid)));
     const myRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!myRegs.length) return;
-
-    // Fetch tournaments for room details
     const tournSnap = await getDocs(collection(db, 'tournaments'));
     const tournamentsById = {};
     tournSnap.docs.forEach(d => { tournamentsById[d.id] = d.data(); });
-
     const section = document.getElementById('myTournamentsSection');
     const list = document.getElementById('myTournamentsList');
     section.style.display = 'block';
-
     list.innerHTML = myRegs.map(r => {
       const isPaid = r.entryType === 'paid';
       const statusClass = r.status === 'confirmed' ? 'confirmed' : (r.status === 'pending' ? 'pending' : 'rejected');
       const statusLabel = r.status ? r.status.toUpperCase() : 'CONFIRMED';
-
       const t = tournamentsById[r.tournamentId] || {};
       const hasRoom = t.roomId && t.roomPassword;
       const roomRevealTime = t.roomRevealAt ? new Date(t.roomRevealAt) : null;
       const canReveal = !roomRevealTime || new Date() >= roomRevealTime;
-
       const showRoom = hasRoom && r.status === 'confirmed' && canReveal;
       const showLocked = hasRoom && r.status === 'confirmed' && !canReveal;
-
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
@@ -371,7 +345,6 @@ async function loadMyTournaments() {
               ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
               ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · Rs. ' + (r.amount||0) : 'Free Entry'}
             </div>
-
             ${showRoom ? `
               <div class="room-details-box">
                 <div class="room-details-header">
@@ -407,7 +380,6 @@ async function loadMyTournaments() {
                 </div>
               </div>
             ` : '')}
-
             ${r.status === 'pending' ? `
               <div style="margin-top:12px;">
                 <small style="color:#fbbf24;">⏳ Waiting for admin to approve your payment</small>
@@ -421,9 +393,7 @@ async function loadMyTournaments() {
         </div>
       `;
     }).join('');
-  } catch (err) {
-    console.warn('loadMyTournaments error:', err);
-  }
+  } catch (err) { console.warn('loadMyTournaments error:', err); }
 }
 
 window.copyRoomField = function(text, btn) {
@@ -431,10 +401,7 @@ window.copyRoomField = function(text, btn) {
     const original = btn.innerText;
     btn.innerText = '✅';
     btn.style.background = 'rgba(34, 197, 94, 0.5)';
-    setTimeout(() => {
-      btn.innerText = original;
-      btn.style.background = '';
-    }, 1500);
+    setTimeout(() => { btn.innerText = original; btn.style.background = ''; }, 1500);
   }).catch(err => console.error('Copy failed:', err));
 };
 
@@ -449,11 +416,9 @@ function renderTournaments() {
     const pct = t.max > 0 ? Math.round((t.filled / t.max) * 100) : 0;
     const isPaid = t.entry_type === 'paid';
     const safeTitle = t.title.replace(/'/g, "\\'");
-
     return `
       <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}">
-        ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>'
-                 : '<span class="free-ribbon">🆓 FREE</span>'}
+        ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>' : '<span class="free-ribbon">🆓 FREE</span>'}
         <div class="card-banner ${t.color}">
           <span class="game-tag">🕹 ${t.game}</span>
           <span class="mode-tag">${t.mode}</span>
@@ -461,38 +426,14 @@ function renderTournaments() {
         <div class="card-body">
           <h3>${t.title}</h3>
           <div class="card-meta">
-            <div>
-              <small>Entry Fee</small>
-              <b class="${isPaid ? 'paid-text' : 'free-text'}">
-                ${isPaid ? 'Rs. ' + t.entry_fee : 'FREE'}
-              </b>
-            </div>
-            <div>
-              <small>Prize Pool</small>
-              <b class="prize">Rs. ${t.prize_pool}</b>
-            </div>
+            <div><small>Entry Fee</small><b class="${isPaid ? 'paid-text' : 'free-text'}">${isPaid ? 'Rs. ' + t.entry_fee : 'FREE'}</b></div>
+            <div><small>Prize Pool</small><b class="prize">Rs. ${t.prize_pool}</b></div>
           </div>
-          ${isPaid && t.top_kills_prize ? `
-            <div class="card-meta extra">
-              <div>
-                <small>🎯 Top Kills</small>
-                <b class="kill-prize">Rs. ${t.top_kills_prize}</b>
-              </div>
-            </div>` : ''}
-          <div class="card-footer">
-            <span>📅 ${t.date}</span>
-            <span>🕐 ${t.time}</span>
-          </div>
+          ${isPaid && t.top_kills_prize ? `<div class="card-meta extra"><div><small>🎯 Top Kills</small><b class="kill-prize">Rs. ${t.top_kills_prize}</b></div></div>` : ''}
+          <div class="card-footer"><span>📅 ${t.date}</span><span>🕐 ${t.time}</span></div>
           <div class="slots">Slots Filled <span>${t.filled}/${t.max}</span></div>
           <div class="progress"><div style="width:${pct}%"></div></div>
-          ${isPaid
-            ? `<button class="btn-join paid-btn"
-                 onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">
-                 Join — Pay Rs. ${t.entry_fee}
-               </button>`
-            : `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">
-                 Join Free
-               </button>`}
+          ${isPaid ? `<button class="btn-join paid-btn" onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">Join — Pay Rs. ${t.entry_fee}</button>` : `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">Join Free</button>`}
         </div>
       </div>
     `;
@@ -508,8 +449,7 @@ window.filterTournamentType = function(type) {
   const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
   Object.keys(tabs).forEach(k => {
     const el = document.getElementById(tabs[k]);
-    if (k === type) el.classList.add('active');
-    else el.classList.remove('active');
+    if (k === type) el.classList.add('active'); else el.classList.remove('active');
   });
   document.querySelectorAll('.tournament-card').forEach(card => {
     const isPaid = card.dataset.type === 'paid';
@@ -519,7 +459,7 @@ window.filterTournamentType = function(type) {
 };
 
 // ================================================
-// JOIN MODAL (FREE) — ONE FREE tournament per player
+// JOIN MODAL (FREE)
 // ================================================
 window.openJoinModal = function(tid, title) {
   document.getElementById('joinTournamentId').value = tid;
@@ -527,9 +467,7 @@ window.openJoinModal = function(tid, title) {
   document.getElementById('joinForm').reset();
   document.getElementById('joinModal').classList.add('active');
 };
-window.closeJoinModal = function() {
-  document.getElementById('joinModal').classList.remove('active');
-};
+window.closeJoinModal = function() { document.getElementById('joinModal').classList.remove('active'); };
 
 window.submitJoin = async function(e) {
   e.preventDefault();
@@ -545,7 +483,6 @@ window.submitJoin = async function(e) {
     if (!ign)   throw new Error('IGN required');
     if (!phone) throw new Error('Phone required');
 
-    // ---- RULE: Only ONE FREE tournament per player ----
     const freeRegSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('userId', '==', currentUid),
@@ -556,7 +493,6 @@ window.submitJoin = async function(e) {
       throw new Error('You already joined a FREE tournament: "' + (existing.tournamentTitle || 'a free tournament') + '". Each player can only join ONE free tournament. Paid tournaments have no limit.');
     }
 
-    // Also block duplicate join of same tournament
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
@@ -565,32 +501,21 @@ window.submitJoin = async function(e) {
     if (!dupSnap.empty) throw new Error('You already registered for this tournament');
 
     await addDoc(collection(db, 'tournament_registrations'), {
-      tournamentId: tid,
-      tournamentTitle: title,
-      userId: currentUid,
-      username: currentUser.username,
-      email: currentUser.email,
-      ign, phone,
-      paymentId: null,
-      entryType: 'free',
-      amount: 0,
-      status: 'confirmed',
-      registeredAt: serverTimestamp()
+      tournamentId: tid, tournamentTitle: title,
+      userId: currentUid, username: currentUser.username, email: currentUser.email,
+      ign, phone, paymentId: null, entryType: 'free', amount: 0,
+      status: 'confirmed', registeredAt: serverTimestamp()
     });
 
     window.closeJoinModal();
     window.showToast('✅ Joined ' + title + '!');
     loadMyTournaments();
-  } catch (err) {
-    window.showToast('❌ ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = '✅ Join Tournament';
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
+  finally { btn.disabled = false; btn.innerText = '✅ Join Tournament'; }
 };
 
 // ================================================
-// PAYMENT MODAL (PAID) — unlimited paid tournaments
+// PAYMENT MODAL (PAID)
 // ================================================
 window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.getElementById('payTournamentId').value = tid;
@@ -609,8 +534,7 @@ window.closePaymentModal = function() {
 };
 window.switchPay = function(method) {
   document.getElementById('payMethod').value = method;
-  document.querySelectorAll('.pay-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.method === method));
+  document.querySelectorAll('.pay-tab').forEach(t => t.classList.toggle('active', t.dataset.method === method));
   document.getElementById('esewaPanel').style.display  = method === 'esewa'  ? 'block' : 'none';
   document.getElementById('khaltiPanel').style.display = method === 'khalti' ? 'block' : 'none';
   document.getElementById('imepayPanel').style.display = method === 'imepay' ? 'block' : 'none';
@@ -650,7 +574,6 @@ window.submitPayment = async function(e) {
     if (!phone)            throw new Error('Phone required');
     if (file.size > 5*1024*1024) throw new Error('Max 5MB');
 
-    // Paid tournaments: only check duplicate of SAME tournament
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
@@ -664,45 +587,25 @@ window.submitPayment = async function(e) {
     const url = await getDownloadURL(sRef);
 
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
-      tournamentId: tid,
-      tournamentTitle: title,
-      userId: currentUid,
-      username: currentUser.username,
-      email: currentUser.email,
-      ign, phone,
-      method, amount,
-      txnId: txn,
-      screenshotUrl: url,
-      status: 'pending',
-      adminNote: '',
-      submittedAt: serverTimestamp(),
-      reviewedAt: null
+      tournamentId: tid, tournamentTitle: title,
+      userId: currentUid, username: currentUser.username, email: currentUser.email,
+      ign, phone, method, amount, txnId: txn, screenshotUrl: url,
+      status: 'pending', adminNote: '', submittedAt: serverTimestamp(), reviewedAt: null
     });
 
     await addDoc(collection(db, 'tournament_registrations'), {
-      tournamentId: tid,
-      tournamentTitle: title,
-      userId: currentUid,
-      username: currentUser.username,
-      email: currentUser.email,
-      ign, phone,
-      paymentId: payRef.id,
-      entryType: 'paid',
-      method, txnId: txn, amount,
-      screenshotUrl: url,
-      status: 'pending',
-      registeredAt: serverTimestamp()
+      tournamentId: tid, tournamentTitle: title,
+      userId: currentUid, username: currentUser.username, email: currentUser.email,
+      ign, phone, paymentId: payRef.id, entryType: 'paid',
+      method, txnId: txn, amount, screenshotUrl: url,
+      status: 'pending', registeredAt: serverTimestamp()
     });
 
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
     loadMyTournaments();
-  } catch (err) {
-    window.showToast('❌ ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = '✅ Submit for Admin Approval';
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
+  finally { btn.disabled = false; btn.innerText = '✅ Submit for Admin Approval'; }
 };
 
 window.showToast = function(msg) {
