@@ -39,6 +39,12 @@
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
 
+        /* Floating WhatsApp button (bottom-right) */
+        .floating-wa { position: fixed; bottom: 24px; right: 24px; z-index: 100; }
+        .wa-btn { width: 60px; height: 60px; background: linear-gradient(135deg, #25D366, #128C7E); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); cursor: pointer; transition: all 0.3s; animation: pulse-wa 2s infinite; }
+        .wa-btn:hover { transform: scale(1.1); }
+        @keyframes pulse-wa { 0%, 100% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); } 50% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.9); } }
+
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
@@ -383,6 +389,26 @@
             transform: translateY(-3px);
         }
 
+        /* NEW: WhatsApp CTA — made green and prominent */
+        .launch-cta-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: #ffffff;
+            font-weight: 800;
+            padding: 16px 28px;
+            border-radius: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+        }
+        .launch-cta-whatsapp:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 45px rgba(37, 211, 102, 0.7);
+        }
+
         .float-icon {
             position: absolute;
             opacity: 0.15;
@@ -478,7 +504,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support -->
+    <!-- Floating Support (bottom-left) -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
@@ -498,6 +524,13 @@
             </a>
         </div>
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
+    </div>
+
+    <!-- Floating WhatsApp (bottom-right) — ALWAYS VISIBLE -->
+    <div class="floating-wa">
+        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="wa-btn" title="Join WhatsApp Community">
+            <i class="fa-brands fa-whatsapp"></i>
+        </a>
     </div>
 
     <!-- LOADING -->
@@ -758,14 +791,15 @@
                         💜 Register now to lock your slot. See you on 22nd September! 🚀
                     </p>
 
+                    <!-- CTA BUTTONS — Restored & Enhanced -->
                     <div class="flex flex-wrap gap-3">
                         <a href="tournaments.html" class="launch-cta-primary">
                             <i class="fa-solid fa-gamepad text-xl"></i>
                             Register for a Tournament
                         </a>
-                        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="launch-cta-secondary">
+                        <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="launch-cta-whatsapp">
                             <i class="fa-brands fa-whatsapp text-lg"></i>
-                            Join Community
+                            Join WhatsApp Community
                         </a>
                     </div>
                 </div>
@@ -877,26 +911,18 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Launch: 22 Sept 2026, 1:00 PM NPT = 7:15 AM UTC
         const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 22, 7, 15, 0));
 
-        // ============================================================
-        // FAKE GROWTH CONFIG
-        // ============================================================
-        // Display = BASE_COUNT + (hours since BASE_DATE × GROWTH_RATE) + real_firestore_count
-        const BASE_COUNT = 40;                                      // Starting number users see
-        const GROWTH_RATE = 0.1;                                    // +2.4/day (+1 every ~10h)
-        const TOTAL_CAPACITY = 500;                                 // For progress bar
-        const BASE_DATE = new Date("2026-09-14T08:00:00.000Z");    // Fixed start date
+        const BASE_COUNT = 40;
+        const GROWTH_RATE = 0.1;
+        const TOTAL_CAPACITY = 500;
+        const BASE_DATE = new Date("2026-09-14T08:00:00.000Z");
 
-        console.log("🔥 Member page initialized. Base:", BASE_COUNT, "Rate:", GROWTH_RATE, "/hour");
+        console.log("🔥 Member page initialized");
 
         let currentUser = null;
         let currentUserProfile = null;
 
-        // ============================================================
-        // MOBILE NAV / SUPPORT
-        // ============================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -920,9 +946,6 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
-        // ============================================================
-        // COUNTDOWN
-        // ============================================================
         function updateCountdown() {
             const now = new Date();
             const diff = LAUNCH_DATE - now;
@@ -947,9 +970,6 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // ============================================================
-        // FAKE GROWTH COUNTER
-        // ============================================================
         function calculateFakeCount() {
             const now = new Date();
             const hoursSinceBase = (now - BASE_DATE) / (1000 * 60 * 60);
@@ -988,14 +1008,10 @@
                         setTimeout(() => el.classList.remove('growing'), 800);
                     }
                 }
-
                 const bar = document.getElementById('slots-progress');
                 if (bar) bar.style.width = percentage + '%';
-
                 const text = document.getElementById('slots-text');
-                if (text) {
-                    text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
-                }
+                if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
             } catch (error) {
                 console.error("Counter error:", error);
                 const displayCount = calculateFakeCount();
@@ -1008,13 +1024,9 @@
                 if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
             }
         }
-
         setInterval(updateLiveCounter, 60000);
         setTimeout(updateLiveCounter, 500);
 
-        // ============================================================
-        // AUTH
-        // ============================================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
@@ -1068,10 +1080,7 @@
         window.forgotPassword = async function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
-            if (!email) {
-                alert("Enter your email above first.");
-                return;
-            }
+            if (!email) { alert("Enter your email above first."); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
                 alert("📧 Password reset email sent to " + email);
