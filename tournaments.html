@@ -21,14 +21,12 @@
   </nav>
 </header>
 
-<!-- ============ HERO ============ -->
 <section class="hero">
   <span class="pill">⚡ Registration Open</span>
   <h1>🏆 Tournaments</h1>
   <p>Join Free &amp; Paid Tournaments. Real Prizes.</p>
 </section>
 
-<!-- ============ GAME FILTERS ============ -->
 <div class="filters">
   <button class="active">All Games</button>
   <button>Free Fire</button>
@@ -41,20 +39,46 @@
   <button>Chess</button>
 </div>
 
-<!-- ============ FREE / PAID TABS ============ -->
 <div class="tournament-type-tabs">
   <button id="tabAll"  class="type-tab active" onclick="filterTournamentType('all')">🎯 All</button>
   <button id="tabFree" class="type-tab"        onclick="filterTournamentType('free')">🆓 Free Entry</button>
   <button id="tabPaid" class="type-tab"        onclick="filterTournamentType('paid')">💵 Paid Entry</button>
 </div>
 
-<!-- ============ TOURNAMENT GRID ============ -->
 <div class="tournament-grid" id="tournamentGrid">
   <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
 </div>
 
 <!-- ============================================== -->
-<!-- PAYMENT MODAL -->
+<!-- JOIN MODAL (FREE TOURNAMENT) -->
+<!-- ============================================== -->
+<div id="joinModal" class="modal-overlay">
+  <div class="modal-box small">
+    <button class="modal-close" onclick="closeJoinModal()">✕</button>
+    <h2>🎮 Join Tournament</h2>
+    <p class="modal-sub">
+      <b id="joinTournamentTitle">Free Fire Solo Cup</b>
+    </p>
+
+    <form id="joinForm" onsubmit="submitJoin(event)">
+      <input type="hidden" id="joinTournamentId">
+
+      <label>🎮 Your IGN (In-Game Name) *</label>
+      <input type="text" id="joinIgn" placeholder="e.g. Amit" required>
+
+      <label>📱 Phone Number *</label>
+      <input type="text" id="joinPhone" placeholder="e.g. 9800000000" required>
+
+      <button type="submit" class="btn-submit-pay" id="joinSubmitBtn">
+        ✅ Join Tournament
+      </button>
+      <p class="hint center">Free entry — no payment needed</p>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- PAYMENT MODAL (PAID TOURNAMENT) -->
 <!-- ============================================== -->
 <div id="paymentModal" class="modal-overlay">
   <div class="modal-box">
@@ -75,7 +99,6 @@
       <button class="pay-tab"        data-method="bank"   onclick="switchPay('bank')">🏦 Bank</button>
     </div>
 
-    <!-- eSewa -->
     <div id="esewaPanel" class="pay-panel">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -85,7 +108,6 @@
       </div>
     </div>
 
-    <!-- Khalti -->
     <div id="khaltiPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -95,7 +117,6 @@
       </div>
     </div>
 
-    <!-- IME Pay -->
     <div id="imepayPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -105,7 +126,6 @@
       </div>
     </div>
 
-    <!-- Bank -->
     <div id="bankPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>🏦 <b>Bank Transfer</b></p>
@@ -150,12 +170,11 @@
   </div>
 </div>
 
-<!-- LIGHTBOX -->
 <div id="shotModal" class="modal-overlay" onclick="this.style.display='none'">
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ FIREBASE + LOGIC ============ -->
+<!-- ============ LOGIC ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs }
@@ -163,7 +182,6 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDoc
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// ---- Firebase config (inline) ----
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
@@ -180,15 +198,25 @@ const storage = getStorage(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
-// ---- Fetch logged-in user from Node session ----
+// ---- Get logged-in user from Node session ----
 let currentUser = null;
+let currentUid  = null;
+
 try {
   const res = await fetch("/api/users/me", { credentials: "include" });
   if (res.ok) {
     const data = await res.json();
     if (data.success && data.user) {
       currentUser = data.user;
-      console.log("👤 Logged in as:", currentUser.username || currentUser.email);
+      // Build a STABLE id — never undefined
+      currentUid = String(
+        currentUser.id ||
+        currentUser.uid ||
+        currentUser._id ||
+        currentUser.email ||
+        currentUser.username
+      );
+      console.log("👤 Logged in as:", currentUser.username, "| uid:", currentUid);
     }
   }
 } catch (e) {
@@ -196,7 +224,7 @@ try {
 }
 
 // ================================================
-// TOURNAMENTS — loaded from Firestore
+// TOURNAMENTS
 // ================================================
 let TOURNAMENTS = [];
 
@@ -206,16 +234,12 @@ async function loadTournaments() {
 
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
-
     TOURNAMENTS = snap.docs.map(d => {
       const t = d.data();
-
-      // Determine free vs paid — support multiple field name styles
       const entryTypeRaw = (t.entry_type || t.entryType || 'free').toString().toLowerCase();
-      const feeValue = Number(t.entryFee || t.entry_fee || t.entry_fee_amount || 0);
+      const feeValue = Number(t.entryFee || t.entry_fee || 0);
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
 
-      // Pick banner color from game name
       const g = (t.game || '').toString().toLowerCase();
       let color = 'blue';
       if (g.includes('free fire')) color = 'orange';
@@ -223,7 +247,7 @@ async function loadTournaments() {
       else if (g.includes('pubg')) color = 'purple';
       else if (g.includes('ludo')) color = 'pink';
       else if (g.includes('valorant')) color = 'blue';
-      else if (g.includes('football')) color = 'green';
+      else if (g.includes('football') || g.includes('efootball')) color = 'green';
       else if (g.includes('chess')) color = 'blue';
 
       return {
@@ -237,7 +261,7 @@ async function loadTournaments() {
         top_kills_prize: Number(t.topKillsPrize || t.top_kills_prize || t.topKiller || 0),
         date:  t.date  || '—',
         time:  t.time  || '—',
-        filled: Number(t.filled || t.registered || t.registeredCount || 0),
+        filled: Number(t.filled || t.registered || 0),
         max:    Number(t.max || t.maxPlayers || t.max_players || 50),
         color
       };
@@ -248,7 +272,7 @@ async function loadTournaments() {
       return;
     }
 
-    console.log("✅ Loaded", TOURNAMENTS.length, "tournaments from Firestore");
+    console.log("✅ Loaded", TOURNAMENTS.length, "tournaments");
     renderTournaments();
   } catch (err) {
     console.error('loadTournaments error:', err);
@@ -310,7 +334,7 @@ function renderTournaments() {
                  onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">
                  Join — Pay Rs. ${t.entry_fee}
                </button>`
-            : `<button class="btn-join free-btn" onclick="joinFree('${t.id}','${safeTitle}')">
+            : `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">
                  Join Free
                </button>`}
         </div>
@@ -319,7 +343,6 @@ function renderTournaments() {
   }).join('');
 }
 
-// Kick off loading
 loadTournaments();
 
 // ================================================
@@ -341,7 +364,73 @@ window.filterTournamentType = function(type) {
 };
 
 // ================================================
-// MODAL
+// JOIN MODAL (FREE)
+// ================================================
+window.openJoinModal = function(tid, title) {
+  document.getElementById('joinTournamentId').value = tid;
+  document.getElementById('joinTournamentTitle').innerText = title;
+  document.getElementById('joinForm').reset();
+  document.getElementById('joinModal').classList.add('active');
+};
+
+window.closeJoinModal = function() {
+  document.getElementById('joinModal').classList.remove('active');
+};
+
+window.submitJoin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('joinSubmitBtn');
+  btn.disabled = true;
+  btn.innerText = '⏳ Joining...';
+
+  try {
+    if (!currentUser) throw new Error('Please login first');
+
+    const tid   = document.getElementById('joinTournamentId').value;
+    const title = document.getElementById('joinTournamentTitle').innerText;
+    const ign   = document.getElementById('joinIgn').value.trim();
+    const phone = document.getElementById('joinPhone').value.trim();
+
+    if (!ign)   throw new Error('IGN required');
+    if (!phone) throw new Error('Phone required');
+
+    // Duplicate check using stable uid
+    const dupSnap = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('tournamentId', '==', tid),
+      where('userId', '==', currentUid)
+    ));
+    if (!dupSnap.empty) throw new Error('You already registered for this tournament');
+
+    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
+
+    await addDoc(collection(db, 'tournament_registrations'), {
+      tournamentId: tid,
+      tournamentTitle: title,
+      userId: currentUid,
+      username,
+      email: currentUser.email,
+      ign, phone,
+      paymentId: null,
+      entryType: 'free',
+      amount: 0,
+      status: 'confirmed',
+      registeredAt: serverTimestamp()
+    });
+
+    window.closeJoinModal();
+    window.showToast('✅ Joined ' + title + '!');
+  } catch (err) {
+    console.error(err);
+    window.showToast('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = '✅ Join Tournament';
+  }
+};
+
+// ================================================
+// PAYMENT MODAL (PAID)
 // ================================================
 window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.getElementById('payTournamentId').value = tid;
@@ -384,9 +473,6 @@ window.previewShot = function(input) {
   }
 };
 
-// ================================================
-// SUBMIT PAYMENT
-// ================================================
 window.submitPayment = async function(e) {
   e.preventDefault();
   const btn = document.getElementById('paySubmitBtn');
@@ -411,16 +497,14 @@ window.submitPayment = async function(e) {
     if (!phone)            throw new Error('Phone required');
     if (file.size > 5*1024*1024) throw new Error('Max 5MB');
 
-    const uid = currentUser.id || currentUser.uid || currentUser.username;
-
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
-      where('userId', '==', uid)
+      where('userId', '==', currentUid)
     ));
     if (!dupSnap.empty) throw new Error('You already registered');
 
-    const path = `payment-screenshots/${uid}/${Date.now()}_${file.name}`;
+    const path = `payment-screenshots/${currentUid}/${Date.now()}_${file.name}`;
     const sRef = ref(storage, path);
     await uploadBytes(sRef, file);
     const url = await getDownloadURL(sRef);
@@ -430,7 +514,7 @@ window.submitPayment = async function(e) {
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
       tournamentId: tid,
       tournamentTitle: title,
-      userId: uid,
+      userId: currentUid,
       username,
       email: currentUser.email,
       ign, phone,
@@ -446,7 +530,7 @@ window.submitPayment = async function(e) {
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid,
       tournamentTitle: title,
-      userId: uid,
+      userId: currentUid,
       username,
       email: currentUser.email,
       ign, phone,
@@ -469,47 +553,6 @@ window.submitPayment = async function(e) {
   }
 };
 
-// ================================================
-// FREE JOIN
-// ================================================
-window.joinFree = async function(tid, title) {
-  try {
-    if (!currentUser) throw new Error('Please login first');
-
-    const uid = currentUser.id || currentUser.uid || currentUser.username;
-
-    const dupSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', tid),
-      where('userId', '==', uid)
-    ));
-    if (!dupSnap.empty) throw new Error('Already registered');
-
-    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
-
-    await addDoc(collection(db, 'tournament_registrations'), {
-      tournamentId: tid,
-      tournamentTitle: title,
-      userId: uid,
-      username,
-      email: currentUser.email,
-      paymentId: null,
-      entryType: 'free',
-      amount: 0,
-      status: 'confirmed',
-      registeredAt: serverTimestamp()
-    });
-
-    window.showToast('✅ Joined free tournament!');
-  } catch (err) {
-    console.error(err);
-    window.showToast('❌ ' + err.message);
-  }
-};
-
-// ================================================
-// TOAST
-// ================================================
 window.showToast = function(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
