@@ -24,27 +24,22 @@
         <span>💰</span> Payments
         <span class="badge pending" id="pendingPayBadge">0</span>
       </a>
-      <a href="#prize" data-section="prize" class="sidebar-link">
-        <span>🧮</span> Prize Calculator
-      </a>
-      <a href="#earnings" data-section="earnings" class="sidebar-link">
-        <span>💵</span> Earnings
-      </a>
-      <a href="#payouts" data-section="payouts" class="sidebar-link">
-        <span>📤</span> Payouts
-      </a>
-      <a href="#users" data-section="users" class="sidebar-link">
-        <span>👥</span> Users
-      </a>
       <a href="#registrations" data-section="registrations" class="sidebar-link">
         <span>📋</span> Registrations
         <span class="badge" id="regsBadge">0</span>
       </a>
-      <a href="#support" data-section="support" class="sidebar-link">
-        <span>🎧</span> Support
+      <a href="#users" data-section="users" class="sidebar-link">
+        <span>👥</span> Users
+        <span class="badge" id="usersBadge">0</span>
       </a>
       <a href="#tournaments" data-section="tournaments" class="sidebar-link">
         <span>🏆</span> Tournaments
+      </a>
+      <a href="#earnings" data-section="earnings" class="sidebar-link">
+        <span>💵</span> Earnings
+      </a>
+      <a href="#support" data-section="support" class="sidebar-link">
+        <span>🎧</span> Support
       </a>
       <a href="#announcements" data-section="announcements" class="sidebar-link">
         <span>📢</span> Announcements
@@ -57,17 +52,50 @@
   <!-- ============ MAIN ============ -->
   <main class="admin-main">
 
+    <!-- ================================================ -->
+    <!-- DASHBOARD -->
+    <!-- ================================================ -->
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
+
       <div class="stat-grid">
-        <div class="stat-card"><small>REAL USERS</small><b id="dashUsers">0</b><span>Accounts created</span></div>
-        <div class="stat-card"><small>REGISTRATIONS</small><b id="dashRegs">0</b><span>Tournament sign-ups</span></div>
-        <div class="stat-card"><small>TOTAL PAID</small><b id="dashPaid">Rs. 0</b><span>From registrations</span></div>
-        <div class="stat-card"><small>PENDING PAYMENTS</small><b id="dashPending">0</b><span>Awaiting review</span></div>
+        <div class="stat-card">
+          <small>REAL USERS</small>
+          <b id="dashUsers">0</b>
+          <span>Accounts created</span>
+        </div>
+        <div class="stat-card">
+          <small>REGISTRATIONS</small>
+          <b id="dashRegs">0</b>
+          <span>Tournament sign-ups</span>
+        </div>
+        <div class="stat-card">
+          <small>TOTAL PAID</small>
+          <b id="dashPaid">Rs. 0</b>
+          <span>From registrations</span>
+        </div>
+        <div class="stat-card">
+          <small>PENDING PAYMENTS</small>
+          <b id="dashPending">0</b>
+          <span>Awaiting review</span>
+        </div>
+      </div>
+
+      <h3 class="mt">👥 Recent Users</h3>
+      <div class="list" id="dashRecentUsers">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
+
+      <h3 class="mt">📋 Recent Registrations</h3>
+      <div class="list" id="dashRecentRegs">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
       </div>
     </section>
 
+    <!-- ================================================ -->
+    <!-- PAYMENTS -->
+    <!-- ================================================ -->
     <section id="section-payments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>💰 Payment Approvals</h2>
@@ -84,6 +112,9 @@
         </button>
         <button data-status="rejected" onclick="filterPayStatus('rejected', this)">
           ❌ Rejected <span class="cnt" id="cntRejected">0</span>
+        </button>
+        <button data-status="all" onclick="filterPayStatus('all', this)">
+          📂 All <span class="cnt" id="cntAll">0</span>
         </button>
       </div>
 
@@ -103,6 +134,9 @@
       </div>
     </section>
 
+    <!-- ================================================ -->
+    <!-- REGISTRATIONS -->
+    <!-- ================================================ -->
     <section id="section-registrations" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>📋 Registrations</h2>
@@ -116,13 +150,86 @@
       </div>
     </section>
 
-    <section id="section-prize"         class="admin-section" style="display:none"><h2>🧮 Prize Calculator</h2><p class="muted">Coming soon</p></section>
-    <section id="section-earnings"      class="admin-section" style="display:none"><h2>💵 Earnings</h2><p class="muted">Coming soon</p></section>
-    <section id="section-payouts"       class="admin-section" style="display:none"><h2>📤 Payouts</h2><p class="muted">Coming soon</p></section>
-    <section id="section-users"         class="admin-section" style="display:none"><h2>👥 Users</h2><p class="muted">Coming soon</p></section>
-    <section id="section-support"       class="admin-section" style="display:none"><h2>🎧 Support</h2><p class="muted">Coming soon</p></section>
-    <section id="section-tournaments"   class="admin-section" style="display:none"><h2>🏆 Tournaments</h2><p class="muted">Coming soon</p></section>
-    <section id="section-announcements" class="admin-section" style="display:none"><h2>📢 Announcements</h2><p class="muted">Coming soon</p></section>
+    <!-- ================================================ -->
+    <!-- USERS -->
+    <!-- ================================================ -->
+    <section id="section-users" class="admin-section" style="display:none">
+      <div class="section-head">
+        <h2>👥 Users</h2>
+        <input type="text" id="userSearch" placeholder="🔍 Search username or email..."
+               oninput="filterUsers()" class="search-input">
+      </div>
+      <div class="reg-list" id="userList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading users...</div>
+      </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- TOURNAMENTS -->
+    <!-- ================================================ -->
+    <section id="section-tournaments" class="admin-section" style="display:none">
+      <div class="section-head">
+        <h2>🏆 Tournaments</h2>
+        <p class="muted">All tournaments on the platform</p>
+      </div>
+      <div class="reg-list" id="tournamentList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
+      </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- EARNINGS -->
+    <!-- ================================================ -->
+    <section id="section-earnings" class="admin-section" style="display:none">
+      <h2>💵 Earnings</h2>
+      <p class="muted">Revenue from paid tournaments</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <small>TOTAL REVENUE</small>
+          <b id="earnTotal">Rs. 0</b>
+          <span>From approved payments</span>
+        </div>
+        <div class="stat-card">
+          <small>APPROVED PAYMENTS</small>
+          <b id="earnApproved">0</b>
+          <span>Successful transactions</span>
+        </div>
+        <div class="stat-card">
+          <small>PENDING AMOUNT</small>
+          <b id="earnPending">Rs. 0</b>
+          <span>Awaiting review</span>
+        </div>
+        <div class="stat-card">
+          <small>AVERAGE ENTRY</small>
+          <b id="earnAvg">Rs. 0</b>
+          <span>Per approved payment</span>
+        </div>
+      </div>
+
+      <h3 class="mt">📊 Breakdown by Method</h3>
+      <div class="list" id="earningsBreakdown">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- SUPPORT -->
+    <!-- ================================================ -->
+    <section id="section-support" class="admin-section" style="display:none">
+      <h2>🎧 Support</h2>
+      <p class="muted">Member support tickets — coming soon</p>
+      <div class="empty-state"><span class="icon">🎧</span>Support system coming soon</div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- ANNOUNCEMENTS -->
+    <!-- ================================================ -->
+    <section id="section-announcements" class="admin-section" style="display:none">
+      <h2>📢 Announcements</h2>
+      <p class="muted">Post updates for members — coming soon</p>
+      <div class="empty-state"><span class="icon">📢</span>Announcements coming soon</div>
+    </section>
 
   </main>
 </div>
@@ -150,7 +257,7 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ SECTION SWITCHER (plain JS, runs first, always works) ============ -->
+<!-- ============ SECTION SWITCHER (plain JS, always works) ============ -->
 <script>
 (function() {
   function showSection(name, el) {
@@ -160,11 +267,17 @@
     document.querySelectorAll('.sidebar-link').forEach(function(a) { a.classList.remove('active'); });
     if (el) el.classList.add('active');
 
-    if (name === 'payments' && typeof window.loadPayments === 'function') {
-      try { window.loadPayments(); } catch (e) { console.error('loadPayments err:', e); }
-    }
-    if (name === 'registrations' && typeof window.loadRegistrations === 'function') {
-      try { window.loadRegistrations(); } catch (e) { console.error('loadRegistrations err:', e); }
+    // Load on demand
+    var loaders = {
+      payments: 'loadPayments',
+      registrations: 'loadRegistrations',
+      users: 'loadUsers',
+      tournaments: 'loadTournamentsAdmin',
+      earnings: 'loadEarnings'
+    };
+    var fn = loaders[name];
+    if (fn && typeof window[fn] === 'function') {
+      try { window[fn](); } catch (e) { console.error(fn + ' error:', e); }
     }
   }
   window.showSection = showSection;
@@ -186,7 +299,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, doc, updateDoc,
-  query, where, serverTimestamp
+  query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -196,7 +309,7 @@ const firebaseConfig = {
     storageBucket: "nepplaygaming.firebasestorage.app",
     messagingSenderId: "893565645520",
     appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
-    measurementId: "G-3PXN38XFG9"
+    measurementIds: "G-3PXN38XFG9"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -206,9 +319,29 @@ console.log("🔥 Firebase ready on admin page");
 
 let allPayments = [];
 let allRegs     = [];
+let allUsers    = [];
+let allTournaments = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
 let currentSearchTerm   = '';
+
+// ================================================
+// HELPERS
+// ================================================
+function fmtDate(ts) {
+  if (!ts?.toDate) return '—';
+  return ts.toDate().toLocaleString('en-GB', {
+    day:'2-digit', month:'short', year:'numeric',
+    hour:'2-digit', minute:'2-digit'
+  });
+}
+function fmtShort(ts) {
+  if (!ts?.toDate) return '—';
+  return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+function initials(name) {
+  return (name || 'U')[0].toUpperCase();
+}
 
 // ================================================
 // PAYMENTS
@@ -224,6 +357,7 @@ window.loadPayments = async function() {
     allPayments.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
     updateCounts();
     renderPayments();
+    renderDashboardRecent();
   } catch (err) {
     console.error('loadPayments error:', err);
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
@@ -238,6 +372,7 @@ function updateCounts() {
   if (el('cntPending'))      el('cntPending').innerText      = c.pending;
   if (el('cntApproved'))     el('cntApproved').innerText     = c.approved;
   if (el('cntRejected'))     el('cntRejected').innerText     = c.rejected;
+  if (el('cntAll'))          el('cntAll').innerText          = allPayments.length;
   if (el('pendingPayBadge')) el('pendingPayBadge').innerText = c.pending;
   if (el('dashPending'))     el('dashPending').innerText     = c.pending;
 
@@ -270,9 +405,7 @@ function renderPayments() {
   const chipLabel = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
 
   list.innerHTML = filtered.map(p => {
-    const date = p.submittedAt?.toDate?.()
-      ? p.submittedAt.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
-      : '—';
+    const date = fmtShort(p.submittedAt);
     const showActions = p.status === 'pending';
     const safeName = (p.username||'').replace(/'/g,'');
 
@@ -285,7 +418,7 @@ function renderPayments() {
         </div>
         <div class="pay-item-mid">
           <div class="pay-user">
-            <div class="avatar">${(p.username||'U')[0].toUpperCase()}</div>
+            <div class="avatar">${initials(p.username)}</div>
             <div>
               <b>${p.username || 'Unknown'}</b>
               <small>${p.email || ''}</small>
@@ -340,12 +473,12 @@ window.loadRegistrations = async function() {
     allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
 
-    if (document.getElementById('dashRegs'))
-      document.getElementById('dashRegs').innerText = allRegs.length;
-    if (document.getElementById('regsBadge'))
-      document.getElementById('regsBadge').innerText = allRegs.length;
+    const el = id => document.getElementById(id);
+    if (el('dashRegs')) el('dashRegs').innerText = allRegs.length;
+    if (el('regsBadge')) el('regsBadge').innerText = allRegs.length;
 
     renderRegistrations();
+    renderDashboardRecent();
   } catch (err) {
     console.error('loadRegistrations error:', err);
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
@@ -371,11 +504,10 @@ function renderRegistrations() {
   }
 
   list.innerHTML = filtered.map(r => {
-    const date = r.registeredAt?.toDate?.()
-      ? r.registeredAt.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
-      : '—';
+    const date = fmtDate(r.registeredAt);
     const isPaid = r.entryType === 'paid';
     const safeName = (r.username||'').replace(/'/g,'');
+    const isPending = r.status === 'pending';
 
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
@@ -397,7 +529,7 @@ function renderRegistrations() {
               <img src="${r.screenshotUrl}" class="thumb" onclick="openShot('${r.screenshotUrl}')">
               <span class="method-tag">${(r.method||'').toUpperCase()}</span>
               <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
-              ${r.status === 'pending' ? `
+              ${isPending && r.paymentId ? `
                 <button class="btn-approve small" onclick="openReview('${r.paymentId}','${safeName}','approve')">✔ Approve</button>
                 <button class="btn-reject small"  onclick="openReview('${r.paymentId}','${safeName}','reject')">✘ Reject</button>
               ` : ''}
@@ -411,6 +543,205 @@ function renderRegistrations() {
       </div>
     `;
   }).join('');
+}
+
+// ================================================
+// USERS
+// ================================================
+window.loadUsers = async function() {
+  const list = document.getElementById('userList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading users...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+
+    const el = id => document.getElementById(id);
+    if (el('usersBadge')) el('usersBadge').innerText = allUsers.length;
+    if (el('dashUsers'))  el('dashUsers').innerText  = allUsers.length;
+
+    renderUsers();
+    renderDashboardRecent();
+  } catch (err) {
+    console.error('loadUsers error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+window.filterUsers = function() { renderUsers(); };
+
+function renderUsers() {
+  const list = document.getElementById('userList');
+  if (!list) return;
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+
+  let filtered = allUsers.filter(u => {
+    if (!q) return true;
+    const hay = `${u.username||''} ${u.email||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(u => `
+    <div class="reg-card free-reg">
+      <div class="reg-icon">${initials(u.username)}</div>
+      <div class="reg-main">
+        <div class="reg-line-1">
+          <b>${u.username || 'Unknown'}</b>
+        </div>
+        <div class="reg-line-2">
+          📧 ${u.email || '—'}
+          ${u.phone ? ' · 📱 ' + u.phone : ''}
+          ${u.role ? ' · 🎭 ' + u.role : ''}
+        </div>
+      </div>
+      <div class="reg-right">
+        <span class="type-chip free">Member</span>
+        <small>${fmtDate(u.createdAt)}</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ================================================
+// TOURNAMENTS (admin view)
+// ================================================
+window.loadTournamentsAdmin = async function() {
+  const list = document.getElementById('tournamentList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
+    allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (!allTournaments.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments in Firestore yet.</div>';
+      return;
+    }
+
+    list.innerHTML = allTournaments.map(t => {
+      const isPaid = (t.entry_type || t.entryType || 'free').toLowerCase() === 'paid';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${t.title || t.name || 'Untitled'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span>
+            </div>
+            <div class="reg-line-2">
+              ${t.date ? '📅 ' + t.date : ''}
+              ${t.time ? ' · 🕐 ' + t.time : ''}
+              ${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}
+              ${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}
+            </div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+            <small>${t.id.slice(0,8)}…</small>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('loadTournamentsAdmin error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+// ================================================
+// EARNINGS
+// ================================================
+window.loadEarnings = function() {
+  const approved = allPayments.filter(p => p.status === 'approved');
+  const pending  = allPayments.filter(p => p.status === 'pending');
+
+  const total    = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const avg = approved.length ? Math.round(total / approved.length) : 0;
+
+  const el = id => document.getElementById(id);
+  if (el('earnTotal'))    el('earnTotal').innerText = 'Rs. ' + total.toLocaleString();
+  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
+  if (el('earnPending'))  el('earnPending').innerText = 'Rs. ' + pendingAmt.toLocaleString();
+  if (el('earnAvg'))      el('earnAvg').innerText = 'Rs. ' + avg.toLocaleString();
+
+  // Breakdown by method
+  const methods = ['esewa','khalti','imepay','bank'];
+  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+  const breakdown = document.getElementById('earningsBreakdown');
+
+  if (breakdown) {
+    breakdown.innerHTML = methods.map(m => {
+      const count = approved.filter(p => p.method === m).length;
+      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">💰</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${labels[m]}</b></div>
+            <div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip paid">Rs. ${sum.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+};
+
+// ================================================
+// DASHBOARD RECENT LISTS
+// ================================================
+function renderDashboardRecent() {
+  const recentUsers = document.getElementById('dashRecentUsers');
+  if (recentUsers && allUsers.length) {
+    recentUsers.innerHTML = allUsers.slice(0,5).map(u => `
+      <div class="reg-card free-reg">
+        <div class="reg-icon">${initials(u.username)}</div>
+        <div class="reg-main">
+          <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
+          <div class="reg-line-2">${u.email || '—'}</div>
+        </div>
+        <div class="reg-right">
+          <small>${fmtDate(u.createdAt)}</small>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const recentRegs = document.getElementById('dashRecentRegs');
+  if (recentRegs && allRegs.length) {
+    recentRegs.innerHTML = allRegs.slice(0,5).map(r => {
+      const isPaid = r.entryType === 'paid';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${r.username || 'Unknown'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+            </div>
+            <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+            <small>${fmtShort(r.registeredAt)}</small>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 // ================================================
@@ -458,6 +789,7 @@ window.confirmReview = async function(e) {
     closeReview();
     window.showToast('✅ Payment ' + status);
     window.loadPayments();
+    if (typeof window.loadRegistrations === 'function') window.loadRegistrations();
   } catch (err) {
     console.error(err);
     window.showToast('❌ ' + err.message);
@@ -479,8 +811,15 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
-console.log("✅ Admin module loaded. window.loadPayments =", typeof window.loadPayments);
-window.loadPayments();
+// ================================================
+// INIT
+// ================================================
+(async function init() {
+  await window.loadPayments();
+  await window.loadRegistrations();
+  await window.loadUsers();
+  console.log("✅ Admin module loaded");
+})();
 </script>
 </body>
 </html>
