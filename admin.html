@@ -29,6 +29,7 @@
       <a href="#earnings" data-section="earnings" class="sidebar-link"><span>💵</span> Earnings</a>
       <a href="#payouts" data-section="payouts" class="sidebar-link"><span>📤</span> Payouts</a>
       <a href="#profitshare" data-section="profitshare" class="sidebar-link"><span>🤝</span> Profit Sharing</a>
+      <a href="#roomdetails" data-section="roomdetails" class="sidebar-link"><span>🔑</span> Room Details</a>
       <a href="#users" data-section="users" class="sidebar-link">
         <span>👥</span> Users
         <span class="badge" id="usersBadge">0</span>
@@ -41,27 +42,22 @@
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column;">
-    <!-- ============ TOP BAR WITH BELL ============ -->
+    <!-- TOP BAR WITH BELL -->
     <header style="display:flex; justify-content:space-between; align-items:center; padding:14px 32px; background:#0d1020; border-bottom:1px solid #2a2d4a;">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2 style="margin:0; font-size:18px; color:#fff;">Admin Panel</h2>
         <span style="font-size:12px; color:#6b7280;">v3.3</span>
       </div>
-
       <div style="display:flex; align-items:center; gap:16px;">
-        <!-- BELL ICON -->
         <div id="notifBell" onclick="toggleNotifPanel()" style="position:relative; cursor:pointer; padding:8px; border-radius:10px; transition:background .15s;">
           <span style="font-size:22px;">🔔</span>
           <span id="notifCount" style="position:absolute; top:-2px; right:-2px; background:#dc2626; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; display:none;">0</span>
         </div>
-
         <span style="color:#9ca3af; font-size:13px;">admin@nepplay.com</span>
-
         <button onclick="if(confirm('Logout?')) location.href='/logout';" style="padding:6px 14px; background:transparent; border:1px solid #2a2d4a; color:#fff; border-radius:8px; cursor:pointer; font-size:13px;">Exit</button>
       </div>
     </header>
 
-    <!-- NOTIFICATIONS DROPDOWN -->
     <div id="notifPanel" style="display:none; position:absolute; top:60px; right:32px; width:400px; max-height:520px; overflow-y:auto; background:#15172b; border:1px solid #2a2d4a; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.6); z-index:9999;">
       <div style="padding:16px 20px; border-bottom:1px solid #2a2d4a; display:flex; justify-content:space-between; align-items:center;">
         <b style="color:#fff;">🔔 Notifications</b>
@@ -72,14 +68,12 @@
       </div>
     </div>
 
-    <!-- ============ MAIN ============ -->
     <main class="admin-main" style="flex:1;">
 
     <!-- DASHBOARD -->
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
-
       <div class="stat-grid">
         <div class="stat-card"><small>REAL USERS</small><b id="dashUsers">0</b><span>Accounts created</span></div>
         <div class="stat-card"><small>REGISTRATIONS</small><b id="dashRegs">0</b><span>Tournament sign-ups</span></div>
@@ -90,10 +84,8 @@
         <div class="stat-card"><small>TODAY NET</small><b id="dashTodayNet">Rs. 0</b><span>Collected − Payouts</span></div>
         <div class="stat-card"><small>ALL-TIME NET</small><b id="dashAllNet">Rs. 0</b><span>Lifetime profit</span></div>
       </div>
-
       <h3 class="mt">👥 Recent Users</h3>
       <div class="list" id="dashRecentUsers"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
-
       <h3 class="mt">📋 Recent Registrations</h3>
       <div class="list" id="dashRecentRegs"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
@@ -228,6 +220,66 @@
       </div>
     </section>
 
+    <!-- ROOM DETAILS -->
+    <section id="section-roomdetails" class="admin-section" style="display:none">
+      <h2>🔑 Room Details</h2>
+      <p class="muted">Set room ID, password &amp; rules per tournament — visible to registered members</p>
+
+      <div style="margin: 20px 0;">
+        <select id="roomTournamentSelect" onchange="loadRoomDetailsForm()"
+                style="padding:12px 16px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;min-width:320px;">
+          <option value="">— Select tournament —</option>
+        </select>
+      </div>
+
+      <div id="roomDetailsForm" class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;display:none;">
+        <h3 id="roomTournamentName" style="color:#fff;margin:0 0 20px 0;"></h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">🔑 Room ID</label>
+            <input type="text" id="roomId" placeholder="e.g. 12345678"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">🔐 Room Password</label>
+            <input type="text" id="roomPassword" placeholder="e.g. nepplay123"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">📋 Format</label>
+            <input type="text" id="roomFormat" placeholder="e.g. Squad · Battle Royale"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">🔢 Rounds</label>
+            <input type="text" id="roomRounds" placeholder="e.g. 3 matches"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">⏰ Room Opens At</label>
+            <input type="text" id="roomOpenTime" placeholder="e.g. 12:45 PM"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">👁 Auto-Reveal Time</label>
+            <input type="datetime-local" id="roomRevealAt"
+                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;">
+            <p style="font-size:11px;color:#6b7280;margin:4px 0 0;">Members see room details after this time. Empty = always visible.</p>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">📜 Rules / Notes (optional)</label>
+          <textarea id="roomRules" rows="3" placeholder="e.g. No teaming. Screenshot required. Admin decision final."
+                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+        </div>
+
+        <button onclick="saveRoomDetails()" class="btn-submit-pay" style="margin-top:20px;">💾 Save Room Details</button>
+        <div id="roomSaveStatus" style="margin-top:14px;font-size:13px;color:#4ade80;display:none;"></div>
+      </div>
+    </section>
+
     <!-- USERS -->
     <section id="section-users" class="admin-section" style="display:none">
       <div class="section-head">
@@ -317,7 +369,8 @@
       payouts: 'loadPayouts',
       daily: 'loadDailyCollections',
       profitshare: 'loadProfitShare',
-      announcements: 'loadAnnouncements'
+      announcements: 'loadAnnouncements',
+      roomdetails: 'loadRoomDetailsForm'
     };
     var fn = loaders[name];
     if (fn && typeof window[fn] === 'function') {
@@ -368,11 +421,10 @@ let allPayouts = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
 let currentSearchTerm = '';
+let roomTournaments = [];
 
-// ================================================
-// NOTIFICATIONS (Bell Icon)
-// ================================================
-let notifications = []; // { id, type, title, message, time, read }
+// ============ NOTIFICATIONS ============
+let notifications = [];
 
 function addNotif(type, title, message) {
   notifications.unshift({
@@ -426,8 +478,6 @@ window.toggleNotifPanel = function() {
   if (!panel) return;
   const isHidden = panel.style.display === 'none';
   panel.style.display = isHidden ? 'block' : 'none';
-
-  // Mark all as read when opened
   if (isHidden) {
     setTimeout(() => {
       notifications.forEach(n => n.read = true);
@@ -442,7 +492,6 @@ window.clearAllNotifs = function() {
   renderNotifPanel();
 };
 
-// Close panel when clicking outside
 document.addEventListener('click', function(e) {
   const panel = document.getElementById('notifPanel');
   const bell = document.getElementById('notifBell');
@@ -452,11 +501,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ================================================
-// REAL-TIME LISTENERS FOR NOTIFICATIONS
-// ================================================
 function attachRealtimeListeners() {
-  // Users
   let initialUsers = true;
   onSnapshot(collection(db, 'users'), snap => {
     if (initialUsers) { initialUsers = false; return; }
@@ -469,7 +514,6 @@ function attachRealtimeListeners() {
     });
   });
 
-  // Registrations
   let initialRegs = true;
   onSnapshot(collection(db, 'tournament_registrations'), snap => {
     if (initialRegs) { initialRegs = false; return; }
@@ -483,7 +527,6 @@ function attachRealtimeListeners() {
     });
   });
 
-  // Payments
   let initialPays = true;
   onSnapshot(collection(db, 'tournament_payments'), snap => {
     if (initialPays) { initialPays = false; return; }
@@ -931,7 +974,7 @@ window.addPayout = async function() {
   const winnerName = prompt('Winner name (username):'); if (!winnerName) return;
   const tournamentTitle = prompt('Tournament title:'); if (!tournamentTitle) return;
   const amount = Number(prompt('Amount (Rs.):', '500')); if (!amount || amount <= 0) return;
-  const rank = prompt('Rank (#1, #2, #3):', '1');
+  const rank = prompt('Rank (#1, #2, #3, Top Killer):', '1');
   const method = prompt('Payout method (esewa/khalti/imepay/bank/cash):', 'esewa');
   const note = prompt('Note (optional):', '');
   try {
@@ -980,6 +1023,94 @@ window.calculateShares = function() {
       <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name2}</b></div><div class="reg-line-2">${share2}% of net profit</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${amt2.toLocaleString()}</span></div></div>
     </div>
   `;
+};
+
+// ============ ROOM DETAILS ============
+window.loadRoomDetailsForm = async function() {
+  const select = document.getElementById('roomTournamentSelect');
+
+  // Populate dropdown on first load
+  if (!roomTournaments.length) {
+    try {
+      const snap = await getDocs(collection(db, 'tournaments'));
+      roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      select.innerHTML = '<option value="">— Select tournament —</option>' +
+        roomTournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
+    } catch (err) {
+      console.warn('loadRoomTournaments failed:', err);
+      return;
+    }
+  }
+
+  const tid = select.value;
+  const form = document.getElementById('roomDetailsForm');
+
+  if (!tid) {
+    form.style.display = 'none';
+    return;
+  }
+
+  const t = roomTournaments.find(x => x.id === tid);
+  if (!t) return;
+
+  form.style.display = 'block';
+  document.getElementById('roomTournamentName').textContent = t.title || 'Tournament';
+
+  document.getElementById('roomId').value         = t.roomId || '';
+  document.getElementById('roomPassword').value   = t.roomPassword || '';
+  document.getElementById('roomFormat').value     = t.roomFormat || '';
+  document.getElementById('roomRounds').value     = t.roomRounds || '';
+  document.getElementById('roomOpenTime').value   = t.roomOpenTime || '';
+  document.getElementById('roomRules').value      = t.roomRules || '';
+
+  if (t.roomRevealAt) {
+    const d = new Date(t.roomRevealAt);
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('roomRevealAt').value =
+      `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } else {
+    document.getElementById('roomRevealAt').value = '';
+  }
+
+  document.getElementById('roomSaveStatus').style.display = 'none';
+};
+
+window.saveRoomDetails = async function() {
+  const select = document.getElementById('roomTournamentSelect');
+  const tid = select.value;
+  if (!tid) { alert('Select a tournament first'); return; }
+
+  const roomId       = document.getElementById('roomId').value.trim();
+  const roomPassword = document.getElementById('roomPassword').value.trim();
+  const roomFormat   = document.getElementById('roomFormat').value.trim();
+  const roomRounds   = document.getElementById('roomRounds').value.trim();
+  const roomOpenTime = document.getElementById('roomOpenTime').value.trim();
+  const roomRules    = document.getElementById('roomRules').value.trim();
+  const revealRaw    = document.getElementById('roomRevealAt').value;
+
+  let roomRevealAt = null;
+  if (revealRaw) roomRevealAt = new Date(revealRaw).toISOString();
+
+  try {
+    await updateDoc(doc(db, 'tournaments', tid), {
+      roomId, roomPassword, roomFormat, roomRounds,
+      roomOpenTime, roomRules, roomRevealAt,
+      roomUpdatedAt: serverTimestamp()
+    });
+
+    const t = roomTournaments.find(x => x.id === tid);
+    if (t) Object.assign(t, { roomId, roomPassword, roomFormat, roomRounds, roomOpenTime, roomRules, roomRevealAt });
+
+    const status = document.getElementById('roomSaveStatus');
+    status.style.display = 'block';
+    status.textContent = '✅ Room details saved — members will see them after reveal time';
+    setTimeout(() => status.style.display = 'none', 3000);
+
+    window.showToast('✅ Room details saved');
+  } catch (err) {
+    console.error('Save room details failed:', err);
+    window.showToast('❌ ' + err.message);
+  }
 };
 
 // ============ USERS ============
@@ -1035,6 +1166,7 @@ window.loadTournamentsAdmin = async function() {
       const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
       const feeValue = Number(t.entryFee || t.entry_fee || 0);
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
+      const hasRoom = t.roomId && t.roomPassword;
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
@@ -1044,7 +1176,10 @@ window.loadTournamentsAdmin = async function() {
               ${t.date ? '📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}
             </div>
           </div>
-          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span></div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+            ${hasRoom ? '<small style="color:#4ade80;">🔑 Room set</small>' : '<small style="color:#6b7280;">No room</small>'}
+          </div>
         </div>
       `;
     }).join('');
@@ -1086,7 +1221,7 @@ window.postAnnouncement = async function(e) {
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
-// ============ DASHBOARD RECENT + STATS ============
+// ============ DASHBOARD RECENT ============
 function renderDashboardRecent() {
   const t = todayKey();
   const todayPayments = allPayments.filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t);
@@ -1191,11 +1326,8 @@ window.showToast = function(msg) {
     allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) { console.warn('payouts load failed:', e); }
   renderDashboardRecent();
-
-  // Attach real-time notification listeners
   attachRealtimeListeners();
-
-  console.log("✅ Admin loaded + notification bell active");
+  console.log("✅ Admin loaded with room details");
 })();
 </script>
 </body>
