@@ -26,6 +26,13 @@
   <p>Join Free &amp; Paid Tournaments. Real Prizes.</p>
 </section>
 
+<!-- MY TOURNAMENTS (only shows if logged in + has registrations) -->
+<section id="myTournamentsSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px;">
+  <h2 style="margin-top:20px;">🎯 My Tournaments</h2>
+  <p class="muted" style="margin-bottom:16px;">Tournaments you've joined</p>
+  <div class="list" id="myTournamentsList"></div>
+</section>
+
 <div class="filters">
   <button class="active">All Games</button>
   <button>Free Fire</button>
@@ -54,19 +61,13 @@
     <button class="modal-close" onclick="closeJoinModal()">✕</button>
     <h2>🎮 Join Tournament</h2>
     <p class="modal-sub"><b id="joinTournamentTitle">Free Fire Solo Cup</b></p>
-
     <form id="joinForm" onsubmit="submitJoin(event)">
       <input type="hidden" id="joinTournamentId">
-
       <label>🎮 Your IGN (In-Game Name) *</label>
       <input type="text" id="joinIgn" placeholder="e.g. Amit" required>
-
       <label>📱 Phone Number *</label>
       <input type="text" id="joinPhone" placeholder="e.g. 9800000000" required>
-
-      <button type="submit" class="btn-submit-pay" id="joinSubmitBtn">
-        ✅ Join Tournament
-      </button>
+      <button type="submit" class="btn-submit-pay" id="joinSubmitBtn">✅ Join Tournament</button>
       <p class="hint center">Free entry — no payment needed</p>
     </form>
   </div>
@@ -76,7 +77,6 @@
 <div id="paymentModal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closePaymentModal()">✕</button>
-
     <h2>💳 Complete Payment</h2>
     <p class="modal-sub">
       <b id="mTournamentTitle">Free Fire Paid Championship</b><br>
@@ -84,14 +84,12 @@
       🏆 Prize: <b>Rs. <span id="mPrize">1500</span></b> |
       🎯 Top Kills: <b>Rs. <span id="mKills">500</span></b>
     </p>
-
     <div class="pay-tabs pay-tabs-4">
       <button class="pay-tab active" data-method="esewa"  onclick="switchPay('esewa')">💚 eSewa</button>
       <button class="pay-tab"        data-method="khalti" onclick="switchPay('khalti')">💜 Khalti</button>
       <button class="pay-tab"        data-method="imepay" onclick="switchPay('imepay')">🟠 IME Pay</button>
       <button class="pay-tab"        data-method="bank"   onclick="switchPay('bank')">🏦 Bank</button>
     </div>
-
     <div id="esewaPanel" class="pay-panel">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -100,7 +98,6 @@
         <p class="hint">Scan QR or send to the number above</p>
       </div>
     </div>
-
     <div id="khaltiPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -109,7 +106,6 @@
         <p class="hint">Scan QR or send to the number above</p>
       </div>
     </div>
-
     <div id="imepayPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
@@ -118,7 +114,6 @@
         <p class="hint warn">⚠ IME Pay uses number only (no QR)</p>
       </div>
     </div>
-
     <div id="bankPanel" class="pay-panel" style="display:none">
       <div class="pay-info">
         <p>🏦 <b>Bank Transfer</b></p>
@@ -130,20 +125,15 @@
         </div>
       </div>
     </div>
-
     <form id="payForm" onsubmit="submitPayment(event)">
       <input type="hidden" id="payTournamentId">
       <input type="hidden" id="payMethod" value="esewa">
-
       <label>🔖 Transaction ID *</label>
       <input type="text" id="payTxn" placeholder="e.g. 8X72H91K" required>
-
       <label>🎮 Your IGN (In-Game Name) *</label>
       <input type="text" id="payIgn" placeholder="e.g. Amit" required>
-
       <label>📱 Phone Number *</label>
       <input type="text" id="payPhone" placeholder="e.g. 9800000000" required>
-
       <label>📸 Payment Screenshot *</label>
       <div class="upload-zone" onclick="document.getElementById('payShot').click()">
         <input type="file" id="payShot" accept="image/*" hidden required onchange="previewShot(this)">
@@ -154,10 +144,7 @@
         </div>
         <img id="shotPreview" style="display:none">
       </div>
-
-      <button type="submit" class="btn-submit-pay" id="paySubmitBtn">
-        ✅ Submit for Admin Approval
-      </button>
+      <button type="submit" class="btn-submit-pay" id="paySubmitBtn">✅ Submit for Admin Approval</button>
       <p class="hint center">Admin will verify within 24 hours</p>
     </form>
   </div>
@@ -190,7 +177,6 @@ const storage = getStorage(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
-// ---- Get logged-in user ----
 let currentUser = null;
 let currentUid  = null;
 
@@ -212,10 +198,8 @@ try {
 }
 
 // ================================================
-// AUTO-SEED PAID TOURNAMENTS
+// AUTO-SEED — 8 PAID TOURNAMENTS (one per game)
 // ================================================
-// If Firestore has no paid tournaments, create 2 seeds automatically.
-// This means the user never has to touch Firebase console.
 async function seedPaidTournamentsIfNeeded() {
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
@@ -228,52 +212,48 @@ async function seedPaidTournamentsIfNeeded() {
     });
 
     if (hasPaid) {
-      console.log("✅ Paid tournaments already exist in Firestore");
+      console.log("✅ Paid tournaments exist");
       return;
     }
 
-    console.log("🌱 No paid tournaments found — seeding 2 sample paid tournaments");
+    console.log("🌱 Seeding 8 paid tournaments — one per game");
 
-    // Seed #1 — Free Fire Paid
-    await setDoc(doc(db, 'tournaments', 'ff_paid_seed_001'), {
-      title: 'Free Fire Paid Championship',
-      game: 'Free Fire',
-      mode: 'Squad',
-      entryType: 'paid',
-      entryFee: 150,
-      prizePool: 1500,
-      topKillsPrize: 500,
-      date: '2026-09-25',
-      time: '18:00',
-      filled: 0,
-      max: 100,
-      createdAt: serverTimestamp()
-    });
+    const SEEDS = [
+      { id:'seed_paid_ff',      title:'Free Fire Paid Championship',  game:'Free Fire',  mode:'Squad', date:'2026-09-25', time:'18:00' },
+      { id:'seed_paid_pubg',    title:'PUBG Paid Pro Cup',            game:'PUBG',       mode:'Squad', date:'2026-09-25', time:'19:00' },
+      { id:'seed_paid_cod',     title:'COD Mobile Paid Cup',          game:'COD',        mode:'Squad', date:'2026-09-26', time:'18:00' },
+      { id:'seed_paid_efoot',   title:'eFootball Paid 1v1 Cup',       game:'eFootball',  mode:'1v1',   date:'2026-09-26', time:'19:00' },
+      { id:'seed_paid_ecricket',title:'eCricket Paid Cup',            game:'eCricket',   mode:'1v1',   date:'2026-09-27', time:'18:00' },
+      { id:'seed_paid_valorant',title:'Valorant Paid Cup',            game:'Valorant',   mode:'5v5',   date:'2026-09-27', time:'19:00' },
+      { id:'seed_paid_ludo',    title:'Ludo King Paid Championship',  game:'Ludo',       mode:'1v1',   date:'2026-09-28', time:'18:00' },
+      { id:'seed_paid_chess',   title:'Chess Paid Championship',      game:'Chess',      mode:'1v1',   date:'2026-09-28', time:'19:00' }
+    ];
 
-    // Seed #2 — PUBG Paid
-    await setDoc(doc(db, 'tournaments', 'pubg_paid_seed_001'), {
-      title: 'PUBG Paid Pro Cup',
-      game: 'PUBG',
-      mode: 'Squad',
-      entryType: 'paid',
-      entryFee: 150,
-      prizePool: 1500,
-      topKillsPrize: 500,
-      date: '2026-09-28',
-      time: '19:00',
-      filled: 0,
-      max: 100,
-      createdAt: serverTimestamp()
-    });
+    for (const s of SEEDS) {
+      await setDoc(doc(db, 'tournaments', s.id), {
+        title: s.title,
+        game: s.game,
+        mode: s.mode,
+        entryType: 'paid',
+        entryFee: 150,
+        prizePool: 1500,
+        topKillsPrize: 500,
+        date: s.date,
+        time: s.time,
+        filled: 0,
+        max: 100,
+        createdAt: serverTimestamp()
+      });
+    }
 
-    console.log("✅ Seeded 2 paid tournaments");
+    console.log("✅ Seeded 8 paid tournaments");
   } catch (err) {
-    console.warn("⚠️ Seed failed (probably rules):", err.message);
+    console.warn("⚠️ Seed failed:", err.message);
   }
 }
 
 // ================================================
-// TOURNAMENTS
+// LOAD TOURNAMENTS
 // ================================================
 let TOURNAMENTS = [];
 
@@ -282,10 +262,8 @@ async function loadTournaments() {
   grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
 
   try {
-    // First — auto-seed if needed
     await seedPaidTournamentsIfNeeded();
 
-    // Then load all
     const snap = await getDocs(collection(db, 'tournaments'));
     TOURNAMENTS = snap.docs.map(d => {
       const t = d.data();
@@ -302,6 +280,7 @@ async function loadTournaments() {
       else if (g.includes('valorant')) color = 'blue';
       else if (g.includes('football') || g.includes('efootball')) color = 'green';
       else if (g.includes('chess')) color = 'blue';
+      else if (g.includes('cricket')) color = 'orange';
 
       return {
         id: d.id,
@@ -321,18 +300,67 @@ async function loadTournaments() {
     });
 
     if (!TOURNAMENTS.length) {
-      grid.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No tournaments yet. Check back soon!</div>';
+      grid.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No tournaments yet.</div>';
       return;
     }
 
     console.log("✅ Loaded", TOURNAMENTS.length, "tournaments");
     renderTournaments();
+    loadMyTournaments();
   } catch (err) {
     console.error('loadTournaments error:', err);
     grid.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
 }
 
+// ================================================
+// MY TOURNAMENTS
+// ================================================
+async function loadMyTournaments() {
+  if (!currentUser || !currentUid) return;
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('userId', '==', currentUid)
+    ));
+    const myRegs = snap.docs.map(d => d.data());
+    if (!myRegs.length) return;
+
+    const section = document.getElementById('myTournamentsSection');
+    const list = document.getElementById('myTournamentsList');
+    section.style.display = 'block';
+
+    list.innerHTML = myRegs.map(r => {
+      const isPaid = r.entryType === 'paid';
+      const statusClass = r.status === 'confirmed' ? 'confirmed' : (r.status === 'pending' ? 'pending' : 'rejected');
+      const statusLabel = r.status ? r.status.toUpperCase() : 'CONFIRMED';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${r.tournamentTitle || 'Tournament'}</b>
+            </div>
+            <div class="reg-line-2">
+              ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
+              ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · Rs. ' + (r.amount||0) : 'Free Entry'}
+            </div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+            <span class="status-pill ${statusClass}">${statusLabel}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.warn('loadMyTournaments error:', err);
+  }
+}
+
+// ================================================
+// RENDER
+// ================================================
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
   grid.innerHTML = TOURNAMENTS.map(t => {
@@ -344,15 +372,12 @@ function renderTournaments() {
       <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}">
         ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>'
                  : '<span class="free-ribbon">🆓 FREE</span>'}
-
         <div class="card-banner ${t.color}">
           <span class="game-tag">🕹 ${t.game}</span>
           <span class="mode-tag">${t.mode}</span>
         </div>
-
         <div class="card-body">
           <h3>${t.title}</h3>
-
           <div class="card-meta">
             <div>
               <small>Entry Fee</small>
@@ -365,7 +390,6 @@ function renderTournaments() {
               <b class="prize">Rs. ${t.prize_pool}</b>
             </div>
           </div>
-
           ${isPaid && t.top_kills_prize ? `
             <div class="card-meta extra">
               <div>
@@ -373,15 +397,12 @@ function renderTournaments() {
                 <b class="kill-prize">Rs. ${t.top_kills_prize}</b>
               </div>
             </div>` : ''}
-
           <div class="card-footer">
             <span>📅 ${t.date}</span>
             <span>🕐 ${t.time}</span>
           </div>
-
           <div class="slots">Slots Filled <span>${t.filled}/${t.max}</span></div>
           <div class="progress"><div style="width:${pct}%"></div></div>
-
           ${isPaid
             ? `<button class="btn-join paid-btn"
                  onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">
@@ -399,7 +420,7 @@ function renderTournaments() {
 loadTournaments();
 
 // ================================================
-// TAB FILTER
+// FILTERS & MODALS
 // ================================================
 window.filterTournamentType = function(type) {
   const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
@@ -408,7 +429,6 @@ window.filterTournamentType = function(type) {
     if (k === type) el.classList.add('active');
     else el.classList.remove('active');
   });
-
   document.querySelectorAll('.tournament-card').forEach(card => {
     const isPaid = card.dataset.type === 'paid';
     const show = type === 'all' ? true : (type === 'paid' ? isPaid : !isPaid);
@@ -416,16 +436,12 @@ window.filterTournamentType = function(type) {
   });
 };
 
-// ================================================
-// JOIN MODAL (FREE)
-// ================================================
 window.openJoinModal = function(tid, title) {
   document.getElementById('joinTournamentId').value = tid;
   document.getElementById('joinTournamentTitle').innerText = title;
   document.getElementById('joinForm').reset();
   document.getElementById('joinModal').classList.add('active');
 };
-
 window.closeJoinModal = function() {
   document.getElementById('joinModal').classList.remove('active');
 };
@@ -435,15 +451,12 @@ window.submitJoin = async function(e) {
   const btn = document.getElementById('joinSubmitBtn');
   btn.disabled = true;
   btn.innerText = '⏳ Joining...';
-
   try {
     if (!currentUser) throw new Error('Please login first');
-
     const tid   = document.getElementById('joinTournamentId').value;
     const title = document.getElementById('joinTournamentTitle').innerText;
     const ign   = document.getElementById('joinIgn').value.trim();
     const phone = document.getElementById('joinPhone').value.trim();
-
     if (!ign)   throw new Error('IGN required');
     if (!phone) throw new Error('Phone required');
 
@@ -452,10 +465,9 @@ window.submitJoin = async function(e) {
       where('tournamentId', '==', tid),
       where('userId', '==', currentUid)
     ));
-    if (!dupSnap.empty) throw new Error('You already registered for this tournament');
+    if (!dupSnap.empty) throw new Error('You already registered');
 
     const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
-
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid,
       tournamentTitle: title,
@@ -472,8 +484,8 @@ window.submitJoin = async function(e) {
 
     window.closeJoinModal();
     window.showToast('✅ Joined ' + title + '!');
+    loadMyTournaments();
   } catch (err) {
-    console.error(err);
     window.showToast('❌ ' + err.message);
   } finally {
     btn.disabled = false;
@@ -481,9 +493,6 @@ window.submitJoin = async function(e) {
   }
 };
 
-// ================================================
-// PAYMENT MODAL (PAID)
-// ================================================
 window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.getElementById('payTournamentId').value = tid;
   document.getElementById('mTournamentTitle').innerText = title;
@@ -493,25 +502,21 @@ window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.querySelectorAll('.payAmt').forEach(el => el.innerText = fee);
   document.getElementById('paymentModal').classList.add('active');
 };
-
 window.closePaymentModal = function() {
   document.getElementById('paymentModal').classList.remove('active');
   document.getElementById('payForm').reset();
   document.getElementById('shotPreview').style.display = 'none';
   document.getElementById('uploadPrompt').style.display = 'block';
 };
-
 window.switchPay = function(method) {
   document.getElementById('payMethod').value = method;
   document.querySelectorAll('.pay-tab').forEach(t =>
     t.classList.toggle('active', t.dataset.method === method));
-
   document.getElementById('esewaPanel').style.display  = method === 'esewa'  ? 'block' : 'none';
   document.getElementById('khaltiPanel').style.display = method === 'khalti' ? 'block' : 'none';
   document.getElementById('imepayPanel').style.display = method === 'imepay' ? 'block' : 'none';
   document.getElementById('bankPanel').style.display   = method === 'bank'   ? 'block' : 'none';
 };
-
 window.previewShot = function(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
@@ -530,10 +535,8 @@ window.submitPayment = async function(e) {
   const btn = document.getElementById('paySubmitBtn');
   btn.disabled = true;
   btn.innerText = '⏳ Uploading...';
-
   try {
     if (!currentUser) throw new Error('Please login first');
-
     const tid    = document.getElementById('payTournamentId').value;
     const title  = document.getElementById('mTournamentTitle').innerText;
     const method = document.getElementById('payMethod').value;
@@ -542,7 +545,6 @@ window.submitPayment = async function(e) {
     const phone  = document.getElementById('payPhone').value.trim();
     const amount = Number(document.getElementById('mFee').innerText);
     const file   = document.getElementById('payShot').files[0];
-
     if (!file)             throw new Error('Screenshot required');
     if (txn.length < 4)    throw new Error('Transaction ID too short');
     if (!ign)              throw new Error('IGN required');
@@ -562,7 +564,6 @@ window.submitPayment = async function(e) {
     const url = await getDownloadURL(sRef);
 
     const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
-
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
       tournamentId: tid,
       tournamentTitle: title,
@@ -596,8 +597,8 @@ window.submitPayment = async function(e) {
 
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
+    loadMyTournaments();
   } catch (err) {
-    console.error(err);
     window.showToast('❌ ' + err.message);
   } finally {
     btn.disabled = false;
