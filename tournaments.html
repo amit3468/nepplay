@@ -153,27 +153,48 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ FIREBASE LOGIC ============ -->
+<!-- ============ FIREBASE + LOGIC ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { app } from "./firebase-config.js";
+// ---- Firebase config (inline — no external file needed) ----
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+    measurementId: "G-3PXN38XFG9"
+};
 
+const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
-const auth    = getAuth(app);
 
+console.log("🔥 Firebase ready on tournaments page");
+
+// ---- Get logged-in user info from the Node.js session ----
 let currentUser = null;
-onAuthStateChanged(auth, u => { currentUser = u; });
+try {
+  const res = await fetch("/api/users/me", { credentials: "include" });
+  if (res.ok) {
+    const data = await res.json();
+    if (data.success && data.user) {
+      currentUser = data.user;
+      console.log("👤 Logged in as:", currentUser.username || currentUser.email);
+    }
+  }
+} catch (e) {
+  console.warn("Could not fetch /api/users/me:", e);
+}
 
 // ================================================
-// TOURNAMENTS
+// TOURNAMENTS DATA
 // ================================================
 const TOURNAMENTS = [
   { id:'cod_free_001',  title:'COD Mobile Solo Cup',         game:'COD',       mode:'Solo',
@@ -267,11 +288,8 @@ window.filterTournamentType = function(type) {
   const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
   Object.keys(tabs).forEach(k => {
     const el = document.getElementById(tabs[k]);
-    if (k === type) {
-      el.classList.add('active');
-    } else {
-      el.classList.remove('active');
-    }
+    if (k === type) el.classList.add('active');
+    else el.classList.remove('active');
   });
 
   document.querySelectorAll('.tournament-card').forEach(card => {
@@ -352,29 +370,30 @@ window.submitPayment = async function(e) {
     if (!phone)            throw new Error('Phone required');
     if (file.size > 5*1024*1024) throw new Error('Max 5MB');
 
+    const uid = currentUser.id || currentUser.uid || currentUser.username;
+
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
-      where('userId', '==', currentUser.uid)
+      where('userId', '==', uid)
     ));
     if (!dupSnap.empty) throw new Error('You already registered');
 
-    const path = `payment-screenshots/${currentUser.uid}/${Date.now()}_${file.name}`;
+    const path = `payment-screenshots/${uid}/${Date.now()}_${file.name}`;
     const sRef = ref(storage, path);
     await uploadBytes(sRef, file);
     const url = await getDownloadURL(sRef);
 
-    const username = currentUser.displayName || currentUser.email.split('@')[0];
+    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
 
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
       tournamentId: tid,
       tournamentTitle: title,
-      userId: currentUser.uid,
+      userId: uid,
       username,
       email: currentUser.email,
       ign, phone,
-      method,
-      amount,
+      method, amount,
       txnId: txn,
       screenshotUrl: url,
       status: 'pending',
@@ -386,15 +405,13 @@ window.submitPayment = async function(e) {
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid,
       tournamentTitle: title,
-      userId: currentUser.uid,
+      userId: uid,
       username,
       email: currentUser.email,
       ign, phone,
       paymentId: payRef.id,
       entryType: 'paid',
-      method,
-      txnId: txn,
-      amount,
+      method, txnId: txn, amount,
       screenshotUrl: url,
       status: 'pending',
       registeredAt: serverTimestamp()
@@ -418,19 +435,21 @@ window.joinFree = async function(tid, title) {
   try {
     if (!currentUser) throw new Error('Please login first');
 
+    const uid = currentUser.id || currentUser.uid || currentUser.username;
+
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
-      where('userId', '==', currentUser.uid)
+      where('userId', '==', uid)
     ));
     if (!dupSnap.empty) throw new Error('Already registered');
 
-    const username = currentUser.displayName || currentUser.email.split('@')[0];
+    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
 
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid,
       tournamentTitle: title,
-      userId: currentUser.uid,
+      userId: uid,
       username,
       email: currentUser.email,
       paymentId: null,
@@ -442,6 +461,7 @@ window.joinFree = async function(tid, title) {
 
     window.showToast('✅ Joined free tournament!');
   } catch (err) {
+    console.error(err);
     window.showToast('❌ ' + err.message);
   }
 };
