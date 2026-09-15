@@ -147,4 +147,807 @@
           </div>
         </div>
 
-        <button onclick="calculatePrize()" class="btn-sub
+        <button onclick="calculatePrize()" class="btn-submit-pay" style="margin-top:20px;">
+          🧮 Calculate
+        </button>
+
+        <div id="calcResult" style="margin-top:20px;display:none;"></div>
+      </div>
+    </section>
+
+    <!-- ==================== EARNINGS ==================== -->
+    <section id="section-earnings" class="admin-section" style="display:none">
+      <h2>💵 Earnings</h2>
+      <p class="muted">Revenue from paid tournaments</p>
+
+      <div class="stat-grid">
+        <div class="stat-card"><small>TOTAL REVENUE</small><b id="earnTotal">Rs. 0</b><span>From approved payments</span></div>
+        <div class="stat-card"><small>APPROVED</small><b id="earnApproved">0</b><span>Successful transactions</span></div>
+        <div class="stat-card"><small>PENDING AMOUNT</small><b id="earnPending">Rs. 0</b><span>Awaiting review</span></div>
+        <div class="stat-card"><small>AVG ENTRY</small><b id="earnAvg">Rs. 0</b><span>Per approved</span></div>
+      </div>
+
+      <h3 class="mt">📊 Breakdown by Method</h3>
+      <div class="list" id="earningsBreakdown">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
+    </section>
+
+    <!-- ==================== PAYOUTS ==================== -->
+    <section id="section-payouts" class="admin-section" style="display:none">
+      <h2>📤 Payouts</h2>
+      <p class="muted">Winner payouts — mark as paid once transferred</p>
+      <div class="list" id="payoutList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading winners...</div>
+      </div>
+    </section>
+
+    <!-- ==================== USERS ==================== -->
+    <section id="section-users" class="admin-section" style="display:none">
+      <div class="section-head">
+        <h2>👥 Users</h2>
+        <input type="text" id="userSearch" placeholder="🔍 Search username or email..."
+               oninput="filterUsers()" class="search-input">
+      </div>
+      <div class="reg-list" id="userList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading users...</div>
+      </div>
+    </section>
+
+    <!-- ==================== SUPPORT ==================== -->
+    <section id="section-support" class="admin-section" style="display:none">
+      <h2>🎧 Support</h2>
+      <p class="muted">Member support tickets</p>
+      <div class="reg-list" id="supportList">
+        <div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div>
+      </div>
+    </section>
+
+    <!-- ==================== TOURNAMENTS ==================== -->
+    <section id="section-tournaments" class="admin-section" style="display:none">
+      <div class="section-head">
+        <h2>🏆 Tournaments</h2>
+        <p class="muted">All tournaments on the platform</p>
+      </div>
+      <div class="reg-list" id="tournamentList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
+      </div>
+    </section>
+
+    <!-- ==================== ANNOUNCEMENTS ==================== -->
+    <section id="section-announcements" class="admin-section" style="display:none">
+      <h2>📢 Announcements</h2>
+      <p class="muted">Post updates for members</p>
+
+      <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;">
+        <form onsubmit="postAnnouncement(event)">
+          <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Title</label>
+          <input type="text" id="annTitle" placeholder="e.g. Grand Opening Update"
+                 style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;margin-bottom:14px;">
+
+          <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Message</label>
+          <textarea id="annMsg" rows="4" placeholder="Type your announcement..."
+                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;"></textarea>
+
+          <button type="submit" class="btn-submit-pay" style="margin-top:14px;">
+            📢 Post Announcement
+          </button>
+        </form>
+      </div>
+
+      <h3 class="mt">📜 Recent Announcements</h3>
+      <div class="list" id="announcementList">
+        <div class="empty-state"><span class="icon">📢</span>No announcements yet</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ REVIEW MODAL ============ -->
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal-box small">
+    <h3 id="reviewTitle">Approve Payment</h3>
+    <p id="reviewDesc" class="modal-sub">Confirm?</p>
+    <form onsubmit="confirmReview(event)">
+      <input type="hidden" id="reviewId">
+      <input type="hidden" id="reviewAction">
+      <label>Admin Note (optional)</label>
+      <textarea id="reviewNote" rows="3" placeholder="Reason for rejection or any comment..."
+                style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+      <div class="modal-actions">
+        <button type="button" onclick="closeReview()" class="btn-secondary">Cancel</button>
+        <button type="submit" id="reviewConfirmBtn" class="btn-primary">Confirm</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="shotModal" class="modal-overlay" onclick="this.style.display='none'">
+  <img id="shotFull" class="lightbox-img">
+</div>
+
+<!-- ============ SECTION SWITCHER ============ -->
+<script>
+(function() {
+  function showSection(name, el) {
+    document.querySelectorAll('.admin-section').forEach(function(s) { s.style.display = 'none'; });
+    var target = document.getElementById('section-' + name);
+    if (target) target.style.display = 'block';
+    document.querySelectorAll('.sidebar-link').forEach(function(a) { a.classList.remove('active'); });
+    if (el) el.classList.add('active');
+
+    var loaders = {
+      payments: 'loadPayments',
+      registrations: 'loadRegistrations',
+      users: 'loadUsers',
+      tournaments: 'loadTournamentsAdmin',
+      earnings: 'loadEarnings',
+      payouts: 'loadPayouts',
+      announcements: 'loadAnnouncements'
+    };
+    var fn = loaders[name];
+    if (fn && typeof window[fn] === 'function') {
+      try { window[fn](); } catch (e) { console.error(fn + ' error:', e); }
+    }
+  }
+  window.showSection = showSection;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var section = this.dataset.section;
+        if (section) showSection(section, this);
+      });
+    });
+  });
+})();
+</script>
+
+<!-- ============ LOGIC ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, doc, updateDoc, deleteDoc,
+  addDoc, query, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+    measurementId: "G-3PXN38XFG9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+console.log("🔥 Firebase ready on admin page");
+
+let allPayments = [];
+let allRegs     = [];
+let allUsers    = [];
+let allTournaments = [];
+let currentStatusFilter = 'pending';
+let currentMethodFilter = 'all';
+let currentSearchTerm   = '';
+
+// ============= HELPERS =============
+function fmtDate(ts) {
+  if (!ts?.toDate) return '—';
+  return ts.toDate().toLocaleString('en-GB', {
+    day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+}
+function fmtShort(ts) {
+  if (!ts?.toDate) return '—';
+  return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+function initials(name) { return (name || 'U')[0].toUpperCase(); }
+
+// ============= PAYMENTS =============
+window.loadPayments = async function() {
+  const list = document.getElementById('payList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading payments...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'tournament_payments'));
+    allPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allPayments.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+    updateCounts();
+    renderPayments();
+    renderDashboardRecent();
+  } catch (err) {
+    console.error('loadPayments error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+function updateCounts() {
+  const c = { pending:0, approved:0, rejected:0 };
+  allPayments.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
+
+  const el = id => document.getElementById(id);
+  if (el('cntPending'))      el('cntPending').innerText      = c.pending;
+  if (el('cntApproved'))     el('cntApproved').innerText     = c.approved;
+  if (el('cntRejected'))     el('cntRejected').innerText     = c.rejected;
+  if (el('cntAll'))          el('cntAll').innerText          = allPayments.length;
+  if (el('pendingPayBadge')) el('pendingPayBadge').innerText = c.pending;
+  if (el('dashPending'))     el('dashPending').innerText     = c.pending;
+
+  const total = allPayments.filter(p => p.status === 'approved')
+    .reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  if (el('dashPaid')) el('dashPaid').innerText = 'Rs. ' + total.toLocaleString();
+}
+
+function renderPayments() {
+  const list = document.getElementById('payList');
+  if (!list) return;
+
+  let filtered = allPayments.filter(p => {
+    if (currentStatusFilter !== 'all' && p.status !== currentStatusFilter) return false;
+    if (currentMethodFilter !== 'all' && p.method !== currentMethodFilter) return false;
+    if (currentSearchTerm) {
+      const q = currentSearchTerm.toLowerCase();
+      const hay = `${p.username||''} ${p.email||''} ${p.txnId||''} ${p.tournamentTitle||''} ${p.ign||''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">🎉</span>No ' + currentStatusFilter + ' payments here.</div>';
+    return;
+  }
+
+  const chipClass = { esewa:'chip-esewa', khalti:'chip-khalti', imepay:'chip-imepay', bank:'chip-bank' };
+  const chipLabel = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+
+  list.innerHTML = filtered.map(p => {
+    const date = fmtShort(p.submittedAt);
+    const showActions = p.status === 'pending';
+    const safeName = (p.username||'').replace(/'/g,'');
+
+    return `
+      <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
+        <div class="pay-item-left">
+          ${p.screenshotUrl
+            ? '<img src="' + p.screenshotUrl + '" class="pay-shot" onclick="openShot(\'' + p.screenshotUrl + '\')">'
+            : '<div class="pay-shot-empty">No image</div>'}
+        </div>
+        <div class="pay-item-mid">
+          <div class="pay-user">
+            <div class="avatar">${initials(p.username)}</div>
+            <div><b>${p.username || 'Unknown'}</b><small>${p.email || ''}</small></div>
+          </div>
+          <div class="pay-details">
+            <div class="detail-row"><span>🏆 Tournament</span><b>${p.tournamentTitle||'—'}</b></div>
+            <div class="detail-row"><span>🎮 IGN</span><b>${p.ign||'—'}</b></div>
+            <div class="detail-row"><span>📱 Phone</span><b>${p.phone||'—'}</b></div>
+            <div class="detail-row"><span>💳 Method</span><span class="chip ${chipClass[p.method]||''}">${chipLabel[p.method]||p.method}</span></div>
+            <div class="detail-row"><span>💰 Amount</span><b class="amount">Rs. ${p.amount||0}</b></div>
+            <div class="detail-row"><span>🔖 Txn ID</span><code class="txn-id">${p.txnId||'—'}</code></div>
+            <div class="detail-row"><span>🕐 Submitted</span><small>${date}</small></div>
+          </div>
+        </div>
+        <div class="pay-item-right">
+          <span class="status-pill ${p.status}">${p.status.toUpperCase()}</span>
+          ${showActions ? `
+            <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve')">✔ Approve</button>
+            <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject')">✘ Reject</button>
+          ` : ''}
+          ${p.screenshotUrl ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 Full Screenshot</a>' : ''}
+          ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.filterPayStatus = function(status, btn) {
+  currentStatusFilter = status;
+  document.querySelectorAll('.pay-status-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPayments();
+};
+window.filterPayMethod = function(method) { currentMethodFilter = method; renderPayments(); };
+window.filterPayments = function() {
+  currentSearchTerm = document.getElementById('paySearch').value;
+  renderPayments();
+};
+
+// ============= REGISTRATIONS with EDIT/DELETE/APPROVE =============
+window.loadRegistrations = async function() {
+  const list = document.getElementById('regList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading registrations...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'tournament_registrations'));
+    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
+
+    if (document.getElementById('dashRegs')) document.getElementById('dashRegs').innerText = allRegs.length;
+    if (document.getElementById('regsBadge')) document.getElementById('regsBadge').innerText = allRegs.length;
+
+    renderRegistrations();
+    renderDashboardRecent();
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+window.filterRegistrations = function() { renderRegistrations(); };
+
+function renderRegistrations() {
+  const list = document.getElementById('regList');
+  if (!list) return;
+  const q = (document.getElementById('regSearch').value || '').toLowerCase();
+
+  let filtered = allRegs.filter(r => {
+    if (!q) return true;
+    const hay = `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">📋</span>No registrations found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => {
+    const date = fmtDate(r.registeredAt);
+    const isPaid = r.entryType === 'paid';
+    const safeName = (r.username||'').replace(/'/g,'');
+    const isPending = r.status === 'pending';
+
+    return `
+      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+        <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+        <div class="reg-main">
+          <div class="reg-line-1">
+            <b>${r.username || 'Unknown'}</b>
+            <span class="reg-sep">—</span>
+            <span class="reg-tournament">${r.tournamentTitle || 'Unknown Tournament'}</span>
+          </div>
+          <div class="reg-line-2">
+            ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
+            ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
+            ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
+            ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
+          </div>
+          ${isPaid && r.screenshotUrl ? `
+            <div class="reg-payment-preview">
+              <img src="${r.screenshotUrl}" class="thumb" onclick="openShot('${r.screenshotUrl}')">
+              <span class="method-tag">${(r.method||'').toUpperCase()}</span>
+              <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
+            </div>
+          ` : ''}
+          <div class="reg-actions">
+            ${isPending && r.paymentId ? `
+              <button class="btn-approve small" onclick="openReview('${r.paymentId}','${safeName}','approve')">✔ Approve</button>
+              <button class="btn-reject small"  onclick="openReview('${r.paymentId}','${safeName}','reject')">✘ Reject</button>
+            ` : ''}
+            <button class="btn-edit small" onclick="editRegistration('${r.id}')">✏️ Edit</button>
+            <button class="btn-delete small" onclick="deleteRegistration('${r.id}','${safeName}')">🗑️ Delete</button>
+          </div>
+        </div>
+        <div class="reg-right">
+          <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+          <small>${date}</small>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.editRegistration = async function(id) {
+  const reg = allRegs.find(r => r.id === id);
+  if (!reg) return;
+
+  const newIgn = prompt('Edit IGN:', reg.ign || '');
+  if (newIgn === null) return;
+  const newPhone = prompt('Edit Phone:', reg.phone || '');
+  if (newPhone === null) return;
+  const newStatus = prompt('Status (confirmed / pending / rejected):', reg.status || 'confirmed');
+  if (newStatus === null) return;
+
+  try {
+    await updateDoc(doc(db, 'tournament_registrations', id), {
+      ign: newIgn.trim(),
+      phone: newPhone.trim(),
+      status: newStatus.trim()
+    });
+    window.showToast('✅ Registration updated');
+    window.loadRegistrations();
+  } catch (err) {
+    window.showToast('❌ ' + err.message);
+  }
+};
+
+window.deleteRegistration = async function(id, name) {
+  if (!confirm('Delete registration for ' + name + '?')) return;
+  try {
+    await deleteDoc(doc(db, 'tournament_registrations', id));
+    window.showToast('🗑️ Registration deleted');
+    window.loadRegistrations();
+  } catch (err) {
+    window.showToast('❌ ' + err.message);
+  }
+};
+
+// ============= USERS =============
+window.loadUsers = async function() {
+  const list = document.getElementById('userList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading users...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+
+    if (document.getElementById('usersBadge')) document.getElementById('usersBadge').innerText = allUsers.length;
+    if (document.getElementById('dashUsers'))  document.getElementById('dashUsers').innerText  = allUsers.length;
+
+    renderUsers();
+    renderDashboardRecent();
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+window.filterUsers = function() { renderUsers(); };
+
+function renderUsers() {
+  const list = document.getElementById('userList');
+  if (!list) return;
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  let filtered = allUsers.filter(u => {
+    if (!q) return true;
+    return `${u.username||''} ${u.email||''}`.toLowerCase().includes(q);
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(u => `
+    <div class="reg-card free-reg">
+      <div class="reg-icon">${initials(u.username)}</div>
+      <div class="reg-main">
+        <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
+        <div class="reg-line-2">
+          📧 ${u.email || '—'}
+          ${u.phone ? ' · 📱 ' + u.phone : ''}
+          ${u.role ? ' · 🎭 ' + u.role : ''}
+        </div>
+      </div>
+      <div class="reg-right">
+        <span class="type-chip free">Member</span>
+        <small>${fmtDate(u.createdAt)}</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============= TOURNAMENTS =============
+window.loadTournamentsAdmin = async function() {
+  const list = document.getElementById('tournamentList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
+
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
+    allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (!allTournaments.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments yet.</div>';
+      return;
+    }
+
+    list.innerHTML = allTournaments.map(t => {
+      const isPaid = (t.entry_type || t.entryType || 'free').toLowerCase() === 'paid';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${t.title || t.name || 'Untitled'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span>
+            </div>
+            <div class="reg-line-2">
+              ${t.date ? '📅 ' + t.date : ''}
+              ${t.time ? ' · 🕐 ' + t.time : ''}
+              ${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}
+              ${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}
+            </div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+// ============= EARNINGS =============
+window.loadEarnings = function() {
+  const approved = allPayments.filter(p => p.status === 'approved');
+  const pending  = allPayments.filter(p => p.status === 'pending');
+  const total    = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const avg = approved.length ? Math.round(total / approved.length) : 0;
+
+  const el = id => document.getElementById(id);
+  if (el('earnTotal'))    el('earnTotal').innerText    = 'Rs. ' + total.toLocaleString();
+  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
+  if (el('earnPending'))  el('earnPending').innerText  = 'Rs. ' + pendingAmt.toLocaleString();
+  if (el('earnAvg'))      el('earnAvg').innerText      = 'Rs. ' + avg.toLocaleString();
+
+  const methods = ['esewa','khalti','imepay','bank'];
+  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+  const breakdown = document.getElementById('earningsBreakdown');
+
+  if (breakdown) {
+    breakdown.innerHTML = methods.map(m => {
+      const count = approved.filter(p => p.method === m).length;
+      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">💰</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${labels[m]}</b></div>
+            <div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip paid">Rs. ${sum.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+};
+
+// ============= PRIZE CALCULATOR =============
+window.calculatePrize = function() {
+  const pool = Number(document.getElementById('calcPool').value) || 0;
+  const fee  = Number(document.getElementById('calcFee').value) || 0;
+  const players = Number(document.getElementById('calcPlayers').value) || 0;
+  const killsPrize = Number(document.getElementById('calcKills').value) || 0;
+
+  const collected = fee * players;
+  const netRevenue = collected - pool - killsPrize;
+
+  const first  = Math.round(pool * 0.50);
+  const second = Math.round(pool * 0.30);
+  const third  = Math.round(pool * 0.20);
+
+  const result = document.getElementById('calcResult');
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><small>COLLECTED</small><b>Rs. ${collected.toLocaleString()}</b><span>From ${players} players</span></div>
+      <div class="stat-card"><small>PRIZE POOL</small><b>Rs. ${pool.toLocaleString()}</b><span>To winners</span></div>
+      <div class="stat-card"><small>TOP KILLS</small><b>Rs. ${killsPrize.toLocaleString()}</b><span>To top killer</span></div>
+      <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">Rs. ${netRevenue.toLocaleString()}</b><span>Platform profit</span></div>
+    </div>
+
+    <h3 class="mt">🥇 Winner Breakdown</h3>
+    <div class="list">
+      <div class="reg-card free-reg">
+        <div class="reg-icon">🥇</div>
+        <div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div><div class="reg-line-2">50% of prize pool</div></div>
+        <div class="reg-right"><span class="type-chip paid">Rs. ${first.toLocaleString()}</span></div>
+      </div>
+      <div class="reg-card free-reg">
+        <div class="reg-icon">🥈</div>
+        <div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div><div class="reg-line-2">30% of prize pool</div></div>
+        <div class="reg-right"><span class="type-chip paid">Rs. ${second.toLocaleString()}</span></div>
+      </div>
+      <div class="reg-card free-reg">
+        <div class="reg-icon">🥉</div>
+        <div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div><div class="reg-line-2">20% of prize pool</div></div>
+        <div class="reg-right"><span class="type-chip paid">Rs. ${third.toLocaleString()}</span></div>
+      </div>
+    </div>
+  `;
+};
+
+// ============= PAYOUTS =============
+window.loadPayouts = function() {
+  const list = document.getElementById('payoutList');
+  if (!list) return;
+  const winners = allRegs.filter(r => r.rank && r.status === 'confirmed');
+
+  if (!winners.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No winners recorded yet.</div>';
+    return;
+  }
+
+  list.innerHTML = winners.map(w => `
+    <div class="reg-card paid-reg">
+      <div class="reg-icon">🏆</div>
+      <div class="reg-main">
+        <div class="reg-line-1"><b>${w.username}</b> — Rank #${w.rank}</div>
+        <div class="reg-line-2">${w.tournamentTitle} · Rs. ${w.prize || 0}</div>
+      </div>
+      <div class="reg-right">
+        <span class="type-chip paid">Rs. ${w.prize || 0}</span>
+      </div>
+    </div>
+  `).join('');
+};
+
+// ============= ANNOUNCEMENTS =============
+window.loadAnnouncements = async function() {
+  const list = document.getElementById('announcementList');
+  if (!list) return;
+  try {
+    const snap = await getDocs(collection(db, 'announcements'));
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+
+    if (!items.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>';
+      return;
+    }
+
+    list.innerHTML = items.map(a => `
+      <div class="reg-card free-reg">
+        <div class="reg-icon">📢</div>
+        <div class="reg-main">
+          <div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div>
+          <div class="reg-line-2">${a.message || ''}</div>
+        </div>
+        <div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div>
+      </div>
+    `).join('');
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+window.postAnnouncement = async function(e) {
+  e.preventDefault();
+  const title = document.getElementById('annTitle').value.trim();
+  const message = document.getElementById('annMsg').value.trim();
+  if (!title || !message) { window.showToast('❌ Title and message required'); return; }
+
+  try {
+    await addDoc(collection(db, 'announcements'), {
+      title, message,
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('annTitle').value = '';
+    document.getElementById('annMsg').value = '';
+    window.showToast('✅ Announcement posted');
+    window.loadAnnouncements();
+  } catch (err) {
+    window.showToast('❌ ' + err.message);
+  }
+};
+
+// ============= DASHBOARD RECENT =============
+function renderDashboardRecent() {
+  const recentUsers = document.getElementById('dashRecentUsers');
+  if (recentUsers && allUsers.length) {
+    recentUsers.innerHTML = allUsers.slice(0,5).map(u => `
+      <div class="reg-card free-reg">
+        <div class="reg-icon">${initials(u.username)}</div>
+        <div class="reg-main">
+          <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
+          <div class="reg-line-2">${u.email || '—'}</div>
+        </div>
+        <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
+      </div>
+    `).join('');
+  }
+
+  const recentRegs = document.getElementById('dashRecentRegs');
+  if (recentRegs && allRegs.length) {
+    recentRegs.innerHTML = allRegs.slice(0,5).map(r => {
+      const isPaid = r.entryType === 'paid';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${r.username || 'Unknown'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+            </div>
+            <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+            <small>${fmtShort(r.registeredAt)}</small>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// ============= REVIEW =============
+window.openReview = function(id, name, action) {
+  document.getElementById('reviewId').value = id;
+  document.getElementById('reviewAction').value = action;
+  document.getElementById('reviewTitle').innerText =
+    action === 'approve' ? '✔ Approve Payment' : '❌ Reject Payment';
+  document.getElementById('reviewDesc').innerHTML =
+    (action === 'approve' ? 'Confirm approval for ' : 'Reject payment from ') + '<b>' + name + '</b>?';
+  const btn = document.getElementById('reviewConfirmBtn');
+  btn.className = action === 'approve' ? 'btn-primary green' : 'btn-primary red';
+  btn.innerText = action === 'approve' ? '✔ Confirm Approve' : '✘ Confirm Reject';
+  document.getElementById('reviewModal').classList.add('active');
+};
+
+window.closeReview = function() {
+  document.getElementById('reviewModal').classList.remove('active');
+  document.getElementById('reviewNote').value = '';
+};
+
+window.confirmReview = async function(e) {
+  e.preventDefault();
+  const id     = document.getElementById('reviewId').value;
+  const action = document.getElementById('reviewAction').value;
+  const note   = document.getElementById('reviewNote').value.trim();
+  const status    = action === 'approve' ? 'approved' : 'rejected';
+  const regStatus = action === 'approve' ? 'confirmed' : 'rejected';
+
+  try {
+    await updateDoc(doc(db, 'tournament_payments', id), {
+      status, adminNote: note, reviewedAt: serverTimestamp()
+    });
+
+    const regSnap = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('paymentId', '==', id)
+    ));
+    for (const d of regSnap.docs) {
+      await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
+    }
+
+    closeReview();
+    window.showToast('✅ Payment ' + status);
+    window.loadPayments();
+    if (typeof window.loadRegistrations === 'function') window.loadRegistrations();
+  } catch (err) {
+    window.showToast('❌ ' + err.message);
+  }
+};
+
+// ============= LIGHTBOX + TOAST =============
+window.openShot = function(src) {
+  document.getElementById('shotFull').src = src;
+  document.getElementById('shotModal').classList.add('active');
+};
+window.showToast = function(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerText = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+};
+
+// ============= INIT =============
+(async function init() {
+  await window.loadPayments();
+  await window.loadRegistrations();
+  await window.loadUsers();
+  console.log("✅ Admin module loaded");
+})();
+</script>
+</body>
+</html>
