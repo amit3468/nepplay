@@ -8,7 +8,6 @@
 </head>
 <body>
 
-<!-- ============ HEADER ============ -->
 <header class="site-header">
   <div class="logo">🎮 <b>Nepal Gaming</b></div>
   <nav>
@@ -49,16 +48,12 @@
   <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
 </div>
 
-<!-- ============================================== -->
-<!-- JOIN MODAL (FREE TOURNAMENT) -->
-<!-- ============================================== -->
+<!-- JOIN MODAL (FREE) -->
 <div id="joinModal" class="modal-overlay">
   <div class="modal-box small">
     <button class="modal-close" onclick="closeJoinModal()">✕</button>
     <h2>🎮 Join Tournament</h2>
-    <p class="modal-sub">
-      <b id="joinTournamentTitle">Free Fire Solo Cup</b>
-    </p>
+    <p class="modal-sub"><b id="joinTournamentTitle">Free Fire Solo Cup</b></p>
 
     <form id="joinForm" onsubmit="submitJoin(event)">
       <input type="hidden" id="joinTournamentId">
@@ -77,9 +72,7 @@
   </div>
 </div>
 
-<!-- ============================================== -->
-<!-- PAYMENT MODAL (PAID TOURNAMENT) -->
-<!-- ============================================== -->
+<!-- PAYMENT MODAL (PAID) -->
 <div id="paymentModal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closePaymentModal()">✕</button>
@@ -87,8 +80,8 @@
     <h2>💳 Complete Payment</h2>
     <p class="modal-sub">
       <b id="mTournamentTitle">Free Fire Paid Championship</b><br>
-      Entry Fee: <b>Rs. <span id="mFee">150</span></b> &nbsp;|&nbsp;
-      🏆 Prize: <b>Rs. <span id="mPrize">1500</span></b> &nbsp;|&nbsp;
+      Entry Fee: <b>Rs. <span id="mFee">150</span></b> |
+      🏆 Prize: <b>Rs. <span id="mPrize">1500</span></b> |
       🎯 Top Kills: <b>Rs. <span id="mKills">500</span></b>
     </p>
 
@@ -174,10 +167,9 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ LOGIC ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs }
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -198,7 +190,7 @@ const storage = getStorage(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
-// ---- Get logged-in user from Node session ----
+// ---- Get logged-in user ----
 let currentUser = null;
 let currentUid  = null;
 
@@ -208,19 +200,76 @@ try {
     const data = await res.json();
     if (data.success && data.user) {
       currentUser = data.user;
-      // Build a STABLE id — never undefined
       currentUid = String(
-        currentUser.id ||
-        currentUser.uid ||
-        currentUser._id ||
-        currentUser.email ||
-        currentUser.username
+        currentUser.id || currentUser.uid || currentUser._id ||
+        currentUser.email || currentUser.username
       );
       console.log("👤 Logged in as:", currentUser.username, "| uid:", currentUid);
     }
   }
 } catch (e) {
   console.warn("Could not fetch /api/users/me:", e);
+}
+
+// ================================================
+// AUTO-SEED PAID TOURNAMENTS
+// ================================================
+// If Firestore has no paid tournaments, create 2 seeds automatically.
+// This means the user never has to touch Firebase console.
+async function seedPaidTournamentsIfNeeded() {
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
+    const docs = snap.docs.map(d => d.data());
+
+    const hasPaid = docs.some(t => {
+      const type = (t.entryType || t.entry_type || '').toLowerCase();
+      const fee = Number(t.entryFee || t.entry_fee || 0);
+      return type === 'paid' || fee > 0;
+    });
+
+    if (hasPaid) {
+      console.log("✅ Paid tournaments already exist in Firestore");
+      return;
+    }
+
+    console.log("🌱 No paid tournaments found — seeding 2 sample paid tournaments");
+
+    // Seed #1 — Free Fire Paid
+    await setDoc(doc(db, 'tournaments', 'ff_paid_seed_001'), {
+      title: 'Free Fire Paid Championship',
+      game: 'Free Fire',
+      mode: 'Squad',
+      entryType: 'paid',
+      entryFee: 150,
+      prizePool: 1500,
+      topKillsPrize: 500,
+      date: '2026-09-25',
+      time: '18:00',
+      filled: 0,
+      max: 100,
+      createdAt: serverTimestamp()
+    });
+
+    // Seed #2 — PUBG Paid
+    await setDoc(doc(db, 'tournaments', 'pubg_paid_seed_001'), {
+      title: 'PUBG Paid Pro Cup',
+      game: 'PUBG',
+      mode: 'Squad',
+      entryType: 'paid',
+      entryFee: 150,
+      prizePool: 1500,
+      topKillsPrize: 500,
+      date: '2026-09-28',
+      time: '19:00',
+      filled: 0,
+      max: 100,
+      createdAt: serverTimestamp()
+    });
+
+    console.log("✅ Seeded 2 paid tournaments");
+  } catch (err) {
+    console.warn("⚠️ Seed failed (probably rules):", err.message);
+  }
 }
 
 // ================================================
@@ -233,10 +282,14 @@ async function loadTournaments() {
   grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
 
   try {
+    // First — auto-seed if needed
+    await seedPaidTournamentsIfNeeded();
+
+    // Then load all
     const snap = await getDocs(collection(db, 'tournaments'));
     TOURNAMENTS = snap.docs.map(d => {
       const t = d.data();
-      const entryTypeRaw = (t.entry_type || t.entryType || 'free').toString().toLowerCase();
+      const entryTypeRaw = (t.entryType || t.entry_type || 'free').toString().toLowerCase();
       const feeValue = Number(t.entryFee || t.entry_fee || 0);
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
 
@@ -276,7 +329,7 @@ async function loadTournaments() {
     renderTournaments();
   } catch (err) {
     console.error('loadTournaments error:', err);
-    grid.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed to load: ' + err.message + '</div>';
+    grid.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
 }
 
@@ -394,7 +447,6 @@ window.submitJoin = async function(e) {
     if (!ign)   throw new Error('IGN required');
     if (!phone) throw new Error('Phone required');
 
-    // Duplicate check using stable uid
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
