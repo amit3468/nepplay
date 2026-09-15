@@ -14,7 +14,6 @@
     <h2 class="logo">🎮 NEPPLAY
       <span style="font-size:11px;background:#dc2626;padding:2px 8px;border-radius:8px;margin-left:6px;">ADMIN</span>
     </h2>
-
     <nav>
       <a href="#dashboard" data-section="dashboard" class="sidebar-link active"><span>📊</span> Dashboard</a>
       <a href="#payments" data-section="payments" class="sidebar-link">
@@ -25,9 +24,11 @@
         <span>📋</span> Registrations
         <span class="badge" id="regsBadge">0</span>
       </a>
+      <a href="#daily" data-section="daily" class="sidebar-link"><span>💹</span> Daily Collections</a>
       <a href="#prize" data-section="prize" class="sidebar-link"><span>🧮</span> Prize Calculator</a>
       <a href="#earnings" data-section="earnings" class="sidebar-link"><span>💵</span> Earnings</a>
       <a href="#payouts" data-section="payouts" class="sidebar-link"><span>📤</span> Payouts</a>
+      <a href="#profitshare" data-section="profitshare" class="sidebar-link"><span>🤝</span> Profit Sharing</a>
       <a href="#users" data-section="users" class="sidebar-link">
         <span>👥</span> Users
         <span class="badge" id="usersBadge">0</span>
@@ -36,11 +37,43 @@
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
     </nav>
-
     <div class="sidebar-footer">🟢 Live • v3.3 • 2026</div>
   </aside>
 
-  <main class="admin-main">
+  <div style="flex:1; display:flex; flex-direction:column;">
+    <!-- ============ TOP BAR WITH BELL ============ -->
+    <header style="display:flex; justify-content:space-between; align-items:center; padding:14px 32px; background:#0d1020; border-bottom:1px solid #2a2d4a;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <h2 style="margin:0; font-size:18px; color:#fff;">Admin Panel</h2>
+        <span style="font-size:12px; color:#6b7280;">v3.3</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px;">
+        <!-- BELL ICON -->
+        <div id="notifBell" onclick="toggleNotifPanel()" style="position:relative; cursor:pointer; padding:8px; border-radius:10px; transition:background .15s;">
+          <span style="font-size:22px;">🔔</span>
+          <span id="notifCount" style="position:absolute; top:-2px; right:-2px; background:#dc2626; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; display:none;">0</span>
+        </div>
+
+        <span style="color:#9ca3af; font-size:13px;">admin@nepplay.com</span>
+
+        <button onclick="if(confirm('Logout?')) location.href='/logout';" style="padding:6px 14px; background:transparent; border:1px solid #2a2d4a; color:#fff; border-radius:8px; cursor:pointer; font-size:13px;">Exit</button>
+      </div>
+    </header>
+
+    <!-- NOTIFICATIONS DROPDOWN -->
+    <div id="notifPanel" style="display:none; position:absolute; top:60px; right:32px; width:400px; max-height:520px; overflow-y:auto; background:#15172b; border:1px solid #2a2d4a; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.6); z-index:9999;">
+      <div style="padding:16px 20px; border-bottom:1px solid #2a2d4a; display:flex; justify-content:space-between; align-items:center;">
+        <b style="color:#fff;">🔔 Notifications</b>
+        <button onclick="clearAllNotifs()" style="background:transparent; border:none; color:#60a5fa; cursor:pointer; font-size:12px;">Mark all read</button>
+      </div>
+      <div id="notifList" style="padding:8px;">
+        <div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">No new notifications</div>
+      </div>
+    </div>
+
+    <!-- ============ MAIN ============ -->
+    <main class="admin-main" style="flex:1;">
 
     <!-- DASHBOARD -->
     <section id="section-dashboard" class="admin-section" style="display:block">
@@ -52,6 +85,10 @@
         <div class="stat-card"><small>REGISTRATIONS</small><b id="dashRegs">0</b><span>Tournament sign-ups</span></div>
         <div class="stat-card"><small>TOTAL PAID</small><b id="dashPaid">Rs. 0</b><span>From registrations</span></div>
         <div class="stat-card"><small>PENDING PAYMENTS</small><b id="dashPending">0</b><span>Awaiting review</span></div>
+        <div class="stat-card"><small>TODAY COLLECTED</small><b id="dashTodayCollected">Rs. 0</b><span>Approved today</span></div>
+        <div class="stat-card"><small>TODAY PAYOUTS</small><b id="dashTodayPayouts">Rs. 0</b><span>Paid to winners today</span></div>
+        <div class="stat-card"><small>TODAY NET</small><b id="dashTodayNet">Rs. 0</b><span>Collected − Payouts</span></div>
+        <div class="stat-card"><small>ALL-TIME NET</small><b id="dashAllNet">Rs. 0</b><span>Lifetime profit</span></div>
       </div>
 
       <h3 class="mt">👥 Recent Users</h3>
@@ -68,25 +105,14 @@
         <input type="text" id="paySearch" placeholder="🔍 Search txn ID, user, tournament..."
                oninput="filterPayments()" class="search-input">
       </div>
-
       <div class="pay-status-tabs">
-        <button class="active" data-status="pending"  onclick="filterPayStatus('pending', this)">
-          ⏳ Pending <span class="cnt" id="cntPending">0</span>
-        </button>
-        <button data-status="approved" onclick="filterPayStatus('approved', this)">
-          ✅ Approved <span class="cnt" id="cntApproved">0</span>
-        </button>
-        <button data-status="rejected" onclick="filterPayStatus('rejected', this)">
-          ❌ Rejected <span class="cnt" id="cntRejected">0</span>
-        </button>
-        <button data-status="all" onclick="filterPayStatus('all', this)">
-          📂 All <span class="cnt" id="cntAll">0</span>
-        </button>
+        <button class="active" data-status="pending"  onclick="filterPayStatus('pending', this)">⏳ Pending <span class="cnt" id="cntPending">0</span></button>
+        <button data-status="approved" onclick="filterPayStatus('approved', this)">✅ Approved <span class="cnt" id="cntApproved">0</span></button>
+        <button data-status="rejected" onclick="filterPayStatus('rejected', this)">❌ Rejected <span class="cnt" id="cntRejected">0</span></button>
+        <button data-status="all" onclick="filterPayStatus('all', this)">📂 All <span class="cnt" id="cntAll">0</span></button>
       </div>
-
-      <div style="margin: 12px 0;">
-        <select id="payMethodFilter" onchange="filterPayMethod(this.value)"
-                style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
+      <div style="margin:12px 0;">
+        <select id="payMethodFilter" onchange="filterPayMethod(this.value)" style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
           <option value="all">All Methods</option>
           <option value="esewa">💚 eSewa</option>
           <option value="khalti">💜 Khalti</option>
@@ -94,7 +120,6 @@
           <option value="bank">🏦 Bank Transfer</option>
         </select>
       </div>
-
       <div class="pay-list" id="payList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
@@ -109,33 +134,44 @@
       <div id="regList" class="reg-list"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
+    <!-- DAILY COLLECTIONS -->
+    <section id="section-daily" class="admin-section" style="display:none">
+      <h2>💹 Daily Collections</h2>
+      <p class="muted">Income, payouts &amp; net profit — day by day</p>
+      <div class="stat-grid">
+        <div class="stat-card"><small>ALL-TIME COLLECTED</small><b id="dailyTotalCollected">Rs. 0</b><span>All approved payments</span></div>
+        <div class="stat-card"><small>ALL-TIME PAYOUTS</small><b id="dailyTotalPayouts">Rs. 0</b><span>To all winners</span></div>
+        <div class="stat-card"><small>ALL-TIME NET</small><b id="dailyTotalNet">Rs. 0</b><span>Collected − Payouts</span></div>
+        <div class="stat-card"><small>ACTIVE DAYS</small><b id="dailyActiveDays">0</b><span>Days with activity</span></div>
+      </div>
+      <div style="margin: 20px 0;">
+        <select id="dailyRangeFilter" onchange="loadDailyCollections()" style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
+          <option value="all">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="today">Today only</option>
+        </select>
+      </div>
+      <h3 class="mt">📅 Per-Day Breakdown</h3>
+      <div class="list" id="dailyList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
+      <h3 class="mt">💳 Breakdown by Payment Method (All time)</h3>
+      <div class="list" id="dailyByMethod"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
+    </section>
+
     <!-- PRIZE CALCULATOR -->
     <section id="section-prize" class="admin-section" style="display:none">
       <h2>🧮 Prize Calculator</h2>
-      <p class="muted">Quickly calculate prize distribution</p>
-
+      <p class="muted">Plan your tournament economics</p>
       <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;">
-          <div>
-            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Total Prize Pool (Rs.)</label>
-            <input type="number" id="calcPool" value="1500"
-                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;">
-          </div>
-          <div>
-            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Entry Fee (Rs.)</label>
-            <input type="number" id="calcFee" value="150"
-                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;">
-          </div>
-          <div>
-            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Registered Players</label>
-            <input type="number" id="calcPlayers" value="45"
-                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;">
-          </div>
-          <div>
-            <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Top Kills Prize (Rs.)</label>
-            <input type="number" id="calcKills" value="500"
-                   style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;">
-          </div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Entry Fee (Rs.)</label>
+            <input type="number" id="calcFee" value="150" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Expected Players</label>
+            <input type="number" id="calcPlayers" value="45" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Prize Pool (Rs.)</label>
+            <input type="number" id="calcPool" value="1500" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Top Kills Prize (Rs.)</label>
+            <input type="number" id="calcKills" value="500" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
         </div>
         <button onclick="calculatePrize()" class="btn-submit-pay" style="margin-top:20px;">🧮 Calculate</button>
         <div id="calcResult" style="margin-top:20px;display:none;"></div>
@@ -159,8 +195,37 @@
     <!-- PAYOUTS -->
     <section id="section-payouts" class="admin-section" style="display:none">
       <h2>📤 Payouts</h2>
-      <p class="muted">Winner payouts</p>
-      <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No winners recorded yet.</div></div>
+      <p class="muted">Winners and prize money paid</p>
+      <div class="stat-grid">
+        <div class="stat-card"><small>TOTAL PAYOUTS</small><b id="payoutTotal">Rs. 0</b><span>All winners</span></div>
+        <div class="stat-card"><small>PAID WINNERS</small><b id="payoutWinners">0</b><span>Marked as paid</span></div>
+        <div class="stat-card"><small>PENDING PAYOUTS</small><b id="payoutPending">Rs. 0</b><span>Not yet paid</span></div>
+      </div>
+      <div style="margin: 20px 0;">
+        <button onclick="addPayout()" class="btn-submit-pay" style="max-width:320px;">➕ Record New Winner Payout</button>
+      </div>
+      <h3 class="mt">🏆 Winner Payouts</h3>
+      <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No payouts recorded yet.</div></div>
+    </section>
+
+    <!-- PROFIT SHARING -->
+    <section id="section-profitshare" class="admin-section" style="display:none">
+      <h2>🤝 Profit Sharing</h2>
+      <p class="muted">Split net profit between admins</p>
+      <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;">
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Admin 1 Name</label>
+            <input type="text" id="admin1Name" value="Amit" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Admin 1 Share (%)</label>
+            <input type="number" id="admin1Share" value="50" min="0" max="100" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Admin 2 Name</label>
+            <input type="text" id="admin2Name" value="Partner" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+          <div><label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Admin 2 Share (%)</label>
+            <input type="number" id="admin2Share" value="50" min="0" max="100" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></div>
+        </div>
+        <button onclick="calculateShares()" class="btn-submit-pay" style="margin-top:20px;">🤝 Calculate Split</button>
+        <div id="shareResult" style="margin-top:20px;"></div>
+      </div>
     </section>
 
     <!-- USERS -->
@@ -177,9 +242,7 @@
     <section id="section-support" class="admin-section" style="display:none">
       <h2>🎧 Support</h2>
       <p class="muted">Member support tickets</p>
-      <div class="reg-list" id="supportList">
-        <div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div>
-      </div>
+      <div class="reg-list" id="supportList"><div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div></div>
     </section>
 
     <!-- TOURNAMENTS -->
@@ -198,35 +261,31 @@
       <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;">
         <form onsubmit="postAnnouncement(event)">
           <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Title</label>
-          <input type="text" id="annTitle" placeholder="e.g. Grand Opening Update"
-                 style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;margin-bottom:14px;box-sizing:border-box;">
+          <input type="text" id="annTitle" placeholder="e.g. Grand Opening Update" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;margin-bottom:14px;box-sizing:border-box;">
           <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Message</label>
-          <textarea id="annMsg" rows="4" placeholder="Type your announcement..."
-                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+          <textarea id="annMsg" rows="4" placeholder="Type your announcement..." style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
           <button type="submit" class="btn-submit-pay" style="margin-top:14px;">📢 Post Announcement</button>
         </form>
       </div>
       <h3 class="mt">📜 Recent Announcements</h3>
-      <div class="list" id="announcementList">
-        <div class="empty-state"><span class="icon">📢</span>No announcements yet</div>
-      </div>
+      <div class="list" id="announcementList"><div class="empty-state"><span class="icon">📢</span>No announcements yet</div></div>
     </section>
 
-  </main>
+    </main>
+  </div>
 </div>
 
 <!-- REVIEW MODAL -->
 <div id="reviewModal" class="modal-overlay">
   <div class="modal-box small">
-    <h3 id="reviewTitle">Approve Payment</h3>
+    <h3 id="reviewTitle">Approve</h3>
     <p id="reviewDesc" class="modal-sub">Confirm?</p>
     <form onsubmit="confirmReview(event)">
       <input type="hidden" id="reviewId">
       <input type="hidden" id="reviewAction">
       <input type="hidden" id="reviewType" value="payment">
       <label>Admin Note (optional)</label>
-      <textarea id="reviewNote" rows="3" placeholder="Reason for rejection or any comment..."
-                style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+      <textarea id="reviewNote" rows="3" placeholder="Reason or comment..." style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
       <div class="modal-actions">
         <button type="button" onclick="closeReview()" class="btn-secondary">Cancel</button>
         <button type="submit" id="reviewConfirmBtn" class="btn-primary">Confirm</button>
@@ -256,6 +315,8 @@
       tournaments: 'loadTournamentsAdmin',
       earnings: 'loadEarnings',
       payouts: 'loadPayouts',
+      daily: 'loadDailyCollections',
+      profitshare: 'loadProfitShare',
       announcements: 'loadAnnouncements'
     };
     var fn = loaders[name];
@@ -282,7 +343,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, doc, updateDoc, deleteDoc,
-  addDoc, query, where, serverTimestamp
+  addDoc, query, where, serverTimestamp, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -303,20 +364,153 @@ let allPayments = [];
 let allRegs = [];
 let allUsers = [];
 let allTournaments = [];
+let allPayouts = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
 let currentSearchTerm = '';
 
+// ================================================
+// NOTIFICATIONS (Bell Icon)
+// ================================================
+let notifications = []; // { id, type, title, message, time, read }
+
+function addNotif(type, title, message) {
+  notifications.unshift({
+    id: Date.now() + Math.random(),
+    type, title, message,
+    time: new Date(),
+    read: false
+  });
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  renderNotifBell();
+  renderNotifPanel();
+}
+
+function renderNotifBell() {
+  const unread = notifications.filter(n => !n.read).length;
+  const countEl = document.getElementById('notifCount');
+  if (!countEl) return;
+  if (unread > 0) {
+    countEl.innerText = unread > 9 ? '9+' : unread;
+    countEl.style.display = 'block';
+  } else {
+    countEl.style.display = 'none';
+  }
+}
+
+function renderNotifPanel() {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (!notifications.length) {
+    list.innerHTML = '<div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">No new notifications</div>';
+    return;
+  }
+  const icons = { user:'👤', registration:'📋', payment:'💰', review:'✅' };
+  const colors = { user:'#3b82f6', registration:'#a855f7', payment:'#f59e0b', review:'#22c55e' };
+  list.innerHTML = notifications.map(n => `
+    <div style="padding:14px 16px; border-bottom:1px solid #242840; display:flex; gap:12px; align-items:flex-start; ${n.read ? 'opacity:.5' : ''}">
+      <div style="width:36px; height:36px; border-radius:50%; background:${colors[n.type] || '#6366f1'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px;">
+        ${icons[n.type] || '🔔'}
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div style="color:#fff; font-size:13px; font-weight:700; margin-bottom:2px;">${n.title}</div>
+        <div style="color:#9ca3af; font-size:12px; line-height:1.4;">${n.message}</div>
+        <div style="color:#6b7280; font-size:11px; margin-top:4px;">${n.time.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.toggleNotifPanel = function() {
+  const panel = document.getElementById('notifPanel');
+  if (!panel) return;
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+
+  // Mark all as read when opened
+  if (isHidden) {
+    setTimeout(() => {
+      notifications.forEach(n => n.read = true);
+      renderNotifBell();
+    }, 1500);
+  }
+};
+
+window.clearAllNotifs = function() {
+  notifications.forEach(n => n.read = true);
+  renderNotifBell();
+  renderNotifPanel();
+};
+
+// Close panel when clicking outside
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('notifPanel');
+  const bell = document.getElementById('notifBell');
+  if (!panel || !bell) return;
+  if (!panel.contains(e.target) && !bell.contains(e.target)) {
+    panel.style.display = 'none';
+  }
+});
+
+// ================================================
+// REAL-TIME LISTENERS FOR NOTIFICATIONS
+// ================================================
+function attachRealtimeListeners() {
+  // Users
+  let initialUsers = true;
+  onSnapshot(collection(db, 'users'), snap => {
+    if (initialUsers) { initialUsers = false; return; }
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const u = change.doc.data();
+        addNotif('user', '👤 New user registered',
+          `${u.username || 'User'} (${u.email || 'no email'}) just created an account`);
+      }
+    });
+  });
+
+  // Registrations
+  let initialRegs = true;
+  onSnapshot(collection(db, 'tournament_registrations'), snap => {
+    if (initialRegs) { initialRegs = false; return; }
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const r = change.doc.data();
+        const isPaid = r.entryType === 'paid';
+        addNotif('registration', `${isPaid ? '💵' : '🆓'} New ${isPaid ? 'paid' : 'free'} registration`,
+          `${r.username || 'User'} joined ${r.tournamentTitle || 'a tournament'}`);
+      }
+    });
+  });
+
+  // Payments
+  let initialPays = true;
+  onSnapshot(collection(db, 'tournament_payments'), snap => {
+    if (initialPays) { initialPays = false; return; }
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const p = change.doc.data();
+        addNotif('payment', '💰 New payment submitted',
+          `${p.username || 'User'} submitted Rs. ${p.amount || 0} via ${p.method || '?'} for ${p.tournamentTitle || 'a tournament'}`);
+      }
+    });
+  });
+}
+
+// ============ HELPERS ============
 function fmtDate(ts) {
   if (!ts?.toDate) return '—';
-  return ts.toDate().toLocaleString('en-GB', {
-    day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
-  });
+  return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 function fmtShort(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
 }
+function dayKey(ts) {
+  if (!ts?.toDate) return null;
+  return ts.toDate().toISOString().slice(0,10);
+}
+function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(name) { return (name || 'U')[0].toUpperCase(); }
 
 // ============ PAYMENTS ============
@@ -324,7 +518,6 @@ window.loadPayments = async function() {
   const list = document.getElementById('payList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-
   try {
     const snap = await getDocs(collection(db, 'tournament_payments'));
     allPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -340,7 +533,6 @@ window.loadPayments = async function() {
 function updateCounts() {
   const c = { pending:0, approved:0, rejected:0 };
   allPayments.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
-
   const el = id => document.getElementById(id);
   if (el('cntPending'))      el('cntPending').innerText      = c.pending;
   if (el('cntApproved'))     el('cntApproved').innerText     = c.approved;
@@ -369,7 +561,7 @@ function renderPayments() {
   });
 
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">🎉</span>No ' + currentStatusFilter + ' payments here.</div>';
+    list.innerHTML = '<div class="empty-state"><span class="icon">🎉</span>No ' + currentStatusFilter + ' payments.</div>';
     return;
   }
 
@@ -379,7 +571,6 @@ function renderPayments() {
   list.innerHTML = filtered.map(p => {
     const showActions = p.status === 'pending';
     const safeName = (p.username||'').replace(/'/g,'');
-
     return `
       <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
         <div class="pay-item-left">
@@ -433,22 +624,18 @@ window.loadRegistrations = async function() {
   const list = document.getElementById('regList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-
   try {
     const snap = await getDocs(collection(db, 'tournament_registrations'));
     allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
-
     if (document.getElementById('dashRegs')) document.getElementById('dashRegs').innerText = allRegs.length;
     if (document.getElementById('regsBadge')) document.getElementById('regsBadge').innerText = allRegs.length;
-
     renderRegistrations();
     renderDashboardRecent();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
 };
-
 window.filterRegistrations = function() { renderRegistrations(); };
 
 function renderRegistrations() {
@@ -459,17 +646,11 @@ function renderRegistrations() {
     if (!q) return true;
     return `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase().includes(q);
   });
-
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">📋</span>No registrations found.</div>';
-    return;
-  }
-
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">📋</span>No registrations.</div>'; return; }
   list.innerHTML = filtered.map(r => {
     const isPaid = r.entryType === 'paid';
     const safeName = (r.username||'').replace(/'/g,'');
     const isPending = r.status === 'pending';
-
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
         <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
@@ -520,14 +701,11 @@ window.editRegistration = async function(id) {
   if (newPhone === null) return;
   try {
     await updateDoc(doc(db, 'tournament_registrations', id), {
-      ign: newIgn.trim(),
-      phone: newPhone.trim()
+      ign: newIgn.trim(), phone: newPhone.trim()
     });
     window.showToast('✅ Updated');
     window.loadRegistrations();
-  } catch (err) {
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 window.deleteRegistration = async function(id, name) {
@@ -536,9 +714,272 @@ window.deleteRegistration = async function(id, name) {
     await deleteDoc(doc(db, 'tournament_registrations', id));
     window.showToast('🗑️ Deleted');
     window.loadRegistrations();
-  } catch (err) {
-    window.showToast('❌ ' + err.message);
+  } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+// ============ DAILY COLLECTIONS ============
+window.loadDailyCollections = function() {
+  const range = document.getElementById('dailyRangeFilter')?.value || 'all';
+  let payments = allPayments.filter(p => p.status === 'approved');
+  if (range === 'today') {
+    payments = payments.filter(p => dayKey(p.reviewedAt || p.submittedAt) === todayKey());
+  } else if (range !== 'all') {
+    const days = Number(range);
+    const cutoff = Date.now() - days * 86400000;
+    payments = payments.filter(p => (p.reviewedAt?.toMillis?.() || p.submittedAt?.toMillis?.() || 0) >= cutoff);
   }
+  let payouts = allPayouts;
+  if (range === 'today') {
+    payouts = payouts.filter(x => dayKey(x.paidAt || x.createdAt) === todayKey());
+  } else if (range !== 'all') {
+    const days = Number(range);
+    const cutoff = Date.now() - days * 86400000;
+    payouts = payouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff);
+  }
+  const totalCollected = payments.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const totalPayouts = payouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const netProfit = totalCollected - totalPayouts;
+
+  const days = {};
+  payments.forEach(p => {
+    const k = dayKey(p.reviewedAt || p.submittedAt);
+    if (!k) return;
+    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
+    days[k].collected += Number(p.amount)||0;
+    days[k].count++;
+    const m = p.method || 'unknown';
+    days[k].byMethod[m] = (days[k].byMethod[m] || 0) + (Number(p.amount)||0);
+  });
+  payouts.forEach(x => {
+    const k = dayKey(x.paidAt || x.createdAt);
+    if (!k) return;
+    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
+    days[k].payouts += Number(x.amount)||0;
+    days[k].payoutsCount = (days[k].payoutsCount || 0) + 1;
+  });
+
+  const sortedKeys = Object.keys(days).sort().reverse();
+  const el = id => document.getElementById(id);
+  if (el('dailyTotalCollected')) el('dailyTotalCollected').innerText = 'Rs. ' + totalCollected.toLocaleString();
+  if (el('dailyTotalPayouts'))   el('dailyTotalPayouts').innerText   = 'Rs. ' + totalPayouts.toLocaleString();
+  if (el('dailyTotalNet'))       el('dailyTotalNet').innerText       = 'Rs. ' + netProfit.toLocaleString();
+  if (el('dailyActiveDays'))     el('dailyActiveDays').innerText     = sortedKeys.length;
+
+  const list = document.getElementById('dailyList');
+  if (!list) return;
+  if (!sortedKeys.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">📅</span>No activity in this range.</div>';
+  } else {
+    list.innerHTML = sortedKeys.map(k => {
+      const d = days[k];
+      const net = d.collected - d.payouts;
+      const methodStr = Object.entries(d.byMethod).map(([m, amt]) => {
+        const emoji = { esewa:'💚', khalti:'💜', imepay:'🟠', bank:'🏦' }[m] || '💳';
+        return emoji + ' ' + amt.toLocaleString();
+      }).join(' · ');
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">📅</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${new Date(k).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'short', year:'numeric' })}</b></div>
+            <div class="reg-line-2">
+              💰 Collected: <b style="color:#4ade80">Rs. ${d.collected.toLocaleString()}</b> (${d.count})
+              · 📤 Payouts: <b style="color:#f87171">Rs. ${d.payouts.toLocaleString()}</b> (${d.payoutsCount || 0})
+              · 📊 Net: <b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">Rs. ${net.toLocaleString()}</b>
+            </div>
+            ${methodStr ? '<div class="reg-line-2" style="font-size:12px;">💳 By method: ' + methodStr + '</div>' : ''}
+          </div>
+          <div class="reg-right">
+            <span class="type-chip ${net >= 0 ? 'paid' : 'free'}">Rs. ${net.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const allApproved = allPayments.filter(p => p.status === 'approved');
+  const methods = ['esewa','khalti','imepay','bank'];
+  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+  const byMethodEl = document.getElementById('dailyByMethod');
+  if (byMethodEl) {
+    byMethodEl.innerHTML = methods.map(m => {
+      const count = allApproved.filter(p => p.method === m).length;
+      const sum = allApproved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">💰</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${labels[m]}</b></div>
+            <div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="reg-right"><span class="type-chip paid">Rs. ${sum.toLocaleString()}</span></div>
+        </div>
+      `;
+    }).join('');
+  }
+};
+
+// ============ PRIZE CALCULATOR ============
+window.calculatePrize = function() {
+  const fee  = Number(document.getElementById('calcFee').value) || 0;
+  const players = Number(document.getElementById('calcPlayers').value) || 0;
+  const pool = Number(document.getElementById('calcPool').value) || 0;
+  const killsPrize = Number(document.getElementById('calcKills').value) || 0;
+  const collected = fee * players;
+  const totalPrizes = pool + killsPrize;
+  const netRevenue = collected - totalPrizes;
+  const margin = collected > 0 ? ((netRevenue / collected) * 100).toFixed(1) : 0;
+  const rtp = collected > 0 ? ((totalPrizes / collected) * 100).toFixed(1) : 0;
+  const breakeven = (pool + killsPrize) > 0 && fee > 0 ? Math.ceil((pool + killsPrize) / fee) : 0;
+  const first  = Math.round(pool * 0.50);
+  const second = Math.round(pool * 0.30);
+  const third  = Math.round(pool * 0.20);
+
+  const result = document.getElementById('calcResult');
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><small>COLLECTED</small><b>Rs. ${collected.toLocaleString()}</b><span>From ${players} players</span></div>
+      <div class="stat-card"><small>PRIZE POOL</small><b>Rs. ${pool.toLocaleString()}</b><span>Main prize</span></div>
+      <div class="stat-card"><small>TOP KILLS</small><b>Rs. ${killsPrize.toLocaleString()}</b><span>Bonus prize</span></div>
+      <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">Rs. ${netRevenue.toLocaleString()}</b><span>Platform profit</span></div>
+      <div class="stat-card"><small>PROFIT MARGIN</small><b>${margin}%</b><span>Net / Collected</span></div>
+      <div class="stat-card"><small>RTP</small><b>${rtp}%</b><span>Return to players</span></div>
+      <div class="stat-card"><small>BREAKEVEN</small><b>${breakeven} players</b><span>To cover prizes</span></div>
+    </div>
+    <h3 class="mt">🥇 Winner Breakdown (50/30/20)</h3>
+    <div class="list">
+      <div class="reg-card free-reg"><div class="reg-icon">🥇</div><div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div><div class="reg-line-2">50% of main pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${first.toLocaleString()}</span></div></div>
+      <div class="reg-card free-reg"><div class="reg-icon">🥈</div><div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div><div class="reg-line-2">30% of main pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${second.toLocaleString()}</span></div></div>
+      <div class="reg-card free-reg"><div class="reg-icon">🥉</div><div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div><div class="reg-line-2">20% of main pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${third.toLocaleString()}</span></div></div>
+      ${killsPrize ? `<div class="reg-card free-reg"><div class="reg-icon">🎯</div><div class="reg-main"><div class="reg-line-1"><b>Top Killer</b></div><div class="reg-line-2">Separate prize</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${killsPrize.toLocaleString()}</span></div></div>` : ''}
+    </div>
+  `;
+};
+
+// ============ EARNINGS ============
+window.loadEarnings = function() {
+  const approved = allPayments.filter(p => p.status === 'approved');
+  const pending  = allPayments.filter(p => p.status === 'pending');
+  const total    = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const avg = approved.length ? Math.round(total / approved.length) : 0;
+  const el = id => document.getElementById(id);
+  if (el('earnTotal'))    el('earnTotal').innerText    = 'Rs. ' + total.toLocaleString();
+  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
+  if (el('earnPending'))  el('earnPending').innerText  = 'Rs. ' + pendingAmt.toLocaleString();
+  if (el('earnAvg'))      el('earnAvg').innerText      = 'Rs. ' + avg.toLocaleString();
+
+  const methods = ['esewa','khalti','imepay','bank'];
+  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+  const breakdown = document.getElementById('earningsBreakdown');
+  if (breakdown) {
+    breakdown.innerHTML = methods.map(m => {
+      const count = approved.filter(p => p.method === m).length;
+      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">💰</div>
+          <div class="reg-main"><div class="reg-line-1"><b>${labels[m]}</b></div><div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div></div>
+          <div class="reg-right"><span class="type-chip paid">Rs. ${sum.toLocaleString()}</span></div>
+        </div>
+      `;
+    }).join('');
+  }
+};
+
+// ============ PAYOUTS ============
+window.loadPayouts = async function() {
+  const list = document.getElementById('payoutList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
+  try {
+    const snap = await getDocs(collection(db, 'tournament_payouts'));
+    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allPayouts.sort((a, b) => (b.paidAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0) - (a.paidAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0));
+    const total = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
+    const paid = allPayouts.filter(p => p.status === 'paid');
+    const pending = allPayouts.filter(p => p.status !== 'paid');
+    const el = id => document.getElementById(id);
+    if (el('payoutTotal'))    el('payoutTotal').innerText    = 'Rs. ' + total.toLocaleString();
+    if (el('payoutWinners'))  el('payoutWinners').innerText  = paid.length;
+    if (el('payoutPending'))  el('payoutPending').innerText  = 'Rs. ' + pending.reduce((s,p) => s + (Number(p.amount)||0), 0).toLocaleString();
+
+    if (!allPayouts.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts recorded yet.</div>';
+      return;
+    }
+    list.innerHTML = allPayouts.map(w => {
+      const isPaid = w.status === 'paid';
+      return `
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+          <div class="reg-icon">🏆</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${w.winnerName || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${w.tournamentTitle || 'Tournament'}</span></div>
+            <div class="reg-line-2">🥇 Rank #${w.rank || '—'} · Rs. ${w.amount || 0}${w.method ? ' · ' + w.method : ''}${w.note ? ' · ' + w.note : ''}</div>
+          </div>
+          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'PAID' : 'PENDING'}</span><small>${fmtShort(w.paidAt || w.createdAt)}</small></div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
+  }
+};
+
+window.addPayout = async function() {
+  const winnerName = prompt('Winner name (username):'); if (!winnerName) return;
+  const tournamentTitle = prompt('Tournament title:'); if (!tournamentTitle) return;
+  const amount = Number(prompt('Amount (Rs.):', '500')); if (!amount || amount <= 0) return;
+  const rank = prompt('Rank (#1, #2, #3):', '1');
+  const method = prompt('Payout method (esewa/khalti/imepay/bank/cash):', 'esewa');
+  const note = prompt('Note (optional):', '');
+  try {
+    await addDoc(collection(db, 'tournament_payouts'), {
+      winnerName, tournamentTitle, amount,
+      rank: rank || '1', method: method || 'cash', note: note || '',
+      status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
+    });
+    window.showToast('✅ Payout recorded');
+    window.loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+// ============ PROFIT SHARING ============
+window.loadProfitShare = function() {
+  const approved = allPayments.filter(p => p.status === 'approved');
+  const collected = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const payouts = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const net = collected - payouts;
+  window.__netProfit = net;
+  const result = document.getElementById('shareResult');
+  if (result) {
+    result.innerHTML = `<div class="stat-grid">
+      <div class="stat-card"><small>TOTAL COLLECTED</small><b>Rs. ${collected.toLocaleString()}</b><span>Approved payments</span></div>
+      <div class="stat-card"><small>TOTAL PAYOUTS</small><b>Rs. ${payouts.toLocaleString()}</b><span>To winners</span></div>
+      <div class="stat-card"><small>NET PROFIT</small><b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">Rs. ${net.toLocaleString()}</b><span>To share</span></div>
+    </div>`;
+  }
+};
+
+window.calculateShares = function() {
+  const name1 = document.getElementById('admin1Name').value || 'Admin 1';
+  const name2 = document.getElementById('admin2Name').value || 'Admin 2';
+  const share1 = Number(document.getElementById('admin1Share').value) || 0;
+  const share2 = Number(document.getElementById('admin2Share').value) || 0;
+  if (share1 + share2 !== 100) { alert('Shares must add up to 100%. Currently: ' + (share1 + share2) + '%'); return; }
+  const net = window.__netProfit || 0;
+  const amt1 = Math.round(net * share1 / 100);
+  const amt2 = net - amt1;
+  const result = document.getElementById('shareResult');
+  result.innerHTML = `
+    <div class="stat-grid"><div class="stat-card"><small>NET PROFIT</small><b>Rs. ${net.toLocaleString()}</b><span>To split</span></div></div>
+    <h3 class="mt">🤝 Share Breakdown</h3>
+    <div class="list">
+      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name1}</b></div><div class="reg-line-2">${share1}% of net profit</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${amt1.toLocaleString()}</span></div></div>
+      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name2}</b></div><div class="reg-line-2">${share2}% of net profit</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${amt2.toLocaleString()}</span></div></div>
+    </div>
+  `;
 };
 
 // ============ USERS ============
@@ -565,7 +1006,7 @@ function renderUsers() {
   if (!list) return;
   const q = (document.getElementById('userSearch').value || '').toLowerCase();
   let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users found.</div>'; return; }
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users.</div>'; return; }
   list.innerHTML = filtered.map(u => `
     <div class="reg-card free-reg">
       <div class="reg-icon">${initials(u.username)}</div>
@@ -587,7 +1028,7 @@ window.loadTournamentsAdmin = async function() {
     const snap = await getDocs(collection(db, 'tournaments'));
     allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!allTournaments.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments yet.</div>';
+      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments.</div>';
       return;
     }
     list.innerHTML = allTournaments.map(t => {
@@ -598,113 +1039,18 @@ window.loadTournamentsAdmin = async function() {
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
           <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${t.title || t.name || 'Untitled'}</b>
-              <span class="reg-sep">—</span>
-              <span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span>
-            </div>
+            <div class="reg-line-1"><b>${t.title || t.name || 'Untitled'}</b><span class="reg-sep">—</span><span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span></div>
             <div class="reg-line-2">
-              ${t.date ? '📅 ' + t.date : ''}
-              ${t.time ? ' · 🕐 ' + t.time : ''}
-              ${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}
-              ${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}
+              ${t.date ? '📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}
             </div>
           </div>
-          <div class="reg-right">
-            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
-          </div>
+          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span></div>
         </div>
       `;
     }).join('');
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
-};
-
-// ============ EARNINGS ============
-window.loadEarnings = function() {
-  const approved = allPayments.filter(p => p.status === 'approved');
-  const pending  = allPayments.filter(p => p.status === 'pending');
-  const total    = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const avg = approved.length ? Math.round(total / approved.length) : 0;
-
-  const el = id => document.getElementById(id);
-  if (el('earnTotal'))    el('earnTotal').innerText    = 'Rs. ' + total.toLocaleString();
-  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
-  if (el('earnPending'))  el('earnPending').innerText  = 'Rs. ' + pendingAmt.toLocaleString();
-  if (el('earnAvg'))      el('earnAvg').innerText      = 'Rs. ' + avg.toLocaleString();
-
-  const methods = ['esewa','khalti','imepay','bank'];
-  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  const breakdown = document.getElementById('earningsBreakdown');
-  if (breakdown) {
-    breakdown.innerHTML = methods.map(m => {
-      const count = approved.filter(p => p.method === m).length;
-      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
-      return `
-        <div class="reg-card free-reg">
-          <div class="reg-icon">💰</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${labels[m]}</b></div>
-            <div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div>
-          </div>
-          <div class="reg-right"><span class="type-chip paid">Rs. ${sum.toLocaleString()}</span></div>
-        </div>
-      `;
-    }).join('');
-  }
-};
-
-// ============ PRIZE CALCULATOR ============
-window.calculatePrize = function() {
-  const pool = Number(document.getElementById('calcPool').value) || 0;
-  const fee  = Number(document.getElementById('calcFee').value) || 0;
-  const players = Number(document.getElementById('calcPlayers').value) || 0;
-  const killsPrize = Number(document.getElementById('calcKills').value) || 0;
-  const collected = fee * players;
-  const netRevenue = collected - pool - killsPrize;
-  const first = Math.round(pool * 0.50);
-  const second = Math.round(pool * 0.30);
-  const third = Math.round(pool * 0.20);
-
-  const result = document.getElementById('calcResult');
-  result.style.display = 'block';
-  result.innerHTML = `
-    <div class="stat-grid">
-      <div class="stat-card"><small>COLLECTED</small><b>Rs. ${collected.toLocaleString()}</b><span>From ${players} players</span></div>
-      <div class="stat-card"><small>PRIZE POOL</small><b>Rs. ${pool.toLocaleString()}</b><span>To winners</span></div>
-      <div class="stat-card"><small>TOP KILLS</small><b>Rs. ${killsPrize.toLocaleString()}</b><span>To top killer</span></div>
-      <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">Rs. ${netRevenue.toLocaleString()}</b><span>Platform profit</span></div>
-    </div>
-    <h3 class="mt">🥇 Winner Breakdown</h3>
-    <div class="list">
-      <div class="reg-card free-reg"><div class="reg-icon">🥇</div><div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div><div class="reg-line-2">50% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${first.toLocaleString()}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥈</div><div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div><div class="reg-line-2">30% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${second.toLocaleString()}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥉</div><div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div><div class="reg-line-2">20% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${third.toLocaleString()}</span></div></div>
-    </div>
-  `;
-};
-
-// ============ PAYOUTS ============
-window.loadPayouts = function() {
-  const list = document.getElementById('payoutList');
-  if (!list) return;
-  const winners = allRegs.filter(r => r.rank && r.status === 'confirmed');
-  if (!winners.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No winners recorded yet.</div>';
-    return;
-  }
-  list.innerHTML = winners.map(w => `
-    <div class="reg-card paid-reg">
-      <div class="reg-icon">🏆</div>
-      <div class="reg-main">
-        <div class="reg-line-1"><b>${w.username}</b> — Rank #${w.rank}</div>
-        <div class="reg-line-2">${w.tournamentTitle} · Rs. ${w.prize || 0}</div>
-      </div>
-      <div class="reg-right"><span class="type-chip paid">Rs. ${w.prize || 0}</span></div>
-    </div>
-  `).join('');
 };
 
 // ============ ANNOUNCEMENTS ============
@@ -715,23 +1061,15 @@ window.loadAnnouncements = async function() {
     const snap = await getDocs(collection(db, 'announcements'));
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (!items.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>';
-      return;
-    }
+    if (!items.length) { list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>'; return; }
     list.innerHTML = items.map(a => `
       <div class="reg-card free-reg">
         <div class="reg-icon">📢</div>
-        <div class="reg-main">
-          <div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div>
-          <div class="reg-line-2">${a.message || ''}</div>
-        </div>
+        <div class="reg-main"><div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div><div class="reg-line-2">${a.message || ''}</div></div>
         <div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div>
       </div>
     `).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
-  }
+  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>'; }
 };
 
 window.postAnnouncement = async function(e) {
@@ -745,13 +1083,23 @@ window.postAnnouncement = async function(e) {
     document.getElementById('annMsg').value = '';
     window.showToast('✅ Announcement posted');
     window.loadAnnouncements();
-  } catch (err) {
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
-// ============ DASHBOARD RECENT ============
+// ============ DASHBOARD RECENT + STATS ============
 function renderDashboardRecent() {
+  const t = todayKey();
+  const todayPayments = allPayments.filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t);
+  const todayCollected = todayPayments.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const todayPayouts = allPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t).reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const allCollected = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const allPayoutsTotal = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const el = id => document.getElementById(id);
+  if (el('dashTodayCollected')) el('dashTodayCollected').innerText = 'Rs. ' + todayCollected.toLocaleString();
+  if (el('dashTodayPayouts'))   el('dashTodayPayouts').innerText   = 'Rs. ' + todayPayouts.toLocaleString();
+  if (el('dashTodayNet'))       el('dashTodayNet').innerText       = 'Rs. ' + (todayCollected - todayPayouts).toLocaleString();
+  if (el('dashAllNet'))         el('dashAllNet').innerText         = 'Rs. ' + (allCollected - allPayoutsTotal).toLocaleString();
+
   const recentUsers = document.getElementById('dashRecentUsers');
   if (recentUsers && allUsers.length) {
     recentUsers.innerHTML = allUsers.slice(0,5).map(u => `
@@ -770,10 +1118,7 @@ function renderDashboardRecent() {
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div>
-            <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
-          </div>
+          <div class="reg-main"><div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div><div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div></div>
           <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div>
         </div>
       `;
@@ -781,26 +1126,22 @@ function renderDashboardRecent() {
   }
 }
 
-// ============ REVIEW (works for BOTH payments and registrations) ============
+// ============ REVIEW ============
 window.openReview = function(id, name, action, type) {
   document.getElementById('reviewId').value = id;
   document.getElementById('reviewAction').value = action;
   document.getElementById('reviewType').value = type || 'payment';
-  document.getElementById('reviewTitle').innerText =
-    action === 'approve' ? '✔ Approve' : '❌ Reject';
-  document.getElementById('reviewDesc').innerHTML =
-    (action === 'approve' ? 'Confirm approval for ' : 'Reject ') + '<b>' + name + '</b>?';
+  document.getElementById('reviewTitle').innerText = action === 'approve' ? '✔ Approve' : '❌ Reject';
+  document.getElementById('reviewDesc').innerHTML = (action === 'approve' ? 'Approve ' : 'Reject ') + '<b>' + name + '</b>?';
   const btn = document.getElementById('reviewConfirmBtn');
   btn.className = action === 'approve' ? 'btn-primary green' : 'btn-primary red';
   btn.innerText = action === 'approve' ? '✔ Confirm Approve' : '✘ Confirm Reject';
   document.getElementById('reviewModal').classList.add('active');
 };
-
 window.closeReview = function() {
   document.getElementById('reviewModal').classList.remove('active');
   document.getElementById('reviewNote').value = '';
 };
-
 window.confirmReview = async function(e) {
   e.preventDefault();
   const id     = document.getElementById('reviewId').value;
@@ -812,31 +1153,19 @@ window.confirmReview = async function(e) {
 
   try {
     if (type === 'payment') {
-      await updateDoc(doc(db, 'tournament_payments', id), {
-        status, adminNote: note, reviewedAt: serverTimestamp()
-      });
-      const regSnap = await getDocs(query(
-        collection(db, 'tournament_registrations'),
-        where('paymentId', '==', id)
-      ));
+      await updateDoc(doc(db, 'tournament_payments', id), { status, adminNote: note, reviewedAt: serverTimestamp() });
+      const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('paymentId', '==', id)));
       for (const d of regSnap.docs) {
         await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
       }
     } else {
-      // Registration-level review (free tournaments)
-      await updateDoc(doc(db, 'tournament_registrations', id), {
-        status: regStatus
-      });
+      await updateDoc(doc(db, 'tournament_registrations', id), { status: regStatus });
     }
-
     closeReview();
     window.showToast('✅ ' + (action === 'approve' ? 'Approved' : 'Rejected'));
     window.loadPayments();
     window.loadRegistrations();
-  } catch (err) {
-    console.error(err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 // ============ LIGHTBOX + TOAST ============
@@ -857,7 +1186,16 @@ window.showToast = function(msg) {
   await window.loadPayments();
   await window.loadRegistrations();
   await window.loadUsers();
-  console.log("✅ Admin loaded");
+  try {
+    const snap = await getDocs(collection(db, 'tournament_payouts'));
+    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) { console.warn('payouts load failed:', e); }
+  renderDashboardRecent();
+
+  // Attach real-time notification listeners
+  attachRealtimeListeners();
+
+  console.log("✅ Admin loaded + notification bell active");
 })();
 </script>
 </body>
