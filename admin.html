@@ -150,7 +150,7 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ SECTION SWITCHER (works even if Firebase fails) ============ -->
+<!-- ============ SECTION SWITCHER (plain JS, runs first, always works) ============ -->
 <script>
 (function() {
   function showSection(name, el) {
@@ -159,14 +159,16 @@
     if (target) target.style.display = 'block';
     document.querySelectorAll('.sidebar-link').forEach(function(a) { a.classList.remove('active'); });
     if (el) el.classList.add('active');
+
     if (name === 'payments' && typeof window.loadPayments === 'function') {
-      try { window.loadPayments(); } catch (e) { console.error(e); }
+      try { window.loadPayments(); } catch (e) { console.error('loadPayments err:', e); }
     }
     if (name === 'registrations' && typeof window.loadRegistrations === 'function') {
-      try { window.loadRegistrations(); } catch (e) { console.error(e); }
+      try { window.loadRegistrations(); } catch (e) { console.error('loadRegistrations err:', e); }
     }
   }
   window.showSection = showSection;
+
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar-link').forEach(function(link) {
       link.addEventListener('click', function(e) {
@@ -187,7 +189,6 @@ import {
   query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ---- Firebase config (inline — no external file needed) ----
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
@@ -478,6 +479,7 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
+console.log("✅ Admin module loaded. window.loadPayments =", typeof window.loadPayments);
 window.loadPayments();
 </script>
 </body>
