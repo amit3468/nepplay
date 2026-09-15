@@ -21,6 +21,18 @@
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
+        /* NOTIFICATION BELL */
+        .notif-btn { position: relative; padding: 6px 10px; border-radius: 10px; transition: background 0.15s; cursor: pointer; }
+        .notif-btn:hover { background-color: rgba(59, 130, 246, 0.15); }
+        .notif-badge { position: absolute; top: 0; right: 4px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; animation: notifPulse 2s infinite; }
+        @keyframes notifPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } }
+        .notif-panel { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 360px; max-width: calc(100vw - 32px); max-height: 480px; overflow-y: auto; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.7); z-index: 9999; }
+        .notif-panel.open { display: block; }
+        .notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; gap: 12px; align-items: flex-start; cursor: pointer; transition: background 0.15s; }
+        .notif-item:hover { background: rgba(59, 130, 246, 0.08); }
+        .notif-item.unread { background: rgba(59, 130, 246, 0.06); border-left: 3px solid #3b82f6; }
+        .notif-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+
         .announcement-card { transition: all 0.3s; }
         .announcement-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2); }
 
@@ -39,7 +51,7 @@
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
 
-        /* Floating WhatsApp button (bottom-right) */
+        /* Floating WhatsApp button */
         .floating-wa { position: fixed; bottom: 24px; right: 24px; z-index: 100; }
         .wa-btn { width: 60px; height: 60px; background: linear-gradient(135deg, #25D366, #128C7E); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); cursor: pointer; transition: all 0.3s; animation: pulse-wa 2s infinite; }
         .wa-btn:hover { transform: scale(1.1); }
@@ -58,453 +70,86 @@
         .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
 
         /* LAUNCH CARD */
-        .launch-card {
-            position: relative;
-            background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4);
-            animation: launchSlide 0.7s ease-out;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-        @keyframes launchSlide {
-            from { opacity: 0; transform: translateY(-30px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .launch-card::before {
-            content: '';
-            position: absolute;
-            top: -100px; right: -100px;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .launch-card::after {
-            content: '';
-            position: absolute;
-            bottom: -150px; left: -100px;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .launch-inner {
-            position: relative;
-            z-index: 10;
-            padding: 28px 24px;
-        }
-        @media (min-width: 640px) {
-            .launch-inner { padding: 40px 36px; }
-        }
+        .launch-card { position: relative; background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4); animation: launchSlide 0.7s ease-out; border: 1px solid rgba(168, 85, 247, 0.3); }
+        @keyframes launchSlide { from { opacity: 0; transform: translateY(-30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .launch-card::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%); pointer-events: none; }
+        .launch-card::after { content: ''; position: absolute; bottom: -150px; left: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%); pointer-events: none; }
+        .launch-inner { position: relative; z-index: 10; padding: 28px 24px; }
+        @media (min-width: 640px) { .launch-inner { padding: 40px 36px; } }
 
-        /* GRAND OPENING */
-        .grand-opening-banner {
-            text-align: center;
-            margin-bottom: 20px;
-            animation: grandPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes grandPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5)); }
-            50% { transform: scale(1.03); filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.9)); }
-        }
-        .grand-opening-title {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: 4px;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #ec4899 70%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-transform: uppercase;
-            line-height: 1.1;
-        }
-        @media (min-width: 640px) {
-            .grand-opening-title { font-size: 3.5rem; letter-spacing: 6px; }
-        }
-        @media (min-width: 1024px) {
-            .grand-opening-title { font-size: 4.5rem; letter-spacing: 8px; }
-        }
-        .grand-opening-subtitle {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.75);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 6px;
-        }
-        @media (min-width: 640px) {
-            .grand-opening-subtitle { font-size: 1rem; letter-spacing: 5px; }
-        }
-        .grand-opening-divider {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .grand-opening-divider .line {
-            height: 2px;
-            width: 60px;
-            background: linear-gradient(90deg, transparent, #fbbf24, transparent);
-        }
-        @media (min-width: 640px) {
-            .grand-opening-divider .line { width: 100px; }
-        }
-        .grand-opening-divider .star {
-            color: #fbbf24;
-            font-size: 18px;
-            animation: starSpin 3s linear infinite;
-        }
-        @keyframes starSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .confetti {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            opacity: 0.8;
-            animation: confettiFall 5s linear infinite;
-            border-radius: 2px;
-        }
-        @keyframes confettiFall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(700px) rotate(720deg); opacity: 0; }
-        }
+        .grand-opening-banner { text-align: center; margin-bottom: 20px; animation: grandPulse 2.5s ease-in-out infinite; }
+        @keyframes grandPulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5)); } 50% { transform: scale(1.03); filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.9)); } }
+        .grand-opening-title { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #ec4899 70%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; line-height: 1.1; }
+        @media (min-width: 640px) { .grand-opening-title { font-size: 3.5rem; letter-spacing: 6px; } }
+        @media (min-width: 1024px) { .grand-opening-title { font-size: 4.5rem; letter-spacing: 8px; } }
+        .grand-opening-subtitle { font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, 0.75); letter-spacing: 3px; text-transform: uppercase; margin-top: 6px; }
+        @media (min-width: 640px) { .grand-opening-subtitle { font-size: 1rem; letter-spacing: 5px; } }
+        .grand-opening-divider { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
+        .grand-opening-divider .line { height: 2px; width: 60px; background: linear-gradient(90deg, transparent, #fbbf24, transparent); }
+        @media (min-width: 640px) { .grand-opening-divider .line { width: 100px; } }
+        .grand-opening-divider .star { color: #fbbf24; font-size: 18px; animation: starSpin 3s linear infinite; }
+        @keyframes starSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .confetti { position: absolute; width: 8px; height: 8px; opacity: 0.8; animation: confettiFall 5s linear infinite; border-radius: 2px; }
+        @keyframes confettiFall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(700px) rotate(720deg); opacity: 0; } }
 
-        .launch-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid rgba(251, 191, 36, 0.5);
-            border-radius: 9999px;
-            padding: 6px 16px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #fbbf24;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .launch-tag .dot {
-            width: 8px; height: 8px;
-            background: #fbbf24;
-            border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6); }
-            50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
-        }
+        .launch-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 9999px; padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; }
+        .launch-tag .dot { width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6); } 50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); } }
 
-        .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(34, 197, 94, 0.25);
-            border: 1px solid rgba(34, 197, 94, 0.6);
-            border-radius: 9999px;
-            padding: 6px 16px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: #4ade80;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .live-indicator .pulse {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse-live 1.5s infinite;
-        }
-        @keyframes pulse-live {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); }
-            50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
-        }
+        .live-indicator { display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.6); border-radius: 9999px; padding: 6px 16px; font-size: 0.75rem; font-weight: 800; color: #4ade80; text-transform: uppercase; letter-spacing: 1px; }
+        .live-indicator .pulse { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse-live 1.5s infinite; }
+        @keyframes pulse-live { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); } 50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); } }
 
-        .countdown-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-        @media (min-width: 640px) {
-            .countdown-grid { gap: 14px; margin: 24px 0; }
-        }
-        .countdown-box {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 14px 8px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        .countdown-box:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: translateY(-3px);
-        }
-        .countdown-number {
-            font-size: 1.75rem;
-            font-weight: 900;
-            color: #fbbf24;
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-            font-variant-numeric: tabular-nums;
-        }
-        @media (min-width: 640px) {
-            .countdown-number { font-size: 2.5rem; }
-        }
-        .countdown-label {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 6px;
-            font-weight: 700;
-        }
-        @media (min-width: 640px) {
-            .countdown-label { font-size: 0.75rem; }
-        }
+        .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        @media (min-width: 640px) { .countdown-grid { gap: 14px; margin: 24px 0; } }
+        .countdown-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 14px 8px; text-align: center; transition: all 0.3s; }
+        .countdown-box:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-3px); }
+        .countdown-number { font-size: 1.75rem; font-weight: 900; color: #fbbf24; line-height: 1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); font-variant-numeric: tabular-nums; }
+        @media (min-width: 640px) { .countdown-number { font-size: 2.5rem; } }
+        .countdown-label { font-size: 0.65rem; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; font-weight: 700; }
+        @media (min-width: 640px) { .countdown-label { font-size: 0.75rem; } }
 
-        .prize-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 14px;
-            padding: 14px 16px;
-            transition: all 0.3s;
-        }
-        .prize-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: translateY(-3px);
-            border-color: rgba(251, 191, 36, 0.4);
-        }
+        .prize-card { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 14px 16px; transition: all 0.3s; }
+        .prize-card:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-3px); border-color: rgba(251, 191, 36, 0.4); }
 
-        .game-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 9999px;
-            padding: 6px 12px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: white;
-            transition: all 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .game-chip:hover {
-            background: rgba(251, 191, 36, 0.3);
-            transform: scale(1.05);
-            border-color: #fbbf24;
-        }
+        .game-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 9999px; padding: 6px 12px; font-size: 0.7rem; font-weight: 700; color: white; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+        .game-chip:hover { background: rgba(251, 191, 36, 0.3); transform: scale(1.05); border-color: #fbbf24; }
 
-        .rule-notice {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15));
-            border: 2px solid rgba(239, 68, 68, 0.4);
-            border-radius: 16px;
-            padding: 18px 20px;
-            margin: 20px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .rule-notice::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 4px; height: 100%;
-            background: linear-gradient(180deg, #ef4444, #fbbf24);
-        }
-        .rule-notice.rule-ok {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.1));
-            border-color: rgba(34, 197, 94, 0.4);
-        }
-        .rule-notice.rule-ok::before {
-            background: linear-gradient(180deg, #22c55e, #3b82f6);
-        }
-        .rule-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-        .rule-notice.rule-ok .rule-icon {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-        }
+        .rule-notice { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15)); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 18px 20px; margin: 20px 0; position: relative; overflow: hidden; }
+        .rule-notice::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #ef4444, #fbbf24); }
+        .rule-notice.rule-ok { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.1)); border-color: rgba(34, 197, 94, 0.4); }
+        .rule-notice.rule-ok::before { background: linear-gradient(180deg, #22c55e, #3b82f6); }
+        .rule-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 18px; flex-shrink: 0; }
+        .rule-notice.rule-ok .rule-icon { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
-        .launch-cta-primary {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #ffffff;
-            font-weight: 800;
-            padding: 16px 32px;
-            border-radius: 14px;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5);
-            font-size: 1rem;
-            animation: ctaPulse 2s ease-in-out infinite;
-            text-decoration: none;
-        }
-        @keyframes ctaPulse {
-            0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); }
-            50% { box-shadow: 0 10px 45px rgba(34, 197, 94, 0.8); }
-        }
-        .launch-cta-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 45px rgba(34, 197, 94, 0.7);
-        }
-        .launch-cta-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: white;
-            font-weight: 700;
-            padding: 16px 28px;
-            border-radius: 14px;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            text-decoration: none;
-        }
-        .launch-cta-secondary:hover {
-            background: rgba(255, 255, 255, 0.18);
-            transform: translateY(-3px);
-        }
+        .launch-cta-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; font-weight: 800; padding: 16px 32px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); font-size: 1rem; animation: ctaPulse 2s ease-in-out infinite; text-decoration: none; }
+        @keyframes ctaPulse { 0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); } 50% { box-shadow: 0 10px 45px rgba(34, 197, 94, 0.8); } }
+        .launch-cta-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(34, 197, 94, 0.7); }
+        .launch-cta-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; font-weight: 800; padding: 16px 28px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; text-decoration: none; box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4); }
+        .launch-cta-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 15px 45px rgba(37, 211, 102, 0.7); }
 
-        /* NEW: WhatsApp CTA — made green and prominent */
-        .launch-cta-whatsapp {
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: #ffffff;
-            font-weight: 800;
-            padding: 16px 28px;
-            border-radius: 14px;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            text-decoration: none;
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
-        }
-        .launch-cta-whatsapp:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 45px rgba(37, 211, 102, 0.7);
-        }
+        .float-icon { position: absolute; opacity: 0.15; animation: floaty 4s ease-in-out infinite; }
+        @keyframes floaty { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(15deg); } }
 
-        .float-icon {
-            position: absolute;
-            opacity: 0.15;
-            animation: floaty 4s ease-in-out infinite;
-        }
-        @keyframes floaty {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(15deg); }
-        }
+        .date-badge { display: inline-flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 16px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); border: 2px solid rgba(255, 255, 255, 0.2); }
+        .date-badge .month { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
+        .date-badge .day { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; margin: 2px 0; }
+        .date-badge .year { font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
 
-        .date-badge {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border-radius: 16px;
-            padding: 12px 20px;
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        .date-badge .month {
-            font-size: 0.7rem; font-weight: 800; letter-spacing: 2px;
-            text-transform: uppercase; color: rgba(255, 255, 255, 0.9);
-        }
-        .date-badge .day {
-            font-size: 2.5rem; font-weight: 900; color: white;
-            line-height: 1; margin: 2px 0;
-        }
-        .date-badge .year {
-            font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* SPOTS INDICATOR */
-        .spots-indicator {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            border-radius: 14px;
-            padding: 16px 20px;
-            margin: 18px 0;
-        }
-        .spots-indicator .number {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #4ade80;
-            display: inline-block;
-            font-variant-numeric: tabular-nums;
-            transition: all 0.5s;
-        }
-        .spots-indicator .number.growing {
-            animation: numberPop 0.6s ease-out;
-            color: #fbbf24;
-        }
-        @keyframes numberPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.25); }
-            100% { transform: scale(1); }
-        }
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 9999px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #22c55e, #fbbf24);
-            border-radius: 9999px;
-            transition: width 0.8s ease-out;
-            animation: progressPulse 2s infinite;
-        }
-        @keyframes progressPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
-        .progress-text {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 6px;
-            text-align: center;
-        }
-        .live-dot-small {
-            width: 6px;
-            height: 6px;
-            background: #22c55e;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse-live 1.5s infinite;
-            vertical-align: middle;
-        }
+        .spots-indicator { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15)); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 14px; padding: 16px 20px; margin: 18px 0; }
+        .spots-indicator .number { font-size: 1.8rem; font-weight: 900; color: #4ade80; display: inline-block; font-variant-numeric: tabular-nums; transition: all 0.5s; }
+        .spots-indicator .number.growing { animation: numberPop 0.6s ease-out; color: #fbbf24; }
+        @keyframes numberPop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+        .progress-bar-container { width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 9999px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #fbbf24); border-radius: 9999px; transition: width 0.8s ease-out; animation: progressPulse 2s infinite; }
+        @keyframes progressPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+        .progress-text { font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); margin-top: 6px; text-align: center; }
+        .live-dot-small { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-live 1.5s infinite; vertical-align: middle; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support (bottom-left) -->
+    <!-- Floating Support -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
@@ -526,7 +171,7 @@
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- Floating WhatsApp (bottom-right) — ALWAYS VISIBLE -->
+    <!-- Floating WhatsApp -->
     <div class="floating-wa">
         <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="wa-btn" title="Join WhatsApp Community">
             <i class="fa-brands fa-whatsapp"></i>
@@ -616,9 +261,34 @@
                     </div>
                 </div>
             </div>
-            <button onclick="toggleMobileNav2()" class="mobile-menu-toggle text-white text-2xl p-1">
-                <i class="fa-solid fa-bars" id="hamburgerIcon2"></i>
-            </button>
+
+            <!-- RIGHT SIDE: BELL + HAMBURGER -->
+            <div class="flex items-center gap-2">
+                <!-- NOTIFICATION BELL -->
+                <div id="notif-wrapper" class="relative">
+                    <div class="notif-btn" onclick="toggleNotifPanel(event)">
+                        <i class="fa-solid fa-bell text-xl text-gray-300"></i>
+                        <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+                    </div>
+                    <div id="notif-panel" class="notif-panel">
+                        <div class="p-4 border-b border-gray-700 flex justify-between items-center sticky top-0 bg-slate-800 z-10">
+                            <p class="text-white font-bold text-sm"><i class="fa-solid fa-bell mr-2 text-blue-400"></i>Notifications</p>
+                            <button onclick="markAllRead(event)" class="text-xs text-blue-400 hover:text-blue-300">Mark all read</button>
+                        </div>
+                        <div id="notif-list">
+                            <div class="p-6 text-center text-gray-500 text-sm">
+                                <i class="fa-solid fa-bell-slash text-2xl mb-2 opacity-50"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="toggleMobileNav2()" class="mobile-menu-toggle text-white text-2xl p-1">
+                    <i class="fa-solid fa-bars" id="hamburgerIcon2"></i>
+                </button>
+            </div>
+
             <div id="mobileNav2" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
                 <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
                 <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
@@ -631,7 +301,6 @@
             
             <!-- LAUNCH CARD -->
             <div id="launch-card" class="launch-card mb-6">
-                
                 <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
                 <i class="fa-solid fa-gamepad float-icon" style="bottom: 20%; left: 5%; font-size: 50px; color: #ec4899; animation-delay: 1.5s;"></i>
                 <i class="fa-solid fa-fire float-icon" style="top: 60%; right: 12%; font-size: 40px; color: #ef4444; animation-delay: 0.8s;"></i>
@@ -791,7 +460,6 @@
                         💜 Register now to lock your slot. See you on 22nd September! 🚀
                     </p>
 
-                    <!-- CTA BUTTONS — Restored & Enhanced -->
                     <div class="flex flex-wrap gap-3">
                         <a href="tournaments.html" class="launch-cta-primary">
                             <i class="fa-solid fa-gamepad text-xl"></i>
@@ -894,7 +562,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -912,7 +580,6 @@
         const auth = getAuth(app);
 
         const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 22, 7, 15, 0));
-
         const BASE_COUNT = 40;
         const GROWTH_RATE = 0.1;
         const TOTAL_CAPACITY = 500;
@@ -922,7 +589,12 @@
 
         let currentUser = null;
         let currentUserProfile = null;
+        let notifListeners = [];
+        let notifCache = [];
 
+        // ===================================================
+        // NAVIGATION / SUPPORT
+        // ===================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -946,22 +618,247 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
+        // ===================================================
+        // NOTIFICATION SYSTEM
+        // ===================================================
+        window.toggleNotifPanel = function(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('notif-panel').classList.toggle('open');
+        };
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('notif-wrapper');
+            const panel = document.getElementById('notif-panel');
+            if (wrapper && !wrapper.contains(e.target)) {
+                if (panel) panel.classList.remove('open');
+            }
+        });
+
+        window.markAllRead = function(e) {
+            if (e) e.stopPropagation();
+            notifCache.forEach(n => n.read = true);
+            localStorage.setItem('notifRead_' + (currentUser?.uid || ''), JSON.stringify(notifCache.map(n => n.id)));
+            updateNotifBadge();
+            renderNotifList();
+        };
+
+        function loadReadIds() {
+            try {
+                const raw = localStorage.getItem('notifRead_' + (currentUser?.uid || ''));
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveReadIds() {
+            const ids = notifCache.filter(n => n.read).map(n => n.id);
+            localStorage.setItem('notifRead_' + (currentUser?.uid || ''), JSON.stringify(ids));
+        }
+
+        function updateNotifBadge() {
+            const unread = notifCache.filter(n => !n.read).length;
+            const badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            if (unread > 0) {
+                badge.textContent = unread > 9 ? '9+' : unread;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function pushNotif(notif) {
+            if (!notif || !notif.id) return;
+            if (notifCache.find(n => n.id === notif.id)) return;
+            const readIds = loadReadIds();
+            notif.read = readIds.includes(notif.id);
+            notifCache.unshift(notif);
+            if (notifCache.length > 60) notifCache = notifCache.slice(0, 60);
+            updateNotifBadge();
+            renderNotifList();
+        }
+
+        function renderNotifList() {
+            const list = document.getElementById('notif-list');
+            if (!list) return;
+            if (!notifCache.length) {
+                list.innerHTML = `
+                    <div class="p-6 text-center text-gray-500 text-sm">
+                        <i class="fa-solid fa-bell-slash text-2xl mb-2 opacity-50"></i>
+                        <p>No notifications yet</p>
+                    </div>
+                `;
+                return;
+            }
+            const style = {
+                success: { bg: 'rgba(34,197,94,.15)', color: '#4ade80', icon: 'fa-circle-check' },
+                info:    { bg: 'rgba(59,130,246,.15)', color: '#60a5fa', icon: 'fa-circle-info' },
+                warning: { bg: 'rgba(234,179,8,.15)',  color: '#facc15', icon: 'fa-triangle-exclamation' },
+                error:   { bg: 'rgba(239,68,68,.15)',  color: '#f87171', icon: 'fa-circle-xmark' },
+                trophy:  { bg: 'rgba(251,191,36,.15)', color: '#fbbf24', icon: 'fa-trophy' },
+                money:   { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-money-bill-wave' }
+            };
+            list.innerHTML = notifCache.map(n => {
+                const s = style[n.type] || style.info;
+                const timeAgo = n.time ? timeSince(n.time) : '';
+                return `
+                    <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markOneRead('${n.id}')">
+                        <div class="notif-icon" style="background:${s.bg}; color:${s.color};">
+                            <i class="fa-solid ${s.icon}"></i>
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <p class="text-sm font-bold text-white">${escapeHtml(n.title || '')}</p>
+                            <p class="text-xs text-gray-400 mt-1">${escapeHtml(n.message || '')}</p>
+                            <p class="text-[10px] text-gray-500 mt-1">${timeAgo}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.markOneRead = function(id) {
+            const n = notifCache.find(x => x.id === id);
+            if (n) { n.read = true; saveReadIds(); updateNotifBadge(); renderNotifList(); }
+        };
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+
+        function timeSince(date) {
+            const d = new Date(date);
+            const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+            if (sec < 60) return 'just now';
+            if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+            if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+            if (sec < 604800) return Math.floor(sec / 86400) + 'd ago';
+            return d.toLocaleDateString();
+        }
+
+        // ===================================================
+        // ATTACH REAL-TIME LISTENERS
+        // ===================================================
+        function attachNotifListeners(uid) {
+            // Clean old listeners
+            notifListeners.forEach(unsub => { try { unsub(); } catch(e){} });
+            notifListeners = [];
+
+            // 1. Payments — watch own payments for status changes
+            const payQ = query(collection(db, 'tournament_payments'), where('userId', '==', uid));
+            notifListeners.push(onSnapshot(payQ, snap => {
+                snap.docChanges().forEach(change => {
+                    const p = change.doc.data();
+                    const id = change.doc.id;
+
+                    if (change.type === 'added' && p.status === 'pending') {
+                        pushNotif({
+                            id: 'pay_submit_' + id,
+                            type: 'info',
+                            title: '💳 Payment Submitted',
+                            message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`,
+                            time: new Date()
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        if (p.status === 'approved') {
+                            pushNotif({
+                                id: 'pay_approved_' + id,
+                                type: 'success',
+                                title: '✅ Payment Approved!',
+                                message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`,
+                                time: new Date()
+                            });
+                        }
+                        if (p.status === 'rejected') {
+                            pushNotif({
+                                id: 'pay_rejected_' + id,
+                                type: 'error',
+                                title: '❌ Payment Rejected',
+                                message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`,
+                                time: new Date()
+                            });
+                        }
+                    }
+                });
+            }));
+
+            // 2. Registrations — watch own registrations
+            const regQ = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
+            notifListeners.push(onSnapshot(regQ, snap => {
+                snap.docChanges().forEach(change => {
+                    const r = change.doc.data();
+                    const id = change.doc.id;
+
+                    if (change.type === 'added') {
+                        pushNotif({
+                            id: 'reg_add_' + id,
+                            type: 'info',
+                            title: '🎮 Tournament Joined',
+                            message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`,
+                            time: new Date()
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        if (r.status === 'confirmed') {
+                            pushNotif({
+                                id: 'reg_conf_' + id + '_' + Date.now(),
+                                type: 'success',
+                                title: '✅ Registration Confirmed',
+                                message: `Your registration for ${r.tournamentTitle || 'a tournament'} is confirmed!`,
+                                time: new Date()
+                            });
+                        }
+                        if (r.status === 'rejected') {
+                            pushNotif({
+                                id: 'reg_rej_' + id + '_' + Date.now(),
+                                type: 'error',
+                                title: '❌ Registration Rejected',
+                                message: `Your registration for ${r.tournamentTitle || 'a tournament'} was rejected.`,
+                                time: new Date()
+                            });
+                        }
+                    }
+                });
+            }));
+
+            // 3. Announcements — global
+            const annQ = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
+            notifListeners.push(onSnapshot(annQ, snap => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const a = change.doc.data();
+                        const id = change.doc.id;
+                        // Skip if item is older than 5 seconds (initial load)
+                        if (a.createdAt?.toDate && (Date.now() - a.createdAt.toDate().getTime()) > 5000) return;
+                        pushNotif({
+                            id: 'ann_' + id,
+                            type: 'warning',
+                            title: '📢 New Announcement',
+                            message: (a.title || 'Announcement') + (a.message ? ' — ' + a.message.substring(0, 80) : ''),
+                            time: new Date()
+                        });
+                    }
+                });
+            }));
+        }
+
+        // ===================================================
+        // COUNTDOWN
+        // ===================================================
         function updateCountdown() {
-            const now = new Date();
-            const diff = LAUNCH_DATE - now;
+            const diff = LAUNCH_DATE - new Date();
             if (diff <= 0) {
-                document.getElementById('cd-days').textContent = '00';
-                document.getElementById('cd-hours').textContent = '00';
-                document.getElementById('cd-minutes').textContent = '00';
-                document.getElementById('cd-seconds').textContent = '00';
+                ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.textContent = '00';
+                });
                 const tag = document.querySelector('.launch-tag');
                 if (tag) tag.innerHTML = '<span class="dot"></span> LIVE NOW';
                 return;
             }
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
             document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
             document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
             document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
@@ -970,77 +867,62 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
+        // ===================================================
+        // LIVE COUNTER
+        // ===================================================
         function calculateFakeCount() {
-            const now = new Date();
-            const hoursSinceBase = (now - BASE_DATE) / (1000 * 60 * 60);
-            const jitter = (Math.sin(hoursSinceBase) * 0.2);
-            const fakeCount = Math.floor(BASE_COUNT + (hoursSinceBase * GROWTH_RATE) + jitter);
-            return Math.max(fakeCount, BASE_COUNT);
+            const hoursSinceBase = (new Date() - BASE_DATE) / 3600000;
+            const jitter = Math.sin(hoursSinceBase) * 0.2;
+            return Math.max(Math.floor(BASE_COUNT + hoursSinceBase * GROWTH_RATE + jitter), BASE_COUNT);
         }
-
-        function animateNumber(element, from, to, duration) {
-            const startTime = performance.now();
+        function animateNumber(el, from, to, duration) {
+            const start = performance.now();
             const diff = to - from;
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+            function frame(now) {
+                const progress = Math.min((now - start) / duration, 1);
                 const eased = 1 - Math.pow(1 - progress, 3);
-                const current = Math.round(from + diff * eased);
-                element.textContent = current;
-                if (progress < 1) requestAnimationFrame(update);
+                el.textContent = Math.round(from + diff * eased);
+                if (progress < 1) requestAnimationFrame(frame);
             }
-            requestAnimationFrame(update);
+            requestAnimationFrame(frame);
         }
-
         async function updateLiveCounter() {
             try {
-                const snapshot = await getDocs(collection(db, "registrations"));
-                const realCount = snapshot.size;
-                const displayCount = calculateFakeCount() + realCount;
-                const percentage = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
-
+                const snapshot = await getDocs(collection(db, 'registrations'));
+                const displayCount = calculateFakeCount() + snapshot.size;
+                const pct = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
                 const el = document.getElementById('total-registered');
                 if (el) {
-                    const current = parseInt(el.textContent) || BASE_COUNT;
-                    if (current !== displayCount) {
+                    const curr = parseInt(el.textContent) || BASE_COUNT;
+                    if (curr !== displayCount) {
                         el.classList.add('growing');
-                        animateNumber(el, current, displayCount, 800);
+                        animateNumber(el, curr, displayCount, 800);
                         setTimeout(() => el.classList.remove('growing'), 800);
                     }
                 }
                 const bar = document.getElementById('slots-progress');
-                if (bar) bar.style.width = percentage + '%';
+                if (bar) bar.style.width = pct + '%';
                 const text = document.getElementById('slots-text');
-                if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
-            } catch (error) {
-                console.error("Counter error:", error);
-                const displayCount = calculateFakeCount();
-                const el = document.getElementById('total-registered');
-                if (el) el.textContent = displayCount;
-                const percentage = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
-                const bar = document.getElementById('slots-progress');
-                if (bar) bar.style.width = percentage + '%';
-                const text = document.getElementById('slots-text');
-                if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${percentage}% capacity`;
+                if (text) text.textContent = `${displayCount} / ${TOTAL_CAPACITY} slots filled • ${pct}% capacity`;
+            } catch (e) {
+                console.warn('Counter error:', e);
             }
         }
         setInterval(updateLiveCounter, 60000);
         setTimeout(updateLiveCounter, 500);
 
+        // ===================================================
+        // AUTH        // ===================================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
                 currentUser = user;
                 await showDashboard(user);
             } else {
-                showLoginScreen();
+                document.getElementById('login-container').classList.remove('hidden');
+                document.getElementById('dashboard-container').classList.add('hidden');
             }
         });
-
-        function showLoginScreen() {
-            document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('dashboard-container').classList.add('hidden');
-        }
 
         window.handleLogin = async function(event) {
             event.preventDefault();
@@ -1051,27 +933,22 @@
 
             if (!email || !password) {
                 msgBox.classList.remove('hidden');
-                msgBox.className = "text-center text-sm mt-4 text-red-400";
-                msgBox.textContent = "Please enter email and password.";
+                msgBox.className = 'text-center text-sm mt-4 text-red-400';
+                msgBox.textContent = 'Please enter email and password.';
                 return;
             }
-
             btn.innerHTML = '<span class="spinner"></span>Logging in...';
             btn.disabled = true;
             msgBox.classList.add('hidden');
-
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                let errorMsg = "Login failed. Please try again.";
-                if (['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found'].includes(error.code)) {
-                    errorMsg = "Invalid email or password.";
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMsg = "Too many attempts. Try later.";
-                }
+                let msg = 'Login failed. Please try again.';
+                if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(error.code)) msg = 'Invalid email or password.';
+                else if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try later.';
                 msgBox.classList.remove('hidden');
-                msgBox.className = "text-center text-sm mt-4 text-red-400";
-                msgBox.textContent = "❌ " + errorMsg;
+                msgBox.className = 'text-center text-sm mt-4 text-red-400';
+                msgBox.textContent = '❌ ' + msg;
                 btn.innerHTML = 'Login';
                 btn.disabled = false;
             }
@@ -1080,13 +957,11 @@
         window.forgotPassword = async function(event) {
             event.preventDefault();
             const email = document.getElementById('email').value.trim();
-            if (!email) { alert("Enter your email above first."); return; }
+            if (!email) { alert('Enter your email above first.'); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
-                alert("📧 Password reset email sent to " + email);
-            } catch (error) {
-                alert("Could not send reset email.");
-            }
+                alert('📧 Password reset email sent to ' + email);
+            } catch (e) { alert('Could not send reset email.'); }
         };
 
         async function showDashboard(user) {
@@ -1094,13 +969,9 @@
             document.getElementById('dashboard-container').classList.remove('hidden');
 
             try {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    currentUserProfile = userDoc.data();
-                } else {
-                    currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
-                }
-            } catch (error) {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                currentUserProfile = userDoc.exists() ? userDoc.data() : { username: user.email.split('@')[0], fullName: 'User', email: user.email };
+            } catch (e) {
                 currentUserProfile = { username: user.email.split('@')[0], fullName: 'User', email: user.email };
             }
 
@@ -1110,6 +981,11 @@
             document.getElementById('welcome-name-inline').textContent = firstName;
             document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
+
+            // Attach notification listeners
+            attachNotifListeners(user.uid);
+            updateNotifBadge();
+            renderNotifList();
 
             await Promise.all([
                 checkUserRegistration(user.uid),
@@ -1121,9 +997,9 @@
 
         async function checkUserRegistration(uid) {
             try {
-                const q = query(collection(db, "registrations"), where("userId", "==", uid));
-                const snapshot = await getDocs(q);
-                const regs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                const q = query(collection(db, 'registrations'), where('userId', '==', uid));
+                const snap = await getDocs(q);
+                const regs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 const ruleBox = document.getElementById('rule-notice');
                 const ruleStatus = document.getElementById('rule-status');
@@ -1136,20 +1012,18 @@
                     ruleTitle.innerHTML = '✅ Registration Locked';
                     ruleStatus.classList.remove('hidden');
                     ruleStatus.className = 'text-xs mt-3 text-green-400';
-                    ruleStatus.innerHTML = `You are already registered for <strong>${regs[0].tournamentName || 'one tournament'}</strong>. You cannot register for another tournament.`;
+                    ruleStatus.innerHTML = `You are already registered for <strong>${regs[0].tournamentName || 'one tournament'}</strong>.`;
                 }
-
-                const uniqueT = new Set(regs.map(r => r.tournamentName));
-                document.getElementById('matches-played').textContent = uniqueT.size;
-
-                const mSub = document.getElementById('matches-subtitle');
-                if (uniqueT.size > 0) {
-                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${uniqueT.size} tournament(s)`;
-                    mSub.className = "text-xs text-blue-400 mt-2";
+                const unique = new Set(regs.map(r => r.tournamentName));
+                document.getElementById('matches-played').textContent = unique.size;
+                if (unique.size > 0) {
+                    const mSub = document.getElementById('matches-subtitle');
+                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${unique.size} tournament(s)`;
+                    mSub.className = 'text-xs text-blue-400 mt-2';
                 }
                 renderUpcoming(regs);
-            } catch (error) {
-                console.error("Registrations error:", error);
+            } catch (e) {
+                console.error('Registrations error:', e);
                 renderUpcoming([]);
             }
         }
@@ -1157,14 +1031,9 @@
         function renderUpcoming(regs) {
             const tbody = document.getElementById('upcoming-table-body');
             const empty = document.getElementById('empty-upcoming');
-            const tableWrap = document.getElementById('upcoming-table-wrapper');
-            if (regs.length === 0) {
-                tableWrap.style.display = 'none';
-                empty.classList.remove('hidden');
-                return;
-            }
-            tableWrap.style.display = 'block';
-            empty.classList.add('hidden');
+            const wrap = document.getElementById('upcoming-table-wrapper');
+            if (!regs.length) { wrap.style.display = 'none'; empty.classList.remove('hidden'); return; }
+            wrap.style.display = 'block'; empty.classList.add('hidden');
             tbody.innerHTML = '';
             const seen = new Set();
             [...regs].reverse().forEach(r => {
@@ -1172,7 +1041,7 @@
                 seen.add(r.tournamentName);
                 const d = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
+                row.className = 'hover:bg-gray-800/50 transition';
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentName || '—'}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">${d}</td>
@@ -1185,42 +1054,35 @@
 
         async function loadPayouts(uid) {
             try {
-                const q = query(collection(db, "payouts"), where("userId", "==", uid));
-                const snapshot = await getDocs(q);
-                const payouts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                const paidWins = payouts.filter(p => p.status === 'paid');
-                const totalEarn = paidWins.reduce((sum, p) => sum + (p.prize || 0), 0);
-                document.getElementById('total-earnings').textContent = totalEarn.toLocaleString();
-                const eSub = document.getElementById('earnings-subtitle');
-                if (totalEarn > 0) {
-                    eSub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paidWins.length} prize(s) won`;
-                    eSub.className = "text-xs text-green-400 mt-2";
-                } else if (payouts.length > 0) {
-                    eSub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${payouts.length} pending`;
-                    eSub.className = "text-xs text-yellow-400 mt-2";
+                const q = query(collection(db, 'payouts'), where('userId', '==', uid));
+                const snap = await getDocs(q);
+                const pays = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const paid = pays.filter(p => p.status === 'paid');
+                const total = paid.reduce((s, p) => s + (p.prize || 0), 0);
+                document.getElementById('total-earnings').textContent = total.toLocaleString();
+                const sub = document.getElementById('earnings-subtitle');
+                if (total > 0) {
+                    sub.innerHTML = `<i class="fa-solid fa-arrow-up text-green-500"></i> ${paid.length} prize(s) won`;
+                    sub.className = 'text-xs text-green-400 mt-2';
+                } else if (pays.length > 0) {
+                    sub.innerHTML = `<i class="fa-solid fa-clock text-yellow-500"></i> ${pays.length} pending`;
+                    sub.className = 'text-xs text-yellow-400 mt-2';
                 }
-                renderHistory(payouts);
-            } catch (error) {
-                renderHistory([]);
-            }
+                renderHistory(pays);
+            } catch (e) { renderHistory([]); }
         }
 
         function renderHistory(pays) {
             const tbody = document.getElementById('history-table-body');
             const empty = document.getElementById('empty-history');
-            const tableWrap = document.getElementById('history-table-wrapper');
-            if (pays.length === 0) {
-                tableWrap.style.display = 'none';
-                empty.classList.remove('hidden');
-                return;
-            }
-            tableWrap.style.display = 'block';
-            empty.classList.add('hidden');
+            const wrap = document.getElementById('history-table-wrapper');
+            if (!pays.length) { wrap.style.display = 'none'; empty.classList.remove('hidden'); return; }
+            wrap.style.display = 'block'; empty.classList.add('hidden');
             tbody.innerHTML = '';
             [...pays].reverse().forEach(p => {
                 const status = p.status === 'paid' ? '<span class="status-badge status-paid">Paid</span>' : '<span class="status-badge status-pending">Pending</span>';
                 const row = document.createElement('tr');
-                row.className = "hover:bg-gray-800/50 transition";
+                row.className = 'hover:bg-gray-800/50 transition';
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-white text-sm">${p.tournament || '—'}</td>
                     <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank || '—'}</td>
@@ -1234,23 +1096,23 @@
         async function loadAnnouncements() {
             const container = document.getElementById('announcements-container');
             try {
-                const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(5));
-                const snapshot = await getDocs(q);
-                const announcements = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (announcements.length === 0) {
-                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Registration is OPEN! Head to Tournaments to claim your slot for 22 September.</span></div>`;
+                const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
+                const snap = await getDocs(q);
+                const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (!items.length) {
+                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Registration is OPEN!</span></div>`;
                     return;
                 }
-                const colors = { normal: 'border-blue-500', high: 'border-yellow-500', urgent: 'border-red-500' };
-                const icons = { normal: 'fa-info-circle text-blue-400', high: 'fa-exclamation-triangle text-yellow-400', urgent: 'fa-exclamation-circle text-red-400' };
+                const colors = { normal:'border-blue-500', high:'border-yellow-500', urgent:'border-red-500' };
+                const icons = { normal:'fa-info-circle text-blue-400', high:'fa-exclamation-triangle text-yellow-400', urgent:'fa-exclamation-circle text-red-400' };
                 container.innerHTML = '';
-                announcements.forEach(a => {
+                items.forEach(a => {
                     const card = document.createElement('div');
                     card.className = `announcement-card bg-gray-800/50 rounded-lg overflow-hidden border-l-4 ${colors[a.priority] || 'border-blue-500'}`;
                     const date = a.createdAt ? new Date(a.createdAt.seconds * 1000 || a.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-                    const imageHtml = a.imageUrl ? `<img src="${a.imageUrl}" class="w-full h-40 object-cover" alt="">` : '';
+                    const img = a.imageUrl ? `<img src="${a.imageUrl}" class="w-full h-40 object-cover" alt="">` : '';
                     card.innerHTML = `
-                        ${imageHtml}
+                        ${img}
                         <div class="p-4">
                             <div class="flex items-start gap-3">
                                 <i class="fa-solid ${icons[a.priority] || 'fa-info-circle'} mt-0.5"></i>
@@ -1264,30 +1126,28 @@
                     `;
                     container.appendChild(card);
                 });
-            } catch (error) {
-                console.error("Announcements error:", error);
+            } catch (e) {
                 container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i><span class="text-sm text-gray-300">Could not load announcements.</span></div>`;
             }
         }
 
         async function loadActiveTournaments() {
             try {
-                const snapshot = await getDocs(collection(db, "tournaments"));
-                document.getElementById('active-tournaments').textContent = snapshot.size;
-            } catch (error) {
+                const snap = await getDocs(collection(db, 'tournaments'));
+                document.getElementById('active-tournaments').textContent = snap.size;
+            } catch (e) {
                 document.getElementById('active-tournaments').textContent = '0';
             }
         }
 
         window.logout = async function() {
-            if (!confirm("Log out from your account?")) return;
+            if (!confirm('Log out from your account?')) return;
             try {
+                notifListeners.forEach(u => { try { u(); } catch(e){} });
                 await signOut(auth);
                 localStorage.removeItem('currentUser');
                 window.location.reload();
-            } catch (error) {
-                console.error("Logout error:", error);
-            }
+            } catch (e) { console.error('Logout error:', e); }
         };
 
         window.toggleProfileDropdown = function() {
