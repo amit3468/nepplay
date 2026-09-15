@@ -9,13 +9,11 @@
 </head>
 <body>
 
-<!-- Mobile hamburger -->
 <button class="admin-hamburger" onclick="toggleAdminSidebar()">☰</button>
 <div class="sidebar-backdrop" id="adminSidebarBackdrop" onclick="toggleAdminSidebar()"></div>
 
 <div class="admin-layout">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2 class="logo">🎮 NEPPLAY
       <span style="font-size:11px;background:#dc2626;padding:2px 8px;border-radius:8px;margin-left:6px;">ADMIN</span>
@@ -30,6 +28,7 @@
         <span>📋</span> Registrations
         <span class="badge" id="regsBadge">0</span>
       </a>
+      <a href="#create" data-section="create" class="sidebar-link"><span>➕</span> Create Tournament</a>
       <a href="#results" data-section="results" class="sidebar-link"><span>🏁</span> Match Results</a>
       <a href="#daily" data-section="daily" class="sidebar-link"><span>💹</span> Daily Collections</a>
       <a href="#prize" data-section="prize" class="sidebar-link"><span>🧮</span> Prize Calculator</a>
@@ -45,15 +44,14 @@
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v3.4 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v3.5 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
-    <!-- TOP BAR -->
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v3.4</span>
+        <span style="font-size:12px; color:#6b7280;">v3.5</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
@@ -65,7 +63,6 @@
       </div>
     </header>
 
-    <!-- NOTIF PANEL -->
     <div id="notifPanel" class="notif-dropdown">
       <div class="notif-dropdown-header">
         <b>🔔 Notifications</b>
@@ -78,7 +75,7 @@
 
     <main class="admin-main" style="flex:1;">
 
-    <!-- ==================== DASHBOARD ==================== -->
+    <!-- DASHBOARD -->
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
@@ -98,7 +95,7 @@
       <div class="list" id="dashRecentRegs"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PAYMENTS ==================== -->
+    <!-- PAYMENTS -->
     <section id="section-payments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>💰 Payment Approvals</h2>
@@ -122,7 +119,7 @@
       <div class="pay-list" id="payList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== REGISTRATIONS ==================== -->
+    <!-- REGISTRATIONS -->
     <section id="section-registrations" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>📋 Registrations</h2>
@@ -132,12 +129,113 @@
       <div id="regList" class="reg-list"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== MATCH RESULTS (NEW) ==================== -->
+    <!-- CREATE TOURNAMENT -->
+    <section id="section-create" class="admin-section" style="display:none">
+      <h2>➕ Create Tournament</h2>
+      <p class="muted">Add a new tournament — it will appear on the member page instantly</p>
+
+      <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:28px;">
+        <form id="createTournamentForm" onsubmit="submitCreateTournament(event)">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="grid-column:1/-1;">
+              <label class="result-label">🏆 Tournament Title *</label>
+              <input type="text" id="ctTitle" placeholder="e.g. Free Fire Friday Cup" class="result-input" required>
+            </div>
+
+            <div>
+              <label class="result-label">🎮 Game *</label>
+              <select id="ctGame" class="result-input" required>
+                <option value="">Select game</option>
+                <option value="Free Fire">🔥 Free Fire</option>
+                <option value="PUBG">🎯 PUBG Mobile</option>
+                <option value="COD">💣 COD Mobile</option>
+                <option value="eFootball">⚽ eFootball</option>
+                <option value="eCricket">🏏 eCricket</option>
+                <option value="Valorant">⚔️ Valorant</option>
+                <option value="Ludo">🎲 Ludo King</option>
+                <option value="Chess">♟️ Chess</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="result-label">👥 Mode *</label>
+              <select id="ctMode" class="result-input" required>
+                <option value="Solo">Solo</option>
+                <option value="Duo">Duo</option>
+                <option value="Squad">Squad</option>
+                <option value="1v1">1v1</option>
+                <option value="5v5">5v5</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="result-label">💰 Entry Type *</label>
+              <select id="ctEntryType" class="result-input" onchange="toggleCreateEntryFee()" required>
+                <option value="free">🆓 Free Entry</option>
+                <option value="paid">💵 Paid Entry</option>
+              </select>
+            </div>
+
+            <div id="ctFeeWrap" style="display:none;">
+              <label class="result-label">💵 Entry Fee (Rs.)</label>
+              <input type="number" id="ctEntryFee" class="result-input" value="150" min="0">
+            </div>
+
+            <div>
+              <label class="result-label">🏆 Prize Pool (Rs.)</label>
+              <input type="number" id="ctPrizePool" class="result-input" value="1500" min="0">
+            </div>
+
+            <div>
+              <label class="result-label">🎯 Top Kills Prize (Rs.)</label>
+              <input type="number" id="ctTopKills" class="result-input" value="500" min="0">
+            </div>
+
+            <div>
+              <label class="result-label">📅 Date *</label>
+              <input type="date" id="ctDate" class="result-input" required>
+            </div>
+
+            <div>
+              <label class="result-label">🕐 Time *</label>
+              <input type="time" id="ctTime" class="result-input" value="18:00" required>
+            </div>
+
+            <div>
+              <label class="result-label">👥 Max Players *</label>
+              <input type="number" id="ctMax" class="result-input" value="100" min="2" required>
+            </div>
+
+            <div style="grid-column:1/-1;">
+              <label class="result-label">📝 Description (optional)</label>
+              <textarea id="ctDesc" rows="3" placeholder="Any special rules or details..." class="result-input"></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;padding:16px;background:#0f1124;border:1px solid #2a2d4a;border-radius:12px;">
+            <div style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:8px;">Preview</div>
+            <div id="ctPreview" style="color:#fff;font-size:14px;">Fill the form to see preview...</div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="submit" class="btn-submit-pay" id="ctSubmitBtn" style="flex:1;min-width:220px;margin-top:0;">🚀 Create Tournament</button>
+            <button type="button" onclick="resetCreateForm()" class="btn-secondary" style="margin-top:0;">🔄 Reset</button>
+          </div>
+
+          <div id="ctStatus" style="margin-top:14px;font-size:14px;display:none;"></div>
+        </form>
+      </div>
+
+      <h3 class="mt">📜 Recently Created Tournaments</h3>
+      <div class="list" id="recentCreatedTournaments"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
+    </section>
+
+    <!-- MATCH RESULTS -->
     <section id="section-results" class="admin-section" style="display:none">
       <h2>🏁 Match Results</h2>
       <p class="muted">Record winners &amp; top killers — payouts auto-create</p>
 
-      <!-- Step 1: Select tournament -->
       <div class="result-step-box">
         <div class="result-step-num">1</div>
         <div class="result-step-content">
@@ -148,40 +246,20 @@
         </div>
       </div>
 
-      <!-- Step 2: Results form (hidden until tournament picked) -->
       <div id="resultForm" style="display:none;">
-
-        <!-- Tournament summary card -->
         <div id="resultTournamentSummary" class="result-summary-card"></div>
 
-        <!-- Winner entry rows -->
         <div class="result-step-box">
           <div class="result-step-num">2</div>
           <div class="result-step-content">
-            <h3>🥇 1st Place Winner</h3>
+            <h3>🥇 1st Place</h3>
             <div class="result-field-row">
-              <div>
-                <label>Username</label>
-                <input type="text" id="winner1Name" placeholder="e.g. test_amit" autocomplete="off">
+              <div><label>Username</label><input type="text" id="winner1Name" placeholder="e.g. test_amit"></div>
+              <div><label>Kills</label><input type="number" id="winner1Kills" placeholder="0" min="0"></div>
+              <div><label>Method</label>
+                <select id="winner1Method"><option value="esewa">💚 eSewa</option><option value="khalti">💜 Khalti</option><option value="imepay">🟠 IME Pay</option><option value="bank">🏦 Bank</option><option value="cash">💵 Cash</option></select>
               </div>
-              <div>
-                <label>Kills</label>
-                <input type="number" id="winner1Kills" placeholder="e.g. 12" min="0">
-              </div>
-              <div>
-                <label>Payout Method</label>
-                <select id="winner1Method">
-                  <option value="esewa">💚 eSewa</option>
-                  <option value="khalti">💜 Khalti</option>
-                  <option value="imepay">🟠 IME Pay</option>
-                  <option value="bank">🏦 Bank</option>
-                  <option value="cash">💵 Cash</option>
-                </select>
-              </div>
-              <div>
-                <label>Prize (auto)</label>
-                <input type="text" id="winner1Prize" readonly class="result-prize-input">
-              </div>
+              <div><label>Prize (auto)</label><input type="text" id="winner1Prize" readonly class="result-prize-input"></div>
             </div>
           </div>
         </div>
@@ -191,16 +269,10 @@
           <div class="result-step-content">
             <h3>🥈 2nd Place</h3>
             <div class="result-field-row">
-              <div><label>Username</label><input type="text" id="winner2Name" placeholder="e.g. ronaldo_goat"></div>
-              <div><label>Kills</label><input type="number" id="winner2Kills" placeholder="e.g. 8" min="0"></div>
+              <div><label>Username</label><input type="text" id="winner2Name" placeholder="Leave blank if no 2nd"></div>
+              <div><label>Kills</label><input type="number" id="winner2Kills" placeholder="0" min="0"></div>
               <div><label>Method</label>
-                <select id="winner2Method">
-                  <option value="esewa">💚 eSewa</option>
-                  <option value="khalti">💜 Khalti</option>
-                  <option value="imepay">🟠 IME Pay</option>
-                  <option value="bank">🏦 Bank</option>
-                  <option value="cash">💵 Cash</option>
-                </select>
+                <select id="winner2Method"><option value="esewa">💚 eSewa</option><option value="khalti">💜 Khalti</option><option value="imepay">🟠 IME Pay</option><option value="bank">🏦 Bank</option><option value="cash">💵 Cash</option></select>
               </div>
               <div><label>Prize (auto)</label><input type="text" id="winner2Prize" readonly class="result-prize-input"></div>
             </div>
@@ -212,16 +284,10 @@
           <div class="result-step-content">
             <h3>🥉 3rd Place</h3>
             <div class="result-field-row">
-              <div><label>Username</label><input type="text" id="winner3Name" placeholder="e.g. lucifer001"></div>
-              <div><label>Kills</label><input type="number" id="winner3Kills" placeholder="e.g. 6" min="0"></div>
+              <div><label>Username</label><input type="text" id="winner3Name" placeholder="Leave blank if no 3rd"></div>
+              <div><label>Kills</label><input type="number" id="winner3Kills" placeholder="0" min="0"></div>
               <div><label>Method</label>
-                <select id="winner3Method">
-                  <option value="esewa">💚 eSewa</option>
-                  <option value="khalti">💜 Khalti</option>
-                  <option value="imepay">🟠 IME Pay</option>
-                  <option value="bank">🏦 Bank</option>
-                  <option value="cash">💵 Cash</option>
-                </select>
+                <select id="winner3Method"><option value="esewa">💚 eSewa</option><option value="khalti">💜 Khalti</option><option value="imepay">🟠 IME Pay</option><option value="bank">🏦 Bank</option><option value="cash">💵 Cash</option></select>
               </div>
               <div><label>Prize (auto)</label><input type="text" id="winner3Prize" readonly class="result-prize-input"></div>
             </div>
@@ -232,64 +298,36 @@
           <div class="result-step-num">5</div>
           <div class="result-step-content">
             <h3>🎯 Top Killer</h3>
-            <p class="result-hint">Leave username blank if same as 1st place winner (they get both prizes)</p>
+            <p class="result-hint">Leave username blank if same as 1st place</p>
             <div class="result-field-row">
-              <div><label>Username</label><input type="text" id="topKillerName" placeholder="Leave blank if 1st place is top killer"></div>
-              <div><label>Kills</label><input type="number" id="topKillerKills" placeholder="e.g. 12" min="0"></div>
+              <div><label>Username</label><input type="text" id="topKillerName" placeholder="Blank = same as 1st"></div>
+              <div><label>Kills</label><input type="number" id="topKillerKills" placeholder="0" min="0"></div>
               <div><label>Method</label>
-                <select id="topKillerMethod">
-                  <option value="esewa">💚 eSewa</option>
-                  <option value="khalti">💜 Khalti</option>
-                  <option value="imepay">🟠 IME Pay</option>
-                  <option value="bank">🏦 Bank</option>
-                  <option value="cash">💵 Cash</option>
-                </select>
+                <select id="topKillerMethod"><option value="esewa">💚 eSewa</option><option value="khalti">💜 Khalti</option><option value="imepay">🟠 IME Pay</option><option value="bank">🏦 Bank</option><option value="cash">💵 Cash</option></select>
               </div>
               <div><label>Prize (auto)</label><input type="text" id="topKillerPrize" readonly class="result-prize-input"></div>
             </div>
           </div>
         </div>
 
-        <!-- Live total summary -->
         <div class="result-total-card">
-          <div>
-            <span>Total Payouts</span>
-            <b id="resultTotalPayout">Rs. 0</b>
-          </div>
-          <div>
-            <span>Prize Pool</span>
-            <b id="resultPool">Rs. 0</b>
-          </div>
-          <div>
-            <span>Entry Fee Collection</span>
-            <b id="resultCollection">Rs. 0</b>
-          </div>
-          <div>
-            <span>Net Profit</span>
-            <b id="resultNetProfit">Rs. 0</b>
-          </div>
+          <div><span>Total Payouts</span><b id="resultTotalPayout">Rs. 0</b></div>
+          <div><span>Prize Pool</span><b id="resultPool">Rs. 0</b></div>
+          <div><span>Entry Collection</span><b id="resultCollection">Rs. 0</b></div>
+          <div><span>Net Profit</span><b id="resultNetProfit">Rs. 0</b></div>
         </div>
 
-        <!-- Actions -->
         <div class="result-actions">
-          <button onclick="submitMatchResults()" class="btn-submit-pay" id="submitResultsBtn">
-            🏆 Submit Results &amp; Create Payouts
-          </button>
-          <button onclick="resetResultsForm()" class="btn-secondary" style="margin-left:10px;">
-            🔄 Reset Form
-          </button>
+          <button onclick="submitMatchResults()" class="btn-submit-pay" id="submitResultsBtn">🏆 Submit Results &amp; Create Payouts</button>
+          <button onclick="resetResultsForm()" class="btn-secondary" style="margin-left:10px;">🔄 Reset Form</button>
         </div>
-
       </div>
 
-      <!-- Recent results history -->
       <h3 class="mt">📜 Recently Completed Matches</h3>
-      <div class="list" id="recentResults">
-        <div class="empty-state"><span class="icon">📭</span>No matches completed yet</div>
-      </div>
+      <div class="list" id="recentResults"><div class="empty-state"><span class="icon">📭</span>No matches completed yet</div></div>
     </section>
 
-    <!-- ==================== DAILY COLLECTIONS ==================== -->
+    <!-- DAILY COLLECTIONS -->
     <section id="section-daily" class="admin-section" style="display:none">
       <h2>💹 Daily Collections</h2>
       <p class="muted">Income, payouts &amp; net profit — day by day</p>
@@ -313,7 +351,7 @@
       <div class="list" id="dailyByMethod"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PRIZE CALCULATOR ==================== -->
+    <!-- PRIZE CALCULATOR -->
     <section id="section-prize" class="admin-section" style="display:none">
       <h2>🧮 Prize Calculator</h2>
       <p class="muted">Plan your tournament economics</p>
@@ -329,21 +367,21 @@
       </div>
     </section>
 
-    <!-- ==================== EARNINGS ==================== -->
+    <!-- EARNINGS -->
     <section id="section-earnings" class="admin-section" style="display:none">
       <h2>💵 Earnings</h2>
       <p class="muted">Revenue from paid tournaments</p>
       <div class="stat-grid">
-        <div class="stat-card"><small>TOTAL REVENUE</small><b id="earnTotal">Rs. 0</b><span>From approved payments</span></div>
-        <div class="stat-card"><small>APPROVED</small><b id="earnApproved">0</b><span>Successful transactions</span></div>
-        <div class="stat-card"><small>PENDING AMOUNT</small><b id="earnPending">Rs. 0</b><span>Awaiting review</span></div>
+        <div class="stat-card"><small>TOTAL REVENUE</small><b id="earnTotal">Rs. 0</b><span>From approved</span></div>
+        <div class="stat-card"><small>APPROVED</small><b id="earnApproved">0</b><span>Successful</span></div>
+        <div class="stat-card"><small>PENDING AMOUNT</small><b id="earnPending">Rs. 0</b><span>Awaiting</span></div>
         <div class="stat-card"><small>AVG ENTRY</small><b id="earnAvg">Rs. 0</b><span>Per approved</span></div>
       </div>
       <h3 class="mt">📊 Breakdown by Method</h3>
       <div class="list" id="earningsBreakdown"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PAYOUTS ==================== -->
+    <!-- PAYOUTS -->
     <section id="section-payouts" class="admin-section" style="display:none">
       <h2>📤 Payouts</h2>
       <p class="muted">Winners and prize money paid</p>
@@ -356,10 +394,10 @@
         <button onclick="addPayout()" class="btn-submit-pay" style="max-width:320px;">➕ Record Manual Payout</button>
       </div>
       <h3 class="mt">🏆 Winner Payouts</h3>
-      <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No payouts recorded yet.</div></div>
+      <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div></div>
     </section>
 
-    <!-- ==================== PROFIT SHARING ==================== -->
+    <!-- PROFIT SHARING -->
     <section id="section-profitshare" class="admin-section" style="display:none">
       <h2>🤝 Profit Sharing</h2>
       <p class="muted">Split net profit between admins</p>
@@ -375,7 +413,7 @@
       </div>
     </section>
 
-    <!-- ==================== ROOM DETAILS ==================== -->
+    <!-- ROOM DETAILS -->
     <section id="section-roomdetails" class="admin-section" style="display:none">
       <h2>🔑 Room Details</h2>
       <p class="muted">Set room ID, password &amp; rules per tournament</p>
@@ -387,39 +425,39 @@
       <div id="roomDetailsForm" class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;display:none;">
         <h3 id="roomTournamentName" style="color:#fff;margin:0 0 20px 0;"></h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div><label class="result-label">🔑 Room ID</label><input type="text" id="roomId" placeholder="e.g. 12345678" class="result-input"></div>
-          <div><label class="result-label">🔐 Room Password</label><input type="text" id="roomPassword" placeholder="e.g. nepplay123" class="result-input"></div>
-          <div><label class="result-label">📋 Format</label><input type="text" id="roomFormat" placeholder="e.g. Squad · Battle Royale" class="result-input"></div>
-          <div><label class="result-label">🔢 Rounds</label><input type="text" id="roomRounds" placeholder="e.g. 3 matches" class="result-input"></div>
-          <div><label class="result-label">⏰ Room Opens At</label><input type="text" id="roomOpenTime" placeholder="e.g. 12:45 PM" class="result-input"></div>
-          <div><label class="result-label">👁 Auto-Reveal Time</label><input type="datetime-local" id="roomRevealAt" class="result-input"></div>
+          <div><label class="result-label">🔑 Room ID</label><input type="text" id="roomId" class="result-input"></div>
+          <div><label class="result-label">🔐 Password</label><input type="text" id="roomPassword" class="result-input"></div>
+          <div><label class="result-label">📋 Format</label><input type="text" id="roomFormat" class="result-input"></div>
+          <div><label class="result-label">🔢 Rounds</label><input type="text" id="roomRounds" class="result-input"></div>
+          <div><label class="result-label">⏰ Opens At</label><input type="text" id="roomOpenTime" class="result-input"></div>
+          <div><label class="result-label">👁 Auto-Reveal</label><input type="datetime-local" id="roomRevealAt" class="result-input"></div>
         </div>
         <div style="margin-top:16px;">
-          <label class="result-label">📜 Rules / Notes</label>
-          <textarea id="roomRules" rows="3" placeholder="e.g. No teaming. Screenshot required." class="result-input"></textarea>
+          <label class="result-label">📜 Rules</label>
+          <textarea id="roomRules" rows="3" class="result-input"></textarea>
         </div>
         <button onclick="saveRoomDetails()" class="btn-submit-pay" style="margin-top:20px;">💾 Save Room Details</button>
         <div id="roomSaveStatus" style="margin-top:14px;font-size:13px;color:#4ade80;display:none;"></div>
       </div>
     </section>
 
-    <!-- ==================== USERS ==================== -->
+    <!-- USERS -->
     <section id="section-users" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>👥 Users</h2>
-        <input type="text" id="userSearch" placeholder="🔍 Search username or email..." oninput="filterUsers()" class="search-input">
+        <input type="text" id="userSearch" placeholder="🔍 Search..." oninput="filterUsers()" class="search-input">
       </div>
       <div class="reg-list" id="userList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== SUPPORT ==================== -->
+    <!-- SUPPORT -->
     <section id="section-support" class="admin-section" style="display:none">
       <h2>🎧 Support</h2>
       <p class="muted">Member support tickets</p>
       <div class="reg-list" id="supportList"><div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div></div>
     </section>
 
-    <!-- ==================== TOURNAMENTS ==================== -->
+    <!-- TOURNAMENTS -->
     <section id="section-tournaments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>🏆 Tournaments</h2>
@@ -428,7 +466,7 @@
       <div class="reg-list" id="tournamentList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== ANNOUNCEMENTS ==================== -->
+    <!-- ANNOUNCEMENTS -->
     <section id="section-announcements" class="admin-section" style="display:none">
       <h2>📢 Announcements</h2>
       <p class="muted">Post updates for members</p>
@@ -459,7 +497,7 @@
       <input type="hidden" id="reviewAction">
       <input type="hidden" id="reviewType" value="payment">
       <label>Admin Note (optional)</label>
-      <textarea id="reviewNote" rows="3" placeholder="Reason or comment..." style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+      <textarea id="reviewNote" rows="3" style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
       <div class="modal-actions">
         <button type="button" onclick="closeReview()" class="btn-secondary">Cancel</button>
         <button type="submit" id="reviewConfirmBtn" class="btn-primary">Confirm</button>
@@ -472,7 +510,7 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- SIDEBAR TOGGLE -->
+<!-- UI SCRIPTS (inline — small) -->
 <script>
 window.toggleAdminSidebar = function() {
   const sidebar = document.querySelector('.sidebar');
@@ -481,7 +519,6 @@ window.toggleAdminSidebar = function() {
   sidebar.classList.toggle('open');
   if (backdrop) backdrop.classList.toggle('show');
 };
-
 document.addEventListener('click', function(e) {
   if (window.innerWidth <= 640 && e.target.closest('.sidebar-link')) {
     setTimeout(() => {
@@ -494,10 +531,7 @@ document.addEventListener('click', function(e) {
     }, 200);
   }
 });
-</script>
 
-<!-- SECTION SWITCHER -->
-<script>
 (function() {
   function showSection(name, el) {
     document.querySelectorAll('.admin-section').forEach(function(s) { s.style.display = 'none'; });
@@ -509,6 +543,7 @@ document.addEventListener('click', function(e) {
     var loaders = {
       payments: 'loadPayments',
       registrations: 'loadRegistrations',
+      create: 'loadRecentCreated',
       results: 'loadMatchResultsSection',
       users: 'loadUsers',
       tournaments: 'loadTournamentsAdmin',
@@ -525,7 +560,6 @@ document.addEventListener('click', function(e) {
     }
   }
   window.showSection = showSection;
-
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar-link').forEach(function(link) {
       link.addEventListener('click', function(e) {
@@ -538,1032 +572,8 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<!-- LOGIC -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, getDocs, doc, updateDoc, deleteDoc,
-  addDoc, query, where, serverTimestamp, onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- MAIN LOGIC — loaded from separate file -->
+<script type="module" src="admin.js"></script>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
-    authDomain: "nepplaygaming.firebaseapp.com",
-    projectId: "nepplaygaming",
-    storageBucket: "nepplaygaming.firebasestorage.app",
-    messagingSenderId: "893565645520",
-    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-console.log("🔥 Admin ready v3.4");
-
-let allPayments = [];
-let allRegs = [];
-let allUsers = [];
-let allTournaments = [];
-let allPayouts = [];
-let allResults = [];
-let currentStatusFilter = 'pending';
-let currentMethodFilter = 'all';
-let currentSearchTerm = '';
-let roomTournaments = [];
-let selectedResultTournament = null;
-
-// ============ NOTIFICATIONS ============
-let notifications = [];
-
-function addNotif(type, title, message) {
-  notifications.unshift({ id: Date.now() + Math.random(), type, title, message, time: new Date(), read: false });
-  if (notifications.length > 50) notifications = notifications.slice(0, 50);
-  renderNotifBell(); renderNotifPanel();
-}
-function renderNotifBell() {
-  const unread = notifications.filter(n => !n.read).length;
-  const c = document.getElementById('notifCount');
-  if (!c) return;
-  if (unread > 0) { c.innerText = unread > 9 ? '9+' : unread; c.style.display = 'block'; }
-  else c.style.display = 'none';
-}
-function renderNotifPanel() {
-  const list = document.getElementById('notifList');
-  if (!list) return;
-  if (!notifications.length) { list.innerHTML = '<div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">No new notifications</div>'; return; }
-  const icons = { user:'👤', registration:'📋', payment:'💰', review:'✅', result:'🏆' };
-  const colors = { user:'#3b82f6', registration:'#a855f7', payment:'#f59e0b', review:'#22c55e', result:'#eab308' };
-  list.innerHTML = notifications.map(n => `
-    <div class="notif-item" style="${n.read ? 'opacity:.5' : ''}">
-      <div class="notif-icon" style="background:${colors[n.type] || '#6366f1'};">${icons[n.type] || '🔔'}</div>
-      <div class="notif-body">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-msg">${n.message}</div>
-        <div class="notif-time">${n.time.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}</div>
-      </div>
-    </div>
-  `).join('');
-}
-window.toggleNotifPanel = function(e) {
-  if (e) e.stopPropagation();
-  const p = document.getElementById('notifPanel');
-  if (!p) return;
-  p.classList.toggle('open');
-  p.style.display = p.classList.contains('open') ? 'block' : 'none';
-  if (p.classList.contains('open')) setTimeout(() => { notifications.forEach(n => n.read = true); renderNotifBell(); }, 1500);
-};
-window.clearAllNotifs = function() { notifications.forEach(n => n.read = true); renderNotifBell(); renderNotifPanel(); };
-document.addEventListener('click', function(e) {
-  const p = document.getElementById('notifPanel'); const b = document.querySelector('.notif-bell-btn');
-  if (p && b && !p.contains(e.target) && !b.contains(e.target)) { p.style.display = 'none'; p.classList.remove('open'); }
-});
-
-function attachRealtimeListeners() {
-  let i1 = true;
-  onSnapshot(collection(db, 'users'), snap => {
-    if (i1) { i1 = false; return; }
-    snap.docChanges().forEach(c => { if (c.type === 'added') { const u = c.doc.data(); addNotif('user', '👤 New user registered', `${u.username || 'User'} (${u.email || ''})`); } });
-  });
-  let i2 = true;
-  onSnapshot(collection(db, 'tournament_registrations'), snap => {
-    if (i2) { i2 = false; return; }
-    snap.docChanges().forEach(c => { if (c.type === 'added') { const r = c.doc.data(); addNotif('registration', `${r.entryType === 'paid' ? '💵' : '🆓'} New registration`, `${r.username || 'User'} joined ${r.tournamentTitle || 'a tournament'}`); } });
-  });
-  let i3 = true;
-  onSnapshot(collection(db, 'tournament_payments'), snap => {
-    if (i3) { i3 = false; return; }
-    snap.docChanges().forEach(c => { if (c.type === 'added') { const p = c.doc.data(); addNotif('payment', '💰 Payment submitted', `${p.username} — Rs. ${p.amount} via ${p.method}`); } });
-  });
-}
-
-// ============ HELPERS ============
-function fmtDate(ts) { if (!ts?.toDate) return '—'; return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
-function fmtShort(ts) { if (!ts?.toDate) return '—'; return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }); }
-function dayKey(ts) { if (!ts?.toDate) return null; return ts.toDate().toISOString().slice(0,10); }
-function todayKey() { return new Date().toISOString().slice(0,10); }
-function initials(n) { return (n || 'U')[0].toUpperCase(); }
-function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
-
-// ============ PAYMENTS ============
-window.loadPayments = async function() {
-  const list = document.getElementById('payList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournament_payments'));
-    allPayments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allPayments.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
-    updateCounts(); renderPayments(); renderDashboardRecent();
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-function updateCounts() {
-  const c = { pending:0, approved:0, rejected:0 };
-  allPayments.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
-  const el = id => document.getElementById(id);
-  if (el('cntPending')) el('cntPending').innerText = c.pending;
-  if (el('cntApproved')) el('cntApproved').innerText = c.approved;
-  if (el('cntRejected')) el('cntRejected').innerText = c.rejected;
-  if (el('cntAll')) el('cntAll').innerText = allPayments.length;
-  if (el('pendingPayBadge')) el('pendingPayBadge').innerText = c.pending;
-  if (el('dashPending')) el('dashPending').innerText = c.pending;
-  const total = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
-  if (el('dashPaid')) el('dashPaid').innerText = fmtRs(total);
-}
-function renderPayments() {
-  const list = document.getElementById('payList');
-  if (!list) return;
-  let filtered = allPayments.filter(p => {
-    if (currentStatusFilter !== 'all' && p.status !== currentStatusFilter) return false;
-    if (currentMethodFilter !== 'all' && p.method !== currentMethodFilter) return false;
-    if (currentSearchTerm) {
-      const q = currentSearchTerm.toLowerCase();
-      if (!`${p.username||''} ${p.email||''} ${p.txnId||''} ${p.tournamentTitle||''} ${p.ign||''}`.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">🎉</span>No ' + currentStatusFilter + ' payments.</div>'; return; }
-  const chipClass = { esewa:'chip-esewa', khalti:'chip-khalti', imepay:'chip-imepay', bank:'chip-bank' };
-  const chipLabel = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  list.innerHTML = filtered.map(p => {
-    const showActions = p.status === 'pending';
-    const safeName = (p.username||'').replace(/'/g,'');
-    return `
-      <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
-        <div class="pay-item-left">
-          ${p.screenshotUrl ? '<img src="' + p.screenshotUrl + '" class="pay-shot" onclick="openShot(\'' + p.screenshotUrl + '\')">' : '<div class="pay-shot-empty">No image</div>'}
-        </div>
-        <div class="pay-item-mid">
-          <div class="pay-user">
-            <div class="avatar">${initials(p.username)}</div>
-            <div><b>${p.username || 'Unknown'}</b><small>${p.email || ''}</small></div>
-          </div>
-          <div class="pay-details">
-            <div class="detail-row"><span>🏆 Tournament</span><b>${p.tournamentTitle||'—'}</b></div>
-            <div class="detail-row"><span>🎮 IGN</span><b>${p.ign||'—'}</b></div>
-            <div class="detail-row"><span>📱 Phone</span><b>${p.phone||'—'}</b></div>
-            <div class="detail-row"><span>💳 Method</span><span class="chip ${chipClass[p.method]||''}">${chipLabel[p.method]||p.method}</span></div>
-            <div class="detail-row"><span>💰 Amount</span><b class="amount">Rs. ${p.amount||0}</b></div>
-            <div class="detail-row"><span>🔖 Txn ID</span><code class="txn-id">${p.txnId||'—'}</code></div>
-            <div class="detail-row"><span>🕐 Submitted</span><small>${fmtShort(p.submittedAt)}</small></div>
-          </div>
-        </div>
-        <div class="pay-item-right">
-          <span class="status-pill ${p.status}">${p.status.toUpperCase()}</span>
-          ${showActions ? `
-            <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Approve</button>
-            <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject','payment')">✘ Reject</button>
-          ` : ''}
-          ${p.screenshotUrl ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 Full Screenshot</a>' : ''}
-          ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-window.filterPayStatus = function(status, btn) {
-  currentStatusFilter = status;
-  document.querySelectorAll('.pay-status-tabs button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPayments();
-};
-window.filterPayMethod = function(m) { currentMethodFilter = m; renderPayments(); };
-window.filterPayments = function() { currentSearchTerm = document.getElementById('paySearch').value; renderPayments(); };
-
-// ============ REGISTRATIONS ============
-window.loadRegistrations = async function() {
-  const list = document.getElementById('regList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournament_registrations'));
-    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
-    if (document.getElementById('dashRegs')) document.getElementById('dashRegs').innerText = allRegs.length;
-    if (document.getElementById('regsBadge')) document.getElementById('regsBadge').innerText = allRegs.length;
-    renderRegistrations(); renderDashboardRecent();
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-window.filterRegistrations = function() { renderRegistrations(); };
-function renderRegistrations() {
-  const list = document.getElementById('regList');
-  if (!list) return;
-  const q = (document.getElementById('regSearch').value || '').toLowerCase();
-  let filtered = allRegs.filter(r => !q || `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase().includes(q));
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">📋</span>No registrations.</div>'; return; }
-  list.innerHTML = filtered.map(r => {
-    const isPaid = r.entryType === 'paid';
-    const safeName = (r.username||'').replace(/'/g,'');
-    const isPending = r.status === 'pending';
-    return `
-      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
-        <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-        <div class="reg-main">
-          <div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div>
-          <div class="reg-line-2">
-            ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
-            ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
-            ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
-            ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
-          </div>
-          ${isPaid && r.screenshotUrl ? `
-            <div class="reg-payment-preview">
-              <img src="${r.screenshotUrl}" class="thumb" onclick="openShot('${r.screenshotUrl}')">
-              <span class="method-tag">${(r.method||'').toUpperCase()}</span>
-              <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
-            </div>
-          ` : ''}
-          <div class="reg-actions">
-            ${isPending ? `
-              <button class="btn-approve small" onclick="openReview('${r.id}','${safeName}','approve','registration')">✔ Approve</button>
-              <button class="btn-reject small"  onclick="openReview('${r.id}','${safeName}','reject','registration')">✘ Reject</button>
-            ` : ''}
-            <button class="btn-edit small" onclick="editRegistration('${r.id}')">✏️ Edit</button>
-            <button class="btn-delete small" onclick="deleteRegistration('${r.id}','${safeName}')">🗑️ Delete</button>
-          </div>
-        </div>
-        <div class="reg-right">
-          <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
-          <span class="status-pill ${r.status}" style="font-size:10px;padding:3px 8px;">${(r.status||'').toUpperCase()}</span>
-          <small>${fmtShort(r.registeredAt)}</small>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-window.editRegistration = async function(id) {
-  const reg = allRegs.find(r => r.id === id);
-  if (!reg) return;
-  const newIgn = prompt('Edit IGN:', reg.ign || '');
-  if (newIgn === null) return;
-  const newPhone = prompt('Edit Phone:', reg.phone || '');
-  if (newPhone === null) return;
-  try {
-    await updateDoc(doc(db, 'tournament_registrations', id), { ign: newIgn.trim(), phone: newPhone.trim() });
-    window.showToast('✅ Updated'); window.loadRegistrations();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-window.deleteRegistration = async function(id, name) {
-  if (!confirm('Delete registration for ' + name + '?')) return;
-  try {
-    await deleteDoc(doc(db, 'tournament_registrations', id));
-    window.showToast('🗑️ Deleted'); window.loadRegistrations();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ================================================================
-// ============ MATCH RESULTS (NEW) ============
-// ================================================================
-window.loadMatchResultsSection = async function() {
-  await populateResultTournamentDropdown();
-  await loadRecentResults();
-};
-
-async function populateResultTournamentDropdown() {
-  const select = document.getElementById('resultTournamentSelect');
-  if (!select) return;
-  try {
-    const snap = await getDocs(collection(db, 'tournaments'));
-    const tournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    // Sort upcoming first
-    select.innerHTML = '<option value="">— Choose a tournament —</option>' +
-      tournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
-  } catch (err) { console.warn('load tournaments for results failed:', err); }
-}
-
-window.loadTournamentForResult = async function() {
-  const select = document.getElementById('resultTournamentSelect');
-  const tid = select.value;
-  const form = document.getElementById('resultForm');
-  const summary = document.getElementById('resultTournamentSummary');
-
-  if (!tid) { form.style.display = 'none'; return; }
-
-  try {
-    const snap = await getDocs(collection(db, 'tournaments'));
-    const tournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const t = tournaments.find(x => x.id === tid);
-    if (!t) return;
-
-    selectedResultTournament = t;
-
-    // Calculate economics
-    const fee = Number(t.entryFee || t.entry_fee || 0);
-    const pool = Number(t.prizePool || t.prize_pool || t.winnerPrize || 0);
-    const killsPrize = Number(t.topKillsPrize || t.top_kills_prize || t.topKiller || 0);
-
-    // Count registrations for this tournament
-    const regSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', tid),
-      where('status', '==', 'confirmed')
-    ));
-    const playerCount = regSnap.size;
-    const collected = fee * playerCount;
-    const netProfit = collected - pool - killsPrize;
-
-    // Show summary card
-    summary.innerHTML = `
-      <div class="result-summary-header">
-        <h3>${t.title || 'Tournament'}</h3>
-        <span>${t.game || ''} · ${t.mode || ''}</span>
-      </div>
-      <div class="result-summary-stats">
-        <div><span>Entry Fee</span><b>${fee === 0 ? 'FREE' : fmtRs(fee)}</b></div>
-        <div><span>Players</span><b>${playerCount}</b></div>
-        <div><span>Collected</span><b>${fmtRs(collected)}</b></div>
-        <div><span>Prize Pool</span><b>${fmtRs(pool)}</b></div>
-        <div><span>Top Kill Prize</span><b>${fmtRs(killsPrize)}</b></div>
-        <div><span>Net Profit</span><b style="color:${netProfit >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(netProfit)}</b></div>
-      </div>
-    `;
-
-    // Auto-fill prize amounts (50/30/20)
-    const p1 = Math.round(pool * 0.50);
-    const p2 = Math.round(pool * 0.30);
-    const p3 = Math.round(pool * 0.20);
-
-    document.getElementById('winner1Prize').value = fmtRs(p1);
-    document.getElementById('winner2Prize').value = fmtRs(p2);
-    document.getElementById('winner3Prize').value = fmtRs(p3);
-    document.getElementById('topKillerPrize').value = fmtRs(killsPrize);
-
-    document.getElementById('resultPool').innerText = fmtRs(pool);
-    document.getElementById('resultCollection').innerText = fmtRs(collected);
-    document.getElementById('resultNetProfit').innerText = fmtRs(netProfit);
-    document.getElementById('resultNetProfit').style.color = netProfit >= 0 ? '#4ade80' : '#f87171';
-
-    // Update total on any input change
-    ['winner1Kills','winner2Kills','winner3Kills','topKillerKills'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.oninput = updateResultTotal;
-    });
-
-    updateResultTotal();
-    form.style.display = 'block';
-
-  } catch (err) {
-    console.error('loadTournamentForResult error:', err);
-    window.showToast('❌ ' + err.message);
-  }
-};
-
-window.updateResultTotal = function() {
-  if (!selectedResultTournament) return;
-  const pool = Number(selectedResultTournament.prizePool || selectedResultTournament.prize_pool || 0);
-  const killsPrize = Number(selectedResultTournament.topKillsPrize || selectedResultTournament.top_kills_prize || 0);
-  const p1 = Math.round(pool * 0.50);
-  const p2 = Math.round(pool * 0.30);
-  const p3 = Math.round(pool * 0.20);
-
-  // Check if top killer is same as 1st place winner
-  const w1Name = (document.getElementById('winner1Name').value || '').trim().toLowerCase();
-  const tkName = (document.getElementById('topKillerName').value || '').trim().toLowerCase();
-  const sameAsFirst = !tkName || (w1Name && tkName === w1Name);
-
-  // If topKillerName is blank, we treat it as same as winner1 → 1 payout covers both
-  const topKillerPayout = sameAsFirst ? 0 : killsPrize;
-
-  const total = p1 + p2 + p3 + topKillerPayout;
-  document.getElementById('resultTotalPayout').innerText = fmtRs(total);
-};
-
-window.submitMatchResults = async function() {
-  if (!selectedResultTournament) { window.showToast('❌ No tournament selected'); return; }
-
-  const t = selectedResultTournament;
-  const tid = t.id;
-  const tTitle = t.title || 'Tournament';
-
-  const w1Name = (document.getElementById('winner1Name').value || '').trim();
-  const w2Name = (document.getElementById('winner2Name').value || '').trim();
-  const w3Name = (document.getElementById('winner3Name').value || '').trim();
-  const tkName = (document.getElementById('topKillerName').value || '').trim();
-
-  if (!w1Name) { window.showToast('❌ 1st place username required'); return; }
-
-  const w1Kills = Number(document.getElementById('winner1Kills').value) || 0;
-  const w2Kills = Number(document.getElementById('winner2Kills').value) || 0;
-  const w3Kills = Number(document.getElementById('winner3Kills').value) || 0;
-  const tkKills = Number(document.getElementById('topKillerKills').value) || w1Kills;
-
-  const w1Method = document.getElementById('winner1Method').value;
-  const w2Method = document.getElementById('winner2Method').value;
-  const w3Method = document.getElementById('winner3Method').value;
-  const tkMethod = document.getElementById('topKillerMethod').value;
-
-  const pool = Number(t.prizePool || t.prize_pool || 0);
-  const killsPrize = Number(t.topKillsPrize || t.top_kills_prize || 0);
-
-  const p1 = Math.round(pool * 0.50);
-  const p2 = Math.round(pool * 0.30);
-  const p3 = Math.round(pool * 0.20);
-
-  const btn = document.getElementById('submitResultsBtn');
-  btn.disabled = true;
-  btn.innerText = '⏳ Saving...';
-
-  try {
-    const payoutRecords = [];
-
-    // 1st place
-    payoutRecords.push({
-      winnerName: w1Name,
-      tournamentId: tid,
-      tournamentTitle: tTitle,
-      amount: p1,
-      rank: '1',
-      kills: w1Kills,
-      method: w1Method,
-      note: `1st place, ${w1Kills} kills`,
-      status: 'paid',
-      paidAt: serverTimestamp(),
-      createdAt: serverTimestamp()
-    });
-
-    // 2nd place (if provided)
-    if (w2Name) {
-      payoutRecords.push({
-        winnerName: w2Name,
-        tournamentId: tid,
-        tournamentTitle: tTitle,
-        amount: p2,
-        rank: '2',
-        kills: w2Kills,
-        method: w2Method,
-        note: `2nd place, ${w2Kills} kills`,
-        status: 'paid',
-        paidAt: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
-    }
-
-    // 3rd place (if provided)
-    if (w3Name) {
-      payoutRecords.push({
-        winnerName: w3Name,
-        tournamentId: tid,
-        tournamentTitle: tTitle,
-        amount: p3,
-        rank: '3',
-        kills: w3Kills,
-        method: w3Method,
-        note: `3rd place, ${w3Kills} kills`,
-        status: 'paid',
-        paidAt: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
-    }
-
-    // Top killer (if different from 1st place)
-    const sameAsFirst = !tkName || (tkName.toLowerCase() === w1Name.toLowerCase());
-    if (!sameAsFirst && killsPrize > 0) {
-      payoutRecords.push({
-        winnerName: tkName,
-        tournamentId: tid,
-        tournamentTitle: tTitle,
-        amount: killsPrize,
-        rank: 'Top Killer',
-        kills: tkKills,
-        method: tkMethod,
-        note: `Top killer, ${tkKills} kills`,
-        status: 'paid',
-        paidAt: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
-    } else if (sameAsFirst && killsPrize > 0 && w1Kills > 0) {
-      // Same person — add top kill prize on top of 1st place
-      // Update 1st place amount to include top kill prize
-      payoutRecords[0].amount = p1 + killsPrize;
-      payoutRecords[0].note = `1st place + Top Killer, ${w1Kills} kills`;
-      payoutRecords[0].rank = '1 + Top Killer';
-    }
-
-    // Save all payouts
-    for (const rec of payoutRecords) {
-      await addDoc(collection(db, 'tournament_payouts'), rec);
-    }
-
-    // Save match result record
-    await addDoc(collection(db, 'match_results'), {
-      tournamentId: tid,
-      tournamentTitle: tTitle,
-      winner1: { name: w1Name, kills: w1Kills, prize: p1, method: w1Method },
-      winner2: w2Name ? { name: w2Name, kills: w2Kills, prize: p2, method: w2Method } : null,
-      winner3: w3Name ? { name: w3Name, kills: w3Kills, prize: p3, method: w3Method } : null,
-      topKiller: sameAsFirst ? { name: w1Name, kills: w1Kills, prize: killsPrize, sameAsFirst: true } : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod },
-      totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
-      completedAt: serverTimestamp(),
-      createdAt: serverTimestamp()
-    });
-
-    // Mark tournament as completed
-    await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
-
-    addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
-
-    window.showToast('✅ Results saved! ' + payoutRecords.length + ' payouts created');
-    resetResultsForm();
-    await loadRecentResults();
-    await loadPayouts();
-
-  } catch (err) {
-    console.error('submitMatchResults error:', err);
-    window.showToast('❌ ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = '🏆 Submit Results & Create Payouts';
-  }
-};
-
-window.resetResultsForm = function() {
-  ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('winner1Method').value = 'esewa';
-  document.getElementById('winner2Method').value = 'esewa';
-  document.getElementById('winner3Method').value = 'esewa';
-  document.getElementById('topKillerMethod').value = 'esewa';
-  document.getElementById('resultTournamentSelect').value = '';
-  document.getElementById('resultForm').style.display = 'none';
-  selectedResultTournament = null;
-};
-
-async function loadRecentResults() {
-  const list = document.getElementById('recentResults');
-  if (!list) return;
-  try {
-    const snap = await getDocs(collection(db, 'match_results'));
-    allResults = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allResults.sort((a, b) => (b.completedAt?.toMillis?.() || 0) - (a.completedAt?.toMillis?.() || 0));
-
-    if (!allResults.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No matches completed yet</div>';
-      return;
-    }
-
-    list.innerHTML = allResults.slice(0, 15).map(r => {
-      const w1 = r.winner1 || {};
-      const tk = r.topKiller || {};
-      return `
-        <div class="reg-card paid-reg">
-          <div class="reg-icon">🏁</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b></div>
-            <div class="reg-line-2">
-              🥇 <b>${w1.name || '—'}</b> (${w1.kills || 0} kills) — Rs. ${w1.prize || 0}
-              ${tk.sameAsFirst ? ' · 🎯 same as 1st' : ` · 🎯 <b>${tk.name || '—'}</b> (${tk.kills || 0})`}
-            </div>
-            <div class="reg-line-2" style="font-size:12px;">
-              Total payouts: Rs. ${(r.totalPayouts || 0).toLocaleString()}
-            </div>
-          </div>
-          <div class="reg-right">
-            <span class="type-chip paid">COMPLETED</span>
-            <small>${fmtShort(r.completedAt)}</small>
-          </div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
-  }
-}
-
-// ============ DAILY COLLECTIONS ============
-window.loadDailyCollections = function() {
-  const range = document.getElementById('dailyRangeFilter')?.value || 'all';
-  let payments = allPayments.filter(p => p.status === 'approved');
-  if (range === 'today') payments = payments.filter(p => dayKey(p.reviewedAt || p.submittedAt) === todayKey());
-  else if (range !== 'all') { const days = Number(range); const cutoff = Date.now() - days * 86400000; payments = payments.filter(p => (p.reviewedAt?.toMillis?.() || p.submittedAt?.toMillis?.() || 0) >= cutoff); }
-
-  let payouts = allPayouts;
-  if (range === 'today') payouts = payouts.filter(x => dayKey(x.paidAt || x.createdAt) === todayKey());
-  else if (range !== 'all') { const days = Number(range); const cutoff = Date.now() - days * 86400000; payouts = payouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff); }
-
-  const totalCollected = payments.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const totalPayouts = payouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const netProfit = totalCollected - totalPayouts;
-
-  const days = {};
-  payments.forEach(p => {
-    const k = dayKey(p.reviewedAt || p.submittedAt); if (!k) return;
-    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
-    days[k].collected += Number(p.amount)||0; days[k].count++;
-    const m = p.method || 'unknown';
-    days[k].byMethod[m] = (days[k].byMethod[m] || 0) + (Number(p.amount)||0);
-  });
-  payouts.forEach(x => {
-    const k = dayKey(x.paidAt || x.createdAt); if (!k) return;
-    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
-    days[k].payouts += Number(x.amount)||0; days[k].payoutsCount = (days[k].payoutsCount || 0) + 1;
-  });
-
-  const sortedKeys = Object.keys(days).sort().reverse();
-  const el = id => document.getElementById(id);
-  if (el('dailyTotalCollected')) el('dailyTotalCollected').innerText = fmtRs(totalCollected);
-  if (el('dailyTotalPayouts')) el('dailyTotalPayouts').innerText = fmtRs(totalPayouts);
-  if (el('dailyTotalNet')) el('dailyTotalNet').innerText = fmtRs(netProfit);
-  if (el('dailyActiveDays')) el('dailyActiveDays').innerText = sortedKeys.length;
-
-  const list = document.getElementById('dailyList');
-  if (!list) return;
-  if (!sortedKeys.length) { list.innerHTML = '<div class="empty-state"><span class="icon">📅</span>No activity in this range.</div>'; }
-  else {
-    list.innerHTML = sortedKeys.map(k => {
-      const d = days[k];
-      const net = d.collected - d.payouts;
-      const methodStr = Object.entries(d.byMethod).map(([m, amt]) => {
-        const emoji = { esewa:'💚', khalti:'💜', imepay:'🟠', bank:'🏦' }[m] || '💳';
-        return emoji + ' ' + amt.toLocaleString();
-      }).join(' · ');
-      return `
-        <div class="reg-card free-reg">
-          <div class="reg-icon">📅</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${new Date(k).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'short', year:'numeric' })}</b></div>
-            <div class="reg-line-2">
-              💰 Collected: <b style="color:#4ade80">${fmtRs(d.collected)}</b> (${d.count})
-              · 📤 Payouts: <b style="color:#f87171">${fmtRs(d.payouts)}</b> (${d.payoutsCount || 0})
-              · 📊 Net: <b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(net)}</b>
-            </div>
-            ${methodStr ? '<div class="reg-line-2" style="font-size:12px;">💳 By method: ' + methodStr + '</div>' : ''}
-          </div>
-          <div class="reg-right"><span class="type-chip ${net >= 0 ? 'paid' : 'free'}">${fmtRs(net)}</span></div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  const allApproved = allPayments.filter(p => p.status === 'approved');
-  const methods = ['esewa','khalti','imepay','bank'];
-  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  const byMethodEl = document.getElementById('dailyByMethod');
-  if (byMethodEl) {
-    byMethodEl.innerHTML = methods.map(m => {
-      const count = allApproved.filter(p => p.method === m).length;
-      const sum = allApproved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
-      return `<div class="reg-card free-reg"><div class="reg-icon">💰</div><div class="reg-main"><div class="reg-line-1"><b>${labels[m]}</b></div><div class="reg-line-2">${count} approved</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(sum)}</span></div></div>`;
-    }).join('');
-  }
-};
-
-// ============ PRIZE CALCULATOR ============
-window.calculatePrize = function() {
-  const fee = Number(document.getElementById('calcFee').value) || 0;
-  const players = Number(document.getElementById('calcPlayers').value) || 0;
-  const pool = Number(document.getElementById('calcPool').value) || 0;
-  const killsPrize = Number(document.getElementById('calcKills').value) || 0;
-  const collected = fee * players;
-  const totalPrizes = pool + killsPrize;
-  const netRevenue = collected - totalPrizes;
-  const margin = collected > 0 ? ((netRevenue / collected) * 100).toFixed(1) : 0;
-  const rtp = collected > 0 ? ((totalPrizes / collected) * 100).toFixed(1) : 0;
-  const breakeven = (pool + killsPrize) > 0 && fee > 0 ? Math.ceil((pool + killsPrize) / fee) : 0;
-  const first = Math.round(pool * 0.50), second = Math.round(pool * 0.30), third = Math.round(pool * 0.20);
-  const result = document.getElementById('calcResult');
-  result.style.display = 'block';
-  result.innerHTML = `
-    <div class="stat-grid">
-      <div class="stat-card"><small>COLLECTED</small><b>${fmtRs(collected)}</b><span>From ${players}</span></div>
-      <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(netRevenue)}</b><span>Profit</span></div>
-      <div class="stat-card"><small>PROFIT MARGIN</small><b>${margin}%</b><span>Net / Collected</span></div>
-      <div class="stat-card"><small>RTP</small><b>${rtp}%</b><span>Return to players</span></div>
-      <div class="stat-card"><small>BREAKEVEN</small><b>${breakeven}</b><span>Players needed</span></div>
-    </div>
-    <h3 class="mt">🥇 Winner Breakdown</h3>
-    <div class="list">
-      <div class="reg-card free-reg"><div class="reg-icon">🥇</div><div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(first)}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥈</div><div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(second)}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥉</div><div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(third)}</span></div></div>
-    </div>
-  `;
-};
-
-// ============ EARNINGS ============
-window.loadEarnings = function() {
-  const approved = allPayments.filter(p => p.status === 'approved');
-  const pending = allPayments.filter(p => p.status === 'pending');
-  const total = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const avg = approved.length ? Math.round(total / approved.length) : 0;
-  const el = id => document.getElementById(id);
-  if (el('earnTotal')) el('earnTotal').innerText = fmtRs(total);
-  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
-  if (el('earnPending')) el('earnPending').innerText = fmtRs(pendingAmt);
-  if (el('earnAvg')) el('earnAvg').innerText = fmtRs(avg);
-  const methods = ['esewa','khalti','imepay','bank'];
-  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  const breakdown = document.getElementById('earningsBreakdown');
-  if (breakdown) {
-    breakdown.innerHTML = methods.map(m => {
-      const count = approved.filter(p => p.method === m).length;
-      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
-      return `<div class="reg-card free-reg"><div class="reg-icon">💰</div><div class="reg-main"><div class="reg-line-1"><b>${labels[m]}</b></div><div class="reg-line-2">${count} approved</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(sum)}</span></div></div>`;
-    }).join('');
-  }
-};
-
-// ============ PAYOUTS ============
-window.loadPayouts = async function() {
-  const list = document.getElementById('payoutList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournament_payouts'));
-    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allPayouts.sort((a, b) => (b.paidAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0) - (a.paidAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0));
-    const total = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-    const paid = allPayouts.filter(p => p.status === 'paid');
-    const pending = allPayouts.filter(p => p.status !== 'paid');
-    const el = id => document.getElementById(id);
-    if (el('payoutTotal')) el('payoutTotal').innerText = fmtRs(total);
-    if (el('payoutWinners')) el('payoutWinners').innerText = paid.length;
-    if (el('payoutPending')) el('payoutPending').innerText = fmtRs(pending.reduce((s,p) => s + (Number(p.amount)||0), 0));
-
-    if (!allPayouts.length) { list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div>'; return; }
-    list.innerHTML = allPayouts.map(w => {
-      const isPaid = w.status === 'paid';
-      return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
-          <div class="reg-icon">🏆</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${w.winnerName || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${w.tournamentTitle || 'Tournament'}</span></div>
-            <div class="reg-line-2">🥇 ${w.rank || '—'}${w.kills ? ' · ' + w.kills + ' kills' : ''} · ${fmtRs(w.amount || 0)}${w.method ? ' · ' + w.method : ''}${w.note ? ' · ' + w.note : ''}</div>
-          </div>
-          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'PAID' : 'PENDING'}</span><small>${fmtShort(w.paidAt || w.createdAt)}</small></div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-
-window.addPayout = async function() {
-  const winnerName = prompt('Winner name (username):'); if (!winnerName) return;
-  const tournamentTitle = prompt('Tournament title:'); if (!tournamentTitle) return;
-  const amount = Number(prompt('Amount (Rs.):', '500')); if (!amount || amount <= 0) return;
-  const rank = prompt('Rank (#1, #2, #3, Top Killer):', '1');
-  const method = prompt('Payout method (esewa/khalti/imepay/bank/cash):', 'esewa');
-  const note = prompt('Note (optional):', '');
-  try {
-    await addDoc(collection(db, 'tournament_payouts'), {
-      winnerName, tournamentTitle, amount,
-      rank: rank || '1', method: method || 'cash', note: note || '',
-      status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
-    });
-    window.showToast('✅ Payout recorded'); window.loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============ PROFIT SHARING ============
-window.loadProfitShare = function() {
-  const approved = allPayments.filter(p => p.status === 'approved');
-  const collected = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const payouts = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const net = collected - payouts;
-  window.__netProfit = net;
-  const result = document.getElementById('shareResult');
-  if (result) {
-    result.innerHTML = `<div class="stat-grid">
-      <div class="stat-card"><small>TOTAL COLLECTED</small><b>${fmtRs(collected)}</b><span>Approved payments</span></div>
-      <div class="stat-card"><small>TOTAL PAYOUTS</small><b>${fmtRs(payouts)}</b><span>To winners</span></div>
-      <div class="stat-card"><small>NET PROFIT</small><b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(net)}</b><span>To share</span></div>
-    </div>`;
-  }
-};
-window.calculateShares = function() {
-  const name1 = document.getElementById('admin1Name').value || 'Admin 1';
-  const name2 = document.getElementById('admin2Name').value || 'Admin 2';
-  const share1 = Number(document.getElementById('admin1Share').value) || 0;
-  const share2 = Number(document.getElementById('admin2Share').value) || 0;
-  if (share1 + share2 !== 100) { alert('Shares must add up to 100%. Currently: ' + (share1 + share2) + '%'); return; }
-  const net = window.__netProfit || 0;
-  const amt1 = Math.round(net * share1 / 100);
-  const amt2 = net - amt1;
-  document.getElementById('shareResult').innerHTML = `
-    <div class="stat-grid"><div class="stat-card"><small>NET PROFIT</small><b>${fmtRs(net)}</b><span>To split</span></div></div>
-    <h3 class="mt">🤝 Share Breakdown</h3>
-    <div class="list">
-      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name1}</b></div><div class="reg-line-2">${share1}%</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(amt1)}</span></div></div>
-      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name2}</b></div><div class="reg-line-2">${share2}%</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(amt2)}</span></div></div>
-    </div>
-  `;
-};
-
-// ============ ROOM DETAILS ============
-window.loadRoomDetailsForm = async function() {
-  const select = document.getElementById('roomTournamentSelect');
-  if (!roomTournaments.length) {
-    try {
-      const snap = await getDocs(collection(db, 'tournaments'));
-      roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      select.innerHTML = '<option value="">— Select tournament —</option>' + roomTournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
-    } catch (err) { console.warn(err); return; }
-  }
-  const tid = select.value;
-  const form = document.getElementById('roomDetailsForm');
-  if (!tid) { form.style.display = 'none'; return; }
-  const t = roomTournaments.find(x => x.id === tid);
-  if (!t) return;
-  form.style.display = 'block';
-  document.getElementById('roomTournamentName').textContent = t.title || 'Tournament';
-  document.getElementById('roomId').value = t.roomId || '';
-  document.getElementById('roomPassword').value = t.roomPassword || '';
-  document.getElementById('roomFormat').value = t.roomFormat || '';
-  document.getElementById('roomRounds').value = t.roomRounds || '';
-  document.getElementById('roomOpenTime').value = t.roomOpenTime || '';
-  document.getElementById('roomRules').value = t.roomRules || '';
-  if (t.roomRevealAt) {
-    const d = new Date(t.roomRevealAt); const pad = n => String(n).padStart(2, '0');
-    document.getElementById('roomRevealAt').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  } else document.getElementById('roomRevealAt').value = '';
-  document.getElementById('roomSaveStatus').style.display = 'none';
-};
-window.saveRoomDetails = async function() {
-  const tid = document.getElementById('roomTournamentSelect').value;
-  if (!tid) { alert('Select a tournament first'); return; }
-  const roomId = document.getElementById('roomId').value.trim();
-  const roomPassword = document.getElementById('roomPassword').value.trim();
-  const roomFormat = document.getElementById('roomFormat').value.trim();
-  const roomRounds = document.getElementById('roomRounds').value.trim();
-  const roomOpenTime = document.getElementById('roomOpenTime').value.trim();
-  const roomRules = document.getElementById('roomRules').value.trim();
-  const revealRaw = document.getElementById('roomRevealAt').value;
-  let roomRevealAt = null;
-  if (revealRaw) roomRevealAt = new Date(revealRaw).toISOString();
-  try {
-    await updateDoc(doc(db, 'tournaments', tid), { roomId, roomPassword, roomFormat, roomRounds, roomOpenTime, roomRules, roomRevealAt, roomUpdatedAt: serverTimestamp() });
-    const status = document.getElementById('roomSaveStatus');
-    status.style.display = 'block';
-    status.textContent = '✅ Room details saved';
-    setTimeout(() => status.style.display = 'none', 3000);
-    window.showToast('✅ Room details saved');
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============ USERS ============
-window.loadUsers = async function() {
-  const list = document.getElementById('userList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'users'));
-    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (document.getElementById('usersBadge')) document.getElementById('usersBadge').innerText = allUsers.length;
-    if (document.getElementById('dashUsers')) document.getElementById('dashUsers').innerText = allUsers.length;
-    renderUsers(); renderDashboardRecent();
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-window.filterUsers = function() { renderUsers(); };
-function renderUsers() {
-  const list = document.getElementById('userList');
-  if (!list) return;
-  const q = (document.getElementById('userSearch').value || '').toLowerCase();
-  let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
-  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users.</div>'; return; }
-  list.innerHTML = filtered.map(u => `<div class="reg-card free-reg"><div class="reg-icon">${initials(u.username)}</div><div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div></div><div class="reg-right"><span class="type-chip free">Member</span><small>${fmtDate(u.createdAt)}</small></div></div>`).join('');
-}
-
-// ============ TOURNAMENTS ============
-window.loadTournamentsAdmin = async function() {
-  const list = document.getElementById('tournamentList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournaments'));
-    allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (!allTournaments.length) { list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments.</div>'; return; }
-    list.innerHTML = allTournaments.map(t => {
-      const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
-      const feeValue = Number(t.entryFee || t.entry_fee || 0);
-      const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
-      const hasRoom = t.roomId && t.roomPassword;
-      const isCompleted = (t.status || '').toLowerCase() === 'completed';
-      return `<div class="reg-card ${isCompleted ? 'free-reg' : (isPaid ? 'paid-reg' : 'free-reg')}">
-        <div class="reg-icon">${isCompleted ? '✅' : (isPaid ? '💵' : '🏆')}</div>
-        <div class="reg-main">
-          <div class="reg-line-1"><b>${t.title || 'Untitled'}</b><span class="reg-sep">—</span><span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span></div>
-          <div class="reg-line-2">${t.date ? '📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}</div>
-        </div>
-        <div class="reg-right">
-          <span class="type-chip ${isCompleted ? 'free' : (isPaid ? 'paid' : 'free')}">${isCompleted ? 'Completed' : (isPaid ? 'Paid' : 'Free')}</span>
-          ${hasRoom ? '<small style="color:#4ade80;">🔑 Room set</small>' : '<small style="color:#6b7280;">No room</small>'}
-        </div>
-      </div>`;
-    }).join('');
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-
-// ============ ANNOUNCEMENTS ============
-window.loadAnnouncements = async function() {
-  const list = document.getElementById('announcementList');
-  if (!list) return;
-  try {
-    const snap = await getDocs(collection(db, 'announcements'));
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (!items.length) { list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements</div>'; return; }
-    list.innerHTML = items.map(a => `<div class="reg-card free-reg"><div class="reg-icon">📢</div><div class="reg-main"><div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div><div class="reg-line-2">${a.message || ''}</div></div><div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div></div>`).join('');
-  } catch (err) { list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>'; }
-};
-window.postAnnouncement = async function(e) {
-  e.preventDefault();
-  const title = document.getElementById('annTitle').value.trim();
-  const message = document.getElementById('annMsg').value.trim();
-  if (!title || !message) { window.showToast('❌ Title and message required'); return; }
-  try {
-    await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp() });
-    document.getElementById('annTitle').value = '';
-    document.getElementById('annMsg').value = '';
-    window.showToast('✅ Announcement posted'); window.loadAnnouncements();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============ DASHBOARD RECENT ============
-function renderDashboardRecent() {
-  const t = todayKey();
-  const todayPayments = allPayments.filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t);
-  const todayCollected = todayPayments.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const todayPayouts = allPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t).reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const allCollected = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const allPayoutsTotal = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const el = id => document.getElementById(id);
-  if (el('dashTodayCollected')) el('dashTodayCollected').innerText = fmtRs(todayCollected);
-  if (el('dashTodayPayouts')) el('dashTodayPayouts').innerText = fmtRs(todayPayouts);
-  if (el('dashTodayNet')) el('dashTodayNet').innerText = fmtRs(todayCollected - todayPayouts);
-  if (el('dashAllNet')) el('dashAllNet').innerText = fmtRs(allCollected - allPayoutsTotal);
-
-  const ru = document.getElementById('dashRecentUsers');
-  if (ru && allUsers.length) {
-    ru.innerHTML = allUsers.slice(0,5).map(u => `<div class="reg-card free-reg"><div class="reg-icon">${initials(u.username)}</div><div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">${u.email || '—'}</div></div><div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div></div>`).join('');
-  }
-  const rr = document.getElementById('dashRecentRegs');
-  if (rr && allRegs.length) {
-    rr.innerHTML = allRegs.slice(0,5).map(r => {
-      const isPaid = r.entryType === 'paid';
-      return `<div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}"><div class="reg-icon">${isPaid ? '💵' : '🏆'}</div><div class="reg-main"><div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div><div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div></div><div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div></div>`;
-    }).join('');
-  }
-}
-
-// ============ REVIEW ============
-window.openReview = function(id, name, action, type) {
-  document.getElementById('reviewId').value = id;
-  document.getElementById('reviewAction').value = action;
-  document.getElementById('reviewType').value = type || 'payment';
-  document.getElementById('reviewTitle').innerText = action === 'approve' ? '✔ Approve' : '❌ Reject';
-  document.getElementById('reviewDesc').innerHTML = (action === 'approve' ? 'Approve ' : 'Reject ') + '<b>' + name + '</b>?';
-  const btn = document.getElementById('reviewConfirmBtn');
-  btn.className = action === 'approve' ? 'btn-primary green' : 'btn-primary red';
-  btn.innerText = action === 'approve' ? '✔ Confirm Approve' : '✘ Confirm Reject';
-  document.getElementById('reviewModal').classList.add('active');
-};
-window.closeReview = function() { document.getElementById('reviewModal').classList.remove('active'); document.getElementById('reviewNote').value = ''; };
-window.confirmReview = async function(e) {
-  e.preventDefault();
-  const id = document.getElementById('reviewId').value;
-  const action = document.getElementById('reviewAction').value;
-  const type = document.getElementById('reviewType').value;
-  const note = document.getElementById('reviewNote').value.trim();
-  const status = action === 'approve' ? 'approved' : 'rejected';
-  const regStatus = action === 'approve' ? 'confirmed' : 'rejected';
-  try {
-    if (type === 'payment') {
-      await updateDoc(doc(db, 'tournament_payments', id), { status, adminNote: note, reviewedAt: serverTimestamp() });
-      const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('paymentId', '==', id)));
-      for (const d of regSnap.docs) await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
-    } else {
-      await updateDoc(doc(db, 'tournament_registrations', id), { status: regStatus });
-    }
-    closeReview();
-    window.showToast('✅ ' + (action === 'approve' ? 'Approved' : 'Rejected'));
-    window.loadPayments(); window.loadRegistrations();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============ LIGHTBOX + TOAST ============
-window.openShot = function(src) { document.getElementById('shotFull').src = src; document.getElementById('shotModal').classList.add('active'); };
-window.showToast = function(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.innerText = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-};
-
-// ============ INIT ============
-(async function init() {
-  await window.loadPayments();
-  await window.loadRegistrations();
-  await window.loadUsers();
-  try {
-    const snap = await getDocs(collection(db, 'tournament_payouts'));
-    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (e) {}
-  renderDashboardRecent();
-  attachRealtimeListeners();
-  console.log("✅ Admin loaded with result entry form");
-})();
-</script>
 </body>
 </html>
