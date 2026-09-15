@@ -49,7 +49,9 @@
 </div>
 
 <!-- ============ TOURNAMENT GRID ============ -->
-<div class="tournament-grid" id="tournamentGrid"></div>
+<div class="tournament-grid" id="tournamentGrid">
+  <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
+</div>
 
 <!-- ============================================== -->
 <!-- PAYMENT MODAL -->
@@ -161,7 +163,7 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDoc
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// ---- Firebase config (inline — no external file needed) ----
+// ---- Firebase config (inline) ----
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
@@ -178,7 +180,7 @@ const storage = getStorage(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
-// ---- Get logged-in user info from the Node.js session ----
+// ---- Fetch logged-in user from Node session ----
 let currentUser = null;
 try {
   const res = await fetch("/api/users/me", { credentials: "include" });
@@ -194,35 +196,72 @@ try {
 }
 
 // ================================================
-// TOURNAMENTS DATA
+// TOURNAMENTS — loaded from Firestore
 // ================================================
-const TOURNAMENTS = [
-  { id:'cod_free_001',  title:'COD Mobile Solo Cup',         game:'COD',       mode:'Solo',
-    entry_type:'free', entry_fee:0,   prize_pool:500,  top_kills_prize:0,
-    date:'2026-09-22', time:'13:00', filled:0,  max:50,  color:'green' },
+let TOURNAMENTS = [];
 
-  { id:'ff_free_001',   title:'Free Fire Solo Cup',          game:'Free Fire', mode:'Solo',
-    entry_type:'free', entry_fee:0,   prize_pool:500,  top_kills_prize:0,
-    date:'2026-09-22', time:'13:00', filled:1,  max:50,  color:'orange' },
+async function loadTournaments() {
+  const grid = document.getElementById('tournamentGrid');
+  grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
 
-  { id:'ludo_free_001', title:'Ludo King Championship',      game:'Ludo',      mode:'1v1',
-    entry_type:'free', entry_fee:0,   prize_pool:500,  top_kills_prize:0,
-    date:'2026-09-22', time:'13:00', filled:0,  max:16,  color:'pink' },
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
 
-  { id:'ff_paid_001',   title:'Free Fire Paid Championship', game:'Free Fire', mode:'Squad',
-    entry_type:'paid', entry_fee:150, prize_pool:1500, top_kills_prize:500,
-    date:'2026-09-25', time:'18:00', filled:12, max:100, color:'purple' },
+    TOURNAMENTS = snap.docs.map(d => {
+      const t = d.data();
 
-  { id:'pubg_paid_001', title:'PUBG Paid Pro Cup',           game:'PUBG',      mode:'Squad',
-    entry_type:'paid', entry_fee:150, prize_pool:1500, top_kills_prize:500,
-    date:'2026-09-28', time:'19:00', filled:45, max:100, color:'purple' },
-];
+      // Determine free vs paid — support multiple field name styles
+      const entryTypeRaw = (t.entry_type || t.entryType || 'free').toString().toLowerCase();
+      const feeValue = Number(t.entryFee || t.entry_fee || t.entry_fee_amount || 0);
+      const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
+
+      // Pick banner color from game name
+      const g = (t.game || '').toString().toLowerCase();
+      let color = 'blue';
+      if (g.includes('free fire')) color = 'orange';
+      else if (g.includes('cod'))  color = 'green';
+      else if (g.includes('pubg')) color = 'purple';
+      else if (g.includes('ludo')) color = 'pink';
+      else if (g.includes('valorant')) color = 'blue';
+      else if (g.includes('football')) color = 'green';
+      else if (g.includes('chess')) color = 'blue';
+
+      return {
+        id: d.id,
+        title: t.title || t.name || 'Untitled Tournament',
+        game:  t.game  || 'Game',
+        mode:  t.mode  || 'Solo',
+        entry_type: isPaid ? 'paid' : 'free',
+        entry_fee:  isPaid ? feeValue : 0,
+        prize_pool: Number(t.prizePool || t.prize_pool || t.winnerPrize || t.prize || 0),
+        top_kills_prize: Number(t.topKillsPrize || t.top_kills_prize || t.topKiller || 0),
+        date:  t.date  || '—',
+        time:  t.time  || '—',
+        filled: Number(t.filled || t.registered || t.registeredCount || 0),
+        max:    Number(t.max || t.maxPlayers || t.max_players || 50),
+        color
+      };
+    });
+
+    if (!TOURNAMENTS.length) {
+      grid.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No tournaments yet. Check back soon!</div>';
+      return;
+    }
+
+    console.log("✅ Loaded", TOURNAMENTS.length, "tournaments from Firestore");
+    renderTournaments();
+  } catch (err) {
+    console.error('loadTournaments error:', err);
+    grid.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed to load: ' + err.message + '</div>';
+  }
+}
 
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
   grid.innerHTML = TOURNAMENTS.map(t => {
-    const pct = Math.round((t.filled / t.max) * 100);
+    const pct = t.max > 0 ? Math.round((t.filled / t.max) * 100) : 0;
     const isPaid = t.entry_type === 'paid';
+    const safeTitle = t.title.replace(/'/g, "\\'");
 
     return `
       <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}">
@@ -268,10 +307,10 @@ function renderTournaments() {
 
           ${isPaid
             ? `<button class="btn-join paid-btn"
-                 onclick="openPaymentModal('${t.id}','${t.title}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">
+                 onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">
                  Join — Pay Rs. ${t.entry_fee}
                </button>`
-            : `<button class="btn-join free-btn" onclick="joinFree('${t.id}','${t.title}')">
+            : `<button class="btn-join free-btn" onclick="joinFree('${t.id}','${safeTitle}')">
                  Join Free
                </button>`}
         </div>
@@ -279,7 +318,9 @@ function renderTournaments() {
     `;
   }).join('');
 }
-renderTournaments();
+
+// Kick off loading
+loadTournaments();
 
 // ================================================
 // TAB FILTER
