@@ -501,6 +501,7 @@ code { font-family: 'Courier New', monospace; }
   font-weight: 500;
   transition: all .15s;
   border-left: 3px solid transparent;
+  cursor: pointer;
 }
 .sidebar-link:hover { background: #151829; color: #fff; }
 .sidebar-link.active {
