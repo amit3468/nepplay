@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Tournaments — Nepal Gaming</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -160,6 +161,8 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDoc
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -174,28 +177,33 @@ const firebaseConfig = {
 const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
+const auth    = getAuth(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
+// ================================================
+// AUTH — use Firebase Auth (same as member.html)
+// ================================================
 let currentUser = null;
 let currentUid  = null;
 
-try {
-  const res = await fetch("/api/users/me", { credentials: "include" });
-  if (res.ok) {
-    const data = await res.json();
-    if (data.success && data.user) {
-      currentUser = data.user;
-      currentUid = String(
-        currentUser.id || currentUser.uid || currentUser._id ||
-        currentUser.email || currentUser.username
-      );
-      console.log("👤 Logged in as:", currentUser.username, "| uid:", currentUid);
+await new Promise((resolve) => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = {
+        uid: user.uid,
+        email: user.email || '',
+        username: user.displayName || (user.email ? user.email.split('@')[0] : 'Player'),
+        displayName: user.displayName
+      };
+      currentUid = user.uid;
+      console.log("👤 Firebase user:", currentUser.username, "| uid:", currentUid);
+    } else {
+      console.log("👤 No Firebase user — visitor mode");
     }
-  }
-} catch (e) {
-  console.warn("Could not fetch /api/users/me:", e);
-}
+    resolve();
+  });
+});
 
 // ================================================
 // AUTO-SEED 8 PAID TOURNAMENTS
@@ -292,7 +300,6 @@ async function loadTournaments() {
         filled: Number(t.filled || t.registered || 0),
         max:    Number(t.max || t.maxPlayers || t.max_players || 50),
         color,
-        // Room details
         roomId: t.roomId || '',
         roomPassword: t.roomPassword || '',
         roomFormat: t.roomFormat || '',
@@ -321,7 +328,10 @@ async function loadTournaments() {
 // MY TOURNAMENTS (with room details)
 // ================================================
 async function loadMyTournaments() {
-  if (!currentUser || !currentUid) return;
+  if (!currentUser || !currentUid) {
+    console.log("ℹ️ Not logged in — skipping My Tournaments");
+    return;
+  }
   try {
     const snap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -344,7 +354,6 @@ async function loadMyTournaments() {
       const statusClass = r.status === 'confirmed' ? 'confirmed' : (r.status === 'pending' ? 'pending' : 'rejected');
       const statusLabel = r.status ? r.status.toUpperCase() : 'CONFIRMED';
 
-      // Get tournament doc for room details
       const t = tournamentsById[r.tournamentId] || {};
       const hasRoom = t.roomId && t.roomPassword;
       const roomRevealTime = t.roomRevealAt ? new Date(t.roomRevealAt) : null;
@@ -424,11 +433,11 @@ window.copyRoomField = function(text, btn) {
   }).catch(err => console.error('Copy failed:', err));
 };
 
-// Auto-refresh room details every minute (for reveal timing)
+// Auto-refresh room details every minute
 setInterval(loadMyTournaments, 60000);
 
 // ================================================
-// RENDER TOURNAMENT CARDS
+// RENDER CARDS
 // ================================================
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
@@ -489,7 +498,7 @@ function renderTournaments() {
 loadTournaments();
 
 // ================================================
-// TAB FILTER
+// FILTERS
 // ================================================
 window.filterTournamentType = function(type) {
   const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
@@ -539,12 +548,11 @@ window.submitJoin = async function(e) {
     ));
     if (!dupSnap.empty) throw new Error('You already registered');
 
-    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid,
       tournamentTitle: title,
       userId: currentUid,
-      username,
+      username: currentUser.username,
       email: currentUser.email,
       ign, phone,
       paymentId: null,
@@ -638,12 +646,11 @@ window.submitPayment = async function(e) {
     await uploadBytes(sRef, file);
     const url = await getDownloadURL(sRef);
 
-    const username = currentUser.username || currentUser.displayName || currentUser.email.split('@')[0];
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
       tournamentId: tid,
       tournamentTitle: title,
       userId: currentUid,
-      username,
+      username: currentUser.username,
       email: currentUser.email,
       ign, phone,
       method, amount,
@@ -659,7 +666,7 @@ window.submitPayment = async function(e) {
       tournamentId: tid,
       tournamentTitle: title,
       userId: currentUid,
-      username,
+      username: currentUser.username,
       email: currentUser.email,
       ign, phone,
       paymentId: payRef.id,
