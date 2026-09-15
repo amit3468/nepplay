@@ -20,41 +20,32 @@
       <a href="#dashboard" data-section="dashboard" class="sidebar-link active">
         <span>📊</span> Dashboard
       </a>
-
       <a href="#payments" data-section="payments" class="sidebar-link">
         <span>💰</span> Payments
         <span class="badge pending" id="pendingPayBadge">0</span>
       </a>
-
       <a href="#prize" data-section="prize" class="sidebar-link">
         <span>🧮</span> Prize Calculator
       </a>
-
       <a href="#earnings" data-section="earnings" class="sidebar-link">
         <span>💵</span> Earnings
       </a>
-
       <a href="#payouts" data-section="payouts" class="sidebar-link">
         <span>📤</span> Payouts
       </a>
-
       <a href="#users" data-section="users" class="sidebar-link">
         <span>👥</span> Users
       </a>
-
       <a href="#registrations" data-section="registrations" class="sidebar-link">
         <span>📋</span> Registrations
         <span class="badge" id="regsBadge">0</span>
       </a>
-
       <a href="#support" data-section="support" class="sidebar-link">
         <span>🎧</span> Support
       </a>
-
       <a href="#tournaments" data-section="tournaments" class="sidebar-link">
         <span>🏆</span> Tournaments
       </a>
-
       <a href="#announcements" data-section="announcements" class="sidebar-link">
         <span>📢</span> Announcements
       </a>
@@ -66,36 +57,17 @@
   <!-- ============ MAIN ============ -->
   <main class="admin-main">
 
-    <!-- DASHBOARD -->
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
-
       <div class="stat-grid">
-        <div class="stat-card">
-          <small>REAL USERS</small>
-          <b id="dashUsers">0</b>
-          <span>Accounts created</span>
-        </div>
-        <div class="stat-card">
-          <small>REGISTRATIONS</small>
-          <b id="dashRegs">0</b>
-          <span>Tournament sign-ups</span>
-        </div>
-        <div class="stat-card">
-          <small>TOTAL PAID</small>
-          <b id="dashPaid">Rs. 0</b>
-          <span>From registrations</span>
-        </div>
-        <div class="stat-card">
-          <small>PENDING PAYMENTS</small>
-          <b id="dashPending">0</b>
-          <span>Awaiting review</span>
-        </div>
+        <div class="stat-card"><small>REAL USERS</small><b id="dashUsers">0</b><span>Accounts created</span></div>
+        <div class="stat-card"><small>REGISTRATIONS</small><b id="dashRegs">0</b><span>Tournament sign-ups</span></div>
+        <div class="stat-card"><small>TOTAL PAID</small><b id="dashPaid">Rs. 0</b><span>From registrations</span></div>
+        <div class="stat-card"><small>PENDING PAYMENTS</small><b id="dashPending">0</b><span>Awaiting review</span></div>
       </div>
     </section>
 
-    <!-- PAYMENTS -->
     <section id="section-payments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>💰 Payment Approvals</h2>
@@ -131,23 +103,19 @@
       </div>
     </section>
 
-    <!-- REGISTRATIONS -->
     <section id="section-registrations" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>📋 Registrations</h2>
         <p class="muted">Who registered for what</p>
       </div>
-
       <input type="text" id="regSearch" placeholder="🔍 Search by username, tournament, or IGN..."
              oninput="filterRegistrations()" class="search-input"
              style="width:100%;margin-bottom:16px;">
-
       <div id="regList" class="reg-list">
         <div class="empty-state"><span class="icon">⏳</span>Loading registrations...</div>
       </div>
     </section>
 
-    <!-- PLACEHOLDERS -->
     <section id="section-prize"         class="admin-section" style="display:none"><h2>🧮 Prize Calculator</h2><p class="muted">Coming soon</p></section>
     <section id="section-earnings"      class="admin-section" style="display:none"><h2>💵 Earnings</h2><p class="muted">Coming soon</p></section>
     <section id="section-payouts"       class="admin-section" style="display:none"><h2>📤 Payouts</h2><p class="muted">Coming soon</p></section>
@@ -178,31 +146,19 @@
   </div>
 </div>
 
-<!-- LIGHTBOX -->
 <div id="shotModal" class="modal-overlay" onclick="this.style.display='none'">
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ SECTION SWITCHER (runs first, always works) ============ -->
+<!-- ============ SECTION SWITCHER (works even if Firebase fails) ============ -->
 <script>
 (function() {
   function showSection(name, el) {
-    document.querySelectorAll('.admin-section').forEach(function(s) {
-      s.style.display = 'none';
-    });
-
+    document.querySelectorAll('.admin-section').forEach(function(s) { s.style.display = 'none'; });
     var target = document.getElementById('section-' + name);
-    if (target) {
-      target.style.display = 'block';
-    } else {
-      console.warn('Section not found:', 'section-' + name);
-    }
-
-    document.querySelectorAll('.sidebar-link').forEach(function(a) {
-      a.classList.remove('active');
-    });
+    if (target) target.style.display = 'block';
+    document.querySelectorAll('.sidebar-link').forEach(function(a) { a.classList.remove('active'); });
     if (el) el.classList.add('active');
-
     if (name === 'payments' && typeof window.loadPayments === 'function') {
       try { window.loadPayments(); } catch (e) { console.error(e); }
     }
@@ -210,9 +166,7 @@
       try { window.loadRegistrations(); } catch (e) { console.error(e); }
     }
   }
-
   window.showSection = showSection;
-
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.sidebar-link').forEach(function(link) {
       link.addEventListener('click', function(e) {
@@ -232,12 +186,22 @@ import {
   getFirestore, collection, getDocs, doc, updateDoc,
   query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-import { app } from "./firebase-config.js";
+// ---- Firebase config (inline — no external file needed) ----
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+    measurementId: "G-3PXN38XFG9"
+};
 
-const db   = getFirestore(app);
-const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+console.log("🔥 Firebase ready on admin page");
 
 let allPayments = [];
 let allRegs     = [];
@@ -318,7 +282,6 @@ function renderPayments() {
             ? '<img src="' + p.screenshotUrl + '" class="pay-shot" onclick="openShot(\'' + p.screenshotUrl + '\')">'
             : '<div class="pay-shot-empty">No image</div>'}
         </div>
-
         <div class="pay-item-mid">
           <div class="pay-user">
             <div class="avatar">${(p.username||'U')[0].toUpperCase()}</div>
@@ -327,7 +290,6 @@ function renderPayments() {
               <small>${p.email || ''}</small>
             </div>
           </div>
-
           <div class="pay-details">
             <div class="detail-row"><span>🏆 Tournament</span><b>${p.tournamentTitle||'—'}</b></div>
             <div class="detail-row"><span>🎮 IGN</span><b>${p.ign||'—'}</b></div>
@@ -338,19 +300,13 @@ function renderPayments() {
             <div class="detail-row"><span>🕐 Submitted</span><small>${date}</small></div>
           </div>
         </div>
-
         <div class="pay-item-right">
           <span class="status-pill ${p.status}">${p.status.toUpperCase()}</span>
-
           ${showActions ? `
             <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve')">✔ Approve</button>
             <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject')">✘ Reject</button>
           ` : ''}
-
-          ${p.screenshotUrl
-            ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 View Full Screenshot</a>'
-            : ''}
-
+          ${p.screenshotUrl ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 View Full Screenshot</a>' : ''}
           ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
         </div>
       </div>
@@ -364,12 +320,7 @@ window.filterPayStatus = function(status, btn) {
   btn.classList.add('active');
   renderPayments();
 };
-
-window.filterPayMethod = function(method) {
-  currentMethodFilter = method;
-  renderPayments();
-};
-
+window.filterPayMethod = function(method) { currentMethodFilter = method; renderPayments(); };
 window.filterPayments = function() {
   currentSearchTerm = document.getElementById('paySearch').value;
   renderPayments();
@@ -388,11 +339,10 @@ window.loadRegistrations = async function() {
     allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
 
-    const dr = document.getElementById('dashRegs');
-    if (dr) dr.innerText = allRegs.length;
-
-    const rb = document.getElementById('regsBadge');
-    if (rb) rb.innerText = allRegs.length;
+    if (document.getElementById('dashRegs'))
+      document.getElementById('dashRegs').innerText = allRegs.length;
+    if (document.getElementById('regsBadge'))
+      document.getElementById('regsBadge').innerText = allRegs.length;
 
     renderRegistrations();
   } catch (err) {
@@ -429,21 +379,18 @@ function renderRegistrations() {
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
         <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-
         <div class="reg-main">
           <div class="reg-line-1">
             <b>${r.username || 'Unknown'}</b>
             <span class="reg-sep">—</span>
             <span class="reg-tournament">${r.tournamentTitle || 'Unknown Tournament'}</span>
           </div>
-
           <div class="reg-line-2">
             ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
             ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
             ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
             ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
           </div>
-
           ${isPaid && r.screenshotUrl ? `
             <div class="reg-payment-preview">
               <img src="${r.screenshotUrl}" class="thumb" onclick="openShot('${r.screenshotUrl}')">
@@ -456,7 +403,6 @@ function renderRegistrations() {
             </div>
           ` : ''}
         </div>
-
         <div class="reg-right">
           <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
           <small>${date}</small>
@@ -476,11 +422,9 @@ window.openReview = function(id, name, action) {
     action === 'approve' ? '✔ Approve Payment' : '❌ Reject Payment';
   document.getElementById('reviewDesc').innerHTML =
     (action === 'approve' ? 'Confirm approval for ' : 'Reject payment from ') + '<b>' + name + '</b>?';
-
   const btn = document.getElementById('reviewConfirmBtn');
   btn.className = action === 'approve' ? 'btn-primary green' : 'btn-primary red';
   btn.innerText = action === 'approve' ? '✔ Confirm Approve' : '✘ Confirm Reject';
-
   document.getElementById('reviewModal').classList.add('active');
 };
 
@@ -494,15 +438,12 @@ window.confirmReview = async function(e) {
   const id     = document.getElementById('reviewId').value;
   const action = document.getElementById('reviewAction').value;
   const note   = document.getElementById('reviewNote').value.trim();
-
   const status    = action === 'approve' ? 'approved' : 'rejected';
   const regStatus = action === 'approve' ? 'confirmed' : 'rejected';
 
   try {
     await updateDoc(doc(db, 'tournament_payments', id), {
-      status: status,
-      adminNote: note,
-      reviewedAt: serverTimestamp()
+      status, adminNote: note, reviewedAt: serverTimestamp()
     });
 
     const regSnap = await getDocs(query(
@@ -529,7 +470,6 @@ window.openShot = function(src) {
   document.getElementById('shotFull').src = src;
   document.getElementById('shotModal').classList.add('active');
 };
-
 window.showToast = function(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
@@ -538,7 +478,6 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
-// Auto-load counts on start
 window.loadPayments();
 </script>
 </body>
