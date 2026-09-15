@@ -42,7 +42,7 @@
 
   <main class="admin-main">
 
-    <!-- ==================== DASHBOARD ==================== -->
+    <!-- DASHBOARD -->
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
@@ -55,17 +55,13 @@
       </div>
 
       <h3 class="mt">👥 Recent Users</h3>
-      <div class="list" id="dashRecentUsers">
-        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
-      </div>
+      <div class="list" id="dashRecentUsers"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
 
       <h3 class="mt">📋 Recent Registrations</h3>
-      <div class="list" id="dashRecentRegs">
-        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
-      </div>
+      <div class="list" id="dashRecentRegs"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PAYMENTS ==================== -->
+    <!-- PAYMENTS -->
     <section id="section-payments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>💰 Payment Approvals</h2>
@@ -99,26 +95,21 @@
         </select>
       </div>
 
-      <div class="pay-list" id="payList">
-        <div class="empty-state"><span class="icon">⏳</span>Loading payments...</div>
-      </div>
+      <div class="pay-list" id="payList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== REGISTRATIONS ==================== -->
+    <!-- REGISTRATIONS -->
     <section id="section-registrations" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>📋 Registrations</h2>
-        <p class="muted">Who registered for what — edit, approve or remove</p>
+        <p class="muted">Approve, edit or remove registrations</p>
       </div>
       <input type="text" id="regSearch" placeholder="🔍 Search by username, tournament, or IGN..."
-             oninput="filterRegistrations()" class="search-input"
-             style="width:100%;margin-bottom:16px;">
-      <div id="regList" class="reg-list">
-        <div class="empty-state"><span class="icon">⏳</span>Loading registrations...</div>
-      </div>
+             oninput="filterRegistrations()" class="search-input" style="width:100%;margin-bottom:16px;">
+      <div id="regList" class="reg-list"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PRIZE CALCULATOR ==================== -->
+    <!-- PRIZE CALCULATOR -->
     <section id="section-prize" class="admin-section" style="display:none">
       <h2>🧮 Prize Calculator</h2>
       <p class="muted">Quickly calculate prize distribution</p>
@@ -146,55 +137,43 @@
                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;">
           </div>
         </div>
-
-        <button onclick="calculatePrize()" class="btn-submit-pay" style="margin-top:20px;">
-          🧮 Calculate
-        </button>
-
+        <button onclick="calculatePrize()" class="btn-submit-pay" style="margin-top:20px;">🧮 Calculate</button>
         <div id="calcResult" style="margin-top:20px;display:none;"></div>
       </div>
     </section>
 
-    <!-- ==================== EARNINGS ==================== -->
+    <!-- EARNINGS -->
     <section id="section-earnings" class="admin-section" style="display:none">
       <h2>💵 Earnings</h2>
       <p class="muted">Revenue from paid tournaments</p>
-
       <div class="stat-grid">
         <div class="stat-card"><small>TOTAL REVENUE</small><b id="earnTotal">Rs. 0</b><span>From approved payments</span></div>
         <div class="stat-card"><small>APPROVED</small><b id="earnApproved">0</b><span>Successful transactions</span></div>
         <div class="stat-card"><small>PENDING AMOUNT</small><b id="earnPending">Rs. 0</b><span>Awaiting review</span></div>
         <div class="stat-card"><small>AVG ENTRY</small><b id="earnAvg">Rs. 0</b><span>Per approved</span></div>
       </div>
-
       <h3 class="mt">📊 Breakdown by Method</h3>
-      <div class="list" id="earningsBreakdown">
-        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
-      </div>
+      <div class="list" id="earningsBreakdown"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== PAYOUTS ==================== -->
+    <!-- PAYOUTS -->
     <section id="section-payouts" class="admin-section" style="display:none">
       <h2>📤 Payouts</h2>
-      <p class="muted">Winner payouts — mark as paid once transferred</p>
-      <div class="list" id="payoutList">
-        <div class="empty-state"><span class="icon">⏳</span>Loading winners...</div>
-      </div>
+      <p class="muted">Winner payouts</p>
+      <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No winners recorded yet.</div></div>
     </section>
 
-    <!-- ==================== USERS ==================== -->
+    <!-- USERS -->
     <section id="section-users" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>👥 Users</h2>
         <input type="text" id="userSearch" placeholder="🔍 Search username or email..."
                oninput="filterUsers()" class="search-input">
       </div>
-      <div class="reg-list" id="userList">
-        <div class="empty-state"><span class="icon">⏳</span>Loading users...</div>
-      </div>
+      <div class="reg-list" id="userList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== SUPPORT ==================== -->
+    <!-- SUPPORT -->
     <section id="section-support" class="admin-section" style="display:none">
       <h2>🎧 Support</h2>
       <p class="muted">Member support tickets</p>
@@ -203,38 +182,30 @@
       </div>
     </section>
 
-    <!-- ==================== TOURNAMENTS ==================== -->
+    <!-- TOURNAMENTS -->
     <section id="section-tournaments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>🏆 Tournaments</h2>
-        <p class="muted">All tournaments on the platform</p>
+        <p class="muted">All tournaments — free &amp; paid</p>
       </div>
-      <div class="reg-list" id="tournamentList">
-        <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
-      </div>
+      <div class="reg-list" id="tournamentList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
-    <!-- ==================== ANNOUNCEMENTS ==================== -->
+    <!-- ANNOUNCEMENTS -->
     <section id="section-announcements" class="admin-section" style="display:none">
       <h2>📢 Announcements</h2>
       <p class="muted">Post updates for members</p>
-
       <div class="reg-card free-reg" style="grid-template-columns:1fr;padding:24px;">
         <form onsubmit="postAnnouncement(event)">
           <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Title</label>
           <input type="text" id="annTitle" placeholder="e.g. Grand Opening Update"
-                 style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;margin-bottom:14px;">
-
+                 style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;margin-bottom:14px;box-sizing:border-box;">
           <label style="display:block;margin-bottom:6px;color:#cbd5e1;font-size:13px;">Message</label>
           <textarea id="annMsg" rows="4" placeholder="Type your announcement..."
-                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;"></textarea>
-
-          <button type="submit" class="btn-submit-pay" style="margin-top:14px;">
-            📢 Post Announcement
-          </button>
+                    style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
+          <button type="submit" class="btn-submit-pay" style="margin-top:14px;">📢 Post Announcement</button>
         </form>
       </div>
-
       <h3 class="mt">📜 Recent Announcements</h3>
       <div class="list" id="announcementList">
         <div class="empty-state"><span class="icon">📢</span>No announcements yet</div>
@@ -244,7 +215,7 @@
   </main>
 </div>
 
-<!-- ============ REVIEW MODAL ============ -->
+<!-- REVIEW MODAL -->
 <div id="reviewModal" class="modal-overlay">
   <div class="modal-box small">
     <h3 id="reviewTitle">Approve Payment</h3>
@@ -252,6 +223,7 @@
     <form onsubmit="confirmReview(event)">
       <input type="hidden" id="reviewId">
       <input type="hidden" id="reviewAction">
+      <input type="hidden" id="reviewType" value="payment">
       <label>Admin Note (optional)</label>
       <textarea id="reviewNote" rows="3" placeholder="Reason for rejection or any comment..."
                 style="width:100%;padding:12px;background:#0f1124;border:1px solid #2a2d4a;border-radius:10px;color:#fff;box-sizing:border-box;"></textarea>
@@ -267,7 +239,7 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- ============ SECTION SWITCHER ============ -->
+<!-- SECTION SWITCHER -->
 <script>
 (function() {
   function showSection(name, el) {
@@ -305,7 +277,7 @@
 })();
 </script>
 
-<!-- ============ LOGIC ============ -->
+<!-- LOGIC -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -319,24 +291,22 @@ const firebaseConfig = {
     projectId: "nepplaygaming",
     storageBucket: "nepplaygaming.firebasestorage.app",
     messagingSenderId: "893565645520",
-    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
-    measurementId: "G-3PXN38XFG9"
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-console.log("🔥 Firebase ready on admin page");
+console.log("🔥 Admin ready");
 
 let allPayments = [];
-let allRegs     = [];
-let allUsers    = [];
+let allRegs = [];
+let allUsers = [];
 let allTournaments = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
-let currentSearchTerm   = '';
+let currentSearchTerm = '';
 
-// ============= HELPERS =============
 function fmtDate(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', {
@@ -349,11 +319,11 @@ function fmtShort(ts) {
 }
 function initials(name) { return (name || 'U')[0].toUpperCase(); }
 
-// ============= PAYMENTS =============
+// ============ PAYMENTS ============
 window.loadPayments = async function() {
   const list = document.getElementById('payList');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading payments...</div>';
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
 
   try {
     const snap = await getDocs(collection(db, 'tournament_payments'));
@@ -363,7 +333,6 @@ window.loadPayments = async function() {
     renderPayments();
     renderDashboardRecent();
   } catch (err) {
-    console.error('loadPayments error:', err);
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
 };
@@ -388,7 +357,6 @@ function updateCounts() {
 function renderPayments() {
   const list = document.getElementById('payList');
   if (!list) return;
-
   let filtered = allPayments.filter(p => {
     if (currentStatusFilter !== 'all' && p.status !== currentStatusFilter) return false;
     if (currentMethodFilter !== 'all' && p.method !== currentMethodFilter) return false;
@@ -409,7 +377,6 @@ function renderPayments() {
   const chipLabel = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
 
   list.innerHTML = filtered.map(p => {
-    const date = fmtShort(p.submittedAt);
     const showActions = p.status === 'pending';
     const safeName = (p.username||'').replace(/'/g,'');
 
@@ -432,14 +399,14 @@ function renderPayments() {
             <div class="detail-row"><span>💳 Method</span><span class="chip ${chipClass[p.method]||''}">${chipLabel[p.method]||p.method}</span></div>
             <div class="detail-row"><span>💰 Amount</span><b class="amount">Rs. ${p.amount||0}</b></div>
             <div class="detail-row"><span>🔖 Txn ID</span><code class="txn-id">${p.txnId||'—'}</code></div>
-            <div class="detail-row"><span>🕐 Submitted</span><small>${date}</small></div>
+            <div class="detail-row"><span>🕐 Submitted</span><small>${fmtShort(p.submittedAt)}</small></div>
           </div>
         </div>
         <div class="pay-item-right">
           <span class="status-pill ${p.status}">${p.status.toUpperCase()}</span>
           ${showActions ? `
-            <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve')">✔ Approve</button>
-            <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject')">✘ Reject</button>
+            <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Approve</button>
+            <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject','payment')">✘ Reject</button>
           ` : ''}
           ${p.screenshotUrl ? '<a href="' + p.screenshotUrl + '" target="_blank" class="link-view">🔍 Full Screenshot</a>' : ''}
           ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
@@ -461,11 +428,11 @@ window.filterPayments = function() {
   renderPayments();
 };
 
-// ============= REGISTRATIONS with EDIT/DELETE/APPROVE =============
+// ============ REGISTRATIONS ============
 window.loadRegistrations = async function() {
   const list = document.getElementById('regList');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading registrations...</div>';
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
 
   try {
     const snap = await getDocs(collection(db, 'tournament_registrations'));
@@ -478,7 +445,6 @@ window.loadRegistrations = async function() {
     renderRegistrations();
     renderDashboardRecent();
   } catch (err) {
-    console.error(err);
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
   }
 };
@@ -489,11 +455,9 @@ function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
   const q = (document.getElementById('regSearch').value || '').toLowerCase();
-
   let filtered = allRegs.filter(r => {
     if (!q) return true;
-    const hay = `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase();
-    return hay.includes(q);
+    return `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase().includes(q);
   });
 
   if (!filtered.length) {
@@ -502,7 +466,6 @@ function renderRegistrations() {
   }
 
   list.innerHTML = filtered.map(r => {
-    const date = fmtDate(r.registeredAt);
     const isPaid = r.entryType === 'paid';
     const safeName = (r.username||'').replace(/'/g,'');
     const isPending = r.status === 'pending';
@@ -514,7 +477,7 @@ function renderRegistrations() {
           <div class="reg-line-1">
             <b>${r.username || 'Unknown'}</b>
             <span class="reg-sep">—</span>
-            <span class="reg-tournament">${r.tournamentTitle || 'Unknown Tournament'}</span>
+            <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
           </div>
           <div class="reg-line-2">
             ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
@@ -530,9 +493,9 @@ function renderRegistrations() {
             </div>
           ` : ''}
           <div class="reg-actions">
-            ${isPending && r.paymentId ? `
-              <button class="btn-approve small" onclick="openReview('${r.paymentId}','${safeName}','approve')">✔ Approve</button>
-              <button class="btn-reject small"  onclick="openReview('${r.paymentId}','${safeName}','reject')">✘ Reject</button>
+            ${isPending ? `
+              <button class="btn-approve small" onclick="openReview('${r.id}','${safeName}','approve','registration')">✔ Approve</button>
+              <button class="btn-reject small"  onclick="openReview('${r.id}','${safeName}','reject','registration')">✘ Reject</button>
             ` : ''}
             <button class="btn-edit small" onclick="editRegistration('${r.id}')">✏️ Edit</button>
             <button class="btn-delete small" onclick="deleteRegistration('${r.id}','${safeName}')">🗑️ Delete</button>
@@ -540,7 +503,8 @@ function renderRegistrations() {
         </div>
         <div class="reg-right">
           <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
-          <small>${date}</small>
+          <span class="status-pill ${r.status}" style="font-size:10px;padding:3px 8px;">${(r.status||'').toUpperCase()}</span>
+          <small>${fmtShort(r.registeredAt)}</small>
         </div>
       </div>
     `;
@@ -550,21 +514,16 @@ function renderRegistrations() {
 window.editRegistration = async function(id) {
   const reg = allRegs.find(r => r.id === id);
   if (!reg) return;
-
   const newIgn = prompt('Edit IGN:', reg.ign || '');
   if (newIgn === null) return;
   const newPhone = prompt('Edit Phone:', reg.phone || '');
   if (newPhone === null) return;
-  const newStatus = prompt('Status (confirmed / pending / rejected):', reg.status || 'confirmed');
-  if (newStatus === null) return;
-
   try {
     await updateDoc(doc(db, 'tournament_registrations', id), {
       ign: newIgn.trim(),
-      phone: newPhone.trim(),
-      status: newStatus.trim()
+      phone: newPhone.trim()
     });
-    window.showToast('✅ Registration updated');
+    window.showToast('✅ Updated');
     window.loadRegistrations();
   } catch (err) {
     window.showToast('❌ ' + err.message);
@@ -575,27 +534,24 @@ window.deleteRegistration = async function(id, name) {
   if (!confirm('Delete registration for ' + name + '?')) return;
   try {
     await deleteDoc(doc(db, 'tournament_registrations', id));
-    window.showToast('🗑️ Registration deleted');
+    window.showToast('🗑️ Deleted');
     window.loadRegistrations();
   } catch (err) {
     window.showToast('❌ ' + err.message);
   }
 };
 
-// ============= USERS =============
+// ============ USERS ============
 window.loadUsers = async function() {
   const list = document.getElementById('userList');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading users...</div>';
-
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
     const snap = await getDocs(collection(db, 'users'));
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-
     if (document.getElementById('usersBadge')) document.getElementById('usersBadge').innerText = allUsers.length;
     if (document.getElementById('dashUsers'))  document.getElementById('dashUsers').innerText  = allUsers.length;
-
     renderUsers();
     renderDashboardRecent();
   } catch (err) {
@@ -608,52 +564,36 @@ function renderUsers() {
   const list = document.getElementById('userList');
   if (!list) return;
   const q = (document.getElementById('userSearch').value || '').toLowerCase();
-  let filtered = allUsers.filter(u => {
-    if (!q) return true;
-    return `${u.username||''} ${u.email||''}`.toLowerCase().includes(q);
-  });
-
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users found.</div>';
-    return;
-  }
-
+  let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users found.</div>'; return; }
   list.innerHTML = filtered.map(u => `
     <div class="reg-card free-reg">
       <div class="reg-icon">${initials(u.username)}</div>
       <div class="reg-main">
         <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
-        <div class="reg-line-2">
-          📧 ${u.email || '—'}
-          ${u.phone ? ' · 📱 ' + u.phone : ''}
-          ${u.role ? ' · 🎭 ' + u.role : ''}
-        </div>
+        <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
       </div>
-      <div class="reg-right">
-        <span class="type-chip free">Member</span>
-        <small>${fmtDate(u.createdAt)}</small>
-      </div>
+      <div class="reg-right"><span class="type-chip free">Member</span><small>${fmtDate(u.createdAt)}</small></div>
     </div>
   `).join('');
 }
 
-// ============= TOURNAMENTS =============
+// ============ TOURNAMENTS ============
 window.loadTournamentsAdmin = async function() {
   const list = document.getElementById('tournamentList');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
-
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
     allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
     if (!allTournaments.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments yet.</div>';
       return;
     }
-
     list.innerHTML = allTournaments.map(t => {
-      const isPaid = (t.entry_type || t.entryType || 'free').toLowerCase() === 'paid';
+      const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
+      const feeValue = Number(t.entryFee || t.entry_fee || 0);
+      const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
@@ -681,7 +621,7 @@ window.loadTournamentsAdmin = async function() {
   }
 };
 
-// ============= EARNINGS =============
+// ============ EARNINGS ============
 window.loadEarnings = function() {
   const approved = allPayments.filter(p => p.status === 'approved');
   const pending  = allPayments.filter(p => p.status === 'pending');
@@ -698,7 +638,6 @@ window.loadEarnings = function() {
   const methods = ['esewa','khalti','imepay','bank'];
   const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
   const breakdown = document.getElementById('earningsBreakdown');
-
   if (breakdown) {
     breakdown.innerHTML = methods.map(m => {
       const count = approved.filter(p => p.method === m).length;
@@ -710,28 +649,24 @@ window.loadEarnings = function() {
             <div class="reg-line-1"><b>${labels[m]}</b></div>
             <div class="reg-line-2">${count} approved payment${count !== 1 ? 's' : ''}</div>
           </div>
-          <div class="reg-right">
-            <span class="type-chip paid">Rs. ${sum.toLocaleString()}</span>
-          </div>
+          <div class="reg-right"><span class="type-chip paid">Rs. ${sum.toLocaleString()}</span></div>
         </div>
       `;
     }).join('');
   }
 };
 
-// ============= PRIZE CALCULATOR =============
+// ============ PRIZE CALCULATOR ============
 window.calculatePrize = function() {
   const pool = Number(document.getElementById('calcPool').value) || 0;
   const fee  = Number(document.getElementById('calcFee').value) || 0;
   const players = Number(document.getElementById('calcPlayers').value) || 0;
   const killsPrize = Number(document.getElementById('calcKills').value) || 0;
-
   const collected = fee * players;
   const netRevenue = collected - pool - killsPrize;
-
-  const first  = Math.round(pool * 0.50);
+  const first = Math.round(pool * 0.50);
   const second = Math.round(pool * 0.30);
-  const third  = Math.round(pool * 0.20);
+  const third = Math.round(pool * 0.20);
 
   const result = document.getElementById('calcResult');
   result.style.display = 'block';
@@ -742,39 +677,24 @@ window.calculatePrize = function() {
       <div class="stat-card"><small>TOP KILLS</small><b>Rs. ${killsPrize.toLocaleString()}</b><span>To top killer</span></div>
       <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">Rs. ${netRevenue.toLocaleString()}</b><span>Platform profit</span></div>
     </div>
-
     <h3 class="mt">🥇 Winner Breakdown</h3>
     <div class="list">
-      <div class="reg-card free-reg">
-        <div class="reg-icon">🥇</div>
-        <div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div><div class="reg-line-2">50% of prize pool</div></div>
-        <div class="reg-right"><span class="type-chip paid">Rs. ${first.toLocaleString()}</span></div>
-      </div>
-      <div class="reg-card free-reg">
-        <div class="reg-icon">🥈</div>
-        <div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div><div class="reg-line-2">30% of prize pool</div></div>
-        <div class="reg-right"><span class="type-chip paid">Rs. ${second.toLocaleString()}</span></div>
-      </div>
-      <div class="reg-card free-reg">
-        <div class="reg-icon">🥉</div>
-        <div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div><div class="reg-line-2">20% of prize pool</div></div>
-        <div class="reg-right"><span class="type-chip paid">Rs. ${third.toLocaleString()}</span></div>
-      </div>
+      <div class="reg-card free-reg"><div class="reg-icon">🥇</div><div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div><div class="reg-line-2">50% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${first.toLocaleString()}</span></div></div>
+      <div class="reg-card free-reg"><div class="reg-icon">🥈</div><div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div><div class="reg-line-2">30% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${second.toLocaleString()}</span></div></div>
+      <div class="reg-card free-reg"><div class="reg-icon">🥉</div><div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div><div class="reg-line-2">20% of prize pool</div></div><div class="reg-right"><span class="type-chip paid">Rs. ${third.toLocaleString()}</span></div></div>
     </div>
   `;
 };
 
-// ============= PAYOUTS =============
+// ============ PAYOUTS ============
 window.loadPayouts = function() {
   const list = document.getElementById('payoutList');
   if (!list) return;
   const winners = allRegs.filter(r => r.rank && r.status === 'confirmed');
-
   if (!winners.length) {
     list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No winners recorded yet.</div>';
     return;
   }
-
   list.innerHTML = winners.map(w => `
     <div class="reg-card paid-reg">
       <div class="reg-icon">🏆</div>
@@ -782,14 +702,12 @@ window.loadPayouts = function() {
         <div class="reg-line-1"><b>${w.username}</b> — Rank #${w.rank}</div>
         <div class="reg-line-2">${w.tournamentTitle} · Rs. ${w.prize || 0}</div>
       </div>
-      <div class="reg-right">
-        <span class="type-chip paid">Rs. ${w.prize || 0}</span>
-      </div>
+      <div class="reg-right"><span class="type-chip paid">Rs. ${w.prize || 0}</span></div>
     </div>
   `).join('');
 };
 
-// ============= ANNOUNCEMENTS =============
+// ============ ANNOUNCEMENTS ============
 window.loadAnnouncements = async function() {
   const list = document.getElementById('announcementList');
   if (!list) return;
@@ -797,12 +715,10 @@ window.loadAnnouncements = async function() {
     const snap = await getDocs(collection(db, 'announcements'));
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-
     if (!items.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>';
       return;
     }
-
     list.innerHTML = items.map(a => `
       <div class="reg-card free-reg">
         <div class="reg-icon">📢</div>
@@ -823,12 +739,8 @@ window.postAnnouncement = async function(e) {
   const title = document.getElementById('annTitle').value.trim();
   const message = document.getElementById('annMsg').value.trim();
   if (!title || !message) { window.showToast('❌ Title and message required'); return; }
-
   try {
-    await addDoc(collection(db, 'announcements'), {
-      title, message,
-      createdAt: serverTimestamp()
-    });
+    await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp() });
     document.getElementById('annTitle').value = '';
     document.getElementById('annMsg').value = '';
     window.showToast('✅ Announcement posted');
@@ -838,17 +750,14 @@ window.postAnnouncement = async function(e) {
   }
 };
 
-// ============= DASHBOARD RECENT =============
+// ============ DASHBOARD RECENT ============
 function renderDashboardRecent() {
   const recentUsers = document.getElementById('dashRecentUsers');
   if (recentUsers && allUsers.length) {
     recentUsers.innerHTML = allUsers.slice(0,5).map(u => `
       <div class="reg-card free-reg">
         <div class="reg-icon">${initials(u.username)}</div>
-        <div class="reg-main">
-          <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
-          <div class="reg-line-2">${u.email || '—'}</div>
-        </div>
+        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">${u.email || '—'}</div></div>
         <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
       </div>
     `).join('');
@@ -862,31 +771,25 @@ function renderDashboardRecent() {
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
           <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${r.username || 'Unknown'}</b>
-              <span class="reg-sep">—</span>
-              <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
-            </div>
+            <div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div>
             <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
           </div>
-          <div class="reg-right">
-            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
-            <small>${fmtShort(r.registeredAt)}</small>
-          </div>
+          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div>
         </div>
       `;
     }).join('');
   }
 }
 
-// ============= REVIEW =============
-window.openReview = function(id, name, action) {
+// ============ REVIEW (works for BOTH payments and registrations) ============
+window.openReview = function(id, name, action, type) {
   document.getElementById('reviewId').value = id;
   document.getElementById('reviewAction').value = action;
+  document.getElementById('reviewType').value = type || 'payment';
   document.getElementById('reviewTitle').innerText =
-    action === 'approve' ? '✔ Approve Payment' : '❌ Reject Payment';
+    action === 'approve' ? '✔ Approve' : '❌ Reject';
   document.getElementById('reviewDesc').innerHTML =
-    (action === 'approve' ? 'Confirm approval for ' : 'Reject payment from ') + '<b>' + name + '</b>?';
+    (action === 'approve' ? 'Confirm approval for ' : 'Reject ') + '<b>' + name + '</b>?';
   const btn = document.getElementById('reviewConfirmBtn');
   btn.className = action === 'approve' ? 'btn-primary green' : 'btn-primary red';
   btn.innerText = action === 'approve' ? '✔ Confirm Approve' : '✘ Confirm Reject';
@@ -902,33 +805,41 @@ window.confirmReview = async function(e) {
   e.preventDefault();
   const id     = document.getElementById('reviewId').value;
   const action = document.getElementById('reviewAction').value;
+  const type   = document.getElementById('reviewType').value;
   const note   = document.getElementById('reviewNote').value.trim();
-  const status    = action === 'approve' ? 'approved' : 'rejected';
+  const status = action === 'approve' ? 'approved' : 'rejected';
   const regStatus = action === 'approve' ? 'confirmed' : 'rejected';
 
   try {
-    await updateDoc(doc(db, 'tournament_payments', id), {
-      status, adminNote: note, reviewedAt: serverTimestamp()
-    });
-
-    const regSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('paymentId', '==', id)
-    ));
-    for (const d of regSnap.docs) {
-      await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
+    if (type === 'payment') {
+      await updateDoc(doc(db, 'tournament_payments', id), {
+        status, adminNote: note, reviewedAt: serverTimestamp()
+      });
+      const regSnap = await getDocs(query(
+        collection(db, 'tournament_registrations'),
+        where('paymentId', '==', id)
+      ));
+      for (const d of regSnap.docs) {
+        await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
+      }
+    } else {
+      // Registration-level review (free tournaments)
+      await updateDoc(doc(db, 'tournament_registrations', id), {
+        status: regStatus
+      });
     }
 
     closeReview();
-    window.showToast('✅ Payment ' + status);
+    window.showToast('✅ ' + (action === 'approve' ? 'Approved' : 'Rejected'));
     window.loadPayments();
-    if (typeof window.loadRegistrations === 'function') window.loadRegistrations();
+    window.loadRegistrations();
   } catch (err) {
+    console.error(err);
     window.showToast('❌ ' + err.message);
   }
 };
 
-// ============= LIGHTBOX + TOAST =============
+// ============ LIGHTBOX + TOAST ============
 window.openShot = function(src) {
   document.getElementById('shotFull').src = src;
   document.getElementById('shotModal').classList.add('active');
@@ -941,12 +852,12 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
-// ============= INIT =============
+// ============ INIT ============
 (async function init() {
   await window.loadPayments();
   await window.loadRegistrations();
   await window.loadUsers();
-  console.log("✅ Admin module loaded");
+  console.log("✅ Admin loaded");
 })();
 </script>
 </body>
