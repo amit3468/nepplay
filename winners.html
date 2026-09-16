@@ -12,7 +12,7 @@
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
-        
+
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
@@ -79,9 +79,45 @@
             text-align: center;
             transition: all 0.3s;
         }
-        .podium-slot:hover {
-            border-color: rgba(148, 163, 184, 0.5);
+        .podium-slot:hover { border-color: rgba(148, 163, 184, 0.5); }
+
+        /* Live podium (when data exists) */
+        .podium-live {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
         }
+        .podium-live:hover { transform: translateY(-4px); }
+        .podium-live.gold { border-color: #fbbf24; box-shadow: 0 0 30px rgba(251, 191, 36, 0.3); }
+        .podium-live.silver { border-color: #94a3b8; }
+        .podium-live.bronze { border-color: #ea580c; }
+        .winner-avatar {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 900; margin: 0 auto 12px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+
+        .winner-row {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; border-radius: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s;
+        }
+        .winner-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -147,36 +183,31 @@
     </nav>
 
     <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
-        
+
         <div class="text-center mb-6 sm:mb-10">
-            <div class="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-3 py-1 text-xs font-bold text-yellow-400 mb-3">
+            <div id="status-pill" class="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-3 py-1 text-xs font-bold text-yellow-400 mb-3">
                 <i class="fa-solid fa-crown mr-1"></i> Launching Soon
             </div>
             <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-crown text-yellow-500 mr-2"></i>Hall of Winners</h1>
-            <p class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto">Our first winners will be announced right here after our launch tournament.</p>
+            <p id="winners-subtitle" class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto">Our first winners will be announced right here after our launch tournament.</p>
         </div>
 
-        <!-- Podium placeholder -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
-            <div class="podium-slot order-2 md:order-1">
-                <div class="text-5xl mb-3">🥈</div>
-                <p class="text-2xl font-bold text-gray-300 mb-1">#2</p>
-                <p class="text-sm text-gray-500">Waiting for winner</p>
-            </div>
-            <div class="podium-slot order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10 border-yellow-500/30">
-                <div class="text-6xl mb-3">🥇</div>
-                <p class="text-3xl font-bold rank-1 mb-1">#1</p>
-                <p class="text-sm text-gray-500">Champion will be crowned soon</p>
-            </div>
-            <div class="podium-slot order-3">
-                <div class="text-5xl mb-3">🥉</div>
-                <p class="text-2xl font-bold text-orange-400 mb-1">#3</p>
-                <p class="text-sm text-gray-500">Waiting for winner</p>
-            </div>
+        <!-- Loading skeleton -->
+        <div id="winners-loading" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
+            <div class="podium-slot"><div class="skeleton h-32 w-full"></div></div>
+            <div class="podium-slot"><div class="skeleton h-40 w-full"></div></div>
+            <div class="podium-slot"><div class="skeleton h-32 w-full"></div></div>
         </div>
 
-        <!-- Empty state info box -->
-        <div class="empty-state-box max-w-2xl mx-auto">
+        <!-- Podium (populated by JS) -->
+        <div id="podium-container" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
+            <div id="podium-2" class="podium-slot order-2 md:order-1"></div>
+            <div id="podium-1" class="podium-slot order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10 border-yellow-500/30"></div>
+            <div id="podium-3" class="podium-slot order-3"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="winners-empty" class="hidden empty-state-box max-w-2xl mx-auto">
             <div class="text-5xl sm:text-6xl mb-4">🏆</div>
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Winners Yet</h2>
             <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Once our first tournament finishes, the winners will be displayed here with their prizes. Sign up now to be among the first to compete!</p>
@@ -190,24 +221,32 @@
             </div>
         </div>
 
-        <!-- Prizes section -->
+        <!-- Full winners list -->
+        <div id="winners-list-wrap" class="hidden max-w-3xl mx-auto mt-8">
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-medal text-yellow-500"></i> All Winners
+            </h2>
+            <div id="winners-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Prizes section (always visible) -->
         <div class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto text-center">
             <h3 class="text-base sm:text-lg font-bold text-white mb-4">💰 Prize Distribution</h3>
             <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
                 <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
                     <p class="text-yellow-400 font-bold mb-1">🥇 1st</p>
-                    <p class="text-white text-xs">Top Prize</p>
+                    <p class="text-white text-xs">50% of pool</p>
                 </div>
                 <div class="bg-gray-500/10 border border-gray-400/30 rounded-lg p-3">
                     <p class="text-gray-300 font-bold mb-1">🥈 2nd</p>
-                    <p class="text-white text-xs">Runner-up</p>
+                    <p class="text-white text-xs">30% of pool</p>
                 </div>
                 <div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
                     <p class="text-orange-400 font-bold mb-1">🥉 3rd</p>
-                    <p class="text-white text-xs">Third Place</p>
+                    <p class="text-white text-xs">20% of pool</p>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-4">Exact prize amounts will be announced with each tournament.</p>
+            <p class="text-xs text-gray-500 mt-4">Plus a separate Top Killer prize where applicable.</p>
         </div>
 
     </main>
@@ -222,7 +261,142 @@
         </div>
     </footer>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const loading = document.getElementById('winners-loading');
+        const empty   = document.getElementById('winners-empty');
+        const podium  = document.getElementById('podium-container');
+        const listWrap = document.getElementById('winners-list-wrap');
+        const listEl  = document.getElementById('winners-list');
+        const statusPill = document.getElementById('status-pill');
+        const subtitle = document.getElementById('winners-subtitle');
+
+        function avatarInitial(name) {
+            return (name || '?').trim().charAt(0).toUpperCase();
+        }
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+
+        async function loadWinners() {
+            try {
+                // Read payouts that are marked as 'paid' (i.e., actual winners)
+                const snap = await getDocs(collection(db, 'tournament_payouts'));
+                const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Keep only real winners with a rank and prize
+                const winners = all
+                    .filter(p => p.rank && Number(p.rank) >= 1 && Number(p.rank) <= 3 && Number(p.prize) > 0)
+                    .sort((a, b) => {
+                        const ta = a.createdAt?.seconds || a.recordedAt?.seconds || 0;
+                        const tb = b.createdAt?.seconds || b.recordedAt?.seconds || 0;
+                        return tb - ta;
+                    });
+
+                loading.classList.add('hidden');
+
+                if (!winners.length) {
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                // Show podium of the most recent tournament's top 3
+                statusPill.className = 'inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3';
+                statusPill.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Live Results';
+                subtitle.textContent = `${winners.length} winner${winners.length !== 1 ? 's' : ''} so far — congratulations!`;
+
+                // Group by tournamentId, take the most recent tournament
+                const byTournament = {};
+                winners.forEach(w => {
+                    const key = w.tournamentId || w.tournamentTitle || 'unknown';
+                    if (!byTournament[key]) byTournament[key] = [];
+                    byTournament[key].push(w);
+                });
+                const latestKey = Object.keys(byTournament).sort((a, b) => {
+                    const ta = byTournament[a][0].createdAt?.seconds || 0;
+                    const tb = byTournament[b][0].createdAt?.seconds || 0;
+                    return tb - ta;
+                })[0];
+                const latest = byTournament[latestKey] || [];
+
+                const getByRank = (rank) => latest.find(w => Number(w.rank) === rank);
+                const first  = getByRank(1);
+                const second = getByRank(2);
+                const third  = getByRank(3);
+
+                const renderPodium = (el, w, emoji, medalClass, titleText) => {
+                    if (!w) {
+                        el.className = 'podium-slot order-' + (w === first ? 1 : w === second ? 2 : 3);
+                        el.innerHTML = `
+                            <div class="text-5xl mb-3">${emoji}</div>
+                            <p class="text-sm text-gray-500">${titleText}</p>
+                        `;
+                        return;
+                    }
+                    const name = w.username || w.ign || w.playerName || 'Player';
+                    el.className = `podium-live ${medalClass} order-${Number(w.rank) === 1 ? 1 : Number(w.rank) === 2 ? 2 : 3} ${Number(w.rank) === 1 ? 'order-1 md:order-2 md:scale-110' : Number(w.rank) === 2 ? 'order-2 md:order-1' : 'order-3'}`;
+                    el.innerHTML = `
+                        <div class="text-5xl mb-3">${emoji}</div>
+                        <div class="winner-avatar">${avatarInitial(name)}</div>
+                        <p class="text-xl font-bold text-white mb-1">${escapeHtml(name)}</p>
+                        <p class="text-xs text-gray-400 mb-2">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
+                        <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || 0).toLocaleString()}</p>
+                    `;
+                };
+
+                renderPodium(document.getElementById('podium-1'), first,  '🥇', 'gold',   'Champion will be crowned soon');
+                renderPodium(document.getElementById('podium-2'), second, '🥈', 'silver', 'Waiting for winner');
+                renderPodium(document.getElementById('podium-3'), third,  '🥉', 'bronze', 'Waiting for winner');
+                podium.classList.remove('hidden');
+
+                // Full list
+                listEl.innerHTML = winners.map(w => {
+                    const name = w.username || w.ign || w.playerName || 'Player';
+                    const medal = Number(w.rank) === 1 ? '🥇' : Number(w.rank) === 2 ? '🥈' : Number(w.rank) === 3 ? '🥉' : '🏅';
+                    return `
+                        <div class="winner-row">
+                            <div class="text-3xl">${medal}</div>
+                            <div class="flex-grow min-w-0">
+                                <p class="font-bold text-white text-sm truncate">${escapeHtml(name)}</p>
+                                <p class="text-xs text-gray-400 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')} • Rank #${w.rank}</p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <p class="font-bold text-green-400">Rs. ${Number(w.prize || 0).toLocaleString()}</p>
+                                ${w.method ? `<p class="text-[10px] text-gray-500">${escapeHtml(w.method)}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                listWrap.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('loadWinners error:', err);
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+            }
+        }
+
+        loadWinners();
+    </script>
+
     <script>
+        // Non-module UI helpers (nav, support menu, user status)
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
