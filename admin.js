@@ -1,16 +1,16 @@
 // ==========================================================
-// NEPPLAY — admin.js (v3.8)
-// All admin panel logic
-// Changes vs v3.7:
-//   - loadRoomDetailsForm() now always fetches fresh data
-//     (fixes empty form fields when editing existing rooms)
+// NEPPLAY — admin.js (v3.9)
+// Secure admin panel with Firebase Auth + role check
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, doc, updateDoc, deleteDoc,
+  getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc,
   addDoc, query, where, serverTimestamp, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -23,11 +23,113 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
+const auth = getAuth(app);
 
-console.log("🔥 Admin ready v3.8");
+console.log("🔥 Admin v3.9 — awaiting auth");
 
 // ============================================================
-// STATE
+// AUTH GATE
+// ============================================================
+let currentAdminEmail = '';
+let bootstrapped = false;
+
+function showGatePanel(panelId) {
+  document.getElementById('auth-gate').style.display = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('adminLoginForm').style.display = 'none';
+  document.getElementById('adminLoadingMsg').style.display = 'none';
+  document.getElementById('adminDeniedMsg').style.display = 'none';
+  const el = document.getElementById(panelId);
+  if (el) el.style.display = 'block';
+}
+
+async function verifyAdminAndBoot(user) {
+  // Check Firestore users/{uid} has role: "admin"
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      console.warn('⛔ No users doc — access denied');
+      return false;
+    }
+    const data = userDoc.data();
+    if (data.role !== 'admin') {
+      console.warn('⛔ role is not admin — access denied');
+      return false;
+    }
+    currentAdminEmail = user.email || data.email || '—';
+    return true;
+  } catch (err) {
+    console.error('Admin verify failed:', err);
+    return false;
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  console.log('👤 Auth state:', user ? user.email : 'signed out');
+  if (!user) {
+    showGatePanel('adminLoginForm');
+    return;
+  }
+  showGatePanel('adminLoadingMsg');
+  const ok = await verifyAdminAndBoot(user);
+  if (!ok) {
+    showGatePanel('adminDeniedMsg');
+    return;
+  }
+  // ✅ Authenticated as admin — boot panel
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('adminEmailDisplay').textContent = currentAdminEmail;
+  console.log('✅ Admin access granted:', currentAdminEmail);
+  if (!bootstrapped) {
+    bootstrapped = true;
+    await bootstrapAdminPanel();
+  }
+});
+
+window.handleAdminLogin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('adminLoginBtn');
+  const msg = document.getElementById('adminLoginMsg');
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  msg.style.display = 'none';
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged will handle the rest
+  } catch (err) {
+    let m = 'Login failed';
+    if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)) m = 'Invalid email or password';
+    else if (err.code === 'auth/too-many-requests') m = 'Too many attempts. Try later.';
+    msg.style.display = 'block';
+    msg.style.color = '#f87171';
+    msg.textContent = '❌ ' + m;
+    btn.disabled = false;
+    btn.textContent = 'Login';
+  }
+};
+
+window.adminSignOut = async function() {
+  await signOut(auth);
+};
+
+window.adminLogout = async function() {
+  if (!confirm('Logout?')) return;
+  try {
+    await signOut(auth);
+    window.location.reload();
+  } catch (err) {
+    console.error('Logout error:', err);
+    window.location.reload();
+  }
+};
+
+// ============================================================
+// STATE (unchanged from v3.8)
 // ============================================================
 let allPayments = [];
 let allRegs = [];
@@ -41,12 +143,8 @@ let currentSearchTerm = '';
 let roomTournaments = [];
 let selectedResultTournament = null;
 
-// Screenshot cache — stores base64 per doc id to avoid inlining huge strings into HTML
 const screenshotCache = {};
 
-// ============================================================
-// HELPERS
-// ============================================================
 function fmtDate(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -63,18 +161,17 @@ function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(n) { return (n || 'U')[0].toUpperCase(); }
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 
-function screenshotSrc(doc) {
-  if (!doc) return null;
-  if (doc.screenshotBase64) return 'data:image/jpeg;base64,' + doc.screenshotBase64;
-  if (doc.screenshotUrl) return doc.screenshotUrl;
+function screenshotSrc(d) {
+  if (!d) return null;
+  if (d.screenshotBase64) return 'data:image/jpeg;base64,' + d.screenshotBase64;
+  if (d.screenshotUrl) return d.screenshotUrl;
   return null;
 }
-
-function registerScreenshot(doc) {
-  const src = screenshotSrc(doc);
+function registerScreenshot(d) {
+  const src = screenshotSrc(d);
   if (!src) return null;
-  screenshotCache[doc.id] = src;
-  return doc.id;
+  screenshotCache[d.id] = src;
+  return d.id;
 }
 
 // ============================================================
@@ -83,17 +180,11 @@ function registerScreenshot(doc) {
 let notifications = [];
 
 function addNotif(type, title, message) {
-  notifications.unshift({
-    id: Date.now() + Math.random(),
-    type, title, message,
-    time: new Date(),
-    read: false
-  });
+  notifications.unshift({ id: Date.now() + Math.random(), type, title, message, time: new Date(), read: false });
   if (notifications.length > 50) notifications = notifications.slice(0, 50);
   renderNotifBell();
   renderNotifPanel();
 }
-
 function renderNotifBell() {
   const unread = notifications.filter(n => !n.read).length;
   const c = document.getElementById('notifCount');
@@ -101,7 +192,6 @@ function renderNotifBell() {
   if (unread > 0) { c.innerText = unread > 9 ? '9+' : unread; c.style.display = 'block'; }
   else c.style.display = 'none';
 }
-
 function renderNotifPanel() {
   const list = document.getElementById('notifList');
   if (!list) return;
@@ -122,7 +212,6 @@ function renderNotifPanel() {
     </div>
   `).join('');
 }
-
 window.toggleNotifPanel = function(e) {
   if (e) e.stopPropagation();
   const p = document.getElementById('notifPanel');
@@ -130,19 +219,14 @@ window.toggleNotifPanel = function(e) {
   p.classList.toggle('open');
   p.style.display = p.classList.contains('open') ? 'block' : 'none';
   if (p.classList.contains('open')) {
-    setTimeout(() => {
-      notifications.forEach(n => n.read = true);
-      renderNotifBell();
-    }, 1500);
+    setTimeout(() => { notifications.forEach(n => n.read = true); renderNotifBell(); }, 1500);
   }
 };
-
 window.clearAllNotifs = function() {
   notifications.forEach(n => n.read = true);
   renderNotifBell();
   renderNotifPanel();
 };
-
 document.addEventListener('click', function(e) {
   const p = document.getElementById('notifPanel');
   const b = document.querySelector('.notif-bell-btn');
@@ -186,6 +270,22 @@ function attachRealtimeListeners() {
 }
 
 // ============================================================
+// BOOTSTRAP — runs ONCE after admin is verified
+// ============================================================
+async function bootstrapAdminPanel() {
+  await window.loadPayments();
+  await window.loadRegistrations();
+  await window.loadUsers();
+  try {
+    const snap = await getDocs(collection(db, 'tournament_payouts'));
+    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) { console.warn('payouts load failed:', e); }
+  renderDashboardRecent();
+  attachRealtimeListeners();
+  console.log("✅ Admin panel booted for:", currentAdminEmail);
+}
+
+// ============================================================
 // CREATE TOURNAMENT
 // ============================================================
 window.toggleCreateEntryFee = function() {
@@ -193,7 +293,6 @@ window.toggleCreateEntryFee = function() {
   document.getElementById('ctFeeWrap').style.display = t === 'paid' ? 'block' : 'none';
   updateCreatePreview();
 };
-
 window.updateCreatePreview = function() {
   const title = document.getElementById('ctTitle').value || 'Tournament Title';
   const game = document.getElementById('ctGame').value || 'Game';
@@ -205,25 +304,20 @@ window.updateCreatePreview = function() {
   const date = document.getElementById('ctDate').value || '—';
   const time = document.getElementById('ctTime').value || '—';
   const max = document.getElementById('ctMax').value || 0;
-
   document.getElementById('ctPreview').innerHTML = `
-    <b style="color:#fff;">${title}</b>
-    · ${game} · ${mode}
+    <b style="color:#fff;">${title}</b> · ${game} · ${mode}
     ${type === 'paid' ? `· 💰 Rs. ${fee}` : '· 🆓 Free'}
     ${pool ? `· 🏆 Rs. ${pool}` : ''}
     ${kills && type === 'paid' ? `· 🎯 Rs. ${kills}` : ''}
-    · 📅 ${date} ${time}
-    · 👥 max ${max}
+    · 📅 ${date} ${time} · 👥 max ${max}
   `;
 };
-
 window.addEventListener('DOMContentLoaded', function() {
   ['ctTitle','ctGame','ctMode','ctEntryFee','ctPrizePool','ctTopKills','ctDate','ctTime','ctMax'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updateCreatePreview);
   });
 });
-
 window.resetCreateForm = function() {
   document.getElementById('createTournamentForm').reset();
   document.getElementById('ctEntryType').value = 'free';
@@ -235,13 +329,11 @@ window.resetCreateForm = function() {
   updateCreatePreview();
   document.getElementById('ctStatus').style.display = 'none';
 };
-
 window.submitCreateTournament = async function(e) {
   e.preventDefault();
   const btn = document.getElementById('ctSubmitBtn');
   btn.disabled = true;
   btn.innerText = '⏳ Creating...';
-
   try {
     const title = document.getElementById('ctTitle').value.trim();
     const game = document.getElementById('ctGame').value;
@@ -254,24 +346,17 @@ window.submitCreateTournament = async function(e) {
     const time = document.getElementById('ctTime').value;
     const max = Number(document.getElementById('ctMax').value) || 100;
     const desc = document.getElementById('ctDesc').value.trim();
-
     if (!title) throw new Error('Title is required');
     if (!game) throw new Error('Select a game');
     if (!date) throw new Error('Select a date');
     if (entryType === 'paid' && entryFee <= 0) throw new Error('Paid tournaments need an entry fee');
-
     const docRef = await addDoc(collection(db, 'tournaments'), {
       title, game, mode, entryType,
       entryFee: entryType === 'paid' ? entryFee : 0,
-      prizePool,
-      topKillsPrize: entryType === 'paid' ? topKillsPrize : 0,
-      date, time, max,
-      filled: 0,
-      description: desc,
-      status: 'upcoming',
-      createdAt: serverTimestamp()
+      prizePool, topKillsPrize: entryType === 'paid' ? topKillsPrize : 0,
+      date, time, max, filled: 0, description: desc,
+      status: 'upcoming', createdAt: serverTimestamp()
     });
-
     console.log("✅ Created tournament:", docRef.id);
     window.showToast('✅ Tournament created');
     resetCreateForm();
@@ -286,7 +371,7 @@ window.submitCreateTournament = async function(e) {
 };
 
 // ============================================================
-// RECENTLY CREATED TOURNAMENTS
+// RECENT TOURNAMENTS
 // ============================================================
 window.loadRecentCreated = async function() {
   const list = document.getElementById('recentCreatedTournaments');
@@ -329,13 +414,11 @@ window.loadRecentCreated = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.editTournament = async function(id) {
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
     const t = snap.docs.map(d => ({ id: d.id, ...d.data() })).find(x => x.id === id);
     if (!t) { window.showToast('❌ Tournament not found'); return; }
-
     const newTitle = prompt('Tournament Title:', t.title || '');
     if (newTitle === null) return;
     const newPrizePool = prompt('Prize Pool (Rs.):', t.prizePool || 0);
@@ -348,17 +431,14 @@ window.editTournament = async function(id) {
     if (newTime === null) return;
     const newMax = prompt('Max Players:', t.max || 100);
     if (newMax === null) return;
-
     await updateDoc(doc(db, 'tournaments', id), {
       title: newTitle.trim(),
       prizePool: Number(newPrizePool) || 0,
       topKillsPrize: Number(newTopKills) || 0,
-      date: newDate.trim(),
-      time: newTime.trim(),
+      date: newDate.trim(), time: newTime.trim(),
       max: Number(newMax) || 100,
       updatedAt: serverTimestamp()
     });
-
     window.showToast('✅ Tournament updated');
     await loadRecentCreated();
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
@@ -367,9 +447,8 @@ window.editTournament = async function(id) {
     window.showToast('❌ ' + err.message);
   }
 };
-
 window.deleteTournament = async function(id, title) {
-  if (!confirm(`Delete tournament "${title}"?\n\nThis will permanently remove it from the member page.`)) return;
+  if (!confirm(`Delete tournament "${title}"?`)) return;
   try {
     await deleteDoc(doc(db, 'tournaments', id));
     window.showToast('🗑️ Tournament deleted');
@@ -399,7 +478,6 @@ window.loadPayments = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 function updateCounts() {
   const c = { pending:0, approved:0, rejected:0 };
   allPayments.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
@@ -413,7 +491,6 @@ function updateCounts() {
   const total = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
   if (el('dashPaid')) el('dashPaid').innerText = fmtRs(total);
 }
-
 function renderPayments() {
   const list = document.getElementById('payList');
   if (!list) return;
@@ -432,18 +509,15 @@ function renderPayments() {
   }
   const chipClass = { esewa:'chip-esewa', khalti:'chip-khalti', imepay:'chip-imepay', bank:'chip-bank' };
   const chipLabel = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-
   list.innerHTML = filtered.map(p => {
     const safeName = (p.username||'').replace(/'/g,'');
     const isPending = p.status === 'pending';
     const isApproved = p.status === 'approved';
     const isRejected = p.status === 'rejected';
-
     const shotId = registerScreenshot(p);
     const shotImgHtml = shotId
       ? `<img src="${screenshotCache[shotId]}" class="pay-shot" onclick="openShotById('${shotId}')" alt="Payment screenshot">`
       : '<div class="pay-shot-empty">No image</div>';
-
     return `
       <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
         <div class="pay-item-left">${shotImgHtml}</div>
@@ -468,9 +542,7 @@ function renderPayments() {
             <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Approve</button>
             <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject','payment')">✘ Reject</button>
           ` : ''}
-          ${isApproved ? `
-            <button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset to Pending</button>
-          ` : ''}
+          ${isApproved ? `<button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset to Pending</button>` : ''}
           ${isRejected ? `
             <button class="btn-approve small" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Re-approve</button>
             <button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset to Pending</button>
@@ -482,7 +554,6 @@ function renderPayments() {
     `;
   }).join('');
 }
-
 window.filterPayStatus = function(status, btn) {
   currentStatusFilter = status;
   document.querySelectorAll('.pay-status-tabs button').forEach(b => b.classList.remove('active'));
@@ -514,9 +585,7 @@ window.loadRegistrations = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.filterRegistrations = function() { renderRegistrations(); };
-
 function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
@@ -532,7 +601,6 @@ function renderRegistrations() {
     const isPending = r.status === 'pending';
     const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
     const shotId = payment ? registerScreenshot(payment) : null;
-
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
         <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
@@ -569,7 +637,6 @@ function renderRegistrations() {
     `;
   }).join('');
 }
-
 window.editRegistration = async function(id) {
   const reg = allRegs.find(r => r.id === id);
   if (!reg) return;
@@ -578,15 +645,11 @@ window.editRegistration = async function(id) {
   const newPhone = prompt('Edit Phone:', reg.phone || '');
   if (newPhone === null) return;
   try {
-    await updateDoc(doc(db, 'tournament_registrations', id), {
-      ign: newIgn.trim(),
-      phone: newPhone.trim()
-    });
+    await updateDoc(doc(db, 'tournament_registrations', id), { ign: newIgn.trim(), phone: newPhone.trim() });
     window.showToast('✅ Updated');
     window.loadRegistrations();
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
-
 window.deleteRegistration = async function(id, name) {
   if (!confirm('Delete registration for ' + name + '?')) return;
   try {
@@ -603,7 +666,6 @@ window.loadMatchResultsSection = async function() {
   await populateResultTournamentDropdown();
   await loadRecentResults();
 };
-
 async function populateResultTournamentDropdown() {
   const select = document.getElementById('resultTournamentSelect');
   if (!select) return;
@@ -614,24 +676,20 @@ async function populateResultTournamentDropdown() {
       tournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
   } catch (err) { console.warn(err); }
 }
-
 window.loadTournamentForResult = async function() {
   const select = document.getElementById('resultTournamentSelect');
   const tid = select.value;
   const form = document.getElementById('resultForm');
   const summary = document.getElementById('resultTournamentSummary');
   if (!tid) { form.style.display = 'none'; return; }
-
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
     const t = snap.docs.map(d => ({ id: d.id, ...d.data() })).find(x => x.id === tid);
     if (!t) return;
-
     selectedResultTournament = t;
     const fee = Number(t.entryFee || t.entry_fee || 0);
     const pool = Number(t.prizePool || t.prize_pool || 0);
     const killsPrize = Number(t.topKillsPrize || t.top_kills_prize || 0);
-
     const regSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
@@ -640,7 +698,6 @@ window.loadTournamentForResult = async function() {
     const playerCount = regSnap.size;
     const collected = fee * playerCount;
     const netProfit = collected - pool - killsPrize;
-
     summary.innerHTML = `
       <div class="result-summary-header">
         <h3>${t.title || 'Tournament'}</h3>
@@ -655,11 +712,9 @@ window.loadTournamentForResult = async function() {
         <div><span>Net Profit</span><b style="color:${netProfit >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(netProfit)}</b></div>
       </div>
     `;
-
     const p1 = Math.round(pool * 0.50);
     const p2 = Math.round(pool * 0.30);
     const p3 = Math.round(pool * 0.20);
-
     document.getElementById('winner1Prize').value = fmtRs(p1);
     document.getElementById('winner2Prize').value = fmtRs(p2);
     document.getElementById('winner3Prize').value = fmtRs(p3);
@@ -668,12 +723,10 @@ window.loadTournamentForResult = async function() {
     document.getElementById('resultCollection').innerText = fmtRs(collected);
     document.getElementById('resultNetProfit').innerText = fmtRs(netProfit);
     document.getElementById('resultNetProfit').style.color = netProfit >= 0 ? '#4ade80' : '#f87171';
-
     ['winner1Kills','winner2Kills','winner3Kills','topKillerKills'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.oninput = updateResultTotal;
     });
-
     updateResultTotal();
     form.style.display = 'block';
   } catch (err) {
@@ -681,7 +734,6 @@ window.loadTournamentForResult = async function() {
     window.showToast('❌ ' + err.message);
   }
 };
-
 window.updateResultTotal = function() {
   if (!selectedResultTournament) return;
   const pool = Number(selectedResultTournament.prizePool || selectedResultTournament.prize_pool || 0);
@@ -693,54 +745,42 @@ window.updateResultTotal = function() {
   const tkName = (document.getElementById('topKillerName').value || '').trim().toLowerCase();
   const sameAsFirst = !tkName || (w1Name && tkName === w1Name);
   const topKillerPayout = sameAsFirst ? 0 : killsPrize;
-  const total = p1 + p2 + p3 + topKillerPayout;
-  document.getElementById('resultTotalPayout').innerText = fmtRs(total);
+  document.getElementById('resultTotalPayout').innerText = fmtRs(p1 + p2 + p3 + topKillerPayout);
 };
-
 window.submitMatchResults = async function() {
   if (!selectedResultTournament) { window.showToast('❌ No tournament selected'); return; }
   const t = selectedResultTournament;
   const tid = t.id;
   const tTitle = t.title || 'Tournament';
-
   const w1Name = (document.getElementById('winner1Name').value || '').trim();
   const w2Name = (document.getElementById('winner2Name').value || '').trim();
   const w3Name = (document.getElementById('winner3Name').value || '').trim();
   const tkName = (document.getElementById('topKillerName').value || '').trim();
-
   if (!w1Name) { window.showToast('❌ 1st place username required'); return; }
-
   const w1Kills = Number(document.getElementById('winner1Kills').value) || 0;
   const w2Kills = Number(document.getElementById('winner2Kills').value) || 0;
   const w3Kills = Number(document.getElementById('winner3Kills').value) || 0;
   const tkKills = Number(document.getElementById('topKillerKills').value) || w1Kills;
-
   const w1Method = document.getElementById('winner1Method').value;
   const w2Method = document.getElementById('winner2Method').value;
   const w3Method = document.getElementById('winner3Method').value;
   const tkMethod = document.getElementById('topKillerMethod').value;
-
   const pool = Number(t.prizePool || t.prize_pool || 0);
   const killsPrize = Number(t.topKillsPrize || t.top_kills_prize || 0);
-
   const p1 = Math.round(pool * 0.50);
   const p2 = Math.round(pool * 0.30);
   const p3 = Math.round(pool * 0.20);
-
   const btn = document.getElementById('submitResultsBtn');
   btn.disabled = true;
   btn.innerText = '⏳ Saving...';
-
   try {
     const payoutRecords = [];
-
     payoutRecords.push({
       winnerName: w1Name, tournamentId: tid, tournamentTitle: tTitle,
       amount: p1, prize: p1, rank: '1', kills: w1Kills, method: w1Method,
       note: `1st place, ${w1Kills} kills`,
       status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
-
     if (w2Name) {
       payoutRecords.push({
         winnerName: w2Name, tournamentId: tid, tournamentTitle: tTitle,
@@ -749,7 +789,6 @@ window.submitMatchResults = async function() {
         status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
       });
     }
-
     if (w3Name) {
       payoutRecords.push({
         winnerName: w3Name, tournamentId: tid, tournamentTitle: tTitle,
@@ -758,7 +797,6 @@ window.submitMatchResults = async function() {
         status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
       });
     }
-
     const sameAsFirst = !tkName || (tkName.toLowerCase() === w1Name.toLowerCase());
     if (!sameAsFirst && killsPrize > 0) {
       payoutRecords.push({
@@ -773,11 +811,9 @@ window.submitMatchResults = async function() {
       payoutRecords[0].note = `1st place + Top Killer, ${w1Kills} kills`;
       payoutRecords[0].rank = '1 + Top Killer';
     }
-
     for (const rec of payoutRecords) {
       await addDoc(collection(db, 'tournament_payouts'), rec);
     }
-
     await addDoc(collection(db, 'match_results'), {
       tournamentId: tid, tournamentTitle: tTitle,
       winner1: { name: w1Name, kills: w1Kills, prize: p1, method: w1Method },
@@ -787,13 +823,10 @@ window.submitMatchResults = async function() {
         ? { name: w1Name, kills: w1Kills, prize: killsPrize, sameAsFirst: true }
         : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod },
       totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
-      completedAt: serverTimestamp(),
-      createdAt: serverTimestamp()
+      completedAt: serverTimestamp(), createdAt: serverTimestamp()
     });
-
     await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
     addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
-
     window.showToast('✅ Results saved! ' + payoutRecords.length + ' payouts created');
     resetResultsForm();
     await loadRecentResults();
@@ -806,7 +839,6 @@ window.submitMatchResults = async function() {
     btn.innerText = '🏆 Submit Results & Create Payouts';
   }
 };
-
 window.resetResultsForm = function() {
   ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills'].forEach(id => {
     const el = document.getElementById(id);
@@ -820,7 +852,6 @@ window.resetResultsForm = function() {
   document.getElementById('resultForm').style.display = 'none';
   selectedResultTournament = null;
 };
-
 async function loadRecentResults() {
   const list = document.getElementById('recentResults');
   if (!list) return;
@@ -828,12 +859,10 @@ async function loadRecentResults() {
     const snap = await getDocs(collection(db, 'match_results'));
     allResults = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allResults.sort((a, b) => (b.completedAt?.toMillis?.() || 0) - (a.completedAt?.toMillis?.() || 0));
-
     if (!allResults.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No matches completed yet</div>';
       return;
     }
-
     list.innerHTML = allResults.slice(0, 15).map(r => {
       const w1 = r.winner1 || {};
       const tk = r.topKiller || {};
@@ -868,7 +897,6 @@ window.loadDailyCollections = function() {
     const cutoff = Date.now() - days * 86400000;
     payments = payments.filter(p => (p.reviewedAt?.toMillis?.() || p.submittedAt?.toMillis?.() || 0) >= cutoff);
   }
-
   let payouts = allPayouts;
   if (range === 'today') payouts = payouts.filter(x => dayKey(x.paidAt || x.createdAt) === todayKey());
   else if (range !== 'all') {
@@ -876,11 +904,9 @@ window.loadDailyCollections = function() {
     const cutoff = Date.now() - days * 86400000;
     payouts = payouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff);
   }
-
   const totalCollected = payments.reduce((s,p) => s + (Number(p.amount)||0), 0);
   const totalPayouts = payouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
   const netProfit = totalCollected - totalPayouts;
-
   const days = {};
   payments.forEach(p => {
     const k = dayKey(p.reviewedAt || p.submittedAt); if (!k) return;
@@ -896,14 +922,12 @@ window.loadDailyCollections = function() {
     days[k].payouts += Number(x.amount)||0;
     days[k].payoutsCount = (days[k].payoutsCount || 0) + 1;
   });
-
   const sortedKeys = Object.keys(days).sort().reverse();
   const el = id => document.getElementById(id);
   if (el('dailyTotalCollected')) el('dailyTotalCollected').innerText = fmtRs(totalCollected);
   if (el('dailyTotalPayouts')) el('dailyTotalPayouts').innerText = fmtRs(totalPayouts);
   if (el('dailyTotalNet')) el('dailyTotalNet').innerText = fmtRs(netProfit);
   if (el('dailyActiveDays')) el('dailyActiveDays').innerText = sortedKeys.length;
-
   const list = document.getElementById('dailyList');
   if (!list) return;
   if (!sortedKeys.length) {
@@ -933,7 +957,6 @@ window.loadDailyCollections = function() {
       `;
     }).join('');
   }
-
   const allApproved = allPayments.filter(p => p.status === 'approved');
   const methods = ['esewa','khalti','imepay','bank'];
   const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
@@ -1019,21 +1042,17 @@ window.loadPayouts = async function() {
     const snap = await getDocs(collection(db, 'tournament_payouts'));
     allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allPayouts.sort((a, b) => (b.paidAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0) - (a.paidAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0));
-
     const total = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
     const paid = allPayouts.filter(p => p.status === 'paid');
     const pending = allPayouts.filter(p => p.status !== 'paid');
-
     const el = id => document.getElementById(id);
     if (el('payoutTotal')) el('payoutTotal').innerText = fmtRs(total);
     if (el('payoutWinners')) el('payoutWinners').innerText = paid.length;
     if (el('payoutPending')) el('payoutPending').innerText = fmtRs(pending.reduce((s,p) => s + (Number(p.amount)||0), 0));
-
     if (!allPayouts.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div>';
       return;
     }
-
     list.innerHTML = allPayouts.map(w => {
       const isPaid = w.status === 'paid';
       return `
@@ -1051,7 +1070,6 @@ window.loadPayouts = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.addPayout = async function() {
   const winnerName = prompt('Winner name (username):');
   if (!winnerName) return;
@@ -1065,12 +1083,8 @@ window.addPayout = async function() {
   try {
     await addDoc(collection(db, 'tournament_payouts'), {
       winnerName, tournamentTitle, amount, prize: amount,
-      rank: rank || '1',
-      method: method || 'cash',
-      note: note || '',
-      status: 'paid',
-      paidAt: serverTimestamp(),
-      createdAt: serverTimestamp()
+      rank: rank || '1', method: method || 'cash', note: note || '',
+      status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
     window.showToast('✅ Payout recorded');
     window.loadPayouts();
@@ -1095,7 +1109,6 @@ window.loadProfitShare = function() {
     </div>`;
   }
 };
-
 window.calculateShares = function() {
   const name1 = document.getElementById('admin1Name').value || 'Admin 1';
   const name2 = document.getElementById('admin2Name').value || 'Admin 2';
@@ -1124,8 +1137,6 @@ window.calculateShares = function() {
 window.loadRoomDetailsForm = async function() {
   const select = document.getElementById('roomTournamentSelect');
   const previousValue = select.value;
-
-  // Always fetch fresh — prevents stale-cache issue
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
     roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1133,39 +1144,23 @@ window.loadRoomDetailsForm = async function() {
       roomTournaments.map(t =>
         `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} (${t.game || 'Game'})</option>`
       ).join('');
-    console.log('🔄 Room details: fetched', roomTournaments.length, 'tournaments');
   } catch (err) {
     console.warn('loadRoomDetailsForm fetch failed:', err);
     return;
   }
-
   const tid = select.value;
   const form = document.getElementById('roomDetailsForm');
   if (!tid) { form.style.display = 'none'; return; }
-
   const t = roomTournaments.find(x => x.id === tid);
-  if (!t) { console.warn('Tournament not found:', tid); return; }
-
+  if (!t) return;
   form.style.display = 'block';
   document.getElementById('roomTournamentName').textContent = t.title || 'Tournament';
-
-  console.log('📖 Loaded room data for:', t.title, {
-    roomId: t.roomId,
-    roomPassword: t.roomPassword,
-    roomFormat: t.roomFormat,
-    roomRounds: t.roomRounds,
-    roomOpenTime: t.roomOpenTime,
-    roomRules: t.roomRules,
-    roomRevealAt: t.roomRevealAt
-  });
-
   document.getElementById('roomId').value = t.roomId || '';
   document.getElementById('roomPassword').value = t.roomPassword || '';
   document.getElementById('roomFormat').value = t.roomFormat || '';
   document.getElementById('roomRounds').value = t.roomRounds || '';
   document.getElementById('roomOpenTime').value = t.roomOpenTime || '';
   document.getElementById('roomRules').value = t.roomRules || '';
-
   if (t.roomRevealAt) {
     const d = new Date(t.roomRevealAt);
     const pad = n => String(n).padStart(2, '0');
@@ -1176,7 +1171,6 @@ window.loadRoomDetailsForm = async function() {
   }
   document.getElementById('roomSaveStatus').style.display = 'none';
 };
-
 window.saveRoomDetails = async function() {
   const tid = document.getElementById('roomTournamentSelect').value;
   if (!tid) { alert('Select a tournament first'); return; }
@@ -1189,7 +1183,6 @@ window.saveRoomDetails = async function() {
   const revealRaw = document.getElementById('roomRevealAt').value;
   let roomRevealAt = null;
   if (revealRaw) roomRevealAt = new Date(revealRaw).toISOString();
-
   try {
     await updateDoc(doc(db, 'tournaments', tid), {
       roomId, roomPassword, roomFormat, roomRounds,
@@ -1223,9 +1216,7 @@ window.loadUsers = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.filterUsers = function() { renderUsers(); };
-
 function renderUsers() {
   const list = document.getElementById('userList');
   if (!list) return;
@@ -1239,10 +1230,10 @@ function renderUsers() {
     <div class="reg-card free-reg">
       <div class="reg-icon">${initials(u.username)}</div>
       <div class="reg-main">
-        <div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div>
+        <div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div>
         <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
       </div>
-      <div class="reg-right"><span class="type-chip free">Member</span><small>${fmtDate(u.createdAt)}</small></div>
+      <div class="reg-right"><span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span><small>${fmtDate(u.createdAt)}</small></div>
     </div>
   `).join('');
 }
@@ -1316,7 +1307,6 @@ window.loadAnnouncements = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.postAnnouncement = async function(e) {
   e.preventDefault();
   const title = document.getElementById('annTitle').value.trim();
@@ -1341,24 +1331,21 @@ function renderDashboardRecent() {
   const todayPayouts = allPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t).reduce((s,p) => s + (Number(p.amount)||0), 0);
   const allCollected = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
   const allPayoutsTotal = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-
   const el = id => document.getElementById(id);
   if (el('dashTodayCollected')) el('dashTodayCollected').innerText = fmtRs(todayCollected);
   if (el('dashTodayPayouts')) el('dashTodayPayouts').innerText = fmtRs(todayPayouts);
   if (el('dashTodayNet')) el('dashTodayNet').innerText = fmtRs(todayCollected - todayPayouts);
   if (el('dashAllNet')) el('dashAllNet').innerText = fmtRs(allCollected - allPayoutsTotal);
-
   const ru = document.getElementById('dashRecentUsers');
   if (ru && allUsers.length) {
     ru.innerHTML = allUsers.slice(0,5).map(u => `
       <div class="reg-card free-reg">
         <div class="reg-icon">${initials(u.username)}</div>
-        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">${u.email || '—'}</div></div>
+        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div><div class="reg-line-2">${u.email || '—'}</div></div>
         <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
       </div>
     `).join('');
   }
-
   const rr = document.getElementById('dashRecentRegs');
   if (rr && allRegs.length) {
     rr.innerHTML = allRegs.slice(0,5).map(r => {
@@ -1381,13 +1368,11 @@ window.openReview = function(id, name, action, type) {
   document.getElementById('reviewId').value = id;
   document.getElementById('reviewAction').value = action;
   document.getElementById('reviewType').value = type || 'payment';
-
   const t = {
     approve: { title: '✔ Approve', btn: '✔ Confirm Approve', cls: 'btn-primary green', desc: 'Approve ' + name + '?' },
     reject:  { title: '❌ Reject',  btn: '✘ Confirm Reject',  cls: 'btn-primary red',   desc: 'Reject ' + name + '?' },
-    reset:   { title: '↺ Reset',   btn: '↺ Confirm Reset',   cls: 'btn-primary',       desc: 'Reset ' + name + ' to PENDING status?' }
+    reset:   { title: '↺ Reset',   btn: '↺ Confirm Reset',   cls: 'btn-primary',       desc: 'Reset ' + name + ' to PENDING?' }
   }[action] || { title:'Confirm', btn:'Confirm', cls:'btn-primary', desc:'Confirm?' };
-
   document.getElementById('reviewTitle').innerText = t.title;
   document.getElementById('reviewDesc').innerHTML = '<b>' + name + '</b> — ' + t.desc;
   const btn = document.getElementById('reviewConfirmBtn');
@@ -1395,25 +1380,21 @@ window.openReview = function(id, name, action, type) {
   btn.innerText = t.btn;
   document.getElementById('reviewModal').classList.add('active');
 };
-
 window.closeReview = function() {
   document.getElementById('reviewModal').classList.remove('active');
   document.getElementById('reviewNote').value = '';
 };
-
 window.confirmReview = async function(e) {
   e.preventDefault();
   const id = document.getElementById('reviewId').value;
   const action = document.getElementById('reviewAction').value;
   const type = document.getElementById('reviewType').value;
   const note = document.getElementById('reviewNote').value.trim();
-
   let status, regStatus;
   if (action === 'approve') { status = 'approved'; regStatus = 'confirmed'; }
   else if (action === 'reject') { status = 'rejected'; regStatus = 'rejected'; }
   else if (action === 'reset') { status = 'pending'; regStatus = 'pending'; }
   else return;
-
   try {
     if (type === 'payment') {
       await updateDoc(doc(db, 'tournament_payments', id), {
@@ -1446,12 +1427,10 @@ window.openShotById = function(id) {
   document.getElementById('shotFull').src = src;
   document.getElementById('shotModal').classList.add('active');
 };
-
 window.openShot = function(src) {
   document.getElementById('shotFull').src = src;
   document.getElementById('shotModal').classList.add('active');
 };
-
 window.showToast = function(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
@@ -1459,19 +1438,3 @@ window.showToast = function(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 };
-
-// ============================================================
-// INIT
-// ============================================================
-(async function init() {
-  await window.loadPayments();
-  await window.loadRegistrations();
-  await window.loadUsers();
-  try {
-    const snap = await getDocs(collection(db, 'tournament_payouts'));
-    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (e) { console.warn('payouts load failed:', e); }
-  renderDashboardRecent();
-  attachRealtimeListeners();
-  console.log("✅ Admin loaded from admin.js v3.8");
-})();
