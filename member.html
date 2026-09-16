@@ -16,12 +16,12 @@
         .status-paid { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
         .status-pending { background-color: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #facc15; }
         .status-upcoming { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+        .status-rejected { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #f87171; }
 
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
-        /* NOTIFICATION BELL */
         .notif-btn { position: relative; padding: 6px 10px; border-radius: 10px; transition: background 0.15s; cursor: pointer; }
         .notif-btn:hover { background-color: rgba(59, 130, 246, 0.15); }
         .notif-badge { position: absolute; top: 0; right: 4px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; animation: notifPulse 2s infinite; }
@@ -51,7 +51,6 @@
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
         .support-menu-item.pr:hover { background-color: rgba(139, 92, 246, 0.15); }
 
-        /* Floating WhatsApp button */
         .floating-wa { position: fixed; bottom: 24px; right: 24px; z-index: 100; }
         .wa-btn { width: 60px; height: 60px; background: linear-gradient(135deg, #25D366, #128C7E); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); cursor: pointer; transition: all 0.3s; animation: pulse-wa 2s infinite; }
         .wa-btn:hover { transform: scale(1.1); }
@@ -69,7 +68,6 @@
         .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
         .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
 
-        /* LAUNCH CARD */
         .launch-card { position: relative; background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4); animation: launchSlide 0.7s ease-out; border: 1px solid rgba(168, 85, 247, 0.3); }
         @keyframes launchSlide { from { opacity: 0; transform: translateY(-30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .launch-card::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%); pointer-events: none; }
@@ -149,7 +147,6 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Floating Support -->
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
             <div class="p-3 border-b border-gray-700 bg-slate-800/50">
@@ -171,14 +168,12 @@
         <div class="support-btn" onclick="toggleSupportMenu()"><i class="fa-solid fa-headset"></i></div>
     </div>
 
-    <!-- Floating WhatsApp -->
     <div class="floating-wa">
         <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="wa-btn" title="Join WhatsApp Community">
             <i class="fa-brands fa-whatsapp"></i>
         </a>
     </div>
 
-    <!-- LOADING -->
     <div id="loading-screen" class="loading-screen flex-grow">
         <div class="text-center">
             <div class="loader mx-auto"></div>
@@ -186,7 +181,6 @@
         </div>
     </div>
 
-    <!-- LOGIN -->
     <div id="login-container" class="hidden flex-grow flex flex-col">
         <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
             <div class="flex items-center gap-3 min-w-0">
@@ -235,7 +229,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard-container" class="hidden flex-grow flex flex-col">
         <nav class="glass-panel w-full px-4 py-3 flex justify-between items-center sticky top-0 z-40 relative">
             <div class="flex items-center gap-3 min-w-0">
@@ -262,9 +255,7 @@
                 </div>
             </div>
 
-            <!-- RIGHT SIDE: BELL + HAMBURGER -->
             <div class="flex items-center gap-2">
-                <!-- NOTIFICATION BELL -->
                 <div id="notif-wrapper" class="relative">
                     <div class="notif-btn" onclick="toggleNotifPanel(event)">
                         <i class="fa-solid fa-bell text-xl text-gray-300"></i>
@@ -299,7 +290,6 @@
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
             
-            <!-- LAUNCH CARD -->
             <div id="launch-card" class="launch-card mb-6">
                 <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
                 <i class="fa-solid fa-gamepad float-icon" style="bottom: 20%; left: 5%; font-size: 50px; color: #ec4899; animation-delay: 1.5s;"></i>
@@ -473,7 +463,6 @@
                 </div>
             </div>
 
-            <!-- STATS -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
@@ -481,7 +470,7 @@
                     <p class="text-xs text-gray-500 mt-2" id="earnings-subtitle">No winnings yet</p>
                 </div>
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-blue-500">
-                    <h3 class="text-gray-400 text-xs font-semibold mb-1">Matches Played</h3>
+                    <h3 class="text-gray-400 text-xs font-semibold mb-1">Registrations</h3>
                     <p class="text-2xl sm:text-3xl font-bold text-blue-400" id="matches-played">0</p>
                     <p class="text-xs text-gray-500 mt-2" id="matches-subtitle">No registrations yet</p>
                 </div>
@@ -492,7 +481,6 @@
                 </div>
             </div>
 
-            <!-- ANNOUNCEMENTS -->
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
@@ -505,7 +493,6 @@
                 </div>
             </div>
 
-            <!-- UPCOMING -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -533,7 +520,6 @@
                 </div>
             </div>
 
-            <!-- WINNINGS -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings</h2>
@@ -562,7 +548,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -739,11 +725,10 @@
         // ATTACH REAL-TIME LISTENERS
         // ===================================================
         function attachNotifListeners(uid) {
-            // Clean old listeners
             notifListeners.forEach(unsub => { try { unsub(); } catch(e){} });
             notifListeners = [];
 
-            // 1. Payments — watch own payments for status changes
+            // 1. Payments
             const payQ = query(collection(db, 'tournament_payments'), where('userId', '==', uid));
             notifListeners.push(onSnapshot(payQ, snap => {
                 snap.docChanges().forEach(change => {
@@ -782,7 +767,7 @@
                 });
             }));
 
-            // 2. Registrations — watch own registrations
+            // 2. Registrations
             const regQ = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
             notifListeners.push(onSnapshot(regQ, snap => {
                 snap.docChanges().forEach(change => {
@@ -821,14 +806,13 @@
                 });
             }));
 
-            // 3. Announcements — global
+            // 3. Announcements
             const annQ = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
             notifListeners.push(onSnapshot(annQ, snap => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const a = change.doc.data();
                         const id = change.doc.id;
-                        // Skip if item is older than 5 seconds (initial load)
                         if (a.createdAt?.toDate && (Date.now() - a.createdAt.toDate().getTime()) > 5000) return;
                         pushNotif({
                             id: 'ann_' + id,
@@ -888,7 +872,7 @@
         }
         async function updateLiveCounter() {
             try {
-                const snapshot = await getDocs(collection(db, 'registrations'));
+                const snapshot = await getDocs(collection(db, 'tournament_registrations'));
                 const displayCount = calculateFakeCount() + snapshot.size;
                 const pct = Math.min(Math.round((displayCount / TOTAL_CAPACITY) * 100), 100);
                 const el = document.getElementById('total-registered');
@@ -912,7 +896,8 @@
         setTimeout(updateLiveCounter, 500);
 
         // ===================================================
-        // AUTH        // ===================================================
+        // AUTH
+        // ===================================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
@@ -982,7 +967,6 @@
             document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
 
-            // Attach notification listeners
             attachNotifListeners(user.uid);
             updateNotifBadge();
             renderNotifList();
@@ -995,9 +979,12 @@
             ]);
         }
 
+        // ===================================================
+        // REGISTRATIONS (fixed collection: tournament_registrations)
+        // ===================================================
         async function checkUserRegistration(uid) {
             try {
-                const q = query(collection(db, 'registrations'), where('userId', '==', uid));
+                const q = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
                 const snap = await getDocs(q);
                 const regs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -1012,13 +999,17 @@
                     ruleTitle.innerHTML = '✅ Registration Locked';
                     ruleStatus.classList.remove('hidden');
                     ruleStatus.className = 'text-xs mt-3 text-green-400';
-                    ruleStatus.innerHTML = `You are already registered for <strong>${regs[0].tournamentName || 'one tournament'}</strong>.`;
+                    const freeReg = regs.find(r => r.entryType === 'free');
+                    const label = freeReg
+                        ? `free tournament: <strong>${freeReg.tournamentTitle || 'one tournament'}</strong>`
+                        : `<strong>${regs[0].tournamentTitle || 'one tournament'}</strong>`;
+                    ruleStatus.innerHTML = `You are already registered for ${label}.`;
                 }
-                const unique = new Set(regs.map(r => r.tournamentName));
-                document.getElementById('matches-played').textContent = unique.size;
-                if (unique.size > 0) {
+
+                document.getElementById('matches-played').textContent = regs.length;
+                if (regs.length > 0) {
                     const mSub = document.getElementById('matches-subtitle');
-                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${unique.size} tournament(s)`;
+                    mSub.innerHTML = `<i class="fa-solid fa-check-circle text-blue-500"></i> ${regs.length} registration(s)`;
                     mSub.className = 'text-xs text-blue-400 mt-2';
                 }
                 renderUpcoming(regs);
@@ -1035,30 +1026,44 @@
             if (!regs.length) { wrap.style.display = 'none'; empty.classList.remove('hidden'); return; }
             wrap.style.display = 'block'; empty.classList.add('hidden');
             tbody.innerHTML = '';
-            const seen = new Set();
-            [...regs].reverse().forEach(r => {
-                if (seen.has(r.tournamentName)) return;
-                seen.add(r.tournamentName);
-                const d = r.registeredAt ? new Date(r.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+
+            const statusMap = {
+                confirmed: '<span class="status-badge status-paid">Confirmed</span>',
+                pending:   '<span class="status-badge status-pending">Pending</span>',
+                rejected:  '<span class="status-badge status-rejected">Rejected</span>'
+            };
+
+            [...regs].sort((a, b) => {
+                const ta = a.registeredAt?.seconds || 0;
+                const tb = b.registeredAt?.seconds || 0;
+                return tb - ta;
+            }).forEach(r => {
+                const d = r.registeredAt?.seconds
+                    ? new Date(r.registeredAt.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : '—';
+                const isPaid = r.entryType === 'paid';
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-800/50 transition';
                 row.innerHTML = `
-                    <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentName || '—'}</td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${r.tournamentTitle || '—'}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">${d}</td>
-                    <td class="px-4 py-3 text-green-400 font-bold text-sm">${r.entryFee === 0 ? 'FREE' : 'Rs. ' + (r.entryFee || 0)}</td>
-                    <td class="px-4 py-3"><span class="status-badge status-upcoming">Upcoming</span></td>
+                    <td class="px-4 py-3 font-bold text-sm ${isPaid ? 'text-yellow-400' : 'text-green-400'}">${isPaid ? 'Rs. ' + (r.amount || 0) : 'FREE'}</td>
+                    <td class="px-4 py-3">${statusMap[r.status] || statusMap.confirmed}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
+        // ===================================================
+        // PAYOUTS (fixed collection: tournament_payouts)
+        // ===================================================
         async function loadPayouts(uid) {
             try {
-                const q = query(collection(db, 'payouts'), where('userId', '==', uid));
+                const q = query(collection(db, 'tournament_payouts'), where('userId', '==', uid));
                 const snap = await getDocs(q);
                 const pays = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 const paid = pays.filter(p => p.status === 'paid');
-                const total = paid.reduce((s, p) => s + (p.prize || 0), 0);
+                const total = paid.reduce((s, p) => s + Number(p.prize || 0), 0);
                 document.getElementById('total-earnings').textContent = total.toLocaleString();
                 const sub = document.getElementById('earnings-subtitle');
                 if (total > 0) {
@@ -1080,11 +1085,14 @@
             wrap.style.display = 'block'; empty.classList.add('hidden');
             tbody.innerHTML = '';
             [...pays].reverse().forEach(p => {
-                const status = p.status === 'paid' ? '<span class="status-badge status-paid">Paid</span>' : '<span class="status-badge status-pending">Pending</span>';
+                const status = p.status === 'paid'
+                    ? '<span class="status-badge status-paid">Paid</span>'
+                    : '<span class="status-badge status-pending">Pending</span>';
+                const title = p.tournamentTitle || p.tournament || '—';
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-800/50 transition';
                 row.innerHTML = `
-                    <td class="px-4 py-3 font-medium text-white text-sm">${p.tournament || '—'}</td>
+                    <td class="px-4 py-3 font-medium text-white text-sm">${title}</td>
                     <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank || '—'}</td>
                     <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize || 0}</td>
                     <td class="px-4 py-3">${status}</td>
