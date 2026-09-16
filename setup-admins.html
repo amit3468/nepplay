@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Setup Admin — NEPPLAY (One-Time)</title>
+<style>
+  body { background:#0f172a; color:#e2e8f0; font-family:system-ui, sans-serif; max-width:600px; margin:60px auto; padding:20px; }
+  h1 { color:#f87171; }
+  .warn { background:#7f1d1d; padding:16px; border-radius:8px; margin:20px 0; border-left:4px solid #ef4444; }
+  .box { background:#1e293b; padding:24px; border-radius:12px; margin-top:20px; }
+  input, button { width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #334155; background:#0f172a; color:#fff; font-size:14px; box-sizing:border-box; }
+  button { background:#22c55e; color:#fff; border:none; cursor:pointer; font-weight:700; margin-top:16px; }
+  button:hover { background:#16a34a; }
+  button:disabled { background:#64748b; cursor:not-allowed; }
+  pre { background:#0f172a; padding:12px; border-radius:8px; overflow-x:auto; font-size:12px; }
+  .ok { color:#4ade80; }
+  .err { color:#f87171; }
+  .warn-txt { color:#fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>⚠️ One-Time Admin Setup — Delete After</h1>
+
+<div class="warn">
+  <b>Creates your admin account in Firebase Auth + Firestore.</b><br>
+  Run it ONCE, then DELETE this file from your repo and redeploy.
+</div>
+
+<div class="box">
+  <input type="email" id="email" placeholder="admin email (e.g. amitacharya111888@gmail.com)">
+  <input type="text" id="user" placeholder="Username (e.g. Amit)">
+  <input type="password" id="pass" placeholder="Password (min 6 chars)">
+  <input type="password" id="pass2" placeholder="Confirm Password">
+
+  <button id="go" onclick="createAdmin()">🚀 Create Admin</button>
+  <pre id="log" style="display:none;"></pre>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  logEl.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = cls || '';
+  line.textContent = msg;
+  logEl.appendChild(line);
+  console.log(msg);
+}
+
+window.createAdmin = async function() {
+  const btn = document.getElementById('go');
+  btn.disabled = true;
+  btn.textContent = '⏳ Creating...';
+  logEl.innerHTML = '';
+
+  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('user').value.trim();
+  const password = document.getElementById('pass').value;
+  const password2 = document.getElementById('pass2').value;
+
+  if (!email || !password) { log('❌ Email and password required', 'err'); btn.disabled = false; btn.textContent = '🚀 Create Admin'; return; }
+  if (password.length < 6)  { log('❌ Password must be at least 6 characters', 'err'); btn.disabled = false; btn.textContent = '🚀 Create Admin'; return; }
+  if (password !== password2) { log('❌ Passwords do not match', 'err'); btn.disabled = false; btn.textContent = '🚀 Create Admin'; return; }
+
+  try {
+    log(`Creating Auth account for ${email}...`);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
+    log(`✅ Auth created: uid = ${uid}`, 'ok');
+
+    const existing = await getDoc(doc(db, 'users', uid));
+    if (existing.exists()) {
+      log(`⚠️ users/${uid} exists — upgrading to admin`, 'warn-txt');
+      await setDoc(doc(db, 'users', uid), {
+        email, role: 'admin', status: 'active',
+        username: username || email.split('@')[0],
+        fullName: username || email.split('@')[0],
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } else {
+      await setDoc(doc(db, 'users', uid), {
+        email,
+        username: username || email.split('@')[0],
+        fullName: username || email.split('@')[0],
+        role: 'admin',
+        status: 'active',
+        totalEarnings: 0,
+        tournamentsPlayed: 0,
+        tournamentsWon: 0,
+        createdAt: serverTimestamp()
+      });
+    }
+    log(`✅ Firestore users/${uid} created with role=admin`, 'ok');
+
+    await signOut(auth);
+    log(`✅ Signed out from setup session`, 'ok');
+    log(``);
+    log(`🎉 Setup complete!`, 'ok');
+    log(`Your admin login:`);
+    log(`  Email:    ${email}`, 'ok');
+    log(`  Password: (the one you just typed)`, 'ok');
+    log(``);
+    log(`NEXT STEPS:`, 'warn-txt');
+    log(`1. Delete setup-admins.html from your repo`);
+    log(`2. Commit + wait for Render`);
+    log(`3. I'll send you the secured admin.html next`);
+  } catch (err) {
+    if (err.code === 'auth/email-already-in-use') {
+      log(`⚠️ ${email} already exists in Firebase Auth`, 'warn-txt');
+      log(`Go to Firebase Console → Authentication → Users → find ${email}`, 'warn-txt');
+      log(`Copy the UID, then check Firestore users/{UID} has role: "admin"`, 'warn-txt');
+      log(`If it doesn't, add it manually.`, 'warn-txt');
+    } else {
+      log(`❌ Failed: ${err.message}`, 'err');
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✅ Done — Delete This File';
+};
+</script>
+</body>
+</html>
