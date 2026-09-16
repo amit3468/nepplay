@@ -578,9 +578,6 @@
         let notifListeners = [];
         let notifCache = [];
 
-        // ===================================================
-        // NAVIGATION / SUPPORT
-        // ===================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -604,9 +601,6 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
-        // ===================================================
-        // NOTIFICATION SYSTEM
-        // ===================================================
         window.toggleNotifPanel = function(e) {
             if (e) e.stopPropagation();
             document.getElementById('notif-panel').classList.toggle('open');
@@ -721,20 +715,15 @@
             return d.toLocaleDateString();
         }
 
-        // ===================================================
-        // ATTACH REAL-TIME LISTENERS
-        // ===================================================
         function attachNotifListeners(uid) {
             notifListeners.forEach(unsub => { try { unsub(); } catch(e){} });
             notifListeners = [];
 
-            // 1. Payments
             const payQ = query(collection(db, 'tournament_payments'), where('userId', '==', uid));
             notifListeners.push(onSnapshot(payQ, snap => {
                 snap.docChanges().forEach(change => {
                     const p = change.doc.data();
                     const id = change.doc.id;
-
                     if (change.type === 'added' && p.status === 'pending') {
                         pushNotif({
                             id: 'pay_submit_' + id,
@@ -747,7 +736,7 @@
                     if (change.type === 'modified') {
                         if (p.status === 'approved') {
                             pushNotif({
-                                id: 'pay_approved_' + id,
+                                id: 'pay_approved_' + id + '_' + Date.now(),
                                 type: 'success',
                                 title: '✅ Payment Approved!',
                                 message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`,
@@ -756,7 +745,7 @@
                         }
                         if (p.status === 'rejected') {
                             pushNotif({
-                                id: 'pay_rejected_' + id,
+                                id: 'pay_rejected_' + id + '_' + Date.now(),
                                 type: 'error',
                                 title: '❌ Payment Rejected',
                                 message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`,
@@ -767,13 +756,11 @@
                 });
             }));
 
-            // 2. Registrations
             const regQ = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
             notifListeners.push(onSnapshot(regQ, snap => {
                 snap.docChanges().forEach(change => {
                     const r = change.doc.data();
                     const id = change.doc.id;
-
                     if (change.type === 'added') {
                         pushNotif({
                             id: 'reg_add_' + id,
@@ -783,30 +770,9 @@
                             time: new Date()
                         });
                     }
-                    if (change.type === 'modified') {
-                        if (r.status === 'confirmed') {
-                            pushNotif({
-                                id: 'reg_conf_' + id + '_' + Date.now(),
-                                type: 'success',
-                                title: '✅ Registration Confirmed',
-                                message: `Your registration for ${r.tournamentTitle || 'a tournament'} is confirmed!`,
-                                time: new Date()
-                            });
-                        }
-                        if (r.status === 'rejected') {
-                            pushNotif({
-                                id: 'reg_rej_' + id + '_' + Date.now(),
-                                type: 'error',
-                                title: '❌ Registration Rejected',
-                                message: `Your registration for ${r.tournamentTitle || 'a tournament'} was rejected.`,
-                                time: new Date()
-                            });
-                        }
-                    }
                 });
             }));
 
-            // 3. Announcements
             const annQ = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
             notifListeners.push(onSnapshot(annQ, snap => {
                 snap.docChanges().forEach(change => {
@@ -827,8 +793,63 @@
         }
 
         // ===================================================
-        // COUNTDOWN
+        // BACKFILL NOTIFICATIONS ON LOAD (new)
         // ===================================================
+        async function backfillNotifications(uid) {
+            try {
+                const paySnap = await getDocs(query(collection(db, 'tournament_payments'), where('userId', '==', uid)));
+                paySnap.docs.forEach(d => {
+                    const p = d.data();
+                    const id = d.id;
+                    if (p.status === 'pending') {
+                        pushNotif({
+                            id: 'pay_submit_' + id,
+                            type: 'info',
+                            title: '💳 Payment Submitted',
+                            message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`,
+                            time: p.submittedAt?.toDate ? p.submittedAt.toDate() : new Date()
+                        });
+                    } else if (p.status === 'approved') {
+                        pushNotif({
+                            id: 'pay_approved_' + id,
+                            type: 'success',
+                            title: '✅ Payment Approved!',
+                            message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`,
+                            time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date()
+                        });
+                    } else if (p.status === 'rejected') {
+                        pushNotif({
+                            id: 'pay_rejected_' + id,
+                            type: 'error',
+                            title: '❌ Payment Rejected',
+                            message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`,
+                            time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date()
+                        });
+                    }
+                });
+
+                const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
+                regSnap.docs.forEach(d => {
+                    const r = d.data();
+                    const id = d.id;
+                    pushNotif({
+                        id: 'reg_add_' + id,
+                        type: 'info',
+                        title: '🎮 Tournament Joined',
+                        message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`,
+                        time: r.registeredAt?.toDate ? r.registeredAt.toDate() : new Date()
+                    });
+                });
+
+                notifCache.sort((a, b) => new Date(b.time) - new Date(a.time));
+                updateNotifBadge();
+                renderNotifList();
+                console.log('📬 Backfilled notifications:', notifCache.length);
+            } catch (e) {
+                console.warn('Backfill failed:', e.message);
+            }
+        }
+
         function updateCountdown() {
             const diff = LAUNCH_DATE - new Date();
             if (diff <= 0) {
@@ -851,9 +872,6 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // ===================================================
-        // LIVE COUNTER
-        // ===================================================
         function calculateFakeCount() {
             const hoursSinceBase = (new Date() - BASE_DATE) / 3600000;
             const jitter = Math.sin(hoursSinceBase) * 0.2;
@@ -895,9 +913,6 @@
         setInterval(updateLiveCounter, 60000);
         setTimeout(updateLiveCounter, 500);
 
-        // ===================================================
-        // AUTH
-        // ===================================================
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('loading-screen').classList.add('hidden');
             if (user) {
@@ -968,6 +983,7 @@
             document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
 
             attachNotifListeners(user.uid);
+            await backfillNotifications(user.uid);
             updateNotifBadge();
             renderNotifList();
 
@@ -979,9 +995,6 @@
             ]);
         }
 
-        // ===================================================
-        // REGISTRATIONS (fixed collection: tournament_registrations)
-        // ===================================================
         async function checkUserRegistration(uid) {
             try {
                 const q = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
@@ -1054,9 +1067,6 @@
             });
         }
 
-        // ===================================================
-        // PAYOUTS (fixed collection: tournament_payouts)
-        // ===================================================
         async function loadPayouts(uid) {
             try {
                 const q = query(collection(db, 'tournament_payouts'), where('userId', '==', uid));
