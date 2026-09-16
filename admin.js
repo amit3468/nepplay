@@ -44,7 +44,6 @@ function showGatePanel(panelId) {
 }
 
 async function verifyAdminAndBoot(user) {
-  // Check Firestore users/{uid} has role: "admin"
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
@@ -76,7 +75,6 @@ onAuthStateChanged(auth, async (user) => {
     showGatePanel('adminDeniedMsg');
     return;
   }
-  // ✅ Authenticated as admin — boot panel
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('adminEmailDisplay').textContent = 'Admin';
@@ -100,7 +98,6 @@ window.handleAdminLogin = async function(e) {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged will handle the rest
   } catch (err) {
     let m = 'Login failed';
     if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)) m = 'Invalid email or password';
@@ -129,7 +126,7 @@ window.adminLogout = async function() {
 };
 
 // ============================================================
-// STATE (unchanged from v3.8)
+// STATE
 // ============================================================
 let allPayments = [];
 let allRegs = [];
@@ -270,7 +267,7 @@ function attachRealtimeListeners() {
 }
 
 // ============================================================
-// BOOTSTRAP — runs ONCE after admin is verified
+// BOOTSTRAP
 // ============================================================
 async function bootstrapAdminPanel() {
   await window.loadPayments();
@@ -611,6 +608,7 @@ function renderRegistrations() {
             ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
             ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
             ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
+            ${r.streamUrl ? ' · <a href="' + r.streamUrl + '" target="_blank" style="color:#f87171; text-decoration:none;">🔴 Live</a>' : ''}
           </div>
           ${isPaid && shotId ? `
             <div class="reg-payment-preview">
@@ -756,6 +754,7 @@ window.submitMatchResults = async function() {
   const w2Name = (document.getElementById('winner2Name').value || '').trim();
   const w3Name = (document.getElementById('winner3Name').value || '').trim();
   const tkName = (document.getElementById('topKillerName').value || '').trim();
+  const highlightUrl = (document.getElementById('resultHighlightUrl')?.value || '').trim();
   if (!w1Name) { window.showToast('❌ 1st place username required'); return; }
   const w1Kills = Number(document.getElementById('winner1Kills').value) || 0;
   const w2Kills = Number(document.getElementById('winner2Kills').value) || 0;
@@ -822,6 +821,7 @@ window.submitMatchResults = async function() {
       topKiller: sameAsFirst
         ? { name: w1Name, kills: w1Kills, prize: killsPrize, sameAsFirst: true }
         : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod },
+      highlightUrl: highlightUrl || null,
       totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
       completedAt: serverTimestamp(), createdAt: serverTimestamp()
     });
@@ -840,7 +840,7 @@ window.submitMatchResults = async function() {
   }
 };
 window.resetResultsForm = function() {
-  ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills'].forEach(id => {
+  ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills','resultHighlightUrl'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -870,7 +870,7 @@ async function loadRecentResults() {
         <div class="reg-card paid-reg">
           <div class="reg-icon">🏁</div>
           <div class="reg-main">
-            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b></div>
+            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b>${r.highlightUrl ? ' <span style="color:#f87171; font-size:11px;">📺 highlight</span>' : ''}</div>
             <div class="reg-line-2">
               🥇 <b>${w1.name || '—'}</b> (${w1.kills || 0} kills) — Rs. ${w1.prize || 0}
               ${tk.sameAsFirst ? ' · 🎯 same as 1st' : ` · 🎯 <b>${tk.name || '—'}</b> (${tk.kills || 0})`}
