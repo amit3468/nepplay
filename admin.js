@@ -1,5 +1,9 @@
 // ==========================================================
-// NEPPLAY — admin.js (v3.7)
+// NEPPLAY — admin.js (v3.8)
+// All admin panel logic
+// Changes vs v3.7:
+//   - loadRoomDetailsForm() now always fetches fresh data
+//     (fixes empty form fields when editing existing rooms)
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -20,7 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-console.log("🔥 Admin ready v3.7");
+console.log("🔥 Admin ready v3.8");
 
 // ============================================================
 // STATE
@@ -37,6 +41,7 @@ let currentSearchTerm = '';
 let roomTournaments = [];
 let selectedResultTournament = null;
 
+// Screenshot cache — stores base64 per doc id to avoid inlining huge strings into HTML
 const screenshotCache = {};
 
 // ============================================================
@@ -1118,13 +1123,20 @@ window.calculateShares = function() {
 // ============================================================
 window.loadRoomDetailsForm = async function() {
   const select = document.getElementById('roomTournamentSelect');
-  if (!roomTournaments.length) {
-    try {
-      const snap = await getDocs(collection(db, 'tournaments'));
-      roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      select.innerHTML = '<option value="">— Select tournament —</option>' +
-        roomTournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
-    } catch (err) { console.warn(err); return; }
+  const previousValue = select.value;
+
+  // Always fetch fresh — prevents stale-cache issue
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
+    roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    select.innerHTML = '<option value="">— Select tournament —</option>' +
+      roomTournaments.map(t =>
+        `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} (${t.game || 'Game'})</option>`
+      ).join('');
+    console.log('🔄 Room details: fetched', roomTournaments.length, 'tournaments');
+  } catch (err) {
+    console.warn('loadRoomDetailsForm fetch failed:', err);
+    return;
   }
 
   const tid = select.value;
@@ -1132,10 +1144,21 @@ window.loadRoomDetailsForm = async function() {
   if (!tid) { form.style.display = 'none'; return; }
 
   const t = roomTournaments.find(x => x.id === tid);
-  if (!t) return;
+  if (!t) { console.warn('Tournament not found:', tid); return; }
 
   form.style.display = 'block';
   document.getElementById('roomTournamentName').textContent = t.title || 'Tournament';
+
+  console.log('📖 Loaded room data for:', t.title, {
+    roomId: t.roomId,
+    roomPassword: t.roomPassword,
+    roomFormat: t.roomFormat,
+    roomRounds: t.roomRounds,
+    roomOpenTime: t.roomOpenTime,
+    roomRules: t.roomRules,
+    roomRevealAt: t.roomRevealAt
+  });
+
   document.getElementById('roomId').value = t.roomId || '';
   document.getElementById('roomPassword').value = t.roomPassword || '';
   document.getElementById('roomFormat').value = t.roomFormat || '';
@@ -1450,5 +1473,5 @@ window.showToast = function(msg) {
   } catch (e) { console.warn('payouts load failed:', e); }
   renderDashboardRecent();
   attachRealtimeListeners();
-  console.log("✅ Admin loaded from admin.js v3.7");
+  console.log("✅ Admin loaded from admin.js v3.8");
 })();
