@@ -40,6 +40,15 @@
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
         .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 40px 20px; text-align: center; }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -106,10 +115,10 @@
     <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
         <div class="text-center mb-6 sm:mb-8">
             <div class="inline-block bg-purple-500/20 border border-purple-500/40 rounded-full px-3 py-1 text-xs font-bold text-purple-400 mb-3">
-                <i class="fa-solid fa-users mr-1"></i> Launching Soon
+                <i class="fa-solid fa-users mr-1"></i> Team Up
             </div>
             <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2"><i class="fa-solid fa-users-rays text-blue-500 mr-2"></i>Teams</h1>
-            <p class="text-sm sm:text-base text-gray-400">Create teams and compete together. Feature opens with our first tournament.</p>
+            <p id="teams-subtitle" class="text-sm sm:text-base text-gray-400">Create teams and compete together.</p>
         </div>
 
         <div class="flex flex-wrap justify-center gap-2 mb-6">
@@ -118,21 +127,30 @@
             <button onclick="openCreateModal()" class="px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 text-xs sm:text-sm font-semibold text-white transition"><i class="fa-solid fa-plus mr-1"></i> Create</button>
         </div>
 
-        <div id="empty-teams" class="empty-state-box max-w-2xl mx-auto">
+        <!-- Loading skeleton -->
+        <div id="teams-loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="skeleton h-64 w-full"></div>
+            <div class="skeleton h-64 w-full"></div>
+            <div class="skeleton h-64 w-full"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-teams" class="hidden empty-state-box max-w-2xl mx-auto">
             <div class="text-5xl sm:text-6xl mb-4">👥</div>
-            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Teams Yet</h2>
-            <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Team creation will be fully enabled when we launch our first tournament. Register your account now to be ready.</p>
+            <h2 id="empty-title" class="text-xl sm:text-2xl font-bold text-white mb-3">No Teams Yet</h2>
+            <p id="empty-message" class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Be the first to create a team and start recruiting players.</p>
             <div class="flex flex-wrap gap-3 justify-center">
-                <a href="register.html" class="btn-primary text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
-                    <i class="fa-solid fa-user-plus"></i> Register Early
-                </a>
+                <button onclick="openCreateModal()" class="text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+                    <i class="fa-solid fa-plus"></i> Create a Team
+                </button>
                 <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
                     <i class="fa-brands fa-whatsapp"></i> Get Notified
                 </a>
             </div>
         </div>
 
-        <div id="teams-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6"></div>
+        <!-- Teams grid -->
+        <div id="teams-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
     </main>
 
     <div id="createModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center p-3 sm:p-4">
@@ -148,7 +166,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Tagline</label>
-                    <input type="text" id="teamTagline" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" maxlength="50">
+                    <input type="text" id="teamTagline" class="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500" maxlength="50" placeholder="Ready to battle!">
                 </div>
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div>
@@ -172,12 +190,12 @@
                 </div>
                 <div class="mb-5">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="teamPublic" class="w-4 h-4 rounded">
-                        <span class="text-sm text-gray-300">Make team public</span>
+                        <input type="checkbox" id="teamPublic" class="w-4 h-4 rounded" checked>
+                        <span class="text-sm text-gray-300">Make team public (visible in Browse)</span>
                     </label>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-sm">Create</button>
+                    <button type="submit" id="createSubmitBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-sm">Create</button>
                     <button type="button" onclick="closeCreateModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-5 rounded-lg text-sm">Cancel</button>
                 </div>
             </form>
@@ -194,6 +212,7 @@
         </div>
     </footer>
 
+    <!-- UI helpers (non-module) -->
     <script>
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
@@ -226,50 +245,175 @@
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
+        document.getElementById('createModal').addEventListener('click', function(e) { if (e.target === this) closeCreateModal(); });
+    </script>
 
-        const allTeams = []; // Empty for fresh start
+    <!-- Firebase + teams logic (module) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        function loadAllTeams() {
-            const custom = JSON.parse(localStorage.getItem('customTeams') || '[]');
-            return [...allTeams, ...custom];
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const GAME_MAP = {
+            freefire:  { name: "Free Fire",    icon: "fa-fire",       color: "from-orange-500 to-red-600" },
+            pubg:      { name: "PUBG Mobile",  icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
+            valorant:  { name: "Valorant",     icon: "fa-bullseye",   color: "from-red-500 to-pink-600" },
+            cod:       { name: "COD Mobile",   icon: "fa-gun",        color: "from-green-500 to-emerald-700" },
+            efootball: { name: "eFootball",    icon: "fa-futbol",     color: "from-blue-500 to-cyan-600" },
+            ecricket:  { name: "eCricket",     icon: "fa-baseball",   color: "from-green-600 to-emerald-800" },
+            ludo:      { name: "Ludo King",    icon: "fa-dice",       color: "from-purple-500 to-pink-600" },
+            chess:     { name: "Chess",        icon: "fa-chess",      color: "from-gray-500 to-slate-700" }
+        };
+
+        let currentUser = null;
+        let currentUserProfile = null;
+        let TEAMS = [];
+        let currentView = 'my';
+        let teamsUnsub = null;
+
+        // ================================================
+        // AUTH
+        // ================================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = { uid: user.uid, email: user.email || '', username: user.displayName || (user.email ? user.email.split('@')[0] : 'Player') };
+                // Merge in localStorage profile (which register.html likely writes)
+                const local = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (local && local.username) currentUserProfile = local;
+            } else {
+                currentUser = null;
+                currentUserProfile = null;
+            }
+            // Refresh view with new user context
+            renderTeams();
+        });
+
+        // ================================================
+        // LOAD TEAMS (real-time)
+        // ================================================
+        function attachTeamsListener() {
+            const teamsLoading = document.getElementById('teams-loading');
+            const teamsGrid = document.getElementById('teams-grid');
+            const emptyBox = document.getElementById('empty-teams');
+
+            try {
+                const q = query(collection(db, 'teams'), orderBy('createdAt', 'desc'));
+                teamsUnsub = onSnapshot(q, (snap) => {
+                    TEAMS = snap.docs.map(d => {
+                        const t = d.data();
+                        const gm = GAME_MAP[t.game] || { name: t.game || 'Game', icon: 'fa-gamepad', color: 'from-gray-500 to-gray-700' };
+                        return {
+                            id: d.id,
+                            name: t.name || 'Team',
+                            tagline: t.tagline || 'Ready to battle!',
+                            game: t.game || '',
+                            gameName: gm.name,
+                            icon: gm.icon,
+                            color: gm.color,
+                            isPublic: !!t.isPublic,
+                            maxMembers: Number(t.maxMembers || 4),
+                            earnings: Number(t.earnings || 0),
+                            wins: Number(t.wins || 0),
+                            createdBy: t.createdBy || '',
+                            createdByUid: t.createdByUid || '',
+                            members: Array.isArray(t.members) && t.members.length
+                                ? t.members
+                                : [{ name: t.createdBy || 'Captain', role: 'Captain' }]
+                        };
+                    });
+                    teamsLoading.classList.add('hidden');
+                    renderTeams();
+                }, (err) => {
+                    console.error('teams listener error:', err);
+                    teamsLoading.classList.add('hidden');
+                    // Show empty state with error text
+                    document.getElementById('empty-title').textContent = 'Could not load teams';
+                    document.getElementById('empty-message').textContent = err.message || 'Permission denied.';
+                    emptyBox.classList.remove('hidden');
+                    teamsGrid.classList.add('hidden');
+                });
+            } catch (err) {
+                console.error('attachTeamsListener error:', err);
+                teamsLoading.classList.add('hidden');
+                emptyBox.classList.remove('hidden');
+            }
         }
 
-        let currentView = 'my';
-
-        function showView(view, btn) {
+        // ================================================
+        // RENDER
+        // ================================================
+        window.showView = function(view, btn) {
             currentView = view;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if (btn) btn.classList.add('active');
             renderTeams();
-        }
+        };
 
         function renderTeams() {
             const grid = document.getElementById('teams-grid');
             const emptyBox = document.getElementById('empty-teams');
-            const teams = loadAllTeams();
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const emptyTitle = document.getElementById('empty-title');
+            const emptyMessage = document.getElementById('empty-message');
 
-            let display = teams;
+            let display = TEAMS;
             if (currentView === 'my') {
                 if (!currentUser) display = [];
-                else display = teams.filter(t => t.createdBy === currentUser.username);
+                else {
+                    const uid = currentUser.uid;
+                    const uname = (currentUserProfile?.username || currentUser.username || '').toLowerCase();
+                    display = TEAMS.filter(t =>
+                        t.createdByUid === uid ||
+                        (t.members || []).some(m => (m.name || '').toLowerCase() === uname) ||
+                        (t.createdBy || '').toLowerCase() === uname
+                    );
+                }
             } else {
-                display = teams.filter(t => t.isPublic);
+                display = TEAMS.filter(t => t.isPublic);
             }
 
             grid.innerHTML = '';
+
             if (display.length === 0) {
                 emptyBox.classList.remove('hidden');
                 grid.classList.add('hidden');
+                if (currentView === 'my') {
+                    emptyTitle.textContent = currentUser ? 'You haven\'t joined a team yet' : 'No Teams Yet';
+                    emptyMessage.textContent = currentUser
+                        ? 'Create your own team or browse public teams to join.'
+                        : 'Be the first to create a team and start recruiting players.';
+                } else {
+                    emptyTitle.textContent = 'No Public Teams';
+                    emptyMessage.textContent = 'No teams have been made public yet. Check back soon.';
+                }
                 return;
             }
+
             emptyBox.classList.add('hidden');
             grid.classList.remove('hidden');
 
             display.forEach(team => {
-                const fill = (team.members.length / team.maxMembers) * 100;
+                const fill = team.maxMembers > 0 ? (team.members.length / team.maxMembers) * 100 : 0;
                 const isFull = team.members.length >= team.maxMembers;
-                const isOwner = currentUser && team.createdBy === currentUser.username;
+                const uname = (currentUserProfile?.username || currentUser?.username || '').toLowerCase();
+                const isOwner =
+                    (currentUser && team.createdByUid === currentUser.uid) ||
+                    (uname && (team.createdBy || '').toLowerCase() === uname);
+
                 const card = document.createElement('div');
                 card.className = "team-card glass-panel rounded-xl overflow-hidden shadow-lg flex flex-col";
                 card.innerHTML = `
@@ -279,8 +423,8 @@
                             ${team.isPublic ? '<div class="bg-green-500/30 rounded-full px-2 py-1 text-xs font-bold text-green-300 border border-green-500 flex-shrink-0">Public</div>' : '<div class="bg-gray-500/30 rounded-full px-2 py-1 text-xs font-bold text-gray-300 border border-gray-500 flex-shrink-0">Private</div>'}
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center border-2 border-white/30 flex-shrink-0"><span class="text-2xl font-bold text-white">${team.name.charAt(0)}</span></div>
-                            <div class="min-w-0"><h3 class="text-base font-bold text-white truncate">${team.name}</h3><p class="text-xs text-white/80 italic truncate">"${team.tagline}"</p></div>
+                            <div class="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center border-2 border-white/30 flex-shrink-0"><span class="text-2xl font-bold text-white">${escapeHtml(team.name.charAt(0))}</span></div>
+                            <div class="min-w-0"><h3 class="text-base font-bold text-white truncate">${escapeHtml(team.name)}</h3><p class="text-xs text-white/80 italic truncate">"${escapeHtml(team.tagline)}"</p></div>
                         </div>
                     </div>
                     <div class="p-4 flex-grow">
@@ -294,75 +438,122 @@
                         </div>
                     </div>
                     <div class="p-4 pt-0 flex gap-2">
-                        <button onclick="viewTeamDetails(${team.id})" class="flex-grow glass-panel hover:bg-gray-800/50 text-white font-bold py-2 rounded-lg text-sm">View</button>
-                        ${isOwner ? '<button onclick="manageTeam()" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm">Manage</button>' : (isFull ? '<button disabled class="flex-grow bg-gray-600 text-white font-bold py-2 rounded-lg text-sm">Full</button>' : '<button onclick="joinTeam(' + team.id + ')" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm">Join</button>')}
+                        <button onclick="viewTeamDetails('${team.id}')" class="flex-grow glass-panel hover:bg-gray-800/50 text-white font-bold py-2 rounded-lg text-sm">View</button>
+                        ${isOwner
+                            ? `<button onclick="manageTeam('${team.id}')" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm">Manage</button>`
+                            : (isFull
+                                ? '<button disabled class="flex-grow bg-gray-600 text-white font-bold py-2 rounded-lg text-sm">Full</button>'
+                                : `<button onclick="joinTeam('${team.id}')" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm">Join</button>`)
+                        }
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function openCreateModal() {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) { alert("Login first."); window.location.href = 'member.html'; return; }
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+
+        // ================================================
+        // CREATE TEAM
+        // ================================================
+        window.openCreateModal = function() {
+            if (!currentUser) {
+                alert('Please log in first.');
+                window.location.href = 'member.html';
+                return;
+            }
             document.getElementById('createModal').classList.remove('hidden');
-        }
-        function closeCreateModal() { document.getElementById('createModal').classList.add('hidden'); document.getElementById('createTeamForm').reset(); }
+        };
+        window.closeCreateModal = function() {
+            document.getElementById('createModal').classList.add('hidden');
+            document.getElementById('createTeamForm').reset();
+        };
 
-        function createTeam(event) {
+        window.createTeam = async function(event) {
             event.preventDefault();
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            const name = document.getElementById('teamName').value.trim();
-            const tagline = document.getElementById('teamTagline').value.trim() || "Ready to battle!";
-            const game = document.getElementById('teamGame').value;
-            const max = parseInt(document.getElementById('teamMax').value);
-            const isPublic = document.getElementById('teamPublic').checked;
+            const btn = document.getElementById('createSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
 
-            const gameMap = {
-                freefire: { name: "Free Fire", icon: "fa-fire", color: "from-orange-500 to-red-600" },
-                pubg: { name: "PUBG Mobile", icon: "fa-crosshairs", color: "from-yellow-500 to-orange-600" },
-                valorant: { name: "Valorant", icon: "fa-bullseye", color: "from-red-500 to-pink-600" },
-                cod: { name: "COD Mobile", icon: "fa-gun", color: "from-green-500 to-emerald-700" },
-                efootball: { name: "eFootball", icon: "fa-futbol", color: "from-blue-500 to-cyan-600" },
-                ecricket: { name: "eCricket", icon: "fa-baseball", color: "from-green-600 to-emerald-800" },
-                ludo: { name: "Ludo King", icon: "fa-dice", color: "from-purple-500 to-pink-600" },
-                chess: { name: "Chess", icon: "fa-chess", color: "from-gray-500 to-slate-700" }
-            };
+            try {
+                if (!currentUser) throw new Error('Please log in first.');
 
-            const gm = gameMap[game] || { name: game, icon: "fa-gamepad", color: "from-gray-500 to-gray-700" };
-            const newTeam = {
-                id: Date.now(), name, tagline, game,
-                gameName: gm.name, icon: gm.icon, color: gm.color,
-                isPublic, maxMembers: max, earnings: 0, wins: 0,
-                createdBy: user.username,
-                members: [{ name: user.username, role: "Captain" }]
-            };
-            const ex = JSON.parse(localStorage.getItem('customTeams') || '[]');
-            ex.push(newTeam);
-            localStorage.setItem('customTeams', JSON.stringify(ex));
-            closeCreateModal();
-            alert(`✅ Team "${name}" created!`);
-            document.getElementById('tabMyTeams').click();
-        }
+                const name = document.getElementById('teamName').value.trim();
+                const tagline = document.getElementById('teamTagline').value.trim() || 'Ready to battle!';
+                const game = document.getElementById('teamGame').value;
+                const maxMembers = parseInt(document.getElementById('teamMax').value);
+                const isPublic = document.getElementById('teamPublic').checked;
 
-        function viewTeamDetails(id) {
-            const team = loadAllTeams().find(t => t.id === id);
+                if (!name) throw new Error('Team name is required.');
+                if (!game) throw new Error('Please select a game.');
+                if (!maxMembers || maxMembers < 2) throw new Error('Max members must be at least 2.');
+
+                const captainName = currentUserProfile?.username || currentUser.username || 'Player';
+
+                await addDoc(collection(db, 'teams'), {
+                    name, tagline, game,
+                    maxMembers, isPublic,
+                    earnings: 0, wins: 0,
+                    createdBy: captainName,
+                    createdByUid: currentUser.uid,
+                    members: [{ name: captainName, role: 'Captain', uid: currentUser.uid }],
+                    createdAt: serverTimestamp()
+                });
+
+                closeCreateModal();
+                // Switch to "My Teams" so they see the new card
+                currentView = 'my';
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabMyTeams')?.classList.add('active');
+
+            } catch (err) {
+                console.error('createTeam error:', err);
+                alert('❌ ' + (err.message || 'Could not create team.'));
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create';
+            }
+        };
+
+        // ================================================
+        // VIEW / JOIN / MANAGE
+        // ================================================
+        window.viewTeamDetails = function(id) {
+            const team = TEAMS.find(t => t.id === id);
             if (!team) return;
-            const membersHtml = team.members.map(m => `<div class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg mb-2"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">${m.name.charAt(0).toUpperCase()}</div><div class="flex-grow min-w-0"><p class="font-bold text-white text-sm truncate">${m.name}</p><span class="text-xs px-2 py-0.5 rounded-full ${m.role === 'Captain' ? 'role-captain' : 'role-member'}">${m.role}</span></div></div>`).join('');
-            alert(`Team: ${team.name}\n\nMembers (${team.members.length}/${team.maxMembers}):\n${team.members.map(m => `• ${m.name} (${m.role})`).join('\n')}`);
-        }
+            const list = team.members.map(m => `• ${m.name} (${m.role})`).join('\n');
+            alert(`Team: ${team.name}\nGame: ${team.gameName}\nMembers (${team.members.length}/${team.maxMembers}):\n${list}`);
+        };
 
-        function joinTeam(id) {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) { alert("Login first."); window.location.href = 'member.html'; return; }
-            const team = loadAllTeams().find(t => t.id === id);
-            if (team) alert(`✅ Join request sent to "${team.name}"!`);
-        }
-        function manageTeam() { alert("Team management coming soon!"); }
+        window.joinTeam = function(id) {
+            if (!currentUser) {
+                alert('Please log in first.');
+                window.location.href = 'member.html';
+                return;
+            }
+            const team = TEAMS.find(t => t.id === id);
+            if (team) alert(`✅ Join request sent to "${team.name}"!\n\nNote: the captain will be able to approve you once join requests are enabled.`);
+        };
 
-        document.getElementById('createModal').addEventListener('click', function(e) { if (e.target === this) closeCreateModal(); });
+        window.manageTeam = function(id) {
+            alert('Team management is coming soon.');
+        };
 
-        window.onload = function() { checkUserStatus(); renderTeams(); };
+        // ================================================
+        // BOOT
+        // ================================================
+        window.addEventListener('load', () => {
+            attachTeamsListener();
+        });
+
+        // Cleanup listener when leaving
+        window.addEventListener('beforeunload', () => {
+            if (teamsUnsub) { try { teamsUnsub(); } catch(e){} }
+        });
     </script>
 </body>
 </html>
