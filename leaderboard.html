@@ -17,33 +17,12 @@
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
-        .support-btn {
-            width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite;
-        }
+        .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
         .support-btn:hover { transform: scale(1.1); }
-        @keyframes pulse-support {
-            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
-            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
-        }
-        .support-menu {
-            display: none; position: absolute; bottom: 68px; left: 0;
-            width: 240px; max-width: calc(100vw - 48px);
-            background: #1e293b; border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
+        @keyframes pulse-support { 0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); } 50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); } }
+        .support-menu { display: none; position: absolute; bottom: 68px; left: 0; width: 240px; max-width: calc(100vw - 48px); background: #1e293b; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); overflow: hidden; }
         .support-menu.open { display: block; }
-        .support-menu-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; color: #e2e8f0;
-            text-decoration: none; transition: all 0.2s;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.85rem;
-        }
+        .support-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e2e8f0; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
@@ -52,78 +31,27 @@
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
-        .mobile-nav-menu.open {
-            display: flex; flex-direction: column;
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; gap: 8px; z-index: 60;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        @media (min-width: 768px) {
-            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
-        .empty-state-box {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px dashed rgba(148, 163, 184, 0.3);
-            border-radius: 16px;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .podium-slot {
-            background: rgba(30, 41, 59, 0.5);
-            border: 2px dashed rgba(148, 163, 184, 0.2);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-        }
+        .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 40px 20px; text-align: center; }
+        .podium-slot { background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 16px; padding: 24px; text-align: center; }
 
-        /* Live leaderboard */
-        .lb-row {
-            display: grid;
-            grid-template-columns: 60px 1fr auto auto;
-            gap: 14px;
-            align-items: center;
-            padding: 14px 18px;
-            border-radius: 12px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s;
-        }
-        @media (min-width: 640px) {
-            .lb-row { grid-template-columns: 70px 1fr 120px 120px; }
-        }
+        .lb-row { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; }
+        @media (min-width: 640px) { .lb-row { grid-template-columns: 70px 1fr 120px 120px; } }
         .lb-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
         .lb-row.top-1 { border-color: rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.06); }
         .lb-row.top-2 { border-color: rgba(148, 163, 184, 0.5); }
         .lb-row.top-3 { border-color: rgba(234, 88, 12, 0.5); }
 
-        .lb-rank {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: #94a3b8;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-        }
+        .lb-rank { font-size: 1.5rem; font-weight: 900; color: #94a3b8; text-align: center; font-variant-numeric: tabular-nums; }
         .lb-rank.gold   { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
         .lb-rank.silver { color: #cbd5e1; }
         .lb-rank.bronze { color: #fb923c; }
 
-        .lb-avatar {
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; color: white;
-            flex-shrink: 0;
-        }
+        .lb-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; flex-shrink: 0; }
 
-        .skeleton {
-            background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
-        }
+        .skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
@@ -190,7 +118,6 @@
     </nav>
 
     <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
-
         <div class="text-center mb-6 sm:mb-8">
             <div id="status-pill" class="inline-block bg-blue-500/20 border border-blue-500/40 rounded-full px-3 py-1 text-xs font-bold text-blue-400 mb-3">
                 <i class="fa-solid fa-ranking-star mr-1"></i> Launching Soon
@@ -199,15 +126,12 @@
             <p id="lb-subtitle" class="text-sm sm:text-base text-gray-400">Player rankings will appear once tournaments begin.</p>
         </div>
 
-        <!-- Loading skeleton -->
         <div id="lb-loading" class="max-w-3xl mx-auto space-y-3 mb-8">
-            <div class="skeleton h-20 w-full"></div>
             <div class="skeleton h-20 w-full"></div>
             <div class="skeleton h-20 w-full"></div>
             <div class="skeleton h-20 w-full"></div>
         </div>
 
-        <!-- Empty state -->
         <div id="lb-empty" class="hidden empty-state-box max-w-2xl mx-auto">
             <div class="text-5xl sm:text-6xl mb-4">📊</div>
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">Leaderboard Opens Soon</h2>
@@ -222,12 +146,8 @@
             </div>
         </div>
 
-        <!-- Live leaderboard -->
         <div id="lb-table-wrap" class="hidden max-w-3xl mx-auto">
-            <!-- Top 3 podium -->
             <div id="lb-podium" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 items-end"></div>
-
-            <!-- Full ranking -->
             <div class="glass-panel rounded-xl overflow-hidden">
                 <div class="p-4 border-b border-gray-700 bg-gray-800/30 flex items-center justify-between">
                     <h2 class="font-bold text-white text-sm sm:text-base"><i class="fa-solid fa-list-ol text-blue-400 mr-2"></i>Full Rankings</h2>
@@ -237,29 +157,15 @@
             </div>
         </div>
 
-        <!-- What will be tracked (only when empty) -->
         <div id="lb-info" class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto">
             <h3 class="text-base sm:text-lg font-bold text-white mb-4 text-center">📈 What's Tracked</h3>
             <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm">
-                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2">
-                    <i class="fa-solid fa-trophy text-yellow-400"></i>
-                    <span class="text-gray-300">Tournament Wins</span>
-                </div>
-                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2">
-                    <i class="fa-solid fa-coins text-green-400"></i>
-                    <span class="text-gray-300">Total Earnings</span>
-                </div>
-                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2">
-                    <i class="fa-solid fa-medal text-orange-400"></i>
-                    <span class="text-gray-300">Podium Finishes</span>
-                </div>
-                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-400"></i>
-                    <span class="text-gray-300">Total Prize Money</span>
-                </div>
+                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2"><i class="fa-solid fa-trophy text-yellow-400"></i><span class="text-gray-300">Tournament Wins</span></div>
+                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2"><i class="fa-solid fa-coins text-green-400"></i><span class="text-gray-300">Total Earnings</span></div>
+                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2"><i class="fa-solid fa-medal text-orange-400"></i><span class="text-gray-300">Podium Finishes</span></div>
+                <div class="bg-gray-800/50 rounded-lg p-3 flex items-center gap-2"><i class="fa-solid fa-chart-line text-blue-400"></i><span class="text-gray-300">Total Prize Money</span></div>
             </div>
         </div>
-
     </main>
 
     <footer class="glass-panel w-full p-5 sm:p-6 mt-8">
@@ -304,21 +210,31 @@
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[c]));
         }
+        function playerName(p) {
+            return p.winnerName || p.username || p.ign || p.playerName || 'Player';
+        }
+        function rankNum(r) {
+            if (!r) return null;
+            const m = String(r).match(/^\s*(\d+)/);
+            return m ? Number(m[1]) : null;
+        }
 
         async function loadLeaderboard() {
             try {
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
                 const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                    .filter(p => Number(p.prize) > 0);
+                    .filter(p => Number(p.prize || p.amount || 0) > 0);
 
                 // Aggregate per player
                 const players = {};
                 all.forEach(p => {
-                    const key = p.userId || p.username || p.ign || 'unknown';
+                    const name = playerName(p);
+                    // Group by userId if available, else by lowercase name
+                    const key = p.userId || name.toLowerCase();
                     if (!players[key]) {
                         players[key] = {
                             userId: p.userId || null,
-                            name: p.username || p.ign || p.playerName || 'Player',
+                            name: name,
                             totalPrize: 0,
                             wins: 0,
                             podiums: 0,
@@ -326,8 +242,8 @@
                         };
                     }
                     const pl = players[key];
-                    pl.totalPrize += Number(p.prize || 0);
-                    const rank = Number(p.rank || 0);
+                    pl.totalPrize += Number(p.prize || p.amount || 0);
+                    const rank = rankNum(p.rank);
                     if (rank === 1) pl.wins++;
                     if (rank >= 1 && rank <= 3) pl.podiums++;
                     if (p.tournamentId) pl.tournaments.add(p.tournamentId);
@@ -356,9 +272,13 @@
                 // Podium (top 3)
                 const medalClasses = ['gold', 'silver', 'bronze'];
                 const medalEmojis = ['🥇', '🥈', '🥉'];
-                const orderClass = ['order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10 border-yellow-500/30', 'order-2 md:order-1', 'order-3'];
+                const orderClass = [
+                    'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10',
+                    'order-2 md:order-1',
+                    'order-3'
+                ];
                 podium.innerHTML = ranked.slice(0, 3).map((p, i) => `
-                    <div class="podium-slot ${orderClass[i]} border-2" style="${i === 0 ? 'border-color:#fbbf24;' : i === 1 ? 'border-color:#94a3b8;' : 'border-color:#ea580c;'}">
+                    <div class="podium-slot ${orderClass[i]}" style="border: 2px solid ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#ea580c'};">
                         <div class="text-5xl mb-3">${medalEmojis[i]}</div>
                         <div class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-2xl" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${avatarInitial(p.name)}</div>
                         <p class="text-lg font-bold text-white truncate">${escapeHtml(p.name)}</p>
