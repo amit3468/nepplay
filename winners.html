@@ -18,33 +18,12 @@
         .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
 
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
-        .support-btn {
-            width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-            cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite;
-        }
+        .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
         .support-btn:hover { transform: scale(1.1); }
-        @keyframes pulse-support {
-            0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); }
-            50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); }
-        }
-        .support-menu {
-            display: none; position: absolute; bottom: 68px; left: 0;
-            width: 240px; max-width: calc(100vw - 48px);
-            background: #1e293b; border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-        }
+        @keyframes pulse-support { 0%, 100% { box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); } 50% { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.7); } }
+        .support-menu { display: none; position: absolute; bottom: 68px; left: 0; width: 240px; max-width: calc(100vw - 48px); background: #1e293b; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); overflow: hidden; }
         .support-menu.open { display: block; }
-        .support-menu-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; color: #e2e8f0;
-            text-decoration: none; transition: all 0.2s;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.85rem;
-        }
+        .support-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #e2e8f0; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; }
         .support-menu-item:last-child { border-bottom: none; }
         .support-menu-item:hover { background-color: rgba(59, 130, 246, 0.15); }
         .support-menu-item.wa:hover { background-color: rgba(37, 211, 102, 0.15); }
@@ -53,70 +32,24 @@
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
-        .mobile-nav-menu.open {
-            display: flex; flex-direction: column;
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; gap: 8px; z-index: 60;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        @media (min-width: 768px) {
-            .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        }
+        .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
-        .empty-state-box {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px dashed rgba(148, 163, 184, 0.3);
-            border-radius: 16px;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .podium-slot {
-            background: rgba(30, 41, 59, 0.5);
-            border: 2px dashed rgba(148, 163, 184, 0.2);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s;
-        }
+        .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 40px 20px; text-align: center; }
+        .podium-slot { background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s; }
         .podium-slot:hover { border-color: rgba(148, 163, 184, 0.5); }
 
-        /* Live podium (when data exists) */
-        .podium-live {
-            background: rgba(30, 41, 59, 0.8);
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s;
-        }
+        .podium-live { background: rgba(30, 41, 59, 0.8); border: 2px solid rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s; }
         .podium-live:hover { transform: translateY(-4px); }
         .podium-live.gold { border-color: #fbbf24; box-shadow: 0 0 30px rgba(251, 191, 36, 0.3); }
         .podium-live.silver { border-color: #94a3b8; }
         .podium-live.bronze { border-color: #ea580c; }
-        .winner-avatar {
-            width: 64px; height: 64px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: 900; margin: 0 auto 12px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-        }
+        .winner-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; margin: 0 auto 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
 
-        .winner-row {
-            display: flex; align-items: center; gap: 14px;
-            padding: 14px 18px; border-radius: 12px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s;
-        }
+        .winner-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; }
         .winner-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
 
-        .skeleton {
-            background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
-        }
+        .skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
@@ -183,7 +116,6 @@
     </nav>
 
     <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
-
         <div class="text-center mb-6 sm:mb-10">
             <div id="status-pill" class="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-3 py-1 text-xs font-bold text-yellow-400 mb-3">
                 <i class="fa-solid fa-crown mr-1"></i> Launching Soon
@@ -192,21 +124,18 @@
             <p id="winners-subtitle" class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto">Our first winners will be announced right here after our launch tournament.</p>
         </div>
 
-        <!-- Loading skeleton -->
         <div id="winners-loading" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
             <div class="podium-slot"><div class="skeleton h-32 w-full"></div></div>
             <div class="podium-slot"><div class="skeleton h-40 w-full"></div></div>
             <div class="podium-slot"><div class="skeleton h-32 w-full"></div></div>
         </div>
 
-        <!-- Podium (populated by JS) -->
         <div id="podium-container" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 max-w-4xl mx-auto items-end">
             <div id="podium-2" class="podium-slot order-2 md:order-1"></div>
             <div id="podium-1" class="podium-slot order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10 border-yellow-500/30"></div>
             <div id="podium-3" class="podium-slot order-3"></div>
         </div>
 
-        <!-- Empty state -->
         <div id="winners-empty" class="hidden empty-state-box max-w-2xl mx-auto">
             <div class="text-5xl sm:text-6xl mb-4">🏆</div>
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Winners Yet</h2>
@@ -221,7 +150,6 @@
             </div>
         </div>
 
-        <!-- Full winners list -->
         <div id="winners-list-wrap" class="hidden max-w-3xl mx-auto mt-8">
             <h2 class="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-medal text-yellow-500"></i> All Winners
@@ -229,7 +157,6 @@
             <div id="winners-list" class="space-y-3"></div>
         </div>
 
-        <!-- Prizes section (always visible) -->
         <div class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto text-center">
             <h3 class="text-base sm:text-lg font-bold text-white mb-4">💰 Prize Distribution</h3>
             <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
@@ -248,7 +175,6 @@
             </div>
             <p class="text-xs text-gray-500 mt-4">Plus a separate Top Killer prize where applicable.</p>
         </div>
-
     </main>
 
     <footer class="glass-panel w-full p-5 sm:p-6 mt-8">
@@ -263,7 +189,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -285,27 +211,40 @@
         const statusPill = document.getElementById('status-pill');
         const subtitle = document.getElementById('winners-subtitle');
 
-        function avatarInitial(name) {
-            return (name || '?').trim().charAt(0).toUpperCase();
-        }
+        function avatarInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
         function escapeHtml(s) {
             return String(s || '').replace(/[&<>"']/g, c => ({
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[c]));
         }
 
+        // Read player name from any of the possible field names
+        function playerName(p) {
+            return p.winnerName || p.username || p.ign || p.playerName || 'Player';
+        }
+
+        // Extract rank number: "1" -> 1, "1 + Top Killer" -> 1, "Top Killer" -> null
+        function rankNum(r) {
+            if (!r) return null;
+            const m = String(r).match(/^\s*(\d+)/);
+            return m ? Number(m[1]) : null;
+        }
+
         async function loadWinners() {
             try {
-                // Read payouts that are marked as 'paid' (i.e., actual winners)
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
                 const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Keep only real winners with a rank and prize
+                // Winners = payouts with a rank 1/2/3 (or "1 + Top Killer") and positive prize
                 const winners = all
-                    .filter(p => p.rank && Number(p.rank) >= 1 && Number(p.rank) <= 3 && Number(p.prize) > 0)
+                    .filter(p => {
+                        const r = rankNum(p.rank);
+                        const prize = Number(p.prize || p.amount || 0);
+                        return r !== null && r >= 1 && r <= 3 && prize > 0;
+                    })
                     .sort((a, b) => {
-                        const ta = a.createdAt?.seconds || a.recordedAt?.seconds || 0;
-                        const tb = b.createdAt?.seconds || b.recordedAt?.seconds || 0;
+                        const ta = a.createdAt?.seconds || 0;
+                        const tb = b.createdAt?.seconds || 0;
                         return tb - ta;
                     });
 
@@ -316,68 +255,75 @@
                     return;
                 }
 
-                // Show podium of the most recent tournament's top 3
                 statusPill.className = 'inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3';
                 statusPill.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Live Results';
                 subtitle.textContent = `${winners.length} winner${winners.length !== 1 ? 's' : ''} so far — congratulations!`;
 
-                // Group by tournamentId, take the most recent tournament
+                // Group by tournament
                 const byTournament = {};
                 winners.forEach(w => {
                     const key = w.tournamentId || w.tournamentTitle || 'unknown';
                     if (!byTournament[key]) byTournament[key] = [];
                     byTournament[key].push(w);
                 });
+
+                // Find most recent tournament (by highest createdAt in each group)
                 const latestKey = Object.keys(byTournament).sort((a, b) => {
-                    const ta = byTournament[a][0].createdAt?.seconds || 0;
-                    const tb = byTournament[b][0].createdAt?.seconds || 0;
+                    const ta = Math.max(...byTournament[a].map(x => x.createdAt?.seconds || 0));
+                    const tb = Math.max(...byTournament[b].map(x => x.createdAt?.seconds || 0));
                     return tb - ta;
                 })[0];
                 const latest = byTournament[latestKey] || [];
 
-                const getByRank = (rank) => latest.find(w => Number(w.rank) === rank);
-                const first  = getByRank(1);
-                const second = getByRank(2);
-                const third  = getByRank(3);
+                const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
+                const first  = findRank(1);
+                const second = findRank(2);
+                const third  = findRank(3);
 
-                const renderPodium = (el, w, emoji, medalClass, titleText) => {
+                const renderPodium = (el, w, emoji, medalClass, placeholder) => {
                     if (!w) {
-                        el.className = 'podium-slot order-' + (w === first ? 1 : w === second ? 2 : 3);
+                        el.className = `podium-slot order-${placeholder === 1 ? '1 md:order-2 md:scale-110' : placeholder === 2 ? 'order-2 md:order-1' : 'order-3'}`;
                         el.innerHTML = `
                             <div class="text-5xl mb-3">${emoji}</div>
-                            <p class="text-sm text-gray-500">${titleText}</p>
+                            <p class="text-sm text-gray-500">Waiting for winner</p>
                         `;
                         return;
                     }
-                    const name = w.username || w.ign || w.playerName || 'Player';
-                    el.className = `podium-live ${medalClass} order-${Number(w.rank) === 1 ? 1 : Number(w.rank) === 2 ? 2 : 3} ${Number(w.rank) === 1 ? 'order-1 md:order-2 md:scale-110' : Number(w.rank) === 2 ? 'order-2 md:order-1' : 'order-3'}`;
+                    const name = playerName(w);
+                    const orderCls = placeholder === 1
+                        ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
+                        : placeholder === 2
+                            ? 'order-2 md:order-1'
+                            : 'order-3';
+                    el.className = `podium-live ${medalClass} ${orderCls}`;
                     el.innerHTML = `
                         <div class="text-5xl mb-3">${emoji}</div>
                         <div class="winner-avatar">${avatarInitial(name)}</div>
-                        <p class="text-xl font-bold text-white mb-1">${escapeHtml(name)}</p>
-                        <p class="text-xs text-gray-400 mb-2">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
-                        <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || 0).toLocaleString()}</p>
+                        <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
+                        <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
+                        <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
                     `;
                 };
 
-                renderPodium(document.getElementById('podium-1'), first,  '🥇', 'gold',   'Champion will be crowned soon');
-                renderPodium(document.getElementById('podium-2'), second, '🥈', 'silver', 'Waiting for winner');
-                renderPodium(document.getElementById('podium-3'), third,  '🥉', 'bronze', 'Waiting for winner');
+                renderPodium(document.getElementById('podium-1'), first,  '🥇', 'gold',   1);
+                renderPodium(document.getElementById('podium-2'), second, '🥈', 'silver', 2);
+                renderPodium(document.getElementById('podium-3'), third,  '🥉', 'bronze', 3);
                 podium.classList.remove('hidden');
 
                 // Full list
                 listEl.innerHTML = winners.map(w => {
-                    const name = w.username || w.ign || w.playerName || 'Player';
-                    const medal = Number(w.rank) === 1 ? '🥇' : Number(w.rank) === 2 ? '🥈' : Number(w.rank) === 3 ? '🥉' : '🏅';
+                    const name = playerName(w);
+                    const r = rankNum(w.rank);
+                    const medal = r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '🏅';
                     return `
                         <div class="winner-row">
                             <div class="text-3xl">${medal}</div>
                             <div class="flex-grow min-w-0">
                                 <p class="font-bold text-white text-sm truncate">${escapeHtml(name)}</p>
-                                <p class="text-xs text-gray-400 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')} • Rank #${w.rank}</p>
+                                <p class="text-xs text-gray-400 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')} • Rank #${r || '—'}</p>
                             </div>
                             <div class="text-right flex-shrink-0">
-                                <p class="font-bold text-green-400">Rs. ${Number(w.prize || 0).toLocaleString()}</p>
+                                <p class="font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
                                 ${w.method ? `<p class="text-[10px] text-gray-500">${escapeHtml(w.method)}</p>` : ''}
                             </div>
                         </div>
@@ -396,7 +342,6 @@
     </script>
 
     <script>
-        // Non-module UI helpers (nav, support menu, user status)
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
