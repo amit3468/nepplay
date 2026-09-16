@@ -27,6 +27,53 @@
   <p>Join Free &amp; Paid Tournaments. Real Prizes.</p>
 </section>
 
+<!-- LIVE STREAMERS BANNER -->
+<section id="liveStreamersSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
+  <div style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <span style="font-size:24px; animation:pulse-live-red 1.5s infinite;">🔴</span>
+      <h2 style="margin:0; color:#fff; font-size:18px;">LIVE NOW</h2>
+      <span id="liveCount" style="color:#fecaca; font-size:14px;">— players streaming</span>
+    </div>
+    <div id="liveStreamersList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px;"></div>
+  </div>
+</section>
+
+<style>
+@keyframes pulse-live-red {
+  0%, 100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.6; transform:scale(1.15); }
+}
+.live-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:#dc2626; color:#fff; padding:3px 10px;
+  border-radius:99px; font-size:11px; font-weight:700;
+  animation:pulse-live-red 2s infinite;
+}
+.stream-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:linear-gradient(135deg,#dc2626,#991b1b);
+  color:#fff; padding:8px 14px; border-radius:10px;
+  text-decoration:none; font-size:13px; font-weight:600;
+  transition:transform 0.15s;
+}
+.stream-btn:hover { transform:scale(1.05); }
+.stream-card {
+  background:rgba(0,0,0,0.3); border-radius:10px;
+  padding:12px; border:1px solid rgba(255,255,255,0.15);
+}
+.stream-card .name {
+  color:#fff; font-weight:700; font-size:14px;
+  margin-bottom:6px; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+.stream-card .tourney {
+  color:#fecaca; font-size:11px;
+  margin-bottom:10px; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+</style>
+
 <!-- MY TOURNAMENTS -->
 <section id="myTournamentsSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px;">
   <h2 style="margin-top:20px;">🎯 My Tournaments</h2>
@@ -34,7 +81,7 @@
   <div class="list" id="myTournamentsList"></div>
 </section>
 
-<!-- GAME FILTERS (NOW WIRED) -->
+<!-- GAME FILTERS -->
 <div class="filters" id="gameFilters">
   <button class="game-tab active" data-game="all"       onclick="filterByGame('all')">All Games</button>
   <button class="game-tab"        data-game="freefire"  onclick="filterByGame('freefire')">Free Fire</button>
@@ -69,6 +116,9 @@
       <input type="text" id="joinIgn" placeholder="e.g. Amit" required>
       <label>📱 Phone Number *</label>
       <input type="text" id="joinPhone" placeholder="e.g. 9800000000" required>
+      <label>📺 Live Stream URL <small style="color:#6b7280;">(optional)</small></label>
+      <input type="url" id="joinStreamUrl" placeholder="https://youtube.com/live/...">
+      <p class="hint" style="font-size:12px; margin-top:-6px;">Paste your YouTube/Facebook/TikTok Live link so other players can watch you play.</p>
       <button type="submit" class="btn-submit-pay" id="joinSubmitBtn">✅ Join Tournament</button>
       <p class="hint center">Free entry — no payment needed</p>
     </form>
@@ -136,6 +186,9 @@
       <input type="text" id="payIgn" placeholder="e.g. Amit" required>
       <label>📱 Phone Number *</label>
       <input type="text" id="payPhone" placeholder="e.g. 9800000000" required>
+      <label>📺 Live Stream URL <small style="color:#6b7280;">(optional)</small></label>
+      <input type="url" id="payStreamUrl" placeholder="https://youtube.com/live/...">
+      <p class="hint" style="font-size:12px; margin-top:-6px;">Paste your YouTube/Facebook/TikTok Live link so other players can watch you play.</p>
       <label>📸 Payment Screenshot *</label>
       <div class="upload-zone" onclick="document.getElementById('payShot').click()">
         <input type="file" id="payShot" accept="image/*" hidden required onchange="previewShot(this)">
@@ -189,16 +242,11 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// NOTE: Firebase Storage removed on purpose (Spark plan workaround).
-// Screenshots are compressed client-side and stored as base64 in Firestore.
-
 console.log("🔥 Firebase ready on tournaments page");
 
 // ================================================
 // IMAGE COMPRESSION HELPER
 // ================================================
-// Takes a File, returns base64 JPEG string.
-// Scales so longest side <= maxDim. quality 0..1
 function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -220,14 +268,10 @@ function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        // toDataURL returns "data:image/jpeg;base64,XXXXX"
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        // Return just the base64 payload (strip prefix) to save space
         const base64 = dataUrl.split(',')[1] || '';
         resolve({
-          base64,
-          dataUrl,          // full data URL, for preview if needed
-          width, height,
+          base64, dataUrl, width, height,
           sizeKB: Math.round((base64.length * 3 / 4) / 1024)
         });
       };
@@ -389,10 +433,14 @@ async function loadMyTournaments() {
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
           <div class="reg-main">
-            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b></div>
+            <div class="reg-line-1">
+              <b>${r.tournamentTitle || 'Tournament'}</b>
+              ${r.streamUrl ? '<span class="live-badge" style="margin-left:8px;">🔴 LIVE</span>' : ''}
+            </div>
             <div class="reg-line-2">
               ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
               ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · Rs. ' + (r.amount||0) : 'Free Entry'}
+              ${r.streamUrl ? ' · <a href="' + r.streamUrl + '" target="_blank" style="color:#f87171;">▶ Your Stream</a>' : ''}
             </div>
             ${showRoom ? `
               <div class="room-details-box">
@@ -536,6 +584,7 @@ window.openJoinModal = function(tid, title) {
   document.getElementById('joinTournamentId').value = tid;
   document.getElementById('joinTournamentTitle').innerText = title;
   document.getElementById('joinForm').reset();
+  document.getElementById('joinStreamUrl').value = '';
   document.getElementById('joinModal').classList.add('active');
 };
 window.closeJoinModal = function() { document.getElementById('joinModal').classList.remove('active'); };
@@ -551,8 +600,10 @@ window.submitJoin = async function(e) {
     const title = document.getElementById('joinTournamentTitle').innerText;
     const ign   = document.getElementById('joinIgn').value.trim();
     const phone = document.getElementById('joinPhone').value.trim();
+    const streamUrl = (document.getElementById('joinStreamUrl').value || '').trim();
     if (!ign)   throw new Error('IGN required');
     if (!phone) throw new Error('Phone required');
+    if (streamUrl && !/^https?:\/\//i.test(streamUrl)) throw new Error('Stream URL must start with http:// or https://');
 
     const freeRegSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -575,6 +626,7 @@ window.submitJoin = async function(e) {
       tournamentId: tid, tournamentTitle: title,
       userId: currentUid, username: currentUser.username, email: currentUser.email,
       ign, phone, paymentId: null, entryType: 'free', amount: 0,
+      streamUrl: streamUrl || null,
       status: 'confirmed', registeredAt: serverTimestamp()
     });
 
@@ -600,6 +652,7 @@ window.openPaymentModal = function(tid, title, fee, prize, kills) {
 window.closePaymentModal = function() {
   document.getElementById('paymentModal').classList.remove('active');
   document.getElementById('payForm').reset();
+  document.getElementById('payStreamUrl').value = '';
   document.getElementById('shotPreview').style.display = 'none';
   document.getElementById('uploadPrompt').style.display = 'block';
 };
@@ -637,15 +690,16 @@ window.submitPayment = async function(e) {
     const txn    = document.getElementById('payTxn').value.trim();
     const ign    = document.getElementById('payIgn').value.trim();
     const phone  = document.getElementById('payPhone').value.trim();
+    const streamUrl = (document.getElementById('payStreamUrl').value || '').trim();
     const amount = Number(document.getElementById('mFee').innerText);
     const file   = document.getElementById('payShot').files[0];
     if (!file)             throw new Error('Screenshot required');
     if (txn.length < 4)    throw new Error('Transaction ID too short');
     if (!ign)              throw new Error('IGN required');
     if (!phone)            throw new Error('Phone required');
+    if (streamUrl && !/^https?:\/\//i.test(streamUrl)) throw new Error('Stream URL must start with http:// or https://');
     if (file.size > 8*1024*1024) throw new Error('Image too large (max 8MB)');
 
-    // 1. Compress image to base64
     console.log("📸 Compressing screenshot...");
     const compressed = await compressImageToBase64(file, 800, 0.7);
     console.log(`✅ Compressed to ${compressed.sizeKB} KB (${compressed.width}×${compressed.height})`);
@@ -653,7 +707,6 @@ window.submitPayment = async function(e) {
       throw new Error(`Image too large after compression (${compressed.sizeKB} KB). Please use a smaller screenshot.`);
     }
 
-    // 2. Prevent duplicate registration
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
       where('tournamentId', '==', tid),
@@ -661,7 +714,6 @@ window.submitPayment = async function(e) {
     ));
     if (!dupSnap.empty) throw new Error('You already registered for this tournament');
 
-    // 3. Write payment doc (base64 inside)
     btn.innerText = '⏳ Submitting...';
     const payRef = await addDoc(collection(db, 'tournament_payments'), {
       tournamentId: tid, tournamentTitle: title,
@@ -675,13 +727,13 @@ window.submitPayment = async function(e) {
       submittedAt: serverTimestamp(), reviewedAt: null
     });
 
-    // 4. Write registration doc
     await addDoc(collection(db, 'tournament_registrations'), {
       tournamentId: tid, tournamentTitle: title,
       userId: currentUid, username: currentUser.username, email: currentUser.email,
       ign, phone, paymentId: payRef.id, entryType: 'paid',
       method, txnId: txn, amount,
       screenshotSizeKB: compressed.sizeKB,
+      streamUrl: streamUrl || null,
       status: 'pending', registeredAt: serverTimestamp()
     });
 
@@ -702,6 +754,52 @@ window.showToast = function(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 };
+
+// ================================================
+// LIVE STREAMERS BANNER
+// ================================================
+function escapeHtmlLive(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function loadLiveStreamers() {
+  const section = document.getElementById('liveStreamersSection');
+  const listEl = document.getElementById('liveStreamersList');
+  const countEl = document.getElementById('liveCount');
+  if (!section || !listEl) return;
+
+  try {
+    const snap = await getDocs(collection(db, 'tournament_registrations'));
+    const streamers = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.streamUrl && r.status === 'confirmed')
+      .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
+
+    if (!streamers.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    countEl.textContent = `${streamers.length} player${streamers.length !== 1 ? 's' : ''} streaming`;
+    listEl.innerHTML = streamers.map(s => `
+      <div class="stream-card">
+        <div class="name">🎮 ${escapeHtmlLive(s.ign || s.username || 'Player')}</div>
+        <div class="tourney">${escapeHtmlLive(s.tournamentTitle || 'Tournament')}</div>
+        <a class="stream-btn" href="${escapeHtmlLive(s.streamUrl)}" target="_blank" rel="noopener">
+          ▶ Watch Live
+        </a>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.warn('Live streamers load failed:', err);
+  }
+}
+
+loadLiveStreamers();
+setInterval(loadLiveStreamers, 60000);
 </script>
 </body>
 </html>
