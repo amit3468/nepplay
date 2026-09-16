@@ -289,14 +289,14 @@
         </nav>
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
-            
+
             <div id="launch-card" class="launch-card mb-6">
                 <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
                 <i class="fa-solid fa-gamepad float-icon" style="bottom: 20%; left: 5%; font-size: 50px; color: #ec4899; animation-delay: 1.5s;"></i>
                 <i class="fa-solid fa-fire float-icon" style="top: 60%; right: 12%; font-size: 40px; color: #ef4444; animation-delay: 0.8s;"></i>
 
                 <div class="launch-inner">
-                    
+
                     <div class="grand-opening-banner">
                         <h1 class="grand-opening-title">🎉 Grand Opening 🎉</h1>
                         <p class="grand-opening-subtitle">NEPPLAY Esports Platform</p>
@@ -312,7 +312,7 @@
                     <div class="confetti" style="left: 45%; background: #3b82f6; animation-delay: 1.4s;"></div>
                     <div class="confetti" style="left: 65%; background: #22c55e; animation-delay: 2.1s;"></div>
                     <div class="confetti" style="left: 85%; background: #f97316; animation-delay: 0.4s;"></div>
-                    
+
                     <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
                         <div class="flex flex-col gap-3">
                             <div class="launch-tag">
@@ -324,7 +324,7 @@
                                 ✅ REGISTRATION OPEN NOW
                             </div>
                         </div>
-                        
+
                         <div class="date-badge">
                             <span class="month">September</span>
                             <span class="day">22</span>
@@ -336,8 +336,8 @@
                         Hello <span id="welcome-name-inline" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Player</span>! 👋
                     </h1>
                     <h2 class="text-2xl sm:text-4xl font-black mb-4 leading-tight">
-                        <span class="text-white">Welcome to</span> 
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">NEPPLAY</span> 
+                        <span class="text-white">Welcome to</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">NEPPLAY</span>
                         <span class="text-white">🎮</span>
                     </h2>
 
@@ -792,9 +792,6 @@
             }));
         }
 
-        // ===================================================
-        // BACKFILL NOTIFICATIONS ON LOAD (new)
-        // ===================================================
         async function backfillNotifications(uid) {
             try {
                 const paySnap = await getDocs(query(collection(db, 'tournament_payments'), where('userId', '==', uid)));
@@ -1067,13 +1064,31 @@
             });
         }
 
+        // =========================================================
+        // PAYOUTS — FIXED: matches by userId OR winnerName (case-insensitive)
+        // =========================================================
         async function loadPayouts(uid) {
             try {
-                const q = query(collection(db, 'tournament_payouts'), where('userId', '==', uid));
-                const snap = await getDocs(q);
-                const pays = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const myUsername = (
+                    currentUserProfile?.username ||
+                    currentUserProfile?.fullName ||
+                    currentUser?.username ||
+                    ''
+                ).toString().toLowerCase();
+
+                // Fetch ALL payouts (they're small — safe to read all)
+                const snap = await getDocs(collection(db, 'tournament_payouts'));
+                const allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Filter: match by userId OR winnerName/username/ign equals my username
+                const pays = allPayouts.filter(p => {
+                    if (p.userId && p.userId === uid) return true;
+                    const name = (p.winnerName || p.username || p.ign || '').toString().toLowerCase();
+                    return myUsername && name === myUsername;
+                });
+
                 const paid = pays.filter(p => p.status === 'paid');
-                const total = paid.reduce((s, p) => s + Number(p.prize || 0), 0);
+                const total = paid.reduce((s, p) => s + Number(p.prize || p.amount || 0), 0);
                 document.getElementById('total-earnings').textContent = total.toLocaleString();
                 const sub = document.getElementById('earnings-subtitle');
                 if (total > 0) {
@@ -1084,7 +1099,10 @@
                     sub.className = 'text-xs text-yellow-400 mt-2';
                 }
                 renderHistory(pays);
-            } catch (e) { renderHistory([]); }
+            } catch (e) {
+                console.warn('loadPayouts error:', e);
+                renderHistory([]);
+            }
         }
 
         function renderHistory(pays) {
@@ -1099,12 +1117,13 @@
                     ? '<span class="status-badge status-paid">Paid</span>'
                     : '<span class="status-badge status-pending">Pending</span>';
                 const title = p.tournamentTitle || p.tournament || '—';
+                const amount = Number(p.prize || p.amount || 0);
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-800/50 transition';
                 row.innerHTML = `
                     <td class="px-4 py-3 font-medium text-white text-sm">${title}</td>
                     <td class="px-4 py-3 text-yellow-400 font-bold text-sm">${p.rank || '—'}</td>
-                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${p.prize || 0}</td>
+                    <td class="px-4 py-3 text-green-400 font-bold text-sm">Rs. ${amount.toLocaleString()}</td>
                     <td class="px-4 py-3">${status}</td>
                 `;
                 tbody.appendChild(row);
