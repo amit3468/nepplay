@@ -16,6 +16,7 @@
         .profile-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, #0f172a 100%); }
         .avatar-ring { box-shadow: 0 0 0 4px #0f172a, 0 0 0 6px #3b82f6; }
         .badge-locked { background: rgba(51, 65, 85, 0.5); color: #64748b; }
+        .badge-unlocked { background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(236, 72, 153, 0.25)); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.5); box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); }
 
         .profile-dropdown { display: none; }
         .profile-dropdown.open { display: block; }
@@ -40,6 +41,23 @@
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
         .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 30px 20px; text-align: center; }
+
+        .match-row {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; border-radius: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s;
+        }
+        .match-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -106,70 +124,113 @@
     <main class="flex-grow">
         <div class="profile-banner"></div>
         <div class="container mx-auto px-4 sm:px-6 -mt-20 sm:-mt-24 relative z-10">
-            
-            <div class="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
-                <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0">
-                    <i class="fa-solid fa-user text-4xl sm:text-5xl text-gray-500"></i>
-                </div>
-                <div class="flex-grow text-center md:text-left">
-                    <div class="flex items-center gap-2 justify-center md:justify-start flex-wrap mb-2">
-                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Player Profile</h1>
-                        <span class="bg-blue-500/20 border border-blue-500/40 text-blue-400 text-xs font-bold px-3 py-1 rounded-full">
-                            <i class="fa-solid fa-hourglass-half mr-1"></i> Opening Soon
-                        </span>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-1">Profile stats will appear after you play</p>
-                    <p class="text-xs text-gray-500">Register to be one of the first players</p>
+
+            <!-- LOADING -->
+            <div id="profile-loading" class="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
+                <div class="skeleton w-24 h-24 sm:w-32 sm:h-32 rounded-full flex-shrink-0"></div>
+                <div class="flex-grow text-center md:text-left space-y-2">
+                    <div class="skeleton h-8 w-64 mx-auto md:mx-0"></div>
+                    <div class="skeleton h-4 w-48 mx-auto md:mx-0"></div>
                 </div>
             </div>
 
-            <!-- Stats placeholder -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <!-- LOGGED-OUT STATE -->
+            <div id="profile-logged-out" class="hidden flex flex-col items-center text-center mb-6">
+                <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0 mb-4">
+                    <i class="fa-solid fa-user text-4xl sm:text-5xl text-gray-500"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Player Profile</h1>
+                <p class="text-gray-400 text-sm mb-5 max-w-md">Log in to see your stats, earnings, and match history.</p>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <a href="member.html" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-right-to-bracket"></i> Log In
+                    </a>
+                    <a href="register.html" class="glass-panel hover:bg-gray-800/50 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-user-plus"></i> Register
+                    </a>
+                </div>
+            </div>
+
+            <!-- LOGGED-IN PROFILE HEADER -->
+            <div id="profile-header" class="hidden flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
+                <div id="profile-avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring flex-shrink-0 text-4xl sm:text-5xl font-black text-white">?</div>
+                <div class="flex-grow text-center md:text-left">
+                    <div class="flex items-center gap-2 justify-center md:justify-start flex-wrap mb-2">
+                        <h1 id="profile-name" class="text-2xl sm:text-3xl font-bold text-white">Player</h1>
+                        <span id="profile-rank-pill" class="bg-blue-500/20 border border-blue-500/40 text-blue-400 text-xs font-bold px-3 py-1 rounded-full">
+                            <i class="fa-solid fa-gamepad mr-1"></i> Player
+                        </span>
+                    </div>
+                    <p id="profile-email" class="text-gray-400 text-sm mb-1">—</p>
+                    <p id="profile-since" class="text-xs text-gray-500">—</p>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div id="profile-stats" class="hidden grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
                 <div class="glass-panel rounded-xl p-4 border border-gray-700/50">
                     <p class="text-xs text-gray-400 uppercase mb-1">Total Earnings</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-600">Rs. 0</p>
-                    <p class="text-xs text-gray-600 mt-1">Pending</p>
+                    <p id="stat-earnings" class="text-xl sm:text-2xl font-bold text-green-400">Rs. 0</p>
+                    <p id="stat-earnings-sub" class="text-xs text-gray-600 mt-1">No winnings yet</p>
                 </div>
                 <div class="glass-panel rounded-xl p-4 border border-gray-700/50">
                     <p class="text-xs text-gray-400 uppercase mb-1">Tournaments</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-600">0</p>
-                    <p class="text-xs text-gray-600 mt-1">Not started</p>
+                    <p id="stat-tournaments" class="text-xl sm:text-2xl font-bold text-blue-400">0</p>
+                    <p id="stat-tournaments-sub" class="text-xs text-gray-600 mt-1">Not started</p>
                 </div>
                 <div class="glass-panel rounded-xl p-4 border border-gray-700/50">
                     <p class="text-xs text-gray-400 uppercase mb-1">Wins</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-600">0</p>
-                    <p class="text-xs text-gray-600 mt-1">—</p>
+                    <p id="stat-wins" class="text-xl sm:text-2xl font-bold text-yellow-400">0</p>
+                    <p id="stat-wins-sub" class="text-xs text-gray-600 mt-1">—</p>
                 </div>
                 <div class="glass-panel rounded-xl p-4 border border-gray-700/50">
                     <p class="text-xs text-gray-400 uppercase mb-1">Win Rate</p>
-                    <p class="text-xl sm:text-2xl font-bold text-gray-600">—%</p>
-                    <p class="text-xs text-gray-600 mt-1">—</p>
+                    <p id="stat-winrate" class="text-xl sm:text-2xl font-bold text-purple-400">—%</p>
+                    <p id="stat-winrate-sub" class="text-xs text-gray-600 mt-1">—</p>
                 </div>
             </div>
 
-            <!-- Achievements -->
-            <div class="glass-panel rounded-xl p-5 sm:p-6 mb-6">
+            <!-- ACHIEVEMENTS -->
+            <div id="profile-achievements" class="hidden glass-panel rounded-xl p-5 sm:p-6 mb-6">
                 <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-medal text-yellow-500 mr-2"></i>Achievements</h2>
                 <p class="text-xs text-gray-500 mb-4">Unlock badges as you compete in tournaments</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div class="text-center p-3 rounded-lg badge-locked"><i class="fa-solid fa-crown text-2xl mb-2"></i><p class="text-xs font-bold">Tournament King</p><p class="text-[10px] opacity-70">50+ wins</p></div>
-                    <div class="text-center p-3 rounded-lg badge-locked"><i class="fa-solid fa-fire text-2xl mb-2"></i><p class="text-xs font-bold">On Fire</p><p class="text-[10px] opacity-70">5-win streak</p></div>
-                    <div class="text-center p-3 rounded-lg badge-locked"><i class="fa-solid fa-bolt text-2xl mb-2"></i><p class="text-xs font-bold">Speed Demon</p><p class="text-[10px] opacity-70">Fastest finalist</p></div>
-                    <div class="text-center p-3 rounded-lg badge-locked"><i class="fa-solid fa-shield-halved text-2xl mb-2"></i><p class="text-xs font-bold">Survivor</p><p class="text-[10px] opacity-70">Top 10 x 100</p></div>
+                    <div id="ach-king" class="text-center p-3 rounded-lg badge-locked transition">
+                        <i class="fa-solid fa-crown text-2xl mb-2"></i>
+                        <p class="text-xs font-bold">Tournament King</p>
+                        <p class="text-[10px] opacity-70">10+ wins</p>
+                    </div>
+                    <div id="ach-fire" class="text-center p-3 rounded-lg badge-locked transition">
+                        <i class="fa-solid fa-fire text-2xl mb-2"></i>
+                        <p class="text-xs font-bold">On Fire</p>
+                        <p class="text-[10px] opacity-70">3+ wins</p>
+                    </div>
+                    <div id="ach-bolt" class="text-center p-3 rounded-lg badge-locked transition">
+                        <i class="fa-solid fa-bolt text-2xl mb-2"></i>
+                        <p class="text-xs font-bold">Speed Demon</p>
+                        <p class="text-[10px] opacity-70">5+ tournaments</p>
+                    </div>
+                    <div id="ach-shield" class="text-center p-3 rounded-lg badge-locked transition">
+                        <i class="fa-solid fa-shield-halved text-2xl mb-2"></i>
+                        <p class="text-xs font-bold">Survivor</p>
+                        <p class="text-[10px] opacity-70">Join 1st tournament</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Recent matches placeholder -->
-            <div class="glass-panel rounded-xl overflow-hidden mb-6">
+            <!-- RECENT MATCHES -->
+            <div id="profile-matches" class="hidden glass-panel rounded-xl overflow-hidden mb-6">
                 <div class="p-4 sm:p-6 border-b border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i>Recent Matches</h2>
+                    <span id="matches-count" class="text-xs text-gray-500"></span>
                 </div>
-                <div class="empty-state-box m-4 sm:m-6">
+                <div id="matches-list" class="p-3 sm:p-4 space-y-2"></div>
+                <div id="matches-empty" class="hidden empty-state-box m-4 sm:m-6">
                     <i class="fa-solid fa-gamepad text-4xl text-gray-600 mb-3"></i>
                     <p class="text-white font-bold mb-1">No matches yet</p>
                     <p class="text-sm text-gray-400 mb-4">Your match history will appear here after you play your first tournament.</p>
-                    <a href="register.html" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-2.5 px-6 rounded-lg transition text-sm">
-                        <i class="fa-solid fa-user-plus mr-2"></i> Register Now
+                    <a href="tournaments.html" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-2.5 px-6 rounded-lg transition text-sm">
+                        <i class="fa-solid fa-gamepad mr-2"></i> Browse Tournaments
                     </a>
                 </div>
             </div>
@@ -187,6 +248,7 @@
         </div>
     </footer>
 
+    <!-- UI helpers -->
     <script>
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
@@ -219,7 +281,239 @@
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
         function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
-        window.onload = checkUserStatus;
+        window.addEventListener('load', checkUserStatus);
+    </script>
+
+    <!-- Firebase + profile logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const loading    = document.getElementById('profile-loading');
+        const loggedOut  = document.getElementById('profile-logged-out');
+        const header     = document.getElementById('profile-header');
+        const statsBox   = document.getElementById('profile-stats');
+        const achBox     = document.getElementById('profile-achievements');
+        const matchesBox = document.getElementById('profile-matches');
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+        function fmtDate(ts) {
+            if (!ts) return '—';
+            const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+            if (isNaN(d.getTime())) return '—';
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // ================================================
+        // AUTH
+        // ================================================
+        onAuthStateChanged(auth, async (user) => {
+            loading.classList.add('hidden');
+            if (!user) {
+                loggedOut.classList.remove('hidden');
+                header.classList.add('hidden');
+                statsBox.classList.add('hidden');
+                achBox.classList.add('hidden');
+                matchesBox.classList.add('hidden');
+                return;
+            }
+            loggedOut.classList.add('hidden');
+            header.classList.remove('hidden');
+            await loadProfile(user);
+            await Promise.all([
+                loadStats(user.uid),
+                loadMatches(user.uid)
+            ]);
+        });
+
+        // ================================================
+        // PROFILE HEADER
+        // ================================================
+        async function loadProfile(user) {
+            let profile = null;
+            try {
+                const snap = await getDoc(doc(db, 'users', user.uid));
+                if (snap.exists()) profile = snap.data();
+            } catch (e) { console.warn('users read failed:', e.message); }
+
+            const displayName =
+                profile?.fullName ||
+                profile?.username ||
+                user.displayName ||
+                (user.email ? user.email.split('@')[0] : 'Player');
+
+            document.getElementById('profile-avatar').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('profile-name').textContent = displayName;
+            document.getElementById('profile-email').textContent = profile?.email || user.email || '—';
+            document.getElementById('profile-since').textContent = profile?.createdAt
+                ? 'Joined ' + fmtDate(profile.createdAt)
+                : 'Welcome to NEPPLAY!';
+
+            // Rank pill — cosmetic, based on tournaments later
+            document.getElementById('profile-rank-pill').innerHTML = '<i class="fa-solid fa-gamepad mr-1"></i> Player';
+        }
+
+        // ================================================
+        // STATS (from tournament_payouts + tournament_registrations)
+        // ================================================
+        async function loadStats(uid) {
+            let payouts = [];
+            let regs = [];
+            try {
+                const pSnap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
+                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('payouts read failed:', e.message); }
+            try {
+                const rSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
+                regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('registrations read failed:', e.message); }
+
+            const paidPayouts = payouts.filter(p => p.status === 'paid');
+            const totalEarnings = paidPayouts.reduce((s, p) => s + Number(p.prize || 0), 0);
+            const totalTournaments = regs.length;
+            const wins = payouts.filter(p => Number(p.rank) === 1).length;
+            const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
+
+            // Fill stats
+            document.getElementById('stat-earnings').textContent = 'Rs. ' + totalEarnings.toLocaleString();
+            document.getElementById('stat-earnings-sub').textContent =
+                totalEarnings > 0 ? `${paidPayouts.length} prize(s) won` : 'No winnings yet';
+
+            document.getElementById('stat-tournaments').textContent = totalTournaments;
+            document.getElementById('stat-tournaments-sub').textContent =
+                totalTournaments > 0 ? `${regs.filter(r => r.status === 'confirmed').length} confirmed` : 'Not started';
+
+            document.getElementById('stat-wins').textContent = wins;
+            document.getElementById('stat-wins-sub').textContent =
+                wins > 0 ? `🥇 ${wins} first-place finish${wins !== 1 ? 'es' : ''}` : '—';
+
+            document.getElementById('stat-winrate').textContent = winRate === null ? '—%' : winRate + '%';
+            document.getElementById('stat-winrate-sub').textContent =
+                winRate === null ? '—' : (winRate >= 50 ? '🔥 Strong player' : 'Keep pushing!');
+
+            // Achievements — simpler unlock rules (can tighten later)
+            unlockIf('ach-shield', totalTournaments >= 1);   // Survivor: joined at least one
+            unlockIf('ach-bolt',   totalTournaments >= 5);   // Speed Demon: 5+ tournaments
+            unlockIf('ach-fire',   wins >= 3);               // On Fire: 3+ wins
+            unlockIf('ach-king',   wins >= 10);              // Tournament King: 10+ wins
+
+            statsBox.classList.remove('hidden');
+            achBox.classList.remove('hidden');
+            statsBox.classList.add('grid');
+            achBox.classList.add('block');
+        }
+
+        function unlockIf(id, condition) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (condition) {
+                el.classList.remove('badge-locked');
+                el.classList.add('badge-unlocked');
+            }
+        }
+
+        // ================================================
+        // RECENT MATCHES (tournament_registrations)
+        // ================================================
+        async function loadMatches(uid) {
+            let regs = [];
+            let payouts = [];
+            try {
+                const rSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
+                regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('regs read failed:', e.message); }
+            try {
+                const pSnap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
+                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('payouts read failed:', e.message); }
+
+            // Sort by registeredAt desc, take last 10
+            regs.sort((a, b) => {
+                const ta = a.registeredAt?.seconds || 0;
+                const tb = b.registeredAt?.seconds || 0;
+                return tb - ta;
+            });
+            const recent = regs.slice(0, 10);
+
+            const listEl = document.getElementById('matches-list');
+            const emptyEl = document.getElementById('matches-empty');
+            const countEl = document.getElementById('matches-count');
+
+            matchesBox.classList.remove('hidden');
+
+            if (!recent.length) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                countEl.textContent = '';
+                return;
+            }
+            emptyEl.classList.add('hidden');
+
+            // Build lookup: payouts by tournamentId
+            const payoutByT = {};
+            payouts.forEach(p => {
+                if (p.tournamentId) payoutByT[p.tournamentId] = p;
+            });
+
+            const statusMap = {
+                confirmed: { cls: 'status-paid', label: 'Confirmed', bg: 'rgba(34,197,94,.15)', color: '#4ade80', icon: 'fa-circle-check' },
+                pending:   { cls: 'status-pending', label: 'Pending', bg: 'rgba(234,179,8,.15)', color: '#facc15', icon: 'fa-clock' },
+                rejected:  { cls: 'status-rejected', label: 'Rejected', bg: 'rgba(239,68,68,.15)', color: '#f87171', icon: 'fa-circle-xmark' }
+            };
+
+            listEl.innerHTML = recent.map(r => {
+                const s = statusMap[r.status] || statusMap.confirmed;
+                const payout = payoutByT[r.tournamentId];
+                const prize = payout ? Number(payout.prize || 0) : 0;
+                const rank = payout ? Number(payout.rank || 0) : 0;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+                const isPaid = r.entryType === 'paid';
+
+                return `
+                    <div class="match-row">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:${s.bg};color:${s.color};">
+                            <i class="fa-solid ${s.icon}"></i>
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <p class="font-bold text-white text-sm truncate">${escapeHtml(r.tournamentTitle || 'Tournament')}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                ${isPaid ? '💵 Paid · Rs. ' + (r.amount || 0) : '🆓 Free entry'}
+                                · ${fmtDate(r.registeredAt)}
+                            </p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            ${prize > 0
+                                ? `<p class="font-bold text-green-400 text-sm">${medal} Rs. ${prize.toLocaleString()}</p>
+                                   <p class="text-[10px] text-gray-500">${payout.status === 'paid' ? 'Paid' : 'Pending'}</p>`
+                                : `<span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:${s.bg};color:${s.color};">${s.label}</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            countEl.textContent = `${regs.length} total`;
+        }
     </script>
 </body>
 </html>
