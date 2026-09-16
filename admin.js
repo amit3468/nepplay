@@ -79,7 +79,7 @@ onAuthStateChanged(auth, async (user) => {
   // ✅ Authenticated as admin — boot panel
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
-  document.getElementById('adminEmailDisplay').textContent = currentAdminEmail;
+  document.getElementById('adminEmailDisplay').textContent = 'Admin';
   console.log('✅ Admin access granted:', currentAdminEmail);
   if (!bootstrapped) {
     bootstrapped = true;
