@@ -34,16 +34,17 @@
   <div class="list" id="myTournamentsList"></div>
 </section>
 
-<div class="filters">
-  <button class="active">All Games</button>
-  <button>Free Fire</button>
-  <button>PUBG</button>
-  <button>COD</button>
-  <button>eFootball</button>
-  <button>eCricket</button>
-  <button>Valorant</button>
-  <button>Ludo</button>
-  <button>Chess</button>
+<!-- GAME FILTERS (NOW WIRED) -->
+<div class="filters" id="gameFilters">
+  <button class="game-tab active" data-game="all"       onclick="filterByGame('all')">All Games</button>
+  <button class="game-tab"        data-game="freefire"  onclick="filterByGame('freefire')">Free Fire</button>
+  <button class="game-tab"        data-game="pubg"      onclick="filterByGame('pubg')">PUBG</button>
+  <button class="game-tab"        data-game="cod"       onclick="filterByGame('cod')">COD</button>
+  <button class="game-tab"        data-game="efootball" onclick="filterByGame('efootball')">eFootball</button>
+  <button class="game-tab"        data-game="ecricket"  onclick="filterByGame('ecricket')">eCricket</button>
+  <button class="game-tab"        data-game="valorant"  onclick="filterByGame('valorant')">Valorant</button>
+  <button class="game-tab"        data-game="ludo"      onclick="filterByGame('ludo')">Ludo</button>
+  <button class="game-tab"        data-game="chess"     onclick="filterByGame('chess')">Chess</button>
 </div>
 
 <div class="tournament-type-tabs">
@@ -218,7 +219,7 @@ await new Promise((resolve) => {
 });
 
 // ================================================
-// AUTO-SEED
+// AUTO-SEED (8 PAID)
 // ================================================
 async function seedPaidTournamentsIfNeeded() {
   try {
@@ -257,6 +258,11 @@ async function seedPaidTournamentsIfNeeded() {
 // ================================================
 let TOURNAMENTS = [];
 
+// Normalize a game name to a filter key: "Free Fire" -> "freefire", "COD" -> "cod"
+function gameKey(g) {
+  return (g || '').toString().toLowerCase().replace(/[^a-z]/g, '');
+}
+
 async function loadTournaments() {
   const grid = document.getElementById('tournamentGrid');
   grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
@@ -282,6 +288,7 @@ async function loadTournaments() {
         id: d.id,
         title: t.title || t.name || 'Untitled Tournament',
         game:  t.game  || 'Game',
+        gameKey: gameKey(t.game),
         mode:  t.mode  || 'Solo',
         entry_type: isPaid ? 'paid' : 'free',
         entry_fee:  isPaid ? feeValue : 0,
@@ -408,11 +415,28 @@ window.copyRoomField = function(text, btn) {
 setInterval(loadMyTournaments, 60000);
 
 // ================================================
-// RENDER CARDS
+// FILTER STATE + COMBINED RENDER
 // ================================================
+const filterState = { game: 'all', type: 'all' };
+
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
-  grid.innerHTML = TOURNAMENTS.map(t => {
+  const visible = TOURNAMENTS.filter(t => {
+    const gameOk = filterState.game === 'all' || t.gameKey === filterState.game;
+    const typeOk =
+      filterState.type === 'all' ||
+      (filterState.type === 'free' && t.entry_type === 'free') ||
+      (filterState.type === 'paid' && t.entry_type === 'paid');
+    return gameOk && typeOk;
+  });
+
+  if (!visible.length) {
+    const label = filterState.game === 'all' ? 'this filter' : document.querySelector(`.game-tab[data-game="${filterState.game}"]`)?.innerText || filterState.game;
+    grid.innerHTML = `<div class="empty-state"><span class="icon">🔍</span>No tournaments match <b>${label}</b> yet. Check back soon!</div>`;
+    return;
+  }
+
+  grid.innerHTML = visible.map(t => {
     const pct = t.max > 0 ? Math.round((t.filled / t.max) * 100) : 0;
     const isPaid = t.entry_type === 'paid';
     const safeTitle = t.title.replace(/'/g, "\\'");
@@ -445,17 +469,22 @@ loadTournaments();
 // ================================================
 // FILTERS
 // ================================================
+window.filterByGame = function(game) {
+  filterState.game = game;
+  document.querySelectorAll('.game-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.game === game);
+  });
+  renderTournaments();
+};
+
 window.filterTournamentType = function(type) {
+  filterState.type = type;
   const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
   Object.keys(tabs).forEach(k => {
     const el = document.getElementById(tabs[k]);
-    if (k === type) el.classList.add('active'); else el.classList.remove('active');
+    if (el) el.classList.toggle('active', k === type);
   });
-  document.querySelectorAll('.tournament-card').forEach(card => {
-    const isPaid = card.dataset.type === 'paid';
-    const show = type === 'all' ? true : (type === 'paid' ? isPaid : !isPaid);
-    card.style.display = show ? '' : 'none';
-  });
+  renderTournaments();
 };
 
 // ================================================
