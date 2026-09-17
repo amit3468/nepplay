@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+  /* ============ Live Now section ============ */
   .home-live-section {
     max-width: 1300px; margin: 0 auto 32px; padding: 0 24px;
   }
@@ -79,6 +80,153 @@
   @keyframes homePulse {
     0%,100% { opacity:1; transform:scale(1); }
     50% { opacity:.6; transform:scale(1.15); }
+  }
+
+  /* ============ Grand Opening section ============ */
+  .grand-opening-section {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 0 24px;
+  }
+  .grand-opening-card {
+    background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+    border: 2px solid rgba(251,191,36,0.35);
+    border-radius: 22px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(251,191,36,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .grand-opening-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.5);
+    color: #fbbf24;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .grand-opening-title {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 2;
+    line-height: 1.2;
+  }
+  @media (min-width: 640px) {
+    .grand-opening-title { font-size: 32px; }
+  }
+  .grand-opening-sub {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0 0 22px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Poster — small enough to not dominate the page */
+  .poster-wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 320px;
+    margin: 0 auto 22px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: zoom-in;
+    transition: transform 0.2s;
+  }
+  @media (min-width: 640px) {
+    .poster-wrap { max-width: 380px; }
+  }
+  .poster-wrap:hover { transform: scale(1.01); }
+  .poster-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .poster-hint {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: -14px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+  }
+  .grand-opening-ctas {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+  .go-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.15s;
+  }
+  .go-btn:hover { transform: translateY(-2px); }
+  .go-btn-primary {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(34,197,94,0.4);
+  }
+  .go-btn-wa {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(37,211,102,0.35);
+  }
+
+  /* ============ Poster lightbox — HIDDEN by default ============ */
+  .poster-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    cursor: zoom-out;
+  }
+  .poster-lightbox.open { display: flex; }
+  .poster-lightbox img {
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+  }
+  .poster-lightbox .close-hint {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+
+  @media (max-width: 640px) {
+    .grand-opening-section { padding: 0 16px; }
+    .grand-opening-title { font-size: 22px; }
   }
 </style>
 </head>
@@ -143,6 +291,7 @@
   </div>
 </section>
 
+<!-- GRAND OPENING PROMO (single poster shown here) -->
 <section class="grand-opening-section">
   <div class="grand-opening-card">
     <div class="grand-opening-tag">
@@ -167,11 +316,13 @@
   </div>
 </section>
 
+<!-- Lightbox — hidden by default, only shows when opened -->
 <div id="posterLightbox" class="poster-lightbox" onclick="closePosterLightbox()">
   <span class="close-hint">✕</span>
   <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening poster">
 </div>
 
+<!-- LIVE NOW — hidden until streamers exist -->
 <section class="home-live-section" id="homeLiveSection" style="display:none;">
   <div class="home-live-inner">
     <div class="home-live-head">
