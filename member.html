@@ -977,7 +977,7 @@
             } catch (e) { alert('Could not send reset email.'); }
         };
 
-        async function showDashboard(user) {
+                async function showDashboard(user) {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
 
@@ -1000,12 +1000,93 @@
             updateNotifBadge();
             renderNotifList();
 
+            // FEATURE #1: Start watching for upcoming tournaments
+            startUpcomingTournamentWatcher(user.uid);
+
             await Promise.all([
                 checkUserRegistration(user.uid),
                 loadPayouts(user.uid),
                 loadAnnouncements(),
                 loadActiveTournaments()
             ]);
+        }
+                // =========================================================
+        // FEATURE #1: AUTO-NOTIFY 30 MIN BEFORE TOURNAMENT STARTS
+        // =========================================================
+        const NOTIFIED_30MIN = new Set();
+        const NOTIFIED_5MIN = new Set();
+        let upcomingWatcherId = null;
+
+        function startUpcomingTournamentWatcher(uid) {
+            // Clear any previous watcher
+            if (upcomingWatcherId) {
+                clearInterval(upcomingWatcherId);
+                upcomingWatcherId = null;
+            }
+            // Run immediately, then every 60 seconds
+            checkUpcomingTournaments(uid);
+            upcomingWatcherId = setInterval(() => checkUpcomingTournaments(uid), 60000);
+        }
+
+        async function checkUpcomingTournaments(uid) {
+            try {
+                // Fetch user's confirmed registrations
+                const regSnap = await getDocs(query(
+                    collection(db, 'tournament_registrations'),
+                    where('userId', '==', uid),
+                    where('status', '==', 'confirmed')
+                ));
+                if (regSnap.empty) return;
+
+                // Fetch all tournaments (small collection, safe to read)
+                const tournSnap = await getDocs(collection(db, 'tournaments'));
+                const tournamentsById = {};
+                tournSnap.docs.forEach(d => { tournamentsById[d.id] = d.data(); });
+
+                const now = Date.now();
+
+                regSnap.docs.forEach(regDoc => {
+                    const reg = regDoc.data();
+                    const t = tournamentsById[reg.tournamentId];
+                    if (!t || !t.date) return;
+
+                    // Compute tournament start time (treat as NPT / UTC+5:45)
+                    const timeStr = t.time && t.time !== '—' ? t.time : '00:00';
+                    const start = new Date(`${t.date}T${timeStr}:00+05:45`);
+                    if (isNaN(start.getTime())) return;
+
+                    const diffMin = Math.floor((start.getTime() - now) / 60000);
+                    const title = reg.tournamentTitle || t.title || 'Your tournament';
+                    const key30 = uid + '_' + reg.tournamentId + '_30';
+                    const key5  = uid + '_' + reg.tournamentId + '_5';
+
+                    // T-30 minute alert (once)
+                    if (diffMin <= 30 && diffMin > 5 && !NOTIFIED_30MIN.has(key30)) {
+                        NOTIFIED_30MIN.add(key30);
+                        pushNotif({
+                            id: 'upcoming_30_' + reg.tournamentId,
+                            type: 'warning',
+                            title: '⏰ Starts in ' + diffMin + ' minutes!',
+                            message: `${title} begins soon. Room details will appear on the Tournaments page shortly.`,
+                            time: new Date()
+                        });
+                    }
+
+                    // T-5 minute alert (once)
+                    if (diffMin <= 5 && diffMin >= 0 && !NOTIFIED_5MIN.has(key5)) {
+                        NOTIFIED_5MIN.add(key5);
+                        pushNotif({
+                            id: 'upcoming_5_' + reg.tournamentId,
+                            type: 'error',
+                            title: '🔴 Starting NOW: ' + title,
+                            message: `Join the room on the Tournaments page. Good luck!`,
+                            time: new Date()
+                        });
+                    }
+                });
+            } catch (err) {
+                console.warn('checkUpcomingTournaments error:', err.message);
+            }
         }
 
         async function checkUserRegistration(uid) {
