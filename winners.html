@@ -51,6 +51,117 @@
 
         .skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ===== NEW: All-time leaderboard cards ===== */
+        .top-player-card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+            border: 2px solid rgba(148,163,184,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .top-player-card:hover { transform: translateY(-4px); }
+        .top-player-card.gold   { border-color: #fbbf24; box-shadow: 0 0 35px rgba(251,191,36,0.35); }
+        .top-player-card.silver { border-color: #94a3b8; }
+        .top-player-card.bronze { border-color: #ea580c; }
+        .top-player-card .crown {
+            position: absolute; top: 8px; right: 12px;
+            font-size: 22px;
+        }
+        .top-player-card .tp-avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 900; margin: 0 auto 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;
+        }
+
+        /* ===== NEW: Tournament podium cards ===== */
+        .tourney-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        .tourney-card:hover { border-color: rgba(59,130,246,0.35); }
+        .tourney-header {
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; flex-wrap: wrap;
+        }
+        .tourney-header h3 {
+            font-weight: 800; color: #fff; font-size: 16px; margin: 0;
+        }
+        .tourney-header .meta {
+            color: #9ca3af; font-size: 12px;
+        }
+        .tourney-podium {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 16px;
+            align-items: end;
+        }
+        @media (max-width: 500px) {
+            .tourney-podium { grid-template-columns: 1fr; }
+        }
+        .tp-slot {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            position: relative;
+        }
+        .tp-slot.r1 { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); order: 2; transform: translateY(-6px); }
+        .tp-slot.r2 { order: 1; }
+        .tp-slot.r3 { order: 3; }
+        @media (max-width: 500px) {
+            .tp-slot.r1 { order: 1; transform: none; }
+        }
+        .tp-slot .tp-rank {
+            font-size: 22px; margin-bottom: 6px;
+        }
+        .tp-slot .tp-name {
+            color: #fff; font-weight: 700; font-size: 14px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .tp-slot .tp-prize {
+            color: #4ade80; font-weight: 800; font-size: 13px;
+            margin-top: 4px;
+        }
+        .tp-slot .tp-kills {
+            color: #9ca3af; font-size: 10px; margin-top: 2px;
+        }
+        .killer-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px;
+            background: rgba(168,85,247,0.06);
+            border-top: 1px solid rgba(168,85,247,0.15);
+            font-size: 13px;
+        }
+        .killer-row .kr-label { color: #c084fc; font-weight: 700; }
+        .killer-row .kr-name { color: #fff; font-weight: 700; }
+        .killer-row .kr-prize { color: #4ade80; font-weight: 800; }
+        .tourney-highlight {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(220,38,38,0.08);
+            border-top: 1px solid rgba(220,38,38,0.2);
+            color: #fca5a5;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .tourney-highlight:hover { background: rgba(220,38,38,0.15); color: #fff; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -93,6 +204,7 @@
                     </div>
                     <div class="py-1">
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -136,6 +248,14 @@
             <div id="podium-3" class="podium-slot order-3"></div>
         </div>
 
+        <!-- ALL-TIME TOP WINNERS -->
+        <div id="alltime-wrap" class="hidden max-w-4xl mx-auto mb-10">
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-fire text-orange-500"></i> All-Time Top Winners
+            </h2>
+            <div id="alltime-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+        </div>
+
         <div id="winners-empty" class="hidden empty-state-box max-w-2xl mx-auto">
             <div class="text-5xl sm:text-6xl mb-4">🏆</div>
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Winners Yet</h2>
@@ -148,6 +268,14 @@
                     <i class="fa-solid fa-eye"></i> View Tournaments
                 </a>
             </div>
+        </div>
+
+        <!-- PER-TOURNAMENT PODIUM CARDS -->
+        <div id="tourney-cards-wrap" class="hidden max-w-4xl mx-auto mb-10">
+            <h2 class="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-yellow-500"></i> Recent Tournament Results
+            </h2>
+            <div id="tourney-cards"></div>
         </div>
 
         <!-- HIGHLIGHTS SECTION -->
@@ -218,6 +346,10 @@
         const listEl  = document.getElementById('winners-list');
         const statusPill = document.getElementById('status-pill');
         const subtitle = document.getElementById('winners-subtitle');
+        const allTimeWrap = document.getElementById('alltime-wrap');
+        const allTimeGrid = document.getElementById('alltime-grid');
+        const tourneyCardsWrap = document.getElementById('tourney-cards-wrap');
+        const tourneyCardsEl = document.getElementById('tourney-cards');
 
         function avatarInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
         function escapeHtml(s) {
@@ -225,17 +357,24 @@
                 '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
             }[c]));
         }
-
         function playerName(p) {
             return p.winnerName || p.username || p.ign || p.playerName || 'Player';
         }
-
         function rankNum(r) {
             if (!r) return null;
             const m = String(r).match(/^\s*(\d+)/);
             return m ? Number(m[1]) : null;
         }
+        function fmtDate(ts) {
+            if (!ts) return '—';
+            const d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+            if (isNaN(d.getTime())) return '—';
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
 
+        // ==========================================
+        // MAIN LOADER
+        // ==========================================
         async function loadWinners() {
             try {
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
@@ -264,6 +403,7 @@
                 statusPill.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Live Results';
                 subtitle.textContent = `${winners.length} winner${winners.length !== 1 ? 's' : ''} so far — congratulations!`;
 
+                // ===== Group by tournament =====
                 const byTournament = {};
                 winners.forEach(w => {
                     const key = w.tournamentId || w.tournamentTitle || 'unknown';
@@ -271,48 +411,28 @@
                     byTournament[key].push(w);
                 });
 
-                const latestKey = Object.keys(byTournament).sort((a, b) => {
+                // Sort tournaments by most recent
+                const sortedKeys = Object.keys(byTournament).sort((a, b) => {
                     const ta = Math.max(...byTournament[a].map(x => x.createdAt?.seconds || 0));
                     const tb = Math.max(...byTournament[b].map(x => x.createdAt?.seconds || 0));
                     return tb - ta;
-                })[0];
-                const latest = byTournament[latestKey] || [];
+                });
 
+                // ===== 1. LATEST PODIUM (top) =====
+                const latest = byTournament[sortedKeys[0]] || [];
                 const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
-                const first  = findRank(1);
-                const second = findRank(2);
-                const third  = findRank(3);
-
-                const renderPodium = (el, w, emoji, medalClass, placeholder) => {
-                    if (!w) {
-                        el.className = `podium-slot order-${placeholder === 1 ? '1 md:order-2 md:scale-110' : placeholder === 2 ? 'order-2 md:order-1' : 'order-3'}`;
-                        el.innerHTML = `
-                            <div class="text-5xl mb-3">${emoji}</div>
-                            <p class="text-sm text-gray-500">Waiting for winner</p>
-                        `;
-                        return;
-                    }
-                    const name = playerName(w);
-                    const orderCls = placeholder === 1
-                        ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
-                        : placeholder === 2
-                            ? 'order-2 md:order-1'
-                            : 'order-3';
-                    el.className = `podium-live ${medalClass} ${orderCls}`;
-                    el.innerHTML = `
-                        <div class="text-5xl mb-3">${emoji}</div>
-                        <div class="winner-avatar">${avatarInitial(name)}</div>
-                        <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
-                        <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
-                        <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
-                    `;
-                };
-
-                renderPodium(document.getElementById('podium-1'), first,  '🥇', 'gold',   1);
-                renderPodium(document.getElementById('podium-2'), second, '🥈', 'silver', 2);
-                renderPodium(document.getElementById('podium-3'), third,  '🥉', 'bronze', 3);
+                renderPodium(document.getElementById('podium-1'), findRank(1), '🥇', 'gold', 1);
+                renderPodium(document.getElementById('podium-2'), findRank(2), '🥈', 'silver', 2);
+                renderPodium(document.getElementById('podium-3'), findRank(3), '🥉', 'bronze', 3);
                 podium.classList.remove('hidden');
 
+                // ===== 2. ALL-TIME TOP WINNERS =====
+                loadAllTime(all);
+
+                // ===== 3. PER-TOURNAMENT CARDS =====
+                renderTourneyCards(sortedKeys, byTournament);
+
+                // ===== 4. FLAT ALL WINNERS LIST =====
                 listEl.innerHTML = winners.map(w => {
                     const name = playerName(w);
                     const r = rankNum(w.rank);
@@ -338,6 +458,128 @@
                 loading.classList.add('hidden');
                 empty.classList.remove('hidden');
             }
+        }
+
+        function renderPodium(el, w, emoji, medalClass, placeholder) {
+            if (!w) {
+                el.className = `podium-slot order-${placeholder === 1 ? '1 md:order-2 md:scale-110' : placeholder === 2 ? 'order-2 md:order-1' : 'order-3'}`;
+                el.innerHTML = `
+                    <div class="text-5xl mb-3">${emoji}</div>
+                    <p class="text-sm text-gray-500">Waiting for winner</p>
+                `;
+                return;
+            }
+            const name = playerName(w);
+            const orderCls = placeholder === 1
+                ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
+                : placeholder === 2
+                    ? 'order-2 md:order-1'
+                    : 'order-3';
+            el.className = `podium-live ${medalClass} ${orderCls}`;
+            el.innerHTML = `
+                <div class="text-5xl mb-3">${emoji}</div>
+                <div class="winner-avatar">${avatarInitial(name)}</div>
+                <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
+                <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
+                <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
+            `;
+        }
+
+        // ==========================================
+        // ALL-TIME TOP WINNERS
+        // ==========================================
+        function loadAllTime(allPayouts) {
+            const paidOnly = allPayouts.filter(p => p.status === 'paid');
+            const totals = {};
+            paidOnly.forEach(p => {
+                const name = playerName(p);
+                if (!name || name === 'Player') return;
+                if (!totals[name]) totals[name] = { name, total: 0, wins: 0, podiums: 0 };
+                totals[name].total += Number(p.prize || p.amount || 0);
+                const r = rankNum(p.rank);
+                if (r === 1) totals[name].wins++;
+                if (r >= 1 && r <= 3) totals[name].podiums++;
+            });
+            const ranked = Object.values(totals)
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 3);
+
+            if (!ranked.length) { allTimeWrap.classList.add('hidden'); return; }
+
+            const medals = ['🥇', '🥈', '🥉'];
+            const classes = ['gold', 'silver', 'bronze'];
+
+            allTimeGrid.innerHTML = ranked.map((p, i) => `
+                <div class="top-player-card ${classes[i]}">
+                    <div class="crown">${medals[i]}</div>
+                    <div class="tp-avatar">${avatarInitial(p.name)}</div>
+                    <p class="text-lg font-bold text-white mb-1 truncate">${escapeHtml(p.name)}</p>
+                    <p class="text-2xl font-black text-green-400">Rs. ${p.total.toLocaleString()}</p>
+                    <p class="text-xs text-gray-400 mt-2">${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}</p>
+                </div>
+            `).join('');
+
+            allTimeWrap.classList.remove('hidden');
+        }
+
+        // ==========================================
+        // PER-TOURNAMENT CARDS
+        // ==========================================
+        function renderTourneyCards(sortedKeys, byTournament) {
+            if (!sortedKeys.length) { tourneyCardsWrap.classList.add('hidden'); return; }
+
+            tourneyCardsEl.innerHTML = sortedKeys.map(key => {
+                const w = byTournament[key];
+                const title = w[0].tournamentTitle || w[0].tournament || 'Tournament';
+                const date = fmtDate(w[0].createdAt);
+
+                const findR = (n) => w.find(x => rankNum(x.rank) === n);
+                const first = findR(1), second = findR(2), third = findR(3);
+                const tk = w.find(x => {
+                    const r = String(x.rank || '').toLowerCase();
+                    return r.includes('kill') || r.includes('top');
+                });
+
+                const slot = (winner, rank, medal, cls) => {
+                    if (!winner) {
+                        return `<div class="tp-slot ${cls}">
+                            <div class="tp-rank">${medal}</div>
+                            <p class="text-gray-500 text-xs">—</p>
+                        </div>`;
+                    }
+                    return `<div class="tp-slot ${cls}">
+                        <div class="tp-rank">${medal}</div>
+                        <p class="tp-name">${escapeHtml(playerName(winner))}</p>
+                        <p class="tp-prize">Rs. ${Number(winner.prize || winner.amount || 0).toLocaleString()}</p>
+                        ${winner.kills ? `<p class="tp-kills">${winner.kills} kills</p>` : ''}
+                    </div>`;
+                };
+
+                return `
+                    <div class="tourney-card">
+                        <div class="tourney-header">
+                            <div>
+                                <h3>${escapeHtml(title)}</h3>
+                                <div class="meta">${escapeHtml(date)}</div>
+                            </div>
+                        </div>
+                        <div class="tourney-podium">
+                            ${slot(second, 2, '🥈', 'r2')}
+                            ${slot(first, 1, '🥇', 'r1')}
+                            ${slot(third, 3, '🥉', 'r3')}
+                        </div>
+                        ${tk ? `
+                            <div class="killer-row">
+                                <span class="kr-label">🎯 Top Killer</span>
+                                <span class="kr-name">${escapeHtml(playerName(tk))}</span>
+                                <span class="kr-prize">Rs. ${Number(tk.prize || tk.amount || 0).toLocaleString()}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            tourneyCardsWrap.classList.remove('hidden');
         }
 
         loadWinners();
