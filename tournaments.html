@@ -49,9 +49,9 @@
   <p>Join Free &amp; Paid Tournaments. Real Prizes.</p>
 </section>
 
-<!-- LIVE STREAMERS BANNER -->
-<section id="live" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
-  <div style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
+<!-- LIVE STREAMERS BANNER (always visible) -->
+<section id="live" style="max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
+  <div id="liveInner" style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
       <span style="font-size:24px; animation:pulse-live-red 1.5s infinite;">🔴</span>
       <h2 style="margin:0; color:#fff; font-size:18px;">LIVE NOW</h2>
@@ -857,18 +857,40 @@ function escapeHtmlLive(s) {
 }
 
 async function loadLiveStreamers() {
-  const section = document.getElementById('live');
   const listEl = document.getElementById('liveStreamersList');
   const countEl = document.getElementById('liveCount');
-  if (!section || !listEl) return;
+  const inner = document.getElementById('liveInner');
+  if (!listEl || !inner) return;
   try {
     const snap = await getDocs(collection(db, 'tournament_registrations'));
     const streamers = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(r => r.streamUrl && r.status === 'confirmed')
       .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
-    if (!streamers.length) { section.style.display = 'none'; return; }
-    section.style.display = 'block';
+
+    if (!streamers.length) {
+      // Friendly placeholder when nobody is live
+      countEl.textContent = 'check back during the tournament';
+      listEl.style.display = 'block';
+      listEl.innerHTML = `
+        <div class="stream-card" style="grid-column:1/-1; text-align:center; padding:24px 16px;">
+          <div style="font-size:42px; margin-bottom:10px;">📺</div>
+          <div style="color:#fff; font-weight:800; font-size:15px; margin-bottom:6px;">
+            No streams live right now
+          </div>
+          <div style="color:#fecaca; font-size:13px; margin-bottom:14px; line-height:1.5;">
+            Players with a registered stream URL will appear here during tournaments.
+          </div>
+          <a href="tournaments.html#tournaments" style="display:inline-block; background:rgba(255,255,255,0.15); color:#fff; padding:9px 18px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:700; border:1px solid rgba(255,255,255,0.25);">
+            🎮 Join a tournament
+          </a>
+        </div>
+      `;
+      return;
+    }
+
+    // Streams are live — show them
+    listEl.style.display = 'grid';
     countEl.textContent = `${streamers.length} player${streamers.length !== 1 ? 's' : ''} streaming`;
     listEl.innerHTML = streamers.map(s => `
       <div class="stream-card">
@@ -879,6 +901,11 @@ async function loadLiveStreamers() {
     `).join('');
   } catch (err) {
     console.warn('Live streamers load failed:', err);
+    listEl.innerHTML = `
+      <div class="stream-card" style="grid-column:1/-1; text-align:center; padding:20px;">
+        <div style="color:#fecaca; font-size:13px;">Could not load live streams. Please refresh.</div>
+      </div>
+    `;
   }
 }
 
