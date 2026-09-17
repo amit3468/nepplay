@@ -6,6 +6,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
+<style>
+  /* ===== FEATURE #2: Confirmation modal ===== */
+  .confirm-box { text-align: center; padding: 8px 4px 4px; }
+  .confirm-icon {
+    font-size: 60px; line-height: 1; margin-bottom: 8px;
+    animation: confirmPop .5s ease-out;
+  }
+  @keyframes confirmPop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .confirm-title { font-size: 22px; font-weight: 800; color: #22c55e; margin: 0 0 6px; }
+  .confirm-sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
+  .confirm-tourney {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 16px; text-align: left;
+  }
+  .confirm-tourney .tname { font-weight: 800; color: #fff; font-size: 15px; margin-bottom: 4px; }
+  .confirm-tourney .tmeta { color: #9ca3af; font-size: 12px; }
+  .confirm-rows { text-align: left; margin-bottom: 18px; }
+  .confirm-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 13px;
+  }
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-row .k { color: #9ca3af; }
+  .confirm-row .v { color: #fff; font-weight: 700; }
+  .confirm-actions { display: flex; flex-direction: column; gap: 10px; }
+  .confirm-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 18px; border-radius: 12px;
+    font-weight: 800; font-size: 14px;
+    text-decoration: none; cursor: pointer; border: none;
+    width: 100%; box-sizing: border-box;
+  }
+  .confirm-btn-wa      { background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; }
+  .confirm-btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; }
+  .confirm-btn-ghost   { background: transparent; color: #9ca3af; border: 1px solid rgba(255,255,255,0.15); }
+  .copy-mini {
+    background: rgba(255,255,255,0.1); border: none; color: #fff;
+    padding: 4px 10px; border-radius: 6px; font-size: 11px;
+    cursor: pointer; margin-left: 8px;
+  }
+</style>
 </head>
 <body>
 
@@ -14,6 +62,7 @@
   <nav>
     <a href="index.html">Home</a>
     <a href="tournaments.html" class="active">Tournaments</a>
+    <a href="tournaments.html#live">🔴 Live</a>
     <a href="winners.html">Winners</a>
     <a href="leaderboard.html">Leaderboard</a>
     <a href="teams.html">Teams</a>
@@ -28,7 +77,7 @@
 </section>
 
 <!-- LIVE STREAMERS BANNER -->
-<section id="liveStreamersSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
+<section id="live" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
   <div style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
       <span style="font-size:24px; animation:pulse-live-red 1.5s infinite;">🔴</span>
@@ -202,6 +251,38 @@
       <button type="submit" class="btn-submit-pay" id="paySubmitBtn">✅ Submit for Admin Approval</button>
       <p class="hint center">Admin will verify within 24 hours</p>
     </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- FEATURE #2: CONFIRMATION MODAL                -->
+<!-- ============================================= -->
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-box small">
+    <div class="confirm-box">
+      <div class="confirm-icon" id="confirmIcon">🎉</div>
+      <h2 class="confirm-title" id="confirmTitle">You're In!</h2>
+      <p class="confirm-sub" id="confirmSub">Registration successful</p>
+
+      <div class="confirm-tourney">
+        <div class="tname" id="confirmTourneyName">Tournament</div>
+        <div class="tmeta" id="confirmTourneyMeta">—</div>
+      </div>
+
+      <div class="confirm-rows" id="confirmRows"></div>
+
+      <div class="confirm-actions">
+        <a href="#" id="confirmWaBtn" target="_blank" class="confirm-btn confirm-btn-wa">
+          💬 Share on WhatsApp
+        </a>
+        <button type="button" class="confirm-btn confirm-btn-primary" onclick="closeConfirmAndScroll()">
+          🎯 View My Tournaments
+        </button>
+        <button type="button" class="confirm-btn confirm-btn-ghost" onclick="closeConfirmModal()">
+          Close
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -633,6 +714,21 @@ window.submitJoin = async function(e) {
     window.closeJoinModal();
     window.showToast('✅ Joined ' + title + '!');
     loadMyTournaments();
+
+    // FEATURE #2: show confirmation modal
+    const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
+    window.showConfirmModal({
+      title: title,
+      game: tourn.game || '',
+      mode: tourn.mode || '',
+      date: tourn.date || '',
+      time: tourn.time || '',
+      ign, phone,
+      entryType: 'free',
+      amount: 0,
+      status: 'confirmed',
+      streamUrl
+    });
   } catch (err) { window.showToast('❌ ' + err.message); }
   finally { btn.disabled = false; btn.innerText = '✅ Join Tournament'; }
 };
@@ -740,12 +836,109 @@ window.submitPayment = async function(e) {
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
     loadMyTournaments();
+
+    // FEATURE #2: show confirmation modal
+    const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
+    window.showConfirmModal({
+      title: title,
+      game: tourn.game || '',
+      mode: tourn.mode || '',
+      date: tourn.date || '',
+      time: tourn.time || '',
+      ign, phone,
+      entryType: 'paid',
+      amount,
+      method,
+      txnId: txn,
+      status: 'pending',
+      streamUrl
+    });
   } catch (err) {
     console.error('submitPayment error:', err);
     window.showToast('❌ ' + err.message);
   }
   finally { btn.disabled = false; btn.innerText = '✅ Submit for Admin Approval'; }
 };
+
+// ================================================
+// FEATURE #2: CONFIRMATION MODAL
+// ================================================
+window.showConfirmModal = function(data) {
+  const modal = document.getElementById('confirmModal');
+  if (!modal) return;
+
+  const isFree = data.entryType === 'free';
+  const isPending = data.status === 'pending';
+
+  document.getElementById('confirmIcon').textContent  = isPending ? '⏳' : '🎉';
+  document.getElementById('confirmTitle').textContent = isPending ? 'Payment Submitted!' : "You're In!";
+  document.getElementById('confirmTitle').style.color = isPending ? '#fbbf24' : '#22c55e';
+  document.getElementById('confirmSub').textContent   = isPending
+    ? 'Waiting for admin to approve your payment'
+    : 'Registration confirmed — good luck!';
+
+  document.getElementById('confirmTourneyName').textContent = data.title || 'Tournament';
+  const meta = [data.game, data.mode, data.date, data.time].filter(Boolean).join(' · ');
+  document.getElementById('confirmTourneyMeta').textContent = meta || '—';
+
+  let rows = '';
+  if (data.ign)  rows += `<div class="confirm-row"><span class="k">🎮 IGN</span><span class="v">${escapeConfirm(data.ign)}</span></div>`;
+  if (data.phone) rows += `<div class="confirm-row"><span class="k">📱 Phone</span><span class="v">${escapeConfirm(data.phone)}</span></div>`;
+  if (isFree) {
+    rows += `<div class="confirm-row"><span class="k">💰 Entry</span><span class="v" style="color:#22c55e;">FREE</span></div>`;
+  } else {
+    rows += `<div class="confirm-row"><span class="k">💰 Amount</span><span class="v">Rs. ${escapeConfirm(data.amount || 0)}</span></div>`;
+    if (data.txnId) rows += `<div class="confirm-row"><span class="k">🔖 Txn ID</span><span class="v">${escapeConfirm(data.txnId)}</span></div>`;
+    if (data.method) rows += `<div class="confirm-row"><span class="k">💳 Method</span><span class="v">${escapeConfirm(data.method).toUpperCase()}</span></div>`;
+  }
+  rows += `<div class="confirm-row"><span class="k">📋 Status</span><span class="v" style="color:${isPending ? '#fbbf24' : '#22c55e'};">${isPending ? 'PENDING' : 'CONFIRMED'}</span></div>`;
+  if (data.streamUrl) {
+    rows += `<div class="confirm-row"><span class="k">🔴 Stream</span><span class="v" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeConfirm(data.streamUrl)} <button class="copy-mini" onclick="copyConfirmStream('${escapeConfirm(data.streamUrl).replace(/'/g,"\\'")}', this)">📋</button></span></div>`;
+  }
+  document.getElementById('confirmRows').innerHTML = rows;
+
+  // WhatsApp share link
+  const siteUrl = 'https://nepplay.onrender.com/tournaments.html';
+  let waMsg;
+  if (isFree) {
+    waMsg = `🎮 I just joined *${data.title}* on NEPPLAY!\n${meta ? meta + '\n' : ''}Free entry — come compete with me 👇\n${siteUrl}`;
+  } else {
+    waMsg = `🎮 I just registered for *${data.title}* on NEPPLAY!\n${meta ? meta + '\n' : ''}Entry: Rs. ${data.amount} · Status: Pending approval\nJoin the next one 👇\n${siteUrl}`;
+  }
+  document.getElementById('confirmWaBtn').href =
+    'https://wa.me/?text=' + encodeURIComponent(waMsg);
+
+  modal.classList.add('active');
+};
+
+window.copyConfirmStream = function(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const old = btn.innerText;
+    btn.innerText = '✅';
+    setTimeout(() => btn.innerText = old, 1200);
+  });
+};
+
+window.closeConfirmModal = function() {
+  document.getElementById('confirmModal').classList.remove('active');
+};
+
+window.closeConfirmAndScroll = function() {
+  document.getElementById('confirmModal').classList.remove('active');
+  const sec = document.getElementById('myTournamentsSection');
+  if (sec && sec.style.display !== 'none') {
+    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // If for some reason the section is not yet visible, scroll to top of grid
+    document.getElementById('tournamentGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+function escapeConfirm(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 
 window.showToast = function(msg) {
   const t = document.createElement('div');
@@ -765,7 +958,7 @@ function escapeHtmlLive(s) {
 }
 
 async function loadLiveStreamers() {
-  const section = document.getElementById('liveStreamersSection');
+  const section = document.getElementById('live');
   const listEl = document.getElementById('liveStreamersList');
   const countEl = document.getElementById('liveCount');
   if (!section || !listEl) return;
