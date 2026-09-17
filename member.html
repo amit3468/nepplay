@@ -246,6 +246,7 @@
                         </div>
                         <div class="py-1">
                             <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Dashboard</a>
+                            <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                             <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                         </div>
                         <div class="py-1 border-t border-gray-700">
@@ -284,6 +285,7 @@
                 <a href="index.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Home</a>
                 <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
                 <a href="teams.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
+                <a href="player.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">My Profile</a>
                 <a href="support.html" class="text-sm text-gray-300 hover:text-white px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
             </div>
         </nav>
@@ -480,6 +482,20 @@
                     <p class="text-xs text-gray-500 mt-2">Available to join</p>
                 </div>
             </div>
+
+            <!-- NEW: My Profile CTA card -->
+            <a href="player.html" class="block glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/30 hover:border-purple-500/60 transition group">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-user text-white text-xl"></i>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <h3 class="text-white font-bold text-base sm:text-lg">View My Player Profile</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mt-0.5">See your stats, achievements, match history — and share your profile link</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-purple-400 text-lg group-hover:translate-x-1 transition"></i>
+                </div>
+            </a>
 
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
@@ -1064,9 +1080,6 @@
             });
         }
 
-        // =========================================================
-        // PAYOUTS — FIXED: matches by userId OR winnerName (case-insensitive)
-        // =========================================================
         async function loadPayouts(uid) {
             try {
                 const myUsername = (
@@ -1076,11 +1089,9 @@
                     ''
                 ).toString().toLowerCase();
 
-                // Fetch ALL payouts (they're small — safe to read all)
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
                 const allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Filter: match by userId OR winnerName/username/ign equals my username
                 const pays = allPayouts.filter(p => {
                     if (p.userId && p.userId === uid) return true;
                     const name = (p.winnerName || p.username || p.ign || '').toString().toLowerCase();
