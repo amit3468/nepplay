@@ -26,6 +26,88 @@
   .confirm-btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; }
   .confirm-btn-ghost   { background: transparent; color: #9ca3af; border: 1px solid rgba(255,255,255,0.15); }
   .copy-mini { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-left: 8px; }
+
+  /* ===== FEATURE #5: Countdown + urgency badges ===== */
+  .card-badges {
+    position: absolute; top: 10px; left: 10px; right: 10px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .urgency-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(6px);
+  }
+  .badge-urgent {
+    background: rgba(220,38,38,0.9);
+    color: #fff;
+    animation: badgePulse 1.5s infinite;
+  }
+  .badge-filling {
+    background: rgba(234,179,8,0.9);
+    color: #fff;
+  }
+  .badge-closing {
+    background: rgba(251,146,60,0.95);
+    color: #fff;
+    animation: badgePulse 1.8s infinite;
+  }
+  .badge-full {
+    background: rgba(71,85,105,0.95);
+    color: #fff;
+  }
+  .badge-live {
+    background: rgba(220,38,38,0.95);
+    color: #fff;
+    animation: badgePulse 1.2s infinite;
+  }
+  @keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+    50% { box-shadow: 0 0 0 6px rgba(0,0,0,0); opacity: 0.85; }
+  }
+  .countdown-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 800;
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.35);
+    font-variant-numeric: tabular-nums;
+  }
+  .countdown-chip.warn {
+    background: rgba(234,179,8,0.15);
+    color: #fbbf24;
+    border-color: rgba(234,179,8,0.4);
+  }
+  .countdown-chip.danger {
+    background: rgba(220,38,38,0.15);
+    color: #f87171;
+    border-color: rgba(220,38,38,0.5);
+    animation: badgePulse 1.5s infinite;
+  }
+  .countdown-chip.over {
+    background: rgba(220,38,38,0.25);
+    color: #fff;
+    border-color: rgba(220,38,38,0.6);
+  }
+  .slots-spots-left {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-top: 2px;
+  }
+  .btn-join:disabled, .btn-join.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+  }
 </style>
 </head>
 <body>
@@ -299,7 +381,7 @@ function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
 }
 
 // ================================================
-// AUTH (non-blocking — module continues even if auth is slow)
+// AUTH
 // ================================================
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -350,6 +432,63 @@ async function seedPaidTournamentsIfNeeded() {
     if (created > 0) console.log(`✅ Seeded ${created} new paid tournaments`);
     else console.log("✅ All paid tournaments exist");
   } catch (err) { console.warn("⚠️ Seed failed:", err.message); }
+}
+
+// ================================================
+// FEATURE #5: Countdown helper
+// ================================================
+function getTournamentStart(t) {
+  // Combine date (YYYY-MM-DD) + time (HH:MM). Treat as NPT (UTC+5:45).
+  if (!t.date || t.date === '—') return null;
+  const timeStr = (t.time && t.time !== '—') ? t.time : '00:00';
+  const iso = `${t.date}T${timeStr}:00+05:45`;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+function countdownLabel(t) {
+  const start = getTournamentStart(t);
+  if (!start) return { text: '', cls: '' };
+  const now = Date.now();
+  const diff = start.getTime() - now;
+
+  if (diff < 0) {
+    // Already started — mark as live if within 3 hours, else completed
+    const hoursSince = -diff / 3600000;
+    if (hoursSince < 3) return { text: '🔴 IN PROGRESS', cls: 'over' };
+    return { text: '✅ COMPLETED', cls: 'over' };
+  }
+
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days >= 1) return { text: `⏱ ${days}d ${hours % 24}h`, cls: '' };
+  if (hours >= 1) return { text: `⏱ ${hours}h ${mins % 60}m`, cls: 'warn' };
+  return { text: `⏱ ${mins}m`, cls: 'danger' };
+}
+
+function urgencyBadge(t) {
+  const filled = Number(t.filled || 0);
+  const max = Number(t.max || 50);
+  const spotsLeft = Math.max(max - filled, 0);
+
+  if (filled >= max) return { text: '❌ FULL', cls: 'badge-full' };
+  if (spotsLeft <= 5) return { text: `🔥 Only ${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left`, cls: 'badge-urgent' };
+  const pct = max > 0 ? (filled / max) : 0;
+  if (pct >= 0.8) return { text: '⚡ Filling fast', cls: 'badge-closing' };
+  return null;
+}
+
+function isTournamentFull(t) {
+  return Number(t.filled || 0) >= Number(t.max || 50);
+}
+
+function isTournamentOver(t) {
+  const start = getTournamentStart(t);
+  if (!start) return false;
+  return Date.now() > start.getTime() + 3 * 3600000; // 3 hours after start = over
 }
 
 // ================================================
@@ -515,7 +654,7 @@ window.copyRoomField = function(text, btn) {
 setInterval(() => { if (currentUid) loadMyTournaments(); }, 60000);
 
 // ================================================
-// RENDER
+// RENDER (FEATURE #5 — with countdown + urgency)
 // ================================================
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
@@ -536,9 +675,49 @@ function renderTournaments() {
     const pct = t.max > 0 ? Math.round((t.filled / t.max) * 100) : 0;
     const isPaid = t.entry_type === 'paid';
     const safeTitle = t.title.replace(/'/g, "\\'");
+    const isFull = isTournamentFull(t);
+    const isOver = isTournamentOver(t);
+
+    const cd = countdownLabel(t);
+    const urg = urgencyBadge(t);
+
+    // Badges overlay (top of card)
+    let badgesHtml = '';
+    if (isOver) {
+      badgesHtml += `<span class="urgency-badge badge-full">✅ COMPLETED</span>`;
+    } else if (isFull) {
+      badgesHtml += `<span class="urgency-badge badge-full">❌ FULL</span>`;
+    } else if (urg) {
+      badgesHtml += `<span class="urgency-badge ${urg.cls}">${urg.text}</span>`;
+    }
+
+    // Countdown chip (in card meta area)
+    const cdChip = cd.text
+      ? `<span class="countdown-chip ${cd.cls}">${cd.text}</span>`
+      : '';
+
+    // Spots left text (small, under slots bar)
+    const spotsLeft = Math.max(t.max - t.filled, 0);
+    const spotsLeftHtml = (!isFull && !isOver && spotsLeft <= 20)
+      ? `<div class="slots-spots-left">Only ${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left</div>`
+      : '';
+
+    // Join button — disabled if full or over
+    let joinBtn;
+    if (isOver) {
+      joinBtn = `<button class="btn-join btn-disabled" disabled>✅ Completed</button>`;
+    } else if (isFull) {
+      joinBtn = `<button class="btn-join btn-disabled" disabled>❌ Tournament Full</button>`;
+    } else if (isPaid) {
+      joinBtn = `<button class="btn-join paid-btn" onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">Join — Pay Rs. ${t.entry_fee}</button>`;
+    } else {
+      joinBtn = `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">Join Free</button>`;
+    }
+
     return `
-      <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}">
+      <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}" style="position:relative;">
         ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>' : '<span class="free-ribbon">🆓 FREE</span>'}
+        ${badgesHtml ? `<div class="card-badges">${badgesHtml}</div>` : ''}
         <div class="card-banner ${t.color}">
           <span class="game-tag">🕹 ${t.game}</span>
           <span class="mode-tag">${t.mode}</span>
@@ -550,18 +729,30 @@ function renderTournaments() {
             <div><small>Prize Pool</small><b class="prize">Rs. ${t.prize_pool}</b></div>
           </div>
           ${isPaid && t.top_kills_prize ? `<div class="card-meta extra"><div><small>🎯 Top Kills</small><b class="kill-prize">Rs. ${t.top_kills_prize}</b></div></div>` : ''}
-          <div class="card-footer"><span>📅 ${t.date}</span><span>🕐 ${t.time}</span></div>
+          <div class="card-footer">
+            <span>📅 ${t.date}</span>
+            <span>🕐 ${t.time}</span>
+          </div>
+          ${cdChip ? `<div style="margin-top:8px;">${cdChip}</div>` : ''}
           <div class="slots">Slots Filled <span>${t.filled}/${t.max}</span></div>
           <div class="progress"><div style="width:${pct}%"></div></div>
-          ${isPaid ? `<button class="btn-join paid-btn" onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">Join — Pay Rs. ${t.entry_fee}</button>` : `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">Join Free</button>`}
+          ${spotsLeftHtml}
+          ${joinBtn}
         </div>
       </div>
     `;
   }).join('');
 }
 
+// Refresh countdowns every 30 seconds (no Firestore re-fetch — just re-render)
+setInterval(() => {
+  if (document.getElementById('tournamentGrid')?.children.length) {
+    renderTournaments();
+  }
+}, 30000);
+
 // ================================================
-// WINDOW-LEVEL FUNCTIONS (defined synchronously — always available)
+// WINDOW-LEVEL FUNCTIONS
 // ================================================
 window.filterByGame = function(game) {
   filterState.game = game;
@@ -869,7 +1060,6 @@ async function loadLiveStreamers() {
       .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
 
     if (!streamers.length) {
-      // Friendly placeholder when nobody is live
       countEl.textContent = 'check back during the tournament';
       listEl.style.display = 'block';
       listEl.innerHTML = `
@@ -889,7 +1079,6 @@ async function loadLiveStreamers() {
       return;
     }
 
-    // Streams are live — show them
     listEl.style.display = 'grid';
     countEl.textContent = `${streamers.length} player${streamers.length !== 1 ? 's' : ''} streaming`;
     listEl.innerHTML = streamers.map(s => `
@@ -910,7 +1099,7 @@ async function loadLiveStreamers() {
 }
 
 // ================================================
-// INIT — kick off async work, but nothing blocks window.* definitions
+// INIT
 // ================================================
 loadTournaments();
 loadLiveStreamers();
