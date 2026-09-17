@@ -6,11 +6,223 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
+<style>
+  /* ===== FEATURE: Live stats bar ===== */
+  .live-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 16px 0 20px;
+  }
+  .live-stat {
+    background: #15172b;
+    border: 1px solid #2a2d4a;
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .live-stat:hover { transform: translateY(-2px); }
+  .live-stat .ls-icon { font-size: 22px; flex-shrink: 0; }
+  .live-stat .ls-body { min-width: 0; flex: 1; }
+  .live-stat .ls-num {
+    color: #fff; font-size: 20px; font-weight: 800; line-height: 1.1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .live-stat .ls-lbl {
+    color: #9ca3af; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; font-weight: 700; margin-top: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .live-stat.highlight-yellow { border-color: #eab308; box-shadow: 0 0 20px rgba(234,179,8,0.15); }
+  .live-stat.highlight-yellow .ls-num { color: #fbbf24; }
+  .live-stat.highlight-green  { border-color: #22c55e; box-shadow: 0 0 20px rgba(34,197,94,0.15); }
+  .live-stat.highlight-green  .ls-num { color: #4ade80; }
+  .live-stat.highlight-red    { border-color: #dc2626; box-shadow: 0 0 20px rgba(220,38,38,0.18); }
+  .live-stat.highlight-red    .ls-num { color: #f87171; }
+  .live-stat.highlight-purple { border-color: #a855f7; box-shadow: 0 0 20px rgba(168,85,247,0.15); }
+  .live-stat.highlight-purple .ls-num { color: #c084fc; }
+
+  /* ===== FEATURE: Detail modal (users + registrations) ===== */
+  .detail-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.7);
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .detail-modal-overlay.open { display: flex; }
+  .detail-modal {
+    background: #15172b;
+    border: 1px solid #2a2d4a;
+    border-radius: 16px;
+    max-width: 620px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    padding: 24px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+  }
+  .detail-modal h2 {
+    color: #fff; font-size: 20px; margin: 0 0 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .detail-modal .dm-sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
+  .detail-modal .dm-close {
+    float: right; background: transparent; border: none;
+    color: #9ca3af; font-size: 22px; cursor: pointer; padding: 0;
+    margin-top: -4px;
+  }
+  .detail-modal .dm-close:hover { color: #fff; }
+  .dm-rows { display: flex; flex-direction: column; gap: 0; }
+  .dm-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 13px; gap: 16px;
+  }
+  .dm-row:last-child { border-bottom: none; }
+  .dm-row .dm-k { color: #9ca3af; flex-shrink: 0; }
+  .dm-row .dm-v { color: #fff; font-weight: 600; text-align: right; word-break: break-word; }
+  .dm-row .dm-v code { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .dm-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .dm-section h3 {
+    color: #a5b4fc; font-size: 12px; margin: 0 0 10px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .dm-actions {
+    display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .dm-actions button, .dm-actions a {
+    flex: 1; min-width: 110px;
+    padding: 12px 16px; border-radius: 10px;
+    font-weight: 700; font-size: 13px;
+    cursor: pointer; border: none; text-decoration: none;
+    text-align: center;
+  }
+  .dm-btn-primary { background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; }
+  .dm-btn-green   { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+  .dm-btn-ghost   { background: transparent; border: 1px solid #2a2d4a !important; color: #fff; }
+  .dm-btn-danger  { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+  .dm-shot {
+    max-width: 100%; border-radius: 10px;
+    border: 1px solid #2a2d4a; margin-top: 8px;
+    cursor: zoom-in;
+  }
+  .clickable-row {
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .clickable-row:hover { background: rgba(99,102,241,0.08) !important; }
+  .clickable-row:active { transform: scale(0.995); }
+
+  /* ===== FEATURE: Bulk approve bar ===== */
+  .bulk-bar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .bulk-bar.show { display: flex; }
+  .bulk-bar .bulk-info {
+    color: #4ade80; font-size: 13px; font-weight: 700;
+  }
+  .bulk-btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+  }
+  .bulk-btn-approve { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .bulk-btn-clear   { background: transparent; border: 1px solid #4ade80; color: #4ade80; }
+
+  .pay-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 10px;
+    flex-shrink: 0;
+  }
+  .pay-checkbox {
+    width: 20px; height: 20px;
+    accent-color: #22c55e;
+    cursor: pointer;
+  }
+
+  /* ===== FEATURE: Export toolbar ===== */
+  .export-toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .export-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid #2a2d4a;
+    background: #15172b;
+    color: #e2e8f0;
+    transition: all 0.15s;
+  }
+  .export-btn:hover {
+    background: #1f2340;
+    border-color: #6366f1;
+    color: #fff;
+  }
+
+  /* ===== FEATURE: Tournament registration counts ===== */
+  .tourney-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  /* ===== Password-only login ===== */
+  .pw-login-wrap { position: relative; }
+  .pw-login-wrap input { padding-right: 44px !important; }
+  .pw-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+  }
+  .pw-toggle:hover { color: #fff; }
+</style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!-- AUTH GATE — shown until admin is verified     -->
+<!-- AUTH GATE — password-only login                 -->
 <!-- ═══════════════════════════════════════════════ -->
 <div id="auth-gate" style="display:none; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0b0d1c; padding:20px; box-sizing:border-box;">
   <div style="width:100%; max-width:400px; background:#15172b; border:1px solid #2a2d4a; border-radius:16px; padding:32px;">
@@ -21,11 +233,11 @@
     </div>
 
     <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" style="display:none;">
-      <label style="display:block; color:#9ca3af; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; margin-bottom:8px;">Email</label>
-      <input type="email" id="adminEmail" required autocomplete="email" style="width:100%; padding:12px; background:#0f1124; border:1px solid #2a2d4a; color:#fff; border-radius:10px; box-sizing:border-box; margin-bottom:16px; font-size:14px;">
-
-      <label style="display:block; color:#9ca3af; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; margin-bottom:8px;">Password</label>
-      <input type="password" id="adminPassword" required autocomplete="current-password" style="width:100%; padding:12px; background:#0f1124; border:1px solid #2a2d4a; color:#fff; border-radius:10px; box-sizing:border-box; margin-bottom:20px; font-size:14px;">
+      <label style="display:block; color:#9ca3af; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; margin-bottom:8px;">🔐 Admin Password</label>
+      <div class="pw-login-wrap" style="margin-bottom:20px;">
+        <input type="password" id="adminPassword" required autocomplete="current-password" placeholder="Enter admin password" style="width:100%; padding:12px; background:#0f1124; border:1px solid #2a2d4a; color:#fff; border-radius:10px; box-sizing:border-box; font-size:14px;">
+        <button type="button" class="pw-toggle" onclick="togglePasswordVisibility()" id="pwToggleBtn" title="Show / hide password">👁</button>
+      </div>
 
       <button type="submit" id="adminLoginBtn" style="width:100%; padding:14px; background:#dc2626; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; margin-bottom:12px;">Login</button>
       <p id="adminLoginMsg" style="display:none; text-align:center; font-size:13px; margin:8px 0 0 0;"></p>
@@ -54,7 +266,7 @@
 </style>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!-- ADMIN PANEL — hidden until authenticated       -->
+<!-- ADMIN PANEL                                     -->
 <!-- ═══════════════════════════════════════════════ -->
 <div id="admin-panel" style="display:none;">
 
@@ -93,14 +305,14 @@
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v3.9 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v4.0 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v3.9</span>
+        <span style="font-size:12px; color:#6b7280;">v4.0</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
@@ -128,6 +340,19 @@
     <section id="section-dashboard" class="admin-section" style="display:block">
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
+
+      <div class="live-stats-bar">
+        <div class="live-stat"><div class="ls-icon">👥</div><div class="ls-body"><div class="ls-num" id="lsUsers">0</div><div class="ls-lbl">Total Users</div></div></div>
+        <div class="live-stat"><div class="ls-icon">📋</div><div class="ls-body"><div class="ls-num" id="lsRegs">0</div><div class="ls-lbl">Registrations</div></div></div>
+        <div class="live-stat highlight-yellow"><div class="ls-icon">⏳</div><div class="ls-body"><div class="ls-num" id="lsPending">0</div><div class="ls-lbl">Pending Payments</div></div></div>
+        <div class="live-stat highlight-green"><div class="ls-icon">✅</div><div class="ls-body"><div class="ls-num" id="lsConfirmedToday">0</div><div class="ls-lbl">Confirmed Today</div></div></div>
+        <div class="live-stat highlight-red"><div class="ls-icon">🔴</div><div class="ls-body"><div class="ls-num" id="lsLiveStreamers">0</div><div class="ls-lbl">Live Streamers</div></div></div>
+        <div class="live-stat highlight-green"><div class="ls-icon">💰</div><div class="ls-body"><div class="ls-num" id="lsCollectedToday">Rs. 0</div><div class="ls-lbl">Collected Today</div></div></div>
+        <div class="live-stat highlight-red"><div class="ls-icon">📤</div><div class="ls-body"><div class="ls-num" id="lsPaidToday">Rs. 0</div><div class="ls-lbl">Paid Out Today</div></div></div>
+        <div class="live-stat highlight-purple"><div class="ls-icon">📊</div><div class="ls-body"><div class="ls-num" id="lsNetToday">Rs. 0</div><div class="ls-lbl">Net Today</div></div></div>
+      </div>
+
+      <h3 class="mt" style="margin-top:24px;">📊 Platform Snapshot</h3>
       <div class="stat-grid">
         <div class="stat-card"><small>REAL USERS</small><b id="dashUsers">0</b><span>Accounts created</span></div>
         <div class="stat-card"><small>REGISTRATIONS</small><b id="dashRegs">0</b><span>Tournament sign-ups</span></div>
@@ -138,9 +363,9 @@
         <div class="stat-card"><small>TODAY NET</small><b id="dashTodayNet">Rs. 0</b><span>Collected − Payouts</span></div>
         <div class="stat-card"><small>ALL-TIME NET</small><b id="dashAllNet">Rs. 0</b><span>Lifetime profit</span></div>
       </div>
-      <h3 class="mt">👥 Recent Users</h3>
+      <h3 class="mt">👥 Recent Users <small style="color:#6366f1; font-weight:400; font-size:12px;">— click any row for full details</small></h3>
       <div class="list" id="dashRecentUsers"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
-      <h3 class="mt">📋 Recent Registrations</h3>
+      <h3 class="mt">📋 Recent Registrations <small style="color:#6366f1; font-weight:400; font-size:12px;">— click any row for full details</small></h3>
       <div class="list" id="dashRecentRegs"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
@@ -156,7 +381,7 @@
         <button data-status="rejected" onclick="filterPayStatus('rejected', this)">❌ Rejected <span class="cnt" id="cntRejected">0</span></button>
         <button data-status="all" onclick="filterPayStatus('all', this)">📂 All <span class="cnt" id="cntAll">0</span></button>
       </div>
-      <div style="margin:12px 0;">
+      <div style="margin:12px 0; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
         <select id="payMethodFilter" onchange="filterPayMethod(this.value)" style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
           <option value="all">All Methods</option>
           <option value="esewa">💚 eSewa</option>
@@ -164,7 +389,22 @@
           <option value="imepay">🟠 IME Pay</option>
           <option value="bank">🏦 Bank Transfer</option>
         </select>
+        <label style="display:flex; align-items:center; gap:8px; color:#9ca3af; font-size:13px; cursor:pointer; user-select:none;">
+          <input type="checkbox" id="paySelectAll" class="pay-checkbox" onchange="toggleSelectAllPayments(this.checked)">
+          Select all visible pending
+        </label>
       </div>
+
+      <div id="bulkApproveBar" class="bulk-bar">
+        <span class="bulk-info" id="bulkCount">0 selected</span>
+        <button class="bulk-btn bulk-btn-approve" onclick="bulkApproveSelected()">✅ Approve Selected</button>
+        <button class="bulk-btn bulk-btn-clear" onclick="clearBulkSelection()">✕ Clear</button>
+      </div>
+
+      <div class="export-toolbar">
+        <button class="export-btn" onclick="exportPaymentsCSV()">⬇️ Export Payments CSV</button>
+      </div>
+
       <div class="pay-list" id="payList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
@@ -172,9 +412,12 @@
     <section id="section-registrations" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>📋 Registrations</h2>
-        <p class="muted">Approve, edit or remove registrations</p>
+        <p class="muted">Approve, edit or remove — click any row for full details</p>
       </div>
       <input type="text" id="regSearch" placeholder="🔍 Search by username, tournament, or IGN..." oninput="filterRegistrations()" class="search-input" style="width:100%;margin-bottom:16px;">
+      <div class="export-toolbar">
+        <button class="export-btn" onclick="exportRegistrationsCSV()">⬇️ Export Registrations CSV</button>
+      </div>
       <div id="regList" class="reg-list"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
 
@@ -508,7 +751,11 @@
     <section id="section-users" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>👥 Users</h2>
-        <input type="text" id="userSearch" placeholder="🔍 Search..." oninput="filterUsers()" class="search-input">
+        <input type="text" id="userSearch" placeholder="🔍 Search by name, email or phone..." oninput="filterUsers()" class="search-input">
+      </div>
+      <p class="muted" style="margin-bottom:14px;">Click any user to see full details — or use 🗑️ to delete</p>
+      <div class="export-toolbar">
+        <button class="export-btn" onclick="exportUsersCSV()">⬇️ Export Users CSV</button>
       </div>
       <div class="reg-list" id="userList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
@@ -524,7 +771,7 @@
     <section id="section-tournaments" class="admin-section" style="display:none">
       <div class="section-head">
         <h2>🏆 Tournaments</h2>
-        <p class="muted">All tournaments — free &amp; paid</p>
+        <p class="muted">All tournaments — free &amp; paid · registration counts shown</p>
       </div>
       <div class="reg-list" id="tournamentList"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
     </section>
@@ -569,15 +816,21 @@
   </div>
 </div>
 
+<!-- DETAIL MODAL (users + registrations) -->
+<div id="detailModal" class="detail-modal-overlay" onclick="if(event.target===this) closeDetailModal()">
+  <div class="detail-modal">
+    <button class="dm-close" onclick="closeDetailModal()">✕</button>
+    <div id="detailModalContent"></div>
+  </div>
+</div>
+
 <div id="shotModal" class="modal-overlay" onclick="this.style.display='none'">
   <img id="shotFull" class="lightbox-img">
 </div>
 
 </div><!-- /#admin-panel -->
 
-<!-- ═══════════════════════════════════════════════ -->
-<!-- UI SCRIPTS                                     -->
-<!-- ═══════════════════════════════════════════════ -->
+<!-- UI SCRIPTS -->
 <script>
 window.toggleAdminSidebar = function() {
   const sidebar = document.querySelector('.sidebar');
@@ -598,6 +851,19 @@ document.addEventListener('click', function(e) {
     }, 200);
   }
 });
+
+window.togglePasswordVisibility = function() {
+  const inp = document.getElementById('adminPassword');
+  const btn = document.getElementById('pwToggleBtn');
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁';
+  }
+};
 
 (function() {
   function showSection(name, el) {
