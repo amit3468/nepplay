@@ -1,6 +1,6 @@
 // ==========================================================
-// NEPPLAY — admin.js (v3.9)
-// Secure admin panel with Firebase Auth + role check
+// NEPPLAY — admin.js (v4.0)
+// Password-only login, live stats, detail modals, bulk approve, CSV export
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -25,7 +25,12 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
-console.log("🔥 Admin v3.9 — awaiting auth");
+console.log("🔥 Admin v4.0 — awaiting auth");
+
+// ============================================================
+// ADMIN EMAIL (for password-only login)
+// ============================================================
+const ADMIN_EMAIL = 'amitacharya018@gmail.com';
 
 // ============================================================
 // AUTH GATE
@@ -85,22 +90,32 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// ============================================================
+// PASSWORD-ONLY LOGIN
+// ============================================================
 window.handleAdminLogin = async function(e) {
   e.preventDefault();
   const btn = document.getElementById('adminLoginBtn');
   const msg = document.getElementById('adminLoginMsg');
-  const email = document.getElementById('adminEmail').value.trim();
   const password = document.getElementById('adminPassword').value;
+
+  if (!password) {
+    msg.style.display = 'block';
+    msg.style.color = '#f87171';
+    msg.textContent = '❌ Password required';
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = 'Logging in...';
   msg.style.display = 'none';
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+    // onAuthStateChanged handles the rest
   } catch (err) {
     let m = 'Login failed';
-    if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)) m = 'Invalid email or password';
+    if (['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)) m = 'Invalid password';
     else if (err.code === 'auth/too-many-requests') m = 'Too many attempts. Try later.';
     msg.style.display = 'block';
     msg.style.color = '#f87171';
@@ -139,6 +154,7 @@ let currentMethodFilter = 'all';
 let currentSearchTerm = '';
 let roomTournaments = [];
 let selectedResultTournament = null;
+let selectedPaymentIds = new Set();
 
 const screenshotCache = {};
 
@@ -157,6 +173,11 @@ function dayKey(ts) {
 function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(n) { return (n || 'U')[0].toUpperCase(); }
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
+function escapeDetail(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 
 function screenshotSrc(d) {
   if (!d) return null;
@@ -278,9 +299,163 @@ async function bootstrapAdminPanel() {
     allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) { console.warn('payouts load failed:', e); }
   renderDashboardRecent();
+  loadLiveStats();
   attachRealtimeListeners();
   console.log("✅ Admin panel booted for:", currentAdminEmail);
 }
+
+// ============================================================
+// LIVE STATS BAR
+// ============================================================
+function loadLiveStats() {
+  const t = todayKey();
+  const el = id => document.getElementById(id);
+
+  if (el('lsUsers')) el('lsUsers').innerText = allUsers.length;
+  if (el('lsRegs')) el('lsRegs').innerText = allRegs.length;
+
+  const pending = allPayments.filter(p => p.status === 'pending').length;
+  if (el('lsPending')) el('lsPending').innerText = pending;
+
+  const confirmedToday = allRegs.filter(r => r.status === 'confirmed' && dayKey(r.registeredAt) === t).length;
+  if (el('lsConfirmedToday')) el('lsConfirmedToday').innerText = confirmedToday;
+
+  const liveStreamers = allRegs.filter(r => r.streamUrl && r.status === 'confirmed').length;
+  if (el('lsLiveStreamers')) el('lsLiveStreamers').innerText = liveStreamers;
+
+  const todayCollected = allPayments
+    .filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t)
+    .reduce((s,p) => s + (Number(p.amount)||0), 0);
+  if (el('lsCollectedToday')) el('lsCollectedToday').innerText = fmtRs(todayCollected);
+
+  const todayPayouts = allPayouts
+    .filter(x => dayKey(x.paidAt || x.createdAt) === t)
+    .reduce((s,p) => s + (Number(p.amount)||0), 0);
+  if (el('lsPaidToday')) el('lsPaidToday').innerText = fmtRs(todayPayouts);
+
+  const net = todayCollected - todayPayouts;
+  if (el('lsNetToday')) {
+    el('lsNetToday').innerText = fmtRs(net);
+    el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
+  }
+}
+
+setInterval(() => {
+  if (document.getElementById('admin-panel')?.style.display === 'block') {
+    loadLiveStats();
+  }
+}, 30000);
+
+// ============================================================
+// DETAIL MODAL — Users
+// ============================================================
+window.closeDetailModal = function() {
+  document.getElementById('detailModal').classList.remove('open');
+};
+
+window.openUserDetail = function(uid) {
+  const u = allUsers.find(x => x.id === uid);
+  if (!u) return;
+  const myRegs = allRegs.filter(r => r.userId === uid);
+  const myPays = allPayments.filter(p => p.userId === uid);
+  const myPayouts = allPayouts.filter(p =>
+    (p.userId && p.userId === uid) ||
+    (p.winnerName && u.username && p.winnerName.toLowerCase() === u.username.toLowerCase())
+  );
+
+  const totalSpent = myPays.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
+  const totalWon = myPayouts.filter(p => p.status === 'paid').reduce((s,p) => s + (Number(p.amount)||0), 0);
+
+  const regsHtml = myRegs.length
+    ? myRegs.map(r => `
+      <div class="dm-row">
+        <span class="dm-k">${escapeDetail(r.tournamentTitle || 'Tournament')}</span>
+        <span class="dm-v">${r.entryType === 'paid' ? 'Rs. ' + (r.amount||0) : 'FREE'} · ${(r.status||'').toUpperCase()}</span>
+      </div>
+    `).join('')
+    : '<div class="dm-row"><span class="dm-k">No registrations yet</span><span class="dm-v">—</span></div>';
+
+  document.getElementById('detailModalContent').innerHTML = `
+    <h2>👤 ${escapeDetail(u.username || 'User')}${u.role === 'admin' ? ' <span style="background:#6366f1;color:#fff;padding:2px 10px;border-radius:8px;font-size:11px;">ADMIN</span>' : ''}</h2>
+    <p class="dm-sub">Member profile & activity</p>
+    <div class="dm-rows">
+      <div class="dm-row"><span class="dm-k">📧 Email</span><span class="dm-v">${escapeDetail(u.email || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(u.phone || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">🔑 User ID</span><span class="dm-v"><code>${escapeDetail(u.id)}</code></span></div>
+      <div class="dm-row"><span class="dm-k">📅 Joined</span><span class="dm-v">${fmtDate(u.createdAt)}</span></div>
+      <div class="dm-row"><span class="dm-k">🎭 Role</span><span class="dm-v">${u.role || 'member'}</span></div>
+    </div>
+
+    <div class="dm-section">
+      <h3>📊 Activity Summary</h3>
+      <div class="dm-rows">
+        <div class="dm-row"><span class="dm-k">Registrations</span><span class="dm-v">${myRegs.length}</span></div>
+        <div class="dm-row"><span class="dm-k">Payments submitted</span><span class="dm-v">${myPays.length}</span></div>
+        <div class="dm-row"><span class="dm-k">💰 Total spent (approved)</span><span class="dm-v" style="color:#fbbf24;">${fmtRs(totalSpent)}</span></div>
+        <div class="dm-row"><span class="dm-k">🏆 Total won (paid)</span><span class="dm-v" style="color:#4ade80;">${fmtRs(totalWon)}</span></div>
+      </div>
+    </div>
+
+    <div class="dm-section">
+      <h3>📋 Registrations</h3>
+      <div class="dm-rows">${regsHtml}</div>
+    </div>
+
+    <div class="dm-actions">
+      <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
+      ${u.role === 'admin' ? '' : `<button class="dm-btn-danger" onclick="deleteUser('${u.id}','${(u.username||'').replace(/'/g,"\\'")}',true)">🗑️ Delete User</button>`}
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('open');
+};
+
+// ============================================================
+// DETAIL MODAL — Registrations
+// ============================================================
+window.openRegDetail = function(regId) {
+  const r = allRegs.find(x => x.id === regId);
+  if (!r) return;
+  const isPaid = r.entryType === 'paid';
+  const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
+  const shotSrc = payment ? (payment.screenshotBase64 ? 'data:image/jpeg;base64,' + payment.screenshotBase64 : payment.screenshotUrl || null) : null;
+
+  document.getElementById('detailModalContent').innerHTML = `
+    <h2>📋 ${escapeDetail(r.tournamentTitle || 'Registration')}</h2>
+    <p class="dm-sub">Registered by ${escapeDetail(r.username || 'Unknown')} · ${fmtDate(r.registeredAt)}</p>
+    <div class="dm-rows">
+      <div class="dm-row"><span class="dm-k">👤 Username</span><span class="dm-v">${escapeDetail(r.username || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">📧 Email</span><span class="dm-v">${escapeDetail(r.email || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">🎮 IGN</span><span class="dm-v">${escapeDetail(r.ign || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(r.phone || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">💰 Type</span><span class="dm-v">${isPaid ? 'PAID' : 'FREE'}</span></div>
+      ${isPaid ? `<div class="dm-row"><span class="dm-k">💵 Amount</span><span class="dm-v" style="color:#fbbf24;">Rs. ${r.amount || 0}</span></div>` : ''}
+      ${isPaid ? `<div class="dm-row"><span class="dm-k">🔖 Txn ID</span><span class="dm-v"><code>${escapeDetail(r.txnId || '—')}</code></span></div>` : ''}
+      ${isPaid ? `<div class="dm-row"><span class="dm-k">💳 Method</span><span class="dm-v">${(r.method || '—').toUpperCase()}</span></div>` : ''}
+      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
+      ${r.streamUrl ? `<div class="dm-row"><span class="dm-k">🔴 Stream URL</span><span class="dm-v"><a href="${escapeDetail(r.streamUrl)}" target="_blank" style="color:#f87171;">Watch →</a></span></div>` : ''}
+    </div>
+
+    ${isPaid && payment ? `
+      <div class="dm-section">
+        <h3>💳 Payment Details</h3>
+        <div class="dm-rows">
+          <div class="dm-row"><span class="dm-k">Payment status</span><span class="dm-v">${(payment.status || '').toUpperCase()}</span></div>
+          <div class="dm-row"><span class="dm-k">Submitted</span><span class="dm-v">${fmtDate(payment.submittedAt)}</span></div>
+          ${payment.reviewedAt ? `<div class="dm-row"><span class="dm-k">Reviewed</span><span class="dm-v">${fmtDate(payment.reviewedAt)}</span></div>` : ''}
+          ${payment.adminNote ? `<div class="dm-row"><span class="dm-k">Admin note</span><span class="dm-v">${escapeDetail(payment.adminNote)}</span></div>` : ''}
+        </div>
+        ${shotSrc ? `<img class="dm-shot" src="${shotSrc}" onclick="openShot('${shotSrc}')">` : ''}
+      </div>
+    ` : ''}
+
+    <div class="dm-actions">
+      ${r.status === 'pending' ? `<button class="dm-btn-green" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','approve','registration');">✔ Approve</button>` : ''}
+      ${r.status === 'pending' ? `<button class="dm-btn-primary" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','reject','registration');">✘ Reject</button>` : ''}
+      <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('open');
+};
 
 // ============================================================
 // CREATE TOURNAMENT
@@ -471,10 +646,12 @@ window.loadPayments = async function() {
     updateCounts();
     renderPayments();
     renderDashboardRecent();
+    loadLiveStats();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+
 function updateCounts() {
   const c = { pending:0, approved:0, rejected:0 };
   allPayments.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
@@ -488,6 +665,7 @@ function updateCounts() {
   const total = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
   if (el('dashPaid')) el('dashPaid').innerText = fmtRs(total);
 }
+
 function renderPayments() {
   const list = document.getElementById('payList');
   if (!list) return;
@@ -515,8 +693,13 @@ function renderPayments() {
     const shotImgHtml = shotId
       ? `<img src="${screenshotCache[shotId]}" class="pay-shot" onclick="openShotById('${shotId}')" alt="Payment screenshot">`
       : '<div class="pay-shot-empty">No image</div>';
+    const isSelected = selectedPaymentIds.has(p.id);
+    const checkboxHtml = isPending
+      ? `<div class="pay-checkbox-wrap"><input type="checkbox" class="pay-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); togglePayCheck('${p.id}', this.checked)"></div>`
+      : '';
     return `
       <div class="pay-item" data-status="${p.status}" data-method="${p.method||''}">
+        ${checkboxHtml}
         <div class="pay-item-left">${shotImgHtml}</div>
         <div class="pay-item-mid">
           <div class="pay-user">
@@ -550,7 +733,9 @@ function renderPayments() {
       </div>
     `;
   }).join('');
+  updateBulkBar();
 }
+
 window.filterPayStatus = function(status, btn) {
   currentStatusFilter = status;
   document.querySelectorAll('.pay-status-tabs button').forEach(b => b.classList.remove('active'));
@@ -561,6 +746,85 @@ window.filterPayMethod = function(m) { currentMethodFilter = m; renderPayments()
 window.filterPayments = function() {
   currentSearchTerm = document.getElementById('paySearch').value;
   renderPayments();
+};
+
+// ============================================================
+// BULK APPROVE
+// ============================================================
+window.togglePayCheck = function(id, checked) {
+  if (checked) selectedPaymentIds.add(id);
+  else selectedPaymentIds.delete(id);
+  updateBulkBar();
+};
+
+window.toggleSelectAllPayments = function(checked) {
+  // Select all currently visible pending payments
+  let filtered = allPayments.filter(p => {
+    if (currentStatusFilter !== 'all' && p.status !== currentStatusFilter) return false;
+    if (currentMethodFilter !== 'all' && p.method !== currentMethodFilter) return false;
+    if (currentSearchTerm) {
+      const q = currentSearchTerm.toLowerCase();
+      if (!`${p.username||''} ${p.email||''} ${p.txnId||''} ${p.tournamentTitle||''} ${p.ign||''}`.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  }).filter(p => p.status === 'pending');
+
+  if (checked) filtered.forEach(p => selectedPaymentIds.add(p.id));
+  else filtered.forEach(p => selectedPaymentIds.delete(p.id));
+  renderPayments();
+};
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkApproveBar');
+  const cnt = document.getElementById('bulkCount');
+  if (!bar) return;
+  if (selectedPaymentIds.size > 0) {
+    bar.classList.add('show');
+    if (cnt) cnt.innerText = `${selectedPaymentIds.size} payment${selectedPaymentIds.size !== 1 ? 's' : ''} selected`;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+window.clearBulkSelection = function() {
+  selectedPaymentIds.clear();
+  const selAll = document.getElementById('paySelectAll');
+  if (selAll) selAll.checked = false;
+  renderPayments();
+};
+
+window.bulkApproveSelected = async function() {
+  if (selectedPaymentIds.size === 0) return;
+  const ids = Array.from(selectedPaymentIds);
+  if (!confirm(`Approve ${ids.length} payment${ids.length !== 1 ? 's' : ''}? This will confirm the related registrations.`)) return;
+
+  let ok = 0, fail = 0;
+  for (const id of ids) {
+    try {
+      await updateDoc(doc(db, 'tournament_payments', id), {
+        status: 'approved',
+        adminNote: 'Bulk approved',
+        reviewedAt: serverTimestamp()
+      });
+      const regSnap = await getDocs(query(
+        collection(db, 'tournament_registrations'),
+        where('paymentId', '==', id)
+      ));
+      for (const d of regSnap.docs) {
+        await updateDoc(doc(db, 'tournament_registrations', d.id), { status: 'confirmed' });
+      }
+      ok++;
+    } catch (e) {
+      console.error('Bulk approve failed for', id, e);
+      fail++;
+    }
+  }
+  selectedPaymentIds.clear();
+  const selAll = document.getElementById('paySelectAll');
+  if (selAll) selAll.checked = false;
+  window.showToast(`✅ Approved ${ok}${fail ? ` · ❌ ${fail} failed` : ''}`);
+  await window.loadPayments();
+  await window.loadRegistrations();
 };
 
 // ============================================================
@@ -578,11 +842,14 @@ window.loadRegistrations = async function() {
     if (document.getElementById('regsBadge')) document.getElementById('regsBadge').innerText = allRegs.length;
     renderRegistrations();
     renderDashboardRecent();
+    loadLiveStats();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+
 window.filterRegistrations = function() { renderRegistrations(); };
+
 function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
@@ -599,7 +866,7 @@ function renderRegistrations() {
     const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
     const shotId = payment ? registerScreenshot(payment) : null;
     return `
-      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
         <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
         <div class="reg-main">
           <div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div>
@@ -612,12 +879,12 @@ function renderRegistrations() {
           </div>
           ${isPaid && shotId ? `
             <div class="reg-payment-preview">
-              <img src="${screenshotCache[shotId]}" class="thumb" onclick="openShotById('${shotId}')" alt="Screenshot">
+              <img src="${screenshotCache[shotId]}" class="thumb" onclick="event.stopPropagation(); openShotById('${shotId}')" alt="Screenshot">
               <span class="method-tag">${(r.method||'').toUpperCase()}</span>
               <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
             </div>
           ` : ''}
-          <div class="reg-actions">
+          <div class="reg-actions" onclick="event.stopPropagation();">
             ${isPending ? `
               <button class="btn-approve small" onclick="openReview('${r.id}','${safeName}','approve','registration')">✔ Approve</button>
               <button class="btn-reject small"  onclick="openReview('${r.id}','${safeName}','reject','registration')">✘ Reject</button>
@@ -635,6 +902,7 @@ function renderRegistrations() {
     `;
   }).join('');
 }
+
 window.editRegistration = async function(id) {
   const reg = allRegs.find(r => r.id === id);
   if (!reg) return;
@@ -648,6 +916,7 @@ window.editRegistration = async function(id) {
     window.loadRegistrations();
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
+
 window.deleteRegistration = async function(id, name) {
   if (!confirm('Delete registration for ' + name + '?')) return;
   try {
@@ -852,6 +1121,7 @@ window.resetResultsForm = function() {
   document.getElementById('resultForm').style.display = 'none';
   selectedResultTournament = null;
 };
+
 async function loadRecentResults() {
   const list = document.getElementById('recentResults');
   if (!list) return;
@@ -1212,34 +1482,154 @@ window.loadUsers = async function() {
     if (document.getElementById('dashUsers')) document.getElementById('dashUsers').innerText = allUsers.length;
     renderUsers();
     renderDashboardRecent();
+    loadLiveStats();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+
 window.filterUsers = function() { renderUsers(); };
+
 function renderUsers() {
   const list = document.getElementById('userList');
   if (!list) return;
   const q = (document.getElementById('userSearch').value || '').toLowerCase();
-  let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
+  let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''} ${u.phone||''}`.toLowerCase().includes(q));
   if (!filtered.length) {
     list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users.</div>';
     return;
   }
   list.innerHTML = filtered.map(u => `
-    <div class="reg-card free-reg">
+    <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')">
       <div class="reg-icon">${initials(u.username)}</div>
       <div class="reg-main">
         <div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div>
         <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
       </div>
-      <div class="reg-right"><span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span><small>${fmtDate(u.createdAt)}</small></div>
+      <div class="reg-right">
+        <span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span>
+        <small>${fmtDate(u.createdAt)}</small>
+        ${u.role === 'admin' ? '' : `<button class="btn-delete small" style="margin-top:6px;" onclick="event.stopPropagation(); deleteUser('${u.id}','${(u.username||'').replace(/'/g,"\\'")}', false)">🗑️ Delete</button>`}
+      </div>
     </div>
   `).join('');
 }
 
+window.deleteUser = async function(uid, username, fromModal) {
+  if (fromModal) closeDetailModal();
+  const confirmText = prompt(`⚠️ Delete user "${username}"?\n\nThis deletes their Firestore user doc + all their registrations + payments. Auth account must be deleted manually in Firebase Console.\n\nType DELETE to confirm:`);
+  if (confirmText !== 'DELETE') {
+    if (confirmText !== null) window.showToast('❌ Cancelled — you must type DELETE exactly');
+    return;
+  }
+  try {
+    // Delete user doc
+    await deleteDoc(doc(db, 'users', uid));
+    // Delete their registrations
+    const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
+    for (const d of regSnap.docs) {
+      await deleteDoc(doc(db, 'tournament_registrations', d.id));
+    }
+    // Delete their payments
+    const paySnap = await getDocs(query(collection(db, 'tournament_payments'), where('userId', '==', uid)));
+    for (const d of paySnap.docs) {
+      await deleteDoc(doc(db, 'tournament_payments', d.id));
+    }
+    window.showToast(`🗑️ Deleted user + ${regSnap.size} regs + ${paySnap.size} payments`);
+    await window.loadUsers();
+    await window.loadRegistrations();
+    await window.loadPayments();
+  } catch (err) {
+    console.error('deleteUser error:', err);
+    window.showToast('❌ ' + err.message);
+  }
+};
+
 // ============================================================
-// TOURNAMENTS ADMIN
+// CSV EXPORTS
+// ============================================================
+function downloadCSV(filename, rows) {
+  const csv = rows.map(r => r.map(cell => {
+    const s = String(cell == null ? '' : cell);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  window.showToast('✅ Downloaded ' + filename);
+}
+
+window.exportUsersCSV = function() {
+  if (!allUsers.length) { window.showToast('❌ No users to export'); return; }
+  const rows = [['Username','Email','Phone','Role','User ID','Joined']];
+  allUsers.forEach(u => {
+    rows.push([
+      u.username || '',
+      u.email || '',
+      u.phone || '',
+      u.role || 'member',
+      u.id,
+      u.createdAt?.toDate ? u.createdAt.toDate().toISOString() : ''
+    ]);
+  });
+  downloadCSV(`nepplay-users-${todayKey()}.csv`, rows);
+};
+
+window.exportRegistrationsCSV = function() {
+  if (!allRegs.length) { window.showToast('❌ No registrations to export'); return; }
+  const rows = [['Username','Email','IGN','Phone','Tournament','Entry Type','Amount','Txn ID','Method','Status','Stream URL','Registered']];
+  allRegs.forEach(r => {
+    rows.push([
+      r.username || '',
+      r.email || '',
+      r.ign || '',
+      r.phone || '',
+      r.tournamentTitle || '',
+      r.entryType || '',
+      r.amount || 0,
+      r.txnId || '',
+      r.method || '',
+      r.status || '',
+      r.streamUrl || '',
+      r.registeredAt?.toDate ? r.registeredAt.toDate().toISOString() : ''
+    ]);
+  });
+  downloadCSV(`nepplay-registrations-${todayKey()}.csv`, rows);
+};
+
+window.exportPaymentsCSV = function() {
+  if (!allPayments.length) { window.showToast('❌ No payments to export'); return; }
+  const rows = [['Username','Email','IGN','Phone','Tournament','Amount','Txn ID','Method','Status','Admin Note','Submitted','Reviewed']];
+  allPayments.forEach(p => {
+    rows.push([
+      p.username || '',
+      p.email || '',
+      p.ign || '',
+      p.phone || '',
+      p.tournamentTitle || '',
+      p.amount || 0,
+      p.txnId || '',
+      p.method || '',
+      p.status || '',
+      p.adminNote || '',
+      p.submittedAt?.toDate ? p.submittedAt.toDate().toISOString() : '',
+      p.reviewedAt?.toDate ? p.reviewedAt.toDate().toISOString() : ''
+    ]);
+  });
+  downloadCSV(`nepplay-payments-${todayKey()}.csv`, rows);
+};
+
+// ============================================================
+// TOURNAMENTS ADMIN (with registration counts)
 // ============================================================
 window.loadTournamentsAdmin = async function() {
   const list = document.getElementById('tournamentList');
@@ -1248,6 +1638,15 @@ window.loadTournamentsAdmin = async function() {
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
     allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Build registration counts per tournament
+    const counts = {};
+    allRegs.forEach(r => {
+      if (!r.tournamentId) return;
+      if (!counts[r.tournamentId]) counts[r.tournamentId] = { total: 0, confirmed: 0, pending: 0 };
+      counts[r.tournamentId].total++;
+      if (r.status === 'confirmed') counts[r.tournamentId].confirmed++;
+      else if (r.status === 'pending') counts[r.tournamentId].pending++;
+    });
     if (!allTournaments.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments.</div>';
       return;
@@ -1259,12 +1658,18 @@ window.loadTournamentsAdmin = async function() {
       const hasRoom = t.roomId && t.roomPassword;
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
+      const c = counts[t.id] || { total: 0, confirmed: 0, pending: 0 };
       return `
         <div class="reg-card ${isCompleted ? 'free-reg' : (isPaid ? 'paid-reg' : 'free-reg')}">
           <div class="reg-icon">${isCompleted ? '✅' : (isPaid ? '💵' : '🏆')}</div>
           <div class="reg-main">
-            <div class="reg-line-1"><b>${t.title || 'Untitled'}</b><span class="reg-sep">—</span><span class="reg-tournament">${t.game || 'Game'} · ${t.mode || 'Solo'}</span></div>
-            <div class="reg-line-2">${t.date ? '📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}</div>
+            <div class="reg-line-1">
+              <b>${t.title || 'Untitled'}</b>
+              <span class="tourney-count">📋 ${c.total} registered</span>
+              ${c.confirmed ? `<span class="tourney-count" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#4ade80;">✅ ${c.confirmed}</span>` : ''}
+              ${c.pending ? `<span class="tourney-count" style="background:rgba(234,179,8,0.15);border-color:rgba(234,179,8,0.4);color:#fbbf24;">⏳ ${c.pending}</span>` : ''}
+            </div>
+            <div class="reg-line-2">${t.game || 'Game'} · ${t.mode || 'Solo'}${t.date ? ' · 📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}</div>
             <div class="reg-actions">
               ${!isCompleted ? `<button class="btn-edit small" onclick="editTournament('${t.id}')">✏️ Edit</button>` : ''}
               <button class="btn-delete small" onclick="deleteTournament('${t.id}','${safeTitle}')">🗑️ Delete</button>
@@ -1322,7 +1727,7 @@ window.postAnnouncement = async function(e) {
 };
 
 // ============================================================
-// DASHBOARD RECENT
+// DASHBOARD RECENT (with clickable rows)
 // ============================================================
 function renderDashboardRecent() {
   const t = todayKey();
@@ -1339,7 +1744,7 @@ function renderDashboardRecent() {
   const ru = document.getElementById('dashRecentUsers');
   if (ru && allUsers.length) {
     ru.innerHTML = allUsers.slice(0,5).map(u => `
-      <div class="reg-card free-reg">
+      <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')">
         <div class="reg-icon">${initials(u.username)}</div>
         <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div><div class="reg-line-2">${u.email || '—'}</div></div>
         <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
@@ -1351,7 +1756,7 @@ function renderDashboardRecent() {
     rr.innerHTML = allRegs.slice(0,5).map(r => {
       const isPaid = r.entryType === 'paid';
       return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
           <div class="reg-main"><div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div><div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div></div>
           <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div>
