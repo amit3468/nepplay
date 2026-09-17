@@ -7,6 +7,65 @@
 <meta name="description" content="NEPPLAY — Nepal's esports platform. Join free & paid tournaments for Free Fire, PUBG, COD, Valorant, and more. Real cash prizes, fast payouts.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
+<style>
+  .home-live-section {
+    max-width: 1300px; margin: 0 auto 32px; padding: 0 24px;
+  }
+  .home-live-inner {
+    background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);
+    border: 2px solid #ef4444;
+    border-radius: 18px;
+    padding: 22px 24px;
+    box-shadow: 0 0 40px rgba(220,38,38,0.35);
+  }
+  .home-live-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .home-live-head .dot {
+    font-size: 26px; animation: homePulse 1.5s infinite;
+  }
+  .home-live-head h2 {
+    margin: 0; color: #fff; font-size: 20px; font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .home-live-head .count {
+    color: #fecaca; font-size: 14px; font-weight: 600;
+  }
+  .home-live-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .home-stream-card {
+    background: rgba(0,0,0,0.32);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 14px;
+    transition: transform .15s;
+  }
+  .home-stream-card:hover { transform: translateY(-2px); }
+  .home-stream-card .sname {
+    color: #fff; font-weight: 800; font-size: 15px;
+    margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .home-stream-card .stourney {
+    color: #fecaca; font-size: 12px;
+    margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .home-stream-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg,#dc2626,#991b1b);
+    color: #fff; padding: 9px 14px; border-radius: 10px;
+    text-decoration: none; font-size: 13px; font-weight: 700;
+    transition: transform .15s;
+  }
+  .home-stream-btn:hover { transform: scale(1.05); }
+  @keyframes homePulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:.6; transform:scale(1.15); }
+  }
+</style>
 </head>
 <body>
 
@@ -62,6 +121,20 @@
       <div class="num gold" id="stat-prizes">Rs. 20K+</div>
       <div class="lbl">Prize Pool</div>
     </div>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- FEATURE #1: LIVE NOW ON HOMEPAGE              -->
+<!-- ============================================= -->
+<section class="home-live-section" id="homeLiveSection" style="display:none;">
+  <div class="home-live-inner">
+    <div class="home-live-head">
+      <span class="dot">🔴</span>
+      <h2>LIVE NOW</h2>
+      <span class="count" id="homeLiveCount">— players streaming</span>
+    </div>
+    <div class="home-live-grid" id="homeLiveList"></div>
   </div>
 </section>
 
@@ -182,6 +255,73 @@
   </div>
   <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
 </footer>
+
+<!-- ============================================= -->
+<!-- FEATURE #1 SCRIPT: fetch live streamers       -->
+<!-- ============================================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
+    measurementId: "G-3PXN38XFG9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function escHome(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function loadHomeLive() {
+  const section = document.getElementById('homeLiveSection');
+  const listEl = document.getElementById('homeLiveList');
+  const countEl = document.getElementById('homeLiveCount');
+  if (!section || !listEl) return;
+
+  try {
+    const snap = await getDocs(collection(db, 'tournament_registrations'));
+    const streamers = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.streamUrl && r.status === 'confirmed')
+      .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0))
+      .slice(0, 6);
+
+    if (!streamers.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    countEl.textContent = `${streamers.length} player${streamers.length !== 1 ? 's' : ''} streaming now`;
+    listEl.innerHTML = streamers.map(s => `
+      <div class="home-stream-card">
+        <div class="sname">🎮 ${escHome(s.ign || s.username || 'Player')}</div>
+        <div class="stourney">${escHome(s.tournamentTitle || 'Tournament')}</div>
+        <a class="home-stream-btn" href="${escHome(s.streamUrl)}" target="_blank" rel="noopener">
+          ▶ Watch Live
+        </a>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.warn('home live load failed:', err);
+    section.style.display = 'none';
+  }
+}
+
+loadHomeLive();
+setInterval(loadHomeLive, 60000);
+</script>
 
 </body>
 </html>
