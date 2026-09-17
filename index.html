@@ -22,6 +22,7 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
   .home-live-section {
     max-width: 1300px; margin: 0 auto 32px; padding: 0 24px;
@@ -258,6 +259,9 @@
     <a href="teams.html">Teams</a>
     <a href="support.html">Support</a>
   </nav>
+    <button class="nav-toggle" id="navToggle" onclick="toggleSiteNav()" aria-label="Menu">
+    <i class="fa-solid fa-bars"></i>
+  </button>
   <a href="member.html" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">Login</a>
 </header>
 
@@ -540,15 +544,15 @@ setInterval(loadHomeLive, 60000);
 <!-- Poster lightbox helpers                       -->
 <!-- ============================================= -->
 <script>
-function openPosterLightbox() {
-  document.getElementById('posterLightbox').classList.add('open');
+function toggleSiteNav() {
+  const nav = document.querySelector('.site-header > nav');
+  const icon = document.querySelector('#navToggle i');
+  if (!nav) return;
+  nav.classList.toggle('open');
+  if (icon) {
+    icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+  }
 }
-function closePosterLightbox() {
-  document.getElementById('posterLightbox').classList.remove('open');
-}
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePosterLightbox();
-});
 </script>
 
 </body>
