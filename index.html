@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="NEPPLAY — Nepal's esports platform. Join free & paid tournaments for Free Fire, PUBG, COD, Valorant, and more. Real cash prizes, fast payouts.">
 
-<!-- ===== OG / Social share preview ===== -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEPPLAY">
 <meta property="og:title" content="🎮 NEPPLAY — Nepal's Esports Platform | Grand Opening 22 Sep 2026">
@@ -22,7 +21,7 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
   .home-live-section {
     max-width: 1300px; margin: 0 auto 32px; padding: 0 24px;
@@ -82,167 +81,214 @@
     50% { opacity:.6; transform:scale(1.15); }
   }
 
-  /* ===== Hero poster background ===== */
-  .landing-hero {
-    position: relative;
-    background-image:
-      linear-gradient(rgba(15,23,42,0.78), rgba(15,23,42,0.88)),
-      url('images/promo-poster.jpg');
-    background-size: cover, cover;
-    background-position: center top, center top;
-    background-repeat: no-repeat, no-repeat;
-  }
-  /* Mobile: slightly stronger overlay for text readability */
-  @media (max-width: 640px) {
-    .landing-hero {
-      background-image:
-        linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.92)),
-        url('images/promo-poster.jpg');
-    }
-  }
-
-  /* ===== Grand Opening promo section ===== */
-  .grand-opening-section {
-    max-width: 900px;
+  /* ===== Upcoming Matches widget ===== */
+  .upcoming-section {
+    max-width: 1200px;
     margin: 0 auto 32px;
     padding: 0 24px;
   }
-  .grand-opening-card {
-    background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
-    border: 2px solid rgba(251,191,36,0.35);
-    border-radius: 22px;
-    padding: 24px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(251,191,36,0.15);
-    position: relative;
-    overflow: hidden;
+  .upcoming-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .grand-opening-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(251,191,36,0.15), transparent 60%);
-    pointer-events: none;
-  }
-  .grand-opening-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(251,191,36,0.15);
-    border: 1px solid rgba(251,191,36,0.5);
-    color: #fbbf24;
-    padding: 6px 16px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 14px;
-    position: relative;
-    z-index: 2;
-  }
-  .grand-opening-title {
-    color: #fff;
+  .upcoming-head h2 {
     font-size: 24px;
     font-weight: 900;
-    margin: 0 0 8px;
-    position: relative;
-    z-index: 2;
-    line-height: 1.2;
-  }
-  @media (min-width: 640px) {
-    .grand-opening-title { font-size: 32px; }
-  }
-  .grand-opening-sub {
-    color: #9ca3af;
-    font-size: 14px;
-    margin: 0 0 22px;
-    position: relative;
-    z-index: 2;
-  }
-  .poster-wrap {
-    position: relative;
-    z-index: 2;
-    max-width: 520px;
-    margin: 0 auto 22px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.1);
-    cursor: zoom-in;
-    transition: transform 0.2s;
-  }
-  .poster-wrap:hover { transform: scale(1.01); }
-  .poster-wrap img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .poster-hint {
-    color: #64748b;
-    font-size: 11px;
-    margin-top: -14px;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 2;
-  }
-  .grand-opening-ctas {
+    color: #fff;
+    margin: 0;
     display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 2;
-  }
-  .go-btn {
-    display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 26px;
-    border-radius: 12px;
-    font-weight: 800;
+  }
+  .upcoming-head .view-all {
+    color: #a5b4fc;
     font-size: 14px;
-    text-decoration: none;
-    transition: transform 0.15s;
-  }
-  .go-btn:hover { transform: translateY(-2px); }
-  .go-btn-primary {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff;
-    box-shadow: 0 10px 30px rgba(34,197,94,0.4);
-  }
-  .go-btn-wa {
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    color: #fff;
-    box-shadow: 0 10px 30px rgba(37,211,102,0.35);
-  }
-
-  /* Lightbox */
-  .poster-lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.92);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    cursor: zoom-out;
-  }
-  .poster-lightbox.open { display: flex; }
-  .poster-lightbox img {
-    max-width: 95vw;
-    max-height: 95vh;
-    border-radius: 12px;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
-  }
-  .poster-lightbox .close-hint {
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    color: #fff;
-    font-size: 24px;
     font-weight: 700;
-    opacity: 0.7;
-    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .upcoming-head .view-all:hover { color: #fff; }
+  .upcoming-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .upcoming-card {
+    background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95));
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 16px;
+    padding: 20px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .upcoming-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(99,102,241,0.6);
+    box-shadow: 0 15px 40px rgba(99,102,241,0.25);
+  }
+  .upcoming-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+  }
+  .uc-row1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .uc-game-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .uc-entry-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .uc-entry-free {
+    background: rgba(34,197,94,0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.4);
+  }
+  .uc-entry-paid {
+    background: rgba(168,85,247,0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168,85,247,0.4);
+  }
+  .uc-title {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .uc-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .uc-stat .k {
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .uc-stat .v {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .uc-stat .v.prize { color: #4ade80; }
+  .uc-stat .v.fee-free { color: #4ade80; }
+  .uc-stat .v.fee-paid { color: #fbbf24; }
+  .uc-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .uc-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.35);
+  }
+  .uc-countdown.warn {
+    background: rgba(234,179,8,0.15);
+    color: #fbbf24;
+    border-color: rgba(234,179,8,0.4);
+  }
+  .uc-countdown.urgent {
+    background: rgba(220,38,38,0.2);
+    color: #f87171;
+    border-color: rgba(220,38,38,0.5);
+    animation: ucPulse 1.5s infinite;
+  }
+  @keyframes ucPulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .uc-cta {
+    color: #a5b4fc;
+    font-size: 13px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .upcoming-empty {
+    text-align: center;
+    padding: 32px 20px;
+    background: rgba(30,41,59,0.5);
+    border: 1px dashed rgba(148,163,184,0.25);
+    border-radius: 16px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  .upcoming-loading {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .upcoming-skeleton {
+    height: 200px;
+    background: linear-gradient(90deg, rgba(148,163,184,0.08) 25%, rgba(148,163,184,0.15) 50%, rgba(148,163,184,0.08) 75%);
+    background-size: 200% 100%;
+    animation: ucShimmer 1.5s infinite;
+    border-radius: 16px;
+  }
+  @keyframes ucShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @media (max-width: 640px) {
+    .upcoming-section { padding: 0 16px; }
+    .upcoming-head h2 { font-size: 20px; }
+    .upcoming-grid { grid-template-columns: 1fr; }
+    .upcoming-loading { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -259,7 +305,7 @@
     <a href="teams.html">Teams</a>
     <a href="support.html">Support</a>
   </nav>
-    <button class="nav-toggle" id="navToggle" onclick="toggleSiteNav()" aria-label="Menu">
+  <button class="nav-toggle" id="navToggle" onclick="toggleSiteNav()" aria-label="Menu">
     <i class="fa-solid fa-bars"></i>
   </button>
   <a href="member.html" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">Login</a>
@@ -307,9 +353,7 @@
   </div>
 </section>
 
-<!-- ============================================= -->
-<!-- GRAND OPENING PROMO POSTER                    -->
-<!-- ============================================= -->
+<!-- GRAND OPENING PROMO -->
 <section class="grand-opening-section">
   <div class="grand-opening-card">
     <div class="grand-opening-tag">
@@ -340,9 +384,7 @@
   <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening poster">
 </div>
 
-<!-- ============================================= -->
-<!-- FEATURE #1: LIVE NOW ON HOMEPAGE              -->
-<!-- ============================================= -->
+<!-- LIVE NOW -->
 <section class="home-live-section" id="homeLiveSection" style="display:none;">
   <div class="home-live-inner">
     <div class="home-live-head">
@@ -352,6 +394,22 @@
     </div>
     <div class="home-live-grid" id="homeLiveList"></div>
   </div>
+</section>
+
+<!-- ============================================= -->
+<!-- FEATURE #1: UPCOMING MATCHES WIDGET           -->
+<!-- ============================================= -->
+<section class="upcoming-section" id="upcomingSection">
+  <div class="upcoming-head">
+    <h2><span>🔥</span> Upcoming Matches</h2>
+    <a href="tournaments.html" class="view-all">View all tournaments <span>→</span></a>
+  </div>
+  <div class="upcoming-loading" id="upcomingLoading">
+    <div class="upcoming-skeleton"></div>
+    <div class="upcoming-skeleton"></div>
+    <div class="upcoming-skeleton"></div>
+  </div>
+  <div class="upcoming-grid" id="upcomingGrid" style="display:none;"></div>
 </section>
 
 <section class="landing-section" style="padding-top:20px;">
@@ -453,7 +511,6 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="landing-footer">
   <div style="margin-bottom:16px;font-size:16px;font-weight:700;color:#fff;">🎮 NEPPLAY</div>
   <div style="margin-bottom:16px;">
@@ -473,9 +530,6 @@
   <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
 </footer>
 
-<!-- ============================================= -->
-<!-- FEATURE #1 SCRIPT: fetch live streamers       -->
-<!-- ============================================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, getDocs }
@@ -500,6 +554,9 @@ function escHome(s) {
   }[c]));
 }
 
+// ==========================================
+// LIVE STREAMERS
+// ==========================================
 async function loadHomeLive() {
   const section = document.getElementById('homeLiveSection');
   const listEl = document.getElementById('homeLiveList');
@@ -536,13 +593,134 @@ async function loadHomeLive() {
   }
 }
 
+// ==========================================
+// FEATURE #1: UPCOMING MATCHES WIDGET
+// ==========================================
+function getTournamentStart(t) {
+  if (!t.date) return null;
+  const timeStr = t.time && t.time !== '—' ? t.time : '00:00';
+  const d = new Date(`${t.date}T${timeStr}:00+05:45`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function countdownText(t) {
+  const start = getTournamentStart(t);
+  if (!start) return { text: '—', cls: '' };
+  const diff = start.getTime() - Date.now();
+  if (diff <= 0) {
+    const hrs = -diff / 3600000;
+    if (hrs < 3) return { text: '🔴 IN PROGRESS', cls: 'urgent' };
+    return { text: '✅ COMPLETED', cls: '' };
+  }
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  if (days >= 1) return { text: `Starts in ${days}d ${hours % 24}h`, cls: '' };
+  if (hours >= 1) return { text: `Starts in ${hours}h ${mins % 60}m`, cls: 'warn' };
+  return { text: `Starts in ${mins}m`, cls: 'urgent' };
+}
+
+async function loadUpcoming() {
+  const loadingEl = document.getElementById('upcomingLoading');
+  const gridEl = document.getElementById('upcomingGrid');
+  if (!loadingEl || !gridEl) return;
+
+  try {
+    const snap = await getDocs(collection(db, 'tournaments'));
+    const now = Date.now();
+
+    const upcoming = snap.docs
+      .map(d => {
+        const t = d.data();
+        const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
+        const fee = Number(t.entryFee || t.entry_fee || 0);
+        const isPaid = entryTypeRaw === 'paid' || fee > 0;
+        const start = getTournamentStart(t);
+        if (!start) return null;
+        // Skip tournaments that started more than 3 hours ago
+        if (Date.now() - start.getTime() > 3 * 3600000) return null;
+        return {
+          id: d.id,
+          title: t.title || 'Untitled',
+          game: t.game || 'Game',
+          mode: t.mode || 'Solo',
+          entryType: isPaid ? 'paid' : 'free',
+          entryFee: isPaid ? fee : 0,
+          prizePool: Number(t.prizePool || t.prize_pool || 0),
+          date: t.date,
+          time: t.time || '—',
+          startTime: start.getTime()
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.startTime - b.startTime)
+      .slice(0, 3);
+
+    loadingEl.style.display = 'none';
+
+    if (!upcoming.length) {
+      gridEl.style.display = 'block';
+      gridEl.innerHTML = `
+        <div class="upcoming-empty" style="grid-column: 1 / -1;">
+          <div style="font-size: 40px; margin-bottom: 8px;">📅</div>
+          <div style="color: #cbd5e1; font-weight: 700; margin-bottom: 4px;">No upcoming matches right now</div>
+          <div style="font-size: 13px;">Check back soon — new tournaments are added regularly.</div>
+        </div>
+      `;
+      return;
+    }
+
+    gridEl.style.display = 'grid';
+    gridEl.innerHTML = upcoming.map(t => {
+      const cd = countdownText(t);
+      const isFree = t.entryType === 'free';
+      const safeId = t.id.replace(/'/g, "\\'");
+      return `
+        <a class="upcoming-card" href="tournaments.html">
+          <div class="uc-row1">
+            <span class="uc-game-badge">🕹 ${escHome(t.game)}</span>
+            <span class="uc-entry-badge ${isFree ? 'uc-entry-free' : 'uc-entry-paid'}">
+              ${isFree ? '🆓 FREE' : '💵 Rs. ' + t.entryFee}
+            </span>
+          </div>
+          <div class="uc-title">${escHome(t.title)}</div>
+          <div class="uc-stats">
+            <div class="uc-stat">
+              <div class="k">Prize Pool</div>
+              <div class="v prize">Rs. ${t.prizePool.toLocaleString()}</div>
+            </div>
+            <div class="uc-stat">
+              <div class="k">Mode</div>
+              <div class="v">${escHome(t.mode)}</div>
+            </div>
+          </div>
+          <div class="uc-bottom">
+            <span class="uc-countdown ${cd.cls}">⏱ ${cd.text}</span>
+            <span class="uc-cta">Join →</span>
+          </div>
+        </a>
+      `;
+    }).join('');
+
+    // Refresh countdowns every 30s
+    setTimeout(loadUpcoming, 30000);
+  } catch (err) {
+    console.warn('upcoming load failed:', err);
+    loadingEl.style.display = 'none';
+    gridEl.style.display = 'block';
+    gridEl.innerHTML = `
+      <div class="upcoming-empty" style="grid-column: 1 / -1;">
+        Could not load upcoming matches.
+      </div>
+    `;
+  }
+}
+
 loadHomeLive();
+loadUpcoming();
 setInterval(loadHomeLive, 60000);
 </script>
 
-<!-- ============================================= -->
-<!-- Poster lightbox helpers                       -->
-<!-- ============================================= -->
 <script>
 function toggleSiteNav() {
   const nav = document.querySelector('.site-header > nav');
@@ -553,6 +731,15 @@ function toggleSiteNav() {
     icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
   }
 }
+function openPosterLightbox() {
+  document.getElementById('posterLightbox').classList.add('open');
+}
+function closePosterLightbox() {
+  document.getElementById('posterLightbox').classList.remove('open');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePosterLightbox();
+});
 </script>
 
 </body>
