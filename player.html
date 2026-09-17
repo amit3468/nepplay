@@ -58,6 +58,43 @@
             border-radius: 8px;
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .status-pill-mini {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #e2e8f0;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .share-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .share-btn.live {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            border-color: #ef4444;
+            color: #fff;
+            animation: pulseLive 1.5s infinite;
+        }
+        @keyframes pulseLive {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -99,6 +136,7 @@
                     </div>
                     <div class="py-1">
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -134,13 +172,27 @@
                 </div>
             </div>
 
-            <!-- LOGGED-OUT STATE -->
+            <!-- NOT FOUND -->
+            <div id="profile-notfound" class="hidden flex flex-col items-center text-center mb-6">
+                <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0 mb-4">
+                    <i class="fa-solid fa-user-slash text-4xl sm:text-5xl text-gray-500"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Player Not Found</h1>
+                <p class="text-gray-400 text-sm mb-5 max-w-md">We couldn't find a player with that ID or username.</p>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <a href="leaderboard.html" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-ranking-star"></i> View Leaderboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- LOGGED-OUT + NO UID -->
             <div id="profile-logged-out" class="hidden flex flex-col items-center text-center mb-6">
                 <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0 mb-4">
                     <i class="fa-solid fa-user text-4xl sm:text-5xl text-gray-500"></i>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Player Profile</h1>
-                <p class="text-gray-400 text-sm mb-5 max-w-md">Log in to see your stats, earnings, and match history.</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Your Player Profile</h1>
+                <p class="text-gray-400 text-sm mb-5 max-w-md">Log in to see your stats, earnings, and match history — or open any player's profile with their link.</p>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <a href="member.html" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center gap-2 text-sm">
                         <i class="fa-solid fa-right-to-bracket"></i> Log In
@@ -151,7 +203,7 @@
                 </div>
             </div>
 
-            <!-- LOGGED-IN PROFILE HEADER -->
+            <!-- PROFILE HEADER -->
             <div id="profile-header" class="hidden flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
                 <div id="profile-avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring flex-shrink-0 text-4xl sm:text-5xl font-black text-white">?</div>
                 <div class="flex-grow text-center md:text-left">
@@ -163,6 +215,7 @@
                     </div>
                     <p id="profile-email" class="text-gray-400 text-sm mb-1">—</p>
                     <p id="profile-since" class="text-xs text-gray-500">—</p>
+                    <div id="profile-actions" class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start"></div>
                 </div>
             </div>
 
@@ -228,7 +281,7 @@
                 <div id="matches-empty" class="hidden empty-state-box m-4 sm:m-6">
                     <i class="fa-solid fa-gamepad text-4xl text-gray-600 mb-3"></i>
                     <p class="text-white font-bold mb-1">No matches yet</p>
-                    <p class="text-sm text-gray-400 mb-4">Your match history will appear here after you play your first tournament.</p>
+                    <p class="text-sm text-gray-400 mb-4">Match history will appear here after their first tournament.</p>
                     <a href="tournaments.html" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-2.5 px-6 rounded-lg transition text-sm">
                         <i class="fa-solid fa-gamepad mr-2"></i> Browse Tournaments
                     </a>
@@ -262,32 +315,27 @@
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
-        function checkUserStatus() {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (user && user.username) {
-                document.getElementById('user-profile').classList.remove('hidden');
-                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('dropdown-username').textContent = user.email || user.username;
-                document.getElementById('nav-login-btn').classList.add('hidden');
-            } else {
-                document.getElementById('user-profile').classList.add('hidden');
-                document.getElementById('nav-login-btn').classList.remove('hidden');
-            }
-        }
         function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
         document.addEventListener('click', function(e) {
             const profile = document.getElementById('user-profile');
             const dropdown = document.getElementById('profile-dropdown');
             if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
         });
-        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
-        window.addEventListener('load', checkUserStatus);
+        function logout() {
+            import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js')
+                .then(({ getAuth, signOut }) => {
+                    const auth = getAuth();
+                    return signOut(auth);
+                })
+                .then(() => { window.location.href = 'member.html'; })
+                .catch(() => { window.location.href = 'member.html'; });
+        }
     </script>
 
     <!-- Firebase + profile logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs }
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged }
             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -307,10 +355,21 @@
 
         const loading    = document.getElementById('profile-loading');
         const loggedOut  = document.getElementById('profile-logged-out');
+        const notFound   = document.getElementById('profile-notfound');
         const header     = document.getElementById('profile-header');
         const statsBox   = document.getElementById('profile-stats');
         const achBox     = document.getElementById('profile-achievements');
         const matchesBox = document.getElementById('profile-matches');
+
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const urlUid = params.get('uid');
+        const urlUsername = params.get('u') || params.get('username');
+
+        let viewedUid = null;
+        let viewedProfile = null;
+        let viewerUid = null;
+        let isSelf = false;
 
         function escapeHtml(s) {
             return String(s || '').replace(/[&<>"']/g, c => ({
@@ -325,56 +384,192 @@
         }
 
         // ================================================
-        // AUTH
+        // AUTH — decide whose profile to show
         // ================================================
         onAuthStateChanged(auth, async (user) => {
-            loading.classList.add('hidden');
-            if (!user) {
+            viewerUid = user ? user.uid : null;
+
+            // Show user chip in nav if logged in
+            if (user) {
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('nav-login-btn')?.classList.add('hidden');
+                try {
+                    const meSnap = await getDoc(doc(db, 'users', user.uid));
+                    const me = meSnap.exists() ? meSnap.data() : {};
+                    const name = me.fullName || me.username || user.email?.split('@')[0] || 'Player';
+                    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+                    document.getElementById('dropdown-username').textContent = me.email || user.email || '—';
+                } catch (e) {}
+            } else {
+                document.getElementById('user-profile')?.classList.add('hidden');
+                document.getElementById('nav-login-btn')?.classList.remove('hidden');
+            }
+
+            // Decide which profile to show
+            if (urlUid || urlUsername) {
+                viewedUid = urlUid; // may be null if only username provided
+                await loadByUrl();
+            } else if (user) {
+                viewedUid = user.uid;
+                isSelf = true;
+                await loadProfile();
+            } else {
+                // No param, not logged in
+                loading.classList.add('hidden');
                 loggedOut.classList.remove('hidden');
-                header.classList.add('hidden');
-                statsBox.classList.add('hidden');
-                achBox.classList.add('hidden');
-                matchesBox.classList.add('hidden');
                 return;
             }
-            loggedOut.classList.add('hidden');
-            header.classList.remove('hidden');
-            await loadProfile(user);
-            await Promise.all([
-                loadStats(user.uid),
-                loadMatches(user.uid)
-            ]);
         });
+
+        async function loadByUrl() {
+            try {
+                // If username provided, resolve to uid first
+                if (!viewedUid && urlUsername) {
+                    const uSnap = await getDocs(query(
+                        collection(db, 'users'),
+                        where('username', '==', urlUsername),
+                        limit(1)
+                    ));
+                    if (uSnap.empty) {
+                        // Try case-insensitive fallback by fetching some docs
+                        showNotFound();
+                        return;
+                    }
+                    viewedUid = uSnap.docs[0].id;
+                }
+                isSelf = viewerUid && viewerUid === viewedUid;
+                await loadProfile();
+            } catch (e) {
+                console.warn('loadByUrl error:', e);
+                showNotFound();
+            }
+        }
+
+        function showNotFound() {
+            loading.classList.add('hidden');
+            notFound.classList.remove('hidden');
+            header.classList.add('hidden');
+            statsBox.classList.add('hidden');
+            achBox.classList.add('hidden');
+            matchesBox.classList.add('hidden');
+        }
 
         // ================================================
         // PROFILE HEADER
         // ================================================
-        async function loadProfile(user) {
+        async function loadProfile() {
+            if (!viewedUid) { showNotFound(); return; }
+
             let profile = null;
             try {
-                const snap = await getDoc(doc(db, 'users', user.uid));
+                const snap = await getDoc(doc(db, 'users', viewedUid));
                 if (snap.exists()) profile = snap.data();
-            } catch (e) { console.warn('users read failed:', e.message); }
+            } catch (e) {
+                console.warn('users read failed:', e.message);
+            }
+            if (!profile) { showNotFound(); return; }
+            viewedProfile = profile;
 
             const displayName =
-                profile?.fullName ||
-                profile?.username ||
-                user.displayName ||
-                (user.email ? user.email.split('@')[0] : 'Player');
+                profile.fullName ||
+                profile.username ||
+                'Player';
 
             document.getElementById('profile-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('profile-name').textContent = displayName;
-            document.getElementById('profile-email').textContent = profile?.email || user.email || '—';
-            document.getElementById('profile-since').textContent = profile?.createdAt
-                ? 'Joined ' + fmtDate(profile.createdAt)
-                : 'Welcome to NEPPLAY!';
 
-            // Rank pill — cosmetic, based on tournaments later
+            // Show email only for self
+            const emailEl = document.getElementById('profile-email');
+            if (isSelf) {
+                emailEl.textContent = profile.email || '—';
+                emailEl.style.display = '';
+            } else {
+                emailEl.textContent = '@' + (profile.username || 'player');
+                emailEl.style.display = '';
+            }
+
+            document.getElementById('profile-since').textContent = profile.createdAt
+                ? 'Joined ' + fmtDate(profile.createdAt)
+                : 'NEPPLAY member';
+
+            // Rank pill
             document.getElementById('profile-rank-pill').innerHTML = '<i class="fa-solid fa-gamepad mr-1"></i> Player';
+
+            // Action buttons: Share + (Watch Live if stream URL exists)
+            buildProfileActions();
+
+            loading.classList.add('hidden');
+            header.classList.remove('hidden');
+            header.classList.add('flex');
+
+            await Promise.all([
+                loadStats(viewedUid),
+                loadMatches(viewedUid)
+            ]);
         }
 
+        async function buildProfileActions() {
+            const actionsEl = document.getElementById('profile-actions');
+            if (!actionsEl) return;
+            const parts = [];
+
+            // Share button
+            const shareUrl = window.location.href;
+            parts.push(`
+                <button class="share-btn" onclick="shareProfile('${escapeHtml(shareUrl).replace(/'/g,"\\'")}')">
+                    <i class="fa-solid fa-share-nodes"></i> Share Profile
+                </button>
+            `);
+
+            // Watch live button if this player has a confirmed stream URL
+            try {
+                const rSnap = await getDocs(query(
+                    collection(db, 'tournament_registrations'),
+                    where('userId', '==', viewedUid),
+                    where('status', '==', 'confirmed')
+                ));
+                const withStream = rSnap.docs
+                    .map(d => d.data())
+                    .filter(r => r.streamUrl)
+                    .sort((a,b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0))[0];
+                if (withStream && withStream.streamUrl) {
+                    parts.push(`
+                        <a class="share-btn live" href="${escapeHtml(withStream.streamUrl)}" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-tower-broadcast"></i> 🔴 Watch Live
+                        </a>
+                    `);
+                }
+            } catch (e) { console.warn('stream lookup failed:', e); }
+
+            // If viewing self, add "Edit / Go to dashboard" button
+            if (isSelf) {
+                parts.push(`
+                    <a class="share-btn" href="member.html">
+                        <i class="fa-solid fa-gauge"></i> Go to Dashboard
+                    </a>
+                `);
+            }
+
+            actionsEl.innerHTML = parts.join('');
+        }
+
+        window.shareProfile = function(url) {
+            if (navigator.share) {
+                navigator.share({ title: 'NEPPLAY Player Profile', url }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = event.target.closest('button');
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                    setTimeout(() => btn.innerHTML = orig, 1500);
+                }).catch(() => {
+                    prompt('Copy this link:', url);
+                });
+            }
+        };
+
         // ================================================
-        // STATS (from tournament_payouts + tournament_registrations)
+        // STATS
         // ================================================
         async function loadStats(uid) {
             let payouts = [];
@@ -389,12 +584,11 @@
             } catch (e) { console.warn('registrations read failed:', e.message); }
 
             const paidPayouts = payouts.filter(p => p.status === 'paid');
-            const totalEarnings = paidPayouts.reduce((s, p) => s + Number(p.prize || 0), 0);
+            const totalEarnings = paidPayouts.reduce((s, p) => s + Number(p.prize || p.amount || 0), 0);
             const totalTournaments = regs.length;
-            const wins = payouts.filter(p => Number(p.rank) === 1).length;
+            const wins = payouts.filter(p => Number(p.rank) === 1 || p.rank === '1').length;
             const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
 
-            // Fill stats
             document.getElementById('stat-earnings').textContent = 'Rs. ' + totalEarnings.toLocaleString();
             document.getElementById('stat-earnings-sub').textContent =
                 totalEarnings > 0 ? `${paidPayouts.length} prize(s) won` : 'No winnings yet';
@@ -411,11 +605,10 @@
             document.getElementById('stat-winrate-sub').textContent =
                 winRate === null ? '—' : (winRate >= 50 ? '🔥 Strong player' : 'Keep pushing!');
 
-            // Achievements — simpler unlock rules (can tighten later)
-            unlockIf('ach-shield', totalTournaments >= 1);   // Survivor: joined at least one
-            unlockIf('ach-bolt',   totalTournaments >= 5);   // Speed Demon: 5+ tournaments
-            unlockIf('ach-fire',   wins >= 3);               // On Fire: 3+ wins
-            unlockIf('ach-king',   wins >= 10);              // Tournament King: 10+ wins
+            unlockIf('ach-shield', totalTournaments >= 1);
+            unlockIf('ach-bolt',   totalTournaments >= 5);
+            unlockIf('ach-fire',   wins >= 3);
+            unlockIf('ach-king',   wins >= 10);
 
             statsBox.classList.remove('hidden');
             achBox.classList.remove('hidden');
@@ -433,7 +626,7 @@
         }
 
         // ================================================
-        // RECENT MATCHES (tournament_registrations)
+        // RECENT MATCHES
         // ================================================
         async function loadMatches(uid) {
             let regs = [];
@@ -447,7 +640,6 @@
                 payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             } catch (e) { console.warn('payouts read failed:', e.message); }
 
-            // Sort by registeredAt desc, take last 10
             regs.sort((a, b) => {
                 const ta = a.registeredAt?.seconds || 0;
                 const tb = b.registeredAt?.seconds || 0;
@@ -469,25 +661,25 @@
             }
             emptyEl.classList.add('hidden');
 
-            // Build lookup: payouts by tournamentId
             const payoutByT = {};
             payouts.forEach(p => {
                 if (p.tournamentId) payoutByT[p.tournamentId] = p;
             });
 
             const statusMap = {
-                confirmed: { cls: 'status-paid', label: 'Confirmed', bg: 'rgba(34,197,94,.15)', color: '#4ade80', icon: 'fa-circle-check' },
-                pending:   { cls: 'status-pending', label: 'Pending', bg: 'rgba(234,179,8,.15)', color: '#facc15', icon: 'fa-clock' },
-                rejected:  { cls: 'status-rejected', label: 'Rejected', bg: 'rgba(239,68,68,.15)', color: '#f87171', icon: 'fa-circle-xmark' }
+                confirmed: { bg: 'rgba(34,197,94,.15)', color: '#4ade80', icon: 'fa-circle-check', label: 'Confirmed' },
+                pending:   { bg: 'rgba(234,179,8,.15)', color: '#facc15', icon: 'fa-clock', label: 'Pending' },
+                rejected:  { bg: 'rgba(239,68,68,.15)', color: '#f87171', icon: 'fa-circle-xmark', label: 'Rejected' }
             };
 
             listEl.innerHTML = recent.map(r => {
                 const s = statusMap[r.status] || statusMap.confirmed;
                 const payout = payoutByT[r.tournamentId];
-                const prize = payout ? Number(payout.prize || 0) : 0;
-                const rank = payout ? Number(payout.rank || 0) : 0;
-                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+                const prize = payout ? Number(payout.prize || payout.amount || 0) : 0;
+                const rank = payout ? String(payout.rank || '') : '';
+                const medal = rank === '1' ? '🥇' : rank === '2' ? '🥈' : rank === '3' ? '🥉' : '';
                 const isPaid = r.entryType === 'paid';
+                const isStreaming = r.streamUrl && r.status === 'confirmed';
 
                 return `
                     <div class="match-row">
@@ -495,7 +687,10 @@
                             <i class="fa-solid ${s.icon}"></i>
                         </div>
                         <div class="flex-grow min-w-0">
-                            <p class="font-bold text-white text-sm truncate">${escapeHtml(r.tournamentTitle || 'Tournament')}</p>
+                            <p class="font-bold text-white text-sm truncate">
+                                ${escapeHtml(r.tournamentTitle || 'Tournament')}
+                                ${isStreaming ? '<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:#dc2626;color:#fff;">🔴 LIVE</span>' : ''}
+                            </p>
                             <p class="text-xs text-gray-400 mt-0.5">
                                 ${isPaid ? '💵 Paid · Rs. ' + (r.amount || 0) : '🆓 Free entry'}
                                 · ${fmtDate(r.registeredAt)}
@@ -505,7 +700,7 @@
                             ${prize > 0
                                 ? `<p class="font-bold text-green-400 text-sm">${medal} Rs. ${prize.toLocaleString()}</p>
                                    <p class="text-[10px] text-gray-500">${payout.status === 'paid' ? 'Paid' : 'Pending'}</p>`
-                                : `<span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:${s.bg};color:${s.color};">${s.label}</span>`
+                                : `<span class="status-pill-mini" style="background:${s.bg};color:${s.color};">${s.label}</span>`
                             }
                         </div>
                     </div>
