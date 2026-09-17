@@ -35,14 +35,17 @@
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
 
         .empty-state-box { background: rgba(30, 41, 59, 0.5); border: 1px dashed rgba(148, 163, 184, 0.3); border-radius: 16px; padding: 40px 20px; text-align: center; }
-        .podium-slot { background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 16px; padding: 24px; text-align: center; }
+        .podium-slot { background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s; cursor: pointer; }
+        .podium-slot:hover { transform: translateY(-4px); }
 
-        .lb-row { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; }
-        @media (min-width: 640px) { .lb-row { grid-template-columns: 70px 1fr 120px 120px; } }
+        .lb-row { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; cursor: pointer; }
+        @media (min-width: 640px) { .lb-row { grid-template-columns: 70px 1fr 90px 100px 120px; } }
         .lb-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
         .lb-row.top-1 { border-color: rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.06); }
         .lb-row.top-2 { border-color: rgba(148, 163, 184, 0.5); }
         .lb-row.top-3 { border-color: rgba(234, 88, 12, 0.5); }
+        .lb-row.is-me { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .lb-row.is-me::before { content: 'YOU'; background: #3b82f6; color: #fff; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; position: absolute; }
 
         .lb-rank { font-size: 1.5rem; font-weight: 900; color: #94a3b8; text-align: center; font-variant-numeric: tabular-nums; }
         .lb-rank.gold   { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
@@ -53,6 +56,33 @@
 
         .skeleton { background: linear-gradient(90deg, rgba(148,163,184,0.1) 25%, rgba(148,163,184,0.2) 50%, rgba(148,163,184,0.1) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Filter tabs */
+        .range-tabs {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .range-tab {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(30, 41, 59, 0.6);
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .range-tab:hover { background: rgba(30, 41, 59, 0.9); color: #e2e8f0; }
+        .range-tab.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -95,6 +125,7 @@
                     </div>
                     <div class="py-1">
                         <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
+                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
                         <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
                     </div>
                     <div class="py-1 border-t border-gray-700">
@@ -147,6 +178,13 @@
         </div>
 
         <div id="lb-table-wrap" class="hidden max-w-3xl mx-auto">
+            <!-- Filter tabs -->
+            <div class="range-tabs">
+                <button class="range-tab active" data-range="all" onclick="setRange('all', this)">🏆 All Time</button>
+                <button class="range-tab" data-range="30" onclick="setRange('30', this)">📅 This Month</button>
+                <button class="range-tab" data-range="7" onclick="setRange('7', this)">⚡ This Week</button>
+            </div>
+
             <div id="lb-podium" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 items-end"></div>
             <div class="glass-panel rounded-xl overflow-hidden">
                 <div class="p-4 border-b border-gray-700 bg-gray-800/30 flex items-center justify-between">
@@ -181,6 +219,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -193,6 +232,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         const loading = document.getElementById('lb-loading');
         const empty = document.getElementById('lb-empty');
@@ -203,6 +243,11 @@
         const countEl = document.getElementById('lb-count');
         const statusPill = document.getElementById('status-pill');
         const subtitle = document.getElementById('lb-subtitle');
+
+        let ALL_PAYOUTS = [];
+        let currentRange = 'all';
+        let viewerUsername = null;
+        let viewerUid = null;
 
         function avatarInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
         function escapeHtml(s) {
@@ -218,111 +263,184 @@
             const m = String(r).match(/^\s*(\d+)/);
             return m ? Number(m[1]) : null;
         }
+        function tsSeconds(p) {
+            return p.createdAt?.seconds || p.paidAt?.seconds || 0;
+        }
 
+        // ================================
+        // AUTH — remember viewer identity
+        // ================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                viewerUid = user.uid;
+                viewerUsername = user.displayName || (user.email ? user.email.split('@')[0] : null);
+            }
+            // Re-render when auth state changes (to apply "is-me" highlight)
+            if (ALL_PAYOUTS.length) renderLeaderboard();
+        });
+
+        // ================================
+        // RANGE FILTER
+        // ================================
+        window.setRange = function(range, btn) {
+            currentRange = range;
+            document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderLeaderboard();
+        };
+
+        function filterByRange(payouts) {
+            if (currentRange === 'all') return payouts;
+            const days = Number(currentRange);
+            const cutoff = (Date.now() - days * 86400000) / 1000; // in seconds
+            return payouts.filter(p => tsSeconds(p) >= cutoff);
+        }
+
+        // ================================
+        // LOAD
+        // ================================
         async function loadLeaderboard() {
             try {
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
-                const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                ALL_PAYOUTS = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
                     .filter(p => Number(p.prize || p.amount || 0) > 0);
-
-                // Aggregate per player
-                const players = {};
-                all.forEach(p => {
-                    const name = playerName(p);
-                    // Group by userId if available, else by lowercase name
-                    const key = p.userId || name.toLowerCase();
-                    if (!players[key]) {
-                        players[key] = {
-                            userId: p.userId || null,
-                            name: name,
-                            totalPrize: 0,
-                            wins: 0,
-                            podiums: 0,
-                            tournaments: new Set()
-                        };
-                    }
-                    const pl = players[key];
-                    pl.totalPrize += Number(p.prize || p.amount || 0);
-                    const rank = rankNum(p.rank);
-                    if (rank === 1) pl.wins++;
-                    if (rank >= 1 && rank <= 3) pl.podiums++;
-                    if (p.tournamentId) pl.tournaments.add(p.tournamentId);
-                });
-
-                const ranked = Object.values(players).map(p => ({
-                    ...p,
-                    tournaments: p.tournaments.size
-                })).sort((a, b) => {
-                    if (b.totalPrize !== a.totalPrize) return b.totalPrize - a.totalPrize;
-                    if (b.wins !== a.wins) return b.wins - a.wins;
-                    return b.podiums - a.podiums;
-                });
 
                 loading.classList.add('hidden');
 
-                if (!ranked.length) {
+                if (!ALL_PAYOUTS.length) {
                     empty.classList.remove('hidden');
+                    tableWrap.classList.add('hidden');
                     return;
                 }
 
                 statusPill.className = 'inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3';
                 statusPill.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Live Standings';
-                subtitle.textContent = `${ranked.length} ranked player${ranked.length !== 1 ? 's' : ''} — updated after every tournament`;
 
-                // Podium (top 3)
-                const medalClasses = ['gold', 'silver', 'bronze'];
-                const medalEmojis = ['🥇', '🥈', '🥉'];
-                const orderClass = [
-                    'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10',
-                    'order-2 md:order-1',
-                    'order-3'
-                ];
-                podium.innerHTML = ranked.slice(0, 3).map((p, i) => `
-                    <div class="podium-slot ${orderClass[i]}" style="border: 2px solid ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#ea580c'};">
-                        <div class="text-5xl mb-3">${medalEmojis[i]}</div>
-                        <div class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-2xl" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${avatarInitial(p.name)}</div>
-                        <p class="text-lg font-bold text-white truncate">${escapeHtml(p.name)}</p>
-                        <p class="text-xs text-gray-400 mt-1">${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}</p>
-                        <p class="text-xl font-bold text-green-400 mt-2">Rs. ${p.totalPrize.toLocaleString()}</p>
-                    </div>
-                `).join('');
-
-                // Full list
-                list.innerHTML = ranked.map((p, i) => {
-                    const rank = i + 1;
-                    const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
-                    const rowClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
-                    return `
-                        <div class="lb-row ${rowClass}">
-                            <div class="lb-rank ${rankClass}">#${rank}</div>
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="lb-avatar">${avatarInitial(p.name)}</div>
-                                <div class="min-w-0">
-                                    <p class="font-bold text-white text-sm truncate">${escapeHtml(p.name)}</p>
-                                    <p class="text-xs text-gray-500">${p.tournaments} tournament${p.tournaments !== 1 ? 's' : ''}</p>
-                                </div>
-                            </div>
-                            <div class="text-right hidden sm:block">
-                                <p class="text-xs text-gray-500">Wins</p>
-                                <p class="font-bold text-yellow-400">${p.wins}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs text-gray-500">Earnings</p>
-                                <p class="font-bold text-green-400">Rs. ${p.totalPrize.toLocaleString()}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                countEl.textContent = `${ranked.length} player${ranked.length !== 1 ? 's' : ''}`;
-                tableWrap.classList.remove('hidden');
-                info.classList.add('hidden');
-
+                renderLeaderboard();
             } catch (err) {
                 console.error('loadLeaderboard error:', err);
                 loading.classList.add('hidden');
                 empty.classList.remove('hidden');
             }
         }
+
+        // ================================
+        // RENDER (called by load + range + auth changes)
+        // ================================
+        function renderLeaderboard() {
+            const filtered = filterByRange(ALL_PAYOUTS);
+            const players = {};
+
+            filtered.forEach(p => {
+                const name = playerName(p);
+                const key = p.userId || name.toLowerCase();
+                if (!players[key]) {
+                    players[key] = {
+                        userId: p.userId || null,
+                        name: name,
+                        totalPrize: 0,
+                        wins: 0,
+                        podiums: 0,
+                        tournaments: new Set()
+                    };
+                }
+                const pl = players[key];
+                pl.totalPrize += Number(p.prize || p.amount || 0);
+                const rank = rankNum(p.rank);
+                if (rank === 1) pl.wins++;
+                if (rank >= 1 && rank <= 3) pl.podiums++;
+                if (p.tournamentId) pl.tournaments.add(p.tournamentId);
+            });
+
+            const ranked = Object.values(players).map(p => ({
+                ...p,
+                tournaments: p.tournaments.size
+            })).sort((a, b) => {
+                if (b.totalPrize !== a.totalPrize) return b.totalPrize - a.totalPrize;
+                if (b.wins !== a.wins) return b.wins - a.wins;
+                return b.podiums - a.podiums;
+            });
+
+            if (!ranked.length) {
+                empty.classList.remove('hidden');
+                tableWrap.classList.add('hidden');
+                info.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            const rangeLabel = currentRange === 'all' ? 'all time' : (currentRange === '30' ? 'this month' : 'this week');
+            subtitle.textContent = `${ranked.length} ranked player${ranked.length !== 1 ? 's' : ''} (${rangeLabel}) — updated after every tournament`;
+
+            // Podium (top 3)
+            const medalEmojis = ['🥇', '🥈', '🥉'];
+            const orderClass = [
+                'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10',
+                'order-2 md:order-1',
+                'order-3'
+            ];
+            const borderColors = ['#fbbf24', '#94a3b8', '#ea580c'];
+
+            podium.innerHTML = ranked.slice(0, 3).map((p, i) => `
+                <div class="podium-slot ${orderClass[i]}" style="border: 2px solid ${borderColors[i]};" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
+                    <div class="text-5xl mb-3">${medalEmojis[i]}</div>
+                    <div class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-2xl" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${avatarInitial(p.name)}</div>
+                    <p class="text-lg font-bold text-white truncate">${escapeHtml(p.name)}</p>
+                    <p class="text-xs text-gray-400 mt-1">${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}</p>
+                    <p class="text-xl font-bold text-green-400 mt-2">Rs. ${p.totalPrize.toLocaleString()}</p>
+                </div>
+            `).join('');
+
+            // Full list
+            list.innerHTML = ranked.map((p, i) => {
+                const rank = i + 1;
+                const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                const rowClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+                const isMe = (p.userId && viewerUid && p.userId === viewerUid) ||
+                             (!p.userId && viewerUsername && p.name.toLowerCase() === viewerUsername.toLowerCase());
+                const winRate = p.tournaments > 0 ? Math.round((p.wins / p.tournaments) * 100) : 0;
+                return `
+                    <div class="lb-row ${rowClass} ${isMe ? 'is-me relative' : ''}" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
+                        <div class="lb-rank ${rankClass}">#${rank}</div>
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="lb-avatar">${avatarInitial(p.name)}</div>
+                            <div class="min-w-0">
+                                <p class="font-bold text-white text-sm truncate">${escapeHtml(p.name)}</p>
+                                <p class="text-xs text-gray-500">${p.tournaments} tournament${p.tournaments !== 1 ? 's' : ''} • ${winRate}% win rate</p>
+                            </div>
+                        </div>
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-gray-500">Wins</p>
+                            <p class="font-bold text-yellow-400">${p.wins}</p>
+                        </div>
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-gray-500">Podiums</p>
+                            <p class="font-bold text-orange-400">${p.podiums}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-500">Earnings</p>
+                            <p class="font-bold text-green-400">Rs. ${p.totalPrize.toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            countEl.textContent = `${ranked.length} player${ranked.length !== 1 ? 's' : ''}`;
+            tableWrap.classList.remove('hidden');
+            info.classList.add('hidden');
+        }
+
+        // ================================
+        // PROFILE JUMP
+        // ================================
+        window.gotoProfile = function(uid, name) {
+            if (uid) {
+                window.location.href = 'player.html?uid=' + encodeURIComponent(uid);
+            } else if (name) {
+                window.location.href = 'player.html?u=' + encodeURIComponent(name);
+            }
+        };
 
         loadLeaderboard();
     </script>
