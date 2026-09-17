@@ -5,6 +5,21 @@
 <title>NEPPLAY — Nepal's Esports Platform</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="NEPPLAY — Nepal's esports platform. Join free & paid tournaments for Free Fire, PUBG, COD, Valorant, and more. Real cash prizes, fast payouts.">
+
+<!-- ===== OG / Social share preview ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NEPPLAY">
+<meta property="og:title" content="🎮 NEPPLAY — Nepal's Esports Platform | Grand Opening 22 Sep 2026">
+<meta property="og:description" content="8 Tournaments · FREE ENTRY · Real Cash Prizes. Register now on Nepal's premier esports platform.">
+<meta property="og:image" content="https://nepplay.onrender.com/images/promo-poster.jpg">
+<meta property="og:image:width" content="1080">
+<meta property="og:image:height" content="1920">
+<meta property="og:url" content="https://nepplay.onrender.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎮 NEPPLAY — Nepal's Esports Platform">
+<meta name="twitter:description" content="8 Tournaments · FREE ENTRY · Real Cash Prizes. Register now.">
+<meta name="twitter:image" content="https://nepplay.onrender.com/images/promo-poster.jpg">
+
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -65,6 +80,169 @@
     0%,100% { opacity:1; transform:scale(1); }
     50% { opacity:.6; transform:scale(1.15); }
   }
+
+  /* ===== Hero poster background ===== */
+  .landing-hero {
+    position: relative;
+    background-image:
+      linear-gradient(rgba(15,23,42,0.78), rgba(15,23,42,0.88)),
+      url('images/promo-poster.jpg');
+    background-size: cover, cover;
+    background-position: center top, center top;
+    background-repeat: no-repeat, no-repeat;
+  }
+  /* Mobile: slightly stronger overlay for text readability */
+  @media (max-width: 640px) {
+    .landing-hero {
+      background-image:
+        linear-gradient(rgba(15,23,42,0.85), rgba(15,23,42,0.92)),
+        url('images/promo-poster.jpg');
+    }
+  }
+
+  /* ===== Grand Opening promo section ===== */
+  .grand-opening-section {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 0 24px;
+  }
+  .grand-opening-card {
+    background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
+    border: 2px solid rgba(251,191,36,0.35);
+    border-radius: 22px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(251,191,36,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .grand-opening-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(251,191,36,0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .grand-opening-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.5);
+    color: #fbbf24;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .grand-opening-title {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 2;
+    line-height: 1.2;
+  }
+  @media (min-width: 640px) {
+    .grand-opening-title { font-size: 32px; }
+  }
+  .grand-opening-sub {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0 0 22px;
+    position: relative;
+    z-index: 2;
+  }
+  .poster-wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 520px;
+    margin: 0 auto 22px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: zoom-in;
+    transition: transform 0.2s;
+  }
+  .poster-wrap:hover { transform: scale(1.01); }
+  .poster-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .poster-hint {
+    color: #64748b;
+    font-size: 11px;
+    margin-top: -14px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+  }
+  .grand-opening-ctas {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+  .go-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.15s;
+  }
+  .go-btn:hover { transform: translateY(-2px); }
+  .go-btn-primary {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(34,197,94,0.4);
+  }
+  .go-btn-wa {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(37,211,102,0.35);
+  }
+
+  /* Lightbox */
+  .poster-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    cursor: zoom-out;
+  }
+  .poster-lightbox.open { display: flex; }
+  .poster-lightbox img {
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+  }
+  .poster-lightbox .close-hint {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    opacity: 0.7;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -124,6 +302,39 @@
     </div>
   </div>
 </section>
+
+<!-- ============================================= -->
+<!-- GRAND OPENING PROMO POSTER                    -->
+<!-- ============================================= -->
+<section class="grand-opening-section">
+  <div class="grand-opening-card">
+    <div class="grand-opening-tag">
+      <span>🎉</span> Grand Opening · 22 September
+    </div>
+    <h2 class="grand-opening-title">All Tournaments · FREE ENTRY</h2>
+    <p class="grand-opening-sub">8 games. 8 tournaments. Real prizes. Limited slots.</p>
+
+    <div class="poster-wrap" onclick="openPosterLightbox()">
+      <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening — 22 September, Free Entry">
+    </div>
+    <p class="poster-hint">👆 Tap poster to view full size</p>
+
+    <div class="grand-opening-ctas">
+      <a href="tournaments.html" class="go-btn go-btn-primary">
+        🎮 Register for a Tournament
+      </a>
+      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="go-btn go-btn-wa">
+        💬 Join WhatsApp Group
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="posterLightbox" class="poster-lightbox" onclick="closePosterLightbox()">
+  <span class="close-hint">✕</span>
+  <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening poster">
+</div>
 
 <!-- ============================================= -->
 <!-- FEATURE #1: LIVE NOW ON HOMEPAGE              -->
@@ -323,6 +534,21 @@ async function loadHomeLive() {
 
 loadHomeLive();
 setInterval(loadHomeLive, 60000);
+</script>
+
+<!-- ============================================= -->
+<!-- Poster lightbox helpers                       -->
+<!-- ============================================= -->
+<script>
+function openPosterLightbox() {
+  document.getElementById('posterLightbox').classList.add('open');
+}
+function closePosterLightbox() {
+  document.getElementById('posterLightbox').classList.remove('open');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePosterLightbox();
+});
 </script>
 
 </body>
