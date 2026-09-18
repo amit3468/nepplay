@@ -23,8 +23,26 @@
         .mobile-nav-menu { display: none; }
         .mobile-nav-menu.open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 12px; gap: 8px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
-        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Referral banner (shows if user arrived via a ref link) */
+        .referral-notice {
+            display: none;
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.12));
+            border: 1px solid rgba(99,102,241,0.4);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #c7d2fe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .referral-notice.show { display: flex; }
+        .referral-notice i { color: #a5b4fc; font-size: 16px; }
+        .referral-notice b { color: #fff; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -49,7 +67,7 @@
 
     <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
         <div class="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-xl shadow-2xl">
-            
+
             <div class="text-center mb-6">
                 <div class="inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3">
                     <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block mr-1"></span>
@@ -60,8 +78,14 @@
                 <p class="text-gray-400 text-xs sm:text-sm mt-1">Register now to be notified when we launch tournaments</p>
             </div>
 
+            <!-- REFERRAL NOTICE (shows only when ?ref= is in URL) -->
+            <div id="referralNotice" class="referral-notice">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>You were invited by a friend — signing up will credit them on their profile.</span>
+            </div>
+
             <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
                     <input type="text" id="fullName" class="form-input w-full px-4 py-3 rounded-lg" placeholder="e.g., Amit Sharma" autocomplete="name">
@@ -116,7 +140,7 @@
             </form>
 
             <div class="text-center mt-6">
-                <p class="text-sm text-gray-400">Already have an account? 
+                <p class="text-sm text-gray-400">Already have an account?
                     <a href="member.html" class="text-red-400 hover:text-red-300 font-semibold">Login here</a>
                 </p>
             </div>
@@ -156,6 +180,31 @@
         const auth = getAuth(app);
 
         console.log("🔥 Firebase initialized for register page");
+
+        // ============================================================
+        // REFERRAL CAPTURE (from URL ?ref= OR from localStorage saved by member.html)
+        // ============================================================
+        let pendingReferral = null;
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refFromUrl = urlParams.get('ref');
+            const refFromStorage = localStorage.getItem('inviteRef');
+            pendingReferral = refFromUrl || refFromStorage || null;
+
+            // Save to localStorage so it survives page reloads
+            if (refFromUrl && refFromUrl.length > 10) {
+                localStorage.setItem('inviteRef', refFromUrl);
+            }
+
+            // Show referral notice if we have a ref
+            if (pendingReferral && pendingReferral.length > 10) {
+                const notice = document.getElementById('referralNotice');
+                if (notice) notice.classList.add('show');
+                console.log('📥 Referral detected:', pendingReferral);
+            }
+        } catch (e) {
+            console.warn('Referral capture failed:', e);
+        }
 
         // ============================================================
         // MOBILE NAV
@@ -283,9 +332,19 @@
                     tournamentsWon: 0
                 };
 
+                // Attach referral if present
+                if (pendingReferral && pendingReferral.length > 10 && pendingReferral !== user.uid) {
+                    userProfile.referredBy = pendingReferral;
+                    userProfile.referredAt = new Date().toISOString();
+                    console.log("🔗 Attaching referral:", pendingReferral);
+                }
+
                 console.log("🔥 Saving user profile to Firestore...");
                 await setDoc(doc(db, "users", user.uid), userProfile);
                 console.log("✅ User profile saved to Firestore");
+
+                // Clear the pending referral from localStorage
+                try { localStorage.removeItem('inviteRef'); } catch (e) {}
 
                 // Success!
                 msgBox.classList.remove('hidden');
