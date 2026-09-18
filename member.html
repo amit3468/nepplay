@@ -56,6 +56,25 @@
         .wa-btn:hover { transform: scale(1.1); }
         @keyframes pulse-wa { 0%, 100% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); } 50% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.9); } }
 
+        /* Viral share floating button (positioned above WhatsApp float) */
+        .floating-share { position: fixed; bottom: 96px; right: 24px; z-index: 100; }
+        .share-fab {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 24px;
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse-share 2.4s infinite;
+        }
+        .share-fab:hover { transform: scale(1.1); }
+        @keyframes pulse-share {
+            0%, 100% { box-shadow: 0 8px 24px rgba(168, 85, 247, 0.5); }
+            50% { box-shadow: 0 8px 36px rgba(168, 85, 247, 0.9); }
+        }
+
         .mobile-menu-toggle { display: flex; }
         @media (min-width: 768px) { .mobile-menu-toggle { display: none !important; } }
         .mobile-nav-menu { display: none; }
@@ -146,6 +165,13 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+    <!-- VIRAL SHARE FLOATING BUTTON (only visible when logged in) -->
+    <div id="floatingShare" class="floating-share" style="display:none;">
+        <div class="share-fab" onclick="shareInviteLink()" title="Share NEPPLAY with friends">
+            <i class="fa-solid fa-share-nodes"></i>
+        </div>
+    </div>
 
     <div class="floating-support">
         <div id="supportMenu" class="support-menu">
@@ -483,7 +509,7 @@
                 </div>
             </div>
 
-            <!-- NEW: My Profile CTA card -->
+            <!-- My Profile CTA card -->
             <a href="player.html" class="block glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/30 hover:border-purple-500/60 transition group">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
@@ -496,6 +522,22 @@
                     <i class="fa-solid fa-arrow-right text-purple-400 text-lg group-hover:translate-x-1 transition"></i>
                 </div>
             </a>
+
+            <!-- INVITE FRIENDS CARD -->
+            <div class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-indigo-500/30 hover:border-indigo-500/60 transition" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.06));">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-users-line text-white text-2xl"></i>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <h3 class="text-white font-black text-base sm:text-lg mb-1">🎁 Invite Friends & Grow NEPPLAY</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm">Share your personal invite link on WhatsApp. When your friends join, they'll see your name on their profile.</p>
+                    </div>
+                    <button onclick="shareInviteLink()" class="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-share-nodes"></i> Share Invite Link
+                    </button>
+                </div>
+            </div>
 
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
@@ -564,7 +606,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -593,6 +635,20 @@
         let currentUserProfile = null;
         let notifListeners = [];
         let notifCache = [];
+
+        // ================================================
+        // REFERRAL CAPTURE (runs on page load)
+        // ================================================
+        (function captureReferral() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const ref = urlParams.get('ref');
+                if (ref && ref.length > 10) {
+                    localStorage.setItem('inviteRef', ref);
+                    console.log('📥 Referral captured:', ref);
+                }
+            } catch (e) {}
+        })();
 
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
@@ -977,9 +1033,12 @@
             } catch (e) { alert('Could not send reset email.'); }
         };
 
-                async function showDashboard(user) {
+        async function showDashboard(user) {
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
+
+            // Show viral share button
+            document.getElementById('floatingShare').style.display = 'block';
 
             try {
                 const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -1000,8 +1059,11 @@
             updateNotifBadge();
             renderNotifList();
 
-            // FEATURE #1: Start watching for upcoming tournaments
+            // Start watching for upcoming tournaments
             startUpcomingTournamentWatcher(user.uid);
+
+            // If there's a pending referral in localStorage and this user doesn't have referredBy yet, save it
+            await applyPendingReferral(user.uid);
 
             await Promise.all([
                 checkUserRegistration(user.uid),
@@ -1010,27 +1072,92 @@
                 loadActiveTournaments()
             ]);
         }
-                // =========================================================
-        // FEATURE #1: AUTO-NOTIFY 30 MIN BEFORE TOURNAMENT STARTS
+
+        // =========================================================
+        // VIRAL SHARE — referral tracking
+        // =========================================================
+        async function applyPendingReferral(uid) {
+            try {
+                const ref = localStorage.getItem('inviteRef');
+                if (!ref || ref === uid) return;
+                const userRef = doc(db, 'users', uid);
+                const snap = await getDoc(userRef);
+                if (!snap.exists()) return;
+                const data = snap.data();
+                if (data.referredBy) return; // already has a referral
+                await updateDoc(userRef, {
+                    referredBy: ref,
+                    referredAt: new Date().toISOString()
+                });
+                localStorage.removeItem('inviteRef');
+                console.log('✅ Referral applied:', ref);
+            } catch (e) {
+                console.warn('applyPendingReferral error:', e.message);
+            }
+        }
+
+        window.shareInviteLink = async function() {
+            if (!currentUser || !currentUser.uid) {
+                alert('Please log in first');
+                return;
+            }
+            const inviteUrl = 'https://nepplay.onrender.com/member.html?ref=' + currentUser.uid;
+            const shareText = '🎮 Join me on NEPPLAY — Nepal\'s esports platform!\n' +
+                              '8 tournaments • FREE ENTRY • Real cash prizes\n\n' +
+                              'Register here: ' + inviteUrl;
+
+            // Try native share first (mobile)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'NEPPLAY — Nepal\'s Esports Platform',
+                        text: 'Join me on NEPPLAY — Nepal\'s esports platform!',
+                        url: inviteUrl
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    // fall through to copy
+                }
+            }
+
+            // Copy to clipboard + open WhatsApp
+            try {
+                await navigator.clipboard.writeText(inviteUrl);
+                // Visual feedback
+                const btn = event?.target?.closest('button');
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Link Copied!';
+                    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+                }
+                setTimeout(() => {
+                    window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
+                }, 600);
+            } catch (err) {
+                // Last resort — prompt
+                prompt('Copy this link and share:', inviteUrl);
+            }
+        };
+
+        // =========================================================
+        // AUTO-NOTIFY 30 MIN BEFORE TOURNAMENT STARTS
         // =========================================================
         const NOTIFIED_30MIN = new Set();
         const NOTIFIED_5MIN = new Set();
         let upcomingWatcherId = null;
 
         function startUpcomingTournamentWatcher(uid) {
-            // Clear any previous watcher
             if (upcomingWatcherId) {
                 clearInterval(upcomingWatcherId);
                 upcomingWatcherId = null;
             }
-            // Run immediately, then every 60 seconds
             checkUpcomingTournaments(uid);
             upcomingWatcherId = setInterval(() => checkUpcomingTournaments(uid), 60000);
         }
 
         async function checkUpcomingTournaments(uid) {
             try {
-                // Fetch user's confirmed registrations
                 const regSnap = await getDocs(query(
                     collection(db, 'tournament_registrations'),
                     where('userId', '==', uid),
@@ -1038,7 +1165,6 @@
                 ));
                 if (regSnap.empty) return;
 
-                // Fetch all tournaments (small collection, safe to read)
                 const tournSnap = await getDocs(collection(db, 'tournaments'));
                 const tournamentsById = {};
                 tournSnap.docs.forEach(d => { tournamentsById[d.id] = d.data(); });
@@ -1050,7 +1176,6 @@
                     const t = tournamentsById[reg.tournamentId];
                     if (!t || !t.date) return;
 
-                    // Compute tournament start time (treat as NPT / UTC+5:45)
                     const timeStr = t.time && t.time !== '—' ? t.time : '00:00';
                     const start = new Date(`${t.date}T${timeStr}:00+05:45`);
                     if (isNaN(start.getTime())) return;
@@ -1060,7 +1185,6 @@
                     const key30 = uid + '_' + reg.tournamentId + '_30';
                     const key5  = uid + '_' + reg.tournamentId + '_5';
 
-                    // T-30 minute alert (once)
                     if (diffMin <= 30 && diffMin > 5 && !NOTIFIED_30MIN.has(key30)) {
                         NOTIFIED_30MIN.add(key30);
                         pushNotif({
@@ -1072,7 +1196,6 @@
                         });
                     }
 
-                    // T-5 minute alert (once)
                     if (diffMin <= 5 && diffMin >= 0 && !NOTIFIED_5MIN.has(key5)) {
                         NOTIFIED_5MIN.add(key5);
                         pushNotif({
