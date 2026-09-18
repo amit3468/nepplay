@@ -215,6 +215,48 @@
   /* Referral bonus card colors */
   .reg-card.referral-pending { border-left: 4px solid #eab308; }
   .reg-card.referral-paid    { border-left: 4px solid #22c55e; }
+
+  /* Clickable name in referral card */
+  .clickable-name {
+    color: #a5b4fc;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .clickable-name:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+
+  /* Referral payment thumbnail */
+  .ref-thumb {
+    width: 60px; height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #2a2d4a;
+    cursor: zoom-in;
+    margin-right: 8px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .ref-thumb:hover {
+    transform: scale(1.08);
+    border-color: #6366f1;
+  }
+  .ref-shot-wrap {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-right: 8px;
+  }
+
+  /* Referral filter tabs */
+  #section-referrals .pay-status-tabs {
+    margin-top: 4px;
+  }
+  #section-referrals .pay-status-tabs button {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
 </style>
 </head>
 <body>
@@ -307,14 +349,14 @@
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v4.1 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v4.2 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v4.1</span>
+        <span style="font-size:12px; color:#6b7280;">v4.2</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
@@ -721,7 +763,7 @@
       </div>
     </section>
 
-    <!-- REFERRALS (NEW) -->
+    <!-- REFERRALS (v4.2 enhanced) -->
     <section id="section-referrals" class="admin-section" style="display:none">
       <h2>🎁 Referral Bonuses</h2>
       <p class="muted">Rs. 20 earned per paid-tournament referral. Pay the referrer manually, then mark as paid.</p>
@@ -733,7 +775,17 @@
         <div class="stat-card"><small>TOP REFERRER</small><b id="refTopReferrer">—</b><span id="refTopReferrerSub">No referrers yet</span></div>
       </div>
 
-      <div class="export-toolbar" style="margin-top:20px;">
+      <div style="margin: 20px 0 12px;">
+        <input type="text" id="refSearch" placeholder="🔍 Search referrer, referred, email, IGN, tournament, txn..." oninput="filterRefSearch()" class="search-input" style="width:100%;">
+      </div>
+
+      <div class="pay-status-tabs">
+        <button class="active" data-status="all"     onclick="filterRefStatus('all', this)">📂 All <span class="cnt" id="refCntAll">0</span></button>
+        <button data-status="pending" onclick="filterRefStatus('pending', this)">⏳ Pending <span class="cnt" id="refCntPending">0</span></button>
+        <button data-status="paid"    onclick="filterRefStatus('paid', this)">✅ Paid <span class="cnt" id="refCntPaid">0</span></button>
+      </div>
+
+      <div class="export-toolbar" style="margin-top:16px;">
         <button class="export-btn" onclick="exportReferralsCSV()">⬇️ Export Referrals CSV</button>
       </div>
 
