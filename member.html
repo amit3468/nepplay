@@ -56,7 +56,6 @@
         .wa-btn:hover { transform: scale(1.1); }
         @keyframes pulse-wa { 0%, 100% { box-shadow: 0 8px 24px rgba(37, 211, 102, 0.5); } 50% { box-shadow: 0 8px 32px rgba(37, 211, 102, 0.9); } }
 
-        /* Viral share floating button (positioned above WhatsApp float) */
         .floating-share { position: fixed; bottom: 96px; right: 24px; z-index: 100; }
         .share-fab {
             width: 60px; height: 60px;
@@ -162,6 +161,28 @@
         @keyframes progressPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
         .progress-text { font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); margin-top: 6px; text-align: center; }
         .live-dot-small { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-live 1.5s infinite; vertical-align: middle; }
+
+        /* Referral Stats Card (NEW) */
+        .ref-stat-tile {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+        }
+        .ref-stat-tile .num {
+            font-size: 1.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .ref-stat-tile .lbl {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+            font-weight: 700;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -539,6 +560,47 @@
                 </div>
             </div>
 
+            <!-- REFERRAL STATS CARD (NEW) -->
+            <div id="referralStatsCard" class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/40" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.06)); display:none;">
+                <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-gift text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-black text-base sm:text-lg">Your Referral Stats</h3>
+                            <p class="text-purple-300 text-xs font-bold uppercase tracking-wider mt-0.5">💰 Rs. 20 per paid referral · Unlimited</p>
+                        </div>
+                    </div>
+                    <button onclick="shareInviteLink()" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg transition text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes"></i> Share
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="ref-stat-tile">
+                        <div class="num text-white" id="refInvited">0</div>
+                        <div class="lbl">🤝 Invited</div>
+                    </div>
+                    <div class="ref-stat-tile">
+                        <div class="num text-green-400" id="refQualified">0</div>
+                        <div class="lbl">✅ Qualified</div>
+                    </div>
+                    <div class="ref-stat-tile">
+                        <div class="num text-yellow-300" id="refEarned">Rs. 0</div>
+                        <div class="lbl">💰 Earned</div>
+                    </div>
+                    <div class="ref-stat-tile">
+                        <div class="num text-purple-300" id="refPending">Rs. 0</div>
+                        <div class="lbl">⏳ Pending</div>
+                    </div>
+                </div>
+
+                <p class="text-purple-200 text-xs mt-4 text-center italic" id="refMessage">
+                    💜 Keep sharing your link to earn more!
+                </p>
+            </div>
+
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
@@ -746,7 +808,8 @@
                 warning: { bg: 'rgba(234,179,8,.15)',  color: '#facc15', icon: 'fa-triangle-exclamation' },
                 error:   { bg: 'rgba(239,68,68,.15)',  color: '#f87171', icon: 'fa-circle-xmark' },
                 trophy:  { bg: 'rgba(251,191,36,.15)', color: '#fbbf24', icon: 'fa-trophy' },
-                money:   { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-money-bill-wave' }
+                money:   { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-money-bill-wave' },
+                referral:{ bg: 'rgba(236,72,153,.15)', color: '#f472b6', icon: 'fa-gift' }
             };
             list.innerHTML = notifCache.map(n => {
                 const s = style[n.type] || style.info;
@@ -862,6 +925,26 @@
                     }
                 });
             }));
+
+            // Referral bonus listener — fires when a bonus is created for this user
+            const refQ = query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid));
+            notifListeners.push(onSnapshot(refQ, snap => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const b = change.doc.data();
+                        const id = change.doc.id;
+                        // Skip if this bonus was created before page load (already seen)
+                        if (b.createdAt?.toDate && (Date.now() - b.createdAt.toDate().getTime()) > 5000) return;
+                        pushNotif({
+                            id: 'ref_bonus_' + id,
+                            type: 'referral',
+                            title: '🎁 You earned Rs. ' + (b.amount || 20) + '!',
+                            message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link. Bonus pending admin payout.`,
+                            time: new Date()
+                        });
+                    }
+                });
+            }));
         }
 
         async function backfillNotifications(uid) {
@@ -907,6 +990,20 @@
                         title: '🎮 Tournament Joined',
                         message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`,
                         time: r.registeredAt?.toDate ? r.registeredAt.toDate() : new Date()
+                    });
+                });
+
+                // Backfill referral bonuses
+                const refSnap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
+                refSnap.docs.forEach(d => {
+                    const b = d.data();
+                    const id = d.id;
+                    pushNotif({
+                        id: 'ref_bonus_' + id,
+                        type: 'referral',
+                        title: '🎁 You earned Rs. ' + (b.amount || 20) + '!',
+                        message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link.`,
+                        time: b.createdAt?.toDate ? b.createdAt.toDate() : new Date()
                     });
                 });
 
@@ -1065,12 +1162,64 @@
             // If there's a pending referral in localStorage and this user doesn't have referredBy yet, save it
             await applyPendingReferral(user.uid);
 
+            // Load referral stats
+            await loadReferralStats(user.uid);
+
             await Promise.all([
                 checkUserRegistration(user.uid),
                 loadPayouts(user.uid),
                 loadAnnouncements(),
                 loadActiveTournaments()
             ]);
+        }
+
+        // =========================================================
+        // REFERRAL STATS CARD (NEW)
+        // =========================================================
+        async function loadReferralStats(uid) {
+            try {
+                // Fetch this user's referral bonuses
+                const snap = await getDocs(query(
+                    collection(db, 'referral_bonuses'),
+                    where('referrerUid', '==', uid)
+                ));
+                const bonuses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                const invited = bonuses.length;
+                const paid = bonuses.filter(b => b.status === 'paid');
+                const pending = bonuses.filter(b => b.status !== 'paid');
+                const earned = paid.reduce((s, b) => s + Number(b.amount || 0), 0);
+                const pendingAmt = pending.reduce((s, b) => s + Number(b.amount || 0), 0);
+                const total = earned + pendingAmt;
+
+                // Also check referralCount from user doc (for counting pre-paid referrals)
+                const count = Math.max(invited, Number(currentUserProfile?.referralCount || 0));
+
+                // Only show card if user has at least one referral
+                const card = document.getElementById('referralStatsCard');
+                if (count === 0 && total === 0) {
+                    card.style.display = 'none';
+                    return;
+                }
+
+                card.style.display = 'block';
+                document.getElementById('refInvited').textContent = count;
+                document.getElementById('refQualified').textContent = invited;
+                document.getElementById('refEarned').textContent = 'Rs. ' + total.toLocaleString();
+                document.getElementById('refPending').textContent = 'Rs. ' + pendingAmt.toLocaleString();
+
+                // Dynamic message
+                const msg = document.getElementById('refMessage');
+                if (count === 0) {
+                    msg.textContent = '💜 Share your link to earn Rs. 20 per friend who joins a paid tournament!';
+                } else if (pendingAmt > 0) {
+                    msg.textContent = `💜 ${invited} friend${invited !== 1 ? 's' : ''} qualified · Rs. ${pendingAmt} pending admin payout`;
+                } else {
+                    msg.textContent = `🎉 ${invited} qualified referral${invited !== 1 ? 's' : ''} · Keep sharing to earn more!`;
+                }
+            } catch (e) {
+                console.warn('loadReferralStats error:', e.message);
+            }
         }
 
         // =========================================================
@@ -1084,7 +1233,7 @@
                 const snap = await getDoc(userRef);
                 if (!snap.exists()) return;
                 const data = snap.data();
-                if (data.referredBy) return; // already has a referral
+                if (data.referredBy) return;
                 await updateDoc(userRef, {
                     referredBy: ref,
                     referredAt: new Date().toISOString()
@@ -1103,28 +1252,25 @@
             }
             const inviteUrl = 'https://nepplay.onrender.com/member.html?ref=' + currentUser.uid;
             const shareText = '🎮 Join me on NEPPLAY — Nepal\'s esports platform!\n' +
-                              '8 tournaments • FREE ENTRY • Real cash prizes\n\n' +
+                              '8 tournaments • FREE ENTRY • Real cash prizes\n' +
+                              '💰 Refer friends & earn Rs. 20 per paid referral\n\n' +
                               'Register here: ' + inviteUrl;
 
-            // Try native share first (mobile)
             if (navigator.share) {
                 try {
                     await navigator.share({
                         title: 'NEPPLAY — Nepal\'s Esports Platform',
-                        text: 'Join me on NEPPLAY — Nepal\'s esports platform!',
+                        text: 'Join me on NEPPLAY — earn Rs. 20 per referral!',
                         url: inviteUrl
                     });
                     return;
                 } catch (err) {
                     if (err.name === 'AbortError') return;
-                    // fall through to copy
                 }
             }
 
-            // Copy to clipboard + open WhatsApp
             try {
                 await navigator.clipboard.writeText(inviteUrl);
-                // Visual feedback
                 const btn = event?.target?.closest('button');
                 if (btn) {
                     const orig = btn.innerHTML;
@@ -1135,7 +1281,6 @@
                     window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
                 }, 600);
             } catch (err) {
-                // Last resort — prompt
                 prompt('Copy this link and share:', inviteUrl);
             }
         };
