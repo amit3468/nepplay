@@ -162,7 +162,7 @@
         .progress-text { font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); margin-top: 6px; text-align: center; }
         .live-dot-small { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-live 1.5s infinite; vertical-align: middle; }
 
-        /* Referral Stats Card (NEW) */
+        /* Referral Stats Card */
         .ref-stat-tile {
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(168, 85, 247, 0.25);
@@ -187,7 +187,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- VIRAL SHARE FLOATING BUTTON (only visible when logged in) -->
+    <!-- VIRAL SHARE FLOATING BUTTON -->
     <div id="floatingShare" class="floating-share" style="display:none;">
         <div class="share-fab" onclick="shareInviteLink()" title="Share NEPPLAY with friends">
             <i class="fa-solid fa-share-nodes"></i>
@@ -530,7 +530,6 @@
                 </div>
             </div>
 
-            <!-- My Profile CTA card -->
             <a href="player.html" class="block glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/30 hover:border-purple-500/60 transition group">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
@@ -560,8 +559,8 @@
                 </div>
             </div>
 
-            <!-- REFERRAL STATS CARD (NEW) -->
-            <div id="referralStatsCard" class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/40" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.06)); display:none;">
+            <!-- REFERRAL STATS CARD (always visible) -->
+            <div id="referralStatsCard" class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/40" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.06));">
                 <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
@@ -597,7 +596,7 @@
                 </div>
 
                 <p class="text-purple-200 text-xs mt-4 text-center italic" id="refMessage">
-                    💜 Keep sharing your link to earn more!
+                    💜 Share your link to earn Rs. 20 per friend who joins a paid tournament!
                 </p>
             </div>
 
@@ -926,14 +925,13 @@
                 });
             }));
 
-            // Referral bonus listener — fires when a bonus is created for this user
+            // Referral bonus listener
             const refQ = query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid));
             notifListeners.push(onSnapshot(refQ, snap => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const b = change.doc.data();
                         const id = change.doc.id;
-                        // Skip if this bonus was created before page load (already seen)
                         if (b.createdAt?.toDate && (Date.now() - b.createdAt.toDate().getTime()) > 5000) return;
                         pushNotif({
                             id: 'ref_bonus_' + id,
@@ -993,7 +991,6 @@
                     });
                 });
 
-                // Backfill referral bonuses
                 const refSnap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
                 refSnap.docs.forEach(d => {
                     const b = d.data();
@@ -1134,7 +1131,6 @@
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('dashboard-container').classList.remove('hidden');
 
-            // Show viral share button
             document.getElementById('floatingShare').style.display = 'block';
 
             try {
@@ -1156,13 +1152,10 @@
             updateNotifBadge();
             renderNotifList();
 
-            // Start watching for upcoming tournaments
             startUpcomingTournamentWatcher(user.uid);
 
-            // If there's a pending referral in localStorage and this user doesn't have referredBy yet, save it
             await applyPendingReferral(user.uid);
 
-            // Load referral stats
             await loadReferralStats(user.uid);
 
             await Promise.all([
@@ -1174,11 +1167,10 @@
         }
 
         // =========================================================
-        // REFERRAL STATS CARD (NEW)
+        // REFERRAL STATS CARD
         // =========================================================
         async function loadReferralStats(uid) {
             try {
-                // Fetch this user's referral bonuses
                 const snap = await getDocs(query(
                     collection(db, 'referral_bonuses'),
                     where('referrerUid', '==', uid)
@@ -1192,23 +1184,16 @@
                 const pendingAmt = pending.reduce((s, b) => s + Number(b.amount || 0), 0);
                 const total = earned + pendingAmt;
 
-                // Also check referralCount from user doc (for counting pre-paid referrals)
                 const count = Math.max(invited, Number(currentUserProfile?.referralCount || 0));
 
-                // Only show card if user has at least one referral
-                const card = document.getElementById('referralStatsCard');
-                if (count === 0 && total === 0) {
-                    card.style.display = 'none';
-                    return;
-                }
+                // Always show the card so every member sees the Rs. 20 offer
+                document.getElementById('referralStatsCard').style.display = 'block';
 
-                card.style.display = 'block';
                 document.getElementById('refInvited').textContent = count;
                 document.getElementById('refQualified').textContent = invited;
                 document.getElementById('refEarned').textContent = 'Rs. ' + total.toLocaleString();
                 document.getElementById('refPending').textContent = 'Rs. ' + pendingAmt.toLocaleString();
 
-                // Dynamic message
                 const msg = document.getElementById('refMessage');
                 if (count === 0) {
                     msg.textContent = '💜 Share your link to earn Rs. 20 per friend who joins a paid tournament!';
