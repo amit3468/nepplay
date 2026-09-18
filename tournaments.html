@@ -8,83 +8,6 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-  /* ===== ANNOUNCEMENT BANNER ===== */
-  .announce-banner {
-    display: none;
-    background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-    color: #fff;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    position: relative;
-    z-index: 999;
-    animation: bannerSlideDown 0.35s ease-out;
-  }
-  .announce-banner.show { display: block; }
-  @keyframes bannerSlideDown {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .announce-inner {
-    max-width: 1300px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-right: 32px;
-  }
-  .announce-icon {
-    font-size: 16px;
-    flex-shrink: 0;
-    animation: announcePulse 1.8s infinite;
-  }
-  @keyframes announcePulse {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-  }
-  .announce-text {
-    flex-grow: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .announce-text b { font-weight: 800; }
-  .announce-link {
-    color: #fff;
-    background: rgba(255,255,255,0.18);
-    padding: 4px 12px;
-    border-radius: 999px;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 800;
-    white-space: nowrap;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.25);
-    transition: background 0.15s;
-  }
-  .announce-link:hover { background: rgba(255,255,255,0.3); }
-  .announce-close {
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    opacity: 0.75;
-    padding: 4px 8px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    transition: opacity 0.15s, background 0.15s;
-  }
-  .announce-close:hover { opacity: 1; background: rgba(255,255,255,0.15); }
-  @media (max-width: 640px) {
-    .announce-banner { padding: 10px 14px; font-size: 12px; }
-    .announce-inner { padding-right: 24px; gap: 8px; }
-    .announce-text { white-space: normal; line-height: 1.35; }
-    .announce-link { display: none; }
-    .announce-close { font-size: 18px; }
-  }
-
   .confirm-box { text-align: center; padding: 8px 4px 4px; }
   .confirm-icon { font-size: 60px; line-height: 1; margin-bottom: 8px; animation: confirmPop .5s ease-out; }
   @keyframes confirmPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
@@ -120,29 +43,11 @@
     letter-spacing: 0.3px;
     backdrop-filter: blur(6px);
   }
-  .badge-urgent {
-    background: rgba(220,38,38,0.9);
-    color: #fff;
-    animation: badgePulse 1.5s infinite;
-  }
-  .badge-filling {
-    background: rgba(234,179,8,0.9);
-    color: #fff;
-  }
-  .badge-closing {
-    background: rgba(251,146,60,0.95);
-    color: #fff;
-    animation: badgePulse 1.8s infinite;
-  }
-  .badge-full {
-    background: rgba(71,85,105,0.95);
-    color: #fff;
-  }
-  .badge-live {
-    background: rgba(220,38,38,0.95);
-    color: #fff;
-    animation: badgePulse 1.2s infinite;
-  }
+  .badge-urgent { background: rgba(220,38,38,0.9); color: #fff; animation: badgePulse 1.5s infinite; }
+  .badge-filling { background: rgba(234,179,8,0.9); color: #fff; }
+  .badge-closing { background: rgba(251,146,60,0.95); color: #fff; animation: badgePulse 1.8s infinite; }
+  .badge-full { background: rgba(71,85,105,0.95); color: #fff; }
+  .badge-live { background: rgba(220,38,38,0.95); color: #fff; animation: badgePulse 1.2s infinite; }
   @keyframes badgePulse {
     0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
     50% { box-shadow: 0 0 0 6px rgba(0,0,0,0); opacity: 0.85; }
@@ -158,46 +63,52 @@
     border: 1px solid rgba(99,102,241,0.35);
     font-variant-numeric: tabular-nums;
   }
-  .countdown-chip.warn {
-    background: rgba(234,179,8,0.15);
-    color: #fbbf24;
-    border-color: rgba(234,179,8,0.4);
-  }
-  .countdown-chip.danger {
-    background: rgba(220,38,38,0.15);
-    color: #f87171;
-    border-color: rgba(220,38,38,0.5);
-    animation: badgePulse 1.5s infinite;
-  }
-  .countdown-chip.over {
-    background: rgba(220,38,38,0.25);
-    color: #fff;
-    border-color: rgba(220,38,38,0.6);
-  }
-  .slots-spots-left {
-    font-size: 11px;
+  .countdown-chip.warn { background: rgba(234,179,8,0.15); color: #fbbf24; border-color: rgba(234,179,8,0.4); }
+  .countdown-chip.danger { background: rgba(220,38,38,0.15); color: #f87171; border-color: rgba(220,38,38,0.5); animation: badgePulse 1.5s infinite; }
+  .countdown-chip.over { background: rgba(220,38,38,0.25); color: #fff; border-color: rgba(220,38,38,0.6); }
+  .slots-spots-left { font-size: 11px; font-weight: 700; color: #fbbf24; margin-top: 2px; }
+  .btn-join:disabled, .btn-join.btn-disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.6); }
+
+  /* ===== FIX #5: Copy/share link per tournament ===== */
+  .card-share-btn {
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 700;
-    color: #fbbf24;
-    margin-top: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
-  .btn-join:disabled, .btn-join.btn-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(0.6);
+  .card-share-btn:hover {
+    background: rgba(99,102,241,0.3);
+    color: #fff;
+    border-color: rgba(99,102,241,0.6);
+  }
+  .card-share-btn.copied {
+    background: rgba(34,197,94,0.3);
+    color: #4ade80;
+    border-color: rgba(34,197,94,0.5);
+  }
+  .tournament-card.highlight {
+    animation: cardHighlight 3s ease-out;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.35), 0 15px 40px rgba(99,102,241,0.4) !important;
+    transform: translateY(-4px);
+  }
+  @keyframes cardHighlight {
+    0% { box-shadow: 0 0 0 12px rgba(99,102,241,0.6), 0 15px 40px rgba(99,102,241,0.6); transform: scale(1.03); }
+    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 12px 30px rgba(0,0,0,0.4); transform: scale(1); }
   }
 </style>
 </head>
 <body>
-
-<!-- ===== ANNOUNCEMENT BANNER ===== -->
-<div id="announceBanner" class="announce-banner">
-  <div class="announce-inner">
-    <span class="announce-icon">📢</span>
-    <div class="announce-text" id="announceText">Loading announcement...</div>
-    <a href="#" id="announceLink" class="announce-link" style="display:none;">Open →</a>
-    <button class="announce-close" onclick="dismissAnnounceBanner()" aria-label="Close">✕</button>
-  </div>
-</div>
 
 <header class="site-header">
   <div class="logo">🎮 <b>Nepal Gaming</b></div>
@@ -413,7 +324,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc, orderBy, limit }
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -433,70 +344,6 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 console.log("🔥 Firebase ready on tournaments page");
-
-// ================================================
-// ANNOUNCEMENT BANNER
-// ================================================
-async function loadAnnouncementBanner() {
-  const banner = document.getElementById('announceBanner');
-  const textEl = document.getElementById('announceText');
-  const linkEl = document.getElementById('announceLink');
-  if (!banner || !textEl) return;
-
-  try {
-    const q = query(
-      collection(db, 'announcements'),
-      orderBy('createdAt', 'desc'),
-      limit(1)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return;
-
-    const docSnap = snap.docs[0];
-    const a = docSnap.data();
-    const id = docSnap.id;
-
-    // Only show banners with priority = 'high' or 'urgent'
-    // (so not every announcement becomes a banner)
-    const priority = (a.priority || 'normal').toLowerCase();
-    if (priority !== 'high' && priority !== 'urgent') return;
-
-    // Check dismissal (per announcement id)
-    const dismissed = localStorage.getItem('bannerDismissed_' + id);
-    if (dismissed === '1') return;
-
-    const title = a.title || 'Announcement';
-    const message = a.message || '';
-    textEl.innerHTML = '<b>' + escapeBanner(title) + '</b>' + (message ? ' — ' + escapeBanner(message) : '');
-
-    if (a.linkUrl) {
-      linkEl.href = a.linkUrl;
-      linkEl.style.display = 'inline-block';
-      linkEl.setAttribute('data-banner-id', id);
-    }
-
-    banner.setAttribute('data-banner-id', id);
-    banner.classList.add('show');
-  } catch (err) {
-    console.warn('banner load failed:', err.message);
-  }
-}
-
-function escapeBanner(s) {
-  return String(s || '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-window.dismissAnnounceBanner = function() {
-  const banner = document.getElementById('announceBanner');
-  if (!banner) return;
-  const id = banner.getAttribute('data-banner-id');
-  if (id) {
-    try { localStorage.setItem('bannerDismissed_' + id, '1'); } catch (e) {}
-  }
-  banner.classList.remove('show');
-};
 
 // ================================================
 // STATE
@@ -630,10 +477,7 @@ function urgencyBadge(t) {
   return null;
 }
 
-function isTournamentFull(t) {
-  return Number(t.filled || 0) >= Number(t.max || 50);
-}
-
+function isTournamentFull(t) { return Number(t.filled || 0) >= Number(t.max || 50); }
 function isTournamentOver(t) {
   const start = getTournamentStart(t);
   if (!start) return false;
@@ -860,7 +704,7 @@ function renderTournaments() {
     }
 
     return `
-      <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}" style="position:relative;">
+      <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}" data-tid="${t.id}" style="position:relative;">
         ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>' : '<span class="free-ribbon">🆓 FREE</span>'}
         ${badgesHtml ? `<div class="card-badges">${badgesHtml}</div>` : ''}
         <div class="card-banner ${t.color}">
@@ -882,12 +726,74 @@ function renderTournaments() {
           <div class="slots">Slots Filled <span>${t.filled}/${t.max}</span></div>
           <div class="progress"><div style="width:${pct}%"></div></div>
           ${spotsLeftHtml}
-          ${joinBtn}
+          <div style="display:flex; gap:8px; align-items:stretch; margin-top:12px;">
+            <div style="flex:1;">${joinBtn}</div>
+            <button class="card-share-btn" onclick="copyTournamentLink('${t.id}', event)" title="Copy shareable link">
+              <i class="fa-solid fa-link"></i> Share
+            </button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
+
+// ================================================
+// FIX #5: COPY TOURNAMENT LINK
+// ================================================
+window.copyTournamentLink = function(tid, event) {
+  if (event) event.stopPropagation();
+  const url = 'https://nepplay.onrender.com/tournaments.html?t=' + tid;
+  const btn = event?.target?.closest('.card-share-btn');
+  const tournamentTitle = TOURNAMENTS.find(x => x.id === tid)?.title || 'NEPPLAY Tournament';
+
+  // Try native share first (mobile)
+  if (navigator.share) {
+    navigator.share({
+      title: tournamentTitle + ' — NEPPLAY',
+      text: `🎮 Join ${tournamentTitle} on NEPPLAY!`,
+      url: url
+    }).catch(() => {
+      // User cancelled or share failed silently — no fallback needed
+    });
+    return;
+  }
+
+  // Fallback: copy to clipboard
+  navigator.clipboard.writeText(url).then(() => {
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.classList.remove('copied');
+      }, 1800);
+    }
+  }).catch(() => {
+    prompt('Copy this link and share:', url);
+  });
+};
+
+// Auto-scroll + highlight from ?t=<id> param
+(function autoHighlightFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const tid = params.get('t');
+  if (!tid) return;
+
+  let attempts = 0;
+  const tryHighlight = setInterval(() => {
+    attempts++;
+    if (attempts > 40) { clearInterval(tryHighlight); return; }
+    const card = document.querySelector(`.tournament-card[data-tid="${tid}"]`);
+    if (card) {
+      clearInterval(tryHighlight);
+      card.classList.add('highlight');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => card.classList.remove('highlight'), 3500);
+    }
+  }, 250);
+})();
 
 setInterval(() => {
   if (document.getElementById('tournamentGrid')?.children.length) {
@@ -1156,7 +1062,7 @@ window.copyConfirmStream = function(url, btn) {
 };
 
 // ================================================
-// FEATURE #3: SHAREABLE REGISTRATION CARD
+// SHAREABLE REGISTRATION CARD
 // ================================================
 window.shareRegistrationCard = async function() {
   if (!lastConfirmData) {
@@ -1462,7 +1368,6 @@ async function loadLiveStreamers() {
 // ================================================
 // INIT
 // ================================================
-loadAnnouncementBanner();
 loadTournaments();
 loadLiveStreamers();
 setInterval(loadLiveStreamers, 60000);
