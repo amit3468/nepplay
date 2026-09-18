@@ -1,6 +1,6 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.1)
-// Adds: referral bonus tracking (Rs. 20 per qualified referral)
+// NEPPLAY — admin.js (v4.2)
+// Enhanced referrals: search, filter, screenshots, linked users
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
-console.log("🔥 Admin v4.1 — awaiting auth");
+console.log("🔥 Admin v4.2 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL (for password-only login)
@@ -152,6 +152,8 @@ let allReferralBonuses = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
 let currentSearchTerm = '';
+let currentRefFilter = 'all';
+let currentRefSearch = '';
 let roomTournaments = [];
 let selectedResultTournament = null;
 let selectedPaymentIds = new Set();
@@ -310,16 +312,8 @@ async function bootstrapAdminPanel() {
 // ============================================================
 const REFERRAL_BONUS_AMOUNT = 20;
 
-/**
- * Called after a payment is approved.
- * Checks if the payer was referred by someone. If so, creates a bonus doc
- * and increments the referrer's counters.
- *
- * Idempotent — will not create duplicate bonuses for the same payment.
- */
 async function handleReferralBonus(paymentId) {
   try {
-    // Fetch the payment
     const paySnap = await getDoc(doc(db, 'tournament_payments', paymentId));
     if (!paySnap.exists()) {
       console.warn('handleReferralBonus: payment not found', paymentId);
@@ -329,7 +323,6 @@ async function handleReferralBonus(paymentId) {
     const payerUid = payment.userId;
     if (!payerUid) return;
 
-    // Check for existing bonus for this payment (idempotency)
     const dupSnap = await getDocs(query(
       collection(db, 'referral_bonuses'),
       where('referredPaymentId', '==', paymentId)
@@ -339,7 +332,6 @@ async function handleReferralBonus(paymentId) {
       return;
     }
 
-    // Look up the payer's user doc to check referredBy
     const payerDoc = await getDoc(doc(db, 'users', payerUid));
     if (!payerDoc.exists()) return;
     const payer = payerDoc.data();
@@ -349,19 +341,24 @@ async function handleReferralBonus(paymentId) {
       return;
     }
 
-    // Look up the referrer to get their username
     const refDoc = await getDoc(doc(db, 'users', referrerUid));
     const referrer = refDoc.exists() ? refDoc.data() : {};
 
-    // Create the bonus record
+    // Snapshot full referred user details for admin display
     await addDoc(collection(db, 'referral_bonuses'), {
       referrerUid: referrerUid,
       referrerName: referrer.username || referrer.fullName || 'Unknown',
+      referrerEmail: referrer.email || '',
       referredUid: payerUid,
       referredName: payer.username || payer.fullName || 'Unknown',
+      referredEmail: payer.email || '',
+      referredIgn: payment.ign || '',
+      referredPhone: payment.phone || '',
       referredPaymentId: paymentId,
       tournamentId: payment.tournamentId || '',
       tournamentTitle: payment.tournamentTitle || '',
+      paymentMethod: payment.method || '',
+      txnId: payment.txnId || '',
       amount: REFERRAL_BONUS_AMOUNT,
       status: 'pending',
       createdAt: serverTimestamp(),
@@ -369,7 +366,6 @@ async function handleReferralBonus(paymentId) {
       adminNote: ''
     });
 
-    // Increment counters on the referrer's user doc
     const currentCount = Number(referrer.referralCount || 0);
     const currentEarnings = Number(referrer.referralEarnings || 0);
     await updateDoc(doc(db, 'users', referrerUid), {
@@ -380,14 +376,14 @@ async function handleReferralBonus(paymentId) {
     addNotif('referral', '🤝 Referral bonus earned',
       `${referrer.username || 'A member'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'a referred friend'}`);
 
-    console.log(`✅ Referral bonus created: ${referrerUid} → ${payerUid} (Rs. ${REFERRAL_BONUS_AMOUNT})`);
+    console.log(`✅ Referral bonus created: ${referrerUid} → ${payerUid}`);
   } catch (err) {
     console.error('handleReferralBonus error:', err);
   }
 }
 
 // ============================================================
-// REFERRAL BONUSES — LOAD / RENDER
+// REFERRAL BONUSES — LOAD / RENDER (v4.2 enhanced)
 // ============================================================
 async function loadReferralBonuses() {
   try {
@@ -396,7 +392,6 @@ async function loadReferralBonuses() {
     allReferralBonuses.sort((a, b) =>
       (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
     );
-    // Update sidebar badge
     const badge = document.getElementById('referralsBadge');
     if (badge) {
       const pending = allReferralBonuses.filter(b => b.status === 'pending').length;
@@ -410,6 +405,18 @@ async function loadReferralBonuses() {
 }
 window.loadReferralBonuses = loadReferralBonuses;
 
+window.filterRefStatus = function(status, btn) {
+  currentRefFilter = status;
+  document.querySelectorAll('#section-referrals .pay-status-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderReferralBonuses();
+};
+
+window.filterRefSearch = function() {
+  currentRefSearch = (document.getElementById('refSearch')?.value || '').toLowerCase().trim();
+  renderReferralBonuses();
+};
+
 function renderReferralBonuses() {
   const totalCount = allReferralBonuses.length;
   const pending = allReferralBonuses.filter(b => b.status === 'pending');
@@ -417,7 +424,6 @@ function renderReferralBonuses() {
   const pendingAmt = pending.reduce((s, b) => s + Number(b.amount || 0), 0);
   const paidAmt = paid.reduce((s, b) => s + Number(b.amount || 0), 0);
 
-  // Top referrer
   const byReferrer = {};
   allReferralBonuses.forEach(b => {
     const key = b.referrerUid;
@@ -429,7 +435,6 @@ function renderReferralBonuses() {
   const topList = Object.values(byReferrer).sort((a, b) => b.total - a.total);
   const top = topList[0] || null;
 
-  // Stats
   const el = id => document.getElementById(id);
   if (el('refTotalCount')) el('refTotalCount').innerText = totalCount;
   if (el('refPendingAmt')) el('refPendingAmt').innerText = fmtRs(pendingAmt);
@@ -440,9 +445,24 @@ function renderReferralBonuses() {
     if (sub) sub.innerText = top ? `${top.count} referral${top.count !== 1 ? 's' : ''} · ${fmtRs(top.total)}` : 'No referrers yet';
   }
 
-  // List
+  // Update filter tab counts
+  if (el('refCntPending')) el('refCntPending').innerText = pending.length;
+  if (el('refCntPaid')) el('refCntPaid').innerText = paid.length;
+  if (el('refCntAll')) el('refCntAll').innerText = totalCount;
+
   const list = document.getElementById('referralList');
   if (!list) return;
+
+  // Apply filters
+  let filtered = allReferralBonuses.filter(b => {
+    if (currentRefFilter !== 'all' && b.status !== currentRefFilter) return false;
+    if (currentRefSearch) {
+      const hay = `${b.referrerName||''} ${b.referredName||''} ${b.referredEmail||''} ${b.referredIgn||''} ${b.tournamentTitle||''} ${b.txnId||''}`.toLowerCase();
+      if (!hay.includes(currentRefSearch)) return false;
+    }
+    return true;
+  });
+
   if (!allReferralBonuses.length) {
     list.innerHTML = `
       <div class="empty-state">
@@ -453,28 +473,63 @@ function renderReferralBonuses() {
     return;
   }
 
-  list.innerHTML = allReferralBonuses.map(b => {
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <span class="icon">🔍</span>
+        No referral bonuses match your filter.
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map(b => {
     const isPaid = b.status === 'paid';
-    const safeName = (b.referrerName || '').replace(/'/g, '');
+
+    // Find the linked payment for screenshot
+    const payment = allPayments.find(p => p.id === b.referredPaymentId);
+    const shotId = payment ? registerScreenshot(payment) : null;
+    const shotHtml = shotId
+      ? `<img src="${screenshotCache[shotId]}" class="ref-thumb" onclick="event.stopPropagation(); openShotById('${shotId}')" alt="Payment">`
+      : '';
+
+    const safeReferrer = (b.referrerName || '').replace(/'/g, '');
+    const safeReferred = (b.referredName || '').replace(/'/g, '');
+
     return `
-      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+      <div class="reg-card ref-card ${isPaid ? 'referral-paid' : 'referral-pending'}">
         <div class="reg-icon">🤝</div>
         <div class="reg-main">
           <div class="reg-line-1">
-            <b>${escapeDetail(b.referrerName || 'Unknown')}</b>
-            <span class="reg-sep">referred</span>
-            <b>${escapeDetail(b.referredName || 'Unknown')}</b>
+            <b class="clickable-name" onclick="openUserDetail('${b.referrerUid || ''}')" title="View referrer">
+              ${escapeDetail(b.referrerName || 'Unknown')}
+            </b>
+            <span class="reg-sep">→</span>
+            <b class="clickable-name" onclick="openUserDetail('${b.referredUid || ''}')" title="View referred user">
+              ${escapeDetail(b.referredName || 'Unknown')}
+            </b>
           </div>
+
+          ${b.referredEmail ? `<div class="reg-line-2">📧 ${escapeDetail(b.referredEmail)}${b.referredPhone ? ' · 📱 ' + escapeDetail(b.referredPhone) : ''}${b.referredIgn ? ' · 🎮 ' + escapeDetail(b.referredIgn) : ''}</div>` : ''}
+
           <div class="reg-line-2">
             🏆 ${escapeDetail(b.tournamentTitle || 'Paid tournament')}
             · 💰 <b style="color:#fbbf24;">${fmtRs(b.amount || REFERRAL_BONUS_AMOUNT)}</b>
-            · 🕐 ${fmtShort(b.createdAt)}
+            ${b.paymentMethod ? ' · 💳 ' + escapeDetail(b.paymentMethod).toUpperCase() : ''}
+            ${b.txnId ? ' · 🔖 <code>' + escapeDetail(b.txnId) + '</code>' : ''}
           </div>
+
+          <div class="reg-line-2" style="font-size:11px;color:#6b7280;">
+            🕐 ${fmtShort(b.createdAt)}
+            ${b.referrerUid ? ' · 🔗 referrer: <code>' + escapeDetail(b.referrerUid).slice(0,8) + '...</code>' : ''}
+          </div>
+
           ${isPaid && b.paidAt ? `<div class="reg-line-2" style="color:#4ade80;">✅ Paid ${fmtShort(b.paidAt)}${b.adminNote ? ' · ' + escapeDetail(b.adminNote) : ''}</div>` : ''}
         </div>
+        ${shotHtml ? `<div class="ref-shot-wrap">${shotHtml}</div>` : ''}
         <div class="reg-right">
           <span class="status-pill ${isPaid ? 'approved' : 'pending'}" style="font-size:10px;padding:3px 8px;">${isPaid ? 'PAID' : 'PENDING'}</span>
-          ${!isPaid ? `<button class="btn-approve small" style="margin-top:6px;" onclick="markReferralPaid('${b.id}','${safeName}')">✔ Mark Paid</button>` : ''}
+          ${!isPaid ? `<button class="btn-approve small" style="margin-top:6px;" onclick="markReferralPaid('${b.id}','${safeReferrer}')">✔ Mark Paid</button>` : ''}
         </div>
       </div>
     `;
@@ -502,12 +557,18 @@ window.exportReferralsCSV = function() {
     window.showToast('❌ No referral bonuses to export');
     return;
   }
-  const rows = [['Referrer','Referred','Tournament','Amount','Status','Created','Paid At','Note']];
+  const rows = [['Referrer','Referrer Email','Referred','Referred Email','Referred IGN','Referred Phone','Tournament','Payment Method','Txn ID','Amount','Status','Created','Paid At','Note']];
   allReferralBonuses.forEach(b => {
     rows.push([
       b.referrerName || '',
+      b.referrerEmail || '',
       b.referredName || '',
+      b.referredEmail || '',
+      b.referredIgn || '',
+      b.referredPhone || '',
       b.tournamentTitle || '',
+      b.paymentMethod || '',
+      b.txnId || '',
       b.amount || 0,
       b.status || '',
       b.createdAt?.toDate ? b.createdAt.toDate().toISOString() : '',
@@ -568,8 +629,12 @@ window.closeDetailModal = function() {
 };
 
 window.openUserDetail = function(uid) {
+  if (!uid) return;
   const u = allUsers.find(x => x.id === uid);
-  if (!u) return;
+  if (!u) {
+    window.showToast('❌ User not found — may have been deleted');
+    return;
+  }
   const myRegs = allRegs.filter(r => r.userId === uid);
   const myPays = allPayments.filter(p => p.userId === uid);
   const myPayouts = allPayouts.filter(p =>
@@ -577,6 +642,7 @@ window.openUserDetail = function(uid) {
     (p.winnerName && u.username && p.winnerName.toLowerCase() === u.username.toLowerCase())
   );
   const myReferrals = allReferralBonuses.filter(b => b.referrerUid === uid);
+  const referredMe = u.referredBy ? allUsers.find(x => x.id === u.referredBy) : null;
 
   const totalSpent = myPays.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
   const totalWon = myPayouts.filter(p => p.status === 'paid').reduce((s,p) => s + (Number(p.amount)||0), 0);
@@ -600,7 +666,7 @@ window.openUserDetail = function(uid) {
       <div class="dm-row"><span class="dm-k">🔑 User ID</span><span class="dm-v"><code>${escapeDetail(u.id)}</code></span></div>
       <div class="dm-row"><span class="dm-k">📅 Joined</span><span class="dm-v">${fmtDate(u.createdAt)}</span></div>
       <div class="dm-row"><span class="dm-k">🎭 Role</span><span class="dm-v">${u.role || 'member'}</span></div>
-      ${u.referredBy ? `<div class="dm-row"><span class="dm-k">🔗 Referred by</span><span class="dm-v"><code>${escapeDetail(u.referredBy)}</code></span></div>` : ''}
+      ${referredMe ? `<div class="dm-row"><span class="dm-k">🔗 Referred by</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${referredMe.id}')" style="color:#a5b4fc;text-decoration:none;font-weight:700;">${escapeDetail(referredMe.username || referredMe.email || 'Unknown')} →</a></span></div>` : ''}
     </div>
 
     <div class="dm-section">
@@ -1030,7 +1096,6 @@ window.bulkApproveSelected = async function() {
       for (const d of regSnap.docs) {
         await updateDoc(doc(db, 'tournament_registrations', d.id), { status: 'confirmed' });
       }
-      // REFERRAL BONUS — check after approval
       await handleReferralBonus(id);
       ok++;
     } catch (e) {
@@ -2031,7 +2096,6 @@ window.confirmReview = async function(e) {
       for (const d of regSnap.docs) {
         await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
       }
-      // REFERRAL BONUS — check after approval
       if (action === 'approve') {
         await handleReferralBonus(id);
         await loadReferralBonuses();
