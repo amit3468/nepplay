@@ -1,12 +1,14 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.3)
+// NEPPLAY — admin.js (v4.4)
 // + Activity feed (#6)
+// + Manual notifications (#7)
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc,
-  addDoc, query, where, serverTimestamp, onSnapshot
+  addDoc, query, where, serverTimestamp, onSnapshot, orderBy, limit,
+  arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -36,7 +38,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.3 — awaiting auth");
+console.log("🔥 Admin v4.4 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL (for password-only login)
@@ -166,6 +168,7 @@ let allTournaments = [];
 let allPayouts = [];
 let allResults = [];
 let allReferralBonuses = [];
+let allSentNotifications = [];
 let currentStatusFilter = 'pending';
 let currentMethodFilter = 'all';
 let currentSearchTerm = '';
@@ -212,7 +215,8 @@ function registerScreenshot(d) {
 }
 
 // ============================================================
-// NOTIFICATIONS
+// NOTIFICATIONS (admin bell — this is the ADMIN-side bell,
+// different from the notifications WE SEND to users in #7)
 // ============================================================
 let notifications = [];
 
@@ -610,6 +614,161 @@ window.exportReferralsCSV = function() {
 };
 
 // ============================================================
+// NOTIFICATIONS (#7) — SEND + RECENT
+// ============================================================
+const NOTIF_TYPE_META = {
+  info:    { icon: 'ℹ️', color: '#60a5fa' },
+  success: { icon: '✅', color: '#4ade80' },
+  warning: { icon: '⚠️', color: '#facc15' },
+  error:   { icon: '❌', color: '#f87171' },
+  trophy:  { icon: '🏆', color: '#fbbf24' },
+  money:   { icon: '💰', color: '#4ade80' }
+};
+
+function renderNotificationTargetOptions() {
+  const sel = document.getElementById('notifTarget');
+  if (!sel) return;
+  const currentVal = sel.value;
+  const users = [...allUsers].filter(u => u.id).sort((a, b) =>
+    String(a.username || a.email || '').localeCompare(String(b.username || b.email || ''))
+  );
+  let html = '<option value="">— Pick a recipient —</option>';
+  html += '<option value="ALL" style="font-weight:700;">📢 All users (broadcast)</option>';
+  if (users.length) {
+    html += '<optgroup label="Individual users">';
+    users.forEach(u => {
+      const label = `${u.username || 'Unknown'}${u.email ? ' — ' + u.email : ''}`;
+      html += `<option value="${escapeDetail(u.id)}">${escapeDetail(label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if (currentVal) sel.value = currentVal;
+}
+
+async function loadSentNotifications() {
+  const list = document.getElementById('sentNotifList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(30)
+    ));
+    allSentNotifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!allSentNotifications.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No notifications sent yet.</div>';
+      return;
+    }
+    list.innerHTML = allSentNotifications.map(n => {
+      const meta = NOTIF_TYPE_META[n.type] || NOTIF_TYPE_META.info;
+      const isBroadcast = n.targetUid === 'ALL';
+      const targetLabel = isBroadcast ? '📢 All users (broadcast)' : `🎯 ${escapeDetail(n.targetName || n.targetUid || 'Unknown')}`;
+      const readCount = Array.isArray(n.readBy) ? n.readBy.length : 0;
+      const sentAt = fmtShort(n.createdAt);
+      const truncMsg = (n.message || '').length > 140 ? n.message.slice(0, 140) + '…' : (n.message || '');
+      return `
+        <div class="sent-notif-item">
+          <div class="sent-notif-dot" style="background:${meta.color}20; border-color:${meta.color}; color:${meta.color};">
+            ${meta.icon}
+          </div>
+          <div class="sent-notif-body">
+            <div class="sent-notif-target">${targetLabel}</div>
+            <div class="sent-notif-title">${escapeDetail(n.title || '(no title)')}</div>
+            <div class="sent-notif-msg">${escapeDetail(truncMsg)}</div>
+            <div class="sent-notif-meta">🕐 ${sentAt} · 👤 ${escapeDetail(n.createdBy || '—')}${!isBroadcast ? ' · ✅ read by ' + readCount : ''}</div>
+          </div>
+          <div>
+            <button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete this notification">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('loadSentNotifications error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + escapeDetail(err.message) + '</div>';
+  }
+}
+
+async function loadNotificationsPage() {
+  renderNotificationTargetOptions();
+  await loadSentNotifications();
+}
+window.loadNotificationsPage = loadNotificationsPage;
+
+window.sendNotification = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('notifSendBtn');
+  const targetUidRaw = document.getElementById('notifTarget').value;
+  const type = document.getElementById('notifType').value || 'info';
+  const title = document.getElementById('notifTitle').value.trim();
+  const message = document.getElementById('notifMessage').value.trim();
+
+  if (!targetUidRaw) { window.showToast('❌ Pick a recipient'); return; }
+  if (!title) { window.showToast('❌ Title required'); return; }
+  if (!message) { window.showToast('❌ Message required'); return; }
+
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Sending...';
+
+  try {
+    const isBroadcast = targetUidRaw === 'ALL';
+    let targetName = 'All users';
+    if (!isBroadcast) {
+      const u = allUsers.find(x => x.id === targetUidRaw);
+      targetName = u ? (u.username || u.email || targetUidRaw) : targetUidRaw;
+    }
+
+    await addDoc(collection(db, 'notifications'), {
+      targetUid: isBroadcast ? 'ALL' : targetUidRaw,
+      targetName: targetName,
+      type: type,
+      title: title,
+      message: message,
+      createdBy: currentAdminEmail || 'admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    });
+
+    logActivity({
+      action: 'notification_sent',
+      category: 'system',
+      targetId: isBroadcast ? null : targetUidRaw,
+      targetType: isBroadcast ? 'broadcast' : 'user',
+      summary: `Notification sent to ${isBroadcast ? 'ALL users' : targetName}: "${title}"`,
+      metadata: { targetUid: isBroadcast ? 'ALL' : targetUidRaw, targetName, type, title }
+    });
+
+    window.showToast('✅ Notification sent');
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifMessage').value = '';
+    document.getElementById('notifType').value = 'info';
+    document.getElementById('notifTarget').value = '';
+    await loadSentNotifications();
+  } catch (err) {
+    console.error('sendNotification error:', err);
+    window.showToast('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+};
+
+window.deleteNotification = async function(id) {
+  if (!confirm('Delete this notification? Recipients will stop seeing it in their bell.')) return;
+  try {
+    await deleteDoc(doc(db, 'notifications', id));
+    window.showToast('🗑️ Notification deleted');
+    await loadSentNotifications();
+  } catch (err) {
+    console.error('deleteNotification error:', err);
+    window.showToast('❌ ' + err.message);
+  }
+};
+
+// ============================================================
 // LIVE STATS BAR
 // ============================================================
 function loadLiveStats() {
@@ -717,6 +876,7 @@ window.openUserDetail = function(uid) {
 
     <div class="dm-actions">
       <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
+      <button class="dm-btn-primary" onclick="closeDetailModal(); showSection('notifications', document.querySelector('[data-section=notifications]')); setTimeout(()=>{ document.getElementById('notifTarget').value='${u.id}'; }, 200);">🔔 Send Notification</button>
       ${u.role === 'admin' ? '' : `<button class="dm-btn-danger" onclick="deleteUser('${u.id}','${(u.username||'').replace(/'/g,"\\'")}',true)">🗑️ Delete User</button>`}
     </div>
   `;
@@ -1851,6 +2011,8 @@ window.loadUsers = async function() {
     renderUsers();
     renderDashboardRecent();
     loadLiveStats();
+    // Refresh notification target dropdown if the notifications section is already visible
+    if (document.getElementById('notifTarget')) renderNotificationTargetOptions();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
