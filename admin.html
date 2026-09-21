@@ -216,7 +216,6 @@
   .reg-card.referral-pending { border-left: 4px solid #eab308; }
   .reg-card.referral-paid    { border-left: 4px solid #22c55e; }
 
-  /* Clickable name in referral card */
   .clickable-name {
     color: #a5b4fc;
     cursor: pointer;
@@ -228,7 +227,6 @@
     text-decoration: underline;
   }
 
-  /* Referral payment thumbnail */
   .ref-thumb {
     width: 60px; height: 60px;
     object-fit: cover;
@@ -249,7 +247,6 @@
     padding-right: 8px;
   }
 
-  /* Referral filter tabs */
   #section-referrals .pay-status-tabs {
     margin-top: 4px;
   }
@@ -289,6 +286,139 @@
   }
   .activity-time { color: #9ca3af; }
   .activity-actor { color: #6b7280; }
+
+  /* ================= NOTIFICATIONS (#7) ================= */
+  .notif-form-wrap {
+    background: #15172b;
+    border: 1px solid #2a2d4a;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .notif-form-wrap h3 {
+    color: #fff;
+    margin: 0 0 4px;
+    font-size: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .notif-form-wrap .notif-sub {
+    color: #9ca3af;
+    font-size: 12px;
+    margin: 0 0 20px;
+  }
+  .notif-field {
+    margin-bottom: 14px;
+  }
+  .notif-field label {
+    display: block;
+    color: #9ca3af;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .notif-field input[type="text"],
+  .notif-field select,
+  .notif-field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    background: #0f1124;
+    border: 1px solid #2a2d4a;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  .notif-field textarea { resize: vertical; min-height: 80px; }
+  .notif-field input:focus,
+  .notif-field select:focus,
+  .notif-field textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  }
+  .notif-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 640px) {
+    .notif-grid-2 { grid-template-columns: 1fr; }
+  }
+  .notif-send-btn {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+  }
+  .notif-send-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+  }
+  .notif-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .notif-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .sent-notif-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .sent-notif-item:last-child { border-bottom: none; }
+  .sent-notif-item:hover { background: rgba(99,102,241,0.05); border-radius: 8px; }
+  .sent-notif-dot {
+    width: 36px; height: 36px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    font-size: 15px;
+    border: 1.5px solid;
+  }
+  .sent-notif-body { flex: 1; min-width: 0; }
+  .sent-notif-target {
+    color: #a5b4fc;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .sent-notif-title {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .sent-notif-msg {
+    color: #9ca3af;
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .sent-notif-meta {
+    color: #6b7280;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+  .notif-help {
+    display: block;
+    color: #6b7280;
+    font-size: 11px;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
 </style>
 </head>
 <body>
@@ -380,16 +510,17 @@
       <a href="#support" data-section="support" class="sidebar-link"><span>🎧</span> Support</a>
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
+      <a href="#notifications" data-section="notifications" class="sidebar-link"><span>🔔</span> Notifications</a>
       <a href="#activity" data-section="activity" class="sidebar-link"><span>📜</span> Activity</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v4.3 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v4.4 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v4.3</span>
+        <span style="font-size:12px; color:#6b7280;">v4.4</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
@@ -805,7 +936,7 @@
       </div>
     </section>
 
-    <!-- REFERRALS (v4.2 enhanced) -->
+    <!-- REFERRALS -->
     <section id="section-referrals" class="admin-section" style="display:none">
       <h2>🎁 Referral Bonuses</h2>
       <p class="muted">Rs. 20 earned per paid-tournament referral. Pay the referrer manually, then mark as paid.</p>
@@ -909,6 +1040,60 @@
       </div>
       <h3 class="mt">📜 Recent Announcements</h3>
       <div class="list" id="announcementList"><div class="empty-state"><span class="icon">📢</span>No announcements yet</div></div>
+    </section>
+
+    <!-- NOTIFICATIONS (#7) -->
+    <section id="section-notifications" class="admin-section" style="display:none">
+      <h2>🔔 Send Notification</h2>
+      <p class="muted">Send a personal notification to a specific user, or broadcast to everyone.</p>
+
+      <div class="notif-form-wrap">
+        <h3>📤 Compose</h3>
+        <p class="notif-sub">Appears in the member's bell icon. Keep it short and specific.</p>
+
+        <form onsubmit="sendNotification(event)">
+          <div class="notif-grid-2">
+            <div class="notif-field">
+              <label>To (user or broadcast)</label>
+              <select id="notifTarget" required>
+                <option value="">— Loading users —</option>
+              </select>
+              <span class="notif-help">Pick one user, or "📢 All users" to broadcast.</span>
+            </div>
+            <div class="notif-field">
+              <label>Type</label>
+              <select id="notifType">
+                <option value="info">ℹ️ Info (blue)</option>
+                <option value="success">✅ Success (green)</option>
+                <option value="warning">⚠️ Warning (yellow)</option>
+                <option value="error">❌ Urgent (red)</option>
+                <option value="trophy">🏆 Trophy (gold)</option>
+                <option value="money">💰 Money (green)</option>
+              </select>
+              <span class="notif-help">Controls the icon + color in the member's bell.</span>
+            </div>
+          </div>
+
+          <div class="notif-field">
+            <label>Title *</label>
+            <input type="text" id="notifTitle" maxlength="80" placeholder="e.g. Match delayed by 30 min" required>
+            <span class="notif-help">Short headline — max 80 chars.</span>
+          </div>
+
+          <div class="notif-field">
+            <label>Message *</label>
+            <textarea id="notifMessage" maxlength="300" rows="3" placeholder="Free Fire Cup now starts at 7:30 PM instead of 7:00 PM. Room details updated." required></textarea>
+            <span class="notif-help">Body text — max 300 chars.</span>
+          </div>
+
+          <button type="submit" class="notif-send-btn" id="notifSendBtn">📤 Send Notification</button>
+        </form>
+      </div>
+
+      <h3 class="mt">📜 Recently Sent</h3>
+      <div class="notif-recent-list" id="sentNotifList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
     </section>
 
     <!-- ACTIVITY FEED -->
@@ -1053,7 +1238,8 @@ window.togglePasswordVisibility = function() {
       referrals: 'loadReferralBonuses',
       announcements: 'loadAnnouncements',
       roomdetails: 'loadRoomDetailsForm',
-      activity: 'loadActivityPage'
+      activity: 'loadActivityPage',
+      notifications: 'loadNotificationsPage'
     };
     var fn = loaders[name];
     if (fn && typeof window[fn] === 'function') {
