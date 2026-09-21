@@ -257,6 +257,38 @@
     padding: 8px 16px;
     font-size: 12px;
   }
+
+  /* ================= ACTIVITY FEED ================= */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+
+  .activity-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 12px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item:hover { background: rgba(99,102,241,0.05); border-radius: 8px; }
+
+  .activity-dot {
+    width: 36px; height: 36px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid;
+    font-size: 15px;
+  }
+
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-summary {
+    color: #e2e8f0; font-size: 13px; font-weight: 600;
+    line-height: 1.4; word-break: break-word;
+  }
+  .activity-meta {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-top: 5px;
+    color: #6b7280; font-size: 11px; font-weight: 600;
+  }
+  .activity-time { color: #9ca3af; }
+  .activity-actor { color: #6b7280; }
 </style>
 </head>
 <body>
@@ -348,15 +380,16 @@
       <a href="#support" data-section="support" class="sidebar-link"><span>🎧</span> Support</a>
       <a href="#tournaments" data-section="tournaments" class="sidebar-link"><span>🏆</span> Tournaments</a>
       <a href="#announcements" data-section="announcements" class="sidebar-link"><span>📢</span> Announcements</a>
+      <a href="#activity" data-section="activity" class="sidebar-link"><span>📜</span> Activity</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v4.2 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v4.3 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v4.2</span>
+        <span style="font-size:12px; color:#6b7280;">v4.3</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
@@ -411,6 +444,15 @@
       <div class="list" id="dashRecentUsers"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
       <h3 class="mt">📋 Recent Registrations <small style="color:#6366f1; font-weight:400; font-size:12px;">— click any row for full details</small></h3>
       <div class="list" id="dashRecentRegs"><div class="empty-state"><span class="icon">⏳</span>Loading...</div></div>
+
+      <h3 class="mt" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <span>📜 Recent Activity <small style="color:#6366f1; font-weight:400; font-size:12px;">— live</small></span>
+        <a href="#activity" onclick="event.preventDefault(); showSection('activity', document.querySelector('[data-section=activity]'));"
+           style="color:#a5b4fc; font-size:12px; font-weight:700; text-decoration:none;">See all →</a>
+      </h3>
+      <div class="list activity-list" id="dashActivityFeed">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
     </section>
 
     <!-- PAYMENTS -->
@@ -869,6 +911,54 @@
       <div class="list" id="announcementList"><div class="empty-state"><span class="icon">📢</span>No announcements yet</div></div>
     </section>
 
+    <!-- ACTIVITY FEED -->
+    <section id="section-activity" class="admin-section" style="display:none">
+      <h2>📜 Recent Activity</h2>
+      <p class="muted">Every admin action, logged. Newest first — live updating.</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; align-items:center;">
+        <select id="activityCategoryFilter" onchange="activityFilterCategory(this.value)"
+                style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
+          <option value="all">All categories</option>
+          <option value="payments">💰 Payments</option>
+          <option value="users">👥 Users</option>
+          <option value="referrals">🤝 Referrals</option>
+          <option value="tournaments">🏆 Tournaments</option>
+          <option value="system">⚙️ System</option>
+        </select>
+
+        <select id="activityActorFilter" onchange="activityFilterActor(this.value)"
+                style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
+          <option value="all">All actors</option>
+        </select>
+
+        <select id="activityRangeFilter" onchange="activityFilterRange(this.value)"
+                style="padding:10px 14px;background:#15172b;border:1px solid #2a2d4a;color:#fff;border-radius:10px;">
+          <option value="all">All time</option>
+          <option value="1">Today</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+
+        <input type="text" id="activitySearch" placeholder="🔍 Search summary / actor / target..."
+               oninput="activitySearch()"
+               style="flex:1; min-width:200px; padding:10px 14px; background:#15172b; border:1px solid #2a2d4a; color:#fff; border-radius:10px;">
+
+        <span id="activityCount" style="color:#9ca3af; font-size:12px; font-weight:700;"></span>
+      </div>
+
+      <div class="list activity-list" id="activityList">
+        <div class="empty-state"><span class="icon">⏳</span>Loading...</div>
+      </div>
+
+      <div style="text-align:center; margin:20px 0;">
+        <button id="activityMoreBtn" onclick="activityLoadMore()"
+                style="padding:10px 24px; background:transparent; border:1px solid #2a2d4a; color:#fff; border-radius:10px; cursor:pointer; font-weight:700;">
+          ⬇️ Load more
+        </button>
+      </div>
+    </section>
+
     </main>
   </div>
 </div>
@@ -962,7 +1052,8 @@ window.togglePasswordVisibility = function() {
       profitshare: 'loadProfitShare',
       referrals: 'loadReferralBonuses',
       announcements: 'loadAnnouncements',
-      roomdetails: 'loadRoomDetailsForm'
+      roomdetails: 'loadRoomDetailsForm',
+      activity: 'loadActivityPage'
     };
     var fn = loaders[name];
     if (fn && typeof window[fn] === 'function') {
