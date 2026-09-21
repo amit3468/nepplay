@@ -1,6 +1,6 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.2)
-// Enhanced referrals: search, filter, screenshots, linked users
+// NEPPLAY — admin.js (v4.3)
+// + Activity feed (#6)
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -11,6 +11,10 @@ import {
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import {
+  initActivity, logActivity, loadActivityFeed, loadActivityPage
+} from "./activity.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -25,7 +29,14 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
-console.log("🔥 Admin v4.2 — awaiting auth");
+// Initialize activity module with the same Firebase instances
+initActivity(db, auth);
+
+// Expose activity loaders to the HTML sidebar loader map
+window.loadActivityFeed = loadActivityFeed;
+window.loadActivityPage = loadActivityPage;
+
+console.log("🔥 Admin v4.3 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL (for password-only login)
@@ -84,6 +95,12 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('adminEmailDisplay').textContent = 'Admin';
   console.log('✅ Admin access granted:', currentAdminEmail);
+  logActivity({
+    action: 'admin_login',
+    category: 'system',
+    summary: `Admin logged in (${currentAdminEmail})`,
+    metadata: { email: currentAdminEmail }
+  });
   if (!bootstrapped) {
     bootstrapped = true;
     await bootstrapAdminPanel();
@@ -302,6 +319,7 @@ async function bootstrapAdminPanel() {
   } catch (e) { console.warn('payouts load failed:', e); }
   await loadReferralBonuses();
   renderDashboardRecent();
+  loadActivityFeed();
   loadLiveStats();
   attachRealtimeListeners();
   console.log("✅ Admin panel booted for:", currentAdminEmail);
@@ -344,7 +362,6 @@ async function handleReferralBonus(paymentId) {
     const refDoc = await getDoc(doc(db, 'users', referrerUid));
     const referrer = refDoc.exists() ? refDoc.data() : {};
 
-    // Snapshot full referred user details for admin display
     await addDoc(collection(db, 'referral_bonuses'), {
       referrerUid: referrerUid,
       referrerName: referrer.username || referrer.fullName || 'Unknown',
@@ -366,6 +383,16 @@ async function handleReferralBonus(paymentId) {
       adminNote: ''
     });
 
+    logActivity({
+      action: 'referral_credited',
+      category: 'referrals',
+      targetId: payerUid,
+      targetType: 'user',
+      summary: `Referral credited — ${referrer.username || 'referrer'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'referred user'}`,
+      metadata: { referrer: referrer.username || '', referred: payer.username || '', amount: REFERRAL_BONUS_AMOUNT },
+      actorType: 'system'
+    });
+
     const currentCount = Number(referrer.referralCount || 0);
     const currentEarnings = Number(referrer.referralEarnings || 0);
     await updateDoc(doc(db, 'users', referrerUid), {
@@ -383,7 +410,7 @@ async function handleReferralBonus(paymentId) {
 }
 
 // ============================================================
-// REFERRAL BONUSES — LOAD / RENDER (v4.2 enhanced)
+// REFERRAL BONUSES — LOAD / RENDER
 // ============================================================
 async function loadReferralBonuses() {
   try {
@@ -416,7 +443,6 @@ window.filterRefSearch = function() {
   currentRefSearch = (document.getElementById('refSearch')?.value || '').toLowerCase().trim();
   renderReferralBonuses();
 };
-
 function renderReferralBonuses() {
   const totalCount = allReferralBonuses.length;
   const pending = allReferralBonuses.filter(b => b.status === 'pending');
@@ -445,7 +471,6 @@ function renderReferralBonuses() {
     if (sub) sub.innerText = top ? `${top.count} referral${top.count !== 1 ? 's' : ''} · ${fmtRs(top.total)}` : 'No referrers yet';
   }
 
-  // Update filter tab counts
   if (el('refCntPending')) el('refCntPending').innerText = pending.length;
   if (el('refCntPaid')) el('refCntPaid').innerText = paid.length;
   if (el('refCntAll')) el('refCntAll').innerText = totalCount;
@@ -453,7 +478,6 @@ function renderReferralBonuses() {
   const list = document.getElementById('referralList');
   if (!list) return;
 
-  // Apply filters
   let filtered = allReferralBonuses.filter(b => {
     if (currentRefFilter !== 'all' && b.status !== currentRefFilter) return false;
     if (currentRefSearch) {
@@ -486,7 +510,6 @@ function renderReferralBonuses() {
   list.innerHTML = filtered.map(b => {
     const isPaid = b.status === 'paid';
 
-    // Find the linked payment for screenshot
     const payment = allPayments.find(p => p.id === b.referredPaymentId);
     const shotId = payment ? registerScreenshot(payment) : null;
     const shotHtml = shotId
@@ -494,7 +517,6 @@ function renderReferralBonuses() {
       : '';
 
     const safeReferrer = (b.referrerName || '').replace(/'/g, '');
-    const safeReferred = (b.referredName || '').replace(/'/g, '');
 
     return `
       <div class="reg-card ref-card ${isPaid ? 'referral-paid' : 'referral-pending'}">
@@ -543,6 +565,14 @@ window.markReferralPaid = async function(bonusId, referrerName) {
       status: 'paid',
       paidAt: serverTimestamp(),
       adminNote: 'Manually marked paid by admin'
+    });
+    logActivity({
+      action: 'referral_marked_paid',
+      category: 'referrals',
+      targetId: bonusId,
+      targetType: 'referral_bonus',
+      summary: `Referral bonus paid to ${referrerName} (Rs. ${REFERRAL_BONUS_AMOUNT})`,
+      metadata: { referrerName, amount: REFERRAL_BONUS_AMOUNT }
     });
     window.showToast('✅ Referral bonus marked as paid');
     await loadReferralBonuses();
@@ -814,6 +844,14 @@ window.submitCreateTournament = async function(e) {
       status: 'upcoming', createdAt: serverTimestamp()
     });
     console.log("✅ Created tournament:", docRef.id);
+    logActivity({
+      action: 'tournament_created',
+      category: 'tournaments',
+      targetId: docRef.id,
+      targetType: 'tournament',
+      summary: `Created tournament "${title}" (${game} · ${mode})`,
+      metadata: { title, game, mode, entryType }
+    });
     window.showToast('✅ Tournament created');
     resetCreateForm();
     await loadRecentCreated();
@@ -895,6 +933,14 @@ window.editTournament = async function(id) {
       max: Number(newMax) || 100,
       updatedAt: serverTimestamp()
     });
+    logActivity({
+      action: 'tournament_updated',
+      category: 'tournaments',
+      targetId: id,
+      targetType: 'tournament',
+      summary: `Updated tournament "${newTitle.trim()}"`,
+      metadata: { title: newTitle.trim() }
+    });
     window.showToast('✅ Tournament updated');
     await loadRecentCreated();
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
@@ -907,6 +953,14 @@ window.deleteTournament = async function(id, title) {
   if (!confirm(`Delete tournament "${title}"?`)) return;
   try {
     await deleteDoc(doc(db, 'tournaments', id));
+    logActivity({
+      action: 'tournament_deleted',
+      category: 'tournaments',
+      targetId: id,
+      targetType: 'tournament',
+      summary: `Deleted tournament "${title}"`,
+      metadata: { title }
+    });
     window.showToast('🗑️ Tournament deleted');
     await loadRecentCreated();
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
@@ -1106,6 +1160,12 @@ window.bulkApproveSelected = async function() {
   selectedPaymentIds.clear();
   const selAll = document.getElementById('paySelectAll');
   if (selAll) selAll.checked = false;
+  logActivity({
+    action: 'payment_bulk_approved',
+    category: 'payments',
+    summary: `Bulk approved ${ok} payment${ok !== 1 ? 's' : ''}${fail ? ` · ${fail} failed` : ''}`,
+    metadata: { ok, fail }
+  });
   window.showToast(`✅ Approved ${ok}${fail ? ` · ❌ ${fail} failed` : ''}`);
   await window.loadPayments();
   await window.loadRegistrations();
@@ -1380,6 +1440,14 @@ window.submitMatchResults = async function() {
       completedAt: serverTimestamp(), createdAt: serverTimestamp()
     });
     await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
+    logActivity({
+      action: 'results_submitted',
+      category: 'tournaments',
+      targetId: tid,
+      targetType: 'tournament',
+      summary: `Results saved for "${tTitle}" — 🥇 ${w1Name}, ${payoutRecords.length} payout${payoutRecords.length !== 1 ? 's' : ''}`,
+      metadata: { tournament: tTitle, winner: w1Name, payouts: payoutRecords.length }
+    });
     addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
     window.showToast('✅ Results saved! ' + payoutRecords.length + ' payouts created');
     resetResultsForm();
@@ -1641,6 +1709,12 @@ window.addPayout = async function() {
       rank: rank || '1', method: method || 'cash', note: note || '',
       status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
+    logActivity({
+      action: 'payout_recorded',
+      category: 'payments',
+      summary: `Manual payout Rs. ${amount} to ${winnerName} (${tournamentTitle})`,
+      metadata: { winnerName, amount, tournamentTitle, method }
+    });
     window.showToast('✅ Payout recorded');
     window.loadPayouts();
   } catch (err) { window.showToast('❌ ' + err.message); }
@@ -1744,6 +1818,15 @@ window.saveRoomDetails = async function() {
       roomOpenTime, roomRules, roomRevealAt,
       roomUpdatedAt: serverTimestamp()
     });
+    const tName = document.getElementById('roomTournamentName')?.textContent || 'tournament';
+    logActivity({
+      action: 'room_details_updated',
+      category: 'system',
+      targetId: tid,
+      targetType: 'tournament',
+      summary: `Room details updated for "${tName}"`,
+      metadata: { tournamentId: tid, tournamentName: tName }
+    });
     const status = document.getElementById('roomSaveStatus');
     status.style.display = 'block';
     status.textContent = '✅ Room details saved';
@@ -1817,6 +1900,14 @@ window.deleteUser = async function(uid, username, fromModal) {
     for (const d of paySnap.docs) {
       await deleteDoc(doc(db, 'tournament_payments', d.id));
     }
+    logActivity({
+      action: 'user_deleted',
+      category: 'users',
+      targetId: uid,
+      targetType: 'user',
+      summary: `Deleted user "${username}" (+${regSnap.size} registrations, ${paySnap.size} payments)`,
+      metadata: { username, uid, regs: regSnap.size, payments: paySnap.size }
+    });
     window.showToast(`🗑️ Deleted user + ${regSnap.size} regs + ${paySnap.size} payments`);
     await window.loadUsers();
     await window.loadRegistrations();
@@ -1914,7 +2005,7 @@ window.exportPaymentsCSV = function() {
 };
 
 // ============================================================
-// TOURNAMENTS ADMIN (with registration counts)
+// TOURNAMENTS ADMIN
 // ============================================================
 window.loadTournamentsAdmin = async function() {
   const list = document.getElementById('tournamentList');
@@ -2003,6 +2094,12 @@ window.postAnnouncement = async function(e) {
   if (!title || !message) { window.showToast('❌ Title and message required'); return; }
   try {
     await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp() });
+    logActivity({
+      action: 'announcement_posted',
+      category: 'system',
+      summary: `Announcement posted: "${title}"`,
+      metadata: { title }
+    });
     document.getElementById('annTitle').value = '';
     document.getElementById('annMsg').value = '';
     window.showToast('✅ Announcement posted');
@@ -2011,7 +2108,7 @@ window.postAnnouncement = async function(e) {
 };
 
 // ============================================================
-// DASHBOARD RECENT (with clickable rows)
+// DASHBOARD RECENT
 // ============================================================
 function renderDashboardRecent() {
   const t = todayKey();
@@ -2105,6 +2202,30 @@ window.confirmReview = async function(e) {
     }
     closeReview();
     const actionLabel = action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Reset to pending';
+
+    if (type === 'payment') {
+      const pay = allPayments.find(x => x.id === id) || {};
+      const actionMap = { approve: 'payment_approved', reject: 'payment_rejected', reset: 'payment_reset' };
+      logActivity({
+        action: actionMap[action] || 'payment_approved',
+        category: 'payments',
+        targetId: id,
+        targetType: 'payment',
+        summary: `${actionLabel} Rs. ${pay.amount || 0} — ${pay.username || 'user'} (${pay.tournamentTitle || 'tournament'})`,
+        metadata: { amount: pay.amount || 0, user: pay.username || '', tournament: pay.tournamentTitle || '' }
+      });
+    } else {
+      const reg = allRegs.find(x => x.id === id) || {};
+      logActivity({
+        action: action === 'approve' ? 'user_registered' : 'payment_reset',
+        category: 'users',
+        targetId: id,
+        targetType: 'registration',
+        summary: `${actionLabel} registration — ${reg.username || 'user'} (${reg.tournamentTitle || 'tournament'})`,
+        metadata: { user: reg.username || '' }
+      });
+    }
+
     window.showToast('✅ ' + actionLabel);
     window.loadPayments();
     window.loadRegistrations();
