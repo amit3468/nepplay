@@ -162,7 +162,6 @@
         .progress-text { font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); margin-top: 6px; text-align: center; }
         .live-dot-small { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse-live 1.5s infinite; vertical-align: middle; }
 
-        /* Referral Stats Card */
         .ref-stat-tile {
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(168, 85, 247, 0.25);
@@ -512,7 +511,6 @@
                 </div>
             </div>
 
-            <!-- ===== FIX #1: REGISTERED BADGE ===== -->
             <div id="myRegBadge" style="display:none; margin: 0 0 20px;">
                 <div style="display:flex; align-items:center; gap:12px; background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.1)); border: 1px solid rgba(34,197,94,0.4); border-left: 4px solid #22c55e; border-radius: 14px; padding: 16px 20px;">
                     <div style="font-size: 24px;">✅</div>
@@ -542,7 +540,6 @@
                 </div>
             </div>
 
-            <!-- My Profile CTA card -->
             <a href="player.html" class="block glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/30 hover:border-purple-500/60 transition group">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
@@ -556,7 +553,6 @@
                 </div>
             </a>
 
-            <!-- INVITE FRIENDS CARD -->
             <div class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-indigo-500/30 hover:border-indigo-500/60 transition" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.06));">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
@@ -572,7 +568,6 @@
                 </div>
             </div>
 
-            <!-- REFERRAL STATS CARD -->
             <div id="referralStatsCard" class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/40" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.06));">
                 <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div class="flex items-center gap-3">
@@ -680,8 +675,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import {
+            getFirestore, doc, getDoc, collection, query, where, getDocs,
+            orderBy, limit, onSnapshot, updateDoc, arrayUnion
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import {
+            getAuth, signInWithEmailAndPassword, signOut,
+            onAuthStateChanged, sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -711,7 +712,7 @@
         let notifCache = [];
 
         // ================================================
-        // REFERRAL CAPTURE (runs on page load)
+        // REFERRAL CAPTURE
         // ================================================
         (function captureReferral() {
             try {
@@ -761,10 +762,12 @@
 
         window.markAllRead = function(e) {
             if (e) e.stopPropagation();
+            const customUnread = notifCache.filter(n => !n.read && n.isCustom);
             notifCache.forEach(n => n.read = true);
             localStorage.setItem('notifRead_' + (currentUser?.uid || ''), JSON.stringify(notifCache.map(n => n.id)));
             updateNotifBadge();
             renderNotifList();
+            customUnread.forEach(n => markCustomNotificationRead(n));
         };
 
         function loadReadIds() {
@@ -795,7 +798,12 @@
             if (!notif || !notif.id) return;
             if (notifCache.find(n => n.id === notif.id)) return;
             const readIds = loadReadIds();
-            notif.read = readIds.includes(notif.id);
+            // Custom notifications use readBy array from Firestore — check that first
+            if (notif.isCustom && Array.isArray(notif.readBy)) {
+                notif.read = notif.readBy.includes(currentUser?.uid);
+            } else {
+                notif.read = readIds.includes(notif.id);
+            }
             notifCache.unshift(notif);
             if (notifCache.length > 60) notifCache = notifCache.slice(0, 60);
             updateNotifBadge();
@@ -815,13 +823,13 @@
                 return;
             }
             const style = {
-                success: { bg: 'rgba(34,197,94,.15)', color: '#4ade80', icon: 'fa-circle-check' },
-                info:    { bg: 'rgba(59,130,246,.15)', color: '#60a5fa', icon: 'fa-circle-info' },
-                warning: { bg: 'rgba(234,179,8,.15)',  color: '#facc15', icon: 'fa-triangle-exclamation' },
-                error:   { bg: 'rgba(239,68,68,.15)',  color: '#f87171', icon: 'fa-circle-xmark' },
-                trophy:  { bg: 'rgba(251,191,36,.15)', color: '#fbbf24', icon: 'fa-trophy' },
-                money:   { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-money-bill-wave' },
-                referral:{ bg: 'rgba(236,72,153,.15)', color: '#f472b6', icon: 'fa-gift' }
+                success:  { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-circle-check' },
+                info:     { bg: 'rgba(59,130,246,.15)', color: '#60a5fa', icon: 'fa-circle-info' },
+                warning:  { bg: 'rgba(234,179,8,.15)',  color: '#facc15', icon: 'fa-triangle-exclamation' },
+                error:    { bg: 'rgba(239,68,68,.15)',  color: '#f87171', icon: 'fa-circle-xmark' },
+                trophy:   { bg: 'rgba(251,191,36,.15)', color: '#fbbf24', icon: 'fa-trophy' },
+                money:    { bg: 'rgba(34,197,94,.15)',  color: '#4ade80', icon: 'fa-money-bill-wave' },
+                referral: { bg: 'rgba(236,72,153,.15)', color: '#f472b6', icon: 'fa-gift' }
             };
             list.innerHTML = notifCache.map(n => {
                 const s = style[n.type] || style.info;
@@ -843,8 +851,26 @@
 
         window.markOneRead = function(id) {
             const n = notifCache.find(x => x.id === id);
-            if (n) { n.read = true; saveReadIds(); updateNotifBadge(); renderNotifList(); }
+            if (!n) return;
+            if (n.read) return;
+            n.read = true;
+            saveReadIds();
+            updateNotifBadge();
+            renderNotifList();
+            if (n.isCustom) markCustomNotificationRead(n);
         };
+
+        function markCustomNotificationRead(notif) {
+            if (!currentUser || !notif || !notif.docId) return;
+            try {
+                const ref = doc(db, 'notifications', notif.docId);
+                updateDoc(ref, { readBy: arrayUnion(currentUser.uid) }).catch(err => {
+                    console.warn('Failed to mark notification as read:', err.message);
+                });
+            } catch (e) {
+                console.warn('markCustomNotificationRead error:', e.message);
+            }
+        }
 
         function escapeHtml(s) {
             return String(s).replace(/[&<>"']/g, c => ({
@@ -955,6 +981,49 @@
                     }
                 });
             }));
+
+            // ============================================
+            // #7 — Custom notifications from admin
+            // ============================================
+            const customQ = query(
+                collection(db, 'notifications'),
+                where('targetUid', 'in', [uid, 'ALL'])
+            );
+            notifListeners.push(onSnapshot(customQ, snap => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const n = change.doc.data();
+                        const docId = change.doc.id;
+                        const isRead = Array.isArray(n.readBy) && n.readBy.includes(uid);
+                        const createdAt = n.createdAt?.toDate ? n.createdAt.toDate() : new Date();
+                        pushNotif({
+                            id: 'custom_' + docId,
+                            docId: docId,
+                            isCustom: true,
+                            readBy: Array.isArray(n.readBy) ? n.readBy : [],
+                            type: n.type || 'info',
+                            title: (n.title || 'Notification'),
+                            message: (n.message || ''),
+                            time: createdAt,
+                            read: isRead
+                        });
+                    }
+                    if (change.type === 'modified') {
+                        const n = change.doc.data();
+                        const docId = change.doc.id;
+                        const cached = notifCache.find(x => x.id === 'custom_' + docId);
+                        if (cached) {
+                            cached.readBy = Array.isArray(n.readBy) ? n.readBy : [];
+                            const isRead = cached.readBy.includes(uid);
+                            if (isRead && !cached.read) {
+                                cached.read = true;
+                                updateNotifBadge();
+                                renderNotifList();
+                            }
+                        }
+                    }
+                });
+            }));
         }
 
         async function backfillNotifications(uid) {
@@ -1015,6 +1084,30 @@
                         time: b.createdAt?.toDate ? b.createdAt.toDate() : new Date()
                     });
                 });
+
+                // Custom notifications from admin — fetch on load
+                try {
+                    const customSnap = await getDocs(query(
+                        collection(db, 'notifications'),
+                        where('targetUid', 'in', [uid, 'ALL'])
+                    ));
+                    customSnap.docs.forEach(d => {
+                        const n = d.data();
+                        const docId = d.id;
+                        pushNotif({
+                            id: 'custom_' + docId,
+                            docId: docId,
+                            isCustom: true,
+                            readBy: Array.isArray(n.readBy) ? n.readBy : [],
+                            type: n.type || 'info',
+                            title: (n.title || 'Notification'),
+                            message: (n.message || ''),
+                            time: n.createdAt?.toDate ? n.createdAt.toDate() : new Date()
+                        });
+                    });
+                } catch (e) {
+                    console.warn('Custom notif backfill skipped:', e.message);
+                }
 
                 notifCache.sort((a, b) => new Date(b.time) - new Date(a.time));
                 updateNotifBadge();
@@ -1186,9 +1279,6 @@
             ]);
         }
 
-        // =========================================================
-        // REFERRAL STATS CARD
-        // =========================================================
         async function loadReferralStats(uid) {
             try {
                 const snap = await getDocs(query(
@@ -1226,9 +1316,6 @@
             }
         }
 
-        // =========================================================
-        // VIRAL SHARE
-        // =========================================================
         async function applyPendingReferral(uid) {
             try {
                 const ref = localStorage.getItem('inviteRef');
@@ -1289,9 +1376,6 @@
             }
         };
 
-        // =========================================================
-        // AUTO-NOTIFY 30 MIN BEFORE TOURNAMENT STARTS
-        // =========================================================
         const NOTIFIED_30MIN = new Set();
         const NOTIFIED_5MIN = new Set();
         let upcomingWatcherId = null;
@@ -1361,9 +1445,6 @@
             }
         }
 
-        // =========================================================
-        // REGISTRATION CHECK + REGISTERED BADGE (FIX #1)
-        // =========================================================
         async function checkUserRegistration(uid) {
             try {
                 const q = query(collection(db, 'tournament_registrations'), where('userId', '==', uid));
@@ -1388,7 +1469,6 @@
                     ruleStatus.innerHTML = `You are already registered for ${label}.`;
                 }
 
-                // ===== FIX #1: Registered badge =====
                 const badge = document.getElementById('myRegBadge');
                 const badgeTitle = document.getElementById('myRegBadgeTitle');
                 if (badge && badgeTitle) {
