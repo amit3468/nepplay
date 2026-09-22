@@ -86,127 +86,63 @@
         .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
         .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
 
-        /* ========== CHAMPION CELEBRATION BANNER ========== */
+        /* Champion banner */
         .champion-banner {
             position: relative;
-            background: linear-gradient(135deg, #78350f 0%, #b45309 30%, #f59e0b 70%, #fbbf24 100%);
+            background: linear-gradient(135deg, #78350f 0%, #b45309 30%, #d97706 60%, #f59e0b 100%);
             border-radius: 20px;
+            padding: 22px 24px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(251, 191, 36, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 24px;
-            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(245, 158, 11, 0.35);
+            border: 2px solid rgba(251, 191, 36, 0.6);
+            animation: champGlow 3s ease-in-out infinite;
+        }
+        @keyframes champGlow {
+            0%, 100% { box-shadow: 0 20px 60px rgba(245, 158, 11, 0.35); }
+            50% { box-shadow: 0 20px 80px rgba(245, 158, 11, 0.6); }
         }
         .champion-banner::before {
             content: '';
             position: absolute;
             top: -80px; right: -80px;
             width: 320px; height: 320px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
             pointer-events: none;
         }
-        .champion-trophy-float {
-            position: absolute;
-            font-size: 100px;
-            opacity: 0.15;
-            top: 10%;
-            right: 8%;
-            animation: floaty 4s ease-in-out infinite;
-        }
-        @media (min-width: 640px) {
-            .champion-banner { padding: 32px 36px; }
-            .champion-trophy-float { font-size: 140px; }
-        }
-        .champion-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-        }
-        .champion-title {
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 1px;
-            line-height: 1.15;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-        }
-        @media (min-width: 640px) { .champion-title { font-size: 2.2rem; } }
-        .champion-sub {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 16px;
-        }
-        .champion-prize-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            padding: 8px 14px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: #fff;
-            margin-right: 8px;
-            margin-top: 4px;
+        .champ-medal {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, #fef3c7, #fbbf24);
+            box-shadow: 0 8px 24px rgba(251, 191, 36, 0.6);
+            font-size: 26px; flex-shrink: 0;
         }
 
-        /* ========== PAID TOURNAMENTS HERO ========== */
+        /* Paid tournament hero */
         .paid-hero {
             position: relative;
-            background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%);
+            background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 30%, #4c1d95 65%, #7e22ce 100%);
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4);
             border: 1px solid rgba(168, 85, 247, 0.3);
-            margin-bottom: 24px;
         }
-        .paid-hero::before {
-            content: '';
-            position: absolute;
-            top: -100px; right: -100px;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .paid-hero::after {
-            content: '';
-            position: absolute;
-            bottom: -150px; left: -100px;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .paid-hero-inner {
-            position: relative;
-            z-index: 10;
-            padding: 28px 24px;
-        }
-        @media (min-width: 640px) { .paid-hero-inner { padding: 40px 36px; } }
+        .paid-hero::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%); pointer-events: none; }
+        .paid-hero::after { content: ''; position: absolute; bottom: -150px; left: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%); pointer-events: none; }
+        .paid-inner { position: relative; z-index: 10; padding: 28px 24px; }
+        @media (min-width: 640px) { .paid-inner { padding: 40px 36px; } }
 
-        .float-icon { position: absolute; opacity: 0.15; animation: floaty 4s ease-in-out infinite; }
-        @keyframes floaty { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(15deg); } }
-
-        .launch-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 9999px; padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; }
-        .launch-tag .dot { width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
+        .paid-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 9999px; padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; }
+        .paid-badge .dot { width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6); } 50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); } }
 
         .live-indicator { display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.6); border-radius: 9999px; padding: 6px 16px; font-size: 0.75rem; font-weight: 800; color: #4ade80; text-transform: uppercase; letter-spacing: 1px; }
         .live-indicator .pulse { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse-live 1.5s infinite; }
         @keyframes pulse-live { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.9); } 50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); } }
+
+        .date-badge { display: inline-flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 16px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); border: 2px solid rgba(255, 255, 255, 0.2); }
+        .date-badge .month { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
+        .date-badge .day { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; margin: 2px 0; }
+        .date-badge .year { font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
 
         .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
         @media (min-width: 640px) { .countdown-grid { gap: 14px; margin: 24px 0; } }
@@ -223,30 +159,53 @@
         .game-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 9999px; padding: 6px 12px; font-size: 0.7rem; font-weight: 700; color: white; transition: all 0.2s; cursor: pointer; text-decoration: none; }
         .game-chip:hover { background: rgba(251, 191, 36, 0.3); transform: scale(1.05); border-color: #fbbf24; }
 
-        .rule-notice { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15)); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 18px 20px; margin: 20px 0; position: relative; overflow: hidden; }
-        .rule-notice::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #ef4444, #fbbf24); }
-        .rule-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 18px; flex-shrink: 0; }
-
-        .launch-cta-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; font-weight: 800; padding: 16px 32px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); font-size: 1rem; animation: ctaPulse 2s ease-in-out infinite; text-decoration: none; }
-        @keyframes ctaPulse { 0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); } 50% { box-shadow: 0 10px 45px rgba(34, 197, 94, 0.8); } }
+        .launch-cta-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; font-weight: 800; padding: 16px 32px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); font-size: 1rem; text-decoration: none; }
         .launch-cta-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(34, 197, 94, 0.7); }
         .launch-cta-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; font-weight: 800; padding: 16px 28px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; text-decoration: none; box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4); }
         .launch-cta-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 15px 45px rgba(37, 211, 102, 0.7); }
 
-        .date-badge { display: inline-flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 16px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); border: 2px solid rgba(255, 255, 255, 0.2); }
-        .date-badge .month { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
-        .date-badge .day { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; margin: 2px 0; }
-        .date-badge .year { font-size: 0.7rem; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
-
-        .ref-stat-tile {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(168, 85, 247, 0.25);
-            border-radius: 12px;
-            padding: 14px 8px;
-            text-align: center;
-        }
+        .ref-stat-tile { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 12px; padding: 14px 8px; text-align: center; }
         .ref-stat-tile .num { font-size: 1.5rem; font-weight: 900; line-height: 1; }
         .ref-stat-tile .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; font-weight: 700; margin-top: 6px; }
+
+        /* Tournament detail cards */
+        .tourney-card {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(76, 29, 149, 0.4));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 18px 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .tourney-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(251, 191, 36, 0.6);
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.2);
+        }
+        .tourney-card .game-icon { font-size: 32px; margin-bottom: 8px; }
+        .tourney-card .game-name { color: #fff; font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+        .tourney-card .game-mode { color: #a5b4fc; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+        .tourney-card .price-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+        .tourney-card .price-row span:first-child { color: #9ca3af; }
+        .tourney-card .price-row span:last-child { color: #fbbf24; font-weight: 700; }
+        .tourney-card .register-btn {
+            display: block;
+            margin-top: 14px;
+            padding: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .tourney-card:hover .register-btn {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.5);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -402,39 +361,35 @@
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
 
-            <!-- 🏆 CHAMPION BANNER -->
-            <div class="champion-banner">
-                <i class="fa-solid fa-trophy champion-trophy-float"></i>
-                <div style="position: relative; z-index: 2;">
-                    <div class="champion-badge">
-                        🏆 FIRST CHAMPION ANNOUNCED
-                    </div>
-                    <h2 class="champion-title">
-                        SharadK11 — Chess Champion
-                    </h2>
-                    <p class="champion-sub">
-                        NEPPLAY's first-ever tournament champion! Won the Chess Championship 2-0 and took home <strong style="color:#fff;">Rs. 500</strong>. Congratulations! 🎉
-                    </p>
-                    <div>
-                        <span class="champion-prize-pill">🥇 Chess · 2-0</span>
-                        <span class="champion-prize-pill">💰 Rs. 500 paid</span>
+            <!-- CHAMPION BANNER -->
+            <div class="champion-banner mb-6">
+                <div class="champion-content">
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="champ-medal">🏆</div>
+                        <div class="flex-grow min-w-0">
+                            <div style="font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 4px;">
+                                🎉 NEPPLAY First Champion
+                            </div>
+                            <div style="color: #fff; font-weight: 900; font-size: 22px; line-height: 1.1; margin-bottom: 4px;">
+                                SharadK11
+                            </div>
+                            <div style="color: rgba(255,255,255,0.9); font-size: 13px;">
+                                Chess Championship · Won <strong>Rs. 500</strong> via eSewa/Khalti
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 🚀 PAID TOURNAMENTS HERO -->
-            <div class="paid-hero">
-                <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
-                <i class="fa-solid fa-gamepad float-icon" style="bottom: 20%; left: 5%; font-size: 50px; color: #ec4899; animation-delay: 1.5s;"></i>
-                <i class="fa-solid fa-fire float-icon" style="top: 60%; right: 12%; font-size: 40px; color: #ef4444; animation-delay: 0.8s;"></i>
+            <!-- PAID TOURNAMENT HERO -->
+            <div class="paid-hero mb-6">
+                <div class="paid-inner">
 
-                <div class="paid-hero-inner">
-
-                    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
                         <div class="flex flex-col gap-3">
-                            <div class="launch-tag">
+                            <div class="paid-badge">
                                 <span class="dot"></span>
-                                Launching in
+                                Registrations Open
                             </div>
                             <div class="live-indicator">
                                 <span class="pulse"></span>
@@ -449,35 +404,13 @@
                         </div>
                     </div>
 
-                    <h1 class="text-3xl sm:text-5xl font-black text-white mb-3 leading-tight">
-                        Hello <span id="welcome-name-inline" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Player</span>! 👋
+                    <h1 class="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+                        Ready to <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">win real cash?</span> 💰
                     </h1>
-                    <h2 class="text-2xl sm:text-4xl font-black mb-4 leading-tight">
-                        <span class="text-white">Paid Tournaments</span>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">26 September</span>
-                        <span class="text-white">🎮</span>
-                    </h2>
 
-                    <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-6 max-w-3xl">
-                        🚀 <strong class="text-green-300">Real cash prizes!</strong> We're running <strong class="text-yellow-300">8 paid tournaments — one for every game</strong> on <strong class="text-white">26th September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Entry only Rs. 150 — win up to <strong class="text-yellow-300">Rs. 1,000</strong> plus <strong class="text-yellow-300">Rs. 500 top kills bonus</strong>. Claim your slot before it fills up! 🚀
+                    <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-5 max-w-3xl">
+                        🚀 <strong class="text-yellow-300">NEPPLAY paid tournaments are live!</strong> 8 games · real cash prizes · professional competition. Pick your game, pay entry, and compete with Nepal's best players. <strong class="text-green-300">Multiple games allowed — play as many as you want!</strong>
                     </p>
-
-                    <div class="rule-notice">
-                        <div class="flex items-start gap-3">
-                            <div class="rule-icon">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <p class="text-white font-bold text-sm sm:text-base mb-1">
-                                    ⚠️ Important Rule
-                                </p>
-                                <p class="text-white/85 text-xs sm:text-sm leading-relaxed">
-                                    Each player can register for <strong class="text-yellow-300">ONLY ONE tournament</strong> on 26 September. Choose your game wisely — registrations for a second tournament will be automatically rejected.
-                                </p>
-                                <p id="rule-status" class="text-xs mt-3 hidden"></p>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="countdown-grid">
                         <div class="countdown-box">
@@ -524,7 +457,7 @@
 
                     <div class="mb-6">
                         <p class="text-xs text-white/70 uppercase tracking-wider font-bold mb-3">
-                            <i class="fa-solid fa-gamepad mr-1"></i> 8 Games • 8 Tournaments • Pick One
+                            <i class="fa-solid fa-gamepad mr-1"></i> 8 Games Available · Pick any · Play multiple
                         </p>
                         <div class="flex flex-wrap gap-2">
                             <a href="tournaments.html" class="game-chip">🔥 Free Fire</a>
@@ -537,10 +470,6 @@
                             <a href="tournaments.html" class="game-chip">♟️ Chess</a>
                         </div>
                     </div>
-
-                    <p class="text-white/85 text-sm mb-6 italic">
-                        💜 Register now to lock your slot. See you on 26th September! 🚀
-                    </p>
 
                     <div class="flex flex-wrap gap-3">
                         <a href="tournaments.html" class="launch-cta-primary">
@@ -555,6 +484,103 @@
                 </div>
             </div>
 
+            <!-- ALL 8 TOURNAMENTS DETAIL CARDS -->
+            <div class="mb-6">
+                <h2 class="text-lg sm:text-xl font-bold text-white mb-4">
+                    🎮 All 8 Tournaments — 26 September 2026
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">🔥</div>
+                        <div class="game-name">Free Fire</div>
+                        <div class="game-mode">Squad · Battle Royale</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">🎯</div>
+                        <div class="game-name">PUBG Mobile</div>
+                        <div class="game-mode">Squad · Battle Royale</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">💣</div>
+                        <div class="game-name">COD Mobile</div>
+                        <div class="game-mode">Multiplayer · FPS</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">⚔️</div>
+                        <div class="game-name">Valorant</div>
+                        <div class="game-mode">5v5 · Tactical FPS</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">⚽</div>
+                        <div class="game-name">eFootball</div>
+                        <div class="game-mode">1v1 · Sports</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">🏏</div>
+                        <div class="game-name">eCricket</div>
+                        <div class="game-mode">1v1 · Sports</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">🎲</div>
+                        <div class="game-name">Ludo King</div>
+                        <div class="game-mode">Multi · Board</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                    <a href="tournaments.html" class="tourney-card">
+                        <div class="game-icon">♟️</div>
+                        <div class="game-name">Chess</div>
+                        <div class="game-mode">1v1 · Strategy</div>
+                        <div class="price-row"><span>Entry</span><span>Rs. 150</span></div>
+                        <div class="price-row"><span>Winner</span><span>Rs. 1,000</span></div>
+                        <div class="price-row"><span>Top Kills</span><span>Rs. 500</span></div>
+                        <span class="register-btn">Register →</span>
+                    </a>
+
+                </div>
+
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500">
+                        💡 You can register for multiple games — just pay entry per game.
+                    </p>
+                </div>
+            </div>
+
+            <!-- REGISTERED BADGE -->
             <div id="myRegBadge" style="display:none; margin: 0 0 20px;">
                 <div style="display:flex; align-items:center; gap:12px; background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.1)); border: 1px solid rgba(34,197,94,0.4); border-left: 4px solid #22c55e; border-radius: 14px; padding: 16px 20px;">
                     <div style="font-size: 24px;">✅</div>
@@ -566,6 +592,7 @@
                 </div>
             </div>
 
+            <!-- STATS CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div class="glass-panel p-5 rounded-xl border-l-4 border-green-500">
                     <h3 class="text-gray-400 text-xs font-semibold mb-1">Total Earnings</h3>
@@ -584,6 +611,7 @@
                 </div>
             </div>
 
+            <!-- PROFILE CTA -->
             <a href="player.html" class="block glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/30 hover:border-purple-500/60 transition group">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
@@ -597,6 +625,7 @@
                 </div>
             </a>
 
+            <!-- INVITE FRIENDS -->
             <div class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-indigo-500/30 hover:border-indigo-500/60 transition" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.06));">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
@@ -612,6 +641,7 @@
                 </div>
             </div>
 
+            <!-- REFERRAL STATS -->
             <div id="referralStatsCard" class="glass-panel rounded-xl p-5 sm:p-6 mb-6 border border-purple-500/40" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.06));">
                 <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <div class="flex items-center gap-3">
@@ -652,6 +682,7 @@
                 </p>
             </div>
 
+            <!-- ANNOUNCEMENTS -->
             <div class="glass-panel rounded-xl shadow-lg mb-6 border-l-4 border-yellow-500 overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i>Announcements</h2>
@@ -659,11 +690,12 @@
                 <div id="announcements-container" class="p-5 space-y-3">
                     <div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
                         <i class="fa-solid fa-circle text-[8px] text-yellow-500 mt-1.5"></i>
-                        <span class="text-sm text-gray-300">Welcome! Registration is OPEN. Check tournaments to claim your slot.</span>
+                        <span class="text-sm text-gray-300">Welcome! Check tournaments to register for paid games on 26 Sept.</span>
                     </div>
                 </div>
             </div>
 
+            <!-- UPCOMING TOURNAMENTS -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden mb-6">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i>My Upcoming Tournaments</h2>
@@ -691,6 +723,7 @@
                 </div>
             </div>
 
+            <!-- WINNINGS -->
             <div class="glass-panel rounded-xl shadow-lg overflow-hidden">
                 <div class="p-5 border-b border-gray-700 bg-gray-800/30">
                     <h2 class="text-base sm:text-lg font-bold text-white"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>My Winnings</h2>
@@ -742,8 +775,8 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Countdown → 26 Sept 2026, 1:00 PM NPT = 07:15 UTC
-        const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 26, 7, 15, 0));
+        // Next paid tournament: 26 September 2026, 1:00 PM NPT = 07:15 UTC
+        const NEXT_TOURNAMENT_DATE = new Date(Date.UTC(2026, 8, 26, 7, 15, 0));
 
         console.log("🔥 Member page initialized");
 
@@ -935,32 +968,14 @@
                     const p = change.doc.data();
                     const id = change.doc.id;
                     if (change.type === 'added' && p.status === 'pending') {
-                        pushNotif({
-                            id: 'pay_submit_' + id,
-                            type: 'info',
-                            title: '💳 Payment Submitted',
-                            message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`,
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'pay_submit_' + id, type: 'info', title: '💳 Payment Submitted', message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`, time: new Date() });
                     }
                     if (change.type === 'modified') {
                         if (p.status === 'approved') {
-                            pushNotif({
-                                id: 'pay_approved_' + id + '_' + Date.now(),
-                                type: 'success',
-                                title: '✅ Payment Approved!',
-                                message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`,
-                                time: new Date()
-                            });
+                            pushNotif({ id: 'pay_approved_' + id + '_' + Date.now(), type: 'success', title: '✅ Payment Approved!', message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`, time: new Date() });
                         }
                         if (p.status === 'rejected') {
-                            pushNotif({
-                                id: 'pay_rejected_' + id + '_' + Date.now(),
-                                type: 'error',
-                                title: '❌ Payment Rejected',
-                                message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`,
-                                time: new Date()
-                            });
+                            pushNotif({ id: 'pay_rejected_' + id + '_' + Date.now(), type: 'error', title: '❌ Payment Rejected', message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`, time: new Date() });
                         }
                     }
                 });
@@ -972,13 +987,7 @@
                     const r = change.doc.data();
                     const id = change.doc.id;
                     if (change.type === 'added') {
-                        pushNotif({
-                            id: 'reg_add_' + id,
-                            type: 'info',
-                            title: '🎮 Tournament Joined',
-                            message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`,
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'reg_add_' + id, type: 'info', title: '🎮 Tournament Joined', message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`, time: new Date() });
                     }
                 });
             }));
@@ -990,13 +999,7 @@
                         const a = change.doc.data();
                         const id = change.doc.id;
                         if (a.createdAt?.toDate && (Date.now() - a.createdAt.toDate().getTime()) > 5000) return;
-                        pushNotif({
-                            id: 'ann_' + id,
-                            type: 'warning',
-                            title: '📢 New Announcement',
-                            message: (a.title || 'Announcement') + (a.message ? ' — ' + a.message.substring(0, 80) : ''),
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'ann_' + id, type: 'warning', title: '📢 New Announcement', message: (a.title || 'Announcement') + (a.message ? ' — ' + a.message.substring(0, 80) : ''), time: new Date() });
                     }
                 });
             }));
@@ -1008,21 +1011,12 @@
                         const b = change.doc.data();
                         const id = change.doc.id;
                         if (b.createdAt?.toDate && (Date.now() - b.createdAt.toDate().getTime()) > 5000) return;
-                        pushNotif({
-                            id: 'ref_bonus_' + id,
-                            type: 'referral',
-                            title: '🎁 You earned Rs. ' + (b.amount || 20) + '!',
-                            message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link. Bonus pending admin payout.`,
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'ref_bonus_' + id, type: 'referral', title: '🎁 You earned Rs. ' + (b.amount || 20) + '!', message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link. Bonus pending admin payout.`, time: new Date() });
                     }
                 });
             }));
 
-            const customQ = query(
-                collection(db, 'notifications'),
-                where('targetUid', 'in', [uid, 'ALL'])
-            );
+            const customQ = query(collection(db, 'notifications'), where('targetUid', 'in', [uid, 'ALL']));
             notifListeners.push(onSnapshot(customQ, snap => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
@@ -1030,17 +1024,7 @@
                         const docId = change.doc.id;
                         const isRead = Array.isArray(n.readBy) && n.readBy.includes(uid);
                         const createdAt = n.createdAt?.toDate ? n.createdAt.toDate() : new Date();
-                        pushNotif({
-                            id: 'custom_' + docId,
-                            docId: docId,
-                            isCustom: true,
-                            readBy: Array.isArray(n.readBy) ? n.readBy : [],
-                            type: n.type || 'info',
-                            title: (n.title || 'Notification'),
-                            message: (n.message || ''),
-                            time: createdAt,
-                            read: isRead
-                        });
+                        pushNotif({ id: 'custom_' + docId, docId: docId, isCustom: true, readBy: Array.isArray(n.readBy) ? n.readBy : [], type: n.type || 'info', title: (n.title || 'Notification'), message: (n.message || ''), time: createdAt, read: isRead });
                     }
                     if (change.type === 'modified') {
                         const n = change.doc.data();
@@ -1067,29 +1051,11 @@
                     const p = d.data();
                     const id = d.id;
                     if (p.status === 'pending') {
-                        pushNotif({
-                            id: 'pay_submit_' + id,
-                            type: 'info',
-                            title: '💳 Payment Submitted',
-                            message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`,
-                            time: p.submittedAt?.toDate ? p.submittedAt.toDate() : new Date()
-                        });
+                        pushNotif({ id: 'pay_submit_' + id, type: 'info', title: '💳 Payment Submitted', message: `Your payment of Rs. ${p.amount || 0} for ${p.tournamentTitle || 'a tournament'} is pending admin approval.`, time: p.submittedAt?.toDate ? p.submittedAt.toDate() : new Date() });
                     } else if (p.status === 'approved') {
-                        pushNotif({
-                            id: 'pay_approved_' + id,
-                            type: 'success',
-                            title: '✅ Payment Approved!',
-                            message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`,
-                            time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date()
-                        });
+                        pushNotif({ id: 'pay_approved_' + id, type: 'success', title: '✅ Payment Approved!', message: `Your payment for ${p.tournamentTitle || 'a tournament'} was approved. You're in!`, time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date() });
                     } else if (p.status === 'rejected') {
-                        pushNotif({
-                            id: 'pay_rejected_' + id,
-                            type: 'error',
-                            title: '❌ Payment Rejected',
-                            message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`,
-                            time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date()
-                        });
+                        pushNotif({ id: 'pay_rejected_' + id, type: 'error', title: '❌ Payment Rejected', message: `Your payment for ${p.tournamentTitle || 'a tournament'} was rejected.${p.adminNote ? ' Reason: ' + p.adminNote : ''}`, time: p.reviewedAt?.toDate ? p.reviewedAt.toDate() : new Date() });
                     }
                 });
 
@@ -1097,46 +1063,22 @@
                 regSnap.docs.forEach(d => {
                     const r = d.data();
                     const id = d.id;
-                    pushNotif({
-                        id: 'reg_add_' + id,
-                        type: 'info',
-                        title: '🎮 Tournament Joined',
-                        message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`,
-                        time: r.registeredAt?.toDate ? r.registeredAt.toDate() : new Date()
-                    });
+                    pushNotif({ id: 'reg_add_' + id, type: 'info', title: '🎮 Tournament Joined', message: `You registered for ${r.tournamentTitle || 'a tournament'}. Good luck!`, time: r.registeredAt?.toDate ? r.registeredAt.toDate() : new Date() });
                 });
 
                 const refSnap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
                 refSnap.docs.forEach(d => {
                     const b = d.data();
                     const id = d.id;
-                    pushNotif({
-                        id: 'ref_bonus_' + id,
-                        type: 'referral',
-                        title: '🎁 You earned Rs. ' + (b.amount || 20) + '!',
-                        message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link.`,
-                        time: b.createdAt?.toDate ? b.createdAt.toDate() : new Date()
-                    });
+                    pushNotif({ id: 'ref_bonus_' + id, type: 'referral', title: '🎁 You earned Rs. ' + (b.amount || 20) + '!', message: `${b.referredName || 'A friend'} joined ${b.tournamentTitle || 'a paid tournament'} using your link.`, time: b.createdAt?.toDate ? b.createdAt.toDate() : new Date() });
                 });
 
                 try {
-                    const customSnap = await getDocs(query(
-                        collection(db, 'notifications'),
-                        where('targetUid', 'in', [uid, 'ALL'])
-                    ));
+                    const customSnap = await getDocs(query(collection(db, 'notifications'), where('targetUid', 'in', [uid, 'ALL'])));
                     customSnap.docs.forEach(d => {
                         const n = d.data();
                         const docId = d.id;
-                        pushNotif({
-                            id: 'custom_' + docId,
-                            docId: docId,
-                            isCustom: true,
-                            readBy: Array.isArray(n.readBy) ? n.readBy : [],
-                            type: n.type || 'info',
-                            title: (n.title || 'Notification'),
-                            message: (n.message || ''),
-                            time: n.createdAt?.toDate ? n.createdAt.toDate() : new Date()
-                        });
+                        pushNotif({ id: 'custom_' + docId, docId: docId, isCustom: true, readBy: Array.isArray(n.readBy) ? n.readBy : [], type: n.type || 'info', title: (n.title || 'Notification'), message: (n.message || ''), time: n.createdAt?.toDate ? n.createdAt.toDate() : new Date() });
                     });
                 } catch (e) {
                     console.warn('Custom notif backfill skipped:', e.message);
@@ -1152,13 +1094,13 @@
         }
 
         function updateCountdown() {
-            const diff = LAUNCH_DATE - new Date();
+            const diff = NEXT_TOURNAMENT_DATE - new Date();
             if (diff <= 0) {
                 ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.textContent = '00';
                 });
-                const tag = document.querySelector('.launch-tag');
-                if (tag) tag.innerHTML = '<span class="dot"></span> LIVE NOW';
+                const badge = document.querySelector('.paid-badge');
+                if (badge) badge.innerHTML = '<span class="dot"></span> LIVE NOW';
                 return;
             }
             const days = Math.floor(diff / 86400000);
@@ -1248,7 +1190,7 @@
             const displayName = currentUserProfile.fullName || currentUserProfile.username || 'Player';
             const firstName = displayName.split(' ')[0];
 
-            document.getElementById('welcome-name-inline').textContent = firstName;
+            document.getElementById('welcome-name-inline') && (document.getElementById('welcome-name-inline').textContent = firstName);
             document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('dropdown-username').textContent = currentUserProfile.email || user.email;
 
@@ -1273,10 +1215,7 @@
 
         async function loadReferralStats(uid) {
             try {
-                const snap = await getDocs(query(
-                    collection(db, 'referral_bonuses'),
-                    where('referrerUid', '==', uid)
-                ));
+                const snap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
                 const bonuses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 const invited = bonuses.length;
@@ -1335,7 +1274,7 @@
             }
             const inviteUrl = 'https://nepplay.onrender.com/member.html?ref=' + currentUser.uid;
             const shareText = '🎮 Join me on NEPPLAY — Nepal\'s esports platform!\n' +
-                              '8 tournaments • FREE ENTRY • Real cash prizes\n' +
+                              '8 tournaments · Paid entry Rs. 150 · Real cash prizes\n' +
                               '💰 Refer friends & earn Rs. 20 per paid referral\n\n' +
                               'Register here: ' + inviteUrl;
 
@@ -1383,11 +1322,7 @@
 
         async function checkUpcomingTournaments(uid) {
             try {
-                const regSnap = await getDocs(query(
-                    collection(db, 'tournament_registrations'),
-                    where('userId', '==', uid),
-                    where('status', '==', 'confirmed')
-                ));
+                const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid), where('status', '==', 'confirmed')));
                 if (regSnap.empty) return;
 
                 const tournSnap = await getDocs(collection(db, 'tournaments'));
@@ -1412,24 +1347,12 @@
 
                     if (diffMin <= 30 && diffMin > 5 && !NOTIFIED_30MIN.has(key30)) {
                         NOTIFIED_30MIN.add(key30);
-                        pushNotif({
-                            id: 'upcoming_30_' + reg.tournamentId,
-                            type: 'warning',
-                            title: '⏰ Starts in ' + diffMin + ' minutes!',
-                            message: `${title} begins soon. Room details will appear on the Tournaments page shortly.`,
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'upcoming_30_' + reg.tournamentId, type: 'warning', title: '⏰ Starts in ' + diffMin + ' minutes!', message: `${title} begins soon. Room details will appear on the Tournaments page shortly.`, time: new Date() });
                     }
 
                     if (diffMin <= 5 && diffMin >= 0 && !NOTIFIED_5MIN.has(key5)) {
                         NOTIFIED_5MIN.add(key5);
-                        pushNotif({
-                            id: 'upcoming_5_' + reg.tournamentId,
-                            type: 'error',
-                            title: '🔴 Starting NOW: ' + title,
-                            message: `Join the room on the Tournaments page. Good luck!`,
-                            time: new Date()
-                        });
+                        pushNotif({ id: 'upcoming_5_' + reg.tournamentId, type: 'error', title: '🔴 Starting NOW: ' + title, message: `Join the room on the Tournaments page. Good luck!`, time: new Date() });
                     }
                 });
             } catch (err) {
@@ -1443,29 +1366,11 @@
                 const snap = await getDocs(q);
                 const regs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                const ruleBox = document.getElementById('rule-notice');
-                const ruleStatus = document.getElementById('rule-status');
-                const ruleIcon = ruleBox.querySelector('.rule-icon');
-                const ruleTitle = ruleBox.querySelector('.text-white.font-bold');
-
-                if (regs.length > 0) {
-                    ruleBox.classList.add('rule-ok');
-                    ruleIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-                    ruleTitle.innerHTML = '✅ Registration Locked';
-                    ruleStatus.classList.remove('hidden');
-                    ruleStatus.className = 'text-xs mt-3 text-green-400';
-                    const freeReg = regs.find(r => r.entryType === 'free');
-                    const label = freeReg
-                        ? `tournament: <strong>${freeReg.tournamentTitle || 'one tournament'}</strong>`
-                        : `<strong>${regs[0].tournamentTitle || 'one tournament'}</strong>`;
-                    ruleStatus.innerHTML = `You are already registered for ${label}.`;
-                }
-
                 const badge = document.getElementById('myRegBadge');
                 const badgeTitle = document.getElementById('myRegBadgeTitle');
                 if (badge && badgeTitle) {
                     if (regs.length > 0) {
-                        const primary = regs.find(r => r.entryType === 'free') || regs[0];
+                        const primary = regs[regs.length - 1];
                         badgeTitle.textContent = primary.tournamentTitle || 'a tournament';
                         badge.style.display = 'block';
                     } else {
@@ -1589,7 +1494,7 @@
                 const snap = await getDocs(q);
                 const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 if (!items.length) {
-                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Paid tournaments now open — 26 Sept!</span></div>`;
+                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Paid tournaments now open for 26 Sept!</span></div>`;
                     return;
                 }
                 const colors = { normal:'border-blue-500', high:'border-yellow-500', urgent:'border-red-500' };
