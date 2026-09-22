@@ -86,27 +86,119 @@
         .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
         .loading-screen .loader { width: 60px; height: 60px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
 
-        .launch-card { position: relative; background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%); border-radius: 24px; overflow: hidden; box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4); animation: launchSlide 0.7s ease-out; border: 1px solid rgba(168, 85, 247, 0.3); }
-        @keyframes launchSlide { from { opacity: 0; transform: translateY(-30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .launch-card::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%); pointer-events: none; }
-        .launch-card::after { content: ''; position: absolute; bottom: -150px; left: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%); pointer-events: none; }
-        .launch-inner { position: relative; z-index: 10; padding: 28px 24px; }
-        @media (min-width: 640px) { .launch-inner { padding: 40px 36px; } }
+        /* ========== CHAMPION CELEBRATION BANNER ========== */
+        .champion-banner {
+            position: relative;
+            background: linear-gradient(135deg, #78350f 0%, #b45309 30%, #f59e0b 70%, #fbbf24 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(251, 191, 36, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .champion-banner::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .champion-trophy-float {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.15;
+            top: 10%;
+            right: 8%;
+            animation: floaty 4s ease-in-out infinite;
+        }
+        @media (min-width: 640px) {
+            .champion-banner { padding: 32px 36px; }
+            .champion-trophy-float { font-size: 140px; }
+        }
+        .champion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+        .champion-title {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+            line-height: 1.15;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        @media (min-width: 640px) { .champion-title { font-size: 2.2rem; } }
+        .champion-sub {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .champion-prize-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #fff;
+            margin-right: 8px;
+            margin-top: 4px;
+        }
 
-        .grand-opening-banner { text-align: center; margin-bottom: 20px; animation: grandPulse 2.5s ease-in-out infinite; }
-        @keyframes grandPulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5)); } 50% { transform: scale(1.03); filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.9)); } }
-        .grand-opening-title { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #ec4899 70%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-transform: uppercase; line-height: 1.1; }
-        @media (min-width: 640px) { .grand-opening-title { font-size: 3.5rem; letter-spacing: 6px; } }
-        @media (min-width: 1024px) { .grand-opening-title { font-size: 4.5rem; letter-spacing: 8px; } }
-        .grand-opening-subtitle { font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, 0.75); letter-spacing: 3px; text-transform: uppercase; margin-top: 6px; }
-        @media (min-width: 640px) { .grand-opening-subtitle { font-size: 1rem; letter-spacing: 5px; } }
-        .grand-opening-divider { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
-        .grand-opening-divider .line { height: 2px; width: 60px; background: linear-gradient(90deg, transparent, #fbbf24, transparent); }
-        @media (min-width: 640px) { .grand-opening-divider .line { width: 100px; } }
-        .grand-opening-divider .star { color: #fbbf24; font-size: 18px; animation: starSpin 3s linear infinite; }
-        @keyframes starSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .confetti { position: absolute; width: 8px; height: 8px; opacity: 0.8; animation: confettiFall 5s linear infinite; border-radius: 2px; }
-        @keyframes confettiFall { 0% { transform: translateY(-100px) rotate(0deg); opacity: 1; } 100% { transform: translateY(700px) rotate(720deg); opacity: 0; } }
+        /* ========== PAID TOURNAMENTS HERO ========== */
+        .paid-hero {
+            position: relative;
+            background: linear-gradient(135deg, #0c0a2e 0%, #1e1b4b 25%, #4c1d95 60%, #7e22ce 100%);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(139, 92, 246, 0.4);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            margin-bottom: 24px;
+        }
+        .paid-hero::before {
+            content: '';
+            position: absolute;
+            top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .paid-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -150px; left: -100px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .paid-hero-inner {
+            position: relative;
+            z-index: 10;
+            padding: 28px 24px;
+        }
+        @media (min-width: 640px) { .paid-hero-inner { padding: 40px 36px; } }
+
+        .float-icon { position: absolute; opacity: 0.15; animation: floaty 4s ease-in-out infinite; }
+        @keyframes floaty { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(15deg); } }
 
         .launch-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 9999px; padding: 6px 16px; font-size: 0.7rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; }
         .launch-tag .dot { width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
@@ -133,19 +225,13 @@
 
         .rule-notice { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(234, 179, 8, 0.15)); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 18px 20px; margin: 20px 0; position: relative; overflow: hidden; }
         .rule-notice::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #ef4444, #fbbf24); }
-        .rule-notice.rule-ok { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.1)); border-color: rgba(34, 197, 94, 0.4); }
-        .rule-notice.rule-ok::before { background: linear-gradient(180deg, #22c55e, #3b82f6); }
         .rule-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 18px; flex-shrink: 0; }
-        .rule-notice.rule-ok .rule-icon { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
 
         .launch-cta-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; font-weight: 800; padding: 16px 32px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); font-size: 1rem; animation: ctaPulse 2s ease-in-out infinite; text-decoration: none; }
         @keyframes ctaPulse { 0%, 100% { box-shadow: 0 10px 30px rgba(34, 197, 94, 0.5); } 50% { box-shadow: 0 10px 45px rgba(34, 197, 94, 0.8); } }
         .launch-cta-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 45px rgba(34, 197, 94, 0.7); }
         .launch-cta-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; font-weight: 800; padding: 16px 28px; border-radius: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; font-size: 0.95rem; text-decoration: none; box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4); }
         .launch-cta-whatsapp:hover { transform: translateY(-3px); box-shadow: 0 15px 45px rgba(37, 211, 102, 0.7); }
-
-        .float-icon { position: absolute; opacity: 0.15; animation: floaty 4s ease-in-out infinite; }
-        @keyframes floaty { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(15deg); } }
 
         .date-badge { display: inline-flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 16px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); border: 2px solid rgba(255, 255, 255, 0.2); }
         .date-badge .month { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
@@ -159,24 +245,12 @@
             padding: 14px 8px;
             text-align: center;
         }
-        .ref-stat-tile .num {
-            font-size: 1.5rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-        .ref-stat-tile .lbl {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #9ca3af;
-            font-weight: 700;
-            margin-top: 6px;
-        }
+        .ref-stat-tile .num { font-size: 1.5rem; font-weight: 900; line-height: 1; }
+        .ref-stat-tile .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; font-weight: 700; margin-top: 6px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- VIRAL SHARE FLOATING BUTTON -->
     <div id="floatingShare" class="floating-share" style="display:none;">
         <div class="share-fab" onclick="shareInviteLink()" title="Share NEPPLAY with friends">
             <i class="fa-solid fa-share-nodes"></i>
@@ -328,28 +402,33 @@
 
         <main class="flex-grow container mx-auto px-4 sm:px-6 py-6">
 
-            <div id="launch-card" class="launch-card mb-6">
+            <!-- 🏆 CHAMPION BANNER -->
+            <div class="champion-banner">
+                <i class="fa-solid fa-trophy champion-trophy-float"></i>
+                <div style="position: relative; z-index: 2;">
+                    <div class="champion-badge">
+                        🏆 FIRST CHAMPION ANNOUNCED
+                    </div>
+                    <h2 class="champion-title">
+                        SharadK11 — Chess Champion
+                    </h2>
+                    <p class="champion-sub">
+                        NEPPLAY's first-ever tournament champion! Won the Chess Championship 2-0 and took home <strong style="color:#fff;">Rs. 500</strong>. Congratulations! 🎉
+                    </p>
+                    <div>
+                        <span class="champion-prize-pill">🥇 Chess · 2-0</span>
+                        <span class="champion-prize-pill">💰 Rs. 500 paid</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🚀 PAID TOURNAMENTS HERO -->
+            <div class="paid-hero">
                 <i class="fa-solid fa-trophy float-icon" style="top: 15%; right: 8%; font-size: 60px; color: #fbbf24;"></i>
                 <i class="fa-solid fa-gamepad float-icon" style="bottom: 20%; left: 5%; font-size: 50px; color: #ec4899; animation-delay: 1.5s;"></i>
                 <i class="fa-solid fa-fire float-icon" style="top: 60%; right: 12%; font-size: 40px; color: #ef4444; animation-delay: 0.8s;"></i>
 
-                <div class="launch-inner">
-
-                    <div class="grand-opening-banner">
-                        <h1 class="grand-opening-title">🎉 Grand Opening 🎉</h1>
-                        <p class="grand-opening-subtitle">NEPPLAY Esports Platform</p>
-                        <div class="grand-opening-divider">
-                            <div class="line"></div>
-                            <i class="fa-solid fa-star star"></i>
-                            <div class="line"></div>
-                        </div>
-                    </div>
-
-                    <div class="confetti" style="left: 10%; background: #fbbf24; animation-delay: 0s;"></div>
-                    <div class="confetti" style="left: 25%; background: #ec4899; animation-delay: 0.7s;"></div>
-                    <div class="confetti" style="left: 45%; background: #3b82f6; animation-delay: 1.4s;"></div>
-                    <div class="confetti" style="left: 65%; background: #22c55e; animation-delay: 2.1s;"></div>
-                    <div class="confetti" style="left: 85%; background: #f97316; animation-delay: 0.4s;"></div>
+                <div class="paid-hero-inner">
 
                     <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
                         <div class="flex flex-col gap-3">
@@ -359,13 +438,13 @@
                             </div>
                             <div class="live-indicator">
                                 <span class="pulse"></span>
-                                ✅ REGISTRATION OPEN NOW
+                                💰 PAID TOURNAMENTS
                             </div>
                         </div>
 
                         <div class="date-badge">
                             <span class="month">September</span>
-                            <span class="day">22</span>
+                            <span class="day">26</span>
                             <span class="year">2026</span>
                         </div>
                     </div>
@@ -374,16 +453,16 @@
                         Hello <span id="welcome-name-inline" class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Player</span>! 👋
                     </h1>
                     <h2 class="text-2xl sm:text-4xl font-black mb-4 leading-tight">
-                        <span class="text-white">Welcome to</span>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">NEPPLAY</span>
+                        <span class="text-white">Paid Tournaments</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">26 September</span>
                         <span class="text-white">🎮</span>
                     </h2>
 
-                    <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-4 max-w-3xl">
-                        🎉 <strong class="text-green-300">Registration is now OPEN!</strong> We're launching <strong class="text-yellow-300">8 tournaments — one for every game</strong> on <strong class="text-white">22nd September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Free entry with real cash prizes — <strong class="text-yellow-300">claim your slot now before it fills up!</strong> 🚀
+                    <p class="text-white/90 text-sm sm:text-base leading-relaxed mb-6 max-w-3xl">
+                        🚀 <strong class="text-green-300">Real cash prizes!</strong> We're running <strong class="text-yellow-300">8 paid tournaments — one for every game</strong> on <strong class="text-white">26th September 2026</strong> at <strong class="text-white">1:00 PM (NPT)</strong>. Entry only Rs. 150 — win up to <strong class="text-yellow-300">Rs. 1,000</strong> plus <strong class="text-yellow-300">Rs. 500 top kills bonus</strong>. Claim your slot before it fills up! 🚀
                     </p>
 
-                    <div id="rule-notice" class="rule-notice">
+                    <div class="rule-notice">
                         <div class="flex items-start gap-3">
                             <div class="rule-icon">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -393,7 +472,7 @@
                                     ⚠️ Important Rule
                                 </p>
                                 <p class="text-white/85 text-xs sm:text-sm leading-relaxed">
-                                    Each player can register for <strong class="text-yellow-300">ONLY ONE tournament</strong> on 22 September. Choose your game wisely — registrations for a second tournament will be automatically rejected.
+                                    Each player can register for <strong class="text-yellow-300">ONLY ONE tournament</strong> on 26 September. Choose your game wisely — registrations for a second tournament will be automatically rejected.
                                 </p>
                                 <p id="rule-status" class="text-xs mt-3 hidden"></p>
                             </div>
@@ -424,21 +503,21 @@
                             <div class="text-3xl">🎁</div>
                             <div>
                                 <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Entry Fee</p>
-                                <p class="text-xl font-black text-green-400">FREE</p>
+                                <p class="text-xl font-black text-yellow-300">Rs. 150</p>
                             </div>
                         </div>
                         <div class="prize-card">
                             <div class="text-3xl">🏆</div>
                             <div>
                                 <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Winner</p>
-                                <p class="text-xl font-black text-yellow-300">Rs. 500</p>
+                                <p class="text-xl font-black text-green-400">Rs. 1,000</p>
                             </div>
                         </div>
                         <div class="prize-card">
                             <div class="text-3xl">🎯</div>
                             <div>
-                                <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Top Killer</p>
-                                <p class="text-xl font-black text-pink-400">Rs. 150</p>
+                                <p class="text-xs text-white/70 uppercase tracking-wider font-bold">Top Kills</p>
+                                <p class="text-xl font-black text-pink-400">Rs. 500</p>
                             </div>
                         </div>
                     </div>
@@ -460,7 +539,7 @@
                     </div>
 
                     <p class="text-white/85 text-sm mb-6 italic">
-                        💜 Register now to lock your slot. See you on 22nd September! 🚀
+                        💜 Register now to lock your slot. See you on 26th September! 🚀
                     </p>
 
                     <div class="flex flex-wrap gap-3">
@@ -663,7 +742,8 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 22, 7, 15, 0));
+        // Countdown → 26 Sept 2026, 1:00 PM NPT = 07:15 UTC
+        const LAUNCH_DATE = new Date(Date.UTC(2026, 8, 26, 7, 15, 0));
 
         console.log("🔥 Member page initialized");
 
@@ -1376,7 +1456,7 @@
                     ruleStatus.className = 'text-xs mt-3 text-green-400';
                     const freeReg = regs.find(r => r.entryType === 'free');
                     const label = freeReg
-                        ? `free tournament: <strong>${freeReg.tournamentTitle || 'one tournament'}</strong>`
+                        ? `tournament: <strong>${freeReg.tournamentTitle || 'one tournament'}</strong>`
                         : `<strong>${regs[0].tournamentTitle || 'one tournament'}</strong>`;
                     ruleStatus.innerHTML = `You are already registered for ${label}.`;
                 }
@@ -1509,7 +1589,7 @@
                 const snap = await getDocs(q);
                 const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 if (!items.length) {
-                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Registration is OPEN!</span></div>`;
+                    container.innerHTML = `<div class="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg"><i class="fa-solid fa-circle text-[8px] text-green-500 mt-1.5"></i><span class="text-sm text-gray-300">🚀 Paid tournaments now open — 26 Sept!</span></div>`;
                     return;
                 }
                 const colors = { normal:'border-blue-500', high:'border-yellow-500', urgent:'border-red-500' };
