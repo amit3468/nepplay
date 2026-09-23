@@ -117,6 +117,76 @@
             font-size: 26px; flex-shrink: 0;
         }
 
+        /* ===== SOCIAL FOLLOW CARDS ===== */
+        .social-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        @media (min-width: 640px) {
+            .social-row { grid-template-columns: 1fr 1fr; }
+        }
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            border: 1px solid;
+        }
+        .social-card:hover {
+            transform: translateY(-3px);
+        }
+        .social-fb {
+            background: linear-gradient(135deg, rgba(24,119,242,0.12), rgba(99,102,241,0.08));
+            border-color: rgba(24,119,242,0.35);
+        }
+        .social-fb:hover {
+            border-color: rgba(24,119,242,0.75);
+            box-shadow: 0 12px 32px rgba(24,119,242,0.25);
+        }
+        .social-wa {
+            background: linear-gradient(135deg, rgba(37,211,102,0.12), rgba(18,140,126,0.08));
+            border-color: rgba(37,211,102,0.35);
+        }
+        .social-wa:hover {
+            border-color: rgba(37,211,102,0.75);
+            box-shadow: 0 12px 32px rgba(37,211,102,0.25);
+        }
+        .social-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+        }
+        .social-icon-fb { background: #1877f2; box-shadow: 0 8px 24px rgba(24,119,242,0.4); }
+        .social-icon-wa { background: #25D366; box-shadow: 0 8px 24px rgba(37,211,102,0.4); }
+        .social-text { flex: 1; min-width: 0; }
+        .social-title { color: #fff; font-weight: 800; font-size: 14px; margin-bottom: 3px; }
+        .social-sub { color: #94a3b8; font-size: 11.5px; line-height: 1.35; }
+        .social-cta {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .social-cta-fb { background: #1877f2; box-shadow: 0 6px 18px rgba(24,119,242,0.35); }
+        .social-cta-wa { background: #25D366; box-shadow: 0 6px 18px rgba(37,211,102,0.35); }
+        @media (max-width: 400px) {
+            .social-cta { display: none; }
+        }
+
         /* Paid tournament hero */
         .paid-hero {
             position: relative;
@@ -168,7 +238,6 @@
         .ref-stat-tile .num { font-size: 1.5rem; font-weight: 900; line-height: 1; }
         .ref-stat-tile .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; font-weight: 700; margin-top: 6px; }
 
-        /* Tournament detail cards */
         .tourney-card {
             background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(76, 29, 149, 0.4));
             border: 1px solid rgba(139, 92, 246, 0.3);
@@ -379,6 +448,33 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- SOCIAL FOLLOW CARDS -->
+            <div class="social-row">
+                <a href="https://www.facebook.com/profile.php?id=61594129844560"
+                   target="_blank" rel="noopener" class="social-card social-fb">
+                    <div class="social-icon social-icon-fb">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </div>
+                    <div class="social-text">
+                        <div class="social-title">Follow on Facebook</div>
+                        <div class="social-sub">Tournament announcements · Winners · Updates</div>
+                    </div>
+                    <div class="social-cta social-cta-fb">Follow</div>
+                </a>
+
+                <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb"
+                   target="_blank" rel="noopener" class="social-card social-wa">
+                    <div class="social-icon social-icon-wa">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div class="social-text">
+                        <div class="social-title">Join WhatsApp Group</div>
+                        <div class="social-sub">Match alerts · Team up · Community chat</div>
+                    </div>
+                    <div class="social-cta social-cta-wa">Join</div>
+                </a>
             </div>
 
             <!-- PAID TOURNAMENT HERO -->
