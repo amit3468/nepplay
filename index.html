@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <title>NEPPLAY — Nepal's Esports Platform</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="NEPPLAY — Nepal's esports platform. Join free & paid tournaments for Free Fire, PUBG, COD, Valorant, and more. Real cash prizes, fast payouts.">
+<meta name="description" content="NEPPLAY — Nepal's esports platform. Paid tournaments for Free Fire, PUBG, COD, Valorant, Chess, and more. Rs. 150 entry. Rs. 1,000 winner. Real cash prizes, fast payouts.">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEPPLAY">
-<meta property="og:title" content="🎮 NEPPLAY — Nepal's Esports Platform | Grand Opening 22 Sep 2026">
-<meta property="og:description" content="8 Tournaments · FREE ENTRY · Real Cash Prizes. Register now on Nepal's premier esports platform.">
+<meta property="og:title" content="🎮 NEPPLAY — 26 Sept Paid Tournaments | Rs. 1,000 Winner">
+<meta property="og:description" content="8 games. Rs. 150 entry. Rs. 1,000 winner. Register now on Nepal's esports platform.">
 <meta property="og:image" content="https://nepplay.onrender.com/images/promo-poster.jpg">
 <meta property="og:image:width" content="1080">
 <meta property="og:image:height" content="1920">
 <meta property="og:url" content="https://nepplay.onrender.com/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="🎮 NEPPLAY — Nepal's Esports Platform">
-<meta name="twitter:description" content="8 Tournaments · FREE ENTRY · Real Cash Prizes. Register now.">
+<meta name="twitter:title" content="🎮 NEPPLAY — 26 Sept Paid Tournaments">
+<meta name="twitter:description" content="8 games. Rs. 150 entry. Rs. 1,000 winner. Register now.">
 <meta name="twitter:image" content="https://nepplay.onrender.com/images/promo-poster.jpg">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
@@ -82,7 +82,7 @@
     50% { opacity:.6; transform:scale(1.15); }
   }
 
-  /* ============ Grand Opening section ============ */
+  /* ============ Next Event section (replaces Grand Opening) ============ */
   .grand-opening-section {
     max-width: 900px;
     margin: 0 auto 32px;
@@ -90,19 +90,19 @@
   }
   .grand-opening-card {
     background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
-    border: 2px solid rgba(251,191,36,0.35);
+    border: 2px solid rgba(99,102,241,0.35);
     border-radius: 22px;
     padding: 24px;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(251,191,36,0.15);
+    box-shadow: 0 20px 60px rgba(99,102,241,0.15);
     position: relative;
     overflow: hidden;
   }
   .grand-opening-tag {
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(251,191,36,0.15);
-    border: 1px solid rgba(251,191,36,0.5);
-    color: #fbbf24;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.5);
+    color: #a5b4fc;
     padding: 6px 16px;
     border-radius: 999px;
     font-size: 12px;
@@ -224,6 +224,48 @@
     cursor: pointer;
   }
 
+  /* ============ Next event detail strip ============ */
+  .next-event-strip {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-width: 460px;
+    margin: 0 auto 22px;
+    position: relative;
+    z-index: 2;
+  }
+  @media (min-width: 640px) {
+    .next-event-strip { grid-template-columns: 1fr 1fr; }
+  }
+  .next-event-item {
+    background: rgba(15,23,42,0.7);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .next-event-item .k {
+    font-size: 11px;
+    color: #818cf8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .next-event-item .v {
+    font-size: 15px;
+    color: #fff;
+    font-weight: 700;
+  }
+  .next-event-deadline {
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    position: relative;
+    z-index: 2;
+  }
+
   @media (max-width: 640px) {
     .grand-opening-section { padding: 0 16px; }
     .grand-opening-title { font-size: 22px; }
@@ -252,7 +294,7 @@
 <section class="landing-hero">
   <div class="landing-badge">
     <span class="pulse-dot"></span>
-    Launching 22 September 2026
+    Next Event · 26 September 2026 · 1:00 PM NPT
   </div>
 
   <h1 class="landing-title">
@@ -260,14 +302,14 @@
   </h1>
 
   <p class="landing-subtitle">
-    Free & paid tournaments across 8 games. Real cash prizes, instant payouts, and a community of passionate gamers. Join before slots fill up.
+    Paid tournaments across 8 games. Rs. 150 entry. Rs. 1,000 winner. Real cash prizes paid via eSewa, Khalti, or IME Pay.
   </p>
 
   <div class="landing-ctas">
-    <a href="member.html" class="btn-hero btn-hero-primary">
-      🎮 Join Tournaments
+    <a href="tournaments.html" class="btn-hero btn-hero-primary">
+      🎮 Register Now
     </a>
-    <a href="tournaments.html" class="btn-hero btn-hero-outline">
+    <a href="tournaments.html#live" class="btn-hero btn-hero-outline">
       👁️ View Tournaments
     </a>
     <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-hero btn-hero-green">
@@ -278,32 +320,56 @@
   <div class="landing-stats">
     <div class="landing-stat">
       <div class="num purple" id="stat-tournaments">8</div>
-      <div class="lbl">Tournaments</div>
+      <div class="lbl">Games</div>
     </div>
     <div class="landing-stat">
-      <div class="num green" id="stat-players">500+</div>
-      <div class="lbl">Players</div>
+      <div class="num green" id="stat-players">Rs. 150</div>
+      <div class="lbl">Entry</div>
     </div>
     <div class="landing-stat">
-      <div class="num gold" id="stat-prizes">Rs. 20K+</div>
-      <div class="lbl">Prize Pool</div>
+      <div class="num gold" id="stat-prizes">Rs. 1,000</div>
+      <div class="lbl">Winner Prize</div>
     </div>
   </div>
 </section>
 
-<!-- GRAND OPENING PROMO (single poster shown here) -->
+<!-- NEXT EVENT PROMO (26 Sept paid tournament) -->
 <section class="grand-opening-section">
   <div class="grand-opening-card">
     <div class="grand-opening-tag">
-      <span>🎉</span> Grand Opening · 22 September
+      <span>🏆</span> Next Event · 26 September · 1:00 PM NPT
     </div>
-    <h2 class="grand-opening-title">All Tournaments · FREE ENTRY</h2>
-    <p class="grand-opening-sub">8 games. 8 tournaments. Real prizes. Limited slots.</p>
+    <h2 class="grand-opening-title">8 Paid Tournaments · Rs. 150 Entry</h2>
+    <p class="grand-opening-sub">Rs. 1,000 winner · Rs. 500 top kills · per game</p>
 
+    <div class="next-event-strip">
+      <div class="next-event-item">
+        <div class="k">Date</div>
+        <div class="v">26 September 2026</div>
+      </div>
+      <div class="next-event-item">
+        <div class="k">Start Time</div>
+        <div class="v">1:00 PM NPT</div>
+      </div>
+      <div class="next-event-item">
+        <div class="k">Entry Fee</div>
+        <div class="v">Rs. 150 / game</div>
+      </div>
+      <div class="next-event-item">
+        <div class="k">Winner Prize</div>
+        <div class="v">Rs. 1,000 / game</div>
+      </div>
+    </div>
+
+    <!-- 👇 REPLACE images/promo-poster.jpg with your 26 Sept poster.
+         If you don't have one yet, delete this .poster-wrap block and the
+         .poster-hint paragraph below it. -->
     <div class="poster-wrap" onclick="openPosterLightbox()">
-      <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening — 22 September, Free Entry">
+      <img src="images/promo-poster.jpg" alt="NEPPLAY 26 September paid tournaments — Rs. 150 entry, Rs. 1,000 winner">
     </div>
     <p class="poster-hint">👆 Tap poster to view full size</p>
+
+    <p class="next-event-deadline">⏰ Registration closes 25 September, 8:00 PM NPT</p>
 
     <div class="grand-opening-ctas">
       <a href="tournaments.html" class="go-btn go-btn-primary">
@@ -319,7 +385,7 @@
 <!-- Lightbox — hidden by default, only shows when opened -->
 <div id="posterLightbox" class="poster-lightbox" onclick="closePosterLightbox()">
   <span class="close-hint">✕</span>
-  <img src="images/promo-poster.jpg" alt="NEPPLAY Grand Opening poster">
+  <img src="images/promo-poster.jpg" alt="NEPPLAY 26 September tournament poster">
 </div>
 
 <!-- LIVE NOW — hidden until streamers exist -->
@@ -338,19 +404,19 @@
   <div class="featured-tournament">
     <div>
       <div class="label">🎯 Featured Tournament</div>
-      <h3 id="featured-title">Free Fire Paid Championship</h3>
+      <h3 id="featured-title">Free Fire Championship</h3>
       <div class="meta">
-        <span>📅 25 September 2026</span>
-        <span>🕐 18:00 NPT</span>
+        <span>📅 26 September 2026</span>
+        <span>🕐 1:00 PM NPT</span>
         <span>🎮 Free Fire · Squad</span>
       </div>
       <div class="meta" style="margin-bottom:20px;">
         <span>💰 Entry: Rs. 150</span>
-        <span>🏆 Prize: Rs. 1500</span>
+        <span>🏆 Winner: Rs. 1,000</span>
         <span>🎯 Top Kills: Rs. 500</span>
       </div>
       <a href="tournaments.html" style="padding:12px 26px;background:#fff;color:#7c3aed;border-radius:12px;font-weight:800;text-decoration:none;display:inline-block;font-size:14px;">
-        Join Now →
+        Register Now →
       </a>
     </div>
     <div style="text-align:center;">
@@ -361,7 +427,7 @@
 
 <section class="landing-section">
   <h2>Why Play on NEPPLAY</h2>
-  <p class="section-sub">Built for Nepali gamers — free tournaments, real cash, no hassle.</p>
+  <p class="section-sub">Built for Nepali gamers — real cash prizes, real payouts, no hassle.</p>
 
   <div class="feature-grid">
     <div class="feature-card">
@@ -372,7 +438,7 @@
     <div class="feature-card">
       <div class="icon green">💰</div>
       <h3>Real Cash Prizes</h3>
-      <p>Winners receive direct payments via eSewa, Khalti, or IME Pay. No delays, no hidden fees.</p>
+      <p>Winners paid directly via eSewa, Khalti, or IME Pay. Rs. 1,000 winner, Rs. 500 top kills. No delays, no hidden fees.</p>
     </div>
     <div class="feature-card">
       <div class="icon orange">⚡</div>
@@ -380,9 +446,9 @@
       <p>Prize money sent within 30 minutes of match end. Compete with confidence.</p>
     </div>
     <div class="feature-card">
-      <div class="icon purple">🆓</div>
-      <h3>Free Entry Tournaments</h3>
-      <p>Sponsored tournaments with real prize pools. Zero entry fee, full prize pool.</p>
+      <div class="icon purple">🎯</div>
+      <h3>Low Entry, High Reward</h3>
+      <p>Rs. 150 entry per game. Winner takes Rs. 1,000 — over 6x return on your entry.</p>
     </div>
     <div class="feature-card">
       <div class="icon green">📱</div>
@@ -392,7 +458,7 @@
     <div class="feature-card">
       <div class="icon orange">🤝</div>
       <h3>Real Community</h3>
-      <p>Join thousands of Nepali gamers in WhatsApp & Telegram. Find teammates, make friends.</p>
+      <p>Join our WhatsApp &amp; Telegram. Find teammates, make friends, run matches together.</p>
     </div>
   </div>
 </section>
@@ -405,26 +471,26 @@
     <div class="feature-card">
       <div class="icon purple">1️⃣</div>
       <h3>Create Account</h3>
-      <p>Sign up in 30 seconds with just your email and password. No credit card needed.</p>
+      <p>Sign up in 30 seconds with just your email and password.</p>
     </div>
     <div class="feature-card">
       <div class="icon green">2️⃣</div>
-      <h3>Join Tournament</h3>
-      <p>Pick a tournament, pay entry (or join free), and submit your payment proof.</p>
+      <h3>Register &amp; Pay</h3>
+      <p>Pick a game, pay Rs. 150 via eSewa, Khalti, or IME Pay, and submit your payment proof.</p>
     </div>
     <div class="feature-card">
       <div class="icon orange">3️⃣</div>
-      <h3>Play & Win</h3>
-      <p>Get room ID & password, compete, and receive your prize money within 30 minutes.</p>
+      <h3>Play &amp; Win</h3>
+      <p>Get room ID &amp; password, compete, and receive your prize money within 30 minutes.</p>
     </div>
   </div>
 </section>
 
 <section class="landing-section" style="text-align:center;">
   <h2>Ready to Compete?</h2>
-  <p class="section-sub">Join hundreds of Nepali gamers already signed up.</p>
+  <p class="section-sub">8 games. Rs. 150 entry. Rs. 1,000 winner. Registration closes 25 Sept, 8 PM NPT.</p>
   <div class="landing-ctas">
-    <a href="member.html" class="btn-hero btn-hero-primary">
+    <a href="tournaments.html" class="btn-hero btn-hero-primary">
       🚀 Register Now
     </a>
     <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-hero btn-hero-green">
