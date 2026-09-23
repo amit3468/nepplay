@@ -69,7 +69,6 @@
   .slots-spots-left { font-size: 11px; font-weight: 700; color: #fbbf24; margin-top: 2px; }
   .btn-join:disabled, .btn-join.btn-disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.6); }
 
-  /* ===== FIX #5: Copy/share link per tournament ===== */
   .card-share-btn {
     background: rgba(99,102,241,0.15);
     border: 1px solid rgba(99,102,241,0.4);
@@ -124,9 +123,9 @@
 </header>
 
 <section class="hero">
-  <span class="pill">⚡ Registration Open</span>
-  <h1>🏆 Tournaments</h1>
-  <p>Join Free &amp; Paid Tournaments. Real Prizes.</p>
+  <span class="pill">⚡ Registration Open · Closes 25 Sept 8 PM NPT</span>
+  <h1>🏆 26 September Tournaments</h1>
+  <p>8 Paid Tournaments · Rs. 150 Entry · Rs. 1,000 Winner</p>
 </section>
 
 <!-- LIVE STREAMERS BANNER -->
@@ -172,9 +171,9 @@
 </div>
 
 <div class="tournament-type-tabs">
-  <button id="tabAll"  class="type-tab active" onclick="filterTournamentType('all')">🎯 All</button>
+  <button id="tabAll"  class="type-tab"        onclick="filterTournamentType('all')">🎯 All</button>
   <button id="tabFree" class="type-tab"        onclick="filterTournamentType('free')">🆓 Free Entry</button>
-  <button id="tabPaid" class="type-tab"        onclick="filterTournamentType('paid')">💵 Paid Entry</button>
+  <button id="tabPaid" class="type-tab active" onclick="filterTournamentType('paid')">💵 Paid Entry</button>
 </div>
 
 <div class="tournament-grid" id="tournamentGrid">
@@ -210,7 +209,7 @@
     <p class="modal-sub">
       <b id="mTournamentTitle">Free Fire Paid Championship</b><br>
       Entry Fee: <b>Rs. <span id="mFee">150</span></b> |
-      🏆 Prize: <b>Rs. <span id="mPrize">1500</span></b> |
+      🏆 Prize: <b>Rs. <span id="mPrize">1000</span></b> |
       🎯 Top Kills: <b>Rs. <span id="mKills">500</span></b>
     </p>
     <div class="pay-tabs pay-tabs-4">
@@ -352,7 +351,7 @@ let currentUser = null;
 let currentUid  = null;
 let TOURNAMENTS = [];
 let lastConfirmData = null;
-const filterState = { game: 'all', type: 'all' };
+const filterState = { game: 'all', type: 'paid' };
 
 // ================================================
 // IMAGE COMPRESSION
@@ -402,19 +401,19 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ================================================
-// SEED PAID TOURNAMENTS
+// SEED PAID TOURNAMENTS — 26 SEPT, 1 PM NPT
 // ================================================
 async function seedPaidTournamentsIfNeeded() {
   try {
     const SEEDS = [
-      { id:'seed_paid_ff',       title:'Free Fire Paid Championship', game:'Free Fire', mode:'Squad', date:'2026-09-25', time:'18:00' },
-      { id:'seed_paid_pubg',     title:'PUBG Paid Pro Cup',           game:'PUBG',      mode:'Squad', date:'2026-09-25', time:'19:00' },
-      { id:'seed_paid_cod',      title:'COD Mobile Paid Cup',         game:'COD',       mode:'Squad', date:'2026-09-26', time:'18:00' },
-      { id:'seed_paid_efoot',    title:'eFootball Paid 1v1 Cup',      game:'eFootball', mode:'1v1',   date:'2026-09-26', time:'19:00' },
-      { id:'seed_paid_ecricket', title:'eCricket Paid Cup',           game:'eCricket',  mode:'1v1',   date:'2026-09-27', time:'18:00' },
-      { id:'seed_paid_valorant', title:'Valorant Paid Cup',           game:'Valorant',  mode:'5v5',   date:'2026-09-27', time:'19:00' },
-      { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-28', time:'18:00' },
-      { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-28', time:'19:00' }
+      { id:'seed_paid_ff',       title:'Free Fire Paid Championship', game:'Free Fire', mode:'Squad', date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_pubg',     title:'PUBG Paid Pro Cup',           game:'PUBG',      mode:'Squad', date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_cod',      title:'COD Mobile Paid Cup',         game:'COD',       mode:'Squad', date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_efoot',    title:'eFootball Paid 1v1 Cup',      game:'eFootball', mode:'1v1',   date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_ecricket', title:'eCricket Paid Cup',           game:'eCricket',  mode:'1v1',   date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_valorant', title:'Valorant Paid Cup',           game:'Valorant',  mode:'5v5',   date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-26', time:'13:00' },
+      { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' }
     ];
     const snap = await getDocs(collection(db, 'tournaments'));
     const existingIds = new Set(snap.docs.map(d => d.id));
@@ -425,7 +424,7 @@ async function seedPaidTournamentsIfNeeded() {
       if (existingTitles.has(s.title.toLowerCase())) continue;
       await setDoc(doc(db, 'tournaments', s.id), {
         title: s.title, game: s.game, mode: s.mode,
-        entryType: 'paid', entryFee: 150, prizePool: 1500, topKillsPrize: 500,
+        entryType: 'paid', entryFee: 150, prizePool: 1000, topKillsPrize: 500,
         date: s.date, time: s.time, filled: 0, max: 100,
         createdAt: serverTimestamp()
       });
@@ -739,7 +738,7 @@ function renderTournaments() {
 }
 
 // ================================================
-// FIX #5: COPY TOURNAMENT LINK
+// COPY TOURNAMENT LINK
 // ================================================
 window.copyTournamentLink = function(tid, event) {
   if (event) event.stopPropagation();
@@ -747,19 +746,15 @@ window.copyTournamentLink = function(tid, event) {
   const btn = event?.target?.closest('.card-share-btn');
   const tournamentTitle = TOURNAMENTS.find(x => x.id === tid)?.title || 'NEPPLAY Tournament';
 
-  // Try native share first (mobile)
   if (navigator.share) {
     navigator.share({
       title: tournamentTitle + ' — NEPPLAY',
-      text: `🎮 Join ${tournamentTitle} on NEPPLAY!`,
+      text: `🎮 Join ${tournamentTitle} on NEPPLAY! Rs. 150 entry, Rs. 1,000 winner.`,
       url: url
-    }).catch(() => {
-      // User cancelled or share failed silently — no fallback needed
-    });
+    }).catch(() => {});
     return;
   }
 
-  // Fallback: copy to clipboard
   navigator.clipboard.writeText(url).then(() => {
     if (btn) {
       const orig = btn.innerHTML;
@@ -1327,7 +1322,7 @@ async function loadLiveStreamers() {
       .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
 
     if (!streamers.length) {
-      countEl.textContent = 'check back during the tournament';
+      countEl.textContent = 'check back on 26 September';
       listEl.style.display = 'block';
       listEl.innerHTML = `
         <div class="stream-card" style="grid-column:1/-1; text-align:center; padding:24px 16px;">
@@ -1336,10 +1331,10 @@ async function loadLiveStreamers() {
             No streams live right now
           </div>
           <div style="color:#fecaca; font-size:13px; margin-bottom:14px; line-height:1.5;">
-            Players with a registered stream URL will appear here during tournaments.
+            Players with a registered stream URL will appear here on 26 September during tournaments.
           </div>
           <a href="tournaments.html#tournaments" style="display:inline-block; background:rgba(255,255,255,0.15); color:#fff; padding:9px 18px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:700; border:1px solid rgba(255,255,255,0.25);">
-            🎮 Join a tournament
+            🎮 Register for 26 September
           </a>
         </div>
       `;
