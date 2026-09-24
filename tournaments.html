@@ -116,7 +116,6 @@
     100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 12px 30px rgba(0,0,0,0.4); transform: scale(1); }
   }
 
-  /* ============ QUICK WIN STYLES ============ */
   .whatsapp-float {
     position: fixed;
     bottom: 20px;
@@ -208,20 +207,6 @@
     font-size: 13px;
   }
 
-  /* ============ NEW USER DISCOUNT ============ */
-  .newuser-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    margin-left: 8px;
-    animation: badgePulse 1.5s infinite;
-  }
-
   .coupon-row {
     display: flex;
     gap: 8px;
@@ -260,13 +245,6 @@
     color: #4ade80;
   }
 
-  .discount-strike {
-    text-decoration: line-through;
-    color: #6b7280;
-    font-size: 12px;
-    margin-right: 6px;
-  }
-
   .newuser-hint {
     background: rgba(34,197,94,0.1);
     border: 1px solid rgba(34,197,94,0.4);
@@ -276,6 +254,23 @@
     font-size: 12.5px;
     color: #86efac;
     line-height: 1.5;
+  }
+
+  .first12-banner {
+    background: linear-gradient(90deg, #dc2626, #ea580c);
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    font-weight: 900;
+    font-size: 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    animation: pulse6 1.5s infinite;
+    letter-spacing: 0.5px;
+  }
+  @keyframes pulse6 {
+    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38,0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(220,38,38,0); }
   }
 </style>
 </head>
@@ -368,6 +363,11 @@
     <button class="modal-close" onclick="closeJoinModal()">✕</button>
     <h2>🎮 Join Tournament</h2>
     <p class="modal-sub"><b id="joinTournamentTitle">Free Fire Solo Cup</b></p>
+
+    <div id="first12Notice" class="first12-banner" style="display:none;">
+      ⚡ ONLY FIRST 12 PLAYERS GET IN — REGISTER FAST! ⚡
+    </div>
+
     <form id="joinForm" onsubmit="submitJoin(event)">
       <input type="hidden" id="joinTournamentId">
       <label>🎮 Your IGN (In-Game Name) *</label>
@@ -578,9 +578,6 @@ let TOURNAMENTS = [];
 let lastConfirmData = null;
 const filterState = { game: 'all', type: 'paid' };
 
-// ================================================
-// NEW USER DISCOUNT STATE
-// ================================================
 const NEW_USER_DISCOUNT = 25;
 let newUserModeActive = false;
 let userIsNew = false;
@@ -635,7 +632,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ================================================
-// CHECK IF USER IS NEW (no past registrations)
+// CHECK IF USER IS NEW
 // ================================================
 async function checkIfUserIsNew() {
   if (!currentUid) { userIsNew = true; return; }
@@ -658,7 +655,7 @@ async function checkIfUserIsNew() {
 }
 
 // ================================================
-// ACTIVATE NEW USER MODE (from banner click)
+// ACTIVATE NEW USER MODE
 // ================================================
 window.activateNewUserMode = function(event) {
   event.preventDefault();
@@ -675,7 +672,7 @@ window.activateNewUserMode = function(event) {
 };
 
 // ================================================
-// SEED PAID TOURNAMENTS — 26 SEPT, 1 PM NPT
+// SEED — 8 PAID + 1 FREE (12 players)
 // ================================================
 async function seedPaidTournamentsIfNeeded() {
   try {
@@ -687,25 +684,41 @@ async function seedPaidTournamentsIfNeeded() {
       { id:'seed_paid_ecricket', title:'eCricket Paid Cup',           game:'eCricket',  mode:'1v1',   date:'2026-09-26', time:'13:00' },
       { id:'seed_paid_valorant', title:'Valorant Paid Cup',           game:'Valorant',  mode:'5v5',   date:'2026-09-26', time:'13:00' },
       { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' }
+      { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' },
+
+      // FREE MINI — 12 PLAYERS
+      { id:'seed_free_ff_mini',
+        title:'⚡ Free Fire Mini — First 12 Only ⚡',
+        game:'Free Fire', mode:'Solo', date:'2025-09-25', time:'13:00',
+        entryType:'free', entryFee:0, prizePool:250, topKillsPrize:80, max:12 }
     ];
+
     const snap = await getDocs(collection(db, 'tournaments'));
     const existingIds = new Set(snap.docs.map(d => d.id));
     const existingTitles = new Set(snap.docs.map(d => (d.data().title || '').toString().trim().toLowerCase()));
     let created = 0;
+
     for (const s of SEEDS) {
       if (existingIds.has(s.id)) continue;
       if (existingTitles.has(s.title.toLowerCase())) continue;
       await setDoc(doc(db, 'tournaments', s.id), {
-        title: s.title, game: s.game, mode: s.mode,
-        entryType: 'paid', entryFee: 150, prizePool: 1000, topKillsPrize: 500,
-        date: s.date, time: s.time, filled: 0, max: 100,
+        title: s.title,
+        game: s.game,
+        mode: s.mode,
+        entryType: s.entryType || 'paid',
+        entryFee: s.entryFee !== undefined ? s.entryFee : 150,
+        prizePool: s.prizePool !== undefined ? s.prizePool : 1000,
+        topKillsPrize: s.topKillsPrize !== undefined ? s.topKillsPrize : 500,
+        date: s.date,
+        time: s.time,
+        filled: 0,
+        max: s.max !== undefined ? s.max : 100,
         createdAt: serverTimestamp()
       });
       created++;
     }
-    if (created > 0) console.log(`✅ Seeded ${created} new paid tournaments`);
-    else console.log("✅ All paid tournaments exist");
+    if (created > 0) console.log(`✅ Seeded ${created} new tournaments`);
+    else console.log("✅ All tournaments exist");
   } catch (err) { console.warn("⚠️ Seed failed:", err.message); }
 }
 
@@ -956,13 +969,18 @@ function renderTournaments() {
       badgesHtml += `<span class="urgency-badge ${urg.cls}">${urg.text}</span>`;
     }
 
+    const isFirst12 = !isPaid && t.max === 12;
+    if (isFirst12 && !isFull && !isOver) {
+      badgesHtml += `<span class="urgency-badge badge-urgent">⚡ FIRST 12 ONLY</span>`;
+    }
+
     const cdChip = cd.text
       ? `<span class="countdown-chip ${cd.cls}">${cd.text}</span>`
       : '';
 
     const spotsLeft = Math.max(t.max - t.filled, 0);
     const spotsLeftHtml = (!isFull && !isOver && spotsLeft <= 20)
-      ? `<div class="slots-spots-left">Only ${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left</div>`
+      ? `<div class="slots-spots-left">${isFirst12 ? '🔥 Only ' : 'Only '}${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left${isFirst12 ? ' — register fast!' : ''}</div>`
       : '';
 
     let joinBtn;
@@ -973,7 +991,7 @@ function renderTournaments() {
     } else if (isPaid) {
       joinBtn = `<button class="btn-join paid-btn" onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">Join — Pay Rs. ${t.entry_fee}</button>`;
     } else {
-      joinBtn = `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">Join Free</button>`;
+      joinBtn = `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">⚡ Join Free — First 12 Only</button>`;
     }
 
     return `
@@ -990,7 +1008,7 @@ function renderTournaments() {
             <div><small>Entry Fee</small><b class="${isPaid ? 'paid-text' : 'free-text'}">${isPaid ? 'Rs. ' + t.entry_fee : 'FREE'}</b></div>
             <div><small>Prize Pool</small><b class="prize">Rs. ${t.prize_pool}</b></div>
           </div>
-          ${isPaid && t.top_kills_prize ? `<div class="card-meta extra"><div><small>🎯 Top Kills</small><b class="kill-prize">Rs. ${t.top_kills_prize}</b></div></div>` : ''}
+          ${t.top_kills_prize ? `<div class="card-meta extra"><div><small>🎯 Top Kills</small><b class="kill-prize">Rs. ${t.top_kills_prize}</b></div></div>` : ''}
           <div class="card-footer">
             <span>📅 ${t.date}</span>
             <span>🕐 ${t.time}</span>
@@ -1022,7 +1040,8 @@ window.shareOnWhatsApp = function(tid, event) {
   const t = TOURNAMENTS.find(x => x.id === tid);
   if (!t) return;
   const url = 'https://nepplay.onrender.com/tournaments.html?t=' + tid;
-  const text = `🔥 *${t.title}* — NEPPLAY\n📅 ${t.date} ⏰ ${t.time}\n💰 Entry: Rs. ${t.entry_fee}\n🏆 Prize: Rs. ${t.prize_pool}${t.top_kills_prize ? '\n🎯 Top Killer: Rs. ' + t.top_kills_prize : ''}\n\n👉 Register: ${url}`;
+  const isFree = t.entry_type === 'free';
+  const text = `🔥 *${t.title}* — NEPPLAY\n📅 ${t.date} ⏰ ${t.time}\n💰 Entry: ${isFree ? 'FREE' : 'Rs. ' + t.entry_fee}\n🏆 Prize: Rs. ${t.prize_pool}${t.top_kills_prize ? '\n🎯 Top Killer: Rs. ' + t.top_kills_prize : ''}${isFree ? '\n⚡ FIRST 12 ONLY — register fast!' : ''}\n\n👉 Register: ${url}`;
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 };
 
@@ -1038,7 +1057,7 @@ window.copyTournamentLink = function(tid, event) {
   if (navigator.share) {
     navigator.share({
       title: tournamentTitle + ' — NEPPLAY',
-      text: `🎮 Join ${tournamentTitle} on NEPPLAY! Rs. 150 entry, Rs. 1,000 winner.`,
+      text: `🎮 Join ${tournamentTitle} on NEPPLAY!`,
       url: url
     }).catch(() => {});
     return;
@@ -1161,6 +1180,15 @@ window.openJoinModal = function(tid, title) {
   document.getElementById('joinTournamentTitle').innerText = title;
   document.getElementById('joinForm').reset();
   document.getElementById('joinStreamUrl').value = '';
+
+  const t = TOURNAMENTS.find(x => x.id === tid);
+  const notice = document.getElementById('first12Notice');
+  if (t && t.entry_type === 'free' && t.max === 12) {
+    notice.style.display = 'block';
+  } else {
+    notice.style.display = 'none';
+  }
+
   document.getElementById('joinModal').classList.add('active');
 };
 window.closeJoinModal = function() { document.getElementById('joinModal').classList.remove('active'); };
@@ -1180,6 +1208,11 @@ window.submitJoin = async function(e) {
     if (!ign)   throw new Error('IGN required');
     if (!phone) throw new Error('Phone required');
     if (streamUrl && !/^https?:\/\//i.test(streamUrl)) throw new Error('Stream URL must start with http:// or https://');
+
+    const tourn = TOURNAMENTS.find(x => x.id === tid);
+    if (tourn && Number(tourn.filled) >= Number(tourn.max)) {
+      throw new Error('This tournament is FULL. All ' + tourn.max + ' slots taken!');
+    }
 
     const freeRegSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -1210,13 +1243,12 @@ window.submitJoin = async function(e) {
     window.showToast('✅ Joined ' + title + '!');
     loadMyTournaments();
 
-    const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
     window.showConfirmModal({
       title: title,
-      game: tourn.game || '',
-      mode: tourn.mode || '',
-      date: tourn.date || '',
-      time: tourn.time || '',
+      game: tourn?.game || '',
+      mode: tourn?.mode || '',
+      date: tourn?.date || '',
+      time: tourn?.time || '',
       ign, phone,
       entryType: 'free',
       amount: 0,
@@ -1235,7 +1267,6 @@ window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.getElementById('mPrize').innerText = prize;
   document.getElementById('mKills').innerText = kills;
 
-  // Reset coupon UI
   const couponInput = document.getElementById('payCoupon');
   const couponMsg = document.getElementById('couponMsg');
   const discountLine = document.getElementById('discountLine');
@@ -1244,7 +1275,6 @@ window.openPaymentModal = function(tid, title, fee, prize, kills) {
   if (couponMsg) couponMsg.style.display = 'none';
   if (discountLine) discountLine.style.display = 'none';
 
-  // Auto-apply if new user mode active
   if (userIsNew && newUserModeActive) {
     if (newUserHint) newUserHint.style.display = 'block';
     if (discountLine) discountLine.style.display = 'flex';
