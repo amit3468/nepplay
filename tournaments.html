@@ -305,7 +305,6 @@
   <p>8 Paid Tournaments · Rs. 150 Entry · Rs. 1,000 Winner</p>
 </section>
 
-<!-- LIVE STREAMERS BANNER -->
 <section id="live" style="max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
   <div id="liveInner" style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
@@ -327,14 +326,12 @@
 .stream-card .tourney { color:#fecaca; font-size:11px; margin-bottom:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 </style>
 
-<!-- MY TOURNAMENTS -->
 <section id="myTournamentsSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px;">
   <h2 style="margin-top:20px;">🎯 My Tournaments</h2>
   <p class="muted" style="margin-bottom:16px;">Tournaments you've joined — room details appear here</p>
   <div class="list" id="myTournamentsList"></div>
 </section>
 
-<!-- GAME FILTERS -->
 <div class="filters" id="gameFilters">
   <button class="game-tab active" data-game="all"       onclick="filterByGame('all')">All Games</button>
   <button class="game-tab"        data-game="freefire"  onclick="filterByGame('freefire')">Free Fire</button>
@@ -357,7 +354,6 @@
   <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
 </div>
 
-<!-- JOIN MODAL (FREE) -->
 <div id="joinModal" class="modal-overlay">
   <div class="modal-box small">
     <button class="modal-close" onclick="closeJoinModal()">✕</button>
@@ -383,7 +379,6 @@
   </div>
 </div>
 
-<!-- PAYMENT MODAL (PAID) -->
 <div id="paymentModal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closePaymentModal()">✕</button>
@@ -482,7 +477,6 @@
   </div>
 </div>
 
-<!-- CONFIRMATION MODAL -->
 <div id="confirmModal" class="modal-overlay">
   <div class="modal-box small">
     <div class="confirm-box">
@@ -510,7 +504,6 @@
   <img id="shotFull" class="lightbox-img">
 </div>
 
-<!-- QR CODE SECTION -->
 <section style="max-width:1300px; margin:0 auto; padding:0 32px;">
   <div class="qr-section">
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://nepplay.onrender.com/tournaments.html" alt="Scan to Register">
@@ -518,7 +511,6 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="landing-footer" style="margin-top:60px;">
   <div style="margin-bottom:16px;font-size:16px;font-weight:700;color:#fff;">🎮 NEPPLAY</div>
 
@@ -538,7 +530,6 @@
   <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
 </footer>
 
-<!-- WhatsApp Floating Button -->
 <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb"
    class="whatsapp-float" target="_blank" aria-label="Join WhatsApp">
   <svg viewBox="0 0 32 32" width="32" height="32" fill="white">
@@ -548,7 +539,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc }
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc, updateDoc, increment }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -569,9 +560,6 @@ const auth = getAuth(app);
 
 console.log("🔥 Firebase ready on tournaments page");
 
-// ================================================
-// STATE
-// ================================================
 let currentUser = null;
 let currentUid  = null;
 let TOURNAMENTS = [];
@@ -582,9 +570,6 @@ const NEW_USER_DISCOUNT = 25;
 let newUserModeActive = false;
 let userIsNew = false;
 
-// ================================================
-// IMAGE COMPRESSION
-// ================================================
 function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -610,9 +595,6 @@ function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
   });
 }
 
-// ================================================
-// AUTH
-// ================================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = {
@@ -631,9 +613,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ================================================
-// CHECK IF USER IS NEW
-// ================================================
 async function checkIfUserIsNew() {
   if (!currentUid) { userIsNew = true; return; }
   try {
@@ -654,15 +633,10 @@ async function checkIfUserIsNew() {
   }
 }
 
-// ================================================
-// ACTIVATE NEW USER MODE
-// ================================================
 window.activateNewUserMode = function(event) {
   event.preventDefault();
   const grid = document.getElementById('tournamentGrid');
-  if (grid) {
-    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
   if (!userIsNew) {
     window.showToast('ℹ️ New user discount is only for first-time players');
     return;
@@ -671,9 +645,6 @@ window.activateNewUserMode = function(event) {
   window.showToast('🎁 Rs 25 OFF activated! Pick any tournament → discount auto-applies at payment.');
 };
 
-// ================================================
-// SEED — 8 PAID + 1 FREE (12 players)
-// ================================================
 async function seedPaidTournamentsIfNeeded() {
   try {
     const SEEDS = [
@@ -685,7 +656,6 @@ async function seedPaidTournamentsIfNeeded() {
       { id:'seed_paid_valorant', title:'Valorant Paid Cup',           game:'Valorant',  mode:'5v5',   date:'2026-09-26', time:'13:00' },
       { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-26', time:'13:00' },
       { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' },
-
       { id:'seed_free_ff_mini',
         title:'⚡ Free Fire Mini — First 12 Only ⚡',
         game:'Free Fire', mode:'Solo', date:'2026-09-25', time:'13:00',
@@ -721,9 +691,6 @@ async function seedPaidTournamentsIfNeeded() {
   } catch (err) { console.warn("⚠️ Seed failed:", err.message); }
 }
 
-// ================================================
-// COUNTDOWN HELPERS
-// ================================================
 function getTournamentStart(t) {
   if (!t.date || t.date === '—') return null;
   const timeStr = (t.time && t.time !== '—') ? t.time : '00:00';
@@ -769,9 +736,6 @@ function isTournamentOver(t) {
   return Date.now() > start.getTime() + 3 * 3600000;
 }
 
-// ================================================
-// LOAD TOURNAMENTS
-// ================================================
 function gameKey(g) {
   return (g || '').toString().toLowerCase().replace(/[^a-z]/g, '');
 }
@@ -831,9 +795,6 @@ async function loadTournaments() {
   }
 }
 
-// ================================================
-// MY TOURNAMENTS
-// ================================================
 async function loadMyTournaments() {
   if (!currentUid) return;
   try {
@@ -931,9 +892,6 @@ window.copyRoomField = function(text, btn) {
 
 setInterval(() => { if (currentUid) loadMyTournaments(); }, 60000);
 
-// ================================================
-// RENDER
-// ================================================
 function renderTournaments() {
   const grid = document.getElementById('tournamentGrid');
   const visible = TOURNAMENTS.filter(t => {
@@ -1031,9 +989,6 @@ function renderTournaments() {
   }).join('');
 }
 
-// ================================================
-// WHATSAPP SHARE
-// ================================================
 window.shareOnWhatsApp = function(tid, event) {
   if (event) event.stopPropagation();
   const t = TOURNAMENTS.find(x => x.id === tid);
@@ -1044,9 +999,6 @@ window.shareOnWhatsApp = function(tid, event) {
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 };
 
-// ================================================
-// COPY TOURNAMENT LINK
-// ================================================
 window.copyTournamentLink = function(tid, event) {
   if (event) event.stopPropagation();
   const url = 'https://nepplay.onrender.com/tournaments.html?t=' + tid;
@@ -1077,12 +1029,10 @@ window.copyTournamentLink = function(tid, event) {
   });
 };
 
-// Auto-scroll + highlight from ?t=<id> param
 (function autoHighlightFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const tid = params.get('t');
   if (!tid) return;
-
   let attempts = 0;
   const tryHighlight = setInterval(() => {
     attempts++;
@@ -1103,9 +1053,17 @@ setInterval(() => {
   }
 }, 30000);
 
-// ================================================
-// COUPON / DISCOUNT
-// ================================================
+// ⚡ AUTO-UPDATE FILLED COUNTER (NEW)
+async function incrementTournamentFilled(tid) {
+  try {
+    const ref = doc(db, 'tournaments', tid);
+    await updateDoc(ref, { filled: increment(1) });
+    console.log("✅ Incremented filled for", tid);
+  } catch (err) {
+    console.warn('incrementTournamentFilled failed:', err);
+  }
+}
+
 window.applyCoupon = function() {
   const code = (document.getElementById('payCoupon').value || '').trim().toUpperCase();
   const msg = document.getElementById('couponMsg');
@@ -1153,9 +1111,6 @@ function updateFeeDisplay(discount) {
   document.querySelectorAll('.payAmt').forEach(el => el.innerText = finalFee);
 }
 
-// ================================================
-// WINDOW-LEVEL FUNCTIONS
-// ================================================
 window.filterByGame = function(game) {
   filterState.game = game;
   document.querySelectorAll('.game-tab').forEach(b => {
@@ -1213,8 +1168,7 @@ window.submitJoin = async function(e) {
       throw new Error('This tournament is FULL. All ' + tourn.max + ' slots taken!');
     }
 
-    // ✅ REMOVED: "one free tournament only" restriction
-    // Players can now join multiple free tournaments
+    // ✅ Free tournaments have no join limit (removed)
 
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -1231,8 +1185,12 @@ window.submitJoin = async function(e) {
       status: 'confirmed', registeredAt: serverTimestamp()
     });
 
+    // ✅ AUTO-INCREMENT filled counter
+    await incrementTournamentFilled(tid);
+
     window.closeJoinModal();
     window.showToast('✅ Joined ' + title + '!');
+    await loadTournaments();  // reload to show new count
     loadMyTournaments();
 
     window.showConfirmModal({
@@ -1385,9 +1343,13 @@ window.submitPayment = async function(e) {
       status: 'pending', registeredAt: serverTimestamp()
     });
 
+    // ✅ AUTO-INCREMENT filled counter (paid)
+    await incrementTournamentFilled(tid);
+
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
     await checkIfUserIsNew();
+    await loadTournaments();  // reload count
     loadMyTournaments();
 
     const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
@@ -1461,9 +1423,6 @@ window.copyConfirmStream = function(url, btn) {
   });
 };
 
-// ================================================
-// SHAREABLE REGISTRATION CARD
-// ================================================
 window.shareRegistrationCard = async function() {
   if (!lastConfirmData) {
     window.showToast('❌ No registration data to share');
@@ -1473,185 +1432,96 @@ window.shareRegistrationCard = async function() {
   const originalHtml = btn.innerHTML;
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-
   try {
     const dataUrl = await renderShareCard(lastConfirmData);
     const blob = await (await fetch(dataUrl)).blob();
     const file = new File([blob], `nepplay-${(lastConfirmData.title || 'tournament').toLowerCase().replace(/[^a-z0-9]/g,'-')}.png`, { type: 'image/png' });
-
     const shareText = `🎮 I just registered for *${lastConfirmData.title}* on NEPPLAY!\n${[lastConfirmData.game, lastConfirmData.mode, lastConfirmData.date, lastConfirmData.time].filter(Boolean).join(' · ')}\n\nJoin the next tournament 👇\nhttps://nepplay.onrender.com/tournaments.html`;
-
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({
-          files: [file],
-          title: 'NEPPLAY Registration',
-          text: shareText
-        });
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-        return;
+        await navigator.share({ files: [file], title: 'NEPPLAY Registration', text: shareText });
+        btn.disabled = false; btn.innerHTML = originalHtml; return;
       } catch (shareErr) {
-        if (shareErr.name === 'AbortError') {
-          btn.disabled = false;
-          btn.innerHTML = originalHtml;
-          return;
-        }
+        if (shareErr.name === 'AbortError') { btn.disabled = false; btn.innerHTML = originalHtml; return; }
       }
     }
-
     const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = dataUrl; a.download = file.name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     window.showToast('✅ Card saved! Attach it in WhatsApp manually.');
-    setTimeout(() => {
-      window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank');
-    }, 800);
+    setTimeout(() => { window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank'); }, 800);
   } catch (err) {
     console.error('shareRegistrationCard error:', err);
     window.showToast('❌ Could not generate card: ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-  }
+  } finally { btn.disabled = false; btn.innerHTML = originalHtml; }
 };
 
 async function renderShareCard(data) {
   const W = 1080, H = 1350;
   const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-
   const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, '#0c0a2e');
-  grad.addColorStop(0.35, '#1e1b4b');
-  grad.addColorStop(0.7, '#4c1d95');
-  grad.addColorStop(1, '#7e22ce');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
-
-  const glow1 = ctx.createRadialGradient(W * 0.85, H * 0.1, 50, W * 0.85, H * 0.1, 500);
-  glow1.addColorStop(0, 'rgba(251, 191, 36, 0.35)');
-  glow1.addColorStop(1, 'rgba(251, 191, 36, 0)');
-  ctx.fillStyle = glow1;
-  ctx.fillRect(0, 0, W, H);
-
-  const glow2 = ctx.createRadialGradient(W * 0.15, H * 0.9, 50, W * 0.15, H * 0.9, 500);
-  glow2.addColorStop(0, 'rgba(236, 72, 153, 0.35)');
-  glow2.addColorStop(1, 'rgba(236, 72, 153, 0)');
-  ctx.fillStyle = glow2;
-  ctx.fillRect(0, 0, W, H);
-
+  grad.addColorStop(0, '#0c0a2e'); grad.addColorStop(0.35, '#1e1b4b');
+  grad.addColorStop(0.7, '#4c1d95'); grad.addColorStop(1, '#7e22ce');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center';
   ctx.font = '900 100px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", sans-serif';
   ctx.fillText('🎮', W / 2, 140);
-
   const titleGrad = ctx.createLinearGradient(W * 0.3, 0, W * 0.7, 0);
-  titleGrad.addColorStop(0, '#a78bfa');
-  titleGrad.addColorStop(0.5, '#f472b6');
-  titleGrad.addColorStop(1, '#fbbf24');
-  ctx.fillStyle = titleGrad;
-  ctx.font = '900 88px "Segoe UI", sans-serif';
+  titleGrad.addColorStop(0, '#a78bfa'); titleGrad.addColorStop(0.5, '#f472b6'); titleGrad.addColorStop(1, '#fbbf24');
+  ctx.fillStyle = titleGrad; ctx.font = '900 88px "Segoe UI", sans-serif';
   ctx.fillText('NEPPLAY', W / 2, 240);
-
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   ctx.font = '600 26px "Segoe UI", sans-serif';
   ctx.fillText("NEPAL'S ESPORTS PLATFORM", W / 2, 290);
-
   ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
-  ctx.strokeStyle = 'rgba(34, 197, 94, 0.7)';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(34, 197, 94, 0.7)'; ctx.lineWidth = 3;
   const badgeY = 360, badgeW = 480, badgeH = 80;
-  roundRect(ctx, (W - badgeW) / 2, badgeY, badgeW, badgeH, 40);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#4ade80';
-  ctx.font = '900 44px "Segoe UI", sans-serif';
+  roundRect(ctx, (W - badgeW) / 2, badgeY, badgeW, badgeH, 40); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#4ade80'; ctx.font = '900 44px "Segoe UI", sans-serif';
   ctx.fillText(data.status === 'pending' ? '⏳ PAYMENT SUBMITTED' : "✅ I'M IN!", W / 2, badgeY + 54);
-
   const cardY = 520, cardW = W - 160, cardH = 260, cardX = 80;
   ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-  roundRect(ctx, cardX, cardY, cardW, cardH, 28);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)';
-  ctx.lineWidth = 3;
-  roundRect(ctx, cardX, cardY, cardW, cardH, 28);
-  ctx.stroke();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '900 46px "Segoe UI", sans-serif';
-  ctx.textAlign = 'center';
+  roundRect(ctx, cardX, cardY, cardW, cardH, 28); ctx.fill();
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)'; ctx.lineWidth = 3;
+  roundRect(ctx, cardX, cardY, cardW, cardH, 28); ctx.stroke();
+  ctx.fillStyle = '#ffffff'; ctx.font = '900 46px "Segoe UI", sans-serif';
   ctx.fillText(truncateText(ctx, data.title || 'Tournament', cardW - 60), W / 2, cardY + 80);
-
-  ctx.fillStyle = '#a5b4fc';
-  ctx.font = '700 28px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#a5b4fc'; ctx.font = '700 28px "Segoe UI", sans-serif';
   const gameLine = [data.game, data.mode].filter(Boolean).join(' · ');
   if (gameLine) ctx.fillText(gameLine, W / 2, cardY + 130);
-
-  ctx.fillStyle = '#fbbf24';
-  ctx.font = '800 32px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#fbbf24'; ctx.font = '800 32px "Segoe UI", sans-serif';
   const dateLine = [data.date, data.time].filter(Boolean).join('  ·  ');
   if (dateLine) ctx.fillText(dateLine, W / 2, cardY + 185);
-
   const infoY = 830, infoW = W - 160, infoH = 220, infoX = 80;
-
   ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
-  ctx.beginPath();
-  ctx.arc(infoX + 110, infoY + infoH / 2, 70, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
+  ctx.beginPath(); ctx.arc(infoX + 110, infoY + infoH / 2, 70, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; ctx.lineWidth = 4; ctx.stroke();
   const initial = (data.ign || 'P').charAt(0).toUpperCase();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '900 72px "Segoe UI", sans-serif';
-  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff'; ctx.font = '900 72px "Segoe UI", sans-serif';
   ctx.fillText(initial, infoX + 110, infoY + infoH / 2 + 26);
-
   ctx.textAlign = 'left';
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.font = '700 22px "Segoe UI", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '700 22px "Segoe UI", sans-serif';
   ctx.fillText('PLAYER', infoX + 220, infoY + 70);
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '900 42px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#ffffff'; ctx.font = '900 42px "Segoe UI", sans-serif';
   ctx.fillText(truncateText(ctx, data.ign || 'Player', infoW - 240), infoX + 220, infoY + 122);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.font = '700 22px "Segoe UI", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '700 22px "Segoe UI", sans-serif';
   ctx.fillText('ENTRY', infoX + 220, infoY + 165);
-
   ctx.fillStyle = data.entryType === 'paid' ? '#fbbf24' : '#4ade80';
   ctx.font = '900 34px "Segoe UI", sans-serif';
   ctx.fillText(data.entryType === 'paid' ? `Rs. ${data.amount || 0}` : 'FREE ENTRY', infoX + 220, infoY + 205);
-
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '700 24px "Segoe UI", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '700 24px "Segoe UI", sans-serif';
   ctx.fillText('Want to compete too?', W / 2, 1160);
-
   const urlY = 1200, urlW = 640, urlH = 74;
   ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
-  ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
-  ctx.lineWidth = 2;
-  roundRect(ctx, (W - urlW) / 2, urlY, urlW, urlH, 20);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#fbbf24';
-  ctx.font = '900 32px "Segoe UI", sans-serif';
+  ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)'; ctx.lineWidth = 2;
+  roundRect(ctx, (W - urlW) / 2, urlY, urlW, urlH, 20); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fbbf24'; ctx.font = '900 32px "Segoe UI", sans-serif';
   ctx.fillText('nepplay.onrender.com', W / 2, urlY + 48);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.font = '500 20px "Segoe UI", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '500 20px "Segoe UI", sans-serif';
   ctx.fillText('Real prizes · Fast payouts · Play together, grow together', W / 2, 1320);
-
   return canvas.toDataURL('image/png');
 }
 
@@ -1668,15 +1538,10 @@ function roundRect(ctx, x, y, w, h, r) {
 function truncateText(ctx, text, maxWidth) {
   if (ctx.measureText(text).width <= maxWidth) return text;
   let t = text;
-  while (t.length > 0 && ctx.measureText(t + '…').width > maxWidth) {
-    t = t.slice(0, -1);
-  }
+  while (t.length > 0 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
   return t + '…';
 }
 
-// ================================================
-// CLOSE MODALS
-// ================================================
 window.closeConfirmModal = function() {
   document.getElementById('confirmModal').classList.remove('active');
 };
@@ -1684,11 +1549,8 @@ window.closeConfirmModal = function() {
 window.closeConfirmAndScroll = function() {
   document.getElementById('confirmModal').classList.remove('active');
   const sec = document.getElementById('myTournamentsSection');
-  if (sec && sec.style.display !== 'none') {
-    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    document.getElementById('tournamentGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (sec && sec.style.display !== 'none') sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else document.getElementById('tournamentGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 function escapeConfirm(s) {
@@ -1705,9 +1567,6 @@ window.showToast = function(msg) {
   setTimeout(() => t.remove(), 3500);
 };
 
-// ================================================
-// LIVE STREAMERS BANNER
-// ================================================
 function escapeHtmlLive(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -1765,9 +1624,6 @@ async function loadLiveStreamers() {
   }
 }
 
-// ================================================
-// INIT
-// ================================================
 loadTournaments();
 loadLiveStreamers();
 setInterval(loadLiveStreamers, 60000);
