@@ -165,13 +165,20 @@
     background: linear-gradient(90deg, #6366f1, #a855f7);
     color: #fff;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
     font-weight: 800;
     font-size: 14px;
     position: sticky;
     top: 0;
     z-index: 1000;
     animation: shine 3s infinite;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: transform 0.15s;
+  }
+  .bonus-banner:hover {
+    transform: scale(1.01);
   }
   @keyframes shine {
     0%,100% { filter: brightness(1); }
@@ -200,13 +207,83 @@
     margin-top: 12px;
     font-size: 13px;
   }
+
+  /* ============ NEW USER DISCOUNT ============ */
+  .newuser-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    animation: badgePulse 1.5s infinite;
+  }
+
+  .coupon-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .coupon-row input {
+    flex: 1;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .coupon-row button {
+    background: rgba(34,197,94,0.2);
+    border: 1px solid rgba(34,197,94,0.6);
+    color: #4ade80;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .coupon-row button:hover {
+    background: rgba(34,197,94,0.4);
+  }
+
+  .discount-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(34,197,94,0.12);
+    border-left: 3px solid #22c55e;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4ade80;
+  }
+
+  .discount-strike {
+    text-decoration: line-through;
+    color: #6b7280;
+    font-size: 12px;
+    margin-right: 6px;
+  }
+
+  .newuser-hint {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.4);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: #86efac;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
 
-<div class="bonus-banner">
-  🎁 FIRST TIME PLAYING? Get <strong>Rs 50 OFF</strong> with code <strong>NEW50</strong>
-</div>
+<a href="#tournaments" class="bonus-banner" onclick="activateNewUserMode(event)">
+  🎁 FIRST TIME PLAYING? Get <strong>Rs 25 OFF</strong> — Tap to claim →
+</a>
 
 <header class="site-header">
   <div class="logo">🎮 <b>Nepal Gaming</b></div>
@@ -281,7 +358,7 @@
   <button id="tabPaid" class="type-tab active" onclick="filterTournamentType('paid')">💵 Paid Entry</button>
 </div>
 
-<div class="tournament-grid" id="tournamentGrid">
+<div class="tournament-grid" id="tournamentGrid" name="tournaments">
   <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
 </div>
 
@@ -317,6 +394,12 @@
       🏆 Prize: <b>Rs. <span id="mPrize">1000</span></b> |
       🎯 Top Kills: <b>Rs. <span id="mKills">500</span></b>
     </p>
+
+    <div id="newUserHint" class="newuser-hint" style="display:none;">
+      🎉 <b>New User Discount Active!</b><br>
+      Rs 25 off applied automatically — you pay <b>Rs 125</b> instead of Rs 150.
+    </div>
+
     <div class="pay-tabs pay-tabs-4">
       <button class="pay-tab active" data-method="esewa"  onclick="switchPay('esewa')">💚 eSewa</button>
       <button class="pay-tab"        data-method="khalti" onclick="switchPay('khalti')">💜 Khalti</button>
@@ -361,6 +444,19 @@
     <form id="payForm" onsubmit="submitPayment(event)">
       <input type="hidden" id="payTournamentId">
       <input type="hidden" id="payMethod" value="esewa">
+
+      <label>🎁 Coupon Code <small style="color:#6b7280;">(optional)</small></label>
+      <div class="coupon-row">
+        <input type="text" id="payCoupon" placeholder="Enter coupon code" style="text-transform:uppercase;">
+        <button type="button" onclick="applyCoupon()">Apply</button>
+      </div>
+      <p id="couponMsg" class="hint" style="display:none; margin-top:-4px;"></p>
+
+      <div id="discountLine" class="discount-line" style="display:none;">
+        <span>🎁 New User Discount</span>
+        <span>− Rs <span id="discountAmt">25</span></span>
+      </div>
+
       <label>🔖 Transaction ID *</label>
       <input type="text" id="payTxn" placeholder="e.g. 8X72H91K" required>
       <label>🎮 Your IGN (In-Game Name) *</label>
@@ -483,6 +579,13 @@ let lastConfirmData = null;
 const filterState = { game: 'all', type: 'paid' };
 
 // ================================================
+// NEW USER DISCOUNT STATE
+// ================================================
+const NEW_USER_DISCOUNT = 25;
+let newUserModeActive = false;
+let userIsNew = false;
+
+// ================================================
 // IMAGE COMPRESSION
 // ================================================
 function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
@@ -513,7 +616,7 @@ function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
 // ================================================
 // AUTH
 // ================================================
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = {
       uid: user.uid,
@@ -523,11 +626,53 @@ onAuthStateChanged(auth, (user) => {
     };
     currentUid = user.uid;
     console.log("👤 Firebase user:", currentUser.username, "| uid:", currentUid);
+    await checkIfUserIsNew();
     loadMyTournaments();
   } else {
     console.log("👤 No Firebase user — visitor mode");
+    userIsNew = true;
   }
 });
+
+// ================================================
+// CHECK IF USER IS NEW (no past registrations)
+// ================================================
+async function checkIfUserIsNew() {
+  if (!currentUid) { userIsNew = true; return; }
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('userId', '==', currentUid)
+    ));
+    userIsNew = snap.empty;
+    console.log("🎁 User is new:", userIsNew);
+    if (!userIsNew) {
+      newUserModeActive = false;
+      const banner = document.querySelector('.bonus-banner');
+      if (banner) banner.style.display = 'none';
+    }
+  } catch (err) {
+    console.warn('checkIfUserIsNew error:', err);
+    userIsNew = true;
+  }
+}
+
+// ================================================
+// ACTIVATE NEW USER MODE (from banner click)
+// ================================================
+window.activateNewUserMode = function(event) {
+  event.preventDefault();
+  const grid = document.getElementById('tournamentGrid');
+  if (grid) {
+    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (!userIsNew) {
+    window.showToast('ℹ️ New user discount is only for first-time players');
+    return;
+  }
+  newUserModeActive = true;
+  window.showToast('🎁 Rs 25 OFF activated! Pick any tournament → discount auto-applies at payment.');
+};
 
 // ================================================
 // SEED PAID TOURNAMENTS — 26 SEPT, 1 PM NPT
@@ -941,6 +1086,56 @@ setInterval(() => {
 }, 30000);
 
 // ================================================
+// COUPON / DISCOUNT
+// ================================================
+window.applyCoupon = function() {
+  const code = (document.getElementById('payCoupon').value || '').trim().toUpperCase();
+  const msg = document.getElementById('couponMsg');
+  const discountLine = document.getElementById('discountLine');
+  const discountAmtEl = document.getElementById('discountAmt');
+
+  if (code === 'NEW25') {
+    if (!userIsNew) {
+      msg.style.display = 'block';
+      msg.style.color = '#f87171';
+      msg.innerText = '❌ NEW25 is only for first-time players';
+      discountLine.style.display = 'none';
+      newUserModeActive = false;
+      updateFeeDisplay(0);
+      return;
+    }
+    newUserModeActive = true;
+    discountAmtEl.innerText = NEW_USER_DISCOUNT;
+    discountLine.style.display = 'flex';
+    msg.style.display = 'block';
+    msg.style.color = '#4ade80';
+    msg.innerText = '✅ Coupon applied! Rs 25 off';
+    updateFeeDisplay(NEW_USER_DISCOUNT);
+  } else if (code === '') {
+    msg.style.display = 'none';
+    discountLine.style.display = 'none';
+    newUserModeActive = false;
+    updateFeeDisplay(0);
+  } else {
+    msg.style.display = 'block';
+    msg.style.color = '#f87171';
+    msg.innerText = '❌ Invalid coupon code';
+    discountLine.style.display = 'none';
+    newUserModeActive = false;
+    updateFeeDisplay(0);
+  }
+};
+
+function updateFeeDisplay(discount) {
+  const feeEl = document.getElementById('mFee');
+  const baseFee = Number(feeEl.dataset.base || 150);
+  if (!feeEl.dataset.base) feeEl.dataset.base = baseFee;
+  const finalFee = Math.max(baseFee - discount, 0);
+  feeEl.innerText = finalFee;
+  document.querySelectorAll('.payAmt').forEach(el => el.innerText = finalFee);
+}
+
+// ================================================
 // WINDOW-LEVEL FUNCTIONS
 // ================================================
 window.filterByGame = function(game) {
@@ -1036,9 +1231,40 @@ window.openPaymentModal = function(tid, title, fee, prize, kills) {
   document.getElementById('payTournamentId').value = tid;
   document.getElementById('mTournamentTitle').innerText = title;
   document.getElementById('mFee').innerText   = fee;
+  document.getElementById('mFee').dataset.base = fee;
   document.getElementById('mPrize').innerText = prize;
   document.getElementById('mKills').innerText = kills;
-  document.querySelectorAll('.payAmt').forEach(el => el.innerText = fee);
+
+  // Reset coupon UI
+  const couponInput = document.getElementById('payCoupon');
+  const couponMsg = document.getElementById('couponMsg');
+  const discountLine = document.getElementById('discountLine');
+  const newUserHint = document.getElementById('newUserHint');
+  if (couponInput) couponInput.value = '';
+  if (couponMsg) couponMsg.style.display = 'none';
+  if (discountLine) discountLine.style.display = 'none';
+
+  // Auto-apply if new user mode active
+  if (userIsNew && newUserModeActive) {
+    if (newUserHint) newUserHint.style.display = 'block';
+    if (discountLine) discountLine.style.display = 'flex';
+    document.getElementById('discountAmt').innerText = NEW_USER_DISCOUNT;
+    if (couponInput) couponInput.value = 'NEW25';
+    if (couponMsg) {
+      couponMsg.style.display = 'block';
+      couponMsg.style.color = '#4ade80';
+      couponMsg.innerText = '✅ New user discount auto-applied';
+    }
+    updateFeeDisplay(NEW_USER_DISCOUNT);
+  } else {
+    if (newUserHint) newUserHint.style.display = 'none';
+    updateFeeDisplay(0);
+  }
+
+  document.querySelectorAll('.payAmt').forEach(el => {
+    el.innerText = document.getElementById('mFee').innerText;
+  });
+
   document.getElementById('paymentModal').classList.add('active');
 };
 window.closePaymentModal = function() {
@@ -1047,6 +1273,10 @@ window.closePaymentModal = function() {
   document.getElementById('payStreamUrl').value = '';
   document.getElementById('shotPreview').style.display = 'none';
   document.getElementById('uploadPrompt').style.display = 'block';
+  const couponMsg = document.getElementById('couponMsg');
+  const discountLine = document.getElementById('discountLine');
+  if (couponMsg) couponMsg.style.display = 'none';
+  if (discountLine) discountLine.style.display = 'none';
 };
 window.switchPay = function(method) {
   document.getElementById('payMethod').value = method;
@@ -1085,6 +1315,8 @@ window.submitPayment = async function(e) {
     const streamUrl = (document.getElementById('payStreamUrl').value || '').trim();
     const amount = Number(document.getElementById('mFee').innerText);
     const file   = document.getElementById('payShot').files[0];
+    const couponCode = (document.getElementById('payCoupon').value || '').trim().toUpperCase();
+
     if (!file)             throw new Error('Screenshot required');
     if (txn.length < 4)    throw new Error('Transaction ID too short');
     if (!ign)              throw new Error('IGN required');
@@ -1109,6 +1341,8 @@ window.submitPayment = async function(e) {
       tournamentId: tid, tournamentTitle: title,
       userId: currentUid, username: currentUser.username, email: currentUser.email,
       ign, phone, method, amount, txnId: txn,
+      couponCode: couponCode || null,
+      discountApplied: couponCode === 'NEW25' ? NEW_USER_DISCOUNT : 0,
       screenshotBase64: compressed.base64,
       screenshotWidth: compressed.width,
       screenshotHeight: compressed.height,
@@ -1122,6 +1356,8 @@ window.submitPayment = async function(e) {
       userId: currentUid, username: currentUser.username, email: currentUser.email,
       ign, phone, paymentId: payRef.id, entryType: 'paid',
       method, txnId: txn, amount,
+      couponCode: couponCode || null,
+      discountApplied: couponCode === 'NEW25' ? NEW_USER_DISCOUNT : 0,
       screenshotSizeKB: compressed.sizeKB,
       streamUrl: streamUrl || null,
       status: 'pending', registeredAt: serverTimestamp()
@@ -1129,6 +1365,7 @@ window.submitPayment = async function(e) {
 
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
+    await checkIfUserIsNew();
     loadMyTournaments();
 
     const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
@@ -1143,6 +1380,7 @@ window.submitPayment = async function(e) {
       amount,
       method,
       txnId: txn,
+      couponCode: couponCode || null,
       status: 'pending',
       streamUrl
     });
@@ -1175,6 +1413,7 @@ window.showConfirmModal = function(data) {
     rows += `<div class="confirm-row"><span class="k">💰 Amount</span><span class="v">Rs. ${escapeConfirm(data.amount || 0)}</span></div>`;
     if (data.txnId) rows += `<div class="confirm-row"><span class="k">🔖 Txn ID</span><span class="v">${escapeConfirm(data.txnId)}</span></div>`;
     if (data.method) rows += `<div class="confirm-row"><span class="k">💳 Method</span><span class="v">${escapeConfirm(data.method).toUpperCase()}</span></div>`;
+    if (data.couponCode) rows += `<div class="confirm-row"><span class="k">🎁 Coupon</span><span class="v" style="color:#4ade80;">${escapeConfirm(data.couponCode)}</span></div>`;
   }
   rows += `<div class="confirm-row"><span class="k">📋 Status</span><span class="v" style="color:${isPending ? '#fbbf24' : '#22c55e'};">${isPending ? 'PENDING' : 'CONFIRMED'}</span></div>`;
   if (data.streamUrl) {
