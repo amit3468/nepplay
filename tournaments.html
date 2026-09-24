@@ -686,10 +686,9 @@ async function seedPaidTournamentsIfNeeded() {
       { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-26', time:'13:00' },
       { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' },
 
-      // FREE MINI — 12 PLAYERS
       { id:'seed_free_ff_mini',
         title:'⚡ Free Fire Mini — First 12 Only ⚡',
-        game:'Free Fire', mode:'Solo', date:'2025-09-25', time:'13:00',
+        game:'Free Fire', mode:'Solo', date:'2026-09-25', time:'13:00',
         entryType:'free', entryFee:0, prizePool:250, topKillsPrize:80, max:12 }
     ];
 
@@ -1214,15 +1213,8 @@ window.submitJoin = async function(e) {
       throw new Error('This tournament is FULL. All ' + tourn.max + ' slots taken!');
     }
 
-    const freeRegSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('userId', '==', currentUid),
-      where('entryType', '==', 'free')
-    ));
-    if (!freeRegSnap.empty) {
-      const existing = freeRegSnap.docs[0].data();
-      throw new Error('You already joined a FREE tournament: "' + (existing.tournamentTitle || 'a free tournament') + '". Each player can only join ONE free tournament. Paid tournaments have no limit.');
-    }
+    // ✅ REMOVED: "one free tournament only" restriction
+    // Players can now join multiple free tournaments
 
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
