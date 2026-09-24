@@ -1053,7 +1053,6 @@ setInterval(() => {
   }
 }, 30000);
 
-// ⚡ AUTO-UPDATE FILLED COUNTER (NEW)
 async function incrementTournamentFilled(tid) {
   try {
     const ref = doc(db, 'tournaments', tid);
@@ -1168,7 +1167,7 @@ window.submitJoin = async function(e) {
       throw new Error('This tournament is FULL. All ' + tourn.max + ' slots taken!');
     }
 
-    // ✅ Free tournaments have no join limit (removed)
+    // ✅ FREE TOURNAMENT LIMIT REMOVED — old players can join free tournaments again
 
     const dupSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -1185,12 +1184,11 @@ window.submitJoin = async function(e) {
       status: 'confirmed', registeredAt: serverTimestamp()
     });
 
-    // ✅ AUTO-INCREMENT filled counter
     await incrementTournamentFilled(tid);
 
     window.closeJoinModal();
     window.showToast('✅ Joined ' + title + '!');
-    await loadTournaments();  // reload to show new count
+    await loadTournaments();
     loadMyTournaments();
 
     window.showConfirmModal({
@@ -1343,13 +1341,12 @@ window.submitPayment = async function(e) {
       status: 'pending', registeredAt: serverTimestamp()
     });
 
-    // ✅ AUTO-INCREMENT filled counter (paid)
     await incrementTournamentFilled(tid);
 
     window.closePaymentModal();
     window.showToast('✅ Payment submitted! Waiting for admin approval.');
     await checkIfUserIsNew();
-    await loadTournaments();  // reload count
+    await loadTournaments();
     loadMyTournaments();
 
     const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
