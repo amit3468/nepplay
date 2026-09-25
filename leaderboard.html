@@ -38,14 +38,14 @@
         .podium-slot { background: rgba(30, 41, 59, 0.5); border: 2px dashed rgba(148, 163, 184, 0.2); border-radius: 16px; padding: 24px; text-align: center; transition: all 0.3s; cursor: pointer; }
         .podium-slot:hover { transform: translateY(-4px); }
 
-        .lb-row { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; cursor: pointer; }
+        .lb-row { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; cursor: pointer; position: relative; }
         @media (min-width: 640px) { .lb-row { grid-template-columns: 70px 1fr 90px 100px 120px; } }
         .lb-row:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(59, 130, 246, 0.4); }
         .lb-row.top-1 { border-color: rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.06); }
         .lb-row.top-2 { border-color: rgba(148, 163, 184, 0.5); }
         .lb-row.top-3 { border-color: rgba(234, 88, 12, 0.5); }
         .lb-row.is-me { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
-        .lb-row.is-me::before { content: 'YOU'; background: #3b82f6; color: #fff; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; position: absolute; }
+        .lb-row.is-me::before { content: 'YOU'; background: #3b82f6; color: #fff; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; position: absolute; top: -6px; left: 10px; }
 
         .lb-rank { font-size: 1.5rem; font-weight: 900; color: #94a3b8; text-align: center; font-variant-numeric: tabular-nums; }
         .lb-rank.gold   { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
@@ -81,6 +81,12 @@
             color: #fff;
             border-color: transparent;
             box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+        }
+
+        /* Top Killer podium — purple accent */
+        .podium-slot.killer-accent {
+            border-color: #a855f7 !important;
+            background: rgba(168, 85, 247, 0.06);
         }
     </style>
 </head>
@@ -261,14 +267,17 @@
             const m = String(r).match(/^\s*(\d+)/);
             return m ? Number(m[1]) : null;
         }
+        function isKillerRank(r) {
+            if (!r) return false;
+            const s = String(r).toLowerCase();
+            return s.includes('kill') || s.includes('top');
+        }
         function tsSeconds(p) {
             return p.createdAt?.seconds || p.paidAt?.seconds || 0;
         }
 
         // ==========================================
-        // HARDCODED FALLBACK WINNERS
-        // Ensures leaderboard shows real data even if
-        // tournament_payouts is empty or incomplete.
+        // HARDCODED FALLBACK PAYOUTS
         // ==========================================
         const HARDCODED_PAYOUTS = [
             {
@@ -311,7 +320,6 @@
             }
         ];
 
-        // Merge strategy: Firestore data wins on duplicates.
         function mergePayouts(fsPayouts, hardcoded) {
             const seen = new Set();
             const out = [];
@@ -395,6 +403,7 @@
                         totalPrize: 0,
                         wins: 0,
                         podiums: 0,
+                        topKillerAwards: 0,
                         tournaments: new Set()
                     };
                 }
@@ -403,6 +412,7 @@
                 const rank = rankNum(p.rank);
                 if (rank === 1) pl.wins++;
                 if (rank >= 1 && rank <= 3) pl.podiums++;
+                if (isKillerRank(p.rank)) pl.topKillerAwards++;
                 if (p.tournamentId) pl.tournaments.add(p.tournamentId);
             });
 
@@ -434,31 +444,45 @@
             ];
             const borderColors = ['#fbbf24', '#94a3b8', '#ea580c'];
 
-            podium.innerHTML = ranked.slice(0, 3).map((p, i) => `
-                <div class="podium-slot ${orderClass[i]}" style="border: 2px solid ${borderColors[i]};" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
-                    <div class="text-5xl mb-3">${medalEmojis[i]}</div>
+            podium.innerHTML = ranked.slice(0, 3).map((p, i) => {
+                const isTopKillerOnly = p.wins === 0 && p.podiums === 0 && p.topKillerAwards > 0;
+                const medal = isTopKillerOnly ? '🎯' : medalEmojis[i];
+                const accentClass = isTopKillerOnly ? 'killer-accent' : '';
+                const borderColor = isTopKillerOnly ? '#a855f7' : borderColors[i];
+                const subtitle = isTopKillerOnly
+                    ? `Top Killer${p.topKillerAwards > 1 ? ' ×' + p.topKillerAwards : ''}`
+                    : `${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}`;
+                return `
+                <div class="podium-slot ${orderClass[i]} ${accentClass}" style="border: 2px solid ${borderColor};" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
+                    <div class="text-5xl mb-3">${medal}</div>
                     <div class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-2xl" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">${avatarInitial(p.name)}</div>
                     <p class="text-lg font-bold text-white truncate">${escapeHtml(p.name)}</p>
-                    <p class="text-xs text-gray-400 mt-1">${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}</p>
+                    <p class="text-xs text-gray-400 mt-1">${subtitle}</p>
                     <p class="text-xl font-bold text-green-400 mt-2">Rs. ${p.totalPrize.toLocaleString()}</p>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             list.innerHTML = ranked.map((p, i) => {
                 const rank = i + 1;
-                const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
-                const rowClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+                const isTopKillerOnly = p.wins === 0 && p.podiums === 0 && p.topKillerAwards > 0;
+                const rankClass = isTopKillerOnly ? '' : (rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '');
+                const rowClass = isTopKillerOnly ? '' : (rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '');
                 const isMe = (p.userId && viewerUid && p.userId === viewerUid) ||
                              (!p.userId && viewerUsername && p.name.toLowerCase() === viewerUsername.toLowerCase());
                 const winRate = p.tournaments > 0 ? Math.round((p.wins / p.tournaments) * 100) : 0;
+
+                const subtitle = isTopKillerOnly
+                    ? `${p.tournaments} tournament${p.tournaments !== 1 ? 's' : ''} • 🎯 Top Killer${p.topKillerAwards > 1 ? ' ×' + p.topKillerAwards : ''}`
+                    : `${p.tournaments} tournament${p.tournaments !== 1 ? 's' : ''} • ${winRate}% win rate`;
+
                 return `
-                    <div class="lb-row ${rowClass} ${isMe ? 'is-me relative' : ''}" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
-                        <div class="lb-rank ${rankClass}">#${rank}</div>
+                    <div class="lb-row ${rowClass} ${isMe ? 'is-me' : ''}" onclick="gotoProfile('${p.userId || ''}', '${escapeHtml(p.name).replace(/'/g,"\\'")}')">
+                        <div class="lb-rank ${rankClass}">${isTopKillerOnly ? '🎯' : '#' + rank}</div>
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="lb-avatar">${avatarInitial(p.name)}</div>
                             <div class="min-w-0">
                                 <p class="font-bold text-white text-sm truncate">${escapeHtml(p.name)}</p>
-                                <p class="text-xs text-gray-500">${p.tournaments} tournament${p.tournaments !== 1 ? 's' : ''} • ${winRate}% win rate</p>
+                                <p class="text-xs text-gray-500">${subtitle}</p>
                             </div>
                         </div>
                         <div class="text-right hidden sm:block">
