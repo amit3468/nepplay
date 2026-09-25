@@ -44,6 +44,7 @@
         .podium-live.gold { border-color: #fbbf24; box-shadow: 0 0 30px rgba(251, 191, 36, 0.3); }
         .podium-live.silver { border-color: #94a3b8; }
         .podium-live.bronze { border-color: #ea580c; }
+        .podium-live.killer { border-color: #a855f7; box-shadow: 0 0 30px rgba(168, 85, 247, 0.3); }
         .winner-avatar { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; margin: 0 auto 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
 
         .winner-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s; }
@@ -66,6 +67,7 @@
         .top-player-card.gold   { border-color: #fbbf24; box-shadow: 0 0 35px rgba(251,191,36,0.35); }
         .top-player-card.silver { border-color: #94a3b8; }
         .top-player-card.bronze { border-color: #ea580c; }
+        .top-player-card.killer { border-color: #a855f7; box-shadow: 0 0 35px rgba(168,85,247,0.3); }
         .top-player-card .crown { position: absolute; top: 8px; right: 12px; font-size: 22px; }
         .top-player-card .tp-avatar { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; margin: 0 auto 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
 
@@ -286,10 +288,21 @@
         function playerName(p) {
             return p.winnerName || p.username || p.ign || p.playerName || 'Player';
         }
+        // ⭐ SAFE NUMBER PARSE — handles both number and string
+        function toNumber(v) {
+            if (v === null || v === undefined || v === '') return 0;
+            const n = typeof v === 'number' ? v : Number(String(v).replace(/[^\d.-]/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
         function rankNum(r) {
             if (!r) return null;
             const m = String(r).match(/^\s*(\d+)/);
             return m ? Number(m[1]) : null;
+        }
+        function isKillerRank(r) {
+            if (!r) return false;
+            const s = String(r).toLowerCase();
+            return s.includes('kill') || s.includes('top');
         }
         function fmtDate(ts) {
             if (!ts) return '—';
@@ -298,83 +311,23 @@
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
-        // Fallback hardcoded winners if Firestore is empty
-        const HARDCODED_WINNERS = [
-            {
-                id: 'fallback_chess',
-                tournamentId: 'seed_paid_chess',
-                tournamentTitle: 'Chess Championship',
-                winnerName: 'SharadK11',
-                ign: 'SharadK11',
-                rank: '1',
-                prize: 500,
-                amount: 500,
-                status: 'paid',
-                method: 'eSewa',
-                createdAt: { seconds: Math.floor(new Date('2026-09-24T18:00:00').getTime() / 1000) }
-            },
-            {
-                id: 'fallback_ff_winner',
-                tournamentId: 'seed_free_ff_mini',
-                tournamentTitle: '⚡ Free Fire Mini — First 12 Only ⚡',
-                winnerName: 'Prashanna Acharya',
-                ign: 'Prasanna.F',
-                rank: '1',
-                prize: 250,
-                amount: 250,
-                kills: 2,
-                status: 'paid',
-                method: 'eSewa',
-                createdAt: { seconds: Math.floor(new Date('2026-09-25T13:30:00').getTime() / 1000) }
-            },
-            {
-                id: 'fallback_ff_killer',
-                tournamentId: 'seed_free_ff_mini',
-                tournamentTitle: '⚡ Free Fire Mini — First 12 Only ⚡',
-                winnerName: 'Ritika',
-                ign: 'RITIKA',
-                rank: 'Top Killer',
-                prize: 80,
-                amount: 80,
-                kills: 3,
-                status: 'paid',
-                method: 'eSewa',
-                createdAt: { seconds: Math.floor(new Date('2026-09-25T13:30:00').getTime() / 1000) }
-            }
-        ];
-
         async function loadWinners() {
             try {
-                let all = [];
-                try {
-                    const snap = await getDocs(collection(db, 'tournament_payouts'));
-                    all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                } catch (fsErr) {
-                    console.warn('Firestore fetch failed, using hardcoded:', fsErr);
-                }
+                const snap = await getDocs(collection(db, 'tournament_payouts'));
+                const all = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(p => toNumber(p.prize || p.amount) > 0);
 
-                // Merge: hardcoded + Firestore (Firestore wins on duplicates by tournamentId+winnerName)
-                const seen = new Set();
-                const merged = [];
-                for (const w of all) {
-                    const key = (w.tournamentId || '') + '::' + (w.winnerName || w.ign || '');
-                    if (!seen.has(key)) { seen.add(key); merged.push(w); }
-                }
-                for (const w of HARDCODED_WINNERS) {
-                    const key = (w.tournamentId || '') + '::' + (w.winnerName || w.ign || '');
-                    if (!seen.has(key)) { seen.add(key); merged.push(w); }
-                }
-
-                const winners = merged
+                const winners = all
                     .filter(p => {
                         const r = rankNum(p.rank);
-                        const isKiller = String(p.rank || '').toLowerCase().includes('kill') || String(p.rank || '').toLowerCase().includes('top');
-                        const prize = Number(p.prize || p.amount || 0);
+                        const isKiller = isKillerRank(p.rank);
+                        const prize = toNumber(p.prize || p.amount);
                         return (r !== null && r >= 1 && r <= 3 && prize > 0) || (isKiller && prize > 0);
                     })
                     .sort((a, b) => {
-                        const ta = a.createdAt?.seconds || 0;
-                        const tb = b.createdAt?.seconds || 0;
+                        const ta = a.createdAt?.seconds || a.paidAt?.seconds || 0;
+                        const tb = b.createdAt?.seconds || b.paidAt?.seconds || 0;
                         return tb - ta;
                     });
 
@@ -397,25 +350,44 @@
                 });
 
                 const sortedKeys = Object.keys(byTournament).sort((a, b) => {
-                    const ta = Math.max(...byTournament[a].map(x => x.createdAt?.seconds || 0));
-                    const tb = Math.max(...byTournament[b].map(x => x.createdAt?.seconds || 0));
+                    const ta = Math.max(...byTournament[a].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
+                    const tb = Math.max(...byTournament[b].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
                     return tb - ta;
                 });
 
+                // Latest podium
                 const latest = byTournament[sortedKeys[0]] || [];
                 const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
-                renderPodium(document.getElementById('podium-1'), findRank(1), '🥇', 'gold', 1);
-                renderPodium(document.getElementById('podium-2'), findRank(2), '🥈', 'silver', 2);
-                renderPodium(document.getElementById('podium-3'), findRank(3), '🥉', 'bronze', 3);
+                const findKiller = latest.find(w => isKillerRank(w.rank));
+
+                const r1 = findRank(1), r2 = findRank(2), r3 = findRank(3);
+                const killer = findKiller;
+
+                // Smart placement: if 2nd or 3rd are missing but Top Killer exists, show killer in empty slot
+                renderPodium(document.getElementById('podium-1'), r1, '🥇', 'gold', 1);
+                if (r2) {
+                    renderPodium(document.getElementById('podium-2'), r2, '🥈', 'silver', 2);
+                } else if (killer) {
+                    renderPodium(document.getElementById('podium-2'), killer, '🎯', 'killer', 2);
+                } else {
+                    renderPodium(document.getElementById('podium-2'), null, '🥈', 'silver', 2);
+                }
+                if (r3) {
+                    renderPodium(document.getElementById('podium-3'), r3, '🥉', 'bronze', 3);
+                } else if (!r2 && !killer && killer) {
+                    renderPodium(document.getElementById('podium-3'), killer, '🎯', 'killer', 3);
+                } else {
+                    renderPodium(document.getElementById('podium-3'), null, '🥉', 'bronze', 3);
+                }
                 podium.classList.remove('hidden');
 
-                loadAllTime(merged);
+                loadAllTime(all);
                 renderTourneyCards(sortedKeys, byTournament);
 
                 listEl.innerHTML = winners.map(w => {
                     const name = playerName(w);
                     const r = rankNum(w.rank);
-                    const isKiller = String(w.rank || '').toLowerCase().includes('kill');
+                    const isKiller = isKillerRank(w.rank);
                     const medal = isKiller ? '🎯' : r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '🏅';
                     const rankLabel = isKiller ? 'Top Killer' : `Rank #${r || '—'}`;
                     return `
@@ -426,7 +398,7 @@
                                 <p class="text-xs text-gray-400 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')} • ${rankLabel}</p>
                             </div>
                             <div class="text-right flex-shrink-0">
-                                <p class="font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
+                                <p class="font-bold text-green-400">Rs. ${toNumber(w.prize || w.amount).toLocaleString()}</p>
                                 ${w.method ? `<p class="text-[10px] text-gray-500">${escapeHtml(w.method)}</p>` : ''}
                             </div>
                         </div>
@@ -442,8 +414,14 @@
         }
 
         function renderPodium(el, w, emoji, medalClass, placeholder) {
+            const orderCls = placeholder === 1
+                ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
+                : placeholder === 2
+                    ? 'order-2 md:order-1'
+                    : 'order-3';
+
             if (!w) {
-                el.className = `podium-slot order-${placeholder === 1 ? '1 md:order-2 md:scale-110' : placeholder === 2 ? 'order-2 md:order-1' : 'order-3'}`;
+                el.className = `podium-slot ${orderCls}`;
                 el.innerHTML = `
                     <div class="text-5xl mb-3">${emoji}</div>
                     <p class="text-sm text-gray-500">Waiting for winner</p>
@@ -451,18 +429,16 @@
                 return;
             }
             const name = playerName(w);
-            const orderCls = placeholder === 1
-                ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
-                : placeholder === 2
-                    ? 'order-2 md:order-1'
-                    : 'order-3';
+            const isKiller = isKillerRank(w.rank);
+            const label = isKiller ? 'Top Killer' : (rankNum(w.rank) === 1 ? 'Winner' : rankNum(w.rank) === 2 ? '2nd Place' : '3rd Place');
+
             el.className = `podium-live ${medalClass} ${orderCls}`;
             el.innerHTML = `
                 <div class="text-5xl mb-3">${emoji}</div>
                 <div class="winner-avatar">${avatarInitial(name)}</div>
                 <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
-                <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(w.tournamentTitle || w.tournament || 'Tournament')}</p>
-                <p class="text-lg font-bold text-green-400">Rs. ${Number(w.prize || w.amount || 0).toLocaleString()}</p>
+                <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(label)}</p>
+                <p class="text-lg font-bold text-green-400">Rs. ${toNumber(w.prize || w.amount).toLocaleString()}</p>
             `;
         }
 
@@ -471,7 +447,7 @@
             allPayouts.forEach(p => {
                 const name = playerName(p);
                 if (!name || name === 'Player') return;
-                const prize = Number(p.prize || p.amount || 0);
+                const prize = toNumber(p.prize || p.amount);
                 if (prize <= 0) return;
                 if (!totals[name]) totals[name] = { name, total: 0, wins: 0, podiums: 0 };
                 totals[name].total += prize;
@@ -488,15 +464,19 @@
             const medals = ['🥇', '🥈', '🥉'];
             const classes = ['gold', 'silver', 'bronze'];
 
-            allTimeGrid.innerHTML = ranked.map((p, i) => `
-                <div class="top-player-card ${classes[i]}">
-                    <div class="crown">${medals[i]}</div>
+            allTimeGrid.innerHTML = ranked.map((p, i) => {
+                const isKillerOnly = p.wins === 0 && p.podiums === 0;
+                const medal = isKillerOnly ? '🎯' : medals[i];
+                const cls = isKillerOnly ? 'killer' : classes[i];
+                return `
+                <div class="top-player-card ${cls}">
+                    <div class="crown">${medal}</div>
                     <div class="tp-avatar">${avatarInitial(p.name)}</div>
                     <p class="text-lg font-bold text-white mb-1 truncate">${escapeHtml(p.name)}</p>
                     <p class="text-2xl font-black text-green-400">Rs. ${p.total.toLocaleString()}</p>
-                    <p class="text-xs text-gray-400 mt-2">${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}</p>
-                </div>
-            `).join('');
+                    <p class="text-xs text-gray-400 mt-2">${isKillerOnly ? '🎯 Top Killer' : `${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}`}</p>
+                </div>`;
+            }).join('');
 
             allTimeWrap.classList.remove('hidden');
         }
@@ -507,14 +487,11 @@
             tourneyCardsEl.innerHTML = sortedKeys.map(key => {
                 const w = byTournament[key];
                 const title = w[0].tournamentTitle || w[0].tournament || 'Tournament';
-                const date = fmtDate(w[0].createdAt);
+                const date = fmtDate(w[0].createdAt || w[0].paidAt);
 
                 const findR = (n) => w.find(x => rankNum(x.rank) === n);
                 const first = findR(1), second = findR(2), third = findR(3);
-                const tk = w.find(x => {
-                    const r = String(x.rank || '').toLowerCase();
-                    return r.includes('kill') || r.includes('top');
-                });
+                const tk = w.find(x => isKillerRank(x.rank));
 
                 const slot = (winner, rank, medal, cls) => {
                     if (!winner) {
@@ -526,8 +503,8 @@
                     return `<div class="tp-slot ${cls}">
                         <div class="tp-rank">${medal}</div>
                         <p class="tp-name">${escapeHtml(playerName(winner))}</p>
-                        <p class="tp-prize">Rs. ${Number(winner.prize || winner.amount || 0).toLocaleString()}</p>
-                        ${winner.kills ? `<p class="tp-kills">${winner.kills} kills</p>` : ''}
+                        <p class="tp-prize">Rs. ${toNumber(winner.prize || winner.amount).toLocaleString()}</p>
+                        ${winner.kills ? `<p class="tp-kills">${toNumber(winner.kills)} kills</p>` : ''}
                     </div>`;
                 };
 
@@ -548,7 +525,7 @@
                             <div class="killer-row">
                                 <span class="kr-label">🎯 Top Killer</span>
                                 <span class="kr-name">${escapeHtml(playerName(tk))}</span>
-                                <span class="kr-prize">Rs. ${Number(tk.prize || tk.amount || 0).toLocaleString()}</span>
+                                <span class="kr-prize">Rs. ${toNumber(tk.prize || tk.amount).toLocaleString()}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -586,7 +563,7 @@
                             </div>
                             <div class="p-4">
                                 <p class="text-sm font-bold text-white mb-1 truncate">${escapeHtml(h.tournamentTitle || 'Tournament')}</p>
-                                <p class="text-xs text-gray-400">🥇 ${escapeHtml(w1.name || '—')} · Rs. ${w1.prize || 0}</p>
+                                <p class="text-xs text-gray-400">🥇 ${escapeHtml(w1.name || '—')} · Rs. ${toNumber(w1.prize)}</p>
                             </div>
                         </div>
                     `;
