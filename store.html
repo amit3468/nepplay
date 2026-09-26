@@ -21,6 +21,7 @@
     --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
@@ -35,104 +36,142 @@
     background: rgba(15, 8, 35, 0.85);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 50;
+    position: sticky; top: 0; z-index: 50; gap: 10px;
+    max-width: 100%;
   }
   .brand {
     display: flex; align-items: center; gap: 10px;
-    font-weight: 800; font-size: 1.15rem;
+    font-weight: 800; font-size: 1.1rem;
+    color: #fff; text-decoration: none; flex-shrink: 0;
   }
   .brand .logo {
     width: 32px; height: 32px; border-radius: 50%;
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
     display: grid; place-items: center; font-size: 1rem;
   }
-  .brand .avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: linear-gradient(135deg, #6d28d9, #a855f7);
-    display: grid; place-items: center; font-weight: 700; font-size: 0.85rem;
-    margin-left: 6px;
+  .nav-links {
+    display: flex; gap: 14px; font-size: 0.9rem;
+    align-items: center; overflow-x: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+    flex: 1; justify-content: flex-end;
   }
-  .nav-links { display: flex; gap: 18px; font-size: 0.95rem; align-items: center; }
-  .nav-links a {
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links > a {
     color: var(--muted); text-decoration: none; transition: color 0.2s;
     display: inline-flex; align-items: center;
+    white-space: nowrap; flex-shrink: 0;
   }
-  .nav-links a:hover { color: var(--text); }
-  .nav-links a.active { color: var(--gold-2); }
-  .nav-links a.winners-link {
+  .nav-links > a:hover { color: var(--text); }
+  .nav-links > a.active { color: var(--gold-2); }
+  .nav-links > a.winners-link {
     background: linear-gradient(135deg, #f59e0b, #fbbf24);
     color: #1a0b3d !important;
-    padding: 6px 14px; border-radius: 999px;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
   }
-  .nav-links a.store-link {
+  .nav-links > a.store-link {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #fff !important;
-    padding: 6px 14px; border-radius: 999px;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
   }
+
+  /* USER CHIP */
+  .user-chip-wrap { position: relative; flex-shrink: 0; }
+  #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+  .user-chip {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 8px 4px 4px;
+    border-radius: 999px;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
+    transition: background .2s;
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(168,85,247,.3);
+  }
+  .user-chip:hover { background: rgba(124,58,237,.3); }
+  #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+  .user-chip .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg,#6d28d9,#a855f7);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: .78rem; color: #fff; flex-shrink: 0;
+  }
+  .user-chip .uname {
+    color: #f5f3ff; font-weight: 700; font-size: .78rem;
+    max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
+  #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
+  .user-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #1a0b3d; border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px; min-width: 210px; padding: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    display: none; z-index: 100;
+  }
+  #chipToggle:checked ~ .user-menu { display: block; }
+  .user-menu a,
+  .user-menu .menu-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border-radius: 8px; color: #e9e5ff;
+    text-decoration: none; font-size: .85rem;
+    font-weight: 600; background: none; border: 0;
+    text-align: left; cursor: pointer; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .user-menu a:hover, .user-menu .menu-btn:hover {
+    background: rgba(124,58,237,.25); color: #fff;
+  }
+  .user-menu .divider {
+    height: 1px; background: rgba(168,85,247,.25);
+    margin: 6px 4px; display: block;
+  }
+  .user-menu .menu-btn.danger { color: #fca5a5; }
+  .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
+  .chip-backdrop {
+    position: fixed; inset: 0; background: transparent;
+    display: none; z-index: 90;
+  }
+  #chipToggle:checked ~ .chip-backdrop { display: block; }
+  .user-chip, .user-menu { position: relative; z-index: 100; }
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
   .store-hero {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
-    border-radius: 22px;
-    padding: 34px 30px;
-    margin-bottom: 26px;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
+    border-radius: 22px; padding: 34px 30px; margin-bottom: 26px;
+    box-shadow: var(--shadow); position: relative; overflow: hidden;
   }
   .store-hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 260px; height: 260px;
+    content: ''; position: absolute;
+    top: -60px; right: -60px; width: 260px; height: 260px;
     background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
     border-radius: 50%;
   }
-  .store-hero h1 {
-    font-size: 2rem; font-weight: 800; margin-bottom: 12px; position: relative;
-  }
+  .store-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; position: relative; }
   .store-hero h1 .accent { color: var(--gold-2); }
-  .store-hero p {
-    color: #ddd6fe; font-size: 1rem; max-width: 640px;
-    line-height: 1.55; position: relative;
-  }
-  .store-hero .badges {
-    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;
-    position: relative;
-  }
+  .store-hero p { color: #ddd6fe; font-size: 1rem; max-width: 640px; line-height: 1.55; position: relative; }
+  .store-hero .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; position: relative; }
   .badge {
     font-size: 0.75rem; font-weight: 800;
     padding: 7px 14px; border-radius: 999px;
     text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .badge.green {
-    background: rgba(34, 197, 94, 0.18);
-    color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
-  }
-  .badge.gold {
-    background: rgba(245, 158, 11, 0.18);
-    color: var(--gold-2); border: 1px solid rgba(245, 158, 11, 0.5);
-  }
+  .badge.green { background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5); }
+  .badge.gold { background: rgba(245, 158, 11, 0.18); color: var(--gold-2); border: 1px solid rgba(245, 158, 11, 0.5); }
 
   .how {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 24px;
-    margin-bottom: 26px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 24px; margin-bottom: 26px;
   }
   .how h2 { font-size: 1.15rem; margin-bottom: 18px; color: var(--gold-2); }
   .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .step {
     background: rgba(124, 58, 237, 0.12);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 12px; padding: 16px;
   }
   .step .num {
     width: 30px; height: 30px; border-radius: 50%;
@@ -145,20 +184,11 @@
 
   /* PAYMENT TABS */
   .pay-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 26px 24px;
-    margin-bottom: 26px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px 24px; margin-bottom: 26px;
   }
-  .pay-header {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
-  }
-  .pay-header h2 {
-    font-size: 1.2rem; color: var(--gold-2);
-    display: flex; align-items: center; gap: 8px;
-  }
+  .pay-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .pay-header h2 { font-size: 1.2rem; color: var(--gold-2); display: flex; align-items: center; gap: 8px; }
   .pay-header .secure-tag {
     font-size: 0.7rem; font-weight: 800;
     padding: 5px 11px; border-radius: 999px;
@@ -166,27 +196,18 @@
     color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
     letter-spacing: 0.5px; text-transform: uppercase;
   }
-  .pay-sub {
-    color: var(--muted); font-size: 0.88rem;
-    margin-bottom: 20px; line-height: 1.5;
-  }
-  .pay-tabs {
-    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px;
-  }
+  .pay-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; line-height: 1.5; }
+  .pay-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
   .pay-tab {
     display: flex; align-items: center; gap: 10px;
     background: rgba(124, 58, 237, 0.12);
     border: 2px solid var(--border);
-    color: var(--text);
-    font-family: inherit;
+    color: var(--text); font-family: inherit;
     font-size: 0.9rem; font-weight: 700;
     padding: 10px 18px; border-radius: 12px;
     cursor: pointer; transition: all 0.2s;
   }
-  .pay-tab:hover {
-    background: rgba(124, 58, 237, 0.25);
-    transform: translateY(-1px);
-  }
+  .pay-tab:hover { background: rgba(124, 58, 237, 0.25); transform: translateY(-1px); }
   .pay-tab.active {
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
     border-color: transparent;
@@ -195,8 +216,7 @@
   .pay-tab .tab-logo {
     width: 28px; height: 28px; border-radius: 8px;
     display: grid; place-items: center;
-    font-size: 0.9rem; font-weight: 900; color: #fff;
-    flex-shrink: 0;
+    font-size: 0.9rem; font-weight: 900; color: #fff; flex-shrink: 0;
   }
   .pay-tab .tab-logo.esewa { background: #60bb46; }
   .pay-tab .tab-logo.khalti { background: #5c2d91; }
@@ -207,8 +227,7 @@
     display: none;
     background: rgba(124, 58, 237, 0.08);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 22px;
+    border-radius: 16px; padding: 22px;
     animation: fadeIn 0.25s ease;
   }
   .pay-panel.active { display: block; }
@@ -216,30 +235,18 @@
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .panel-inner {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
+  .panel-inner { display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: start; }
   .qr-box {
-    background: #fff;
-    border-radius: 16px;
-    padding: 14px;
-    text-align: center;
+    background: #fff; border-radius: 16px;
+    padding: 14px; text-align: center;
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   }
   .qr-img-wrap {
     width: 100%; aspect-ratio: 1 / 1;
-    border-radius: 8px;
-    background: #f3f0ff;
-    display: grid; place-items: center;
-    overflow: hidden;
+    border-radius: 8px; background: #f3f0ff;
+    display: grid; place-items: center; overflow: hidden;
   }
-  .qr-img-wrap img {
-    width: 100%; height: 100%; object-fit: contain;
-    display: block;
-  }
+  .qr-img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .qr-noimg {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -251,7 +258,7 @@
   .qr-noimg .hint { font-size: 0.7rem; color: #6d28d9; opacity: 0.85; line-height: 1.3; }
   .qr-box .qr-label {
     margin-top: 10px; color: #1a0b3d;
-    font-weight: 800; font-size: 0.9rem; letter-spacing: 0.3px;
+    font-weight: 800; font-size: 0.9rem;
   }
   .qr-box .qr-sub { color: #555; font-size: 0.75rem; margin-top: 2px; }
   .panel-details { flex: 1; }
@@ -280,8 +287,7 @@
   .num-box {
     background: rgba(15, 8, 35, 0.6);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 12px; padding: 14px 16px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 14px; margin-bottom: 12px;
   }
@@ -292,17 +298,16 @@
   .num-box .val {
     font-family: 'Courier New', monospace;
     font-size: 1.3rem; font-weight: 900;
-    color: var(--gold-2);
-    letter-spacing: 2px; margin-top: 2px;
+    color: var(--gold-2); letter-spacing: 2px; margin-top: 2px;
   }
   .num-box .copy-btn {
     background: rgba(168, 85, 247, 0.25);
     border: 1px solid var(--border);
-    color: var(--text);
-    font-family: inherit; font-weight: 700;
-    font-size: 0.78rem; padding: 9px 16px;
-    border-radius: 8px; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
+    color: var(--text); font-family: inherit;
+    font-weight: 700; font-size: 0.78rem;
+    padding: 9px 16px; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
   }
   .num-box .copy-btn:hover {
     background: rgba(168, 85, 247, 0.45);
@@ -341,8 +346,8 @@
   .filter-btn {
     background: rgba(124, 58, 237, 0.15);
     border: 1px solid var(--border);
-    color: var(--text);
-    font-family: inherit; font-size: 0.85rem; font-weight: 700;
+    color: var(--text); font-family: inherit;
+    font-size: 0.85rem; font-weight: 700;
     padding: 8px 16px; border-radius: 999px;
     cursor: pointer; transition: all 0.2s;
   }
@@ -359,17 +364,14 @@
     display: flex; align-items: center; gap: 10px;
   }
   .section-title .emoji { font-size: 1.4rem; }
-
   .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px; margin-bottom: 26px;
   }
   .product {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px;
     display: flex; flex-direction: column; gap: 12px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     position: relative; overflow: hidden;
@@ -382,9 +384,7 @@
   .product .icon { font-size: 2rem; margin-bottom: 4px; }
   .product .name { font-weight: 800; font-size: 1rem; line-height: 1.3; }
   .product .sub { font-size: 0.78rem; color: var(--muted); }
-  .product .price-row {
-    display: flex; align-items: baseline; gap: 8px; margin-top: auto;
-  }
+  .product .price-row { display: flex; align-items: baseline; gap: 8px; margin-top: auto; }
   .product .price { font-size: 1.35rem; font-weight: 900; color: var(--gold-2); }
   .product .buy-btn {
     display: block; text-align: center;
@@ -408,34 +408,23 @@
   }
 
   .trust-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 14px; margin-bottom: 26px;
   }
   .trust {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px; text-align: center;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; text-align: center;
   }
   .trust .ico { font-size: 1.5rem; margin-bottom: 6px; }
   .trust .t { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
   .trust .d { font-size: 0.75rem; color: var(--muted); }
 
   .proof-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 26px 24px; margin-bottom: 26px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px 24px; margin-bottom: 26px;
   }
-  .proof-header {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
-  }
-  .proof-header h2 {
-    font-size: 1.2rem; color: var(--green);
-    display: flex; align-items: center; gap: 8px;
-  }
+  .proof-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .proof-header h2 { font-size: 1.2rem; color: var(--green); display: flex; align-items: center; gap: 8px; }
   .proof-header .verified {
     font-size: 0.7rem; font-weight: 800;
     padding: 5px 11px; border-radius: 999px;
@@ -443,15 +432,8 @@
     color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
     letter-spacing: 0.5px;
   }
-  .proof-sub {
-    color: var(--muted); font-size: 0.85rem;
-    margin-bottom: 20px; line-height: 1.5;
-  }
-  .proof-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 14px;
-  }
+  .proof-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
+  .proof-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
   .proof-card {
     background: rgba(34, 197, 94, 0.08);
     border: 1px solid rgba(34, 197, 94, 0.3);
@@ -463,27 +445,17 @@
     border-radius: 10px;
     background: linear-gradient(135deg, #1e123c, #2a1065);
     display: grid; place-items: center;
-    font-size: 1.8rem;
-    color: rgba(168, 85, 247, 0.4);
+    font-size: 1.8rem; color: rgba(168, 85, 247, 0.4);
     border: 1px dashed rgba(168, 85, 247, 0.35);
     overflow: hidden;
   }
-  .proof-card .proof-img img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
+  .proof-card .proof-img img { width: 100%; height: 100%; object-fit: cover; }
   .proof-card .proof-meta { display: flex; flex-direction: column; gap: 3px; }
   .proof-card .proof-name { font-weight: 800; font-size: 0.88rem; }
   .proof-card .proof-item { font-size: 0.75rem; color: var(--muted); }
-  .proof-card .proof-amount {
-    font-size: 0.85rem; font-weight: 800; color: var(--green); margin-top: 2px;
-  }
-  .proof-card .proof-time {
-    font-size: 0.68rem; color: var(--muted); opacity: 0.75; margin-top: 2px;
-  }
-  .proof-footer {
-    text-align: center; margin-top: 18px;
-    font-size: 0.82rem; color: var(--muted);
-  }
+  .proof-card .proof-amount { font-size: 0.85rem; font-weight: 800; color: var(--green); margin-top: 2px; }
+  .proof-card .proof-time { font-size: 0.68rem; color: var(--muted); opacity: 0.75; margin-top: 2px; }
+  .proof-footer { text-align: center; margin-top: 18px; font-size: 0.82rem; color: var(--muted); }
   .proof-footer a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
 
   .custom-order {
@@ -508,8 +480,7 @@
   .float-wa {
     position: fixed; right: 20px; bottom: 24px;
     width: 56px; height: 56px; border-radius: 50%;
-    background: #25d366;
-    display: grid; place-items: center;
+    background: #25d366; display: grid; place-items: center;
     font-size: 1.5rem;
     box-shadow: 0 10px 26px rgba(37, 211, 102, 0.5);
     z-index: 60; text-decoration: none;
@@ -520,27 +491,24 @@
     50% { box-shadow: 0 10px 36px rgba(37, 211, 102, 0.85); }
   }
 
-  /* ===== MOBILE NAV FIX ===== */
   @media (max-width: 720px) {
-    .topnav { padding: 12px 14px; }
-    .brand { font-size: 0.95rem; gap: 6px; }
-    .brand .avatar { display: none; }
-    .nav-links {
-      gap: 6px;
-      font-size: 0.72rem;
-      flex-wrap: nowrap;
-    }
-    .nav-links a.winners-link,
-    .nav-links a.store-link { padding: 5px 10px; }
-    /* Hide only these less-critical links on mobile */
-    .nav-links a[href="/teams.html"],
-    .nav-links a[href="/profile.html"],
-    .nav-links a[href="/support.html"] { display: none; }
-    /* Keep Tournaments bright & clickable */
-    .nav-links a[href="/tournaments.html"] {
-      color: var(--gold-2);
-      font-weight: 700;
-    }
+    .topnav { padding: 10px 10px; gap: 6px; }
+    .brand { font-size: 0.85rem; gap: 5px; }
+    .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
+    .brand .brand-text { display: none; }
+    .nav-links { gap: 4px; font-size: 0.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
+    .nav-links > a[href="/member.html"],
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/profile.html"],
+    .nav-links > a[href="/support.html"] { display: none; }
+    .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+    .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
+    .user-chip .uname { display: none; }
+    .user-chip .caret { font-size: 0.45rem; }
+    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
     .store-hero h1 { font-size: 1.5rem; }
     .steps { grid-template-columns: 1fr 1fr; }
     .trust-row { grid-template-columns: 1fr; }
@@ -557,20 +525,16 @@
   @media (max-width: 460px) {
     .product-grid { grid-template-columns: 1fr; }
     .proof-grid { grid-template-columns: 1fr; }
-    .nav-links { font-size: 0.68rem; gap: 5px; }
-    .nav-links a.winners-link,
-    .nav-links a.store-link { padding: 4px 8px; }
   }
 </style>
 </head>
 <body>
 
 <nav class="topnav">
-  <div class="brand">
+  <a href="/member.html" class="brand">
     <span class="logo">🎮</span>
-    Nepal Gaming
-    <span class="avatar">C</span>
-  </div>
+    <span class="brand-text">Nepal Gaming</span>
+  </a>
   <div class="nav-links">
     <a href="/member.html">Home</a>
     <a href="/tournaments.html">Tournaments</a>
@@ -579,6 +543,23 @@
     <a href="/teams.html">Teams</a>
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
+
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/player.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -601,26 +582,10 @@
   <section class="how">
     <h2>📖 How to Order (4 Simple Steps)</h2>
     <div class="steps">
-      <div class="step">
-        <div class="num">1</div>
-        <div class="t">Choose Product</div>
-        <div class="d">Pick your game or gift card from below.</div>
-      </div>
-      <div class="step">
-        <div class="num">2</div>
-        <div class="t">Tap "Order on WhatsApp"</div>
-        <div class="d">Send us your Player ID (UID) and chosen pack.</div>
-      </div>
-      <div class="step">
-        <div class="num">3</div>
-        <div class="t">Choose Payment Method</div>
-        <div class="d">Select eSewa / Khalti / IME Pay below.</div>
-      </div>
-      <div class="step">
-        <div class="num">4</div>
-        <div class="t">Receive Instantly</div>
-        <div class="d">Top-up delivered within 5–15 minutes.</div>
-      </div>
+      <div class="step"><div class="num">1</div><div class="t">Choose Product</div><div class="d">Pick your game or gift card from below.</div></div>
+      <div class="step"><div class="num">2</div><div class="t">Tap "Order on WhatsApp"</div><div class="d">Send us your Player ID (UID) and chosen pack.</div></div>
+      <div class="step"><div class="num">3</div><div class="t">Choose Payment Method</div><div class="d">Select eSewa / Khalti / IME Pay below.</div></div>
+      <div class="step"><div class="num">4</div><div class="t">Receive Instantly</div><div class="d">Top-up delivered within 5–15 minutes.</div></div>
     </div>
   </section>
 
@@ -636,20 +601,16 @@
 
     <div class="pay-tabs">
       <button class="pay-tab active" data-tab="esewa">
-        <span class="tab-logo esewa">e</span>
-        <span class="tab-name">eSewa</span>
+        <span class="tab-logo esewa">e</span><span class="tab-name">eSewa</span>
       </button>
       <button class="pay-tab" data-tab="khalti">
-        <span class="tab-logo khalti">K</span>
-        <span class="tab-name">Khalti</span>
+        <span class="tab-logo khalti">K</span><span class="tab-name">Khalti</span>
       </button>
       <button class="pay-tab" data-tab="imepay">
-        <span class="tab-logo imepay">i</span>
-        <span class="tab-name">IME Pay</span>
+        <span class="tab-logo imepay">i</span><span class="tab-name">IME Pay</span>
       </button>
       <button class="pay-tab" data-tab="bank">
-        <span class="tab-logo bank">🏦</span>
-        <span class="tab-name">Bank</span>
+        <span class="tab-logo bank">🏦</span><span class="tab-name">Bank</span>
       </button>
     </div>
 
@@ -665,22 +626,14 @@
         </div>
         <div class="panel-details">
           <h3>eSewa Payment</h3>
-          <p class="desc">
-            eSewa app kholnus, QR scan garnus, wa tala ko number ma direct
-            Send Money garnus.
-          </p>
+          <p class="desc">eSewa app kholnus, QR scan garnus, wa tala ko number ma direct Send Money garnus.</p>
           <div class="num-box">
-            <div>
-              <div class="lbl">eSewa Number</div>
-              <div class="val">9748835184</div>
-            </div>
+            <div><div class="lbl">eSewa Number</div><div class="val">9748835184</div></div>
             <button class="copy-btn" onclick="copyNum(this, '9748835184')">Copy Number</button>
           </div>
           <ul class="steps-list">
-            <li>Open eSewa app</li>
-            <li>Tap "Send Money" or scan QR</li>
-            <li>Enter amount (Rs. your order total)</li>
-            <li>Confirm with MPIN</li>
+            <li>Open eSewa app</li><li>Tap "Send Money" or scan QR</li>
+            <li>Enter amount (Rs. your order total)</li><li>Confirm with MPIN</li>
             <li>Screenshot & send to WhatsApp 9816023400</li>
           </ul>
         </div>
@@ -699,22 +652,14 @@
         </div>
         <div class="panel-details">
           <h3>Khalti Payment</h3>
-          <p class="desc">
-            Khalti app kholnus, QR scan garnus, wa tala ko number ma direct
-            Send Money garnus.
-          </p>
+          <p class="desc">Khalti app kholnus, QR scan garnus, wa tala ko number ma direct Send Money garnus.</p>
           <div class="num-box">
-            <div>
-              <div class="lbl">Khalti Number</div>
-              <div class="val">9766258368</div>
-            </div>
+            <div><div class="lbl">Khalti Number</div><div class="val">9766258368</div></div>
             <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy Number</button>
           </div>
           <ul class="steps-list">
-            <li>Open Khalti app</li>
-            <li>Tap "Send Money" or scan QR</li>
-            <li>Enter amount (Rs. your order total)</li>
-            <li>Confirm with MPIN</li>
+            <li>Open Khalti app</li><li>Tap "Send Money" or scan QR</li>
+            <li>Enter amount</li><li>Confirm with MPIN</li>
             <li>Screenshot & send to WhatsApp 9816023400</li>
           </ul>
         </div>
@@ -736,21 +681,14 @@
         </div>
         <div class="panel-details">
           <h3>IME Pay Payment <span class="badge-no-qr">NUMBER ONLY</span></h3>
-          <p class="desc">
-            IME Pay ma QR chhaina — tala ko number ma Send Money garnus.
-          </p>
+          <p class="desc">IME Pay ma QR chhaina — tala ko number ma Send Money garnus.</p>
           <div class="num-box">
-            <div>
-              <div class="lbl">IME Pay Number</div>
-              <div class="val">9766258368</div>
-            </div>
+            <div><div class="lbl">IME Pay Number</div><div class="val">9766258368</div></div>
             <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy Number</button>
           </div>
           <ul class="steps-list">
-            <li>Open IME Pay app</li>
-            <li>Tap "Send Money"</li>
-            <li>Enter number 9766258368</li>
-            <li>Enter amount & confirm with MPIN</li>
+            <li>Open IME Pay app</li><li>Tap "Send Money"</li>
+            <li>Enter number 9766258368</li><li>Enter amount & confirm with MPIN</li>
             <li>Screenshot & send to WhatsApp 9816023400</li>
           </ul>
         </div>
@@ -789,21 +727,9 @@
   </section>
 
   <div class="trust-row">
-    <div class="trust">
-      <div class="ico">🔒</div>
-      <div class="t">100% Safe</div>
-      <div class="d">Direct top-up to your ID</div>
-    </div>
-    <div class="trust">
-      <div class="ico">⚡</div>
-      <div class="t">Fast Delivery</div>
-      <div class="d">5–15 minutes average</div>
-    </div>
-    <div class="trust">
-      <div class="ico">💬</div>
-      <div class="t">24/7 Support</div>
-      <div class="d">WhatsApp us anytime</div>
-    </div>
+    <div class="trust"><div class="ico">🔒</div><div class="t">100% Safe</div><div class="d">Direct top-up to your ID</div></div>
+    <div class="trust"><div class="ico">⚡</div><div class="t">Fast Delivery</div><div class="d">5–15 minutes average</div></div>
+    <div class="trust"><div class="ico">💬</div><div class="t">24/7 Support</div><div class="d">WhatsApp us anytime</div></div>
   </div>
 
   <div class="filters">
@@ -815,212 +741,120 @@
     <button class="filter-btn" data-filter="giftcard">Gift Cards</button>
   </div>
 
-  <h2 class="section-title" data-cat="freefire">
-    <span class="emoji">🔥</span> Free Fire Diamonds
-  </h2>
+  <h2 class="section-title" data-cat="freefire"><span class="emoji">🔥</span> Free Fire Diamonds</h2>
   <div class="product-grid" data-cat="freefire">
-
     <div class="product">
-      <div class="tag-pop">POPULAR</div>
-      <div class="icon">💎</div>
-      <div class="name">110 Diamonds</div>
-      <div class="sub">Free Fire · Nepal Server</div>
+      <div class="tag-pop">POPULAR</div><div class="icon">💎</div>
+      <div class="name">110 Diamonds</div><div class="sub">Free Fire · Nepal Server</div>
       <div class="price-row"><div class="price">Rs 130</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20110%20Free%20Fire%20Diamonds%20-%20Rs%20130.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20110%20Free%20Fire%20Diamonds%20-%20Rs%20130.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">💎</div>
-      <div class="name">341 Diamonds</div>
+      <div class="icon">💎</div><div class="name">341 Diamonds</div>
       <div class="sub">Free Fire · Nepal Server</div>
       <div class="price-row"><div class="price">Rs 380</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20341%20Free%20Fire%20Diamonds%20-%20Rs%20380.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20341%20Free%20Fire%20Diamonds%20-%20Rs%20380.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">💎</div>
-      <div class="name">720 Diamonds</div>
+      <div class="icon">💎</div><div class="name">720 Diamonds</div>
       <div class="sub">Free Fire · Nepal Server</div>
       <div class="price-row"><div class="price">Rs 750</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20720%20Free%20Fire%20Diamonds%20-%20Rs%20750.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20720%20Free%20Fire%20Diamonds%20-%20Rs%20750.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">💎</div>
-      <div class="name">1080 Diamonds</div>
+      <div class="icon">💎</div><div class="name">1080 Diamonds</div>
       <div class="sub">Free Fire · Nepal Server</div>
       <div class="price-row"><div class="price">Rs 1100</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201080%20Free%20Fire%20Diamonds%20-%20Rs%201100.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201080%20Free%20Fire%20Diamonds%20-%20Rs%201100.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">🎫</div>
-      <div class="name">Weekly Membership</div>
+      <div class="icon">🎫</div><div class="name">Weekly Membership</div>
       <div class="sub">Free Fire · 7 days</div>
       <div class="price-row"><div class="price">Rs 250</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Weekly%20Membership%20-%20Rs%20250.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Weekly%20Membership%20-%20Rs%20250.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="tag-pop">BEST VALUE</div>
-      <div class="icon">🎫</div>
-      <div class="name">Monthly Membership</div>
-      <div class="sub">Free Fire · 30 days</div>
+      <div class="tag-pop">BEST VALUE</div><div class="icon">🎫</div>
+      <div class="name">Monthly Membership</div><div class="sub">Free Fire · 30 days</div>
       <div class="price-row"><div class="price">Rs 900</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Monthly%20Membership%20-%20Rs%20900.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Monthly%20Membership%20-%20Rs%20900.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
   </div>
 
-  <h2 class="section-title" data-cat="pubg">
-    <span class="emoji">🎯</span> PUBG Mobile UC
-  </h2>
+  <h2 class="section-title" data-cat="pubg"><span class="emoji">🎯</span> PUBG Mobile UC</h2>
   <div class="product-grid" data-cat="pubg">
-
     <div class="product">
-      <div class="icon">🪙</div>
-      <div class="name">60 UC</div>
-      <div class="sub">PUBG Mobile</div>
+      <div class="icon">🪙</div><div class="name">60 UC</div><div class="sub">PUBG Mobile</div>
       <div class="price-row"><div class="price">Rs 150</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2060%20PUBG%20UC%20-%20Rs%20150.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2060%20PUBG%20UC%20-%20Rs%20150.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">🪙</div>
-      <div class="name">325 UC</div>
-      <div class="sub">PUBG Mobile</div>
+      <div class="icon">🪙</div><div class="name">325 UC</div><div class="sub">PUBG Mobile</div>
       <div class="price-row"><div class="price">Rs 700</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20325%20PUBG%20UC%20-%20Rs%20700.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20325%20PUBG%20UC%20-%20Rs%20700.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="tag-pop">POPULAR</div>
-      <div class="icon">🪙</div>
-      <div class="name">660 UC</div>
-      <div class="sub">PUBG Mobile</div>
+      <div class="tag-pop">POPULAR</div><div class="icon">🪙</div>
+      <div class="name">660 UC</div><div class="sub">PUBG Mobile</div>
       <div class="price-row"><div class="price">Rs 1350</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20660%20PUBG%20UC%20-%20Rs%201350.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20660%20PUBG%20UC%20-%20Rs%201350.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
   </div>
 
-  <h2 class="section-title" data-cat="cod">
-    <span class="emoji">🎖️</span> Call of Duty CP
-  </h2>
+  <h2 class="section-title" data-cat="cod"><span class="emoji">🎖️</span> Call of Duty CP</h2>
   <div class="product-grid" data-cat="cod">
-
     <div class="product">
-      <div class="icon">💠</div>
-      <div class="name">80 CP</div>
-      <div class="sub">COD Mobile</div>
+      <div class="icon">💠</div><div class="name">80 CP</div><div class="sub">COD Mobile</div>
       <div class="price-row"><div class="price">Rs 150</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2080%20COD%20CP%20-%20Rs%20150.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2080%20COD%20CP%20-%20Rs%20150.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">💠</div>
-      <div class="name">420 CP</div>
-      <div class="sub">COD Mobile</div>
+      <div class="icon">💠</div><div class="name">420 CP</div><div class="sub">COD Mobile</div>
       <div class="price-row"><div class="price">Rs 700</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20420%20COD%20CP%20-%20Rs%20700.%20My%20UID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20420%20COD%20CP%20-%20Rs%20700.%20My%20UID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
   </div>
 
-  <h2 class="section-title" data-cat="valorant">
-    <span class="emoji">⚔️</span> Valorant Points
-  </h2>
+  <h2 class="section-title" data-cat="valorant"><span class="emoji">⚔️</span> Valorant Points</h2>
   <div class="product-grid" data-cat="valorant">
-
     <div class="product">
-      <div class="icon">🔺</div>
-      <div class="name">475 VP</div>
-      <div class="sub">Valorant</div>
+      <div class="icon">🔺</div><div class="name">475 VP</div><div class="sub">Valorant</div>
       <div class="price-row"><div class="price">Rs 600</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20475%20Valorant%20VP%20-%20Rs%20600.%20My%20Riot%20ID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20475%20Valorant%20VP%20-%20Rs%20600.%20My%20Riot%20ID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">🔺</div>
-      <div class="name">1000 VP</div>
-      <div class="sub">Valorant</div>
+      <div class="icon">🔺</div><div class="name">1000 VP</div><div class="sub">Valorant</div>
       <div class="price-row"><div class="price">Rs 1200</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201000%20Valorant%20VP%20-%20Rs%201200.%20My%20Riot%20ID%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201000%20Valorant%20VP%20-%20Rs%201200.%20My%20Riot%20ID%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
   </div>
 
-  <h2 class="section-title" data-cat="giftcard">
-    <span class="emoji">🎁</span> Gift Cards
-  </h2>
+  <h2 class="section-title" data-cat="giftcard"><span class="emoji">🎁</span> Gift Cards</h2>
   <div class="product-grid" data-cat="giftcard">
-
     <div class="product">
-      <div class="icon">🎮</div>
-      <div class="name">Steam Wallet</div>
+      <div class="icon">🎮</div><div class="name">Steam Wallet</div>
       <div class="sub">Rs 500 / 1000 / 2500 / 5000</div>
       <div class="price-row"><div class="price">From Rs 550</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Steam%20Wallet%20Gift%20Card.%20Amount%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Steam%20Wallet%20Gift%20Card.%20Amount%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">▶️</div>
-      <div class="name">Google Play</div>
+      <div class="icon">▶️</div><div class="name">Google Play</div>
       <div class="sub">Rs 500 / 1000 / 2000</div>
       <div class="price-row"><div class="price">From Rs 550</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Google%20Play%20Gift%20Card.%20Amount%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Google%20Play%20Gift%20Card.%20Amount%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">🍎</div>
-      <div class="name">iTunes / Apple</div>
+      <div class="icon">🍎</div><div class="name">iTunes / Apple</div>
       <div class="sub">Rs 500 / 1000 / 2000</div>
       <div class="price-row"><div class="price">From Rs 600</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20iTunes%20Gift%20Card.%20Amount%3A%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20iTunes%20Gift%20Card.%20Amount%3A%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
     <div class="product">
-      <div class="icon">💳</div>
-      <div class="name">Netflix / Spotify</div>
+      <div class="icon">💳</div><div class="name">Netflix / Spotify</div>
       <div class="sub">Subscription gift cards</div>
       <div class="price-row"><div class="price">Ask rate</div></div>
-      <a class="buy-btn"
-         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Netflix%2FSpotify%20Gift%20Card.%20"
-         target="_blank">Order on WhatsApp</a>
+      <a class="buy-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Netflix%2FSpotify%20Gift%20Card.%20" target="_blank" rel="noopener">Order on WhatsApp</a>
     </div>
-
   </div>
 
   <section class="proof-section">
@@ -1028,12 +862,9 @@
       <h2>✅ Payment Proof — Recent Deliveries</h2>
       <span class="verified">100% Verified</span>
     </div>
-    <p class="proof-sub">
-      Hamro recent top-up orders ko proof. Sabai real members, real deliveries.
-    </p>
+    <p class="proof-sub">Hamro recent top-up orders ko proof. Sabai real members, real deliveries.</p>
 
     <div class="proof-grid">
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1043,7 +874,6 @@
           <div class="proof-time">Today · 10:42 AM</div>
         </div>
       </div>
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1053,7 +883,6 @@
           <div class="proof-time">Today · 10:18 AM</div>
         </div>
       </div>
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1063,7 +892,6 @@
           <div class="proof-time">Today · 9:55 AM</div>
         </div>
       </div>
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1073,7 +901,6 @@
           <div class="proof-time">Yesterday · 8:12 PM</div>
         </div>
       </div>
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1083,7 +910,6 @@
           <div class="proof-time">Yesterday · 6:40 PM</div>
         </div>
       </div>
-
       <div class="proof-card">
         <div class="proof-img">🧾</div>
         <div class="proof-meta">
@@ -1093,32 +919,22 @@
           <div class="proof-time">Yesterday · 4:20 PM</div>
         </div>
       </div>
-
     </div>
 
     <p class="proof-footer">
-      Want to see more? Check the
-      <a href="/winners.html">Winners & Leaderboard</a>
-      page or ask us directly on WhatsApp.
+      Want to see more? Check the <a href="/winners.html">Winners & Leaderboard</a> page or ask us on WhatsApp.
     </p>
   </section>
 
   <div class="custom-order">
     <h3>🛍️ Don't see what you need?</h3>
-    <p>
-      Hamisanga dherai games ra gift cards available chhan — list ma nabhayeko
-      kunai pani item chahiyeko bhaye WhatsApp ma sodhnus.
-    </p>
-    <a class="wa-btn"
-       href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20custom%20top-up%2Fgift%20card.%20Details%3A%20"
-       target="_blank">💬 Chat with us on WhatsApp</a>
+    <p>Hamisanga dherai games ra gift cards available chhan — list ma nabhayeko kunai pani item chahiyeko bhaye WhatsApp ma sodhnus.</p>
+    <a class="wa-btn" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20custom%20top-up%2Fgift%20card.%20Details%3A%20" target="_blank" rel="noopener">💬 Chat with us on WhatsApp</a>
   </div>
 
 </div>
 
-<a class="float-wa"
-   href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20top-up."
-   target="_blank">💬</a>
+<a class="float-wa" href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20top-up." target="_blank" rel="noopener">💬</a>
 
 <script>
   function copyNum(btn, num) {
@@ -1133,33 +949,93 @@
     }).catch(() => alert('Number: ' + num));
   }
 
-  const payTabs = document.querySelectorAll('.pay-tab');
-  const payPanels = document.querySelectorAll('.pay-panel');
-
-  payTabs.forEach(tab => {
+  // Payment method tabs
+  document.querySelectorAll('.pay-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       const key = tab.dataset.tab;
-      payTabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      payPanels.forEach(panel => {
+      document.querySelectorAll('.pay-panel').forEach(panel => {
         panel.classList.toggle('active', panel.dataset.panel === key);
       });
     });
   });
 
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const sections = document.querySelectorAll('.section-title[data-cat], .product-grid[data-cat]');
-
-  filterBtns.forEach(btn => {
+  // Product filter
+  document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.dataset.filter;
-      filterBtns.forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      sections.forEach(el => {
+      document.querySelectorAll('.section-title[data-cat], .product-grid[data-cat]').forEach(el => {
         el.style.display = (filter === 'all' || el.dataset.cat === filter) ? '' : 'none';
       });
     });
   });
+
+  // Logout
+  (function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (!confirm("Logout now?")) return;
+        import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+          .then(function (a) {
+            return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+              .then(function (b) {
+                var cfg = {
+                  apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                  authDomain: "nepplaygaming.firebaseapp.com",
+                  projectId: "nepplaygaming",
+                  storageBucket: "nepplaygaming.firebasestorage.app",
+                  messagingSenderId: "893565645520",
+                  appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                };
+                var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                return b.signOut(b.getAuth(app));
+              });
+          })
+          .catch(function () {})
+          .finally(function () { window.location.href = "/login.html"; });
+      });
+    }
+  })();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+const app  = initializeApp(cfg);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+    if (!user) {
+        if (avatar) avatar.textContent = "?";
+        if (nameEl) nameEl.textContent = "Login";
+        return;
+    }
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+});
 </script>
 
 </body>
