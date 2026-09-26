@@ -21,6 +21,7 @@
     --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
@@ -35,14 +36,13 @@
     background: rgba(15, 8, 35, 0.85);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 50;
-    gap: 12px;
+    position: sticky; top: 0; z-index: 50; gap: 10px;
+    max-width: 100%;
   }
   .brand {
     display: flex; align-items: center; gap: 10px;
     font-weight: 800; font-size: 1.1rem;
-    color: #fff; text-decoration: none;
-    flex-shrink: 0;
+    color: #fff; text-decoration: none; flex-shrink: 0;
   }
   .brand .logo {
     width: 32px; height: 32px; border-radius: 50%;
@@ -50,90 +50,103 @@
     display: grid; place-items: center; font-size: 1rem;
   }
   .nav-links {
-    display: flex; gap: 16px; font-size: 0.95rem; align-items: center;
+    display: flex; gap: 14px; font-size: 0.9rem;
+    align-items: center; overflow-x: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+    flex: 1; justify-content: flex-end;
   }
-  .nav-links a {
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links > a {
     color: var(--muted); text-decoration: none; transition: color 0.2s;
     display: inline-flex; align-items: center;
+    white-space: nowrap; flex-shrink: 0;
   }
-  .nav-links a:hover { color: var(--text); }
-  .nav-links a.active { color: var(--gold-2); }
-  .nav-links a.winners-link {
+  .nav-links > a:hover { color: var(--text); }
+  .nav-links > a.active { color: var(--gold-2); }
+  .nav-links > a.winners-link {
     background: linear-gradient(135deg, #f59e0b, #fbbf24);
     color: #1a0b3d !important;
-    padding: 6px 14px; border-radius: 999px;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
   }
-  .nav-links a.store-link {
+  .nav-links > a.store-link {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #fff !important;
-    padding: 6px 14px; border-radius: 999px;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
   }
 
-  /* user chip */
-  .user-chip{
-    position:relative;
-    display:flex; align-items:center; gap:8px;
-    cursor:pointer;
-    padding:4px 10px 4px 4px;
-    border-radius:999px;
-    background:rgba(124,58,237,.15);
-    border:1px solid rgba(168,85,247,.35);
-    transition:background .2s;
-    flex-shrink:0;
+  /* USER CHIP */
+  .user-chip-wrap { position: relative; flex-shrink: 0; }
+  #chipToggle {
+    position: absolute; opacity: 0;
+    pointer-events: none; width: 0; height: 0;
   }
-  .user-chip:hover{ background:rgba(124,58,237,.3); }
-  .user-chip .avatar{
-    width:30px; height:30px; border-radius:50%;
-    background:linear-gradient(135deg,#6d28d9,#a855f7);
-    display:grid; place-items:center;
-    font-weight:700; font-size:.8rem;
-    color:#fff; flex-shrink:0;
+  .user-chip {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 8px 4px 4px;
+    border-radius: 999px;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
+    transition: background .2s;
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(168,85,247,.3);
   }
-  .user-chip .uname{
-    color:#f5f3ff; font-weight:700; font-size:.82rem;
-    max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  .user-chip:hover { background: rgba(124,58,237,.3); }
+  #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+  .user-chip .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg,#6d28d9,#a855f7);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: .78rem;
+    color: #fff; flex-shrink: 0;
   }
-  .user-chip .caret{ font-size:.55rem; color:#a8a3c9; }
-  .user-menu{
-    position:absolute;
-    top:calc(100% + 8px);
-    right:0;
-    background:#1a0b3d;
-    border:1px solid rgba(168,85,247,.35);
-    border-radius:12px;
-    min-width:200px;
-    padding:8px;
-    box-shadow:0 12px 40px rgba(0,0,0,.55);
-    display:none;
-    z-index:100;
+  .user-chip .uname {
+    color: #f5f3ff; font-weight: 700; font-size: .78rem;
+    max-width: 90px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
   }
-  .user-menu.open{ display:block; }
+  .user-chip .caret {
+    font-size: .5rem; color: #a8a3c9;
+    transition: transform .2s;
+  }
+  #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
+  .user-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #1a0b3d;
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px; min-width: 210px; padding: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    display: none; z-index: 100;
+  }
+  #chipToggle:checked ~ .user-menu { display: block; }
   .user-menu a,
-  .user-menu button{
-    display:flex; align-items:center; gap:10px;
-    width:100%; padding:10px 14px;
-    border-radius:8px;
-    color:#e9e5ff; text-decoration:none;
-    font-size:.85rem; font-weight:600;
-    background:none; border:0;
-    text-align:left; cursor:pointer; font-family:inherit;
+  .user-menu .menu-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border-radius: 8px;
+    color: #e9e5ff; text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    background: none; border: 0;
+    text-align: left; cursor: pointer; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
   }
   .user-menu a:hover,
-  .user-menu button:hover{
-    background:rgba(124,58,237,.25);
-    color:#fff;
+  .user-menu .menu-btn:hover {
+    background: rgba(124,58,237,.25); color: #fff;
   }
-  .user-menu .divider{
-    height:1px;
-    background:rgba(168,85,247,.25);
-    margin:6px 4px;
+  .user-menu .divider {
+    height: 1px; background: rgba(168,85,247,.25);
+    margin: 6px 4px; display: block;
   }
-  .user-menu .danger{ color:#fca5a5; }
-  .user-menu .danger:hover{ background:rgba(239,68,68,.2); }
+  .user-menu .menu-btn.danger { color: #fca5a5; }
+  .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
+  .chip-backdrop {
+    position: fixed; inset: 0; background: transparent;
+    display: none; z-index: 90;
+  }
+  #chipToggle:checked ~ .chip-backdrop { display: block; }
+  .user-chip, .user-menu { position: relative; z-index: 100; }
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
@@ -160,10 +173,8 @@
   .auto-counter .sub {
     color: #ddd6fe; font-size: 0.9rem; margin-top: 8px;
   }
-
   .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
   .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
-
   .game-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -195,11 +206,9 @@
     color: #fff; text-decoration: none;
     font-weight: 800; font-size: 0.9rem;
     padding: 11px; border-radius: 10px;
-    transition: transform 0.15s;
-    margin-top: 6px;
+    transition: transform 0.15s; margin-top: 6px;
   }
   .game-card .join-btn:hover { transform: translateY(-1px); }
-
   .room-note {
     background: rgba(245, 158, 11, 0.12);
     border: 1px solid rgba(245, 158, 11, 0.4);
@@ -212,19 +221,23 @@
   }
 
   @media (max-width: 720px) {
-    .topnav { padding: 12px 14px; }
-    .brand { font-size: 0.95rem; gap: 6px; }
-    .nav-links { gap: 6px; font-size: 0.72rem; flex-wrap: nowrap; }
-    .nav-links a.winners-link,
-    .nav-links a.store-link { padding: 5px 10px; }
-    .nav-links a[href="/teams.html"],
-    .nav-links a[href="/profile.html"],
-    .nav-links a[href="/support.html"] { display: none; }
-    .nav-links a[href="/tournaments.html"] {
-      color: var(--gold-2); font-weight: 700;
-    }
+    .topnav { padding: 10px 10px; gap: 6px; }
+    .brand { font-size: 0.85rem; gap: 5px; }
+    .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
+    .brand .brand-text { display: none; }
+    .nav-links { gap: 4px; font-size: 0.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
+    .nav-links > a[href="/member.html"],
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/profile.html"],
+    .nav-links > a[href="/support.html"] { display: none; }
+    .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+    .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
     .user-chip .uname { display: none; }
-    .user-chip { padding: 4px; }
+    .user-chip .caret { font-size: 0.45rem; }
+    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
     .game-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .game-card { padding: 14px; }
     .auto-counter .big { font-size: 2rem; }
@@ -233,8 +246,8 @@
   @media (max-width: 460px) {
     .game-grid { grid-template-columns: 1fr; }
     .nav-links { font-size: 0.68rem; gap: 5px; }
-    .nav-links a.winners-link,
-    .nav-links a.store-link { padding: 4px 8px; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 4px 8px; }
   }
 </style>
 </head>
@@ -243,7 +256,7 @@
 <nav class="topnav">
   <a href="/member.html" class="brand">
     <span class="logo">🎮</span>
-    Nepal Gaming
+    <span class="brand-text">Nepal Gaming</span>
   </a>
   <div class="nav-links">
     <a href="/member.html">Home</a>
@@ -254,16 +267,20 @@
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
 
-    <div class="user-chip" id="userChip" onclick="toggleUserMenu(event)">
-      <div class="avatar" id="userAvatar">?</div>
-      <span class="uname" id="userName">Loading…</span>
-      <span class="caret">▼</span>
-      <div class="user-menu" id="userMenu" onclick="event.stopPropagation()">
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
         <a href="/member.html">📊 My Dashboard</a>
-        <a href="/profile.html">👤 My Profile</a>
+        <a href="/player.html">👤 My Profile</a>
         <a href="/my-tournaments.html">🏆 My Tournaments</a>
         <div class="divider"></div>
-        <button class="danger" onclick="logoutNow()">🚪 Logout</button>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
       </div>
     </div>
   </div>
@@ -288,139 +305,88 @@
   </div>
 
   <div class="game-grid">
-
-    <!-- ✅ Each link uses EXACT Firestore doc ID — no ambiguity -->
     <div class="game-card">
       <div class="icon">🔥</div>
       <div class="name">Free Fire</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_ff" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">🎯</div>
       <div class="name">PUBG Mobile</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_pubg" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">🎖️</div>
       <div class="name">Call of Duty</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_cod" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">⚔️</div>
       <div class="name">Valorant</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_valorant" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">⚽</div>
       <div class="name">eFootball</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_efoot" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">🏏</div>
       <div class="name">eCricket</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_ecricket" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">♟️</div>
       <div class="name">Chess</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_chess" class="join-btn">Register</a>
     </div>
-
     <div class="game-card">
       <div class="icon">🎲</div>
       <div class="name">Ludo</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
       <a href="/registration.html?tournamentId=seed_paid_ludo" class="join-btn">Register</a>
     </div>
-
   </div>
 
 </div>
 
-<script type="module">
-// ============================================================
-// USER CHIP — Firebase Auth
-// ============================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, doc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  getAuth, onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
-    authDomain: "nepplaygaming.firebaseapp.com",
-    projectId: "nepplaygaming",
-    storageBucket: "nepplaygaming.firebasestorage.app",
-    messagingSenderId: "893565645520",
-    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
-};
-
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
-
-window.toggleUserMenu = function(e) {
-    if (e) e.stopPropagation();
-    const m = document.getElementById("userMenu");
-    if (m) m.classList.toggle("open");
-};
-
-document.addEventListener("click", (e) => {
-    const m = document.getElementById("userMenu");
-    const c = document.getElementById("userChip");
-    if (m && c && !c.contains(e.target)) m.classList.remove("open");
-});
-
-window.logoutNow = async function() {
-    if (!confirm("Logout now?")) return;
-    try { await signOut(auth); } catch (e) {}
-    window.location.href = "/login.html";
-};
-
-onAuthStateChanged(auth, async (user) => {
-    const avatar = document.getElementById("userAvatar");
-    const nameEl = document.getElementById("userName");
-
-    if (!user) {
-        // Not logged in — show "Login" prompt
-        if (avatar) avatar.textContent = "?";
-        if (nameEl) nameEl.textContent = "Login";
-        const chip = document.getElementById("userChip");
-        if (chip) chip.onclick = () => { window.location.href = "/login.html"; };
-        return;
+<script>
+(function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (!confirm("Logout now?")) return;
+        import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+          .then(function (a) {
+            return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+              .then(function (b) {
+                var cfg = {
+                  apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                  authDomain: "nepplaygaming.firebaseapp.com",
+                  projectId: "nepplaygaming",
+                  storageBucket: "nepplaygaming.firebasestorage.app",
+                  messagingSenderId: "893565645520",
+                  appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                };
+                var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                return b.signOut(b.getAuth(app));
+              });
+          })
+          .catch(function () {})
+          .finally(function () { window.location.href = "/login.html"; });
+      });
     }
+})();
 
-    let display = user.email || user.uid || "Member";
-    try {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (uDoc.exists()) {
-            const u = uDoc.data();
-            if (u.username) display = u.username;
-        }
-    } catch (e) {}
-    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
-    if (nameEl) nameEl.textContent = display;
-});
-
-// ============================================================
-// Auto-counter (placeholder — replace with your real Firestore sync)
-// ============================================================
+// Auto-counter placeholder
 (function tick() {
     const target = new Date();
     target.setHours(13, 0, 0, 0);
@@ -436,6 +402,41 @@ onAuthStateChanged(auth, async (user) => {
     update();
     setInterval(update, 1000);
 })();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+const app  = initializeApp(cfg);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+    if (!user) {
+        if (avatar) avatar.textContent = "?";
+        if (nameEl) nameEl.textContent = "Login";
+        return;
+    }
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+});
 </script>
 
 </body>
