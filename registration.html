@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEPPLAY - Tournament Registration</title>
+<title>NEPPLAY — Tournament Registration</title>
 
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; }
@@ -77,9 +77,7 @@ label{
     font-weight:bold;
 }
 
-input,
-textarea,
-select{
+input, textarea, select{
     width:100%;
     padding:12px;
     border-radius:8px;
@@ -90,9 +88,7 @@ select{
     outline:none;
 }
 
-input:focus,
-textarea:focus,
-select:focus{ border-color:#ff3b30; }
+input:focus, textarea:focus, select:focus{ border-color:#ff3b30; }
 
 textarea{ min-height:100px; resize:vertical; }
 
@@ -108,7 +104,6 @@ textarea{ min-height:100px; resize:vertical; }
     color:#fff;
 }
 
-/* DYNAMIC PAYMENT OPTIONS */
 .payment-options{
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
@@ -152,7 +147,6 @@ textarea{ min-height:100px; resize:vertical; }
     word-break:break-word;
 }
 
-/* PAYMENT DETAILS PANEL */
 .payment-details{
     display:none;
     margin-top:15px;
@@ -298,9 +292,15 @@ textarea{ min-height:100px; resize:vertical; }
     line-height:1.6;
 }
 
+.loading-state{
+    padding:40px 20px;
+    text-align:center;
+    color:#8da2bc;
+    font-size:15px;
+}
+
 @media(max-width:650px){
-    .grid,
-    .payment-options{ grid-template-columns:1fr; }
+    .grid, .payment-options{ grid-template-columns:1fr; }
 }
 </style>
 </head>
@@ -318,18 +318,20 @@ textarea{ min-height:100px; resize:vertical; }
         <h1 class="title">Tournament Registration</h1>
         <p class="subtitle">
             Complete your team information and payment details.
-            Your registration will remain Pending until the admin verifies your payment.
+            Your registration will remain <b>Pending</b> until the admin verifies your payment.
         </p>
 
         <div id="message" class="message"></div>
 
-        <div class="tournament-box">
-            <div id="tournamentName" class="tournament-name">Loading tournament...</div>
+        <div id="loading" class="loading-state">⏳ Loading tournament…</div>
+
+        <div id="tournamentBox" class="tournament-box" style="display:none;">
+            <div id="tournamentName" class="tournament-name">—</div>
             <div id="gameName" class="game"></div>
             <div id="entryFee" class="fee"></div>
         </div>
 
-        <form id="registrationForm">
+        <form id="registrationForm" style="display:none;">
 
             <h2 class="section-title">Team Information</h2>
 
@@ -367,15 +369,11 @@ textarea{ min-height:100px; resize:vertical; }
 
             <h2 class="section-title">Payment</h2>
 
-            <div id="amountBox" class="amount">Amount: Loading...</div>
+            <div id="amountBox" class="amount">Amount: Loading…</div>
 
             <div id="paymentContainer">
-                <div class="payment-options" id="paymentOptions">
-                    <!-- Populated dynamically -->
-                </div>
-                <div id="paymentDetailsContainer">
-                    <!-- Detail panels injected here -->
-                </div>
+                <div class="payment-options" id="paymentOptions"></div>
+                <div id="paymentDetailsContainer"></div>
             </div>
 
             <div class="grid">
@@ -412,35 +410,54 @@ textarea{ min-height:100px; resize:vertical; }
     </div>
 </div>
 
-<script>
+<script type="module">
+// ============================================================
+// NEPPLAY — Tournament Registration
+// Reads tournament + payment methods from Firestore
+// Writes registration to Firestore tournament_registrations
+// Requires Firebase Auth session (via firebase-config.js)
+// ============================================================
 
-var tournament = null;
-var paymentMethods = [];
-var selectedPaymentId = "";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, query, where,
+  serverTimestamp, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// --- Firebase config (same as admin.js) ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// --- State ---
+let currentUser = null;
+let tournament  = null;
+let paymentMethods = [];
+let selectedPaymentId = "";
+
+// --- DOM helpers ---
+const $ = id => document.getElementById(id);
 
 function showMessage(text, type) {
-    var box = document.getElementById("message");
+    const box = $("message");
     box.textContent = text;
     box.className = "message " + type;
 }
 
-function api(url, options) {
-    options = options || {};
-    return fetch(url, Object.assign({ credentials: "include" }, options))
-        .then(function (response) {
-            return response.text().then(function (text) {
-                var data = {};
-                try { data = text ? JSON.parse(text) : {}; } catch (e) { data = {}; }
-                if (!response.ok) {
-                    throw new Error(data.message || data.error || "Request failed.");
-                }
-                return data;
-            });
-        });
-}
-
-function escapeHTML(value) {
-    return String(value === undefined || value === null ? "" : value)
+function escapeHTML(v) {
+    return String(v === undefined || v === null ? "" : v)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -448,161 +465,229 @@ function escapeHTML(value) {
         .replace(/'/g, "&#039;");
 }
 
-/* =========================================
-   PAYMENT METHOD RENDERING
-========================================= */
+// ============================================================
+// AUTH GATE — redirect to login if not signed in
+// ============================================================
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        const returnTo = window.location.pathname + window.location.search;
+        window.location.href = "/login.html?redirect=" + encodeURIComponent(returnTo);
+        return;
+    }
+    currentUser = user;
+    loadRegistrationPage();
+});
+
+// ============================================================
+// LOAD TOURNAMENT + PAYMENT METHODS
+// ============================================================
+async function loadRegistrationPage() {
+    try {
+        // Read ?game= OR ?tournamentId= from URL
+        const params = new URLSearchParams(window.location.search);
+        const gameParam = (params.get("game") || "").toLowerCase();
+        const tidParam  = params.get("tournamentId") || params.get("tournament");
+
+        // Load all tournaments from Firestore
+        const snap = await getDocs(collection(db, "tournaments"));
+        const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Pick the tournament
+        if (tidParam) {
+            tournament = all.find(t => t.id === tidParam);
+        } else if (gameParam) {
+            // Match by game field (case-insensitive)
+            tournament = all
+                .filter(t => String(t.game || "").toLowerCase() === gameParam)
+                .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+        } else {
+            // Fallback: latest open tournament
+            tournament = all
+                .filter(t => String(t.status || "upcoming").toLowerCase() !== "completed")
+                .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+        }
+
+        if (!tournament) {
+            showMessage("❌ Tournament not found. Please open it from the Tournaments page.", "error");
+            $("loading").style.display = "none";
+            return;
+        }
+
+        // Fill tournament box
+        $("tournamentName").textContent = tournament.title || tournament.name || "Tournament";
+        $("gameName").textContent = tournament.game || "";
+        $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || 0);
+        $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || 0);
+
+        $("loading").style.display = "none";
+        $("tournamentBox").style.display = "block";
+        $("registrationForm").style.display = "block";
+
+        // Pre-fill captain name + email from Firebase user
+        if (currentUser) {
+            $("email").value = currentUser.email || "";
+            // Try to load username from Firestore users/{uid}
+            try {
+                const uDoc = await getDoc(doc(db, "users", currentUser.uid));
+                if (uDoc.exists()) {
+                    const u = uDoc.data();
+                    if (u.username) $("captainName").value = u.username;
+                    if (u.phone)    $("phone").value = u.phone;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Load payment methods from Firestore (payment_settings/main or similar)
+        await loadPaymentMethods();
+
+        // Block registration if tournament closed
+        const status = String(tournament.status || "upcoming").toLowerCase();
+        if (status === "completed" || tournament.isFull) {
+            $("submitButton").disabled = true;
+            showMessage("⚠️ This tournament is not currently open for registration.", "error");
+        }
+
+    } catch (err) {
+        console.error("loadRegistrationPage error:", err);
+        showMessage("❌ " + (err.message || "Failed to load tournament."), "error");
+        $("loading").style.display = "none";
+    }
+}
+
+// ============================================================
+// PAYMENT METHODS — reads from Firestore `payment_settings/main`
+// ============================================================
+async function loadPaymentMethods() {
+    let methods = [];
+    try {
+        // Try the canonical payment settings doc
+        const psDoc = await getDoc(doc(db, "payment_settings", "main"));
+        if (psDoc.exists()) {
+            const data = psDoc.data();
+            if (Array.isArray(data.methods)) {
+                methods = data.methods;
+            } else {
+                // Legacy: {eSewa:{number}, Khalti:{number}, ...}
+                if (data.eSewa)  methods.push({ id:"esewa",  name:"eSewa",  number:data.eSewa.number  || "", qrImage: data.eSewa.qrImage  || "/images/esewa-qr.png",  instructions: data.eSewa.instructions  || "" });
+                if (data.Khalti) methods.push({ id:"khalti", name:"Khalti", number:data.Khalti.number || "", qrImage: data.Khalti.qrImage || "/images/khalti-qr.png", instructions: data.Khalti.instructions || "" });
+                if (data.IMEPay || data.imePay) {
+                    const im = data.IMEPay || data.imePay;
+                    methods.push({ id:"imepay", name:"IME Pay", number:im.number || "9766258368", qrImage:"", instructions: im.instructions || "" });
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("payment_settings load failed:", e);
+    }
+
+    // Fallback hardcoded methods (matches your store.html)
+    if (!methods.length) {
+        methods = [
+            { id:"esewa",  name:"eSewa",   number:"9748835184", qrImage:"/images/esewa-qr.png",  instructions:"Open eSewa → Send Money → enter number → confirm with MPIN." },
+            { id:"khalti", name:"Khalti",  number:"9766258368", qrImage:"/images/khalti-qr.png", instructions:"Open Khalti → Send Money → enter number → confirm with MPIN." },
+            { id:"imepay", name:"IME Pay", number:"9766258368", qrImage:"",                     instructions:"Open IME Pay → Send Money → enter number → confirm with MPIN." }
+        ];
+    }
+
+    renderPaymentMethods(methods);
+}
 
 function renderPaymentMethods(methods) {
-
     paymentMethods = methods || [];
-    var container = document.getElementById("paymentOptions");
-    var detailsContainer = document.getElementById("paymentDetailsContainer");
+    const container = $("paymentOptions");
+    const detailsContainer = $("paymentDetailsContainer");
 
-    if (paymentMethods.length === 0) {
+    if (!paymentMethods.length) {
         container.innerHTML = "";
         detailsContainer.innerHTML =
-            '<div class="payment-no-methods">' +
-                'No payment methods are currently available.<br>' +
-                'Please contact the admin or try again later.' +
-            '</div>';
-        document.getElementById("submitButton").disabled = true;
+            '<div class="payment-no-methods">No payment methods available. Contact admin.</div>';
+        $("submitButton").disabled = true;
         return;
     }
 
-    /* Build radio buttons */
-    var html = "";
-    for (var i = 0; i < paymentMethods.length; i++) {
-        var m = paymentMethods[i];
-        var methodId = String(m.id || "");
-        html +=
-            '<label class="payment-option" id="payment-opt-' + escapeHTML(methodId) + '" ' +
-                'onclick="selectPayment(\'' + escapeHTML(methodId).replace(/'/g, "\\'") + '\')">' +
-                '<input type="radio" name="paymentMethod" value="' + escapeHTML(methodId) + '" ' +
-                    'onclick="event.stopPropagation(); selectPayment(\'' + escapeHTML(methodId).replace(/'/g, "\\'") + '\')">' +
-                '<span class="payment-name">' + escapeHTML(m.name || "Method") + '</span>' +
-            '</label>';
-    }
-    container.innerHTML = html;
+    // Radio options
+    container.innerHTML = paymentMethods.map(m => {
+        const id = escapeHTML(String(m.id || ""));
+        return `
+          <label class="payment-option" id="payment-opt-${id}" onclick="selectPayment('${id}')">
+            <input type="radio" name="paymentMethod" value="${id}"
+                   onclick="event.stopPropagation(); selectPayment('${id}')">
+            <span class="payment-name">${escapeHTML(m.name || "Method")}</span>
+          </label>`;
+    }).join("");
 
-    /* Build detail panels for each method */
-    var details = "";
-    for (var j = 0; j < paymentMethods.length; j++) {
-        var d = paymentMethods[j];
-        var did = String(d.id || "");
+    // Detail panels
+    detailsContainer.innerHTML = paymentMethods.map(m => {
+        const id = escapeHTML(String(m.id || ""));
+        const qr = m.qrImage
+            ? `<img src="${escapeHTML(m.qrImage)}" class="qr" alt="${escapeHTML(m.name)} QR">`
+            : "";
+        const wallet = m.number
+            ? `<div class="wallet">${escapeHTML(m.name)} Number:
+                 <strong>${escapeHTML(m.number)}</strong>
+                 <button type="button" class="wallet-copy" onclick="copyToClipboard('${escapeHTML(m.number)}')">Copy</button>
+               </div>`
+            : `<div class="wallet" style="color:#a87918;">No number provided. Contact admin.</div>`;
+        const instr = m.instructions
+            ? `<div class="payment-instructions">${escapeHTML(m.instructions)}</div>`
+            : "";
+        return `
+          <div class="payment-details" id="payment-details-${id}">
+            <div class="payment-details-title">Pay using ${escapeHTML(m.name)}</div>
+            ${qr}
+            ${wallet}
+            ${instr}
+          </div>`;
+    }).join("");
 
-        var qrHtml = "";
-        if (d.qrImage) {
-            qrHtml = '<img src="' + escapeHTML(d.qrImage) + '" class="qr" alt="' + escapeHTML(d.name) + ' QR">';
-        }
-
-        var walletHtml = "";
-        if (d.number) {
-            var safeNum = escapeHTML(d.number).replace(/'/g, "\\'");
-            walletHtml =
-                '<div class="wallet">' +
-                    escapeHTML(d.name) + ' Number:' +
-                    '<strong>' + escapeHTML(d.number) + '</strong>' +
-                    '<button type="button" class="wallet-copy" ' +
-                        'onclick="copyToClipboard(\'' + safeNum + '\')">Copy</button>' +
-                '</div>';
-        } else {
-            walletHtml = '<div class="wallet" style="color:#a87918;">No number provided. Contact admin.</div>';
-        }
-
-        var instructionsHtml = "";
-        if (d.instructions) {
-            instructionsHtml =
-                '<div class="payment-instructions">' +
-                    escapeHTML(d.instructions) +
-                '</div>';
-        }
-
-        details +=
-            '<div class="payment-details" id="payment-details-' + escapeHTML(did) + '">' +
-                '<div class="payment-details-title">Pay using ' + escapeHTML(d.name) + '</div>' +
-                qrHtml +
-                walletHtml +
-                instructionsHtml +
-            '</div>';
-    }
-    detailsContainer.innerHTML = details;
-
-    /* Auto-select first method */
-    if (paymentMethods.length > 0) {
-        selectPayment(String(paymentMethods[0].id || ""));
-    }
+    // Auto-select first
+    if (paymentMethods.length) selectPayment(String(paymentMethods[0].id));
 }
 
-function selectPayment(methodId) {
-
+window.selectPayment = function(methodId) {
     selectedPaymentId = methodId;
 
-    /* Clear all highlights */
-    var options = document.querySelectorAll(".payment-option");
-    for (var i = 0; i < options.length; i++) {
-        options[i].classList.remove("selected");
-    }
+    document.querySelectorAll(".payment-option").forEach(el => el.classList.remove("selected"));
+    document.querySelectorAll(".payment-details").forEach(el => el.classList.remove("active"));
 
-    /* Clear all details */
-    var details = document.querySelectorAll(".payment-details");
-    for (var j = 0; j < details.length; j++) {
-        details[j].classList.remove("active");
-    }
+    const opt = document.getElementById("payment-opt-" + methodId);
+    if (opt) opt.classList.add("selected");
+    const det = document.getElementById("payment-details-" + methodId);
+    if (det) det.classList.add("active");
 
-    /* Highlight selected */
-    var selectedOpt = document.getElementById("payment-opt-" + methodId);
-    if (selectedOpt) selectedOpt.classList.add("selected");
-
-    /* Show details */
-    var selectedDetails = document.getElementById("payment-details-" + methodId);
-    if (selectedDetails) selectedDetails.classList.add("active");
-
-    /* Check the radio */
-    var radio = document.querySelector('input[name="paymentMethod"][value="' + methodId + '"]');
+    const radio = document.querySelector(`input[name="paymentMethod"][value="${methodId}"]`);
     if (radio) radio.checked = true;
 
-    /* Get the method name for display */
-    var m = paymentMethods.find(function (x) { return String(x.id) === String(methodId); });
-    if (m && m.name) {
-        /* Set the transaction ID placeholder to make it clearer */
-        var txInput = document.getElementById("transactionId");
-        if (txInput) {
-            txInput.placeholder = "Enter your " + m.name + " transaction ID";
-        }
+    const m = paymentMethods.find(x => String(x.id) === String(methodId));
+    if (m) {
+        const tx = $("transactionId");
+        if (tx) tx.placeholder = `Enter your ${m.name} transaction ID`;
     }
-}
+};
 
-function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-            showTempMessage("Copied: " + text);
-        }).catch(function () {
-            fallbackCopy(text);
-        });
+window.copyToClipboard = function(text) {
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => showToast("Copied: " + text))
+            .catch(() => fallbackCopy(text));
     } else {
         fallbackCopy(text);
     }
-}
+};
 
 function fallbackCopy(text) {
-    var ta = document.createElement("textarea");
+    const ta = document.createElement("textarea");
     ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
+    ta.style.position = "fixed"; ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
-    try {
-        document.execCommand("copy");
-        showTempMessage("Copied: " + text);
-    } catch (e) {
-        showTempMessage("Could not copy");
-    }
+    try { document.execCommand("copy"); showToast("Copied: " + text); }
+    catch (e) { showToast("Copy failed"); }
     document.body.removeChild(ta);
 }
 
-function showTempMessage(msg) {
-    /* Small floating toast on registration page */
-    var el = document.getElementById("copyToast");
+function showToast(msg) {
+    let el = document.getElementById("copyToast");
     if (!el) {
         el = document.createElement("div");
         el.id = "copyToast";
@@ -611,223 +696,90 @@ function showTempMessage(msg) {
     }
     el.textContent = msg;
     el.style.display = "block";
-    setTimeout(function () { el.style.display = "none"; }, 1800);
+    setTimeout(() => { el.style.display = "none"; }, 1800);
 }
 
-/* =========================================
-   LOAD TOURNAMENT + PAYMENT METHODS
-========================================= */
+// ============================================================
+// SUBMIT REGISTRATION → writes to Firestore
+// ============================================================
+$("registrationForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-function load() {
+    if (!currentUser) {
+        showMessage("Please login first.", "error");
+        return;
+    }
+    if (!tournament) {
+        showMessage("Tournament not loaded.", "error");
+        return;
+    }
+    if (!selectedPaymentId) {
+        showMessage("Please select a payment method.", "error");
+        return;
+    }
 
-    api("/api/users/me")
-        .then(function (userData) {
-            if (userData && userData.user) {
-                document.getElementById("email").value = userData.user.email || "";
-            }
-        })
-        .catch(function () {})
-        .then(function () {
+    const selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
+    if (!selectedMethod) {
+        showMessage("Please select a payment method.", "error");
+        return;
+    }
 
-            var params = new URLSearchParams(window.location.search);
-            var tournamentId =
-                params.get("tournamentId") ||
-                params.get("tournament");
+    const transactionId = $("transactionId").value.trim();
+    if (transactionId.length < 3) {
+        showMessage("Please enter a valid transaction ID.", "error");
+        return;
+    }
 
-            if (!tournamentId) {
-                throw new Error("Tournament was not selected.");
-            }
+    const btn = $("submitButton");
+    btn.disabled = true;
+    btn.textContent = "Submitting…";
 
-            return api("/api/tournaments").then(function (response) {
-
-                var list = [];
-                if (Array.isArray(response)) {
-                    list = response;
-                } else if (response && Array.isArray(response.tournaments)) {
-                    list = response.tournaments;
-                }
-
-                var found = null;
-                for (var i = 0; i < list.length; i++) {
-                    if (String(list[i].id) === String(tournamentId)) {
-                        found = list[i];
-                        break;
-                    }
-                }
-
-                return found;
-
-            });
-
-        })
-        .then(function (found) {
-
-            if (!found) {
-                throw new Error("Tournament not found.");
-            }
-
-            tournament = found;
-
-            document.getElementById("tournamentName").textContent =
-                tournament.name || "Tournament";
-
-            document.getElementById("gameName").textContent =
-                tournament.game || "";
-
-            document.getElementById("entryFee").textContent =
-                "Entry Fee: NPR " + (tournament.entryFee || 0);
-
-            document.getElementById("amountBox").textContent =
-                "Amount to Pay: NPR " + (tournament.entryFee || 0);
-
-            if (
-                tournament.isFull ||
-                String(tournament.status || "").toLowerCase() !== "open"
-            ) {
-                document.getElementById("submitButton").disabled = true;
-                showMessage(
-                    "This tournament is not currently open for registration.",
-                    "error"
-                );
-            }
-
-            return api("/api/payment-settings").then(function (paymentData) {
-
-                var methods = [];
-
-                if (paymentData && Array.isArray(paymentData.methods)) {
-                    methods = paymentData.methods;
-                } else if (paymentData && paymentData.payment) {
-                    /* Legacy fallback */
-                    if (paymentData.payment.eSewa) {
-                        methods.push({
-                            id: "esewa",
-                            name: "eSewa",
-                            number: paymentData.payment.eSewa.number || "",
-                            qrImage: "",
-                            instructions: ""
-                        });
-                    }
-                    if (paymentData.payment.Khalti) {
-                        methods.push({
-                            id: "khalti",
-                            name: "Khalti",
-                            number: paymentData.payment.Khalti.number || "",
-                            qrImage: "",
-                            instructions: ""
-                        });
-                    }
-                }
-
-                renderPaymentMethods(methods);
-
-            }).catch(function (err) {
-                console.error("Payment load error:", err);
-                renderPaymentMethods([]);
-            });
-
-        })
-        .catch(function (error) {
-
-            showMessage(error.message || "Could not load tournament.", "error");
-            document.getElementById("submitButton").disabled = true;
-
-        });
-
-}
-
-/* =========================================
-   SUBMIT REGISTRATION
-========================================= */
-
-document
-    .getElementById("registrationForm")
-    .addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        if (!tournament) {
-            showMessage("Tournament information is not loaded yet.", "error");
-            return;
-        }
-
-        if (!selectedPaymentId) {
-            showMessage("Please select a payment method.", "error");
-            return;
-        }
-
-        var selectedMethod = paymentMethods.find(function (m) {
-            return String(m.id) === String(selectedPaymentId);
-        });
-        if (!selectedMethod) {
-            showMessage("Please select a payment method.", "error");
-            return;
-        }
-
-        var transactionId =
-            document.getElementById("transactionId").value.trim();
-
-        if (transactionId.length < 3) {
-            showMessage("Please enter a valid transaction ID.", "error");
-            return;
-        }
-
-        var btn = document.getElementById("submitButton");
-        btn.disabled = true;
-        btn.textContent = "Submitting...";
-
-        var body = {
-            tournamentId: tournament.id,
-            tournament: tournament.id,
-            game: tournament.game,
-            teamName: document.getElementById("teamName").value.trim(),
-            captainName: document.getElementById("captainName").value.trim(),
-            phone: document.getElementById("phone").value.trim(),
-            email: document.getElementById("email").value.trim(),
-            player1: document.getElementById("player1").value.trim(),
-            player2: document.getElementById("player2").value.trim(),
-            player3: document.getElementById("player3").value.trim(),
-            player4: document.getElementById("player4").value.trim(),
-            player5: document.getElementById("player5").value.trim(),
-            player6: document.getElementById("player6").value.trim(),
-            payerName: document.getElementById("payerName").value.trim(),
-            payerPhone: document.getElementById("payerPhone").value.trim(),
-            transactionId: transactionId,
-            paymentMethod: selectedMethod.name,
-            amount: tournament.entryFee,
-            message: document.getElementById("messageText").value.trim()
+    try {
+        const body = {
+            userId:         currentUser.uid,
+            userEmail:      currentUser.email || "",
+            tournamentId:   tournament.id,
+            tournamentTitle: tournament.title || tournament.name || "",
+            game:           tournament.game || "",
+            teamName:       $("teamName").value.trim(),
+            captainName:    $("captainName").value.trim(),
+            phone:          $("phone").value.trim(),
+            email:          $("email").value.trim(),
+            player1:        $("player1").value.trim(),
+            player2:        $("player2").value.trim(),
+            player3:        $("player3").value.trim(),
+            player4:        $("player4").value.trim(),
+            player5:        $("player5").value.trim(),
+            player6:        $("player6").value.trim(),
+            payerName:      $("payerName").value.trim(),
+            payerPhone:     $("payerPhone").value.trim(),
+            transactionId,
+            paymentMethod:  selectedMethod.name,
+            paymentMethodId: selectedMethod.id,
+            amount:         Number(tournament.entryFee || 0),
+            message:        $("messageText").value.trim(),
+            status:         "pending",
+            entryType:      "paid",
+            registeredAt:   serverTimestamp()
         };
 
-        api("/api/registrations", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        })
-        .then(function (result) {
+        // Write to Firestore
+        await addDoc(collection(db, "tournament_registrations"), body);
 
-            showMessage(
-                result.message || "Registration submitted successfully.",
-                "success"
-            );
+        showMessage("✅ Registration submitted! Admin will verify your payment.", "success");
+        $("registrationForm").reset();
 
-            document.getElementById("registrationForm").reset();
+        setTimeout(() => {
+            window.location.href = "/member.html";
+        }, 1800);
 
-            setTimeout(function () {
-                window.location.href = "/member.html";
-            }, 1500);
-
-        })
-        .catch(function (error) {
-
-            showMessage(error.message || "Submission failed.", "error");
-            btn.disabled = false;
-            btn.textContent = "Submit Registration";
-
-        });
-
-    });
-
-load();
+    } catch (err) {
+        console.error("submit error:", err);
+        showMessage("❌ " + (err.message || "Submission failed."), "error");
+        btn.disabled = false;
+        btn.textContent = "Submit Registration";
+    }
+});
 
 </script>
 
