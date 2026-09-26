@@ -13,10 +13,6 @@
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .rank-1 { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
 
-        .profile-dropdown { display: none; }
-        .profile-dropdown.open { display: block; }
-        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
-
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
         .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
         .support-btn:hover { transform: scale(1.1); }
@@ -93,6 +89,89 @@
         .killer-row .kr-prize { color: #4ade80; font-weight: 800; }
         .tourney-highlight { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; background: rgba(220,38,38,0.08); border-top: 1px solid rgba(220,38,38,0.2); color: #fca5a5; font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
         .tourney-highlight:hover { background: rgba(220,38,38,0.15); color: #fff; }
+
+        /* ===== USER CHIP NAV ===== */
+        .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
+        #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+        .user-chip {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; padding: 4px 8px 4px 4px;
+            border-radius: 999px;
+            background: rgba(124,58,237,.15);
+            border: 1px solid rgba(168,85,247,.35);
+            transition: background .2s;
+            user-select: none; -webkit-user-select: none;
+            -webkit-tap-highlight-color: rgba(168,85,247,.3);
+        }
+        .user-chip:hover { background: rgba(124,58,237,.3); }
+        #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+        .user-chip .avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg,#6d28d9,#a855f7);
+            display: grid; place-items: center;
+            font-weight: 700; font-size: .78rem;
+            color: #fff; flex-shrink: 0;
+        }
+        .user-chip .uname {
+            color: #f5f3ff; font-weight: 700; font-size: .78rem;
+            max-width: 90px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .user-chip .caret {
+            font-size: .5rem; color: #a8a3c9;
+            transition: transform .2s;
+        }
+        #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
+        .user-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #1a0b3d;
+            border: 1px solid rgba(168,85,247,.35);
+            border-radius: 12px; min-width: 210px; padding: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.55);
+            display: none; z-index: 100;
+        }
+        #chipToggle:checked ~ .user-menu { display: block; }
+        .user-menu a,
+        .user-menu .menu-btn {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 11px 14px;
+            border-radius: 8px;
+            color: #e9e5ff; text-decoration: none;
+            font-size: .85rem; font-weight: 600;
+            background: none; border: 0;
+            text-align: left; cursor: pointer; font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .user-menu a:hover,
+        .user-menu .menu-btn:hover {
+            background: rgba(124,58,237,.25); color: #fff;
+        }
+        .user-menu .divider {
+            height: 1px; background: rgba(168,85,247,.25);
+            margin: 6px 4px; display: block;
+        }
+        .user-menu .menu-btn.danger { color: #fca5a5; }
+        .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
+        .chip-backdrop {
+            position: fixed; inset: 0;
+            background: transparent;
+            display: none; z-index: 90;
+        }
+        #chipToggle:checked ~ .chip-backdrop { display: block; }
+        .user-chip, .user-menu { position: relative; z-index: 100; }
+
+        @media (max-width: 720px) {
+            .user-chip .uname { display: none; }
+            .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+            .user-chip .avatar { width: 26px; height: 26px; font-size: .72rem; }
+            .user-menu {
+                min-width: 180px; padding: 6px;
+                max-width: calc(100vw - 20px);
+                right: 0;
+            }
+            .user-menu a,
+            .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -123,30 +202,12 @@
         <div class="flex items-center gap-3 min-w-0">
             <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
             <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
-            <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
-                    <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
-                    <div class="p-3 border-b border-gray-700">
-                        <p class="text-xs text-gray-500">Signed in as</p>
-                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
-                    </div>
-                    <div class="py-1">
-                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> My Dashboard</a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                        <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
-                    </div>
-                    <div class="py-1 border-t border-gray-700">
-                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
-                    </div>
-                </div>
-            </div>
         </div>
+
         <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
             <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
         </button>
+
         <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
@@ -154,7 +215,24 @@
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
             <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Support</a>
-            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
+
+            <!-- USER CHIP -->
+            <div class="user-chip-wrap">
+                <input type="checkbox" id="chipToggle" />
+                <label class="user-chip" for="chipToggle">
+                    <span class="avatar" id="userAvatar">?</span>
+                    <span class="uname" id="userName">Loading…</span>
+                    <span class="caret">▼</span>
+                </label>
+                <label class="chip-backdrop" for="chipToggle"></label>
+                <div class="user-menu">
+                    <a href="/member.html">📊 My Dashboard</a>
+                    <a href="/player.html">👤 My Profile</a>
+                    <a href="/my-tournaments.html">🏆 My Tournaments</a>
+                    <div class="divider"></div>
+                    <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -251,9 +329,14 @@
         </div>
     </footer>
 
+    <!-- ============================================================
+         WINTERS FIRESTORE LOGIC — unchanged
+         ============================================================ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -266,6 +349,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         const loading = document.getElementById('winners-loading');
         const empty   = document.getElementById('winners-empty');
@@ -288,7 +372,6 @@
         function playerName(p) {
             return p.winnerName || p.username || p.ign || p.playerName || 'Player';
         }
-        // ⭐ SAFE NUMBER PARSE — handles both number and string
         function toNumber(v) {
             if (v === null || v === undefined || v === '') return 0;
             const n = typeof v === 'number' ? v : Number(String(v).replace(/[^\d.-]/g, ''));
@@ -355,7 +438,6 @@
                     return tb - ta;
                 });
 
-                // Latest podium
                 const latest = byTournament[sortedKeys[0]] || [];
                 const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
                 const findKiller = latest.find(w => isKillerRank(w.rank));
@@ -363,7 +445,6 @@
                 const r1 = findRank(1), r2 = findRank(2), r3 = findRank(3);
                 const killer = findKiller;
 
-                // Smart placement: if 2nd or 3rd are missing but Top Killer exists, show killer in empty slot
                 renderPodium(document.getElementById('podium-1'), r1, '🥇', 'gold', 1);
                 if (r2) {
                     renderPodium(document.getElementById('podium-2'), r2, '🥈', 'silver', 2);
@@ -593,6 +674,26 @@
         }
 
         loadHighlights();
+
+        // ============================================================
+        // USER CHIP — Firebase auth
+        // ============================================================
+        onAuthStateChanged(auth, async (user) => {
+            const avatar = document.getElementById("userAvatar");
+            const nameEl = document.getElementById("userName");
+            if (!user) {
+                if (avatar) avatar.textContent = "?";
+                if (nameEl) nameEl.textContent = "Login";
+                return;
+            }
+            let display = user.email || user.uid || "Member";
+            try {
+                const uDoc = await getDoc(doc(db, "users", user.uid));
+                if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+            } catch (e) {}
+            if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+            if (nameEl) nameEl.textContent = display;
+        });
     </script>
 
     <script>
@@ -608,26 +709,35 @@
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
-        function checkUserStatus() {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (user && user.username) {
-                document.getElementById('user-profile').classList.remove('hidden');
-                document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-                document.getElementById('dropdown-username').textContent = user.email || user.username;
-                document.getElementById('nav-login-btn').classList.add('hidden');
-            } else {
-                document.getElementById('user-profile').classList.add('hidden');
-                document.getElementById('nav-login-btn').classList.remove('hidden');
+
+        // Logout
+        (function () {
+            var logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function (e) {
+                    e.preventDefault(); e.stopPropagation();
+                    if (!confirm("Logout now?")) return;
+                    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                        .then(function (a) {
+                            return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                                .then(function (b) {
+                                    var cfg = {
+                                        apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                        authDomain: "nepplaygaming.firebaseapp.com",
+                                        projectId: "nepplaygaming",
+                                        storageBucket: "nepplaygaming.firebasestorage.app",
+                                        messagingSenderId: "893565645520",
+                                        appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                                    };
+                                    var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                                    return b.signOut(b.getAuth(app));
+                                });
+                        })
+                        .catch(function () {})
+                        .finally(function () { window.location.href = "/login.html"; });
+                });
             }
-        }
-        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
-        document.addEventListener('click', function(e) {
-            const profile = document.getElementById('user-profile');
-            const dropdown = document.getElementById('profile-dropdown');
-            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
-        });
-        function logout() { localStorage.removeItem('currentUser'); window.location.reload(); }
-        window.onload = function() { checkUserStatus(); };
+        })();
     </script>
 </body>
 </html>
