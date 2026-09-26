@@ -15,24 +15,134 @@ body{
     min-height:100vh;
 }
 
-.container{ width:min(850px,94%); margin:30px auto; }
-
-.header{
-    background:#111927;
-    border:1px solid #27364d;
-    border-radius:15px;
-    padding:25px;
-    margin-bottom:20px;
+/* ===== TOP NAV ===== */
+.topnav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 22px;
+    background:rgba(15,8,35,.85);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(168,85,247,.25);
+    position:sticky; top:0; z-index:50;
+    gap:12px;
 }
-
-.logo{ font-size:30px; font-weight:900; color:#ff3b30; }
-
-.back{
-    display:inline-block;
-    margin-top:14px;
-    color:#8eb5df;
+.brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:800; font-size:1.1rem;
+    color:#fff;
     text-decoration:none;
+    flex-shrink:0;
 }
+.brand .logo{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    display:grid; place-items:center; font-size:1rem;
+}
+.nav-links{
+    display:flex; gap:16px; font-size:.95rem; align-items:center;
+}
+.nav-links a{
+    color:#a8a3c9; text-decoration:none; transition:color .2s;
+    display:inline-flex; align-items:center;
+}
+.nav-links a:hover{ color:#fff; }
+.nav-links a.active{ color:#fbbf24; }
+.nav-links a.winners-link{
+    background:linear-gradient(135deg,#f59e0b,#fbbf24);
+    color:#1a0b3d !important;
+    padding:6px 14px; border-radius:999px;
+    font-weight:800;
+    box-shadow:0 4px 14px rgba(245,158,11,.4);
+}
+.nav-links a.store-link{
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    color:#fff !important;
+    padding:6px 14px; border-radius:999px;
+    font-weight:800;
+    box-shadow:0 4px 14px rgba(124,58,237,.5);
+}
+
+/* user chip */
+.user-chip{
+    position:relative;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer;
+    padding:4px 10px 4px 4px;
+    border-radius:999px;
+    background:rgba(124,58,237,.15);
+    border:1px solid rgba(168,85,247,.35);
+    transition:background .2s;
+    flex-shrink:0;
+}
+.user-chip:hover{ background:rgba(124,58,237,.3); }
+.user-chip .avatar{
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg,#6d28d9,#a855f7);
+    display:grid; place-items:center;
+    font-weight:700; font-size:.8rem;
+    color:#fff;
+    flex-shrink:0;
+}
+.user-chip .uname{
+    color:#f5f3ff;
+    font-weight:700;
+    font-size:.82rem;
+    max-width:100px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.user-chip .caret{
+    font-size:.55rem; color:#a8a3c9;
+}
+.user-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    background:#1a0b3d;
+    border:1px solid rgba(168,85,247,.35);
+    border-radius:12px;
+    min-width:200px;
+    padding:8px;
+    box-shadow:0 12px 40px rgba(0,0,0,.55);
+    display:none;
+    z-index:100;
+}
+.user-menu.open{ display:block; }
+.user-menu a,
+.user-menu button{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    padding:10px 14px;
+    border-radius:8px;
+    color:#e9e5ff;
+    text-decoration:none;
+    font-size:.85rem;
+    font-weight:600;
+    background:none;
+    border:0;
+    text-align:left;
+    cursor:pointer;
+    font-family:inherit;
+}
+.user-menu a:hover,
+.user-menu button:hover{
+    background:rgba(124,58,237,.25);
+    color:#fff;
+}
+.user-menu .divider{
+    height:1px;
+    background:rgba(168,85,247,.25);
+    margin:6px 4px;
+}
+.user-menu .danger{ color:#fca5a5; }
+.user-menu .danger:hover{ background:rgba(239,68,68,.2); }
+
+/* ===== CONTENT ===== */
+.container{ width:min(850px,94%); margin:30px auto; }
 
 .card{
     background:#111927;
@@ -41,14 +151,8 @@ body{
     padding:25px;
     margin-bottom:20px;
 }
-
 .title{ font-size:25px; margin-bottom:8px; }
-
-.subtitle{
-    color:#8da2bc;
-    line-height:1.6;
-    margin-bottom:20px;
-}
+.subtitle{ color:#8da2bc; line-height:1.6; margin-bottom:20px; }
 
 .tournament-box{
     background:#0b1320;
@@ -57,26 +161,17 @@ body{
     padding:18px;
     margin-bottom:22px;
 }
-
-.tournament-name{
-    font-size:21px;
-    font-weight:bold;
-    color:#ff3b30;
-}
-
+.tournament-name{ font-size:21px; font-weight:bold; color:#ff3b30; }
 .game{ margin-top:6px; color:#9cb5d3; }
-
 .fee{ margin-top:10px; font-size:20px; font-weight:bold; }
 
 .form-group{ margin-bottom:17px; }
-
 label{
     display:block;
     margin-bottom:7px;
     color:#c8d5e5;
     font-weight:bold;
 }
-
 input, textarea, select{
     width:100%;
     padding:12px;
@@ -87,22 +182,11 @@ input, textarea, select{
     font-size:15px;
     outline:none;
 }
-
 input:focus, textarea:focus, select:focus{ border-color:#ff3b30; }
-
 textarea{ min-height:100px; resize:vertical; }
 
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-}
-
-.section-title{
-    font-size:19px;
-    margin:25px 0 15px;
-    color:#fff;
-}
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+.section-title{ font-size:19px; margin:25px 0 15px; color:#fff; }
 
 .payment-options{
     display:grid;
@@ -110,42 +194,25 @@ textarea{ min-height:100px; resize:vertical; }
     gap:15px;
     margin-bottom:16px;
 }
-
 .payment-option{
     border:1px solid #30435e;
     background:#0b1320;
     border-radius:10px;
     padding:16px;
     cursor:pointer;
-    transition:0.15s;
+    transition:.15s;
     display:flex;
     align-items:center;
     gap:10px;
 }
-
-.payment-option:hover{
-    border-color:#4a5f7d;
-    background:#101b2e;
-}
-
-.payment-option.selected{
-    border-color:#ff3b30;
-    background:#201517;
-}
-
+.payment-option:hover{ border-color:#4a5f7d; background:#101b2e; }
+.payment-option.selected{ border-color:#ff3b30; background:#201517; }
 .payment-option input[type="radio"]{
-    width:auto;
-    margin:0;
+    width:auto; margin:0;
     accent-color:#ff3b30;
     flex-shrink:0;
 }
-
-.payment-name{
-    font-weight:bold;
-    font-size:16px;
-    color:white;
-    word-break:break-word;
-}
+.payment-name{ font-weight:bold; font-size:16px; color:white; word-break:break-word; }
 
 .payment-details{
     display:none;
@@ -155,150 +222,90 @@ textarea{ min-height:100px; resize:vertical; }
     background:#080d18;
     border:1px solid #293a52;
 }
-
 .payment-details.active{ display:block; }
-
 .payment-details-title{
-    font-size:15px;
-    font-weight:bold;
-    color:#7db7ff;
-    margin-bottom:12px;
-    text-transform:uppercase;
-    letter-spacing:1px;
+    font-size:15px; font-weight:bold; color:#7db7ff;
+    margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;
 }
-
 .qr{
-    width:200px;
-    height:200px;
-    object-fit:contain;
-    background:#fff;
-    border-radius:8px;
-    display:block;
-    margin:14px auto;
-    padding:6px;
+    width:200px; height:200px;
+    object-fit:contain; background:#fff;
+    border-radius:8px; display:block;
+    margin:14px auto; padding:6px;
 }
-
 .wallet{
-    text-align:center;
-    color:#b8c9dd;
-    margin-top:12px;
-    font-size:14px;
-    line-height:1.6;
+    text-align:center; color:#b8c9dd;
+    margin-top:12px; font-size:14px; line-height:1.6;
 }
-
 .wallet strong{
-    color:#fff;
-    font-family:'Courier New', monospace;
-    font-size:16px;
-    letter-spacing:1px;
-    display:inline-block;
-    padding:2px 8px;
-    background:#172033;
-    border-radius:5px;
-    margin-left:4px;
+    color:#fff; font-family:'Courier New', monospace;
+    font-size:16px; letter-spacing:1px;
+    display:inline-block; padding:2px 8px;
+    background:#172033; border-radius:5px; margin-left:4px;
 }
-
 .wallet-copy{
-    display:inline-block;
-    margin-left:8px;
-    background:#1e3a5f;
-    color:#7db7ff;
-    border:none;
-    border-radius:5px;
-    padding:4px 10px;
-    font-size:11px;
-    font-weight:bold;
-    text-transform:uppercase;
+    display:inline-block; margin-left:8px;
+    background:#1e3a5f; color:#7db7ff;
+    border:none; border-radius:5px;
+    padding:4px 10px; font-size:11px;
+    font-weight:bold; text-transform:uppercase;
     cursor:pointer;
 }
-
-.wallet-copy:hover{
-    background:#3b82f6;
-    color:white;
-}
-
+.wallet-copy:hover{ background:#3b82f6; color:white; }
 .payment-instructions{
-    color:#9cb5d3;
-    font-size:13px;
-    line-height:1.6;
-    margin-top:12px;
-    padding:12px;
-    background:#0b1a2e;
-    border-left:3px solid #3b82f6;
+    color:#9cb5d3; font-size:13px; line-height:1.6;
+    margin-top:12px; padding:12px;
+    background:#0b1a2e; border-left:3px solid #3b82f6;
     border-radius:4px;
 }
-
 .payment-no-methods{
-    padding:30px 20px;
-    text-align:center;
-    color:#a87918;
-    background:#1a1408;
-    border:2px dashed #a87918;
-    border-radius:10px;
-    font-size:14px;
-    line-height:1.6;
+    padding:30px 20px; text-align:center;
+    color:#a87918; background:#1a1408;
+    border:2px dashed #a87918; border-radius:10px;
+    font-size:14px; line-height:1.6;
 }
-
 .amount{
-    background:#153b2b;
-    border:1px solid #267a55;
-    color:#8ef0bb;
-    border-radius:10px;
-    padding:15px;
-    margin-bottom:15px;
-    font-size:18px;
-    font-weight:bold;
+    background:#153b2b; border:1px solid #267a55;
+    color:#8ef0bb; border-radius:10px;
+    padding:15px; margin-bottom:15px;
+    font-size:18px; font-weight:bold;
 }
-
 .submit{
-    width:100%;
-    background:#ff3b30;
-    color:white;
-    border:0;
-    border-radius:9px;
-    padding:15px;
-    font-size:17px;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
+    width:100%; background:#ff3b30; color:white;
+    border:0; border-radius:9px; padding:15px;
+    font-size:17px; font-weight:bold;
+    cursor:pointer; margin-top:10px;
 }
-
 .submit:disabled{ opacity:.5; cursor:not-allowed; }
-
 .message{
-    padding:15px;
-    border-radius:9px;
-    margin-bottom:18px;
-    display:none;
+    padding:15px; border-radius:9px;
+    margin-bottom:18px; display:none;
 }
-
 .message.error{
-    display:block;
-    background:#411818;
-    border:1px solid #9e3030;
-    color:#ffbaba;
+    display:block; background:#411818;
+    border:1px solid #9e3030; color:#ffbaba;
 }
-
 .message.success{
-    display:block;
-    background:#123c28;
-    border:1px solid #2c8d5e;
-    color:#a4f2c7;
+    display:block; background:#123c28;
+    border:1px solid #2c8d5e; color:#a4f2c7;
 }
-
-.small{
-    color:#8096b0;
-    font-size:13px;
-    line-height:1.6;
-}
-
+.small{ color:#8096b0; font-size:13px; line-height:1.6; }
 .loading-state{
-    padding:40px 20px;
-    text-align:center;
-    color:#8da2bc;
-    font-size:15px;
+    padding:40px 20px; text-align:center;
+    color:#8da2bc; font-size:15px;
 }
 
+@media(max-width:720px){
+    .nav-links { gap:8px; font-size:.72rem; flex-wrap:nowrap; }
+    .nav-links a.winners-link,
+    .nav-links a.store-link { padding:5px 10px; }
+    .nav-links a[href="/teams.html"],
+    .nav-links a[href="/profile.html"],
+    .nav-links a[href="/support.html"] { display:none; }
+    .nav-links a[href="/tournaments.html"] { color:#fbbf24; font-weight:700; }
+    .user-chip .uname { display:none; }
+    .user-chip { padding:4px; }
+}
 @media(max-width:650px){
     .grid, .payment-options{ grid-template-columns:1fr; }
 }
@@ -307,12 +314,37 @@ textarea{ min-height:100px; resize:vertical; }
 
 <body>
 
-<div class="container">
+<!-- ===== TOP NAV ===== -->
+<nav class="topnav">
+  <a href="/member.html" class="brand">
+    <span class="logo">🎮</span>
+    Nepal Gaming
+  </a>
+  <div class="nav-links">
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html" class="active">Tournaments</a>
+    <a href="/winners.html" class="winners-link">🏆 Winners</a>
+    <a href="/store.html" class="store-link">🛒 Store</a>
+    <a href="/teams.html">Teams</a>
+    <a href="/profile.html">My Profile</a>
+    <a href="/support.html">Support</a>
 
-    <div class="header">
-        <div class="logo">NEPPLAY.</div>
-        <a href="/tournaments.html" class="back">← Back to Tournaments</a>
+    <div class="user-chip" id="userChip" onclick="toggleUserMenu(event)">
+      <div class="avatar" id="userAvatar">?</div>
+      <span class="uname" id="userName">Loading…</span>
+      <span class="caret">▼</span>
+      <div class="user-menu" id="userMenu" onclick="event.stopPropagation()">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/profile.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <button class="danger" onclick="logoutNow()">🚪 Logout</button>
+      </div>
     </div>
+  </div>
+</nav>
+
+<div class="container">
 
     <div class="card">
         <h1 class="title">Tournament Registration</h1>
@@ -411,23 +443,15 @@ textarea{ min-height:100px; resize:vertical; }
 </div>
 
 <script type="module">
-// ============================================================
-// NEPPLAY — Tournament Registration
-// Reads tournament + payment methods from Firestore
-// Writes registration to Firestore tournament_registrations
-// Requires Firebase Auth session (via firebase-config.js)
-// ============================================================
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, addDoc, query, where,
+  getFirestore, collection, getDocs, addDoc,
   serverTimestamp, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
-  getAuth, onAuthStateChanged
+  getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// --- Firebase config (same as admin.js) ---
 const firebaseConfig = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
@@ -441,13 +465,11 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// --- State ---
 let currentUser = null;
 let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
 
-// --- DOM helpers ---
 const $ = id => document.getElementById(id);
 
 function showMessage(text, type) {
@@ -466,7 +488,43 @@ function escapeHTML(v) {
 }
 
 // ============================================================
-// AUTH GATE — redirect to login if not signed in
+// USER CHIP + DROPDOWN
+// ============================================================
+window.toggleUserMenu = function(e) {
+    if (e) e.stopPropagation();
+    const m = $("userMenu");
+    if (m) m.classList.toggle("open");
+};
+
+document.addEventListener("click", (e) => {
+    const m = $("userMenu");
+    const c = $("userChip");
+    if (m && c && !c.contains(e.target)) m.classList.remove("open");
+});
+
+window.logoutNow = async function() {
+    if (!confirm("Logout now?")) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = "/login.html";
+};
+
+async function loadUserChip(user) {
+    const avatar = $("userAvatar");
+    const nameEl = $("userName");
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists()) {
+            const u = uDoc.data();
+            if (u.username) display = u.username;
+        }
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+}
+
+// ============================================================
+// AUTH GATE
 // ============================================================
 onAuthStateChanged(auth, (user) => {
     if (!user) {
@@ -475,58 +533,105 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
     currentUser = user;
+    loadUserChip(user);
     loadRegistrationPage();
 });
 
 // ============================================================
-// LOAD TOURNAMENT + PAYMENT METHODS
+// SMART GAME MATCHING
+// ============================================================
+function normalizeGame(s) {
+    return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+const GAME_ALIASES = {
+    freefire:  ["freefire", "ff", "freefiremini", "freefirepaidchampionship"],
+    pubg:      ["pubg", "pubgm", "pubgmobile"],
+    cod:       ["cod", "codm", "callofduty", "callofdutymobile"],
+    valorant:  ["valorant", "val"],
+    efootball: ["efootball", "efoot", "efootballmobile"],
+    ecricket:  ["ecricket", "cricket"],
+    chess:     ["chess"],
+    ludo:      ["ludo"]
+};
+
+function matchGame(game, title, id, urlParam) {
+    const aliases = GAME_ALIASES[urlParam] || [urlParam];
+    const haystack = [
+        normalizeGame(game),
+        normalizeGame(title),
+        normalizeGame(id)
+    ];
+    return aliases.some(alias => {
+        const na = normalizeGame(alias);
+        return haystack.some(h => h === na || h.includes(na));
+    });
+}
+
+// ============================================================
+// LOAD TOURNAMENT + PAYMENT
 // ============================================================
 async function loadRegistrationPage() {
     try {
-        // Read ?game= OR ?tournamentId= from URL
         const params = new URLSearchParams(window.location.search);
-        const gameParam = (params.get("game") || "").toLowerCase();
+        const gameParam = normalizeGame(params.get("game") || "");
         const tidParam  = params.get("tournamentId") || params.get("tournament");
 
-        // Load all tournaments from Firestore
         const snap = await getDocs(collection(db, "tournaments"));
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        console.log("🗂️ Tournaments:", all.length, all.map(t => ({ id: t.id, game: t.game, title: t.title })));
 
-        // Pick the tournament
-        if (tidParam) {
-            tournament = all.find(t => t.id === tidParam);
-        } else if (gameParam) {
-            // Match by game field (case-insensitive)
-            tournament = all
-                .filter(t => String(t.game || "").toLowerCase() === gameParam)
-                .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
-        } else {
-            // Fallback: latest open tournament
-            tournament = all
-                .filter(t => String(t.status || "upcoming").toLowerCase() !== "completed")
-                .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
-        }
-
-        if (!tournament) {
-            showMessage("❌ Tournament not found. Please open it from the Tournaments page.", "error");
+        if (!all.length) {
+            showMessage("❌ No tournaments in database yet. Please create one from the admin panel first.", "error");
             $("loading").style.display = "none";
             return;
         }
 
-        // Fill tournament box
-        $("tournamentName").textContent = tournament.title || tournament.name || "Tournament";
+        // Priority 1: exact tournamentId
+        if (tidParam) {
+            tournament = all.find(t => t.id === tidParam);
+        }
+
+        // Priority 2: match by game param
+        if (!tournament && gameParam) {
+            const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
+            const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
+            const pool = open.length ? open : matching;
+            tournament = pool.sort((a, b) =>
+                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+            )[0];
+        }
+
+        // Priority 3: latest open tournament (any game)
+        if (!tournament) {
+            const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
+            const pool = open.length ? open : all;
+            tournament = pool.sort((a, b) =>
+                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+            )[0];
+            if (tournament && gameParam) {
+                showMessage("ℹ️ Exact game not found — loaded latest open tournament instead.", "success");
+            }
+        }
+
+        if (!tournament) {
+            showMessage("❌ No open tournament found. Please contact admin.", "error");
+            $("loading").style.display = "none";
+            return;
+        }
+
+        $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
-        $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || 0);
-        $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || 0);
+        $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
+        $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
 
         $("loading").style.display = "none";
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
-        // Pre-fill captain name + email from Firebase user
+        // Prefill
         if (currentUser) {
             $("email").value = currentUser.email || "";
-            // Try to load username from Firestore users/{uid}
             try {
                 const uDoc = await getDoc(doc(db, "users", currentUser.uid));
                 if (uDoc.exists()) {
@@ -534,14 +639,12 @@ async function loadRegistrationPage() {
                     if (u.username) $("captainName").value = u.username;
                     if (u.phone)    $("phone").value = u.phone;
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) {}
         }
 
-        // Load payment methods from Firestore (payment_settings/main or similar)
         await loadPaymentMethods();
 
-        // Block registration if tournament closed
-        const status = String(tournament.status || "upcoming").toLowerCase();
+        const status = String(tournament.status || "").toLowerCase();
         if (status === "completed" || tournament.isFull) {
             $("submitButton").disabled = true;
             showMessage("⚠️ This tournament is not currently open for registration.", "error");
@@ -554,25 +657,20 @@ async function loadRegistrationPage() {
     }
 }
 
-// ============================================================
-// PAYMENT METHODS — reads from Firestore `payment_settings/main`
-// ============================================================
 async function loadPaymentMethods() {
     let methods = [];
     try {
-        // Try the canonical payment settings doc
         const psDoc = await getDoc(doc(db, "payment_settings", "main"));
         if (psDoc.exists()) {
             const data = psDoc.data();
             if (Array.isArray(data.methods)) {
                 methods = data.methods;
             } else {
-                // Legacy: {eSewa:{number}, Khalti:{number}, ...}
-                if (data.eSewa)  methods.push({ id:"esewa",  name:"eSewa",  number:data.eSewa.number  || "", qrImage: data.eSewa.qrImage  || "/images/esewa-qr.png",  instructions: data.eSewa.instructions  || "" });
-                if (data.Khalti) methods.push({ id:"khalti", name:"Khalti", number:data.Khalti.number || "", qrImage: data.Khalti.qrImage || "/images/khalti-qr.png", instructions: data.Khalti.instructions || "" });
+                if (data.eSewa)  methods.push({ id:"esewa",  name:"eSewa",  number:data.eSewa.number  || "9748835184", qrImage: data.eSewa.qrImage  || "/images/esewa-qr.png",  instructions: data.eSewa.instructions  || "Open eSewa → Send Money → enter number → confirm with MPIN." });
+                if (data.Khalti) methods.push({ id:"khalti", name:"Khalti", number:data.Khalti.number || "9766258368", qrImage: data.Khalti.qrImage || "/images/khalti-qr.png", instructions: data.Khalti.instructions || "Open Khalti → Send Money → enter number → confirm with MPIN." });
                 if (data.IMEPay || data.imePay) {
                     const im = data.IMEPay || data.imePay;
-                    methods.push({ id:"imepay", name:"IME Pay", number:im.number || "9766258368", qrImage:"", instructions: im.instructions || "" });
+                    methods.push({ id:"imepay", name:"IME Pay", number:im.number || "9766258368", qrImage:"", instructions: im.instructions || "Open IME Pay → Send Money → enter number → confirm with MPIN." });
                 }
             }
         }
@@ -580,7 +678,6 @@ async function loadPaymentMethods() {
         console.warn("payment_settings load failed:", e);
     }
 
-    // Fallback hardcoded methods (matches your store.html)
     if (!methods.length) {
         methods = [
             { id:"esewa",  name:"eSewa",   number:"9748835184", qrImage:"/images/esewa-qr.png",  instructions:"Open eSewa → Send Money → enter number → confirm with MPIN." },
@@ -588,7 +685,6 @@ async function loadPaymentMethods() {
             { id:"imepay", name:"IME Pay", number:"9766258368", qrImage:"",                     instructions:"Open IME Pay → Send Money → enter number → confirm with MPIN." }
         ];
     }
-
     renderPaymentMethods(methods);
 }
 
@@ -605,7 +701,6 @@ function renderPaymentMethods(methods) {
         return;
     }
 
-    // Radio options
     container.innerHTML = paymentMethods.map(m => {
         const id = escapeHTML(String(m.id || ""));
         return `
@@ -616,7 +711,6 @@ function renderPaymentMethods(methods) {
           </label>`;
     }).join("");
 
-    // Detail panels
     detailsContainer.innerHTML = paymentMethods.map(m => {
         const id = escapeHTML(String(m.id || ""));
         const qr = m.qrImage
@@ -640,24 +734,19 @@ function renderPaymentMethods(methods) {
           </div>`;
     }).join("");
 
-    // Auto-select first
     if (paymentMethods.length) selectPayment(String(paymentMethods[0].id));
 }
 
 window.selectPayment = function(methodId) {
     selectedPaymentId = methodId;
-
     document.querySelectorAll(".payment-option").forEach(el => el.classList.remove("selected"));
     document.querySelectorAll(".payment-details").forEach(el => el.classList.remove("active"));
-
     const opt = document.getElementById("payment-opt-" + methodId);
     if (opt) opt.classList.add("selected");
     const det = document.getElementById("payment-details-" + methodId);
     if (det) det.classList.add("active");
-
     const radio = document.querySelector(`input[name="paymentMethod"][value="${methodId}"]`);
     if (radio) radio.checked = true;
-
     const m = paymentMethods.find(x => String(x.id) === String(methodId));
     if (m) {
         const tx = $("transactionId");
@@ -670,9 +759,7 @@ window.copyToClipboard = function(text) {
         navigator.clipboard.writeText(text)
             .then(() => showToast("Copied: " + text))
             .catch(() => fallbackCopy(text));
-    } else {
-        fallbackCopy(text);
-    }
+    } else fallbackCopy(text);
 };
 
 function fallbackCopy(text) {
@@ -700,29 +787,16 @@ function showToast(msg) {
 }
 
 // ============================================================
-// SUBMIT REGISTRATION → writes to Firestore
+// SUBMIT
 // ============================================================
 $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-
-    if (!currentUser) {
-        showMessage("Please login first.", "error");
-        return;
-    }
-    if (!tournament) {
-        showMessage("Tournament not loaded.", "error");
-        return;
-    }
-    if (!selectedPaymentId) {
-        showMessage("Please select a payment method.", "error");
-        return;
-    }
+    if (!currentUser) { showMessage("Please login first.", "error"); return; }
+    if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
+    if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
 
     const selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
-    if (!selectedMethod) {
-        showMessage("Please select a payment method.", "error");
-        return;
-    }
+    if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
 
     const transactionId = $("transactionId").value.trim();
     if (transactionId.length < 3) {
@@ -736,42 +810,39 @@ $("registrationForm").addEventListener("submit", async (event) => {
 
     try {
         const body = {
-            userId:         currentUser.uid,
-            userEmail:      currentUser.email || "",
-            tournamentId:   tournament.id,
+            userId:          currentUser.uid,
+            userEmail:       currentUser.email || "",
+            tournamentId:    tournament.id,
             tournamentTitle: tournament.title || tournament.name || "",
-            game:           tournament.game || "",
-            teamName:       $("teamName").value.trim(),
-            captainName:    $("captainName").value.trim(),
-            phone:          $("phone").value.trim(),
-            email:          $("email").value.trim(),
-            player1:        $("player1").value.trim(),
-            player2:        $("player2").value.trim(),
-            player3:        $("player3").value.trim(),
-            player4:        $("player4").value.trim(),
-            player5:        $("player5").value.trim(),
-            player6:        $("player6").value.trim(),
-            payerName:      $("payerName").value.trim(),
-            payerPhone:     $("payerPhone").value.trim(),
+            game:            tournament.game || "",
+            teamName:        $("teamName").value.trim(),
+            captainName:     $("captainName").value.trim(),
+            phone:           $("phone").value.trim(),
+            email:           $("email").value.trim(),
+            player1:         $("player1").value.trim(),
+            player2:         $("player2").value.trim(),
+            player3:         $("player3").value.trim(),
+            player4:         $("player4").value.trim(),
+            player5:         $("player5").value.trim(),
+            player6:         $("player6").value.trim(),
+            payerName:       $("payerName").value.trim(),
+            payerPhone:      $("payerPhone").value.trim(),
             transactionId,
-            paymentMethod:  selectedMethod.name,
+            paymentMethod:   selectedMethod.name,
             paymentMethodId: selectedMethod.id,
-            amount:         Number(tournament.entryFee || 0),
-            message:        $("messageText").value.trim(),
-            status:         "pending",
-            entryType:      "paid",
-            registeredAt:   serverTimestamp()
+            amount:          Number(tournament.entryFee || tournament.entry_fee || 0),
+            message:         $("messageText").value.trim(),
+            status:          "pending",
+            entryType:       "paid",
+            registeredAt:    serverTimestamp()
         };
 
-        // Write to Firestore
         await addDoc(collection(db, "tournament_registrations"), body);
 
         showMessage("✅ Registration submitted! Admin will verify your payment.", "success");
         $("registrationForm").reset();
 
-        setTimeout(() => {
-            window.location.href = "/member.html";
-        }, 1800);
+        setTimeout(() => { window.location.href = "/member.html"; }, 1800);
 
     } catch (err) {
         console.error("submit error:", err);
