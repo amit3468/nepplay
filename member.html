@@ -41,14 +41,17 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    gap: 12px;
   }
   .brand {
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 800;
-    font-size: 1.15rem;
-    letter-spacing: 0.3px;
+    font-size: 1.1rem;
+    color: #fff;
+    text-decoration: none;
+    flex-shrink: 0;
   }
   .brand .logo {
     width: 32px; height: 32px;
@@ -57,17 +60,9 @@
     display: grid; place-items: center;
     font-size: 1rem;
   }
-  .brand .avatar {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6d28d9, #a855f7);
-    display: grid; place-items: center;
-    font-weight: 700; font-size: 0.85rem;
-    margin-left: 6px;
-  }
   .nav-links {
     display: flex;
-    gap: 18px;
+    gap: 16px;
     font-size: 0.95rem;
     align-items: center;
   }
@@ -105,21 +100,68 @@
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(124, 58, 237, 0.7);
   }
-  .bell {
-    position: relative;
-    font-size: 1.1rem;
-    cursor: pointer;
+
+  /* ===== USER CHIP ===== */
+  .user-chip{
+    position:relative;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer;
+    padding:4px 10px 4px 4px;
+    border-radius:999px;
+    background:rgba(124,58,237,.15);
+    border:1px solid rgba(168,85,247,.35);
+    transition:background .2s;
+    flex-shrink:0;
   }
-  .bell .dot {
-    position: absolute;
-    top: -4px; right: -4px;
-    width: 16px; height: 16px;
-    background: #ef4444;
-    border-radius: 50%;
-    font-size: 0.65rem;
-    display: grid; place-items: center;
-    font-weight: 700;
+  .user-chip:hover{ background:rgba(124,58,237,.3); }
+  .user-chip .avatar{
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg,#6d28d9,#a855f7);
+    display:grid; place-items:center;
+    font-weight:700; font-size:.8rem;
+    color:#fff; flex-shrink:0;
   }
+  .user-chip .uname{
+    color:#f5f3ff; font-weight:700; font-size:.82rem;
+    max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .user-chip .caret{ font-size:.55rem; color:#a8a3c9; }
+  .user-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    background:#1a0b3d;
+    border:1px solid rgba(168,85,247,.35);
+    border-radius:12px;
+    min-width:200px;
+    padding:8px;
+    box-shadow:0 12px 40px rgba(0,0,0,.55);
+    display:none;
+    z-index:100;
+  }
+  .user-menu.open{ display:block; }
+  .user-menu a,
+  .user-menu button{
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:10px 14px;
+    border-radius:8px;
+    color:#e9e5ff; text-decoration:none;
+    font-size:.85rem; font-weight:600;
+    background:none; border:0;
+    text-align:left; cursor:pointer; font-family:inherit;
+  }
+  .user-menu a:hover,
+  .user-menu button:hover{
+    background:rgba(124,58,237,.25);
+    color:#fff;
+  }
+  .user-menu .divider{
+    height:1px;
+    background:rgba(168,85,247,.25);
+    margin:6px 4px;
+  }
+  .user-menu .danger{ color:#fca5a5; }
+  .user-menu .danger:hover{ background:rgba(239,68,68,.2); }
 
   .container {
     max-width: 1100px;
@@ -322,27 +364,20 @@
     background: #25d366;
   }
 
-  /* ===== MOBILE NAV FIX ===== */
   @media (max-width: 720px) {
     .topnav { padding: 12px 14px; }
     .brand { font-size: 0.95rem; gap: 6px; }
-    .brand .avatar { display: none; }
-    .nav-links {
-      gap: 6px;
-      font-size: 0.72rem;
-      flex-wrap: nowrap;
-    }
+    .nav-links { gap: 6px; font-size: 0.72rem; flex-wrap: nowrap; }
     .nav-links a.winners-link,
     .nav-links a.store-link { padding: 5px 10px; }
-    /* Hide only these less-critical links on mobile */
     .nav-links a[href="/teams.html"],
     .nav-links a[href="/profile.html"],
     .nav-links a[href="/support.html"] { display: none; }
-    /* Keep Tournaments bright & clickable */
     .nav-links a[href="/tournaments.html"] {
-      color: var(--gold-2);
-      font-weight: 700;
+      color: var(--gold-2); font-weight: 700;
     }
+    .user-chip .uname { display: none; }
+    .user-chip { padding: 4px; }
     .social-row { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.5rem; }
     .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
@@ -360,11 +395,10 @@
 <body>
 
 <nav class="topnav">
-  <div class="brand">
+  <a href="/member.html" class="brand">
     <span class="logo">🎮</span>
     Nepal Gaming
-    <span class="avatar">C</span>
-  </div>
+  </a>
   <div class="nav-links">
     <a href="/member.html" class="active">Home</a>
     <a href="/tournaments.html">Tournaments</a>
@@ -373,8 +407,20 @@
     <a href="/teams.html">Teams</a>
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
+
+    <div class="user-chip" id="userChip" onclick="toggleUserMenu(event)">
+      <div class="avatar" id="userAvatar">?</div>
+      <span class="uname" id="userName">Loading…</span>
+      <span class="caret">▼</span>
+      <div class="user-menu" id="userMenu" onclick="event.stopPropagation()">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/profile.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <button class="danger" onclick="logoutNow()">🚪 Logout</button>
+      </div>
+    </div>
   </div>
-  <div class="bell">🔔<span class="dot">1</span></div>
 </nav>
 
 <div class="container">
@@ -449,20 +495,88 @@
 <div class="float-share" onclick="sharePage()">🔗</div>
 <a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" class="float-wa">💬</a>
 
-<script>
-  function sharePage() {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ============================================================
+// USER CHIP
+// ============================================================
+window.toggleUserMenu = function(e) {
+    if (e) e.stopPropagation();
+    const m = document.getElementById("userMenu");
+    if (m) m.classList.toggle("open");
+};
+
+document.addEventListener("click", (e) => {
+    const m = document.getElementById("userMenu");
+    const c = document.getElementById("userChip");
+    if (m && c && !c.contains(e.target)) m.classList.remove("open");
+});
+
+window.logoutNow = async function() {
+    if (!confirm("Logout now?")) return;
+    try { await signOut(auth); } catch (e) {}
+    window.location.href = "/login.html";
+};
+
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+
+    if (!user) {
+        // Not logged in → send to login
+        const returnTo = "/member.html";
+        window.location.href = "/login.html?redirect=" + encodeURIComponent(returnTo);
+        return;
+    }
+
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists()) {
+            const u = uDoc.data();
+            if (u.username) display = u.username;
+        }
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+});
+
+// ============================================================
+// Share
+// ============================================================
+window.sharePage = function() {
     const url = window.location.origin + '/tournaments.html';
     if (navigator.share) {
-      navigator.share({
-        title: 'NEPPLAY — 26 Sept 8-Game Tournament',
-        text: 'Join NEPPLAY 26 Sept 8-Game Tournament! Rs 150 entry, Rs 1000 prize per game.',
-        url: url
-      }).catch(() => {});
+        navigator.share({
+            title: 'NEPPLAY — 26 Sept 8-Game Tournament',
+            text: 'Join NEPPLAY 26 Sept 8-Game Tournament! Rs 150 entry, Rs 1000 prize per game.',
+            url: url
+        }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(url);
-      alert('Link copied!');
+        navigator.clipboard.writeText(url);
+        alert('Link copied!');
     }
-  }
+};
 </script>
 
 </body>
