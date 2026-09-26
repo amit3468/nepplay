@@ -180,17 +180,32 @@
     line-height: 1.5;
   }
 
+  /* ===== MOBILE NAV FIX ===== */
   @media (max-width: 720px) {
-    .nav-links { gap: 8px; font-size: 0.78rem; }
+    .topnav { padding: 12px 14px; }
+    .brand { font-size: 0.95rem; gap: 6px; }
+    .brand .avatar { display: none; }
+    .nav-links {
+      gap: 6px;
+      font-size: 0.72rem;
+      flex-wrap: nowrap;
+    }
     .nav-links a.winners-link,
     .nav-links a.store-link { padding: 5px 10px; }
-    .nav-links a:not(.winners-link):not(.store-link):not(.active) { display: none; }
+    /* Hide only these less-critical links on mobile */
+    .nav-links a[href="/teams.html"],
+    .nav-links a[href="/profile.html"],
+    .nav-links a[href="/support.html"] { display: none; }
     .game-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .game-card { padding: 14px; }
     .auto-counter .big { font-size: 2rem; }
+    .page-title { font-size: 1.25rem; }
   }
   @media (max-width: 460px) {
     .game-grid { grid-template-columns: 1fr; }
+    .nav-links { font-size: 0.68rem; gap: 5px; }
+    .nav-links a.winners-link,
+    .nav-links a.store-link { padding: 4px 8px; }
   }
 </style>
 </head>
