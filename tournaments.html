@@ -76,7 +76,6 @@
     font-weight: 800; font-size: 0.82rem;
   }
 
-  /* USER CHIP */
   .user-chip-wrap { position: relative; flex-shrink: 0; }
   #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
   .user-chip {
@@ -191,8 +190,22 @@
     display: flex; justify-content: space-between;
     font-size: 0.78rem; color: var(--muted);
     margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
   }
   .game-card .meta strong { color: var(--gold-2); }
+  .tk-badge {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
 
   .mode-buttons {
     display: grid;
@@ -200,9 +213,9 @@
     gap: 8px;
     margin-top: 6px;
   }
-  .mode-buttons.two-col {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .mode-buttons.two-col { grid-template-columns: repeat(2, 1fr); }
+  .mode-buttons.one-col { grid-template-columns: 1fr; }
+
   .mode-btn {
     display: flex;
     flex-direction: column;
@@ -227,6 +240,15 @@
     font-size: 0.68rem; font-weight: 700;
     opacity: 0.85; letter-spacing: 0.3px;
   }
+  .mode-btn .mode-prize {
+    font-size: 0.72rem;
+    font-weight: 900;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
   .mode-btn.solo {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
@@ -238,6 +260,10 @@
   .mode-btn.squad {
     background: linear-gradient(135deg, #f59e0b, #f97316);
     box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  }
+  .mode-btn.ffa {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
   }
 
   .room-note {
@@ -278,6 +304,7 @@
     .mode-btn { padding: 11px 4px; font-size: 0.78rem; }
     .mode-btn .mode-icon { font-size: 1.05rem; }
     .mode-btn .mode-label { font-size: 0.62rem; }
+    .mode-btn .mode-prize { font-size: 0.64rem; padding: 2px 6px; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link,
@@ -332,11 +359,11 @@
 
   <h1 class="page-title">26 September — 8-Game Tournament Day 🎮</h1>
   <p class="page-sub">
-    Aaja 1:00 PM NPT · Rs 150 entry · Rs 1000 prize per game · Top Killer Rs 400
+    Aaja 1:00 PM NPT · Rs 150 entry · Win real cash
   </p>
 
   <div class="room-note">
-    🎯 <strong>Pick your mode:</strong> Solo · Duo · Squad (team size varies per game).<br>
+    🎯 <strong>Pick your mode:</strong> Solo · Duo · Squad — different prize for each.<br>
     🔓 Room details auto-reveal 30 minutes before match (12:30 PM NPT).
   </div>
 
@@ -346,22 +373,28 @@
     <div class="game-card">
       <div class="icon">🔥</div>
       <div class="name">Free Fire</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+        <span class="tk-badge">🔪 Top Killer Rs 250</span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_ff_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_ff_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_ff_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">Up to 6</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
@@ -370,22 +403,28 @@
     <div class="game-card">
       <div class="icon">🎯</div>
       <div class="name">PUBG Mobile</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+        <span class="tk-badge">🔪 Top Killer Rs 250</span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_pubg_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_pubg_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_pubg_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">Up to 6</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
@@ -394,22 +433,28 @@
     <div class="game-card">
       <div class="icon">🎖️</div>
       <div class="name">Call of Duty</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+        <span class="tk-badge">🔪 Top Killer Rs 250</span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_cod_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_cod_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_cod_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">Up to 6</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
@@ -418,113 +463,120 @@
     <div class="game-card">
       <div class="icon">⚔️</div>
       <div class="name">Valorant</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+        <span class="tk-badge">🔪 Top Killer Rs 250</span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_valorant_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_valorant_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_valorant_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">Up to 5</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
 
-    <!-- EFOOTBALL — Squad = 3-5 players -->
+    <!-- EFOOTBALL -->
     <div class="game-card">
       <div class="icon">⚽</div>
       <div class="name">eFootball</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_efoot_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_efoot_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_efoot_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">3-5 players</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
 
-    <!-- ECRICKET — Squad = 3-5 players -->
+    <!-- ECRICKET -->
     <div class="game-card">
       <div class="icon">🏏</div>
       <div class="name">eCricket</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+      </div>
       <div class="mode-buttons">
         <a href="/registration.html?seedKey=seed_paid_ecricket_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
           <span class="mode-label">1 player</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_ecricket_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
+          <span class="mode-prize">Rs 750</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_ecricket_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
           <span class="mode-label">3-5 players</span>
+          <span class="mode-prize">Rs 1000</span>
         </a>
       </div>
     </div>
 
-    <!-- CHESS — Solo + Duo only (2 buttons) -->
+    <!-- CHESS — Solo only -->
     <div class="game-card">
       <div class="icon">♟️</div>
       <div class="name">Chess</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <div class="mode-buttons two-col">
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+      </div>
+      <div class="mode-buttons one-col">
         <a href="/registration.html?seedKey=seed_paid_chess_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
-          <span>Solo</span>
-          <span class="mode-label">1v1</span>
-        </a>
-        <a href="/registration.html?seedKey=seed_paid_chess_duo" class="mode-btn duo">
-          <span class="mode-icon">👥</span>
-          <span>Duo</span>
-          <span class="mode-label">2 players</span>
+          <span>1v1 Solo</span>
+          <span class="mode-label">Winner takes all</span>
+          <span class="mode-prize">Rs 250</span>
         </a>
       </div>
     </div>
 
-    <!-- LUDO — Squad = 4 players -->
+    <!-- LUDO — 4-Player FFA -->
     <div class="game-card">
       <div class="icon">🎲</div>
       <div class="name">Ludo</div>
-      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <div class="mode-buttons">
-        <a href="/registration.html?seedKey=seed_paid_ludo_solo" class="mode-btn solo">
-          <span class="mode-icon">👤</span>
-          <span>Solo</span>
-          <span class="mode-label">1 player</span>
-        </a>
-        <a href="/registration.html?seedKey=seed_paid_ludo_duo" class="mode-btn duo">
-          <span class="mode-icon">👥</span>
-          <span>Duo</span>
-          <span class="mode-label">2 players</span>
-        </a>
-        <a href="/registration.html?seedKey=seed_paid_ludo_squad" class="mode-btn squad">
-          <span class="mode-icon">🏆</span>
-          <span>Squad</span>
-          <span class="mode-label">4 players</span>
+      <div class="meta">
+        <span>Entry: <strong>Rs 150</strong></span>
+      </div>
+      <div class="mode-buttons one-col">
+        <a href="/registration.html?seedKey=seed_paid_ludo_solo" class="mode-btn ffa">
+          <span class="mode-icon">🎲</span>
+          <span>4-Player FFA</span>
+          <span class="mode-label">Winner takes all</span>
+          <span class="mode-prize">Rs 500</span>
         </a>
       </div>
     </div>
@@ -562,7 +614,6 @@
     }
 })();
 
-// Auto-counter placeholder
 (function tick() {
     const target = new Date();
     target.setHours(13, 0, 0, 0);
