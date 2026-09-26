@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Seed Tournaments — Run Once</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #080d18;
+    color: #fff;
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  h1 { color: #22c55e; }
+  .info { color: #8da2bc; margin-bottom: 20px; line-height: 1.6; }
+  button {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    border: 0;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #log {
+    background: #0b1320;
+    border: 1px solid #2b3d56;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .ok { color: #4ade80; }
+  .err { color: #fca5a5; }
+  .warn { color: #fbbf24; }
+  .dim { color: #6b7280; }
+</style>
+</head>
+<body>
+
+<h1>🌱 NEPPLAY — Tournament Seeder</h1>
+<p class="info">
+  This page creates <b>24 tournament documents</b> in Firestore (8 games × 3 modes: Solo / Duo / Squad).<br>
+  Run it <b>once</b>, verify in Firebase Console, then <b>delete this file</b> from your repo.
+</p>
+
+<button id="seedBtn" onclick="seedAll()">🚀 Create All 24 Tournaments</button>
+
+<div id="log">Ready. Click the button above to start.</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const log = document.getElementById("log");
+function out(msg, cls) {
+  const span = document.createElement("span");
+  span.className = cls || "";
+  span.textContent = msg + "\n";
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ============================================================
+// 8 GAMES × 3 MODES = 24 TOURNAMENTS
+// ============================================================
+const games = [
+  { key: "ff",       name: "Free Fire",     icon: "🔥", modeLabels: { solo: "Free Fire Solo Showdown", duo: "Free Fire Duo Clash", squad: "Free Fire Squad Championship" } },
+  { key: "pubg",     name: "PUBG Mobile",   icon: "🎯", modeLabels: { solo: "PUBG Solo Battle",       duo: "PUBG Duo Clash",      squad: "PUBG Squad Championship" } },
+  { key: "cod",      name: "Call of Duty",  icon: "🎖️", modeLabels: { solo: "COD Solo Deathmatch",     duo: "COD Duo Duels",       squad: "COD Squad Showdown" } },
+  { key: "valorant", name: "Valorant",      icon: "⚔️", modeLabels: { solo: "Valorant Solo Duel",      duo: "Valorant Duo Clash",  squad: "Valorant Squad Clash" } },
+  { key: "efoot",    name: "eFootball",     icon: "⚽", modeLabels: { solo: "eFootball 1v1 Cup",       duo: "eFootball 2v2 Cup",   squad: "eFootball Team Cup" } },
+  { key: "ecricket", name: "eCricket",      icon: "🏏", modeLabels: { solo: "eCricket Solo Cup",       duo: "eCricket Duo Cup",    squad: "eCricket Team Cup" } },
+  { key: "chess",    name: "Chess",         icon: "♟️", modeLabels: { solo: "Chess Solo Cup",          duo: "Chess Duo Cup",       squad: "Chess Team Cup" } },
+  { key: "ludo",     name: "Ludo",          icon: "🎲", modeLabels: { solo: "Ludo Solo Cup",           duo: "Ludo Duo Cup",        squad: "Ludo Team Cup" } }
+];
+
+const modes = ["solo", "duo", "squad"];
+const entryFee = 150;
+const prizePool = 1000;
+const topKillsPrize = 500;
+const tournamentDate = "2026-09-26";
+const tournamentTime = "13:00";
+
+window.seedAll = async function() {
+  const btn = document.getElementById("seedBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Seeding…";
+  log.innerHTML = "";
+
+  let created = 0, skipped = 0, failed = 0;
+
+  out("🌱 Starting seed — 8 games × 3 modes = 24 tournaments\n", "warn");
+  out("", "");
+
+  for (const g of games) {
+    for (const mode of modes) {
+      const docId = `seed_paid_${g.key}_${mode}`;
+      const title = g.modeLabels[mode];
+      const docData = {
+        title,
+        game: g.name,
+        mode: mode.charAt(0).toUpperCase() + mode.slice(1),
+        entryType: "paid",
+        entryFee,
+        prizePool,
+        topKillsPrize,
+        date: tournamentDate,
+        time: tournamentTime,
+        max: mode === "solo" ? 50 : mode === "duo" ? 25 : 12,
+        filled: 0,
+        status: "upcoming",
+        icon: g.icon,
+        seedKey: docId,
+        createdAt: serverTimestamp()
+      };
+
+      try {
+        // Check if already exists
+        const q = await getDocs(query(
+          collection(db, "tournaments"),
+          where("seedKey", "==", docId)
+        ));
+        if (!q.empty) {
+          out(`  ⏭️  ${docId} — already exists, skipping`, "dim");
+          skipped++;
+          continue;
+        }
+
+        // Create
+        await addDoc(collection(db, "tournaments"), docData);
+        out(`  ✅ ${docId} — "${title}"`, "ok");
+        created++;
+      } catch (err) {
+        out(`  ❌ ${docId} — ${err.message}`, "err");
+        failed++;
+      }
+    }
+  }
+
+  out("", "");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out(`✅ Created: ${created}`, "ok");
+  out(`⏭️  Skipped: ${skipped}`, "dim");
+  out(`❌ Failed: ${failed}`, failed ? "err" : "dim");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out("", "");
+  out("👉 Next: open Firebase Console → Firestore → tournaments collection", "warn");
+  out("👉 Verify all 24 docs exist, then DELETE this seed-tournaments.html file", "warn");
+
+  btn.disabled = false;
+  btn.textContent = "🚀 Re-run (safe — skips existing)";
+};
+</script>
+
+</body>
+</html>
