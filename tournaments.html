@@ -166,7 +166,6 @@
   .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
   .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
 
-  /* GAME GRID */
   .game-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
@@ -195,12 +194,14 @@
   }
   .game-card .meta strong { color: var(--gold-2); }
 
-  /* 3-MODE BUTTONS */
   .mode-buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-top: 6px;
+  }
+  .mode-buttons.two-col {
+    grid-template-columns: repeat(2, 1fr);
   }
   .mode-btn {
     display: flex;
@@ -218,19 +219,13 @@
     transition: transform 0.15s, box-shadow 0.2s;
     text-align: center;
   }
-  .mode-btn:hover {
-    transform: translateY(-1px);
-  }
+  .mode-btn:hover { transform: translateY(-1px); }
   .mode-btn .mode-icon {
-    font-size: 1.15rem;
-    line-height: 1;
-    margin-bottom: 2px;
+    font-size: 1.15rem; line-height: 1; margin-bottom: 2px;
   }
   .mode-btn .mode-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    opacity: 0.85;
-    letter-spacing: 0.3px;
+    font-size: 0.68rem; font-weight: 700;
+    opacity: 0.85; letter-spacing: 0.3px;
   }
   .mode-btn.solo {
     background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -243,13 +238,6 @@
   .mode-btn.squad {
     background: linear-gradient(135deg, #f59e0b, #f97316);
     box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
-  }
-  .mode-btn.disabled {
-    background: rgba(120, 120, 140, 0.2);
-    box-shadow: none;
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
   }
 
   .room-note {
@@ -348,7 +336,7 @@
   </p>
 
   <div class="room-note">
-    🎯 <strong>Pick your mode:</strong> Solo (1 player) · Duo (2 players) · Squad (up to 6).<br>
+    🎯 <strong>Pick your mode:</strong> Solo · Duo · Squad (team size varies per game).<br>
     🔓 Room details auto-reveal 30 minutes before match (12:30 PM NPT).
   </div>
 
@@ -445,12 +433,12 @@
         <a href="/registration.html?seedKey=seed_paid_valorant_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
-          <span class="mode-label">Up to 6</span>
+          <span class="mode-label">Up to 5</span>
         </a>
       </div>
     </div>
 
-    <!-- EFOOTBALL -->
+    <!-- EFOOTBALL — Squad = 3-5 players -->
     <div class="game-card">
       <div class="icon">⚽</div>
       <div class="name">eFootball</div>
@@ -469,12 +457,12 @@
         <a href="/registration.html?seedKey=seed_paid_efoot_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
-          <span class="mode-label">Up to 6</span>
+          <span class="mode-label">3-5 players</span>
         </a>
       </div>
     </div>
 
-    <!-- ECRICKET -->
+    <!-- ECRICKET — Squad = 3-5 players -->
     <div class="game-card">
       <div class="icon">🏏</div>
       <div class="name">eCricket</div>
@@ -493,36 +481,31 @@
         <a href="/registration.html?seedKey=seed_paid_ecricket_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
-          <span class="mode-label">Up to 6</span>
+          <span class="mode-label">3-5 players</span>
         </a>
       </div>
     </div>
 
-    <!-- CHESS -->
+    <!-- CHESS — Solo + Duo only (2 buttons) -->
     <div class="game-card">
       <div class="icon">♟️</div>
       <div class="name">Chess</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <div class="mode-buttons">
+      <div class="mode-buttons two-col">
         <a href="/registration.html?seedKey=seed_paid_chess_solo" class="mode-btn solo">
           <span class="mode-icon">👤</span>
           <span>Solo</span>
-          <span class="mode-label">1 player</span>
+          <span class="mode-label">1v1</span>
         </a>
         <a href="/registration.html?seedKey=seed_paid_chess_duo" class="mode-btn duo">
           <span class="mode-icon">👥</span>
           <span>Duo</span>
           <span class="mode-label">2 players</span>
         </a>
-        <a href="/registration.html?seedKey=seed_paid_chess_squad" class="mode-btn squad">
-          <span class="mode-icon">🏆</span>
-          <span>Squad</span>
-          <span class="mode-label">Up to 6</span>
-        </a>
       </div>
     </div>
 
-    <!-- LUDO -->
+    <!-- LUDO — Squad = 4 players -->
     <div class="game-card">
       <div class="icon">🎲</div>
       <div class="name">Ludo</div>
@@ -541,7 +524,7 @@
         <a href="/registration.html?seedKey=seed_paid_ludo_squad" class="mode-btn squad">
           <span class="mode-icon">🏆</span>
           <span>Squad</span>
-          <span class="mode-label">Up to 6</span>
+          <span class="mode-label">4 players</span>
         </a>
       </div>
     </div>
