@@ -18,10 +18,6 @@
         .badge-locked { background: rgba(51, 65, 85, 0.5); color: #64748b; }
         .badge-unlocked { background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(236, 72, 153, 0.25)); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.5); box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); }
 
-        .profile-dropdown { display: none; }
-        .profile-dropdown.open { display: block; }
-        .profile-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
-
         .floating-support { position: fixed; bottom: 24px; left: 24px; z-index: 100; }
         .support-btn { width: 56px; height: 56px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4); cursor: pointer; transition: all 0.3s; animation: pulse-support 2s infinite; }
         .support-btn:hover { transform: scale(1.1); }
@@ -95,6 +91,89 @@
             0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
             50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); }
         }
+
+        /* ===== USER CHIP NAV (checkbox hack) ===== */
+        .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
+        #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+        .user-chip {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; padding: 4px 8px 4px 4px;
+            border-radius: 999px;
+            background: rgba(124,58,237,.15);
+            border: 1px solid rgba(168,85,247,.35);
+            transition: background .2s;
+            user-select: none; -webkit-user-select: none;
+            -webkit-tap-highlight-color: rgba(168,85,247,.3);
+        }
+        .user-chip:hover { background: rgba(124,58,237,.3); }
+        #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+        .user-chip .avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg,#6d28d9,#a855f7);
+            display: grid; place-items: center;
+            font-weight: 700; font-size: .78rem;
+            color: #fff; flex-shrink: 0;
+        }
+        .user-chip .uname {
+            color: #f5f3ff; font-weight: 700; font-size: .78rem;
+            max-width: 90px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .user-chip .caret {
+            font-size: .5rem; color: #a8a3c9;
+            transition: transform .2s;
+        }
+        #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
+        .user-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #1a0b3d;
+            border: 1px solid rgba(168,85,247,.35);
+            border-radius: 12px; min-width: 210px; padding: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.55);
+            display: none; z-index: 100;
+        }
+        #chipToggle:checked ~ .user-menu { display: block; }
+        .user-menu a,
+        .user-menu .menu-btn {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 11px 14px;
+            border-radius: 8px;
+            color: #e9e5ff; text-decoration: none;
+            font-size: .85rem; font-weight: 600;
+            background: none; border: 0;
+            text-align: left; cursor: pointer; font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .user-menu a:hover,
+        .user-menu .menu-btn:hover {
+            background: rgba(124,58,237,.25); color: #fff;
+        }
+        .user-menu .divider {
+            height: 1px; background: rgba(168,85,247,.25);
+            margin: 6px 4px; display: block;
+        }
+        .user-menu .menu-btn.danger { color: #fca5a5; }
+        .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
+        .chip-backdrop {
+            position: fixed; inset: 0;
+            background: transparent;
+            display: none; z-index: 90;
+        }
+        #chipToggle:checked ~ .chip-backdrop { display: block; }
+        .user-chip, .user-menu { position: relative; z-index: 100; }
+
+        @media (max-width: 720px) {
+            .user-chip .uname { display: none; }
+            .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+            .user-chip .avatar { width: 26px; height: 26px; font-size: .72rem; }
+            .user-menu {
+                min-width: 180px; padding: 6px;
+                max-width: calc(100vw - 20px);
+                right: 0;
+            }
+            .user-menu a,
+            .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -124,26 +203,6 @@
         <div class="flex items-center gap-3 min-w-0">
             <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
             <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
-            <div id="user-profile" class="hidden relative">
-                <button onclick="toggleProfileDropdown()" class="profile-btn flex items-center gap-2 px-2 py-1 rounded-lg transition">
-                    <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">A</div>
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
-                </button>
-                <div id="profile-dropdown" class="profile-dropdown absolute top-full left-0 mt-2 w-56 glass-panel rounded-lg shadow-2xl overflow-hidden z-50">
-                    <div class="p-3 border-b border-gray-700">
-                        <p class="text-xs text-gray-500">Signed in</p>
-                        <p id="dropdown-username" class="font-bold text-white text-sm truncate">user</p>
-                    </div>
-                    <div class="py-1">
-                        <a href="member.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-gauge w-4"></i> Dashboard</a>
-                        <a href="player.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-user w-4"></i> My Profile</a>
-                        <a href="support.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/50 transition"><i class="fa-solid fa-headset w-4"></i> Support</a>
-                    </div>
-                    <div class="py-1 border-t border-gray-700">
-                        <button onclick="logout()" class="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition w-full text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Logout</button>
-                    </div>
-                </div>
-            </div>
         </div>
         <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
             <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
@@ -155,7 +214,24 @@
             <a href="leaderboard.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Leaderboard</a>
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
             <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
-            <a href="member.html" id="nav-login-btn" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:py-1 rounded transition text-center">Login</a>
+
+            <!-- USER CHIP -->
+            <div class="user-chip-wrap">
+                <input type="checkbox" id="chipToggle" />
+                <label class="user-chip" for="chipToggle">
+                    <span class="avatar" id="userAvatar">?</span>
+                    <span class="uname" id="userName">Loading…</span>
+                    <span class="caret">▼</span>
+                </label>
+                <label class="chip-backdrop" for="chipToggle"></label>
+                <div class="user-menu">
+                    <a href="/member.html">📊 My Dashboard</a>
+                    <a href="/player.html">👤 My Profile</a>
+                    <a href="/my-tournaments.html">🏆 My Tournaments</a>
+                    <div class="divider"></div>
+                    <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -315,21 +391,35 @@
             const btn = document.querySelector('.support-btn');
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
-        function toggleProfileDropdown() { document.getElementById('profile-dropdown').classList.toggle('open'); }
-        document.addEventListener('click', function(e) {
-            const profile = document.getElementById('user-profile');
-            const dropdown = document.getElementById('profile-dropdown');
-            if (profile && !profile.contains(e.target)) dropdown.classList.remove('open');
-        });
-        function logout() {
-            import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js')
-                .then(({ getAuth, signOut }) => {
-                    const auth = getAuth();
-                    return signOut(auth);
-                })
-                .then(() => { window.location.href = 'member.html'; })
-                .catch(() => { window.location.href = 'member.html'; });
-        }
+
+        // Chip logout
+        (function () {
+            var logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function (e) {
+                    e.preventDefault(); e.stopPropagation();
+                    if (!confirm("Logout now?")) return;
+                    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                        .then(function (a) {
+                            return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                                .then(function (b) {
+                                    var cfg = {
+                                        apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                        authDomain: "nepplaygaming.firebaseapp.com",
+                                        projectId: "nepplaygaming",
+                                        storageBucket: "nepplaygaming.firebasestorage.app",
+                                        messagingSenderId: "893565645520",
+                                        appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                                    };
+                                    var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                                    return b.signOut(b.getAuth(app));
+                                });
+                        })
+                        .catch(function () {})
+                        .finally(function () { window.location.href = "/login.html"; });
+                });
+            }
+        })();
     </script>
 
     <!-- Firebase + profile logic -->
@@ -389,32 +479,34 @@
         onAuthStateChanged(auth, async (user) => {
             viewerUid = user ? user.uid : null;
 
-            // Show user chip in nav if logged in
+            // Fill the chip
+            const chipAvatar = document.getElementById('userAvatar');
+            const chipName = document.getElementById('userName');
             if (user) {
-                document.getElementById('user-profile').classList.remove('hidden');
-                document.getElementById('nav-login-btn')?.classList.add('hidden');
+                let meName = user.email || user.uid || 'Member';
                 try {
                     const meSnap = await getDoc(doc(db, 'users', user.uid));
-                    const me = meSnap.exists() ? meSnap.data() : {};
-                    const name = me.fullName || me.username || user.email?.split('@')[0] || 'Player';
-                    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-                    document.getElementById('dropdown-username').textContent = me.email || user.email || '—';
+                    if (meSnap.exists()) {
+                        const me = meSnap.data();
+                        meName = me.fullName || me.username || me.email || meName;
+                    }
                 } catch (e) {}
+                if (chipAvatar) chipAvatar.textContent = (meName[0] || '?').toUpperCase();
+                if (chipName) chipName.textContent = meName;
             } else {
-                document.getElementById('user-profile')?.classList.add('hidden');
-                document.getElementById('nav-login-btn')?.classList.remove('hidden');
+                if (chipAvatar) chipAvatar.textContent = '?';
+                if (chipName) chipName.textContent = 'Login';
             }
 
             // Decide which profile to show
             if (urlUid || urlUsername) {
-                viewedUid = urlUid; // may be null if only username provided
+                viewedUid = urlUid;
                 await loadByUrl();
             } else if (user) {
                 viewedUid = user.uid;
                 isSelf = true;
                 await loadProfile();
             } else {
-                // No param, not logged in
                 loading.classList.add('hidden');
                 loggedOut.classList.remove('hidden');
                 return;
@@ -423,18 +515,13 @@
 
         async function loadByUrl() {
             try {
-                // If username provided, resolve to uid first
                 if (!viewedUid && urlUsername) {
                     const uSnap = await getDocs(query(
                         collection(db, 'users'),
                         where('username', '==', urlUsername),
                         limit(1)
                     ));
-                    if (uSnap.empty) {
-                        // Try case-insensitive fallback by fetching some docs
-                        showNotFound();
-                        return;
-                    }
+                    if (uSnap.empty) { showNotFound(); return; }
                     viewedUid = uSnap.docs[0].id;
                 }
                 isSelf = viewerUid && viewerUid === viewedUid;
@@ -470,32 +557,25 @@
             if (!profile) { showNotFound(); return; }
             viewedProfile = profile;
 
-            const displayName =
-                profile.fullName ||
-                profile.username ||
-                'Player';
+            const displayName = profile.fullName || profile.username || 'Player';
 
             document.getElementById('profile-avatar').textContent = displayName.charAt(0).toUpperCase();
             document.getElementById('profile-name').textContent = displayName;
 
-            // Show email only for self
             const emailEl = document.getElementById('profile-email');
             if (isSelf) {
                 emailEl.textContent = profile.email || '—';
-                emailEl.style.display = '';
             } else {
                 emailEl.textContent = '@' + (profile.username || 'player');
-                emailEl.style.display = '';
             }
+            emailEl.style.display = '';
 
             document.getElementById('profile-since').textContent = profile.createdAt
                 ? 'Joined ' + fmtDate(profile.createdAt)
                 : 'NEPPLAY member';
 
-            // Rank pill
             document.getElementById('profile-rank-pill').innerHTML = '<i class="fa-solid fa-gamepad mr-1"></i> Player';
 
-            // Action buttons: Share + (Watch Live if stream URL exists)
             buildProfileActions();
 
             loading.classList.add('hidden');
@@ -513,7 +593,6 @@
             if (!actionsEl) return;
             const parts = [];
 
-            // Share button
             const shareUrl = window.location.href;
             parts.push(`
                 <button class="share-btn" onclick="shareProfile('${escapeHtml(shareUrl).replace(/'/g,"\\'")}')">
@@ -521,7 +600,6 @@
                 </button>
             `);
 
-            // Watch live button if this player has a confirmed stream URL
             try {
                 const rSnap = await getDocs(query(
                     collection(db, 'tournament_registrations'),
@@ -541,7 +619,6 @@
                 }
             } catch (e) { console.warn('stream lookup failed:', e); }
 
-            // If viewing self, add "Edit / Go to dashboard" button
             if (isSelf) {
                 parts.push(`
                     <a class="share-btn" href="member.html">
