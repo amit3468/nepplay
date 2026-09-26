@@ -7,7 +7,7 @@
 
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; }
-
+html, body { overflow-x: hidden; max-width: 100vw; }
 body{
     font-family:Arial,Helvetica,sans-serif;
     background:#080d18;
@@ -15,7 +15,7 @@ body{
     min-height:100vh;
 }
 
-/* ===== TOP NAV ===== */
+/* TOP NAV */
 .topnav{
     display:flex;
     align-items:center;
@@ -25,12 +25,14 @@ body{
     backdrop-filter:blur(14px);
     border-bottom:1px solid rgba(168,85,247,.25);
     position:sticky; top:0; z-index:50;
-    gap:12px;
+    gap:10px;
+    max-width:100%;
 }
 .brand{
     display:flex; align-items:center; gap:10px;
     font-weight:800; font-size:1.1rem;
-    color:#fff; text-decoration:none;
+    color:#fff;
+    text-decoration:none;
     flex-shrink:0;
 }
 .brand .logo{
@@ -39,91 +41,94 @@ body{
     display:grid; place-items:center; font-size:1rem;
 }
 .nav-links{
-    display:flex; gap:16px; font-size:.95rem; align-items:center;
+    display:flex; gap:14px; font-size:.9rem; align-items:center;
+    overflow-x:auto; scrollbar-width:none; flex:1;
+    justify-content:flex-end;
 }
-.nav-links a{
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links > a{
     color:#a8a3c9; text-decoration:none; transition:color .2s;
     display:inline-flex; align-items:center;
+    white-space:nowrap; flex-shrink:0;
 }
-.nav-links a:hover{ color:#fff; }
-.nav-links a.active{ color:#fbbf24; }
-.nav-links a.winners-link{
+.nav-links > a:hover{ color:#fff; }
+.nav-links > a.active{ color:#fbbf24; }
+.nav-links > a.winners-link{
     background:linear-gradient(135deg,#f59e0b,#fbbf24);
     color:#1a0b3d !important;
-    padding:6px 14px; border-radius:999px;
-    font-weight:800;
-    box-shadow:0 4px 14px rgba(245,158,11,.4);
+    padding:6px 12px; border-radius:999px;
+    font-weight:800; font-size:.82rem;
 }
-.nav-links a.store-link{
+.nav-links > a.store-link{
     background:linear-gradient(135deg,#7c3aed,#a855f7);
     color:#fff !important;
-    padding:6px 14px; border-radius:999px;
-    font-weight:800;
-    box-shadow:0 4px 14px rgba(124,58,237,.5);
+    padding:6px 12px; border-radius:999px;
+    font-weight:800; font-size:.82rem;
 }
 
+/* USER CHIP */
+.user-chip-wrap { position:relative; flex-shrink:0; }
+#chipToggle { position:absolute; opacity:0; pointer-events:none; width:0; height:0; }
 .user-chip{
-    position:relative;
-    display:flex; align-items:center; gap:8px;
-    cursor:pointer;
-    padding:4px 10px 4px 4px;
+    display:flex; align-items:center; gap:6px;
+    cursor:pointer; padding:4px 8px 4px 4px;
     border-radius:999px;
     background:rgba(124,58,237,.15);
     border:1px solid rgba(168,85,247,.35);
     transition:background .2s;
-    flex-shrink:0;
+    user-select:none; -webkit-user-select:none;
+    -webkit-tap-highlight-color:rgba(168,85,247,.3);
 }
 .user-chip:hover{ background:rgba(124,58,237,.3); }
+#chipToggle:checked ~ .user-chip{ background:rgba(124,58,237,.35); }
 .user-chip .avatar{
-    width:30px; height:30px; border-radius:50%;
+    width:28px; height:28px; border-radius:50%;
     background:linear-gradient(135deg,#6d28d9,#a855f7);
     display:grid; place-items:center;
-    font-weight:700; font-size:.8rem;
+    font-weight:700; font-size:.78rem;
     color:#fff; flex-shrink:0;
 }
 .user-chip .uname{
-    color:#f5f3ff; font-weight:700; font-size:.82rem;
-    max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    color:#f5f3ff; font-weight:700; font-size:.78rem;
+    max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.user-chip .caret{ font-size:.55rem; color:#a8a3c9; }
+.user-chip .caret{ font-size:.5rem; color:#a8a3c9; transition:transform .2s; }
+#chipToggle:checked ~ .user-chip .caret{ transform:rotate(180deg); }
 .user-menu{
-    position:absolute;
-    top:calc(100% + 8px);
-    right:0;
-    background:#1a0b3d;
-    border:1px solid rgba(168,85,247,.35);
-    border-radius:12px;
-    min-width:200px;
-    padding:8px;
+    position:absolute; top:calc(100% + 8px); right:0;
+    background:#1a0b3d; border:1px solid rgba(168,85,247,.35);
+    border-radius:12px; min-width:210px; padding:8px;
     box-shadow:0 12px 40px rgba(0,0,0,.55);
-    display:none;
-    z-index:100;
+    display:none; z-index:100;
 }
-.user-menu.open{ display:block; }
+#chipToggle:checked ~ .user-menu{ display:block; }
 .user-menu a,
-.user-menu button{
+.user-menu .menu-btn{
     display:flex; align-items:center; gap:10px;
-    width:100%; padding:10px 14px;
-    border-radius:8px;
-    color:#e9e5ff; text-decoration:none;
-    font-size:.85rem; font-weight:600;
-    background:none; border:0;
+    width:100%; padding:11px 14px;
+    border-radius:8px; color:#e9e5ff;
+    text-decoration:none; font-size:.85rem;
+    font-weight:600; background:none; border:0;
     text-align:left; cursor:pointer; font-family:inherit;
+    -webkit-tap-highlight-color:transparent;
 }
 .user-menu a:hover,
-.user-menu button:hover{
-    background:rgba(124,58,237,.25);
-    color:#fff;
+.user-menu .menu-btn:hover{
+    background:rgba(124,58,237,.25); color:#fff;
 }
 .user-menu .divider{
-    height:1px;
-    background:rgba(168,85,247,.25);
-    margin:6px 4px;
+    height:1px; background:rgba(168,85,247,.25);
+    margin:6px 4px; display:block;
 }
-.user-menu .danger{ color:#fca5a5; }
-.user-menu .danger:hover{ background:rgba(239,68,68,.2); }
+.user-menu .menu-btn.danger{ color:#fca5a5; }
+.user-menu .menu-btn.danger:hover{ background:rgba(239,68,68,.2); }
+.chip-backdrop{
+    position:fixed; inset:0; background:transparent;
+    display:none; z-index:90;
+}
+#chipToggle:checked ~ .chip-backdrop{ display:block; }
+.user-chip, .user-menu{ position:relative; z-index:100; }
 
-/* ===== CONTENT ===== */
 .container{ width:min(850px,94%); margin:30px auto; }
 
 .card{
@@ -137,59 +142,38 @@ body{
 .subtitle{ color:#8da2bc; line-height:1.6; margin-bottom:20px; }
 
 .tournament-box{
-    background:#0b1320;
-    border:1px solid #2b3d56;
-    border-radius:10px;
-    padding:18px;
-    margin-bottom:22px;
+    background:#0b1320; border:1px solid #2b3d56;
+    border-radius:10px; padding:18px; margin-bottom:22px;
 }
 .tournament-name{ font-size:21px; font-weight:bold; color:#ff3b30; }
 .game{ margin-top:6px; color:#9cb5d3; }
 .fee{ margin-top:10px; font-size:20px; font-weight:bold; }
 .mode-badge{
-    display:inline-block;
-    padding:4px 12px;
-    border-radius:999px;
-    font-size:.7rem;
-    font-weight:800;
-    letter-spacing:.5px;
-    text-transform:uppercase;
-    margin-left:10px;
-    vertical-align:middle;
+    display:inline-block; padding:4px 12px;
+    border-radius:999px; font-size:.7rem; font-weight:800;
+    letter-spacing:.5px; text-transform:uppercase;
+    margin-left:10px; vertical-align:middle;
 }
 .mode-badge.solo  { background:rgba(34,197,94,.2);  color:#4ade80; border:1px solid rgba(34,197,94,.5); }
 .mode-badge.duo   { background:rgba(59,130,246,.2); color:#7db7ff; border:1px solid rgba(59,130,246,.5); }
 .mode-badge.squad { background:rgba(245,158,11,.2); color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
 
-/* ===== PLAYING-AS SELECTOR ===== */
-.playing-as{
-    margin-bottom:22px;
-}
+.playing-as{ margin-bottom:22px; }
 .playing-as-label{
-    display:block;
-    margin-bottom:10px;
-    color:#c8d5e5;
-    font-weight:bold;
-    font-size:15px;
+    display:block; margin-bottom:10px;
+    color:#c8d5e5; font-weight:bold; font-size:15px;
 }
 .playing-as-options{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
 }
 .playing-option{
-    background:#0b1320;
-    border:2px solid #30435e;
-    border-radius:12px;
-    padding:16px 12px;
-    cursor:pointer;
-    text-align:center;
-    transition:all .2s;
-    user-select:none;
+    background:#0b1320; border:2px solid #30435e;
+    border-radius:12px; padding:16px 12px;
+    cursor:pointer; text-align:center;
+    transition:all .2s; user-select:none;
 }
 .playing-option:hover{
-    border-color:#4a5f7d;
-    background:#101b2e;
+    border-color:#4a5f7d; background:#101b2e;
     transform:translateY(-1px);
 }
 .playing-option.active{
@@ -197,100 +181,59 @@ body{
     background:rgba(34,197,94,.12);
     box-shadow:0 0 0 3px rgba(34,197,94,.15);
 }
-.playing-option .icon{
-    font-size:28px;
-    margin-bottom:6px;
-}
-.playing-option .label{
-    font-weight:800;
-    font-size:15px;
-    color:#fff;
-    margin-bottom:2px;
-}
-.playing-option .desc{
-    font-size:11px;
-    color:#8da2bc;
-    line-height:1.4;
-}
+.playing-option .icon{ font-size:28px; margin-bottom:6px; }
+.playing-option .label{ font-weight:800; font-size:15px; color:#fff; margin-bottom:2px; }
+.playing-option .desc{ font-size:11px; color:#8da2bc; line-height:1.4; }
 .playing-option.active .desc{ color:#a4f2c7; }
 
-/* Show/hide sections based on mode */
 body.mode-solo  .team-only,
 body.mode-solo  .duo-plus-only,
 body.mode-solo  .squad-only { display:none; }
-
 body.mode-duo   .squad-only { display:none; }
 body.mode-duo   .team-only  { display:block; }
-
 body.mode-squad .team-only  { display:block; }
 
 .solo-note{
     display:none;
     background:rgba(34,197,94,.1);
     border-left:3px solid #22c55e;
-    padding:12px 16px;
-    border-radius:8px;
-    font-size:.85rem;
-    color:#a4f2c7;
-    margin-bottom:16px;
+    padding:12px 16px; border-radius:8px;
+    font-size:.85rem; color:#a4f2c7; margin-bottom:16px;
 }
 body.mode-solo .solo-note{ display:block; }
 
 .form-group{ margin-bottom:17px; }
-label{
-    display:block;
-    margin-bottom:7px;
-    color:#c8d5e5;
-    font-weight:bold;
-}
+label{ display:block; margin-bottom:7px; color:#c8d5e5; font-weight:bold; }
 input, textarea, select{
-    width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:1px solid #30435e;
-    background:#0a111d;
-    color:#fff;
-    font-size:15px;
-    outline:none;
+    width:100%; padding:12px; border-radius:8px;
+    border:1px solid #30435e; background:#0a111d;
+    color:#fff; font-size:15px; outline:none;
 }
 input:focus, textarea:focus, select:focus{ border-color:#ff3b30; }
 textarea{ min-height:100px; resize:vertical; }
-
 .grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
 .section-title{ font-size:19px; margin:25px 0 15px; color:#fff; }
 
 .payment-options{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
-    gap:15px;
-    margin-bottom:16px;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    gap:15px; margin-bottom:16px;
 }
 .payment-option{
-    border:1px solid #30435e;
-    background:#0b1320;
-    border-radius:10px;
-    padding:16px;
-    cursor:pointer;
-    transition:.15s;
-    display:flex;
-    align-items:center;
-    gap:10px;
+    border:1px solid #30435e; background:#0b1320;
+    border-radius:10px; padding:16px;
+    cursor:pointer; transition:.15s;
+    display:flex; align-items:center; gap:10px;
 }
 .payment-option:hover{ border-color:#4a5f7d; background:#101b2e; }
 .payment-option.selected{ border-color:#ff3b30; background:#201517; }
 .payment-option input[type="radio"]{
-    width:auto; margin:0;
-    accent-color:#ff3b30;
-    flex-shrink:0;
+    width:auto; margin:0; accent-color:#ff3b30; flex-shrink:0;
 }
 .payment-name{ font-weight:bold; font-size:16px; color:white; word-break:break-word; }
 
 .payment-details{
-    display:none;
-    margin-top:15px;
-    padding:18px;
-    border-radius:10px;
-    background:#080d18;
+    display:none; margin-top:15px; padding:18px;
+    border-radius:10px; background:#080d18;
     border:1px solid #293a52;
 }
 .payment-details.active{ display:block; }
@@ -299,10 +242,9 @@ textarea{ min-height:100px; resize:vertical; }
     margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;
 }
 .qr{
-    width:200px; height:200px;
-    object-fit:contain; background:#fff;
-    border-radius:8px; display:block;
-    margin:14px auto; padding:6px;
+    width:200px; height:200px; object-fit:contain;
+    background:#fff; border-radius:8px;
+    display:block; margin:14px auto; padding:6px;
 }
 .wallet{
     text-align:center; color:#b8c9dd;
@@ -367,19 +309,26 @@ textarea{ min-height:100px; resize:vertical; }
 }
 
 @media(max-width:720px){
-    .nav-links { gap:8px; font-size:.72rem; flex-wrap:nowrap; }
-    .nav-links a.winners-link,
-    .nav-links a.store-link { padding:5px 10px; }
-    .nav-links a[href="/teams.html"],
-    .nav-links a[href="/profile.html"],
-    .nav-links a[href="/support.html"] { display:none; }
-    .nav-links a[href="/tournaments.html"] { color:#fbbf24; font-weight:700; }
+    .topnav { padding:10px 10px; gap:6px; }
+    .brand { font-size:.85rem; gap:5px; }
+    .brand .logo { width:26px; height:26px; font-size:.85rem; }
+    .brand .brand-text { display:none; }
+    .nav-links { gap:4px; font-size:.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding:4px 8px; font-size:.68rem; }
+    .nav-links > a[href="/member.html"],
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/profile.html"],
+    .nav-links > a[href="/support.html"] { display:none; }
+    .nav-links > a[href="/tournaments.html"] { color:#fbbf24; font-weight:700; }
+    .user-chip { padding:3px 6px 3px 3px; gap:4px; }
+    .user-chip .avatar { width:26px; height:26px; font-size:.72rem; }
     .user-chip .uname { display:none; }
-    .user-chip { padding:4px; }
+    .user-chip .caret { font-size:.45rem; }
+    .user-menu { min-width:180px; padding:6px; max-width:calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding:10px 12px; font-size:.82rem; }
     .playing-as-options { grid-template-columns:1fr; }
-}
-@media(max-width:650px){
-    .grid, .payment-options{ grid-template-columns:1fr; }
+    .grid, .payment-options { grid-template-columns:1fr; }
 }
 </style>
 </head>
@@ -390,7 +339,7 @@ textarea{ min-height:100px; resize:vertical; }
 <nav class="topnav">
   <a href="/member.html" class="brand">
     <span class="logo">🎮</span>
-    Nepal Gaming
+    <span class="brand-text">Nepal Gaming</span>
   </a>
   <div class="nav-links">
     <a href="/member.html">Home</a>
@@ -401,16 +350,20 @@ textarea{ min-height:100px; resize:vertical; }
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
 
-    <div class="user-chip" id="userChip" onclick="toggleUserMenu(event)">
-      <div class="avatar" id="userAvatar">?</div>
-      <span class="uname" id="userName">Loading…</span>
-      <span class="caret">▼</span>
-      <div class="user-menu" id="userMenu" onclick="event.stopPropagation()">
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
         <a href="/member.html">📊 My Dashboard</a>
-        <a href="/profile.html">👤 My Profile</a>
+        <a href="/player.html">👤 My Profile</a>
         <a href="/my-tournaments.html">🏆 My Tournaments</a>
         <div class="divider"></div>
-        <button class="danger" onclick="logoutNow()">🚪 Logout</button>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
       </div>
     </div>
   </div>
@@ -421,7 +374,7 @@ textarea{ min-height:100px; resize:vertical; }
     <div class="card">
         <h1 class="title">Tournament Registration</h1>
         <p class="subtitle">
-            Choose how you want to play, fill in your details and payment info.
+            Complete your information and payment details.
             Your registration will remain <b>Pending</b> until the admin verifies your payment.
         </p>
 
@@ -440,7 +393,6 @@ textarea{ min-height:100px; resize:vertical; }
 
         <form id="registrationForm" style="display:none;">
 
-            <!-- ===== PLAYING AS SELECTOR ===== -->
             <div class="playing-as">
                 <label class="playing-as-label">🎮 How are you playing?</label>
                 <div class="playing-as-options">
@@ -466,15 +418,13 @@ textarea{ min-height:100px; resize:vertical; }
                 🎯 <b>Solo Match</b> — Just fill in your IGN, phone, and payment. No team details needed.
             </div>
 
-            <!-- ===== SOLO FIELDS ===== -->
+            <!-- SOLO FIELDS -->
             <div id="soloFields">
                 <h2 class="section-title">Your Details</h2>
-
                 <div class="form-group">
                     <label>Your IGN (In-Game Name) *</label>
                     <input id="soloIgn" placeholder="e.g. ProGamer99">
                 </div>
-
                 <div class="grid">
                     <div class="form-group">
                         <label>Phone *</label>
@@ -487,15 +437,13 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- ===== TEAM FIELDS (Duo + Squad) ===== -->
+            <!-- TEAM FIELDS -->
             <div id="teamFields">
                 <h2 class="section-title">Team Information</h2>
-
                 <div class="form-group">
                     <label>Team Name *</label>
                     <input id="teamName" placeholder="e.g. Nepali Warriors">
                 </div>
-
                 <div class="grid">
                     <div class="form-group">
                         <label>Captain Name *</label>
@@ -506,15 +454,12 @@ textarea{ min-height:100px; resize:vertical; }
                         <input id="phone">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Account Email</label>
                     <input id="email" type="email" readonly>
                 </div>
             </div>
 
-            <!-- ===== PLAYER ROSTERS ===== -->
-            <!-- Duo: Player 1 & 2 -->
             <div id="duoPlayers">
                 <h2 class="section-title">Players (2)</h2>
                 <div class="grid">
@@ -523,7 +468,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- Squad: Player 3-6 (shown only in squad mode) -->
             <div id="squadPlayers" class="squad-only">
                 <h2 class="section-title">Additional Players</h2>
                 <div class="grid">
@@ -535,7 +479,6 @@ textarea{ min-height:100px; resize:vertical; }
             </div>
 
             <h2 class="section-title">Payment</h2>
-
             <div id="amountBox" class="amount">Amount: Loading…</div>
 
             <div id="paymentContainer">
@@ -577,6 +520,37 @@ textarea{ min-height:100px; resize:vertical; }
     </div>
 </div>
 
+<script>
+// Logout + basic UI — plain script
+(function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm("Logout now?")) return;
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                .then(function (a) {
+                    return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                        .then(function (b) {
+                            var cfg = {
+                                apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                authDomain: "nepplaygaming.firebaseapp.com",
+                                projectId: "nepplaygaming",
+                                storageBucket: "nepplaygaming.firebasestorage.app",
+                                messagingSenderId: "893565645520",
+                                appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                            };
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
+                        });
+                })
+                .catch(function () {})
+                .finally(function () { window.location.href = "/login.html"; });
+        });
+    }
+})();
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -584,7 +558,7 @@ import {
   serverTimestamp, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
-  getAuth, onAuthStateChanged, signOut
+  getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -604,7 +578,7 @@ let currentUser = null;
 let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
-let playingMode = "squad"; // solo | duo | squad
+let playingMode = "squad";
 
 const $ = id => document.getElementById(id);
 
@@ -623,53 +597,13 @@ function escapeHTML(v) {
         .replace(/'/g, "&#039;");
 }
 
-// ============================================================
-// USER CHIP
-// ============================================================
-window.toggleUserMenu = function(e) {
-    if (e) e.stopPropagation();
-    const m = $("userMenu");
-    if (m) m.classList.toggle("open");
-};
-
-document.addEventListener("click", (e) => {
-    const m = $("userMenu");
-    const c = $("userChip");
-    if (m && c && !c.contains(e.target)) m.classList.remove("open");
-});
-
-window.logoutNow = async function() {
-    if (!confirm("Logout now?")) return;
-    try { await signOut(auth); } catch (e) {}
-    window.location.href = "/login.html";
-};
-
-async function loadUserChip(user) {
-    const avatar = $("userAvatar");
-    const nameEl = $("userName");
-    let display = user.email || user.uid || "Member";
-    try {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (uDoc.exists()) {
-            const u = uDoc.data();
-            if (u.username) display = u.username;
-        }
-    } catch (e) {}
-    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
-    if (nameEl) nameEl.textContent = display;
-}
-
-// ============================================================
-// PLAYING MODE SELECTOR
-// ============================================================
+// Expose setPlayingMode for inline onclick
 window.setPlayingMode = function(mode) {
     playingMode = mode;
 
-    // Body class for CSS
     document.body.classList.remove("mode-solo", "mode-duo", "mode-squad");
     document.body.classList.add("mode-" + mode);
 
-    // Button highlights
     ["optSolo","optDuo","optSquad"].forEach(id => {
         const el = $(id);
         if (el) el.classList.remove("active");
@@ -677,7 +611,6 @@ window.setPlayingMode = function(mode) {
     const active = mode === "solo" ? $("optSolo") : mode === "duo" ? $("optDuo") : $("optSquad");
     if (active) active.classList.add("active");
 
-    // Show/hide sections
     if (mode === "solo") {
         $("soloFields").style.display = "block";
         $("teamFields").style.display = "none";
@@ -688,7 +621,7 @@ window.setPlayingMode = function(mode) {
         $("teamFields").style.display = "block";
         $("duoPlayers").style.display = "block";
         $("squadPlayers").style.display = "none";
-    } else { // squad
+    } else {
         $("soloFields").style.display = "none";
         $("teamFields").style.display = "block";
         $("duoPlayers").style.display = "block";
@@ -696,27 +629,33 @@ window.setPlayingMode = function(mode) {
     }
 };
 
-// ============================================================
-// AUTH GATE
-// ============================================================
-onAuthStateChanged(auth, (user) => {
+// AUTH GATE + user chip
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+
     if (!user) {
         const returnTo = window.location.pathname + window.location.search;
         window.location.href = "/login.html?redirect=" + encodeURIComponent(returnTo);
         return;
     }
     currentUser = user;
-    loadUserChip(user);
+
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+
     loadRegistrationPage();
 });
 
-// ============================================================
 // GAME MATCHING
-// ============================================================
 function normalizeGame(s) {
     return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
-
 const GAME_ALIASES = {
     freefire:  ["freefire", "ff", "freefiremini"],
     pubg:      ["pubg", "pubgm", "pubgmobile"],
@@ -727,7 +666,6 @@ const GAME_ALIASES = {
     chess:     ["chess"],
     ludo:      ["ludo"]
 };
-
 function matchGame(game, title, id, urlParam) {
     const aliases = GAME_ALIASES[urlParam] || [urlParam];
     const haystack = [normalizeGame(game), normalizeGame(title), normalizeGame(id)];
@@ -737,9 +675,6 @@ function matchGame(game, title, id, urlParam) {
     });
 }
 
-// ============================================================
-// LOAD TOURNAMENT
-// ============================================================
 async function loadRegistrationPage() {
     try {
         const params = new URLSearchParams(window.location.search);
@@ -755,35 +690,27 @@ async function loadRegistrationPage() {
             return;
         }
 
-        // Priority 1: exact tournamentId
         if (tidParam) tournament = all.find(t => t.id === tidParam);
-
-        // Priority 2: game match
         if (!tournament && gameParam) {
             const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
             const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : matching;
             tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
         }
-
-        // Priority 3: latest open
         if (!tournament) {
             const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : all;
             tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
         }
-
         if (!tournament) {
             showMessage("❌ No open tournament found. Please contact admin.", "error");
             $("loading").style.display = "none";
             return;
         }
 
-        // Determine default mode
         const defaultMode = String(tournament.mode || "Squad").trim().toLowerCase();
         const initialMode = defaultMode === "solo" ? "solo" : defaultMode === "duo" ? "duo" : "squad";
 
-        // Fill tournament box
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
         $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
@@ -797,7 +724,6 @@ async function loadRegistrationPage() {
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
-        // Prefill from user data
         if (currentUser) {
             const uEmail = currentUser.email || "";
             $("email").value = uEmail;
@@ -806,50 +732,41 @@ async function loadRegistrationPage() {
                 const uDoc = await getDoc(doc(db, "users", currentUser.uid));
                 if (uDoc.exists()) {
                     const u = uDoc.data();
-                    const uname = u.username || "";
-                    const uphone = u.phone || "";
-                    if (uname) {
-                        $("soloIgn").value = uname;
-                        $("captainName").value = uname;
+                    if (u.username) {
+                        $("soloIgn").value = u.username;
+                        $("captainName").value = u.username;
                     }
-                    if (uphone) {
-                        $("soloPhone").value = uphone;
-                        $("phone").value = uphone;
+                    if (u.phone) {
+                        $("soloPhone").value = u.phone;
+                        $("phone").value = u.phone;
                     }
                 }
             } catch (e) {}
         }
 
         await loadPaymentMethods();
-
-        // Apply initial mode
-        setPlayingMode(initialMode);
+        window.setPlayingMode(initialMode);
 
         const status = String(tournament.status || "").toLowerCase();
         if (status === "completed" || tournament.isFull) {
             $("submitButton").disabled = true;
             showMessage("⚠️ This tournament is not currently open for registration.", "error");
         }
-
     } catch (err) {
-        console.error("loadRegistrationPage error:", err);
+        console.error(err);
         showMessage("❌ " + (err.message || "Failed to load tournament."), "error");
         $("loading").style.display = "none";
     }
 }
 
-// ============================================================
-// PAYMENT METHODS
-// ============================================================
 async function loadPaymentMethods() {
     let methods = [];
     try {
         const psDoc = await getDoc(doc(db, "payment_settings", "main"));
         if (psDoc.exists()) {
             const data = psDoc.data();
-            if (Array.isArray(data.methods)) {
-                methods = data.methods;
-            } else {
+            if (Array.isArray(data.methods)) methods = data.methods;
+            else {
                 if (data.eSewa)  methods.push({ id:"esewa",  name:"eSewa",  number:data.eSewa.number  || "9748835184", qrImage: data.eSewa.qrImage  || "/images/esewa-qr.png",  instructions: data.eSewa.instructions  || "Open eSewa → Send Money → enter number → confirm with MPIN." });
                 if (data.Khalti) methods.push({ id:"khalti", name:"Khalti", number:data.Khalti.number || "9766258368", qrImage: data.Khalti.qrImage || "/images/khalti-qr.png", instructions: data.Khalti.instructions || "Open Khalti → Send Money → enter number → confirm with MPIN." });
                 if (data.IMEPay || data.imePay) {
@@ -905,7 +822,7 @@ function renderPaymentMethods(methods) {
           </div>`;
     }).join("");
 
-    if (paymentMethods.length) selectPayment(String(paymentMethods[0].id));
+    if (paymentMethods.length) window.selectPayment(String(paymentMethods[0].id));
 }
 
 window.selectPayment = function(methodId) {
@@ -930,7 +847,6 @@ window.copyToClipboard = function(text) {
         navigator.clipboard.writeText(text).then(() => showToast("Copied: " + text)).catch(() => fallbackCopy(text));
     } else fallbackCopy(text);
 };
-
 function fallbackCopy(text) {
     const ta = document.createElement("textarea");
     ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
@@ -939,7 +855,6 @@ function fallbackCopy(text) {
     catch (e) { showToast("Copy failed"); }
     document.body.removeChild(ta);
 }
-
 function showToast(msg) {
     let el = document.getElementById("copyToast");
     if (!el) {
@@ -953,9 +868,6 @@ function showToast(msg) {
     setTimeout(() => { el.style.display = "none"; }, 1800);
 }
 
-// ============================================================
-// SUBMIT
-// ============================================================
 $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
@@ -968,7 +880,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
     const transactionId = $("transactionId").value.trim();
     if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
 
-    // Validate based on mode
     let body = {
         userId:          currentUser.uid,
         userEmail:       currentUser.email || "",
@@ -994,26 +905,22 @@ $("registrationForm").addEventListener("submit", async (event) => {
         const soloPhone = $("soloPhone").value.trim();
         if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
         if (!soloPhone) { showMessage("Please enter your phone.", "error"); return; }
-
         body.teamSize = 1;
         body.teamName = soloIgn + " (Solo)";
         body.captainName = soloIgn;
         body.phone = soloPhone;
         body.ign = soloIgn;
         body.players = [soloIgn];
-
     } else if (playingMode === "duo") {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
         const phone = $("phone").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
-
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
         if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
         if (!p1 || !p2) { showMessage("Both player IGNs are required for Duo.", "error"); return; }
-
         body.teamSize = 2;
         body.teamName = teamName;
         body.captainName = captainName;
@@ -1022,24 +929,20 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.player1 = p1;
         body.player2 = p2;
         body.players = [p1, p2];
-
-    } else { // squad
+    } else {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
         const phone = $("phone").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
-
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
         if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
         if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
-
         const p3 = $("player3").value.trim();
         const p4 = $("player4").value.trim();
         const p5 = $("player5").value.trim();
         const p6 = $("player6").value.trim();
-
         body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
         body.teamName = teamName;
         body.captainName = captainName;
@@ -1071,7 +974,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
         btn.textContent = "Submit Registration";
     }
 });
-
 </script>
 
 </body>
