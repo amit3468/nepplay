@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Tournaments — NEPPLAY</title>
+<link rel="icon" href="/favicon.ico" />
+
+<style>
+  :root {
+    --purple: #7c3aed;
+    --purple-2: #a855f7;
+    --gold-2: #fbbf24;
+    --green: #22c55e;
+    --text: #f5f3ff;
+    --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25);
+    --card: rgba(30, 18, 60, 0.75);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    background: rgba(15, 8, 35, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50; gap: 10px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.1rem;
+    color: #fff; text-decoration: none; flex-shrink: 0;
+  }
+  .brand .logo {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center; font-size: 1rem;
+  }
+  .nav-links {
+    display: flex; gap: 14px; font-size: 0.9rem;
+    align-items: center; overflow-x: auto;
+    scrollbar-width: none; flex: 1; justify-content: flex-end;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links > a {
+    color: var(--muted); text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+    display: inline-flex; align-items: center;
+  }
+  .nav-links > a:hover { color: var(--text); }
+  .nav-links > a.active { color: var(--gold-2); }
+  .nav-links > a.winners-link {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d !important;
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
+  }
+  .nav-links > a.store-link {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff !important;
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 800; font-size: 0.82rem;
+  }
+
+  /* USER CHIP */
+  .user-chip-wrap { position: relative; flex-shrink: 0; }
+  #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+  .user-chip {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 8px 4px 4px;
+    border-radius: 999px;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(168,85,247,.3);
+  }
+  #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+  .user-chip .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg,#6d28d9,#a855f7);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: .78rem;
+    color: #fff; flex-shrink: 0;
+  }
+  .user-chip .uname {
+    color: #f5f3ff; font-weight: 700; font-size: .78rem;
+    max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .user-chip .caret { font-size: .5rem; color: #a8a3c9; }
+  .user-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #1a0b3d;
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px; min-width: 210px; padding: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    display: none; z-index: 100;
+  }
+  #chipToggle:checked ~ .user-menu { display: block; }
+  .user-menu a,
+  .user-menu .menu-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border-radius: 8px;
+    color: #e9e5ff; text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    background: none; border: 0;
+    text-align: left; cursor: pointer; font-family: inherit;
+  }
+  .user-menu a:hover,
+  .user-menu .menu-btn:hover {
+    background: rgba(124,58,237,.25); color: #fff;
+  }
+  .user-menu .divider {
+    height: 1px; background: rgba(168,85,247,.25);
+    margin: 6px 4px; display: block;
+  }
+  .user-menu .menu-btn.danger { color: #fca5a5; }
+  .chip-backdrop {
+    position: fixed; inset: 0; background: transparent;
+    display: none; z-index: 90;
+  }
+  #chipToggle:checked ~ .chip-backdrop { display: block; }
+  .user-chip, .user-menu { position: relative; z-index: 100; }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 26px 18px;
+  }
+
+  h1.page-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  p.page-sub {
+    color: var(--muted);
+    margin-bottom: 26px;
+    font-size: 0.92rem;
+  }
+
+  .loading {
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .tourney-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .tourney-card .icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .tourney-card .main { flex: 1; }
+  .tourney-card .name {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+    color: #fbbf24;
+  }
+  .tourney-card .meta {
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .tourney-card .status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+  }
+  .status.pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  .status.confirmed,
+  .status.approved { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+  .status.rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty .big {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+  }
+  .empty .title {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .empty .sub {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  .empty .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 720px) {
+    .topnav { padding: 10px 10px; gap: 6px; }
+    .brand { font-size: 0.85rem; gap: 5px; }
+    .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
+    .brand .brand-text { display: none; }
+    .nav-links { gap: 4px; font-size: 0.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
+    .nav-links > a[href="/member.html"],
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/profile.html"],
+    .nav-links > a[href="/support.html"] { display: none; }
+    .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+    .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
+    .user-chip .uname { display: none; }
+    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
+    h1.page-title { font-size: 1.35rem; }
+    .tourney-card { padding: 14px; gap: 12px; }
+    .tourney-card .icon { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="/member.html" class="brand">
+    <span class="logo">🎮</span>
+    <span class="brand-text">Nepal Gaming</span>
+  </a>
+  <div class="nav-links">
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html">Tournaments</a>
+    <a href="/winners.html" class="winners-link">🏆 Winners</a>
+    <a href="/store.html" class="store-link">🛒 Store</a>
+    <a href="/my-tournaments.html" class="active">My Tournaments</a>
+
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/player.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <h1 class="page-title">🏆 My Tournaments</h1>
+  <p class="page-sub">All your tournament registrations across NEPPLAY.</p>
+
+  <div id="loading" class="loading">⏳ Loading your tournaments…</div>
+  <div id="list" style="display:none;"></div>
+  <div id="empty" class="empty" style="display:none;">
+    <div class="big">📭</div>
+    <div class="title">No tournaments yet</div>
+    <div class="sub">Join a tournament from the Tournaments page to see it here.</div>
+    <a href="/tournaments.html" class="btn">Browse Tournaments</a>
+  </div>
+</div>
+
+<script>
+(function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm("Logout now?")) return;
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                .then(function (a) {
+                    return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                        .then(function (b) {
+                            var cfg = {
+                                apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                authDomain: "nepplaygaming.firebaseapp.com",
+                                projectId: "nepplaygaming",
+                                storageBucket: "nepplaygaming.firebasestorage.app",
+                                messagingSenderId: "893565645520",
+                                appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                            };
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
+                        });
+                })
+                .catch(function () {})
+                .finally(function () { window.location.href = "/login.html"; });
+        });
+    }
+})();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, query, where, getDocs, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+function fmtDate(ts) {
+    if (!ts || !ts.toDate) return "—";
+    return ts.toDate().toLocaleString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+}
+
+function escHTML(v) {
+    return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+    const loading = document.getElementById("loading");
+    const list = document.getElementById("list");
+    const empty = document.getElementById("empty");
+
+    if (!user) {
+        window.location.href = "/login.html?redirect=" + encodeURIComponent("/my-tournaments.html");
+        return;
+    }
+
+    // User chip
+    let display = user.email || user.uid;
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+
+    // Load registrations
+    try {
+        const snap = await getDocs(
+            query(
+                collection(db, "tournament_registrations"),
+                where("userId", "==", user.uid)
+            )
+        );
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) =>
+            (b.registeredAt?.toMillis?.() || 0) -
+            (a.registeredAt?.toMillis?.() || 0)
+        );
+
+        loading.style.display = "none";
+
+        if (!items.length) {
+            empty.style.display = "block";
+            return;
+        }
+
+        list.style.display = "block";
+        list.innerHTML = items.map(r => {
+            const status = String(r.status || "pending").toLowerCase();
+            const statusClass =
+                status === "confirmed" || status === "approved"
+                    ? "confirmed"
+                    : status;
+            const icon = r.entryType === "paid" ? "💵" : "🏆";
+
+            const players = Array.isArray(r.players)
+                ? r.players.filter(Boolean).join(", ")
+                : (r.player1 || "");
+
+            const modeLabel = r.playingAs
+                ? r.playingAs.charAt(0).toUpperCase() + r.playingAs.slice(1)
+                : (r.tournamentMode || "");
+
+            return `
+                <div class="tourney-card">
+                    <div class="icon">${icon}</div>
+                    <div class="main">
+                        <div class="name">${escHTML(r.tournamentTitle || "Tournament")}</div>
+                        <div class="meta">
+                            🎮 ${escHTML(r.game || "")}${modeLabel ? " · " + escHTML(modeLabel) : ""}
+                            ${r.teamName ? " · 👥 " + escHTML(r.teamName) : ""}
+                        </div>
+                        ${players ? `<div class="meta">🎯 ${escHTML(players)}</div>` : ""}
+                        ${r.amount ? `<div class="meta">💰 Rs ${escHTML(r.amount)}</div>` : ""}
+                        <div class="meta">🕐 ${fmtDate(r.registeredAt)}</div>
+                        <span class="status ${statusClass}">${escHTML(status.toUpperCase())}</span>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } catch (err) {
+        console.error("my-tournaments load error:", err);
+        loading.textContent = "❌ Could not load tournaments: " + err.message;
+    }
+});
+</script>
+
+</body>
+</html>
