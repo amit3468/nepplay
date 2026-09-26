@@ -78,10 +78,7 @@
 
   /* USER CHIP */
   .user-chip-wrap { position: relative; flex-shrink: 0; }
-  #chipToggle {
-    position: absolute; opacity: 0;
-    pointer-events: none; width: 0; height: 0;
-  }
+  #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
   .user-chip {
     display: flex; align-items: center; gap: 6px;
     cursor: pointer; padding: 4px 8px 4px 4px;
@@ -106,15 +103,11 @@
     max-width: 90px; overflow: hidden;
     text-overflow: ellipsis; white-space: nowrap;
   }
-  .user-chip .caret {
-    font-size: .5rem; color: #a8a3c9;
-    transition: transform .2s;
-  }
+  .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
   #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
   .user-menu {
     position: absolute; top: calc(100% + 8px); right: 0;
-    background: #1a0b3d;
-    border: 1px solid rgba(168,85,247,.35);
+    background: #1a0b3d; border: 1px solid rgba(168,85,247,.35);
     border-radius: 12px; min-width: 210px; padding: 8px;
     box-shadow: 0 12px 40px rgba(0,0,0,.55);
     display: none; z-index: 100;
@@ -124,15 +117,13 @@
   .user-menu .menu-btn {
     display: flex; align-items: center; gap: 10px;
     width: 100%; padding: 11px 14px;
-    border-radius: 8px;
-    color: #e9e5ff; text-decoration: none;
-    font-size: .85rem; font-weight: 600;
-    background: none; border: 0;
+    border-radius: 8px; color: #e9e5ff;
+    text-decoration: none; font-size: .85rem;
+    font-weight: 600; background: none; border: 0;
     text-align: left; cursor: pointer; font-family: inherit;
     -webkit-tap-highlight-color: transparent;
   }
-  .user-menu a:hover,
-  .user-menu .menu-btn:hover {
+  .user-menu a:hover, .user-menu .menu-btn:hover {
     background: rgba(124,58,237,.25); color: #fff;
   }
   .user-menu .divider {
@@ -153,10 +144,8 @@
   .auto-counter {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    margin-bottom: 26px;
+    padding: 30px; text-align: center;
+    box-shadow: var(--shadow); margin-bottom: 26px;
   }
   .auto-counter h2 {
     font-size: 1rem; color: var(--gold-2);
@@ -173,18 +162,22 @@
   .auto-counter .sub {
     color: #ddd6fe; font-size: 0.9rem; margin-top: 8px;
   }
+
   .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
   .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+
+  /* GAME GRID */
   .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px; margin-bottom: 26px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
   }
   .game-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 20px;
+    padding: 18px;
     display: flex; flex-direction: column; gap: 12px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
@@ -193,22 +186,72 @@
     box-shadow: 0 12px 32px rgba(124, 58, 237, 0.35);
     border-color: rgba(168, 85, 247, 0.5);
   }
-  .game-card .icon { font-size: 2rem; }
-  .game-card .name { font-weight: 800; font-size: 1.1rem; }
+  .game-card .icon { font-size: 2rem; line-height: 1; }
+  .game-card .name { font-weight: 800; font-size: 1.15rem; }
   .game-card .meta {
     display: flex; justify-content: space-between;
-    font-size: 0.8rem; color: var(--muted);
+    font-size: 0.78rem; color: var(--muted);
+    margin-bottom: 4px;
   }
   .game-card .meta strong { color: var(--gold-2); }
-  .game-card .join-btn {
-    display: block; text-align: center;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff; text-decoration: none;
-    font-weight: 800; font-size: 0.9rem;
-    padding: 11px; border-radius: 10px;
-    transition: transform 0.15s; margin-top: 6px;
+
+  /* 3-MODE BUTTONS */
+  .mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 6px;
   }
-  .game-card .join-btn:hover { transform: translateY(-1px); }
+  .mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 12px 6px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: #fff;
+    border: 1px solid transparent;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-align: center;
+  }
+  .mode-btn:hover {
+    transform: translateY(-1px);
+  }
+  .mode-btn .mode-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .mode-btn .mode-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    opacity: 0.85;
+    letter-spacing: 0.3px;
+  }
+  .mode-btn.solo {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+  }
+  .mode-btn.duo {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  }
+  .mode-btn.squad {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  }
+  .mode-btn.disabled {
+    background: rgba(120, 120, 140, 0.2);
+    box-shadow: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .room-note {
     background: rgba(245, 158, 11, 0.12);
     border: 1px solid rgba(245, 158, 11, 0.4);
@@ -232,22 +275,27 @@
     .nav-links > a[href="/teams.html"],
     .nav-links > a[href="/profile.html"],
     .nav-links > a[href="/support.html"] { display: none; }
+    .nav-links > a[href="/tournaments.html"] { color: var(--gold-2); font-weight: 700; }
     .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
     .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
     .user-chip .uname { display: none; }
     .user-chip .caret { font-size: 0.45rem; }
     .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
-    .game-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .game-grid { grid-template-columns: 1fr; gap: 14px; }
     .game-card { padding: 14px; }
     .auto-counter .big { font-size: 2rem; }
     .page-title { font-size: 1.25rem; }
+    .mode-buttons { gap: 6px; }
+    .mode-btn { padding: 11px 4px; font-size: 0.78rem; }
+    .mode-btn .mode-icon { font-size: 1.05rem; }
+    .mode-btn .mode-label { font-size: 0.62rem; }
   }
-  @media (max-width: 460px) {
-    .game-grid { grid-template-columns: 1fr; }
-    .nav-links { font-size: 0.68rem; gap: 5px; }
+  @media (max-width: 380px) {
     .nav-links > a.winners-link,
-    .nav-links > a.store-link { padding: 4px 8px; }
+    .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
+    .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
+    .mode-btn .mode-label { display: none; }
   }
 </style>
 </head>
@@ -300,59 +348,204 @@
   </p>
 
   <div class="room-note">
-    🔓 <strong>Room details auto-reveal 30 minutes before match</strong> (12:30 PM NPT).
-    Refresh this page at 12:30 PM to see room IDs and passwords.
+    🎯 <strong>Pick your mode:</strong> Solo (1 player) · Duo (2 players) · Squad (up to 6).<br>
+    🔓 Room details auto-reveal 30 minutes before match (12:30 PM NPT).
   </div>
 
   <div class="game-grid">
+
+    <!-- FREE FIRE -->
     <div class="game-card">
       <div class="icon">🔥</div>
       <div class="name">Free Fire</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_ff" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_ff_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ff_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ff_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- PUBG -->
     <div class="game-card">
       <div class="icon">🎯</div>
       <div class="name">PUBG Mobile</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_pubg" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_pubg_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_pubg_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_pubg_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- COD -->
     <div class="game-card">
       <div class="icon">🎖️</div>
       <div class="name">Call of Duty</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_cod" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_cod_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_cod_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_cod_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- VALORANT -->
     <div class="game-card">
       <div class="icon">⚔️</div>
       <div class="name">Valorant</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_valorant" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_valorant_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_valorant_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_valorant_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- EFOOTBALL -->
     <div class="game-card">
       <div class="icon">⚽</div>
       <div class="name">eFootball</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_efoot" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_efoot_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_efoot_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_efoot_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- ECRICKET -->
     <div class="game-card">
       <div class="icon">🏏</div>
       <div class="name">eCricket</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_ecricket" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_ecricket_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ecricket_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ecricket_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- CHESS -->
     <div class="game-card">
       <div class="icon">♟️</div>
       <div class="name">Chess</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_chess" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_chess_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_chess_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_chess_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
+    <!-- LUDO -->
     <div class="game-card">
       <div class="icon">🎲</div>
       <div class="name">Ludo</div>
       <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
-      <a href="/registration.html?tournamentId=seed_paid_ludo" class="join-btn">Register</a>
+      <div class="mode-buttons">
+        <a href="/registration.html?seedKey=seed_paid_ludo_solo" class="mode-btn solo">
+          <span class="mode-icon">👤</span>
+          <span>Solo</span>
+          <span class="mode-label">1 player</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ludo_duo" class="mode-btn duo">
+          <span class="mode-icon">👥</span>
+          <span>Duo</span>
+          <span class="mode-label">2 players</span>
+        </a>
+        <a href="/registration.html?seedKey=seed_paid_ludo_squad" class="mode-btn squad">
+          <span class="mode-icon">🏆</span>
+          <span>Squad</span>
+          <span class="mode-label">Up to 6</span>
+        </a>
+      </div>
     </div>
+
   </div>
 
 </div>
@@ -361,28 +554,28 @@
 (function () {
     var logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        if (!confirm("Logout now?")) return;
-        import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
-          .then(function (a) {
-            return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
-              .then(function (b) {
-                var cfg = {
-                  apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
-                  authDomain: "nepplaygaming.firebaseapp.com",
-                  projectId: "nepplaygaming",
-                  storageBucket: "nepplaygaming.firebasestorage.app",
-                  messagingSenderId: "893565645520",
-                  appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
-                };
-                var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
-                return b.signOut(b.getAuth(app));
-              });
-          })
-          .catch(function () {})
-          .finally(function () { window.location.href = "/login.html"; });
-      });
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm("Logout now?")) return;
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                .then(function (a) {
+                    return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                        .then(function (b) {
+                            var cfg = {
+                                apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                authDomain: "nepplaygaming.firebaseapp.com",
+                                projectId: "nepplaygaming",
+                                storageBucket: "nepplaygaming.firebasestorage.app",
+                                messagingSenderId: "893565645520",
+                                appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                            };
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
+                        });
+                })
+                .catch(function () {})
+                .finally(function () { window.location.href = "/login.html"; });
+        });
     }
 })();
 
