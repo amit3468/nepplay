@@ -102,9 +102,19 @@
     font-size: 0.82rem;
   }
 
-  /* ===== USER CHIP ===== */
-  .user-chip {
+  /* ===== USER CHIP (checkbox hack) ===== */
+  .user-chip-wrap {
     position: relative;
+    flex-shrink: 0;
+  }
+  /* Hidden checkbox controls menu */
+  #chipToggle {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0; height: 0;
+  }
+  .user-chip {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -114,14 +124,12 @@
     background: rgba(124, 58, 237, 0.15);
     border: 1px solid rgba(168, 85, 247, 0.35);
     transition: background 0.2s;
-    flex-shrink: 0;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: rgba(168, 85, 247, 0.3);
-    z-index: 60;
   }
   .user-chip:hover { background: rgba(124, 58, 237, 0.3); }
-  .user-chip.menu-open { background: rgba(124, 58, 237, 0.35); }
+  #chipToggle:checked ~ .user-chip { background: rgba(124, 58, 237, 0.35); }
 
   .user-chip .avatar {
     width: 28px; height: 28px; border-radius: 50%;
@@ -138,7 +146,7 @@
     font-size: 0.5rem; color: #a8a3c9;
     transition: transform 0.2s;
   }
-  .user-chip.menu-open .caret { transform: rotate(180deg); }
+  #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
 
   .user-menu {
     position: absolute;
@@ -153,7 +161,7 @@
     display: none;
     z-index: 100;
   }
-  .user-menu.open { display: block; }
+  #chipToggle:checked ~ .user-menu { display: block; }
 
   .user-menu a,
   .user-menu .menu-btn {
@@ -188,6 +196,19 @@
   }
   .user-menu .menu-btn.danger { color: #fca5a5; }
   .user-menu .menu-btn.danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+  /* Backdrop — closes menu on outside tap */
+  .chip-backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    display: none;
+    z-index: 90;
+    cursor: default;
+  }
+  #chipToggle:checked ~ .chip-backdrop { display: block; }
+  /* Bring chip + menu above the backdrop */
+  .user-chip, .user-menu { position: relative; z-index: 100; }
 
   .container {
     max-width: 1100px;
@@ -393,18 +414,22 @@
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
 
-    <!-- USER CHIP -->
-    <div class="user-chip" id="userChip" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
-      <span class="avatar" id="userAvatar">?</span>
-      <span class="uname" id="userName">Loading…</span>
-      <span class="caret">▼</span>
-      <span class="user-menu" id="userMenu" role="menu">
-        <a href="/member.html" role="menuitem">📊 My Dashboard</a>
-        <a href="/profile.html" role="menuitem">👤 My Profile</a>
-        <a href="/my-tournaments.html" role="menuitem">🏆 My Tournaments</a>
+    <!-- USER CHIP — checkbox hack, works on every device without JS -->
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu" id="userMenu">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/profile.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
         <span class="divider"></span>
-        <span class="menu-btn danger" id="logoutBtn" role="menuitem" tabindex="0">🚪 Logout</span>
-      </span>
+        <span class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</span>
+      </div>
     </div>
   </div>
 </nav>
@@ -482,57 +507,13 @@
 <a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" rel="noopener" class="float-wa">💬</a>
 
 <!-- ============================================================
-     USER CHIP — plain script, click-only, most reliable pattern
+     LOGOUT + SHARE — small plain script
+     The chip open/close is handled by the CSS checkbox trick
      ============================================================ -->
 <script>
 (function () {
-    var chip = document.getElementById("userChip");
-    var menu = document.getElementById("userMenu");
     var logoutBtn = document.getElementById("logoutBtn");
 
-    if (!chip || !menu) return;
-
-    var isOpen = false;
-
-    function open() {
-        isOpen = true;
-        menu.classList.add("open");
-        chip.classList.add("menu-open");
-        chip.setAttribute("aria-expanded", "true");
-    }
-    function close() {
-        isOpen = false;
-        menu.classList.remove("open");
-        chip.classList.remove("menu-open");
-        chip.setAttribute("aria-expanded", "false");
-    }
-    function toggle(e) {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        if (isOpen) close(); else open();
-    }
-
-    // Chip toggles on click
-    chip.addEventListener("click", toggle);
-
-    // Taps inside the menu don't bubble
-    menu.addEventListener("click", function (e) {
-        e.stopPropagation();
-    });
-
-    // Tap anywhere else closes
-    document.addEventListener("click", function (e) {
-        if (isOpen && !chip.contains(e.target)) close();
-    });
-
-    // Escape
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") close();
-    });
-
-    // Logout
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function (e) {
             e.preventDefault();
