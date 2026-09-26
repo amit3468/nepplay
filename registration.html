@@ -158,49 +158,48 @@ body{
 .mode-badge.duo   { background:rgba(59,130,246,.2); color:#7db7ff; border:1px solid rgba(59,130,246,.5); }
 .mode-badge.squad { background:rgba(245,158,11,.2); color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
 
-.playing-as{ margin-bottom:22px; }
-.playing-as-label{
-    display:block; margin-bottom:10px;
-    color:#c8d5e5; font-weight:bold; font-size:15px;
+/* LOCKED MODE BANNER (replaces the mode selector) */
+.mode-locked-banner {
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(168,85,247,.1));
+    border: 1px solid rgba(168,85,247,.4);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
-.playing-as-options{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+.mode-locked-banner .mlb-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    line-height: 1;
 }
-.playing-option{
-    background:#0b1320; border:2px solid #30435e;
-    border-radius:12px; padding:16px 12px;
-    cursor:pointer; text-align:center;
-    transition:all .2s; user-select:none;
+.mode-locked-banner .mlb-text {
+    flex: 1;
 }
-.playing-option:hover{
-    border-color:#4a5f7d; background:#101b2e;
-    transform:translateY(-1px);
+.mode-locked-banner .mlb-title {
+    font-weight: 800;
+    font-size: .95rem;
+    color: #fff;
+    margin-bottom: 2px;
 }
-.playing-option.active{
-    border-color:#22c55e;
-    background:rgba(34,197,94,.12);
-    box-shadow:0 0 0 3px rgba(34,197,94,.15);
+.mode-locked-banner .mlb-sub {
+    font-size: .78rem;
+    color: #a8a3c9;
+    line-height: 1.4;
 }
-.playing-option .icon{ font-size:28px; margin-bottom:6px; }
-.playing-option .label{ font-weight:800; font-size:15px; color:#fff; margin-bottom:2px; }
-.playing-option .desc{ font-size:11px; color:#8da2bc; line-height:1.4; }
-.playing-option.active .desc{ color:#a4f2c7; }
-
-body.mode-solo  .team-only,
-body.mode-solo  .duo-plus-only,
-body.mode-solo  .squad-only { display:none; }
-body.mode-duo   .squad-only { display:none; }
-body.mode-duo   .team-only  { display:block; }
-body.mode-squad .team-only  { display:block; }
-
-.solo-note{
-    display:none;
-    background:rgba(34,197,94,.1);
-    border-left:3px solid #22c55e;
-    padding:12px 16px; border-radius:8px;
-    font-size:.85rem; color:#a4f2c7; margin-bottom:16px;
+.mode-locked-banner.solo {
+    background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05));
+    border-color: rgba(34,197,94,.4);
 }
-body.mode-solo .solo-note{ display:block; }
+.mode-locked-banner.duo {
+    background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05));
+    border-color: rgba(59,130,246,.4);
+}
+.mode-locked-banner.squad {
+    background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.05));
+    border-color: rgba(245,158,11,.4);
+}
 
 .form-group{ margin-bottom:17px; }
 label{ display:block; margin-bottom:7px; color:#c8d5e5; font-weight:bold; }
@@ -327,8 +326,11 @@ textarea{ min-height:100px; resize:vertical; }
     .user-chip .caret { font-size:.45rem; }
     .user-menu { min-width:180px; padding:6px; max-width:calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding:10px 12px; font-size:.82rem; }
-    .playing-as-options { grid-template-columns:1fr; }
     .grid, .payment-options { grid-template-columns:1fr; }
+    .mode-locked-banner { padding: 12px 14px; gap: 10px; }
+    .mode-locked-banner .mlb-icon { font-size: 1.6rem; }
+    .mode-locked-banner .mlb-title { font-size: .88rem; }
+    .mode-locked-banner .mlb-sub { font-size: .72rem; }
 }
 </style>
 </head>
@@ -381,7 +383,6 @@ textarea{ min-height:100px; resize:vertical; }
         <!-- SAFETY WARNING -->
         <div id="tournamentWarning" style="display:none; background:rgba(245,158,11,.15); border-left:3px solid #fbbf24; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:.9rem; color:#fde68a; line-height:1.6;">
           ⚠️ <b>Confirm garnus:</b> Tapaile <span id="confirmGameName" style="color:#fbbf24; font-weight:900; font-size:1.05rem;">this tournament</span> ma register garna lageko chhau.
-          <br>Galat game ma register gare paxi transfer manual garnu parcha.
         </div>
 
         <div id="message" class="message"></div>
@@ -399,29 +400,13 @@ textarea{ min-height:100px; resize:vertical; }
 
         <form id="registrationForm" style="display:none;">
 
-            <div class="playing-as">
-                <label class="playing-as-label">🎮 How are you playing?</label>
-                <div class="playing-as-options">
-                    <div class="playing-option" id="optSolo" onclick="setPlayingMode('solo')">
-                        <div class="icon">👤</div>
-                        <div class="label">Solo</div>
-                        <div class="desc">Just me (1 player)</div>
-                    </div>
-                    <div class="playing-option" id="optDuo" onclick="setPlayingMode('duo')">
-                        <div class="icon">👥</div>
-                        <div class="label">Duo</div>
-                        <div class="desc">Me + 1 friend (2 players)</div>
-                    </div>
-                    <div class="playing-option" id="optSquad" onclick="setPlayingMode('squad')">
-                        <div class="icon">🏆</div>
-                        <div class="label">Squad</div>
-                        <div class="desc">Me + friends (up to 6)</div>
-                    </div>
+            <!-- LOCKED MODE BANNER (replaces the selector) -->
+            <div id="modeLockedBanner" class="mode-locked-banner solo">
+                <div class="mlb-icon" id="mlbIcon">👤</div>
+                <div class="mlb-text">
+                    <div class="mlb-title" id="mlbTitle">Solo Mode</div>
+                    <div class="mlb-sub" id="mlbSub">You are registering as a single player for this tournament.</div>
                 </div>
-            </div>
-
-            <div class="solo-note">
-                🎯 <b>Solo Match</b> — Just fill in your IGN, phone, and payment. No team details needed.
             </div>
 
             <!-- SOLO FIELDS -->
@@ -443,8 +428,8 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- TEAM FIELDS -->
-            <div id="teamFields">
+            <!-- TEAM FIELDS (Duo + Squad) -->
+            <div id="teamFields" style="display:none;">
                 <h2 class="section-title">Team Information</h2>
                 <div class="form-group">
                     <label>Team Name *</label>
@@ -466,7 +451,8 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <div id="duoPlayers">
+            <!-- DUO PLAYERS -->
+            <div id="duoPlayers" style="display:none;">
                 <h2 class="section-title">Players (2)</h2>
                 <div class="grid">
                     <div class="form-group"><label>Player 1 IGN *</label><input id="player1"></div>
@@ -474,7 +460,8 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <div id="squadPlayers" class="squad-only">
+            <!-- SQUAD PLAYERS -->
+            <div id="squadPlayers" style="display:none;">
                 <h2 class="section-title">Additional Players</h2>
                 <div class="grid">
                     <div class="form-group"><label>Player 3 IGN</label><input id="player3"></div>
@@ -581,7 +568,7 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 let currentUser = null;
-let currentUsername = "";   // 👈 new: cached username from users/{uid}
+let currentUsername = "";
 let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
@@ -604,18 +591,36 @@ function escapeHTML(v) {
         .replace(/'/g, "&#039;");
 }
 
-window.setPlayingMode = function(mode) {
+// ============================================================
+// SET MODE — now just swaps field visibility, no user toggle
+// ============================================================
+function applyMode(mode) {
     playingMode = mode;
-    document.body.classList.remove("mode-solo", "mode-duo", "mode-squad");
-    document.body.classList.add("mode-" + mode);
 
-    ["optSolo","optDuo","optSquad"].forEach(id => {
-        const el = $(id);
-        if (el) el.classList.remove("active");
-    });
-    const active = mode === "solo" ? $("optSolo") : mode === "duo" ? $("optDuo") : $("optSquad");
-    if (active) active.classList.add("active");
+    // Banner content
+    const banner = $("modeLockedBanner");
+    const icon = $("mlbIcon");
+    const title = $("mlbTitle");
+    const sub = $("mlbSub");
 
+    banner.classList.remove("solo", "duo", "squad");
+    banner.classList.add(mode);
+
+    if (mode === "solo") {
+        icon.textContent = "👤";
+        title.textContent = "Solo Mode";
+        sub.textContent = "You are registering as a single player. No team details needed.";
+    } else if (mode === "duo") {
+        icon.textContent = "👥";
+        title.textContent = "Duo Mode";
+        sub.textContent = "You + 1 teammate. Both player IGNs required.";
+    } else {
+        icon.textContent = "🏆";
+        title.textContent = "Squad Mode";
+        sub.textContent = "Up to 6 players. At least 2 IGNs required.";
+    }
+
+    // Show/hide field groups
     if (mode === "solo") {
         $("soloFields").style.display = "block";
         $("teamFields").style.display = "none";
@@ -632,10 +637,10 @@ window.setPlayingMode = function(mode) {
         $("duoPlayers").style.display = "block";
         $("squadPlayers").style.display = "block";
     }
-};
+}
 
 // ============================================================
-// AUTH GATE + cache username from users/{uid}
+// AUTH GATE + cache username
 // ============================================================
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
@@ -648,7 +653,6 @@ onAuthStateChanged(auth, async (user) => {
     }
     currentUser = user;
 
-    // Get username — fallback chain for reliability
     let display = user.displayName || (user.email ? user.email.split("@")[0] : user.uid) || "Member";
     try {
         const uDoc = await getDoc(doc(db, "users", user.uid));
@@ -667,7 +671,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ============================================================
-// GAME MATCHING
+// GAME MATCHING (fallback for ?game= links)
 // ============================================================
 function normalizeGame(s) {
     return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -691,61 +695,92 @@ function matchGame(game, title, id, urlParam) {
     });
 }
 
+// ============================================================
+// LOAD TOURNAMENT — supports seedKey, tournamentId, or game
+// ============================================================
 async function loadRegistrationPage() {
     try {
         const params = new URLSearchParams(window.location.search);
-        const gameParam = normalizeGame(params.get("game") || "");
-        const tidParam  = params.get("tournamentId") || params.get("tournament");
+        const seedKeyParam = params.get("seedKey") || "";       // ⭐ new
+        const tidParam     = params.get("tournamentId") || params.get("tournament");
+        const gameParam    = normalizeGame(params.get("game") || "");
 
         const snap = await getDocs(collection(db, "tournaments"));
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         if (!all.length) {
-            showMessage("❌ No tournaments found. Please create one from admin panel first.", "error");
+            showMessage("❌ No tournaments found. Please contact admin.", "error");
             $("loading").style.display = "none";
             return;
         }
 
-        if (tidParam) tournament = all.find(t => t.id === tidParam);
+        // Priority 1: seedKey (from the new 3-button layout)
+        if (seedKeyParam) {
+            tournament = all.find(t => t.seedKey === seedKeyParam);
+            if (!tournament) {
+                // Fallback: try matching by ID prefix
+                tournament = all.find(t => t.id === seedKeyParam);
+            }
+        }
+
+        // Priority 2: tournamentId (legacy links)
+        if (!tournament && tidParam) {
+            tournament = all.find(t => t.id === tidParam);
+        }
+
+        // Priority 3: game match (old fallback)
         if (!tournament && gameParam) {
             const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
             const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : matching;
-            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+            tournament = pool.sort((a, b) =>
+                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+            )[0];
         }
+
+        // Priority 4: latest open tournament
         if (!tournament) {
             const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : all;
-            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+            tournament = pool.sort((a, b) =>
+                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+            )[0];
         }
+
         if (!tournament) {
             showMessage("❌ No open tournament found. Please contact admin.", "error");
             $("loading").style.display = "none";
             return;
         }
 
-        const defaultMode = String(tournament.mode || "Squad").trim().toLowerCase();
-        const initialMode = defaultMode === "solo" ? "solo" : defaultMode === "duo" ? "duo" : "squad";
+        // ============================================================
+        // LOCK THE MODE from tournament.mode (no user toggle)
+        // ============================================================
+        const mode = String(tournament.mode || "Squad").trim().toLowerCase();
+        const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
 
+        // Fill tournament box
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
         $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
         $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
 
-        // 🔔 Safety warning — show tournament name prominently
+        // Mode badge
+        const badge = $("modeBadge");
+        badge.textContent = "Mode: " + (tournament.mode || "Squad");
+        badge.classList.add(lockedMode);
+
+        // Safety warning
         const cg = $("confirmGameName");
         if (cg) cg.textContent = tournament.title || tournament.game || "this tournament";
         const w = $("tournamentWarning");
         if (w) w.style.display = "block";
 
-        const badge = $("modeBadge");
-        badge.textContent = "Default: " + (tournament.mode || "Squad");
-        badge.classList.add(initialMode);
-
         $("loading").style.display = "none";
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
+        // Prefill user data
         if (currentUser) {
             const uEmail = currentUser.email || "";
             $("email").value = uEmail;
@@ -757,6 +792,7 @@ async function loadRegistrationPage() {
                     if (u.username) {
                         $("soloIgn").value = u.username;
                         $("captainName").value = u.username;
+                        $("player1").value = u.username;
                     }
                     if (u.phone) {
                         $("soloPhone").value = u.phone;
@@ -767,8 +803,11 @@ async function loadRegistrationPage() {
         }
 
         await loadPaymentMethods();
-        window.setPlayingMode(initialMode);
 
+        // Apply locked mode
+        applyMode(lockedMode);
+
+        // Block if tournament is closed
         const status = String(tournament.status || "").toLowerCase();
         if (status === "completed" || tournament.isFull) {
             $("submitButton").disabled = true;
@@ -781,6 +820,9 @@ async function loadRegistrationPage() {
     }
 }
 
+// ============================================================
+// PAYMENT METHODS
+// ============================================================
 async function loadPaymentMethods() {
     let methods = [];
     try {
@@ -905,16 +947,13 @@ $("registrationForm").addEventListener("submit", async (event) => {
     const transactionId = $("transactionId").value.trim();
     if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
 
-    // ============================================================
-    // Base body — includes username, userId, everything needed
-    // ============================================================
     let body = {
-        // ⭐ NEW: username from Firestore users/{uid}
         username:        currentUsername || currentUser.email?.split("@")[0] || "Player",
         userId:          currentUser.uid,
         userEmail:       currentUser.email || "",
         tournamentId:    tournament.id,
         tournamentTitle: tournament.title || tournament.name || "",
+        tournamentSeedKey: tournament.seedKey || "",
         game:            tournament.game || "",
         tournamentMode:  tournament.mode || "Squad",
         playingAs:       playingMode,
@@ -988,15 +1027,13 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
     }
 
-    // ============================================================
-    // 🛡️ CONFIRMATION DIALOG — one last check
-    // ============================================================
+    // Confirmation dialog
     const tName = tournament.title || tournament.game || "this tournament";
     const confirmMsg =
         `Tapaile "${tName}" ma register garna lageko chhau.\n\n` +
         `Game: ${tournament.game || "—"}\n` +
+        `Mode: ${tournament.mode || "—"}\n` +
         (body.teamName ? `Team: ${body.teamName}\n` : "") +
-        (body.playingAs ? `Playing as: ${body.playingAs}\n` : "") +
         `Amount: Rs ${body.amount}\n\n` +
         `Confirm garnus?`;
     if (!confirm(confirmMsg)) {
