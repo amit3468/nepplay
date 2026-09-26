@@ -1,1636 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Tournaments — Nepal Gaming</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEPPLAY — Tournaments</title>
+<link rel="icon" href="/favicon.ico" />
+
 <style>
-  .confirm-box { text-align: center; padding: 8px 4px 4px; }
-  .confirm-icon { font-size: 60px; line-height: 1; margin-bottom: 8px; animation: confirmPop .5s ease-out; }
-  @keyframes confirmPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
-  .confirm-title { font-size: 22px; font-weight: 800; color: #22c55e; margin: 0 0 6px; }
-  .confirm-sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
-  .confirm-tourney { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; text-align: left; }
-  .confirm-tourney .tname { font-weight: 800; color: #fff; font-size: 15px; margin-bottom: 4px; }
-  .confirm-tourney .tmeta { color: #9ca3af; font-size: 12px; }
-  .confirm-rows { text-align: left; margin-bottom: 18px; }
-  .confirm-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 13px; }
-  .confirm-row:last-child { border-bottom: none; }
-  .confirm-row .k { color: #9ca3af; }
-  .confirm-row .v { color: #fff; font-weight: 700; }
-  .confirm-actions { display: flex; flex-direction: column; gap: 10px; }
-  .confirm-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 18px; border-radius: 12px; font-weight: 800; font-size: 14px; text-decoration: none; cursor: pointer; border: none; width: 100%; box-sizing: border-box; }
-  .confirm-btn-wa      { background: linear-gradient(135deg, #25D366, #128C7E); color: #fff; }
-  .confirm-btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; }
-  .confirm-btn-ghost   { background: transparent; color: #9ca3af; border: 1px solid rgba(255,255,255,0.15); }
-  .copy-mini { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-left: 8px; }
-
-  .card-badges {
-    position: absolute; top: 10px; left: 10px; right: 10px;
-    display: flex; gap: 6px; flex-wrap: wrap;
-    pointer-events: none;
-    z-index: 5;
+  :root {
+    --bg: #0a0618;
+    --purple: #7c3aed;
+    --purple-2: #a855f7;
+    --gold: #f59e0b;
+    --gold-2: #fbbf24;
+    --green: #22c55e;
+    --text: #f5f3ff;
+    --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25);
+    --card: rgba(30, 18, 60, 0.75);
+    --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
-  .urgency-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font-size: 10.5px;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    background: rgba(15, 8, 35, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.15rem;
+  }
+  .brand .logo {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center; font-size: 1rem;
+  }
+  .brand .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    display: grid; place-items: center; font-weight: 700; font-size: 0.85rem;
+    margin-left: 6px;
+  }
+  .nav-links {
+    display: flex; gap: 18px; font-size: 0.95rem; align-items: center;
+  }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; transition: color 0.2s;
+    display: inline-flex; align-items: center;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--gold-2); }
+  .nav-links a.winners-link {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d !important;
+    padding: 6px 14px; border-radius: 999px;
     font-weight: 800;
-    letter-spacing: 0.3px;
-    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    transition: transform 0.15s, box-shadow 0.2s;
   }
-  .badge-urgent { background: rgba(220,38,38,0.9); color: #fff; animation: badgePulse 1.5s infinite; }
-  .badge-filling { background: rgba(234,179,8,0.9); color: #fff; }
-  .badge-closing { background: rgba(251,146,60,0.95); color: #fff; animation: badgePulse 1.8s infinite; }
-  .badge-full { background: rgba(71,85,105,0.95); color: #fff; }
-  .badge-live { background: rgba(220,38,38,0.95); color: #fff; animation: badgePulse 1.2s infinite; }
-  @keyframes badgePulse {
-    0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
-    50% { box-shadow: 0 0 0 6px rgba(0,0,0,0); opacity: 0.85; }
+  .nav-links a.winners-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
   }
-  .countdown-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 11.5px;
+  .nav-links a.store-link {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff !important;
+    padding: 6px 14px; border-radius: 999px;
     font-weight: 800;
-    background: rgba(99,102,241,0.15);
-    color: #a5b4fc;
-    border: 1px solid rgba(99,102,241,0.35);
-    font-variant-numeric: tabular-nums;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+    transition: transform 0.15s, box-shadow 0.2s;
   }
-  .countdown-chip.warn { background: rgba(234,179,8,0.15); color: #fbbf24; border-color: rgba(234,179,8,0.4); }
-  .countdown-chip.danger { background: rgba(220,38,38,0.15); color: #f87171; border-color: rgba(220,38,38,0.5); animation: badgePulse 1.5s infinite; }
-  .countdown-chip.over { background: rgba(220,38,38,0.25); color: #fff; border-color: rgba(220,38,38,0.6); }
-  .slots-spots-left { font-size: 11px; font-weight: 700; color: #fbbf24; margin-top: 2px; }
-  .btn-join:disabled, .btn-join.btn-disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.6); }
-
-  .card-share-btn {
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.4);
-    color: #a5b4fc;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .card-share-btn:hover {
-    background: rgba(99,102,241,0.3);
-    color: #fff;
-    border-color: rgba(99,102,241,0.6);
-  }
-  .card-share-btn.copied {
-    background: rgba(34,197,94,0.3);
-    color: #4ade80;
-    border-color: rgba(34,197,94,0.5);
-  }
-  .card-share-btn.wa-share {
-    background: rgba(37,211,102,0.15);
-    border-color: rgba(37,211,102,0.5);
-    color: #4ade80;
-  }
-  .card-share-btn.wa-share:hover {
-    background: rgba(37,211,102,0.35);
-    color: #fff;
-    border-color: rgba(37,211,102,0.8);
-  }
-  .tournament-card.highlight {
-    animation: cardHighlight 3s ease-out;
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 4px rgba(99,102,241,0.35), 0 15px 40px rgba(99,102,241,0.4) !important;
-    transform: translateY(-4px);
-  }
-  @keyframes cardHighlight {
-    0% { box-shadow: 0 0 0 12px rgba(99,102,241,0.6), 0 15px 40px rgba(99,102,241,0.6); transform: scale(1.03); }
-    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 12px 30px rgba(0,0,0,0.4); transform: scale(1); }
+  .nav-links a.store-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.7);
   }
 
-  .whatsapp-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    background: #25D366;
-    border-radius: 50%;
-    padding: 12px;
-    box-shadow: 0 4px 20px rgba(37,211,102,0.6);
-    animation: pulse-wa 2s infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-  @keyframes pulse-wa {
-    0%,100% { transform: scale(1); box-shadow: 0 4px 20px rgba(37,211,102,0.6); }
-    50% { transform: scale(1.1); box-shadow: 0 4px 30px rgba(37,211,102,1); }
-  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
-  .social-header {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-left: auto;
-  }
-  .social-header a {
-    font-size: 18px;
-    text-decoration: none;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(99,102,241,0.4);
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s, background 0.2s;
-  }
-  .social-header a:hover {
-    transform: scale(1.15);
-    background: rgba(99,102,241,0.3);
-  }
-
-  .bonus-banner {
-    background: linear-gradient(90deg, #6366f1, #a855f7);
-    color: #fff;
+  .auto-counter {
+    background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
+    border-radius: 22px;
+    padding: 30px;
     text-align: center;
-    padding: 12px;
-    font-weight: 800;
-    font-size: 14px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    animation: shine 3s infinite;
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    transition: transform 0.15s;
+    box-shadow: var(--shadow);
+    margin-bottom: 26px;
+    position: relative;
+    overflow: hidden;
   }
-  .bonus-banner:hover { transform: scale(1.01); }
-  @keyframes shine {
-    0%,100% { filter: brightness(1); }
-    50% { filter: brightness(1.25); }
+  .auto-counter h2 {
+    font-size: 1rem;
+    color: var(--gold-2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .auto-counter .big {
+    font-size: 2.6rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fbbf24, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .auto-counter .sub {
+    color: #ddd6fe;
+    font-size: 0.9rem;
+    margin-top: 8px;
   }
 
-  .qr-section {
-    text-align: center;
-    padding: 24px;
-    background: rgba(255,255,255,0.04);
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 22px;
+  }
+
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .game-card {
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    margin: 30px auto;
-    max-width: 320px;
-    border: 2px solid rgba(99,102,241,0.5);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
-  .qr-section img {
-    background: white;
-    padding: 10px;
-    border-radius: 10px;
-    width: 200px;
-    height: 200px;
+  .game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.35);
+    border-color: rgba(168, 85, 247, 0.5);
   }
-  .qr-section p {
-    color: #a5b4fc;
-    font-weight: 700;
-    margin-top: 12px;
-    font-size: 13px;
-  }
-
-  .coupon-row { display: flex; gap: 8px; margin-bottom: 4px; }
-  .coupon-row input { flex: 1; text-transform: uppercase; font-weight: 700; }
-  .coupon-row button {
-    background: rgba(34,197,94,0.2);
-    border: 1px solid rgba(34,197,94,0.6);
-    color: #4ade80;
-    padding: 0 16px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 12px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .coupon-row button:hover { background: rgba(34,197,94,0.4); }
-
-  .discount-line {
+  .game-card .icon { font-size: 2rem; }
+  .game-card .name { font-weight: 800; font-size: 1.1rem; }
+  .game-card .meta {
     display: flex; justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(34,197,94,0.12);
-    border-left: 3px solid #22c55e;
-    border-radius: 6px;
-    margin: 8px 0;
-    font-size: 13px;
-    font-weight: 700;
-    color: #4ade80;
+    font-size: 0.8rem; color: var(--muted);
   }
+  .game-card .meta strong { color: var(--gold-2); }
+  .game-card .join-btn {
+    display: block; text-align: center;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; text-decoration: none;
+    font-weight: 800; font-size: 0.9rem;
+    padding: 11px; border-radius: 10px;
+    transition: transform 0.15s;
+    margin-top: 6px;
+  }
+  .game-card .join-btn:hover { transform: translateY(-1px); }
 
-  .newuser-hint {
-    background: rgba(34,197,94,0.1);
-    border: 1px solid rgba(34,197,94,0.4);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 14px;
-    font-size: 12.5px;
-    color: #86efac;
+  .room-note {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    color: var(--gold-2);
+    margin-bottom: 22px;
     line-height: 1.5;
   }
 
-  .first12-banner {
-    background: linear-gradient(90deg, #dc2626, #ea580c);
-    color: #fff;
-    text-align: center;
-    padding: 10px;
-    font-weight: 900;
-    font-size: 14px;
-    border-radius: 10px;
-    margin-bottom: 14px;
-    animation: pulse6 1.5s infinite;
-    letter-spacing: 0.5px;
+  @media (max-width: 720px) {
+    .nav-links { gap: 8px; font-size: 0.78rem; }
+    .nav-links a.winners-link,
+    .nav-links a.store-link { padding: 5px 10px; }
+    .nav-links a:not(.winners-link):not(.store-link):not(.active) { display: none; }
+    .game-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .game-card { padding: 14px; }
+    .auto-counter .big { font-size: 2rem; }
   }
-  @keyframes pulse6 {
-    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38,0.7); }
-    50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(220,38,38,0); }
+  @media (max-width: 460px) {
+    .game-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<a href="#tournaments" class="bonus-banner" onclick="activateNewUserMode(event)">
-  🎁 FIRST TIME PLAYING? Get <strong>Rs 25 OFF</strong> — Tap to claim →
-</a>
-
-<header class="site-header">
-  <div class="logo">🎮 <b>Nepal Gaming</b></div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="tournaments.html" class="active">Tournaments</a>
-    <a href="tournaments.html#live">🔴 Live</a>
-    <a href="winners.html">Winners</a>
-    <a href="leaderboard.html">Leaderboard</a>
-    <a href="teams.html">Teams</a>
-    <a href="support.html">Support</a>
-  </nav>
-  <div class="social-header">
-    <a href="https://www.facebook.com/share/1crFFEo5qR/" target="_blank" title="Facebook">📘</a>
-    <a href="https://www.instagram.com/nepplaysofficial" target="_blank" title="Instagram">📸</a>
-    <a href="https://www.tiktok.com/@nepplay666" target="_blank" title="TikTok">🎵</a>
-    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" title="WhatsApp">💬</a>
+<nav class="topnav">
+  <div class="brand">
+    <span class="logo">🎮</span>
+    Nepal Gaming
+    <span class="avatar">C</span>
   </div>
-</header>
+  <div class="nav-links">
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html" class="active">Tournaments</a>
+    <a href="/winners.html" class="winners-link">🏆 Winners</a>
+    <a href="/store.html" class="store-link">🛒 Store</a>
+    <a href="/teams.html">Teams</a>
+    <a href="/profile.html">My Profile</a>
+    <a href="/support.html">Support</a>
+  </div>
+</nav>
 
-<section class="hero">
-  <span class="pill">⚡ Registration Open · Closes 25 Sept 8 PM NPT</span>
-  <h1>🏆 26 September Tournaments</h1>
-  <p>8 Paid Tournaments · Rs. 150 Entry · Rs. 1,000 Winner</p>
-</section>
+<div class="container">
 
-<section id="live" style="max-width:1300px; margin:0 auto; padding:0 32px; margin-bottom:24px;">
-  <div id="liveInner" style="background: linear-gradient(135deg, #dc2626, #7f1d1d); border-radius:16px; padding:20px; border:2px solid #ef4444; box-shadow: 0 0 30px rgba(220,38,38,0.4);">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-      <span style="font-size:24px; animation:pulse-live-red 1.5s infinite;">🔴</span>
-      <h2 style="margin:0; color:#fff; font-size:18px;">LIVE NOW</h2>
-      <span id="liveCount" style="color:#fecaca; font-size:14px;">— players streaming</span>
+  <div class="auto-counter" id="autoCounter">
+    <h2>● Registration Countdown</h2>
+    <div class="big" id="counterDisplay">--:--:--</div>
+    <div class="sub">Loading counter… auto-syncs from server.</div>
+  </div>
+
+  <h1 class="page-title">26 September — 8-Game Tournament Day 🎮</h1>
+  <p class="page-sub">
+    Aaja 1:00 PM NPT · Rs 150 entry · Rs 1000 prize per game · Top Killer Rs 400
+  </p>
+
+  <div class="room-note">
+    🔓 <strong>Room details auto-reveal 30 minutes before match</strong> (12:30 PM NPT).
+    Refresh this page at 12:30 PM to see room IDs and passwords.
+  </div>
+
+  <div class="game-grid">
+
+    <div class="game-card">
+      <div class="icon">🔥</div>
+      <div class="name">Free Fire</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=freefire" class="join-btn">Register</a>
     </div>
-    <div id="liveStreamersList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px;"></div>
+
+    <div class="game-card">
+      <div class="icon">🎯</div>
+      <div class="name">PUBG Mobile</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=pubg" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">🎖️</div>
+      <div class="name">Call of Duty</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=cod" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">⚔️</div>
+      <div class="name">Valorant</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=valorant" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">⚽</div>
+      <div class="name">eFootball</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=efootball" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">🏏</div>
+      <div class="name">eCricket</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=ecricket" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">♟️</div>
+      <div class="name">Chess</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=chess" class="join-btn">Register</a>
+    </div>
+
+    <div class="game-card">
+      <div class="icon">🎲</div>
+      <div class="name">Ludo</div>
+      <div class="meta"><span>Entry: <strong>Rs 150</strong></span><span>Prize: Rs 1000</span></div>
+      <a href="/register.html?game=ludo" class="join-btn">Register</a>
+    </div>
+
   </div>
-</section>
 
-<style>
-@keyframes pulse-live-red { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.6; transform:scale(1.15); } }
-.live-badge { display:inline-flex; align-items:center; gap:4px; background:#dc2626; color:#fff; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; animation:pulse-live-red 2s infinite; }
-.stream-btn { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff; padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; transition:transform 0.15s; }
-.stream-btn:hover { transform:scale(1.05); }
-.stream-card { background:rgba(0,0,0,0.3); border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.15); }
-.stream-card .name { color:#fff; font-weight:700; font-size:14px; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.stream-card .tourney { color:#fecaca; font-size:11px; margin-bottom:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-</style>
-
-<section id="myTournamentsSection" style="display:none; max-width:1300px; margin:0 auto; padding:0 32px;">
-  <h2 style="margin-top:20px;">🎯 My Tournaments</h2>
-  <p class="muted" style="margin-bottom:16px;">Tournaments you've joined — room details appear here</p>
-  <div class="list" id="myTournamentsList"></div>
-</section>
-
-<div class="filters" id="gameFilters">
-  <button class="game-tab active" data-game="all"       onclick="filterByGame('all')">All Games</button>
-  <button class="game-tab"        data-game="freefire"  onclick="filterByGame('freefire')">Free Fire</button>
-  <button class="game-tab"        data-game="pubg"      onclick="filterByGame('pubg')">PUBG</button>
-  <button class="game-tab"        data-game="cod"       onclick="filterByGame('cod')">COD</button>
-  <button class="game-tab"        data-game="efootball" onclick="filterByGame('efootball')">eFootball</button>
-  <button class="game-tab"        data-game="ecricket"  onclick="filterByGame('ecricket')">eCricket</button>
-  <button class="game-tab"        data-game="valorant"  onclick="filterByGame('valorant')">Valorant</button>
-  <button class="game-tab"        data-game="ludo"      onclick="filterByGame('ludo')">Ludo</button>
-  <button class="game-tab"        data-game="chess"     onclick="filterByGame('chess')">Chess</button>
 </div>
 
-<div class="tournament-type-tabs">
-  <button id="tabAll"  class="type-tab"        onclick="filterTournamentType('all')">🎯 All</button>
-  <button id="tabFree" class="type-tab"        onclick="filterTournamentType('free')">🆓 Free Entry</button>
-  <button id="tabPaid" class="type-tab active" onclick="filterTournamentType('paid')">💵 Paid Entry</button>
-</div>
-
-<div class="tournament-grid" id="tournamentGrid" name="tournaments">
-  <div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>
-</div>
-
-<div id="joinModal" class="modal-overlay">
-  <div class="modal-box small">
-    <button class="modal-close" onclick="closeJoinModal()">✕</button>
-    <h2>🎮 Join Tournament</h2>
-    <p class="modal-sub"><b id="joinTournamentTitle">Free Fire Solo Cup</b></p>
-
-    <div id="first12Notice" class="first12-banner" style="display:none;">
-      ⚡ ONLY FIRST 12 PLAYERS GET IN — REGISTER FAST! ⚡
-    </div>
-
-    <form id="joinForm" onsubmit="submitJoin(event)">
-      <input type="hidden" id="joinTournamentId">
-      <label>🎮 Your IGN (In-Game Name) *</label>
-      <input type="text" id="joinIgn" placeholder="e.g. Amit" required>
-      <label>📱 Phone Number *</label>
-      <input type="text" id="joinPhone" placeholder="e.g. 9800000000" required>
-      <label>📺 Live Stream URL <small style="color:#6b7280;">(optional)</small></label>
-      <input type="url" id="joinStreamUrl" placeholder="https://youtube.com/live/...">
-      <p class="hint" style="font-size:12px; margin-top:-6px;">Paste your YouTube/Facebook/TikTok Live link so other players can watch you play.</p>
-      <button type="submit" class="btn-submit-pay" id="joinSubmitBtn">✅ Join Tournament</button>
-      <p class="hint center">Free entry — no payment needed</p>
-    </form>
-  </div>
-</div>
-
-<div id="paymentModal" class="modal-overlay">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closePaymentModal()">✕</button>
-    <h2>💳 Complete Payment</h2>
-    <p class="modal-sub">
-      <b id="mTournamentTitle">Free Fire Paid Championship</b><br>
-      Entry Fee: <b>Rs. <span id="mFee">150</span></b> |
-      🏆 Prize: <b>Rs. <span id="mPrize">1000</span></b> |
-      🎯 Top Kills: <b>Rs. <span id="mKills">500</span></b>
-    </p>
-
-    <div id="newUserHint" class="newuser-hint" style="display:none;">
-      🎉 <b>New User Discount Active!</b><br>
-      Rs 25 off applied automatically — you pay <b>Rs 125</b> instead of Rs 150.
-    </div>
-
-    <div class="pay-tabs pay-tabs-4">
-      <button class="pay-tab active" data-method="esewa"  onclick="switchPay('esewa')">💚 eSewa</button>
-      <button class="pay-tab"        data-method="khalti" onclick="switchPay('khalti')">💜 Khalti</button>
-      <button class="pay-tab"        data-method="imepay" onclick="switchPay('imepay')">🟠 IME Pay</button>
-      <button class="pay-tab"        data-method="bank"   onclick="switchPay('bank')">🏦 Bank</button>
-    </div>
-    <div id="esewaPanel" class="pay-panel">
-      <div class="pay-info">
-        <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
-        <p class="pay-number">📱 9748835184</p>
-        <img src="esewa-qr.png" alt="eSewa QR" class="qr-img" onerror="this.style.display='none'">
-        <p class="hint">Scan QR or send to the number above</p>
-      </div>
-    </div>
-    <div id="khaltiPanel" class="pay-panel" style="display:none">
-      <div class="pay-info">
-        <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
-        <p class="pay-number">📱 9766258368</p>
-        <img src="khalti-qr.png" alt="Khalti QR" class="qr-img" onerror="this.style.display='none'">
-        <p class="hint">Scan QR or send to the number above</p>
-      </div>
-    </div>
-    <div id="imepayPanel" class="pay-panel" style="display:none">
-      <div class="pay-info">
-        <p>Send <b>Rs. <span class="payAmt">150</span></b> to:</p>
-        <p class="pay-number">📱 9766258368</p>
-        <p class="hint">Open IME Pay app → Send Money → Enter number above</p>
-        <p class="hint warn">⚠ IME Pay uses number only (no QR)</p>
-      </div>
-    </div>
-    <div id="bankPanel" class="pay-panel" style="display:none">
-      <div class="pay-info">
-        <p>🏦 <b>Bank Transfer</b></p>
-        <div class="bank-coming-soon">
-          <span class="cs-icon">⏳</span>
-          <h4>Coming Soon</h4>
-          <p>Bank account details will be updated here shortly.</p>
-          <p class="hint">Please use eSewa, Khalti, or IME Pay for now.</p>
-        </div>
-      </div>
-    </div>
-    <form id="payForm" onsubmit="submitPayment(event)">
-      <input type="hidden" id="payTournamentId">
-      <input type="hidden" id="payMethod" value="esewa">
-
-      <label>🎁 Coupon Code <small style="color:#6b7280;">(optional)</small></label>
-      <div class="coupon-row">
-        <input type="text" id="payCoupon" placeholder="Enter coupon code" style="text-transform:uppercase;">
-        <button type="button" onclick="applyCoupon()">Apply</button>
-      </div>
-      <p id="couponMsg" class="hint" style="display:none; margin-top:-4px;"></p>
-
-      <div id="discountLine" class="discount-line" style="display:none;">
-        <span>🎁 New User Discount</span>
-        <span>− Rs <span id="discountAmt">25</span></span>
-      </div>
-
-      <label>🔖 Transaction ID *</label>
-      <input type="text" id="payTxn" placeholder="e.g. 8X72H91K" required>
-      <label>🎮 Your IGN (In-Game Name) *</label>
-      <input type="text" id="payIgn" placeholder="e.g. Amit" required>
-      <label>📱 Phone Number *</label>
-      <input type="text" id="payPhone" placeholder="e.g. 9800000000" required>
-      <label>📺 Live Stream URL <small style="color:#6b7280;">(optional)</small></label>
-      <input type="url" id="payStreamUrl" placeholder="https://youtube.com/live/...">
-      <p class="hint" style="font-size:12px; margin-top:-6px;">Paste your YouTube/Facebook/TikTok Live link so other players can watch you play.</p>
-      <label>📸 Payment Screenshot *</label>
-      <div class="upload-zone" onclick="document.getElementById('payShot').click()">
-        <input type="file" id="payShot" accept="image/*" hidden required onchange="previewShot(this)">
-        <div id="uploadPrompt">
-          <span class="upload-icon">📸</span>
-          <p>Click to upload screenshot</p>
-          <small>PNG, JPG — max 5MB</small>
-        </div>
-        <img id="shotPreview" style="display:none">
-      </div>
-      <button type="submit" class="btn-submit-pay" id="paySubmitBtn">✅ Submit for Admin Approval</button>
-      <p class="hint center">Admin will verify within 24 hours</p>
-    </form>
-  </div>
-</div>
-
-<div id="confirmModal" class="modal-overlay">
-  <div class="modal-box small">
-    <div class="confirm-box">
-      <div class="confirm-icon" id="confirmIcon">🎉</div>
-      <h2 class="confirm-title" id="confirmTitle">You're In!</h2>
-      <p class="confirm-sub" id="confirmSub">Registration successful</p>
-      <div class="confirm-tourney">
-        <div class="tname" id="confirmTourneyName">Tournament</div>
-        <div class="tmeta" id="confirmTourneyMeta">—</div>
-      </div>
-      <div class="confirm-rows" id="confirmRows"></div>
-      <div class="confirm-actions">
-        <button type="button" id="confirmShareCardBtn" class="confirm-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;" onclick="shareRegistrationCard()">
-          <i class="fa-solid fa-image"></i> 📸 Share Your Card
-        </button>
-        <a href="#" id="confirmWaBtn" target="_blank" class="confirm-btn confirm-btn-wa">💬 Share on WhatsApp</a>
-        <button type="button" class="confirm-btn confirm-btn-primary" onclick="closeConfirmAndScroll()">🎯 View My Tournaments</button>
-        <button type="button" class="confirm-btn confirm-btn-ghost" onclick="closeConfirmModal()">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="shotModal" class="modal-overlay" onclick="this.style.display='none'">
-  <img id="shotFull" class="lightbox-img">
-</div>
-
-<section style="max-width:1300px; margin:0 auto; padding:0 32px;">
-  <div class="qr-section">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://nepplay.onrender.com/tournaments.html" alt="Scan to Register">
-    <p>📱 Scan to Register on Mobile</p>
-  </div>
-</section>
-
-<footer class="landing-footer" style="margin-top:60px;">
-  <div style="margin-bottom:16px;font-size:16px;font-weight:700;color:#fff;">🎮 NEPPLAY</div>
-
-  <div style="margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank">💬 WhatsApp Group</a>
-    <a href="https://www.facebook.com/share/1crFFEo5qR/" target="_blank">📘 Facebook</a>
-    <a href="https://www.instagram.com/nepplaysofficial" target="_blank">📸 Instagram</a>
-    <a href="https://www.tiktok.com/@nepplay666" target="_blank">🎵 TikTok</a>
-  </div>
-
-  <div style="margin-bottom:16px;">
-    <a href="terms.html">Terms of Service</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="refund.html">Refund Policy</a>
-    <a href="support.html">Support</a>
-  </div>
-  <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
-</footer>
-
-<a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb"
-   class="whatsapp-float" target="_blank" aria-label="Join WhatsApp">
-  <svg viewBox="0 0 32 32" width="32" height="32" fill="white">
-    <path d="M16 0C7.2 0 0 7.2 0 16c0 2.8.7 5.5 2.1 7.9L0 32l8.4-2.2c2.3 1.3 4.9 1.9 7.6 1.9 8.8 0 16-7.2 16-16S24.8 0 16 0zm0 29.3c-2.4 0-4.7-.6-6.7-1.8l-.5-.3-5 1.3 1.3-4.9-.3-.5c-1.3-2.1-2-4.5-2-7.1 0-7.3 5.9-13.2 13.2-13.2S29.3 8.7 29.3 16 23.4 29.3 16 29.3zm7.2-9.9c-.4-.2-2.3-1.1-2.7-1.3-.4-.1-.6-.2-.9.2-.3.4-1 1.3-1.3 1.5-.2.3-.5.3-.9.1-.4-.2-1.7-.6-3.2-2-1.2-1-2-2.3-2.2-2.7-.2-.4 0-.6.2-.8.2-.2.4-.5.6-.7.2-.2.3-.4.4-.7.1-.3 0-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.6-.7-.9-.7h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.8 0 1.7 1.2 3.3 1.4 3.5.2.2 2.4 3.7 5.9 5.2.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.7.2-1.8-.1-.2-.3-.2-.7-.4z"/>
-  </svg>
-</a>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, setDoc, updateDoc }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
-    authDomain: "nepplaygaming.firebaseapp.com",
-    projectId: "nepplaygaming",
-    storageBucket: "nepplaygaming.firebasestorage.app",
-    messagingSenderId: "893565645520",
-    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
-    measurementId: "G-3PXN38XFG9"
-};
-
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
-
-console.log("🔥 Firebase ready on tournaments page");
-
-let currentUser = null;
-let currentUid  = null;
-let TOURNAMENTS = [];
-let lastConfirmData = null;
-const filterState = { game: 'all', type: 'paid' };
-
-const NEW_USER_DISCOUNT = 25;
-let newUserModeActive = false;
-let userIsNew = false;
-
-function compressImageToBase64(file, maxDim = 800, quality = 0.7) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Could not read file'));
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('Not a valid image'));
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
-        else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        const base64 = dataUrl.split(',')[1] || '';
-        resolve({ base64, dataUrl, width, height, sizeKB: Math.round((base64.length * 3 / 4) / 1024) });
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = {
-      uid: user.uid,
-      email: user.email || '',
-      username: user.displayName || (user.email ? user.email.split('@')[0] : 'Player'),
-      displayName: user.displayName
-    };
-    currentUid = user.uid;
-    console.log("👤 Firebase user:", currentUser.username, "| uid:", currentUid);
-    await checkIfUserIsNew();
-    loadMyTournaments();
-  } else {
-    console.log("👤 No Firebase user — visitor mode");
-    userIsNew = true;
-  }
-});
-
-async function checkIfUserIsNew() {
-  if (!currentUid) { userIsNew = true; return; }
-  try {
-    const snap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('userId', '==', currentUid)
-    ));
-    userIsNew = snap.empty;
-    console.log("🎁 User is new:", userIsNew);
-    if (!userIsNew) {
-      newUserModeActive = false;
-      const banner = document.querySelector('.bonus-banner');
-      if (banner) banner.style.display = 'none';
+<script>
+  // Placeholder auto-counter. Replace with your existing Firestore sync if already wired.
+  (function tick() {
+    const target = new Date();
+    target.setHours(13, 0, 0, 0);
+    function update() {
+      const now = new Date();
+      let diff = Math.max(0, target - now);
+      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      const el = document.getElementById('counterDisplay');
+      if (el) el.textContent = `${h}:${m}:${s}`;
     }
-  } catch (err) {
-    console.warn('checkIfUserIsNew error:', err);
-    userIsNew = true;
-  }
-}
-
-window.activateNewUserMode = function(event) {
-  event.preventDefault();
-  const grid = document.getElementById('tournamentGrid');
-  if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  if (!userIsNew) {
-    window.showToast('ℹ️ New user discount is only for first-time players');
-    return;
-  }
-  newUserModeActive = true;
-  window.showToast('🎁 Rs 25 OFF activated! Pick any tournament → discount auto-applies at payment.');
-};
-
-async function seedPaidTournamentsIfNeeded() {
-  try {
-    const SEEDS = [
-      { id:'seed_paid_ff',       title:'Free Fire Paid Championship', game:'Free Fire', mode:'Squad', date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_pubg',     title:'PUBG Paid Pro Cup',           game:'PUBG',      mode:'Squad', date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_cod',      title:'COD Mobile Paid Cup',         game:'COD',       mode:'Squad', date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_efoot',    title:'eFootball Paid 1v1 Cup',      game:'eFootball', mode:'1v1',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_ecricket', title:'eCricket Paid Cup',           game:'eCricket',  mode:'1v1',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_valorant', title:'Valorant Paid Cup',           game:'Valorant',  mode:'5v5',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_ludo',     title:'Ludo King Paid Championship', game:'Ludo',      mode:'1v1',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_paid_chess',    title:'Chess Paid Championship',     game:'Chess',     mode:'1v1',   date:'2026-09-26', time:'13:00' },
-      { id:'seed_free_ff_mini',
-        title:'⚡ Free Fire Mini — First 12 Only ⚡',
-        game:'Free Fire', mode:'Solo', date:'2026-09-25', time:'13:00',
-        entryType:'free', entryFee:0, prizePool:250, topKillsPrize:80, max:12 }
-    ];
-
-    const snap = await getDocs(collection(db, 'tournaments'));
-    const existingIds = new Set(snap.docs.map(d => d.id));
-    const existingTitles = new Set(snap.docs.map(d => (d.data().title || '').toString().trim().toLowerCase()));
-    let created = 0;
-
-    for (const s of SEEDS) {
-      if (existingIds.has(s.id)) continue;
-      if (existingTitles.has(s.title.toLowerCase())) continue;
-      await setDoc(doc(db, 'tournaments', s.id), {
-        title: s.title,
-        game: s.game,
-        mode: s.mode,
-        entryType: s.entryType || 'paid',
-        entryFee: s.entryFee !== undefined ? s.entryFee : 150,
-        prizePool: s.prizePool !== undefined ? s.prizePool : 1000,
-        topKillsPrize: s.topKillsPrize !== undefined ? s.topKillsPrize : 500,
-        date: s.date,
-        time: s.time,
-        filled: 0,
-        max: s.max !== undefined ? s.max : 100,
-        createdAt: serverTimestamp()
-      });
-      created++;
-    }
-    if (created > 0) console.log(`✅ Seeded ${created} new tournaments`);
-    else console.log("✅ All tournaments exist");
-  } catch (err) { console.warn("⚠️ Seed failed:", err.message); }
-}
-
-function getTournamentStart(t) {
-  if (!t.date || t.date === '—') return null;
-  const timeStr = (t.time && t.time !== '—') ? t.time : '00:00';
-  const iso = `${t.date}T${timeStr}:00+05:45`;
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
-  return d;
-}
-
-function countdownLabel(t) {
-  const start = getTournamentStart(t);
-  if (!start) return { text: '', cls: '' };
-  const now = Date.now();
-  const diff = start.getTime() - now;
-  if (diff < 0) {
-    const hoursSince = -diff / 3600000;
-    if (hoursSince < 3) return { text: '🔴 IN PROGRESS', cls: 'over' };
-    return { text: '✅ COMPLETED', cls: 'over' };
-  }
-  const mins = Math.floor(diff / 60000);
-  const hours = Math.floor(mins / 60);
-  const days = Math.floor(hours / 24);
-  if (days >= 1) return { text: `⏱ ${days}d ${hours % 24}h`, cls: '' };
-  if (hours >= 1) return { text: `⏱ ${hours}h ${mins % 60}m`, cls: 'warn' };
-  return { text: `⏱ ${mins}m`, cls: 'danger' };
-}
-
-function urgencyBadge(t) {
-  const filled = Number(t.filled || 0);
-  const max = Number(t.max || 50);
-  const spotsLeft = Math.max(max - filled, 0);
-  if (filled >= max) return { text: '❌ FULL', cls: 'badge-full' };
-  if (spotsLeft <= 5) return { text: `🔥 Only ${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left`, cls: 'badge-urgent' };
-  const pct = max > 0 ? (filled / max) : 0;
-  if (pct >= 0.8) return { text: '⚡ Filling fast', cls: 'badge-closing' };
-  return null;
-}
-
-function isTournamentFull(t) { return Number(t.filled || 0) >= Number(t.max || 50); }
-function isTournamentOver(t) {
-  const start = getTournamentStart(t);
-  if (!start) return false;
-  return Date.now() > start.getTime() + 3 * 3600000;
-}
-
-function gameKey(g) {
-  return (g || '').toString().toLowerCase().replace(/[^a-z]/g, '');
-}
-
-// ✅ SYNC: count real registrations and update filled
-async function syncTournamentFilled(tid) {
-  try {
-    const snap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', tid),
-      where('status', 'in', ['confirmed', 'pending'])
-    ));
-    const realCount = snap.size;
-    await updateDoc(doc(db, 'tournaments', tid), { filled: realCount });
-    console.log("🔄 Synced", tid, "→", realCount);
-    return realCount;
-  } catch (err) {
-    console.warn('syncTournamentFilled failed:', err);
-    return null;
-  }
-}
-
-async function loadTournaments() {
-  const grid = document.getElementById('tournamentGrid');
-  grid.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading tournaments...</div>';
-  try {
-    await seedPaidTournamentsIfNeeded();
-    const snap = await getDocs(collection(db, 'tournaments'));
-    TOURNAMENTS = snap.docs.map(d => {
-      const t = d.data();
-      const entryTypeRaw = (t.entryType || t.entry_type || 'free').toString().toLowerCase();
-      const feeValue = Number(t.entryFee || t.entry_fee || 0);
-      const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
-      const g = (t.game || '').toString().toLowerCase();
-      let color = 'blue';
-      if (g.includes('free fire')) color = 'orange';
-      else if (g.includes('cod'))  color = 'green';
-      else if (g.includes('pubg')) color = 'purple';
-      else if (g.includes('ludo')) color = 'pink';
-      else if (g.includes('valorant')) color = 'blue';
-      else if (g.includes('football') || g.includes('efootball')) color = 'green';
-      else if (g.includes('chess')) color = 'blue';
-      else if (g.includes('cricket')) color = 'orange';
-      return {
-        id: d.id,
-        title: t.title || t.name || 'Untitled Tournament',
-        game:  t.game  || 'Game',
-        gameKey: gameKey(t.game),
-        mode:  t.mode  || 'Solo',
-        entry_type: isPaid ? 'paid' : 'free',
-        entry_fee:  isPaid ? feeValue : 0,
-        prize_pool: Number(t.prizePool || t.prize_pool || t.winnerPrize || t.prize || 0),
-        top_kills_prize: Number(t.topKillsPrize || t.top_kills_prize || t.topKiller || 0),
-        date:  t.date  || '—',
-        time:  t.time  || '—',
-        filled: Number(t.filled || t.registered || 0),
-        max:    Number(t.max || t.maxPlayers || t.max_players || 50),
-        color,
-        roomId: t.roomId || '', roomPassword: t.roomPassword || '',
-        roomFormat: t.roomFormat || '', roomRounds: t.roomRounds || '',
-        roomOpenTime: t.roomOpenTime || '', roomRules: t.roomRules || '',
-        roomRevealAt: t.roomRevealAt || null
-      };
-    });
-    if (!TOURNAMENTS.length) {
-      grid.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No tournaments yet.</div>';
-      return;
-    }
-    console.log("✅ Loaded", TOURNAMENTS.length, "tournaments");
-
-    // 🔄 AUTO-SYNC all counters on page load
-    for (const t of TOURNAMENTS) {
-      try {
-        const snap2 = await getDocs(query(
-          collection(db, 'tournament_registrations'),
-          where('tournamentId', '==', t.id),
-          where('status', 'in', ['confirmed', 'pending'])
-        ));
-        const realCount = snap2.size;
-        if (realCount !== t.filled) {
-          await updateDoc(doc(db, 'tournaments', t.id), { filled: realCount });
-          t.filled = realCount;
-          console.log(`🔄 Auto-synced ${t.id}: ${realCount}`);
-        }
-      } catch (e) {
-        console.warn('Auto-sync failed for', t.id, e);
-      }
-    }
-
-    renderTournaments();
-    loadMyTournaments();
-  } catch (err) {
-    console.error('loadTournaments error:', err);
-    grid.innerHTML = '<div class="empty-state"><span class="icon">❌</span>Failed: ' + err.message + '</div>';
-  }
-}
-
-async function loadMyTournaments() {
-  if (!currentUid) return;
-  try {
-    const snap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', currentUid)));
-    const myRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (!myRegs.length) return;
-    const tournSnap = await getDocs(collection(db, 'tournaments'));
-    const tournamentsById = {};
-    tournSnap.docs.forEach(d => { tournamentsById[d.id] = d.data(); });
-    const section = document.getElementById('myTournamentsSection');
-    const list = document.getElementById('myTournamentsList');
-    section.style.display = 'block';
-    list.innerHTML = myRegs.map(r => {
-      const isPaid = r.entryType === 'paid';
-      const statusClass = r.status === 'confirmed' ? 'confirmed' : (r.status === 'pending' ? 'pending' : 'rejected');
-      const statusLabel = r.status ? r.status.toUpperCase() : 'CONFIRMED';
-      const t = tournamentsById[r.tournamentId] || {};
-      const hasRoom = t.roomId && t.roomPassword;
-      const roomRevealTime = t.roomRevealAt ? new Date(t.roomRevealAt) : null;
-      const canReveal = !roomRevealTime || new Date() >= roomRevealTime;
-      const showRoom = hasRoom && r.status === 'confirmed' && canReveal;
-      const showLocked = hasRoom && r.status === 'confirmed' && !canReveal;
-      return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
-          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-          <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${r.tournamentTitle || 'Tournament'}</b>
-              ${r.streamUrl ? '<span class="live-badge" style="margin-left:8px;">🔴 LIVE</span>' : ''}
-            </div>
-            <div class="reg-line-2">
-              ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
-              ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · Rs. ' + (r.amount||0) : 'Free Entry'}
-              ${r.streamUrl ? ' · <a href="' + r.streamUrl + '" target="_blank" style="color:#f87171;">▶ Your Stream</a>' : ''}
-            </div>
-            ${showRoom ? `
-              <div class="room-details-box">
-                <div class="room-details-header">
-                  <span>🔑 Room Details</span>
-                  ${t.roomOpenTime ? `<small>⏰ Opens ${t.roomOpenTime}</small>` : ''}
-                </div>
-                <div class="room-details-grid">
-                  <div class="room-field">
-                    <span class="room-label">Room ID</span>
-                    <div class="room-value-wrap">
-                      <code>${t.roomId}</code>
-                      <button class="copy-btn" onclick="copyRoomField('${String(t.roomId).replace(/'/g,"\\'")}', this)">📋</button>
-                    </div>
-                  </div>
-                  <div class="room-field">
-                    <span class="room-label">Password</span>
-                    <div class="room-value-wrap">
-                      <code>${t.roomPassword}</code>
-                      <button class="copy-btn" onclick="copyRoomField('${String(t.roomPassword).replace(/'/g,"\\'")}', this)">📋</button>
-                    </div>
-                  </div>
-                </div>
-                ${t.roomFormat ? `<div class="room-extra"><b>Format:</b> ${t.roomFormat}</div>` : ''}
-                ${t.roomRounds ? `<div class="room-extra"><b>Rounds:</b> ${t.roomRounds}</div>` : ''}
-                ${t.roomRules ? `<div class="room-extra room-rules"><b>📜 Rules:</b> ${t.roomRules}</div>` : ''}
-              </div>
-            ` : (showLocked ? `
-              <div class="room-locked">
-                <span>🔒</span>
-                <div>
-                  <b>Room details will appear 30 minutes before match</b>
-                  ${t.roomOpenTime ? `<small>Opens at ${t.roomOpenTime}</small>` : ''}
-                </div>
-              </div>
-            ` : '')}
-            ${r.status === 'pending' ? `
-              <div style="margin-top:12px;">
-                <small style="color:#fbbf24;">⏳ Waiting for admin to approve your payment</small>
-              </div>
-            ` : ''}
-          </div>
-          <div class="reg-right">
-            <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
-            <span class="status-pill ${statusClass}">${statusLabel}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) { console.warn('loadMyTournaments error:', err); }
-}
-
-window.copyRoomField = function(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const original = btn.innerText;
-    btn.innerText = '✅';
-    btn.style.background = 'rgba(34, 197, 94, 0.5)';
-    setTimeout(() => { btn.innerText = original; btn.style.background = ''; }, 1500);
-  }).catch(err => console.error('Copy failed:', err));
-};
-
-setInterval(() => { if (currentUid) loadMyTournaments(); }, 60000);
-
-function renderTournaments() {
-  const grid = document.getElementById('tournamentGrid');
-  const visible = TOURNAMENTS.filter(t => {
-    const gameOk = filterState.game === 'all' || t.gameKey === filterState.game;
-    const typeOk =
-      filterState.type === 'all' ||
-      (filterState.type === 'free' && t.entry_type === 'free') ||
-      (filterState.type === 'paid' && t.entry_type === 'paid');
-    return gameOk && typeOk;
-  });
-  if (!visible.length) {
-    const label = filterState.game === 'all' ? 'this filter' : document.querySelector(`.game-tab[data-game="${filterState.game}"]`)?.innerText || filterState.game;
-    grid.innerHTML = `<div class="empty-state"><span class="icon">🔍</span>No tournaments match <b>${label}</b> yet. Check back soon!</div>`;
-    return;
-  }
-  grid.innerHTML = visible.map(t => {
-    const pct = t.max > 0 ? Math.round((t.filled / t.max) * 100) : 0;
-    const isPaid = t.entry_type === 'paid';
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const isFull = isTournamentFull(t);
-    const isOver = isTournamentOver(t);
-
-    const cd = countdownLabel(t);
-    const urg = urgencyBadge(t);
-
-    let badgesHtml = '';
-    if (isOver) {
-      badgesHtml += `<span class="urgency-badge badge-full">✅ COMPLETED</span>`;
-    } else if (isFull) {
-      badgesHtml += `<span class="urgency-badge badge-full">❌ FULL</span>`;
-    } else if (urg) {
-      badgesHtml += `<span class="urgency-badge ${urg.cls}">${urg.text}</span>`;
-    }
-
-    const isFirst12 = !isPaid && t.max === 12;
-    if (isFirst12 && !isFull && !isOver) {
-      badgesHtml += `<span class="urgency-badge badge-urgent">⚡ FIRST 12 ONLY</span>`;
-    }
-
-    const cdChip = cd.text
-      ? `<span class="countdown-chip ${cd.cls}">${cd.text}</span>`
-      : '';
-
-    const spotsLeft = Math.max(t.max - t.filled, 0);
-    const spotsLeftHtml = (!isFull && !isOver && spotsLeft <= 20)
-      ? `<div class="slots-spots-left">${isFirst12 ? '🔥 Only ' : 'Only '}${spotsLeft} spot${spotsLeft !== 1 ? 's' : ''} left${isFirst12 ? ' — register fast!' : ''}</div>`
-      : '';
-
-    let joinBtn;
-    if (isOver) {
-      joinBtn = `<button class="btn-join btn-disabled" disabled>✅ Completed</button>`;
-    } else if (isFull) {
-      joinBtn = `<button class="btn-join btn-disabled" disabled>❌ Tournament Full</button>`;
-    } else if (isPaid) {
-      joinBtn = `<button class="btn-join paid-btn" onclick="openPaymentModal('${t.id}','${safeTitle}',${t.entry_fee},${t.prize_pool},${t.top_kills_prize})">Join — Pay Rs. ${t.entry_fee}</button>`;
-    } else {
-      joinBtn = `<button class="btn-join free-btn" onclick="openJoinModal('${t.id}','${safeTitle}')">⚡ Join Free — First 12 Only</button>`;
-    }
-
-    return `
-      <div class="tournament-card ${t.entry_type}" data-type="${t.entry_type}" data-tid="${t.id}" style="position:relative;">
-        ${isPaid ? '<span class="paid-ribbon">💵 PAID</span>' : '<span class="free-ribbon">🆓 FREE</span>'}
-        ${badgesHtml ? `<div class="card-badges">${badgesHtml}</div>` : ''}
-        <div class="card-banner ${t.color}">
-          <span class="game-tag">🕹 ${t.game}</span>
-          <span class="mode-tag">${t.mode}</span>
-        </div>
-        <div class="card-body">
-          <h3>${t.title}</h3>
-          <div class="card-meta">
-            <div><small>Entry Fee</small><b class="${isPaid ? 'paid-text' : 'free-text'}">${isPaid ? 'Rs. ' + t.entry_fee : 'FREE'}</b></div>
-            <div><small>Prize Pool</small><b class="prize">Rs. ${t.prize_pool}</b></div>
-          </div>
-          ${t.top_kills_prize ? `<div class="card-meta extra"><div><small>🎯 Top Kills</small><b class="kill-prize">Rs. ${t.top_kills_prize}</b></div></div>` : ''}
-          <div class="card-footer">
-            <span>📅 ${t.date}</span>
-            <span>🕐 ${t.time}</span>
-          </div>
-          ${cdChip ? `<div style="margin-top:8px;">${cdChip}</div>` : ''}
-          <div class="slots">Slots Filled <span>${t.filled}/${t.max}</span></div>
-          <div class="progress"><div style="width:${pct}%"></div></div>
-          ${spotsLeftHtml}
-          <div style="display:flex; gap:8px; align-items:stretch; margin-top:12px;">
-            <div style="flex:1;">${joinBtn}</div>
-            <button class="card-share-btn" onclick="copyTournamentLink('${t.id}', event)" title="Copy shareable link">
-              <i class="fa-solid fa-link"></i> Share
-            </button>
-            <button class="card-share-btn wa-share" onclick="shareOnWhatsApp('${t.id}', event)" title="Share on WhatsApp">
-              <i class="fa-brands fa-whatsapp"></i> WA
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-window.shareOnWhatsApp = function(tid, event) {
-  if (event) event.stopPropagation();
-  const t = TOURNAMENTS.find(x => x.id === tid);
-  if (!t) return;
-  const url = 'https://nepplay.onrender.com/tournaments.html?t=' + tid;
-  const isFree = t.entry_type === 'free';
-  const text = `🔥 *${t.title}* — NEPPLAY\n📅 ${t.date} ⏰ ${t.time}\n💰 Entry: ${isFree ? 'FREE' : 'Rs. ' + t.entry_fee}\n🏆 Prize: Rs. ${t.prize_pool}${t.top_kills_prize ? '\n🎯 Top Killer: Rs. ' + t.top_kills_prize : ''}${isFree ? '\n⚡ FIRST 12 ONLY — register fast!' : ''}\n\n👉 Register: ${url}`;
-  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
-};
-
-window.copyTournamentLink = function(tid, event) {
-  if (event) event.stopPropagation();
-  const url = 'https://nepplay.onrender.com/tournaments.html?t=' + tid;
-  const btn = event?.target?.closest('.card-share-btn');
-  const tournamentTitle = TOURNAMENTS.find(x => x.id === tid)?.title || 'NEPPLAY Tournament';
-
-  if (navigator.share) {
-    navigator.share({
-      title: tournamentTitle + ' — NEPPLAY',
-      text: `🎮 Join ${tournamentTitle} on NEPPLAY!`,
-      url: url
-    }).catch(() => {});
-    return;
-  }
-
-  navigator.clipboard.writeText(url).then(() => {
-    if (btn) {
-      const orig = btn.innerHTML;
-      btn.classList.add('copied');
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-      setTimeout(() => {
-        btn.innerHTML = orig;
-        btn.classList.remove('copied');
-      }, 1800);
-    }
-  }).catch(() => {
-    prompt('Copy this link and share:', url);
-  });
-};
-
-(function autoHighlightFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const tid = params.get('t');
-  if (!tid) return;
-  let attempts = 0;
-  const tryHighlight = setInterval(() => {
-    attempts++;
-    if (attempts > 40) { clearInterval(tryHighlight); return; }
-    const card = document.querySelector(`.tournament-card[data-tid="${tid}"]`);
-    if (card) {
-      clearInterval(tryHighlight);
-      card.classList.add('highlight');
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => card.classList.remove('highlight'), 3500);
-    }
-  }, 250);
-})();
-
-setInterval(() => {
-  if (document.getElementById('tournamentGrid')?.children.length) {
-    renderTournaments();
-  }
-}, 30000);
-
-window.applyCoupon = function() {
-  const code = (document.getElementById('payCoupon').value || '').trim().toUpperCase();
-  const msg = document.getElementById('couponMsg');
-  const discountLine = document.getElementById('discountLine');
-  const discountAmtEl = document.getElementById('discountAmt');
-
-  if (code === 'NEW25') {
-    if (!userIsNew) {
-      msg.style.display = 'block';
-      msg.style.color = '#f87171';
-      msg.innerText = '❌ NEW25 is only for first-time players';
-      discountLine.style.display = 'none';
-      newUserModeActive = false;
-      updateFeeDisplay(0);
-      return;
-    }
-    newUserModeActive = true;
-    discountAmtEl.innerText = NEW_USER_DISCOUNT;
-    discountLine.style.display = 'flex';
-    msg.style.display = 'block';
-    msg.style.color = '#4ade80';
-    msg.innerText = '✅ Coupon applied! Rs 25 off';
-    updateFeeDisplay(NEW_USER_DISCOUNT);
-  } else if (code === '') {
-    msg.style.display = 'none';
-    discountLine.style.display = 'none';
-    newUserModeActive = false;
-    updateFeeDisplay(0);
-  } else {
-    msg.style.display = 'block';
-    msg.style.color = '#f87171';
-    msg.innerText = '❌ Invalid coupon code';
-    discountLine.style.display = 'none';
-    newUserModeActive = false;
-    updateFeeDisplay(0);
-  }
-};
-
-function updateFeeDisplay(discount) {
-  const feeEl = document.getElementById('mFee');
-  const baseFee = Number(feeEl.dataset.base || 150);
-  if (!feeEl.dataset.base) feeEl.dataset.base = baseFee;
-  const finalFee = Math.max(baseFee - discount, 0);
-  feeEl.innerText = finalFee;
-  document.querySelectorAll('.payAmt').forEach(el => el.innerText = finalFee);
-}
-
-window.filterByGame = function(game) {
-  filterState.game = game;
-  document.querySelectorAll('.game-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.game === game);
-  });
-  renderTournaments();
-};
-
-window.filterTournamentType = function(type) {
-  filterState.type = type;
-  const tabs = { all:'tabAll', free:'tabFree', paid:'tabPaid' };
-  Object.keys(tabs).forEach(k => {
-    const el = document.getElementById(tabs[k]);
-    if (el) el.classList.toggle('active', k === type);
-  });
-  renderTournaments();
-};
-
-window.openJoinModal = function(tid, title) {
-  document.getElementById('joinTournamentId').value = tid;
-  document.getElementById('joinTournamentTitle').innerText = title;
-  document.getElementById('joinForm').reset();
-  document.getElementById('joinStreamUrl').value = '';
-
-  const t = TOURNAMENTS.find(x => x.id === tid);
-  const notice = document.getElementById('first12Notice');
-  if (t && t.entry_type === 'free' && t.max === 12) {
-    notice.style.display = 'block';
-  } else {
-    notice.style.display = 'none';
-  }
-
-  document.getElementById('joinModal').classList.add('active');
-};
-window.closeJoinModal = function() { document.getElementById('joinModal').classList.remove('active'); };
-
-window.submitJoin = async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById('joinSubmitBtn');
-  btn.disabled = true;
-  btn.innerText = '⏳ Joining...';
-  try {
-    if (!currentUser) throw new Error('Please login first');
-    const tid   = document.getElementById('joinTournamentId').value;
-    const title = document.getElementById('joinTournamentTitle').innerText;
-    const ign   = document.getElementById('joinIgn').value.trim();
-    const phone = document.getElementById('joinPhone').value.trim();
-    const streamUrl = (document.getElementById('joinStreamUrl').value || '').trim();
-    if (!ign)   throw new Error('IGN required');
-    if (!phone) throw new Error('Phone required');
-    if (streamUrl && !/^https?:\/\//i.test(streamUrl)) throw new Error('Stream URL must start with http:// or https://');
-
-    const tourn = TOURNAMENTS.find(x => x.id === tid);
-    if (tourn && Number(tourn.filled) >= Number(tourn.max)) {
-      throw new Error('This tournament is FULL. All ' + tourn.max + ' slots taken!');
-    }
-
-    const dupSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', tid),
-      where('userId', '==', currentUid)
-    ));
-    if (!dupSnap.empty) throw new Error('You already registered for this tournament');
-
-    await addDoc(collection(db, 'tournament_registrations'), {
-      tournamentId: tid, tournamentTitle: title,
-      userId: currentUid, username: currentUser.username, email: currentUser.email,
-      ign, phone, paymentId: null, entryType: 'free', amount: 0,
-      streamUrl: streamUrl || null,
-      status: 'confirmed', registeredAt: serverTimestamp()
-    });
-
-    // ✅ SYNC counter (recounts real registrations)
-    await syncTournamentFilled(tid);
-
-    window.closeJoinModal();
-    window.showToast('✅ Joined ' + title + '!');
-    await loadTournaments();
-    loadMyTournaments();
-
-    window.showConfirmModal({
-      title: title,
-      game: tourn?.game || '',
-      mode: tourn?.mode || '',
-      date: tourn?.date || '',
-      time: tourn?.time || '',
-      ign, phone,
-      entryType: 'free',
-      amount: 0,
-      status: 'confirmed',
-      streamUrl
-    });
-  } catch (err) { window.showToast('❌ ' + err.message); }
-  finally { btn.disabled = false; btn.innerText = '✅ Join Tournament'; }
-};
-
-window.openPaymentModal = function(tid, title, fee, prize, kills) {
-  document.getElementById('payTournamentId').value = tid;
-  document.getElementById('mTournamentTitle').innerText = title;
-  document.getElementById('mFee').innerText   = fee;
-  document.getElementById('mFee').dataset.base = fee;
-  document.getElementById('mPrize').innerText = prize;
-  document.getElementById('mKills').innerText = kills;
-
-  const couponInput = document.getElementById('payCoupon');
-  const couponMsg = document.getElementById('couponMsg');
-  const discountLine = document.getElementById('discountLine');
-  const newUserHint = document.getElementById('newUserHint');
-  if (couponInput) couponInput.value = '';
-  if (couponMsg) couponMsg.style.display = 'none';
-  if (discountLine) discountLine.style.display = 'none';
-
-  if (userIsNew && newUserModeActive) {
-    if (newUserHint) newUserHint.style.display = 'block';
-    if (discountLine) discountLine.style.display = 'flex';
-    document.getElementById('discountAmt').innerText = NEW_USER_DISCOUNT;
-    if (couponInput) couponInput.value = 'NEW25';
-    if (couponMsg) {
-      couponMsg.style.display = 'block';
-      couponMsg.style.color = '#4ade80';
-      couponMsg.innerText = '✅ New user discount auto-applied';
-    }
-    updateFeeDisplay(NEW_USER_DISCOUNT);
-  } else {
-    if (newUserHint) newUserHint.style.display = 'none';
-    updateFeeDisplay(0);
-  }
-
-  document.querySelectorAll('.payAmt').forEach(el => {
-    el.innerText = document.getElementById('mFee').innerText;
-  });
-
-  document.getElementById('paymentModal').classList.add('active');
-};
-window.closePaymentModal = function() {
-  document.getElementById('paymentModal').classList.remove('active');
-  document.getElementById('payForm').reset();
-  document.getElementById('payStreamUrl').value = '';
-  document.getElementById('shotPreview').style.display = 'none';
-  document.getElementById('uploadPrompt').style.display = 'block';
-  const couponMsg = document.getElementById('couponMsg');
-  const discountLine = document.getElementById('discountLine');
-  if (couponMsg) couponMsg.style.display = 'none';
-  if (discountLine) discountLine.style.display = 'none';
-};
-window.switchPay = function(method) {
-  document.getElementById('payMethod').value = method;
-  document.querySelectorAll('.pay-tab').forEach(t => t.classList.toggle('active', t.dataset.method === method));
-  document.getElementById('esewaPanel').style.display  = method === 'esewa'  ? 'block' : 'none';
-  document.getElementById('khaltiPanel').style.display = method === 'khalti' ? 'block' : 'none';
-  document.getElementById('imepayPanel').style.display = method === 'imepay' ? 'block' : 'none';
-  document.getElementById('bankPanel').style.display   = method === 'bank'   ? 'block' : 'none';
-};
-window.previewShot = function(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.getElementById('shotPreview');
-      img.src = e.target.result;
-      img.style.display = 'block';
-      document.getElementById('uploadPrompt').style.display = 'none';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-};
-
-window.submitPayment = async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById('paySubmitBtn');
-  btn.disabled = true;
-  btn.innerText = '⏳ Compressing...';
-  try {
-    if (!currentUser) throw new Error('Please login first');
-    const tid    = document.getElementById('payTournamentId').value;
-    const title  = document.getElementById('mTournamentTitle').innerText;
-    const method = document.getElementById('payMethod').value;
-    const txn    = document.getElementById('payTxn').value.trim();
-    const ign    = document.getElementById('payIgn').value.trim();
-    const phone  = document.getElementById('payPhone').value.trim();
-    const streamUrl = (document.getElementById('payStreamUrl').value || '').trim();
-    const amount = Number(document.getElementById('mFee').innerText);
-    const file   = document.getElementById('payShot').files[0];
-    const couponCode = (document.getElementById('payCoupon').value || '').trim().toUpperCase();
-
-    if (!file)             throw new Error('Screenshot required');
-    if (txn.length < 4)    throw new Error('Transaction ID too short');
-    if (!ign)              throw new Error('IGN required');
-    if (!phone)            throw new Error('Phone required');
-    if (streamUrl && !/^https?:\/\//i.test(streamUrl)) throw new Error('Stream URL must start with http:// or https://');
-    if (file.size > 8*1024*1024) throw new Error('Image too large (max 8MB)');
-
-    const compressed = await compressImageToBase64(file, 800, 0.7);
-    if (compressed.sizeKB > 700) {
-      throw new Error(`Image too large after compression (${compressed.sizeKB} KB). Please use a smaller screenshot.`);
-    }
-
-    const dupSnap = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', tid),
-      where('userId', '==', currentUid)
-    ));
-    if (!dupSnap.empty) throw new Error('You already registered for this tournament');
-
-    btn.innerText = '⏳ Submitting...';
-    const payRef = await addDoc(collection(db, 'tournament_payments'), {
-      tournamentId: tid, tournamentTitle: title,
-      userId: currentUid, username: currentUser.username, email: currentUser.email,
-      ign, phone, method, amount, txnId: txn,
-      couponCode: couponCode || null,
-      discountApplied: couponCode === 'NEW25' ? NEW_USER_DISCOUNT : 0,
-      screenshotBase64: compressed.base64,
-      screenshotWidth: compressed.width,
-      screenshotHeight: compressed.height,
-      screenshotSizeKB: compressed.sizeKB,
-      status: 'pending', adminNote: '',
-      submittedAt: serverTimestamp(), reviewedAt: null
-    });
-
-    await addDoc(collection(db, 'tournament_registrations'), {
-      tournamentId: tid, tournamentTitle: title,
-      userId: currentUid, username: currentUser.username, email: currentUser.email,
-      ign, phone, paymentId: payRef.id, entryType: 'paid',
-      method, txnId: txn, amount,
-      couponCode: couponCode || null,
-      discountApplied: couponCode === 'NEW25' ? NEW_USER_DISCOUNT : 0,
-      screenshotSizeKB: compressed.sizeKB,
-      streamUrl: streamUrl || null,
-      status: 'pending', registeredAt: serverTimestamp()
-    });
-
-    // ✅ SYNC counter (recounts real registrations)
-    await syncTournamentFilled(tid);
-
-    window.closePaymentModal();
-    window.showToast('✅ Payment submitted! Waiting for admin approval.');
-    await checkIfUserIsNew();
-    await loadTournaments();
-    loadMyTournaments();
-
-    const tourn = TOURNAMENTS.find(x => x.id === tid) || {};
-    window.showConfirmModal({
-      title: title,
-      game: tourn.game || '',
-      mode: tourn.mode || '',
-      date: tourn.date || '',
-      time: tourn.time || '',
-      ign, phone,
-      entryType: 'paid',
-      amount,
-      method,
-      txnId: txn,
-      couponCode: couponCode || null,
-      status: 'pending',
-      streamUrl
-    });
-  } catch (err) {
-    console.error('submitPayment error:', err);
-    window.showToast('❌ ' + err.message);
-  }
-  finally { btn.disabled = false; btn.innerText = '✅ Submit for Admin Approval'; }
-};
-
-window.showConfirmModal = function(data) {
-  const modal = document.getElementById('confirmModal');
-  if (!modal) return;
-  lastConfirmData = data;
-  const isFree = data.entryType === 'free';
-  const isPending = data.status === 'pending';
-  document.getElementById('confirmIcon').textContent  = isPending ? '⏳' : '🎉';
-  document.getElementById('confirmTitle').textContent = isPending ? 'Payment Submitted!' : "You're In!";
-  document.getElementById('confirmTitle').style.color = isPending ? '#fbbf24' : '#22c55e';
-  document.getElementById('confirmSub').textContent   = isPending ? 'Waiting for admin to approve your payment' : 'Registration confirmed — good luck!';
-  document.getElementById('confirmTourneyName').textContent = data.title || 'Tournament';
-  const meta = [data.game, data.mode, data.date, data.time].filter(Boolean).join(' · ');
-  document.getElementById('confirmTourneyMeta').textContent = meta || '—';
-  let rows = '';
-  if (data.ign)  rows += `<div class="confirm-row"><span class="k">🎮 IGN</span><span class="v">${escapeConfirm(data.ign)}</span></div>`;
-  if (data.phone) rows += `<div class="confirm-row"><span class="k">📱 Phone</span><span class="v">${escapeConfirm(data.phone)}</span></div>`;
-  if (isFree) {
-    rows += `<div class="confirm-row"><span class="k">💰 Entry</span><span class="v" style="color:#22c55e;">FREE</span></div>`;
-  } else {
-    rows += `<div class="confirm-row"><span class="k">💰 Amount</span><span class="v">Rs. ${escapeConfirm(data.amount || 0)}</span></div>`;
-    if (data.txnId) rows += `<div class="confirm-row"><span class="k">🔖 Txn ID</span><span class="v">${escapeConfirm(data.txnId)}</span></div>`;
-    if (data.method) rows += `<div class="confirm-row"><span class="k">💳 Method</span><span class="v">${escapeConfirm(data.method).toUpperCase()}</span></div>`;
-    if (data.couponCode) rows += `<div class="confirm-row"><span class="k">🎁 Coupon</span><span class="v" style="color:#4ade80;">${escapeConfirm(data.couponCode)}</span></div>`;
-  }
-  rows += `<div class="confirm-row"><span class="k">📋 Status</span><span class="v" style="color:${isPending ? '#fbbf24' : '#22c55e'};">${isPending ? 'PENDING' : 'CONFIRMED'}</span></div>`;
-  if (data.streamUrl) {
-    rows += `<div class="confirm-row"><span class="k">🔴 Stream</span><span class="v" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeConfirm(data.streamUrl)} <button class="copy-mini" onclick="copyConfirmStream('${escapeConfirm(data.streamUrl).replace(/'/g,"\\'")}', this)">📋</button></span></div>`;
-  }
-  document.getElementById('confirmRows').innerHTML = rows;
-  const siteUrl = 'https://nepplay.onrender.com/tournaments.html';
-  let waMsg;
-  if (isFree) {
-    waMsg = `🎮 I just joined *${data.title}* on NEPPLAY!\n${meta ? meta + '\n' : ''}Free entry — come compete with me 👇\n${siteUrl}`;
-  } else {
-    waMsg = `🎮 I just registered for *${data.title}* on NEPPLAY!\n${meta ? meta + '\n' : ''}Entry: Rs. ${data.amount} · Status: Pending approval\nJoin the next one 👇\n${siteUrl}`;
-  }
-  document.getElementById('confirmWaBtn').href = 'https://wa.me/?text=' + encodeURIComponent(waMsg);
-  modal.classList.add('active');
-};
-
-window.copyConfirmStream = function(url, btn) {
-  navigator.clipboard.writeText(url).then(() => {
-    const old = btn.innerText;
-    btn.innerText = '✅';
-    setTimeout(() => btn.innerText = old, 1200);
-  });
-};
-
-window.shareRegistrationCard = async function() {
-  if (!lastConfirmData) { window.showToast('❌ No registration data to share'); return; }
-  const btn = document.getElementById('confirmShareCardBtn');
-  const originalHtml = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-  try {
-    const dataUrl = await renderShareCard(lastConfirmData);
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], `nepplay-${(lastConfirmData.title || 'tournament').toLowerCase().replace(/[^a-z0-9]/g,'-')}.png`, { type: 'image/png' });
-    const shareText = `🎮 I just registered for *${lastConfirmData.title}* on NEPPLAY!\n${[lastConfirmData.game, lastConfirmData.mode, lastConfirmData.date, lastConfirmData.time].filter(Boolean).join(' · ')}\n\nJoin the next tournament 👇\nhttps://nepplay.onrender.com/tournaments.html`;
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'NEPPLAY Registration', text: shareText });
-        btn.disabled = false; btn.innerHTML = originalHtml; return;
-      } catch (shareErr) { if (shareErr.name === 'AbortError') { btn.disabled = false; btn.innerHTML = originalHtml; return; } }
-    }
-    const a = document.createElement('a');
-    a.href = dataUrl; a.download = file.name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    window.showToast('✅ Card saved! Attach it in WhatsApp manually.');
-    setTimeout(() => { window.open('https://wa.me/?text=' + encodeURIComponent(shareText), '_blank'); }, 800);
-  } catch (err) {
-    console.error('shareRegistrationCard error:', err);
-    window.showToast('❌ Could not generate card: ' + err.message);
-  } finally { btn.disabled = false; btn.innerHTML = originalHtml; }
-};
-
-async function renderShareCard(data) {
-  const W = 1080, H = 1350;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, '#0c0a2e'); grad.addColorStop(0.35, '#1e1b4b');
-  grad.addColorStop(0.7, '#4c1d95'); grad.addColorStop(1, '#7e22ce');
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-  ctx.textAlign = 'center';
-  ctx.font = '900 100px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", sans-serif';
-  ctx.fillText('🎮', W / 2, 140);
-  const titleGrad = ctx.createLinearGradient(W * 0.3, 0, W * 0.7, 0);
-  titleGrad.addColorStop(0, '#a78bfa'); titleGrad.addColorStop(0.5, '#f472b6'); titleGrad.addColorStop(1, '#fbbf24');
-  ctx.fillStyle = titleGrad; ctx.font = '900 88px "Segoe UI", sans-serif';
-  ctx.fillText('NEPPLAY', W / 2, 240);
-  ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  ctx.font = '600 26px "Segoe UI", sans-serif';
-  ctx.fillText("NEPAL'S ESPORTS PLATFORM", W / 2, 290);
-  ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
-  ctx.strokeStyle = 'rgba(34, 197, 94, 0.7)'; ctx.lineWidth = 3;
-  const badgeY = 360, badgeW = 480, badgeH = 80;
-  roundRect(ctx, (W - badgeW) / 2, badgeY, badgeW, badgeH, 40); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#4ade80'; ctx.font = '900 44px "Segoe UI", sans-serif';
-  ctx.fillText(data.status === 'pending' ? '⏳ PAYMENT SUBMITTED' : "✅ I'M IN!", W / 2, badgeY + 54);
-  const cardY = 520, cardW = W - 160, cardH = 260, cardX = 80;
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-  roundRect(ctx, cardX, cardY, cardW, cardH, 28); ctx.fill();
-  ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)'; ctx.lineWidth = 3;
-  roundRect(ctx, cardX, cardY, cardW, cardH, 28); ctx.stroke();
-  ctx.fillStyle = '#ffffff'; ctx.font = '900 46px "Segoe UI", sans-serif';
-  ctx.fillText(truncateText(ctx, data.title || 'Tournament', cardW - 60), W / 2, cardY + 80);
-  ctx.fillStyle = '#a5b4fc'; ctx.font = '700 28px "Segoe UI", sans-serif';
-  const gameLine = [data.game, data.mode].filter(Boolean).join(' · ');
-  if (gameLine) ctx.fillText(gameLine, W / 2, cardY + 130);
-  ctx.fillStyle = '#fbbf24'; ctx.font = '800 32px "Segoe UI", sans-serif';
-  const dateLine = [data.date, data.time].filter(Boolean).join('  ·  ');
-  if (dateLine) ctx.fillText(dateLine, W / 2, cardY + 185);
-  const infoY = 830, infoW = W - 160, infoH = 220, infoX = 80;
-  ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
-  ctx.beginPath(); ctx.arc(infoX + 110, infoY + infoH / 2, 70, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)'; ctx.lineWidth = 4; ctx.stroke();
-  const initial = (data.ign || 'P').charAt(0).toUpperCase();
-  ctx.fillStyle = '#ffffff'; ctx.font = '900 72px "Segoe UI", sans-serif';
-  ctx.fillText(initial, infoX + 110, infoY + infoH / 2 + 26);
-  ctx.textAlign = 'left';
-  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '700 22px "Segoe UI", sans-serif';
-  ctx.fillText('PLAYER', infoX + 220, infoY + 70);
-  ctx.fillStyle = '#ffffff'; ctx.font = '900 42px "Segoe UI", sans-serif';
-  ctx.fillText(truncateText(ctx, data.ign || 'Player', infoW - 240), infoX + 220, infoY + 122);
-  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '700 22px "Segoe UI", sans-serif';
-  ctx.fillText('ENTRY', infoX + 220, infoY + 165);
-  ctx.fillStyle = data.entryType === 'paid' ? '#fbbf24' : '#4ade80';
-  ctx.font = '900 34px "Segoe UI", sans-serif';
-  ctx.fillText(data.entryType === 'paid' ? `Rs. ${data.amount || 0}` : 'FREE ENTRY', infoX + 220, infoY + 205);
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '700 24px "Segoe UI", sans-serif';
-  ctx.fillText('Want to compete too?', W / 2, 1160);
-  const urlY = 1200, urlW = 640, urlH = 74;
-  ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
-  ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)'; ctx.lineWidth = 2;
-  roundRect(ctx, (W - urlW) / 2, urlY, urlW, urlH, 20); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fbbf24'; ctx.font = '900 32px "Segoe UI", sans-serif';
-  ctx.fillText('nepplay.onrender.com', W / 2, urlY + 48);
-  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '500 20px "Segoe UI", sans-serif';
-  ctx.fillText('Real prizes · Fast payouts · Play together, grow together', W / 2, 1320);
-  return canvas.toDataURL('image/png');
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-function truncateText(ctx, text, maxWidth) {
-  if (ctx.measureText(text).width <= maxWidth) return text;
-  let t = text;
-  while (t.length > 0 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
-  return t + '…';
-}
-
-window.closeConfirmModal = function() { document.getElementById('confirmModal').classList.remove('active'); };
-
-window.closeConfirmAndScroll = function() {
-  document.getElementById('confirmModal').classList.remove('active');
-  const sec = document.getElementById('myTournamentsSection');
-  if (sec && sec.style.display !== 'none') sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  else document.getElementById('tournamentGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
-
-function escapeConfirm(s) {
-  return String(s || '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-window.showToast = function(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.innerText = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-};
-
-function escapeHtmlLive(s) {
-  return String(s || '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-async function loadLiveStreamers() {
-  const listEl = document.getElementById('liveStreamersList');
-  const countEl = document.getElementById('liveCount');
-  const inner = document.getElementById('liveInner');
-  if (!listEl || !inner) return;
-  try {
-    const snap = await getDocs(collection(db, 'tournament_registrations'));
-    const streamers = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(r => r.streamUrl && r.status === 'confirmed')
-      .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
-
-    if (!streamers.length) {
-      countEl.textContent = 'check back on 26 September';
-      listEl.style.display = 'block';
-      listEl.innerHTML = `
-        <div class="stream-card" style="grid-column:1/-1; text-align:center; padding:24px 16px;">
-          <div style="font-size:42px; margin-bottom:10px;">📺</div>
-          <div style="color:#fff; font-weight:800; font-size:15px; margin-bottom:6px;">
-            No streams live right now
-          </div>
-          <div style="color:#fecaca; font-size:13px; margin-bottom:14px; line-height:1.5;">
-            Players with a registered stream URL will appear here on 26 September during tournaments.
-          </div>
-          <a href="tournaments.html#tournaments" style="display:inline-block; background:rgba(255,255,255,0.15); color:#fff; padding:9px 18px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:700; border:1px solid rgba(255,255,255,0.25);">
-            🎮 Register for 26 September
-          </a>
-        </div>
-      `;
-      return;
-    }
-
-    listEl.style.display = 'grid';
-    countEl.textContent = `${streamers.length} player${streamers.length !== 1 ? 's' : ''} streaming`;
-    listEl.innerHTML = streamers.map(s => `
-      <div class="stream-card">
-        <div class="name">🎮 ${escapeHtmlLive(s.ign || s.username || 'Player')}</div>
-        <div class="tourney">${escapeHtmlLive(s.tournamentTitle || 'Tournament')}</div>
-        <a class="stream-btn" href="${escapeHtmlLive(s.streamUrl)}" target="_blank" rel="noopener">▶ Watch Live</a>
-      </div>
-    `).join('');
-  } catch (err) {
-    console.warn('Live streamers load failed:', err);
-    listEl.innerHTML = `
-      <div class="stream-card" style="grid-column:1/-1; text-align:center; padding:20px;">
-        <div style="color:#fecaca; font-size:13px;">Could not load live streams. Please refresh.</div>
-      </div>
-    `;
-  }
-}
-
-loadTournaments();
-loadLiveStreamers();
-setInterval(loadLiveStreamers, 60000);
+    update();
+    setInterval(update, 1000);
+  })();
 </script>
+
 </body>
 </html>
