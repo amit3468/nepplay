@@ -378,6 +378,12 @@ textarea{ min-height:100px; resize:vertical; }
             Your registration will remain <b>Pending</b> until the admin verifies your payment.
         </p>
 
+        <!-- SAFETY WARNING -->
+        <div id="tournamentWarning" style="display:none; background:rgba(245,158,11,.15); border-left:3px solid #fbbf24; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:.9rem; color:#fde68a; line-height:1.6;">
+          ⚠️ <b>Confirm garnus:</b> Tapaile <span id="confirmGameName" style="color:#fbbf24; font-weight:900; font-size:1.05rem;">this tournament</span> ma register garna lageko chhau.
+          <br>Galat game ma register gare paxi transfer manual garnu parcha.
+        </div>
+
         <div id="message" class="message"></div>
 
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
@@ -575,6 +581,7 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 let currentUser = null;
+let currentUsername = "";   // 👈 new: cached username from users/{uid}
 let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
@@ -597,10 +604,8 @@ function escapeHTML(v) {
         .replace(/'/g, "&#039;");
 }
 
-// Expose setPlayingMode for inline onclick
 window.setPlayingMode = function(mode) {
     playingMode = mode;
-
     document.body.classList.remove("mode-solo", "mode-duo", "mode-squad");
     document.body.classList.add("mode-" + mode);
 
@@ -629,7 +634,9 @@ window.setPlayingMode = function(mode) {
     }
 };
 
-// AUTH GATE + user chip
+// ============================================================
+// AUTH GATE + cache username from users/{uid}
+// ============================================================
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
     const nameEl = document.getElementById("userName");
@@ -641,18 +648,27 @@ onAuthStateChanged(auth, async (user) => {
     }
     currentUser = user;
 
-    let display = user.email || user.uid || "Member";
+    // Get username — fallback chain for reliability
+    let display = user.displayName || (user.email ? user.email.split("@")[0] : user.uid) || "Member";
     try {
         const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+        if (uDoc.exists()) {
+            const u = uDoc.data();
+            if (u.username) display = u.username;
+            else if (u.fullName) display = u.fullName;
+        }
     } catch (e) {}
+    currentUsername = display;
+
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
     if (nameEl) nameEl.textContent = display;
 
     loadRegistrationPage();
 });
 
+// ============================================================
 // GAME MATCHING
+// ============================================================
 function normalizeGame(s) {
     return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
@@ -715,6 +731,12 @@ async function loadRegistrationPage() {
         $("gameName").textContent = tournament.game || "";
         $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
         $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
+
+        // 🔔 Safety warning — show tournament name prominently
+        const cg = $("confirmGameName");
+        if (cg) cg.textContent = tournament.title || tournament.game || "this tournament";
+        const w = $("tournamentWarning");
+        if (w) w.style.display = "block";
 
         const badge = $("modeBadge");
         badge.textContent = "Default: " + (tournament.mode || "Squad");
@@ -868,6 +890,9 @@ function showToast(msg) {
     setTimeout(() => { el.style.display = "none"; }, 1800);
 }
 
+// ============================================================
+// SUBMIT
+// ============================================================
 $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
@@ -880,7 +905,12 @@ $("registrationForm").addEventListener("submit", async (event) => {
     const transactionId = $("transactionId").value.trim();
     if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
 
+    // ============================================================
+    // Base body — includes username, userId, everything needed
+    // ============================================================
     let body = {
+        // ⭐ NEW: username from Firestore users/{uid}
+        username:        currentUsername || currentUser.email?.split("@")[0] || "Player",
         userId:          currentUser.uid,
         userEmail:       currentUser.email || "",
         tournamentId:    tournament.id,
@@ -956,6 +986,21 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.player5 = p5;
         body.player6 = p6;
         body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
+    }
+
+    // ============================================================
+    // 🛡️ CONFIRMATION DIALOG — one last check
+    // ============================================================
+    const tName = tournament.title || tournament.game || "this tournament";
+    const confirmMsg =
+        `Tapaile "${tName}" ma register garna lageko chhau.\n\n` +
+        `Game: ${tournament.game || "—"}\n` +
+        (body.teamName ? `Team: ${body.teamName}\n` : "") +
+        (body.playingAs ? `Playing as: ${body.playingAs}\n` : "") +
+        `Amount: Rs ${body.amount}\n\n` +
+        `Confirm garnus?`;
+    if (!confirm(confirmMsg)) {
+        return;
     }
 
     const btn = $("submitButton");
