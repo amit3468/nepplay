@@ -29,7 +29,6 @@
     padding-bottom: 60px;
   }
 
-  /* TOP NAV */
   .topnav {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 22px;
@@ -77,7 +76,6 @@
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
-  /* HERO */
   .store-hero {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
@@ -96,43 +94,31 @@
     border-radius: 50%;
   }
   .store-hero h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 12px;
-    position: relative;
+    font-size: 2rem; font-weight: 800; margin-bottom: 12px; position: relative;
   }
   .store-hero h1 .accent { color: var(--gold-2); }
   .store-hero p {
-    color: #ddd6fe;
-    font-size: 1rem;
-    max-width: 640px;
-    line-height: 1.55;
-    position: relative;
+    color: #ddd6fe; font-size: 1rem; max-width: 640px;
+    line-height: 1.55; position: relative;
   }
   .store-hero .badges {
     display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;
     position: relative;
   }
   .badge {
-    font-size: 0.75rem;
-    font-weight: 800;
-    padding: 7px 14px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.75rem; font-weight: 800;
+    padding: 7px 14px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.5px;
   }
   .badge.green {
     background: rgba(34, 197, 94, 0.18);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
   }
   .badge.gold {
     background: rgba(245, 158, 11, 0.18);
-    color: var(--gold-2);
-    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: var(--gold-2); border: 1px solid rgba(245, 158, 11, 0.5);
   }
 
-  /* HOW IT WORKS */
   .how {
     background: var(--card);
     border: 1px solid var(--border);
@@ -141,11 +127,7 @@
     margin-bottom: 26px;
   }
   .how h2 { font-size: 1.15rem; margin-bottom: 18px; color: var(--gold-2); }
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-  }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .step {
     background: rgba(124, 58, 237, 0.12);
     border: 1px solid var(--border);
@@ -174,26 +156,19 @@
     flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
   }
   .pay-header h2 {
-    font-size: 1.2rem;
-    color: var(--gold-2);
+    font-size: 1.2rem; color: var(--gold-2);
     display: flex; align-items: center; gap: 8px;
   }
   .pay-header .secure-tag {
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 5px 11px;
-    border-radius: 999px;
+    font-size: 0.7rem; font-weight: 800;
+    padding: 5px 11px; border-radius: 999px;
     background: rgba(34, 197, 94, 0.18);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.5);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
+    letter-spacing: 0.5px; text-transform: uppercase;
   }
   .pay-sub {
-    color: var(--muted);
-    font-size: 0.88rem;
-    margin-bottom: 20px;
-    line-height: 1.5;
+    color: var(--muted); font-size: 0.88rem;
+    margin-bottom: 20px; line-height: 1.5;
   }
   .pay-layout {
     display: grid;
@@ -209,66 +184,65 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   }
   .qr-box img {
-    width: 100%;
-    max-width: 220px;
-    display: block;
-    margin: 0 auto;
-    border-radius: 8px;
+    width: 100%; max-width: 220px;
+    display: block; margin: 0 auto; border-radius: 8px;
   }
   .qr-box .qr-label {
-    margin-top: 10px;
-    color: #1a0b3d;
-    font-weight: 800;
-    font-size: 0.85rem;
-    letter-spacing: 0.3px;
+    margin-top: 10px; color: #1a0b3d;
+    font-weight: 800; font-size: 0.85rem; letter-spacing: 0.3px;
   }
   .qr-box .qr-sub {
-    color: #555;
-    font-size: 0.75rem;
-    margin-top: 2px;
+    color: #555; font-size: 0.75rem; margin-top: 2px;
   }
-  .pay-methods {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+  .pay-methods { display: flex; flex-direction: column; gap: 12px; }
   .pay-method {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    display: flex; align-items: center; gap: 14px;
     background: rgba(124, 58, 237, 0.1);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 14px 16px;
   }
   .pay-method .logo {
-    width: 46px; height: 46px;
-    border-radius: 12px;
+    width: 46px; height: 46px; border-radius: 12px;
     display: grid; place-items: center;
-    font-size: 1.4rem;
-    font-weight: 900;
+    font-size: 1.4rem; font-weight: 900;
     flex-shrink: 0;
   }
   .pay-method .logo.esewa { background: #60bb46; color: #fff; }
   .pay-method .logo.khalti { background: #5c2d91; color: #fff; }
   .pay-method .logo.imepay { background: #d9261c; color: #fff; }
+  .pay-method .logo.bank { background: #0369a1; color: #fff; font-size: 1rem; }
   .pay-method .info { flex: 1; }
   .pay-method .info .name {
+    font-weight: 800; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pay-method .info .name .no-qr {
+    font-size: 0.6rem;
     font-weight: 800;
-    font-size: 0.95rem;
+    background: rgba(168, 85, 247, 0.2);
+    color: var(--purple-2);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.4px;
+  }
+  .pay-method .info .name .soon {
+    font-size: 0.6rem;
+    font-weight: 800;
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--gold-2);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.4px;
   }
   .pay-method .info .number {
-    font-size: 1.05rem;
-    font-weight: 900;
+    font-size: 1.05rem; font-weight: 900;
     color: var(--gold-2);
-    letter-spacing: 1px;
-    margin-top: 2px;
+    letter-spacing: 1px; margin-top: 2px;
     font-family: 'Courier New', monospace;
   }
   .pay-method .info .hint {
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 2px;
+    font-size: 0.72rem; color: var(--muted); margin-top: 2px;
   }
   .pay-method .copy-btn {
     background: rgba(168, 85, 247, 0.2);
@@ -292,6 +266,10 @@
     border-color: rgba(34, 197, 94, 0.6);
     color: #4ade80;
   }
+  .pay-method .copy-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
   .pay-warning {
     margin-top: 18px;
     background: rgba(245, 158, 11, 0.1);
@@ -303,19 +281,15 @@
     line-height: 1.5;
   }
 
-  /* FILTERS */
   .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
   .filter-btn {
     background: rgba(124, 58, 237, 0.15);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 0.85rem; font-weight: 700;
+    padding: 8px 16px; border-radius: 999px;
+    cursor: pointer; transition: all 0.2s;
   }
   .filter-btn:hover { background: rgba(124, 58, 237, 0.3); }
   .filter-btn.active {
@@ -324,10 +298,8 @@
     box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
   }
 
-  /* PRODUCT GRID */
   .section-title {
-    font-size: 1.25rem;
-    font-weight: 800;
+    font-size: 1.25rem; font-weight: 800;
     margin: 24px 0 14px;
     display: flex; align-items: center; gap: 10px;
   }
@@ -384,7 +356,6 @@
     letter-spacing: 0.5px; text-transform: uppercase;
   }
 
-  /* TRUST ROW */
   .trust-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -402,7 +373,6 @@
   .trust .t { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
   .trust .d { font-size: 0.75rem; color: var(--muted); }
 
-  /* PAYMENT PROOF SECTION */
   .proof-section {
     background: var(--card);
     border: 1px solid var(--border);
@@ -415,25 +385,19 @@
     flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
   }
   .proof-header h2 {
-    font-size: 1.2rem;
-    color: var(--green);
+    font-size: 1.2rem; color: var(--green);
     display: flex; align-items: center; gap: 8px;
   }
   .proof-header .verified {
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 5px 11px;
-    border-radius: 999px;
+    font-size: 0.7rem; font-weight: 800;
+    padding: 5px 11px; border-radius: 999px;
     background: rgba(34, 197, 94, 0.18);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5);
     letter-spacing: 0.5px;
   }
   .proof-sub {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin-bottom: 20px;
-    line-height: 1.5;
+    color: var(--muted); font-size: 0.85rem;
+    margin-bottom: 20px; line-height: 1.5;
   }
   .proof-grid {
     display: grid;
@@ -450,12 +414,10 @@
     gap: 10px;
   }
   .proof-card .proof-img {
-    width: 100%;
-    aspect-ratio: 16 / 10;
+    width: 100%; aspect-ratio: 16 / 10;
     border-radius: 10px;
     background: linear-gradient(135deg, #1e123c, #2a1065);
-    display: grid;
-    place-items: center;
+    display: grid; place-items: center;
     font-size: 1.8rem;
     color: rgba(168, 85, 247, 0.4);
     border: 1px dashed rgba(168, 85, 247, 0.35);
@@ -474,14 +436,11 @@
     font-size: 0.68rem; color: var(--muted); opacity: 0.75; margin-top: 2px;
   }
   .proof-footer {
-    text-align: center;
-    margin-top: 18px;
-    font-size: 0.82rem;
-    color: var(--muted);
+    text-align: center; margin-top: 18px;
+    font-size: 0.82rem; color: var(--muted);
   }
   .proof-footer a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
 
-  /* CUSTOM ORDER */
   .custom-order {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
     border: 2px dashed rgba(245, 158, 11, 0.5);
@@ -503,7 +462,6 @@
   }
   .custom-order .wa-btn:hover { transform: translateY(-2px); }
 
-  /* FLOATING WA */
   .float-wa {
     position: fixed;
     right: 20px; bottom: 24px;
@@ -522,7 +480,6 @@
     50% { box-shadow: 0 10px 36px rgba(37, 211, 102, 0.85); }
   }
 
-  /* MOBILE */
   @media (max-width: 720px) {
     .nav-links { gap: 8px; font-size: 0.78rem; }
     .nav-links a.winners-link,
@@ -546,7 +503,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="topnav">
   <div class="brand">
     <span class="logo">🎮</span>
@@ -566,7 +522,6 @@
 
 <div class="container">
 
-  <!-- HERO -->
   <section class="store-hero">
     <h1>Top-Ups, <span class="accent">Diamonds</span> & Gift Cards 🎁</h1>
     <p>
@@ -581,7 +536,6 @@
     </div>
   </section>
 
-  <!-- ===== HOW TO ORDER ===== -->
   <section class="how">
     <h2>📖 How to Order (4 Simple Steps)</h2>
     <div class="steps">
@@ -598,7 +552,7 @@
       <div class="step">
         <div class="num">3</div>
         <div class="t">Pay via eSewa / Khalti / IME Pay</div>
-        <div class="d">Scan the QR below or send to 9816023400.</div>
+        <div class="d">Scan the QR below or send to the number shown.</div>
       </div>
       <div class="step">
         <div class="num">4</div>
@@ -615,18 +569,18 @@
       <span class="secure-tag">🔒 100% Secure</span>
     </div>
     <p class="pay-sub">
-      Kunai pani payment method bata pay garnus — sabai ma <strong>9816023400</strong> nai
-      number ho. QR scan gare pani same account ma aauxa. Payment paxi screenshot
-      WhatsApp ma pathaunus.
+      Kunai pani payment method bata pay garnus. QR scan gare pani, number ma
+      send gare pani — same account ma aauxa. Payment paxi screenshot
+      WhatsApp <strong>9816023400</strong> ma pathaunus.
     </p>
 
     <div class="pay-layout">
 
-      <!-- QR IMAGE -->
+      <!-- QR IMAGE (shared by eSewa + Khalti) -->
       <div class="qr-box">
-        <img src="/images/qr.png" alt="NEPPLAY Payment QR — eSewa / Khalti / IME Pay" />
+        <img src="/images/qr.png" alt="NEPPLAY Payment QR — eSewa / Khalti" />
         <div class="qr-label">Scan to Pay</div>
-        <div class="qr-sub">eSewa · Khalti · IME Pay</div>
+        <div class="qr-sub">Works with eSewa & Khalti</div>
       </div>
 
       <!-- PAYMENT METHODS -->
@@ -636,30 +590,40 @@
           <div class="logo esewa">e</div>
           <div class="info">
             <div class="name">eSewa</div>
-            <div class="number">9816023400</div>
-            <div class="hint">Send Money → enter number → confirm</div>
+            <div class="number">9748835184</div>
+            <div class="hint">Send Money → enter number → confirm (QR also works)</div>
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+          <button class="copy-btn" onclick="copyNum(this, '9748835184')">Copy</button>
         </div>
 
         <div class="pay-method">
           <div class="logo khalti">K</div>
           <div class="info">
             <div class="name">Khalti</div>
-            <div class="number">9816023400</div>
-            <div class="hint">Send Money → enter number → confirm</div>
+            <div class="number">9766258368</div>
+            <div class="hint">Send Money → enter number → confirm (QR also works)</div>
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+          <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy</button>
         </div>
 
         <div class="pay-method">
           <div class="logo imepay">i</div>
           <div class="info">
-            <div class="name">IME Pay</div>
-            <div class="number">9816023400</div>
+            <div class="name">IME Pay <span class="no-qr">NUMBER ONLY</span></div>
+            <div class="number">9766258368</div>
             <div class="hint">Send Money → enter number → confirm</div>
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+          <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy</button>
+        </div>
+
+        <div class="pay-method">
+          <div class="logo bank">🏦</div>
+          <div class="info">
+            <div class="name">Bank Transfer <span class="soon">COMING SOON</span></div>
+            <div class="number">— — —</div>
+            <div class="hint">Mobile banking / bank deposit — coming soon</div>
+          </div>
+          <button class="copy-btn" disabled>Soon</button>
         </div>
 
       </div>
@@ -667,12 +631,12 @@
 
     <div class="pay-warning">
       ⚠️ <strong>Payment garepaxi</strong> screenshot WhatsApp ma pathaunus:
-      <strong>9816023400</strong>. Screenshot aaye paxi matra order process hunchha.
-      Reference ma timro <strong>Player ID (UID)</strong> pani lekhnus.
+      <strong>9816023400</strong> (WhatsApp only — payments ko lagi hoina).
+      Screenshot aaye paxi matra order process hunchha. Reference ma timro
+      <strong>Player ID (UID)</strong> pani lekhnus.
     </div>
   </section>
 
-  <!-- TRUST ROW -->
   <div class="trust-row">
     <div class="trust">
       <div class="ico">🔒</div>
@@ -691,7 +655,6 @@
     </div>
   </div>
 
-  <!-- FILTERS -->
   <div class="filters">
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="freefire">Free Fire</button>
@@ -701,7 +664,6 @@
     <button class="filter-btn" data-filter="giftcard">Gift Cards</button>
   </div>
 
-  <!-- FREE FIRE -->
   <h2 class="section-title" data-cat="freefire">
     <span class="emoji">🔥</span> Free Fire Diamonds
   </h2>
@@ -771,7 +733,6 @@
 
   </div>
 
-  <!-- PUBG -->
   <h2 class="section-title" data-cat="pubg">
     <span class="emoji">🎯</span> PUBG Mobile UC
   </h2>
@@ -810,7 +771,6 @@
 
   </div>
 
-  <!-- COD -->
   <h2 class="section-title" data-cat="cod">
     <span class="emoji">🎖️</span> Call of Duty CP
   </h2>
@@ -838,7 +798,6 @@
 
   </div>
 
-  <!-- VALORANT -->
   <h2 class="section-title" data-cat="valorant">
     <span class="emoji">⚔️</span> Valorant Points
   </h2>
@@ -866,7 +825,6 @@
 
   </div>
 
-  <!-- GIFT CARDS -->
   <h2 class="section-title" data-cat="giftcard">
     <span class="emoji">🎁</span> Gift Cards
   </h2>
@@ -914,7 +872,6 @@
 
   </div>
 
-  <!-- ===== PAYMENT PROOF SECTION ===== -->
   <section class="proof-section">
     <div class="proof-header">
       <h2>✅ Payment Proof — Recent Deliveries</h2>
@@ -928,10 +885,7 @@
     <div class="proof-grid">
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof1.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Suman K.</div>
           <div class="proof-item">720 Free Fire Diamonds</div>
@@ -941,10 +895,7 @@
       </div>
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof2.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Bibek T.</div>
           <div class="proof-item">325 PUBG UC</div>
@@ -954,10 +905,7 @@
       </div>
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof3.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Anita R.</div>
           <div class="proof-item">341 Free Fire Diamonds</div>
@@ -967,10 +915,7 @@
       </div>
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof4.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Ramesh B.</div>
           <div class="proof-item">Steam Wallet Rs 1000</div>
@@ -980,10 +925,7 @@
       </div>
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof5.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Kiran S.</div>
           <div class="proof-item">80 COD CP</div>
@@ -993,10 +935,7 @@
       </div>
 
       <div class="proof-card">
-        <div class="proof-img">
-          <!-- <img src="/proofs/proof6.jpg" alt="Proof" /> -->
-          🧾
-        </div>
+        <div class="proof-img">🧾</div>
         <div class="proof-meta">
           <div class="proof-name">Priya M.</div>
           <div class="proof-item">Google Play Rs 500</div>
@@ -1014,7 +953,6 @@
     </p>
   </section>
 
-  <!-- CUSTOM ORDER -->
   <div class="custom-order">
     <h3>🛍️ Don't see what you need?</h3>
     <p>
@@ -1028,13 +966,11 @@
 
 </div>
 
-<!-- FLOATING WA -->
 <a class="float-wa"
    href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20top-up."
    target="_blank">💬</a>
 
 <script>
-  // Copy-to-clipboard for payment numbers
   function copyNum(btn, num) {
     navigator.clipboard.writeText(num).then(() => {
       const original = btn.textContent;
@@ -1049,7 +985,6 @@
     });
   }
 
-  // Category filter
   const filterBtns = document.querySelectorAll('.filter-btn');
   const sections = document.querySelectorAll('.section-title[data-cat], .product-grid[data-cat]');
 
