@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -265,23 +265,9 @@ form.addEventListener(
 
         try{
 
-            /*
-            ====================================================
-            DETERMINE WHETHER USER ENTERED USERNAME OR EMAIL
-            ====================================================
-            */
-
             const isEmail =
                 login.includes("@");
 
-
-            /*
-            ====================================================
-            SEND ALL COMPATIBLE LOGIN FIELDS
-
-            The server can use username, email, or login.
-            ====================================================
-            */
 
             const loginData = {
 
@@ -332,12 +318,6 @@ form.addEventListener(
             }
 
 
-            /*
-            ====================================================
-            LOGIN FAILED
-            ====================================================
-            */
-
             if(!response.ok ||
                !data.success){
 
@@ -347,13 +327,6 @@ form.addEventListener(
                 );
             }
 
-
-            /*
-            ====================================================
-            IMPORTANT:
-            VERIFY THAT THE SESSION COOKIE ACTUALLY WORKS
-            ====================================================
-            */
 
             const meResponse =
                 await fetch(
@@ -378,14 +351,8 @@ form.addEventListener(
             }
 
 
-            /*
-            ====================================================
-            LOGIN SUCCESS
-            ====================================================
-            */
-
             showMessage(
-                "Login successful. Opening member dashboard...",
+                "Login successful. Opening...",
                 "success"
             );
 
@@ -393,8 +360,25 @@ form.addEventListener(
             setTimeout(
                 function(){
 
-                    window.location.href =
-                        "member.html";
+                    // ✅ Respect ?redirect= param
+                    const params =
+                        new URLSearchParams(
+                            window.location.search
+                        );
+
+                    const redirect =
+                        params.get("redirect");
+
+                    if(redirect){
+
+                        window.location.href =
+                            decodeURIComponent(redirect);
+
+                    }else{
+
+                        window.location.href =
+                            "member.html";
+                    }
 
                 },
                 700
