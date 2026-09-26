@@ -44,7 +44,6 @@
     z-index: 50;
     gap: 10px;
     max-width: 100%;
-    overflow: visible;
   }
   .brand {
     display: flex;
@@ -103,7 +102,7 @@
     font-size: 0.82rem;
   }
 
-  /* ===== USER CHIP (div, not button) ===== */
+  /* ===== USER CHIP ===== */
   .user-chip {
     position: relative;
     display: flex;
@@ -119,7 +118,6 @@
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: rgba(168, 85, 247, 0.3);
-    touch-action: manipulation;
     z-index: 60;
   }
   .user-chip:hover { background: rgba(124, 58, 237, 0.3); }
@@ -175,7 +173,6 @@
     cursor: pointer;
     font-family: inherit;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
     box-sizing: border-box;
   }
   .user-menu a:hover,
@@ -365,8 +362,6 @@
     .user-menu {
       min-width: 180px;
       padding: 6px;
-      /* ensure menu appears within viewport on mobile */
-      right: 0;
       max-width: calc(100vw - 20px);
     }
     .user-menu a,
@@ -398,18 +393,18 @@
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
 
-    <!-- USER CHIP — plain div, no nested buttons -->
-    <div class="user-chip" id="userChip">
-      <div class="avatar" id="userAvatar">?</div>
+    <!-- USER CHIP -->
+    <div class="user-chip" id="userChip" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
+      <span class="avatar" id="userAvatar">?</span>
       <span class="uname" id="userName">Loading…</span>
       <span class="caret">▼</span>
-      <div class="user-menu" id="userMenu">
-        <a href="/member.html">📊 My Dashboard</a>
-        <a href="/profile.html">👤 My Profile</a>
-        <a href="/my-tournaments.html">🏆 My Tournaments</a>
-        <div class="divider"></div>
-        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
-      </div>
+      <span class="user-menu" id="userMenu" role="menu">
+        <a href="/member.html" role="menuitem">📊 My Dashboard</a>
+        <a href="/profile.html" role="menuitem">👤 My Profile</a>
+        <a href="/my-tournaments.html" role="menuitem">🏆 My Tournaments</a>
+        <span class="divider"></span>
+        <span class="menu-btn danger" id="logoutBtn" role="menuitem" tabindex="0">🚪 Logout</span>
+      </span>
     </div>
   </div>
 </nav>
@@ -487,7 +482,7 @@
 <a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" rel="noopener" class="float-wa">💬</a>
 
 <!-- ============================================================
-     PLAIN SCRIPT — chip toggle (touch + pointer + click)
+     USER CHIP — plain script, click-only, most reliable pattern
      ============================================================ -->
 <script>
 (function () {
@@ -495,57 +490,49 @@
     var menu = document.getElementById("userMenu");
     var logoutBtn = document.getElementById("logoutBtn");
 
-    if (!chip || !menu) {
-        console.warn("[NEPPLAY] chip or menu not found");
-        return;
-    }
+    if (!chip || !menu) return;
 
-    var menuOpen = false;
-    var lastToggle = 0;
+    var isOpen = false;
 
-    function openMenu() {
-        menuOpen = true;
+    function open() {
+        isOpen = true;
         menu.classList.add("open");
         chip.classList.add("menu-open");
+        chip.setAttribute("aria-expanded", "true");
     }
-    function closeMenu() {
-        menuOpen = false;
+    function close() {
+        isOpen = false;
         menu.classList.remove("open");
         chip.classList.remove("menu-open");
+        chip.setAttribute("aria-expanded", "false");
     }
     function toggle(e) {
-        var now = Date.now();
-        if (now - lastToggle < 350) return;
-        lastToggle = now;
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        if (menuOpen) closeMenu(); else openMenu();
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (isOpen) close(); else open();
     }
 
-    // Bind touch + pointer + click for max compatibility
-    chip.addEventListener("touchstart", toggle, { passive: false });
-    chip.addEventListener("pointerdown", function (e) {
-        if (e.pointerType === "touch") toggle(e);
-    });
+    // Chip toggles on click
     chip.addEventListener("click", toggle);
 
-    // Prevent taps inside menu from closing it
-    menu.addEventListener("touchstart", function (e) { e.stopPropagation(); }, { passive: true });
-    menu.addEventListener("click", function (e) { e.stopPropagation(); });
+    // Taps inside the menu don't bubble
+    menu.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
 
-    // Tap outside closes
-    document.addEventListener("touchstart", function (e) {
-        if (!chip.contains(e.target)) closeMenu();
-    }, { passive: true });
+    // Tap anywhere else closes
     document.addEventListener("click", function (e) {
-        if (!chip.contains(e.target)) closeMenu();
+        if (isOpen && !chip.contains(e.target)) close();
     });
 
-    // Escape key
+    // Escape
     document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") closeMenu();
+        if (e.key === "Escape") close();
     });
 
-    // Logout handler
+    // Logout
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function (e) {
             e.preventDefault();
@@ -586,7 +573,7 @@ window.sharePage = window.sharePage || function () {
 </script>
 
 <!-- ============================================================
-     MODULE — load username + avatar + auth guard
+     MODULE — username/avatar + auth guard
      ============================================================ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
