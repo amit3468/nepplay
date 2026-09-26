@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEPPLAY Store — Top-Ups, Diamonds & Gift Cards</title>
+<link rel="icon" href="/favicon.ico" />
+
+<style>
+  :root {
+    --bg: #0a0618;
+    --purple: #7c3aed;
+    --purple-2: #a855f7;
+    --gold: #f59e0b;
+    --gold-2: #fbbf24;
+    --green: #22c55e;
+    --text: #f5f3ff;
+    --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25);
+    --card: rgba(30, 18, 60, 0.75);
+    --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* TOP NAV */
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    background: rgba(15, 8, 35, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.15rem;
+  }
+  .brand .logo {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center; font-size: 1rem;
+  }
+  .brand .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    display: grid; place-items: center; font-weight: 700; font-size: 0.85rem;
+    margin-left: 6px;
+  }
+  .nav-links { display: flex; gap: 18px; font-size: 0.95rem; align-items: center; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; transition: color 0.2s;
+    display: inline-flex; align-items: center;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--gold-2); }
+  .nav-links a.winners-link {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d !important;
+    padding: 6px 14px; border-radius: 999px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+  }
+  .nav-links a.store-link {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff !important;
+    padding: 6px 14px; border-radius: 999px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
+
+  /* HERO */
+  .store-hero {
+    background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
+    border-radius: 22px;
+    padding: 34px 30px;
+    margin-bottom: 26px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .store-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+    border-radius: 50%;
+  }
+  .store-hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .store-hero h1 .accent { color: var(--gold-2); }
+  .store-hero p {
+    color: #ddd6fe;
+    font-size: 1rem;
+    max-width: 640px;
+    line-height: 1.55;
+    position: relative;
+  }
+  .store-hero .badges {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px;
+    position: relative;
+  }
+  .badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 7px 14px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge.green {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+  }
+  .badge.gold {
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--gold-2);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+  }
+
+  /* HOW IT WORKS */
+  .how {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 26px;
+  }
+  .how h2 { font-size: 1.15rem; margin-bottom: 18px; color: var(--gold-2); }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .step {
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .step .num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 0.9rem; margin-bottom: 10px;
+  }
+  .step .t { font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
+  .step .d { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
+
+  /* ===== PAYMENT INFO SECTION ===== */
+  .pay-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 24px;
+    margin-bottom: 26px;
+  }
+  .pay-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
+  }
+  .pay-header h2 {
+    font-size: 1.2rem;
+    color: var(--gold-2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pay-header .secure-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .pay-sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .pay-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .qr-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .qr-box img {
+    width: 100%;
+    max-width: 220px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+  .qr-box .qr-label {
+    margin-top: 10px;
+    color: #1a0b3d;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+  }
+  .qr-box .qr-sub {
+    color: #555;
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .pay-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pay-method {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .pay-method .logo {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 1.4rem;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .pay-method .logo.esewa { background: #60bb46; color: #fff; }
+  .pay-method .logo.khalti { background: #5c2d91; color: #fff; }
+  .pay-method .logo.imepay { background: #d9261c; color: #fff; }
+  .pay-method .info { flex: 1; }
+  .pay-method .info .name {
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .pay-method .info .number {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--gold-2);
+    letter-spacing: 1px;
+    margin-top: 2px;
+    font-family: 'Courier New', monospace;
+  }
+  .pay-method .info .hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .pay-method .copy-btn {
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pay-method .copy-btn:hover {
+    background: rgba(168, 85, 247, 0.4);
+    transform: translateY(-1px);
+  }
+  .pay-method .copy-btn.copied {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: rgba(34, 197, 94, 0.6);
+    color: #4ade80;
+  }
+  .pay-warning {
+    margin-top: 18px;
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid var(--gold-2);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #fde68a;
+    line-height: 1.5;
+  }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-btn {
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { background: rgba(124, 58, 237, 0.3); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+  }
+
+  /* PRODUCT GRID */
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 24px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .emoji { font-size: 1.4rem; }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .product {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .product:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.35);
+    border-color: rgba(168, 85, 247, 0.5);
+  }
+  .product .icon { font-size: 2rem; margin-bottom: 4px; }
+  .product .name { font-weight: 800; font-size: 1rem; line-height: 1.3; }
+  .product .sub { font-size: 0.78rem; color: var(--muted); }
+  .product .price-row {
+    display: flex; align-items: baseline; gap: 8px; margin-top: auto;
+  }
+  .product .price { font-size: 1.35rem; font-weight: 900; color: var(--gold-2); }
+  .product .buy-btn {
+    display: block; text-align: center;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; text-decoration: none;
+    font-weight: 800; font-size: 0.9rem;
+    padding: 11px; border-radius: 10px;
+    transition: transform 0.15s, box-shadow 0.2s;
+    margin-top: 6px;
+  }
+  .product .buy-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4);
+  }
+  .tag-pop {
+    position: absolute; top: 12px; right: 12px;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: #fff; font-size: 0.65rem; font-weight: 800;
+    padding: 4px 9px; border-radius: 999px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* TRUST ROW */
+  .trust-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .trust {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .trust .ico { font-size: 1.5rem; margin-bottom: 6px; }
+  .trust .t { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+  .trust .d { font-size: 0.75rem; color: var(--muted); }
+
+  /* PAYMENT PROOF SECTION */
+  .proof-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 24px;
+    margin-bottom: 26px;
+  }
+  .proof-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 6px;
+  }
+  .proof-header h2 {
+    font-size: 1.2rem;
+    color: var(--green);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .proof-header .verified {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    letter-spacing: 0.5px;
+  }
+  .proof-sub {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .proof-card {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .proof-card .proof-img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e123c, #2a1065);
+    display: grid;
+    place-items: center;
+    font-size: 1.8rem;
+    color: rgba(168, 85, 247, 0.4);
+    border: 1px dashed rgba(168, 85, 247, 0.35);
+    overflow: hidden;
+  }
+  .proof-card .proof-img img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .proof-card .proof-meta { display: flex; flex-direction: column; gap: 3px; }
+  .proof-card .proof-name { font-weight: 800; font-size: 0.88rem; }
+  .proof-card .proof-item { font-size: 0.75rem; color: var(--muted); }
+  .proof-card .proof-amount {
+    font-size: 0.85rem; font-weight: 800; color: var(--green); margin-top: 2px;
+  }
+  .proof-card .proof-time {
+    font-size: 0.68rem; color: var(--muted); opacity: 0.75; margin-top: 2px;
+  }
+  .proof-footer {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .proof-footer a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
+
+  /* CUSTOM ORDER */
+  .custom-order {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+    border: 2px dashed rgba(245, 158, 11, 0.5);
+    border-radius: 18px;
+    padding: 26px;
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .custom-order h3 { font-size: 1.15rem; margin-bottom: 10px; color: var(--gold-2); }
+  .custom-order p { color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; line-height: 1.5; }
+  .custom-order .wa-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; text-decoration: none;
+    font-weight: 800; padding: 13px 28px;
+    border-radius: 999px; font-size: 0.95rem;
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    transition: transform 0.15s;
+  }
+  .custom-order .wa-btn:hover { transform: translateY(-2px); }
+
+  /* FLOATING WA */
+  .float-wa {
+    position: fixed;
+    right: 20px; bottom: 24px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #25d366;
+    display: grid; place-items: center;
+    font-size: 1.5rem;
+    box-shadow: 0 10px 26px rgba(37, 211, 102, 0.5);
+    z-index: 60;
+    text-decoration: none;
+    animation: pulse 2.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 10px 26px rgba(37, 211, 102, 0.5); }
+    50% { box-shadow: 0 10px 36px rgba(37, 211, 102, 0.85); }
+  }
+
+  /* MOBILE */
+  @media (max-width: 720px) {
+    .nav-links { gap: 8px; font-size: 0.78rem; }
+    .nav-links a.winners-link,
+    .nav-links a.store-link { padding: 5px 10px; }
+    .nav-links a:not(.winners-link):not(.store-link):not(.active) { display: none; }
+    .store-hero h1 { font-size: 1.5rem; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .trust-row { grid-template-columns: 1fr; }
+    .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .product { padding: 14px; }
+    .product .price { font-size: 1.1rem; }
+    .proof-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pay-layout { grid-template-columns: 1fr; }
+    .qr-box { max-width: 260px; margin: 0 auto; }
+  }
+  @media (max-width: 460px) {
+    .product-grid { grid-template-columns: 1fr; }
+    .proof-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="brand">
+    <span class="logo">🎮</span>
+    Nepal Gaming
+    <span class="avatar">C</span>
+  </div>
+  <div class="nav-links">
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html">Tournaments</a>
+    <a href="/winners.html" class="winners-link">🏆 Winners</a>
+    <a href="/store.html" class="store-link active">🛒 Store</a>
+    <a href="/teams.html">Teams</a>
+    <a href="/profile.html">My Profile</a>
+    <a href="/support.html">Support</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <section class="store-hero">
+    <h1>Top-Ups, <span class="accent">Diamonds</span> & Gift Cards 🎁</h1>
+    <p>
+      NEPPLAY le ahile top-up service pani dinchha! Free Fire diamonds, PUBG UC,
+      COD CP, Valorant Points, Steam Wallet, Google Play, iTunes ra aru dherai.
+      Nepal ko best rate ma — direct WhatsApp order garnus.
+    </p>
+    <div class="badges">
+      <span class="badge green">✅ Trusted Seller</span>
+      <span class="badge green">⚡ Fast Delivery</span>
+      <span class="badge gold">💰 Best Rate in Nepal</span>
+    </div>
+  </section>
+
+  <!-- ===== HOW TO ORDER ===== -->
+  <section class="how">
+    <h2>📖 How to Order (4 Simple Steps)</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div class="t">Choose Product</div>
+        <div class="d">Pick your game or gift card from below.</div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="t">Tap "Order on WhatsApp"</div>
+        <div class="d">Send us your Player ID (UID) and chosen pack.</div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="t">Pay via eSewa / Khalti / IME Pay</div>
+        <div class="d">Scan the QR below or send to 9816023400.</div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="t">Receive Instantly</div>
+        <div class="d">Top-up delivered within 5–15 minutes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAYMENT INFO SECTION ===== -->
+  <section class="pay-section">
+    <div class="pay-header">
+      <h2>💳 Payment Details</h2>
+      <span class="secure-tag">🔒 100% Secure</span>
+    </div>
+    <p class="pay-sub">
+      Kunai pani payment method bata pay garnus — sabai ma <strong>9816023400</strong> nai
+      number ho. QR scan gare pani same account ma aauxa. Payment paxi screenshot
+      WhatsApp ma pathaunus.
+    </p>
+
+    <div class="pay-layout">
+
+      <!-- QR IMAGE -->
+      <div class="qr-box">
+        <img src="/images/qr.png" alt="NEPPLAY Payment QR — eSewa / Khalti / IME Pay" />
+        <div class="qr-label">Scan to Pay</div>
+        <div class="qr-sub">eSewa · Khalti · IME Pay</div>
+      </div>
+
+      <!-- PAYMENT METHODS -->
+      <div class="pay-methods">
+
+        <div class="pay-method">
+          <div class="logo esewa">e</div>
+          <div class="info">
+            <div class="name">eSewa</div>
+            <div class="number">9816023400</div>
+            <div class="hint">Send Money → enter number → confirm</div>
+          </div>
+          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+        </div>
+
+        <div class="pay-method">
+          <div class="logo khalti">K</div>
+          <div class="info">
+            <div class="name">Khalti</div>
+            <div class="number">9816023400</div>
+            <div class="hint">Send Money → enter number → confirm</div>
+          </div>
+          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+        </div>
+
+        <div class="pay-method">
+          <div class="logo imepay">i</div>
+          <div class="info">
+            <div class="name">IME Pay</div>
+            <div class="number">9816023400</div>
+            <div class="hint">Send Money → enter number → confirm</div>
+          </div>
+          <button class="copy-btn" onclick="copyNum(this, '9816023400')">Copy</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pay-warning">
+      ⚠️ <strong>Payment garepaxi</strong> screenshot WhatsApp ma pathaunus:
+      <strong>9816023400</strong>. Screenshot aaye paxi matra order process hunchha.
+      Reference ma timro <strong>Player ID (UID)</strong> pani lekhnus.
+    </div>
+  </section>
+
+  <!-- TRUST ROW -->
+  <div class="trust-row">
+    <div class="trust">
+      <div class="ico">🔒</div>
+      <div class="t">100% Safe</div>
+      <div class="d">Direct top-up to your ID</div>
+    </div>
+    <div class="trust">
+      <div class="ico">⚡</div>
+      <div class="t">Fast Delivery</div>
+      <div class="d">5–15 minutes average</div>
+    </div>
+    <div class="trust">
+      <div class="ico">💬</div>
+      <div class="t">24/7 Support</div>
+      <div class="d">WhatsApp us anytime</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="freefire">Free Fire</button>
+    <button class="filter-btn" data-filter="pubg">PUBG</button>
+    <button class="filter-btn" data-filter="cod">COD</button>
+    <button class="filter-btn" data-filter="valorant">Valorant</button>
+    <button class="filter-btn" data-filter="giftcard">Gift Cards</button>
+  </div>
+
+  <!-- FREE FIRE -->
+  <h2 class="section-title" data-cat="freefire">
+    <span class="emoji">🔥</span> Free Fire Diamonds
+  </h2>
+  <div class="product-grid" data-cat="freefire">
+
+    <div class="product">
+      <div class="tag-pop">POPULAR</div>
+      <div class="icon">💎</div>
+      <div class="name">110 Diamonds</div>
+      <div class="sub">Free Fire · Nepal Server</div>
+      <div class="price-row"><div class="price">Rs 130</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20110%20Free%20Fire%20Diamonds%20-%20Rs%20130.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">💎</div>
+      <div class="name">341 Diamonds</div>
+      <div class="sub">Free Fire · Nepal Server</div>
+      <div class="price-row"><div class="price">Rs 380</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20341%20Free%20Fire%20Diamonds%20-%20Rs%20380.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">💎</div>
+      <div class="name">720 Diamonds</div>
+      <div class="sub">Free Fire · Nepal Server</div>
+      <div class="price-row"><div class="price">Rs 750</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20720%20Free%20Fire%20Diamonds%20-%20Rs%20750.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">💎</div>
+      <div class="name">1080 Diamonds</div>
+      <div class="sub">Free Fire · Nepal Server</div>
+      <div class="price-row"><div class="price">Rs 1100</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201080%20Free%20Fire%20Diamonds%20-%20Rs%201100.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">🎫</div>
+      <div class="name">Weekly Membership</div>
+      <div class="sub">Free Fire · 7 days</div>
+      <div class="price-row"><div class="price">Rs 250</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Weekly%20Membership%20-%20Rs%20250.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="tag-pop">BEST VALUE</div>
+      <div class="icon">🎫</div>
+      <div class="name">Monthly Membership</div>
+      <div class="sub">Free Fire · 30 days</div>
+      <div class="price-row"><div class="price">Rs 900</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Free%20Fire%20Monthly%20Membership%20-%20Rs%20900.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+  </div>
+
+  <!-- PUBG -->
+  <h2 class="section-title" data-cat="pubg">
+    <span class="emoji">🎯</span> PUBG Mobile UC
+  </h2>
+  <div class="product-grid" data-cat="pubg">
+
+    <div class="product">
+      <div class="icon">🪙</div>
+      <div class="name">60 UC</div>
+      <div class="sub">PUBG Mobile</div>
+      <div class="price-row"><div class="price">Rs 150</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2060%20PUBG%20UC%20-%20Rs%20150.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">🪙</div>
+      <div class="name">325 UC</div>
+      <div class="sub">PUBG Mobile</div>
+      <div class="price-row"><div class="price">Rs 700</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20325%20PUBG%20UC%20-%20Rs%20700.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="tag-pop">POPULAR</div>
+      <div class="icon">🪙</div>
+      <div class="name">660 UC</div>
+      <div class="sub">PUBG Mobile</div>
+      <div class="price-row"><div class="price">Rs 1350</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20660%20PUBG%20UC%20-%20Rs%201350.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+  </div>
+
+  <!-- COD -->
+  <h2 class="section-title" data-cat="cod">
+    <span class="emoji">🎖️</span> Call of Duty CP
+  </h2>
+  <div class="product-grid" data-cat="cod">
+
+    <div class="product">
+      <div class="icon">💠</div>
+      <div class="name">80 CP</div>
+      <div class="sub">COD Mobile</div>
+      <div class="price-row"><div class="price">Rs 150</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%2080%20COD%20CP%20-%20Rs%20150.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">💠</div>
+      <div class="name">420 CP</div>
+      <div class="sub">COD Mobile</div>
+      <div class="price-row"><div class="price">Rs 700</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20420%20COD%20CP%20-%20Rs%20700.%20My%20UID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+  </div>
+
+  <!-- VALORANT -->
+  <h2 class="section-title" data-cat="valorant">
+    <span class="emoji">⚔️</span> Valorant Points
+  </h2>
+  <div class="product-grid" data-cat="valorant">
+
+    <div class="product">
+      <div class="icon">🔺</div>
+      <div class="name">475 VP</div>
+      <div class="sub">Valorant</div>
+      <div class="price-row"><div class="price">Rs 600</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20475%20Valorant%20VP%20-%20Rs%20600.%20My%20Riot%20ID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">🔺</div>
+      <div class="name">1000 VP</div>
+      <div class="sub">Valorant</div>
+      <div class="price-row"><div class="price">Rs 1200</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%201000%20Valorant%20VP%20-%20Rs%201200.%20My%20Riot%20ID%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+  </div>
+
+  <!-- GIFT CARDS -->
+  <h2 class="section-title" data-cat="giftcard">
+    <span class="emoji">🎁</span> Gift Cards
+  </h2>
+  <div class="product-grid" data-cat="giftcard">
+
+    <div class="product">
+      <div class="icon">🎮</div>
+      <div class="name">Steam Wallet</div>
+      <div class="sub">Rs 500 / 1000 / 2500 / 5000</div>
+      <div class="price-row"><div class="price">From Rs 550</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Steam%20Wallet%20Gift%20Card.%20Amount%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">▶️</div>
+      <div class="name">Google Play</div>
+      <div class="sub">Rs 500 / 1000 / 2000</div>
+      <div class="price-row"><div class="price">From Rs 550</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Google%20Play%20Gift%20Card.%20Amount%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">🍎</div>
+      <div class="name">iTunes / Apple</div>
+      <div class="sub">Rs 500 / 1000 / 2000</div>
+      <div class="price-row"><div class="price">From Rs 600</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20iTunes%20Gift%20Card.%20Amount%3A%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+    <div class="product">
+      <div class="icon">💳</div>
+      <div class="name">Netflix / Spotify</div>
+      <div class="sub">Subscription gift cards</div>
+      <div class="price-row"><div class="price">Ask rate</div></div>
+      <a class="buy-btn"
+         href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%3A%20Netflix%2FSpotify%20Gift%20Card.%20"
+         target="_blank">Order on WhatsApp</a>
+    </div>
+
+  </div>
+
+  <!-- ===== PAYMENT PROOF SECTION ===== -->
+  <section class="proof-section">
+    <div class="proof-header">
+      <h2>✅ Payment Proof — Recent Deliveries</h2>
+      <span class="verified">100% Verified</span>
+    </div>
+    <p class="proof-sub">
+      Hamro recent top-up orders ko proof. Sabai real members, real deliveries.
+      Timi pani order garna sakchhau — proof yeta auto-update hunchha.
+    </p>
+
+    <div class="proof-grid">
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof1.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Suman K.</div>
+          <div class="proof-item">720 Free Fire Diamonds</div>
+          <div class="proof-amount">Rs 750 ✅</div>
+          <div class="proof-time">Today · 10:42 AM</div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof2.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Bibek T.</div>
+          <div class="proof-item">325 PUBG UC</div>
+          <div class="proof-amount">Rs 700 ✅</div>
+          <div class="proof-time">Today · 10:18 AM</div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof3.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Anita R.</div>
+          <div class="proof-item">341 Free Fire Diamonds</div>
+          <div class="proof-amount">Rs 380 ✅</div>
+          <div class="proof-time">Today · 9:55 AM</div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof4.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Ramesh B.</div>
+          <div class="proof-item">Steam Wallet Rs 1000</div>
+          <div class="proof-amount">Rs 1150 ✅</div>
+          <div class="proof-time">Yesterday · 8:12 PM</div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof5.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Kiran S.</div>
+          <div class="proof-item">80 COD CP</div>
+          <div class="proof-amount">Rs 150 ✅</div>
+          <div class="proof-time">Yesterday · 6:40 PM</div>
+        </div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-img">
+          <!-- <img src="/proofs/proof6.jpg" alt="Proof" /> -->
+          🧾
+        </div>
+        <div class="proof-meta">
+          <div class="proof-name">Priya M.</div>
+          <div class="proof-item">Google Play Rs 500</div>
+          <div class="proof-amount">Rs 580 ✅</div>
+          <div class="proof-time">Yesterday · 4:20 PM</div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="proof-footer">
+      Want to see more? Check the
+      <a href="/winners.html">Winners & Leaderboard</a>
+      page or ask us directly on WhatsApp.
+    </p>
+  </section>
+
+  <!-- CUSTOM ORDER -->
+  <div class="custom-order">
+    <h3>🛍️ Don't see what you need?</h3>
+    <p>
+      Hamisanga dherai games ra gift cards available chhan — list ma nabhayeko
+      kunai pani item chahiyeko bhaye WhatsApp ma sodhnus. We'll get it for you!
+    </p>
+    <a class="wa-btn"
+       href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20custom%20top-up%2Fgift%20card.%20Details%3A%20"
+       target="_blank">💬 Chat with us on WhatsApp</a>
+  </div>
+
+</div>
+
+<!-- FLOATING WA -->
+<a class="float-wa"
+   href="https://wa.me/9779816023400?text=Hi%20NEPPLAY%2C%20I%20want%20to%20order%20a%20top-up."
+   target="_blank">💬</a>
+
+<script>
+  // Copy-to-clipboard for payment numbers
+  function copyNum(btn, num) {
+    navigator.clipboard.writeText(num).then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1500);
+    }).catch(() => {
+      alert('Number: ' + num);
+    });
+  }
+
+  // Category filter
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const sections = document.querySelectorAll('.section-title[data-cat], .product-grid[data-cat]');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      sections.forEach(el => {
+        if (filter === 'all' || el.dataset.cat === filter) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
