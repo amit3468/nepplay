@@ -9,7 +9,6 @@
 <style>
   :root {
     --bg: #0a0618;
-    --bg-2: #120a2e;
     --purple: #7c3aed;
     --purple-2: #a855f7;
     --gold: #f59e0b;
@@ -31,7 +30,6 @@
     padding-bottom: 60px;
   }
 
-  /* ===== TOP NAV ===== */
   .topnav {
     display: flex;
     align-items: center;
@@ -69,29 +67,18 @@
   }
   .nav-links {
     display: flex;
-    gap: 22px;
+    gap: 18px;
     font-size: 0.95rem;
+    align-items: center;
   }
   .nav-links a {
     color: var(--muted);
     text-decoration: none;
     transition: color 0.2s;
-    position: relative;
+    display: inline-flex; align-items: center;
   }
   .nav-links a:hover { color: var(--text); }
   .nav-links a.active { color: var(--gold-2); }
-  .nav-links a.highlight {
-    color: var(--gold-2);
-    font-weight: 700;
-  }
-  .nav-links a.highlight::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; bottom: -6px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--gold), var(--gold-2));
-    border-radius: 2px;
-  }
   .nav-links a.winners-link {
     background: linear-gradient(135deg, #f59e0b, #fbbf24);
     color: #1a0b3d !important;
@@ -104,6 +91,19 @@
   .nav-links a.winners-link:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+  }
+  .nav-links a.store-link {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .nav-links a.store-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.7);
   }
   .bell {
     position: relative;
@@ -127,7 +127,6 @@
     padding: 22px 18px;
   }
 
-  /* ===== WINNERS BANNER (clickable) ===== */
   .winners-banner {
     display: block;
     text-decoration: none;
@@ -176,9 +175,7 @@
     gap: 10px;
     color: #1a0b3d;
   }
-  .wb-item .trophy {
-    font-size: 1.6rem;
-  }
+  .wb-item .trophy { font-size: 1.6rem; }
   .wb-item .name {
     font-weight: 800;
     font-size: 1.05rem;
@@ -199,7 +196,6 @@
     text-underline-offset: 3px;
   }
 
-  /* ===== FOLLOW CARDS ===== */
   .social-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -227,15 +223,8 @@
   }
   .social-card .icon.fb { background: #1877f2; }
   .social-card .icon.wa { background: #25d366; }
-  .social-card .title {
-    font-weight: 700;
-    font-size: 0.95rem;
-  }
-  .social-card .sub {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+  .social-card .title { font-weight: 700; font-size: 0.95rem; }
+  .social-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
   .social-card .btn {
     text-decoration: none;
     font-weight: 700;
@@ -247,7 +236,6 @@
   .social-card .btn.fb { background: #1877f2; }
   .social-card .btn.wa { background: #25d366; }
 
-  /* ===== HERO ===== */
   .hero {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
@@ -265,10 +253,7 @@
     background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
     border-radius: 50%;
   }
-  .hero .tags {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
+  .hero .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
   .tag {
     font-size: 0.72rem;
     font-weight: 800;
@@ -294,9 +279,7 @@
     margin-bottom: 12px;
     position: relative;
   }
-  .hero h1 .cash {
-    color: var(--gold-2);
-  }
+  .hero h1 .cash { color: var(--gold-2); }
   .hero p {
     color: #ddd6fe;
     font-size: 0.98rem;
@@ -315,25 +298,10 @@
     color: #fff;
     box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
   }
-  .date-badge .m {
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-    font-weight: 800;
-    opacity: 0.9;
-  }
-  .date-badge .d {
-    font-size: 1.8rem;
-    font-weight: 900;
-    line-height: 1;
-    margin: 4px 0;
-  }
-  .date-badge .y {
-    font-size: 0.7rem;
-    opacity: 0.85;
-    font-weight: 600;
-  }
+  .date-badge .m { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 800; opacity: 0.9; }
+  .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
+  .date-badge .y { font-size: 0.7rem; opacity: 0.85; font-weight: 600; }
 
-  /* ===== FLOATING ICONS ===== */
   .float-share, .float-wa {
     position: fixed;
     right: 20px;
@@ -354,10 +322,11 @@
     background: #25d366;
   }
 
-  /* ===== MOBILE ===== */
   @media (max-width: 720px) {
-    .nav-links { gap: 12px; font-size: 0.82rem; }
-    .nav-links a.winners-link { padding: 5px 10px; }
+    .nav-links { gap: 8px; font-size: 0.78rem; }
+    .nav-links a.winners-link,
+    .nav-links a.store-link { padding: 5px 10px; }
+    .nav-links a:not(.winners-link):not(.store-link):not(.active) { display: none; }
     .social-row { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.5rem; }
     .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
@@ -369,7 +338,6 @@
 </head>
 <body>
 
-<!-- ===== TOP NAV ===== -->
 <nav class="topnav">
   <div class="brand">
     <span class="logo">🎮</span>
@@ -379,10 +347,8 @@
   <div class="nav-links">
     <a href="/member.html" class="active">Home</a>
     <a href="/tournaments.html">Tournaments</a>
-
-    <!-- ✅ NEW: Winners link added here -->
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
-
+    <a href="/store.html" class="store-link">🛒 Store</a>
     <a href="/teams.html">Teams</a>
     <a href="/profile.html">My Profile</a>
     <a href="/support.html">Support</a>
@@ -392,7 +358,6 @@
 
 <div class="container">
 
-  <!-- ===== WINNERS BANNER (now clickable) ===== -->
   <a href="/winners.html" class="winners-banner">
     <div class="wb-label">NEPPLAY WINNERS — 25 SEPTEMBER</div>
     <div class="wb-grid">
@@ -414,7 +379,6 @@
     <span class="wb-view">View Full Leaderboard →</span>
   </a>
 
-  <!-- ===== SOCIAL FOLLOW ===== -->
   <div class="social-row">
     <div class="social-card">
       <div class="left">
@@ -439,7 +403,6 @@
     </div>
   </div>
 
-  <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="tags">
       <span class="tag gold">● REGISTRATIONS OPEN</span>
@@ -462,7 +425,6 @@
 
 </div>
 
-<!-- ===== FLOATING BUTTONS ===== -->
 <div class="float-share" onclick="sharePage()">🔗</div>
 <a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" class="float-wa">💬</a>
 
