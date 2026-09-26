@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My Tournaments — NEPPLAY</title>
+<title>NEPPLAY — Member Dashboard</title>
 <link rel="icon" href="/favicon.ico" />
 
 <style>
   :root {
     --purple: #7c3aed;
     --purple-2: #a855f7;
+    --gold: #f59e0b;
     --gold-2: #fbbf24;
     --green: #22c55e;
     --text: #f5f3ff;
     --muted: #a8a3c9;
     --border: rgba(168, 85, 247, 0.25);
     --card: rgba(30, 18, 60, 0.75);
+    --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { overflow-x: hidden; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
@@ -34,6 +36,7 @@
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 50; gap: 10px;
+    max-width: 100%;
   }
   .brand {
     display: flex; align-items: center; gap: 10px;
@@ -48,15 +51,13 @@
   .nav-links {
     display: flex; gap: 14px; font-size: 0.9rem;
     align-items: center; overflow-x: auto;
-    scrollbar-width: none; -ms-overflow-style: none;
-    flex: 1; justify-content: flex-end;
+    scrollbar-width: none; flex: 1; justify-content: flex-end;
   }
   .nav-links::-webkit-scrollbar { display: none; }
   .nav-links > a {
-    color: var(--muted); text-decoration: none;
-    white-space: nowrap; flex-shrink: 0;
+    color: var(--muted); text-decoration: none; transition: color 0.2s;
     display: inline-flex; align-items: center;
-    transition: color 0.2s;
+    white-space: nowrap; flex-shrink: 0;
   }
   .nav-links > a:hover { color: var(--text); }
   .nav-links > a.active { color: var(--gold-2); }
@@ -73,179 +74,196 @@
     font-weight: 800; font-size: 0.82rem;
   }
 
-  /* USER CHIP */
   .user-chip-wrap { position: relative; flex-shrink: 0; }
-  #chipToggle {
-    position: absolute; opacity: 0;
-    pointer-events: none; width: 0; height: 0;
-  }
+  #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
   .user-chip {
     display: flex; align-items: center; gap: 6px;
     cursor: pointer; padding: 4px 8px 4px 4px;
     border-radius: 999px;
-    background: rgba(124, 58, 237, 0.15);
-    border: 1px solid rgba(168, 85, 247, 0.35);
-    transition: background 0.2s;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
     user-select: none; -webkit-user-select: none;
-    -webkit-tap-highlight-color: rgba(168, 85, 247, 0.3);
+    -webkit-tap-highlight-color: rgba(168,85,247,.3);
   }
-  .user-chip:hover { background: rgba(124, 58, 237, 0.3); }
-  #chipToggle:checked ~ .user-chip { background: rgba(124, 58, 237, 0.35); }
+  .user-chip:hover { background: rgba(124,58,237,.3); }
+  #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
   .user-chip .avatar {
     width: 28px; height: 28px; border-radius: 50%;
-    background: linear-gradient(135deg, #6d28d9, #a855f7);
+    background: linear-gradient(135deg,#6d28d9,#a855f7);
     display: grid; place-items: center;
-    font-weight: 700; font-size: 0.78rem;
+    font-weight: 700; font-size: .78rem;
     color: #fff; flex-shrink: 0;
   }
   .user-chip .uname {
-    color: #f5f3ff; font-weight: 700; font-size: 0.78rem;
+    color: #f5f3ff; font-weight: 700; font-size: .78rem;
     max-width: 90px; overflow: hidden;
     text-overflow: ellipsis; white-space: nowrap;
   }
-  .user-chip .caret {
-    font-size: 0.5rem; color: #a8a3c9;
-    transition: transform 0.2s;
-  }
+  .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
   #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
   .user-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: #1a0b3d;
-    border: 1px solid rgba(168, 85, 247, 0.35);
-    border-radius: 12px;
-    min-width: 210px;
-    padding: 8px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
-    display: none;
-    z-index: 100;
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #1a0b3d; border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px; min-width: 210px; padding: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    display: none; z-index: 100;
   }
   #chipToggle:checked ~ .user-menu { display: block; }
   .user-menu a,
   .user-menu .menu-btn {
     display: flex; align-items: center; gap: 10px;
     width: 100%; padding: 11px 14px;
-    border-radius: 8px;
-    color: #e9e5ff; text-decoration: none;
-    font-size: 0.85rem; font-weight: 600;
-    background: none; border: 0;
-    text-align: left; cursor: pointer;
-    font-family: inherit;
+    border-radius: 8px; color: #e9e5ff;
+    text-decoration: none; font-size: .85rem;
+    font-weight: 600; background: none; border: 0;
+    text-align: left; cursor: pointer; font-family: inherit;
     -webkit-tap-highlight-color: transparent;
   }
-  .user-menu a:hover,
-  .user-menu .menu-btn:hover {
-    background: rgba(124, 58, 237, 0.25);
-    color: #fff;
+  .user-menu a:hover, .user-menu .menu-btn:hover {
+    background: rgba(124,58,237,.25); color: #fff;
   }
   .user-menu .divider {
-    height: 1px; background: rgba(168, 85, 247, 0.25);
+    height: 1px; background: rgba(168,85,247,.25);
     margin: 6px 4px; display: block;
   }
   .user-menu .menu-btn.danger { color: #fca5a5; }
-  .user-menu .menu-btn.danger:hover { background: rgba(239, 68, 68, 0.2); }
+  .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
   .chip-backdrop {
-    position: fixed; inset: 0;
-    background: transparent;
+    position: fixed; inset: 0; background: transparent;
     display: none; z-index: 90;
   }
   #chipToggle:checked ~ .chip-backdrop { display: block; }
   .user-chip, .user-menu { position: relative; z-index: 100; }
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 24px 18px;
+  .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
+
+  .winners-banner {
+    display: block; text-decoration: none; color: inherit;
+    background: linear-gradient(135deg, #b45309 0%, #f59e0b 45%, #fbbf24 100%);
+    border-radius: 18px; padding: 20px 24px; margin-bottom: 18px;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.25s;
+  }
+  .winners-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(245, 158, 11, 0.5);
+  }
+  .winners-banner::after {
+    content: '→'; position: absolute;
+    right: 22px; top: 50%; transform: translateY(-50%);
+    font-size: 1.4rem; color: #1a0b3d;
+    font-weight: 800; opacity: 0.6;
+  }
+  .wb-label {
+    font-size: 0.72rem; letter-spacing: 1.5px;
+    font-weight: 800; color: #1a0b3d;
+    opacity: 0.85; margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .wb-grid { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
+  .wb-item { display: flex; align-items: center; gap: 10px; color: #1a0b3d; }
+  .wb-item .trophy { font-size: 1.6rem; }
+  .wb-item .name { font-weight: 800; font-size: 1.05rem; }
+  .wb-item .meta { font-size: 0.78rem; font-weight: 600; opacity: 0.8; }
+  .wb-view {
+    display: inline-block; margin-top: 10px;
+    font-size: 0.78rem; font-weight: 800;
+    color: #1a0b3d; text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
-  h1.page-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 6px;
+  .social-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-bottom: 22px;
   }
-  p.page-sub {
-    color: var(--muted);
-    margin-bottom: 26px;
-    font-size: 0.92rem;
+  .social-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 18px; gap: 14px;
   }
+  .social-card .left { display: flex; align-items: center; gap: 12px; }
+  .social-card .icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: grid; place-items: center; font-size: 1.3rem;
+  }
+  .social-card .icon.fb { background: #1877f2; }
+  .social-card .icon.wa { background: #25d366; }
+  .social-card .title { font-weight: 700; font-size: 0.95rem; }
+  .social-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .social-card .btn {
+    text-decoration: none; font-weight: 700; font-size: 0.82rem;
+    padding: 8px 16px; border-radius: 8px; color: #fff;
+  }
+  .social-card .btn.fb { background: #1877f2; }
+  .social-card .btn.wa { background: #25d366; }
 
-  .loading {
-    padding: 40px;
-    text-align: center;
-    color: var(--muted);
+  .hero {
+    background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
+    border-radius: 22px; padding: 32px 30px;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow); margin-bottom: 26px;
   }
+  .hero::before {
+    content: ''; position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+    border-radius: 50%;
+  }
+  .hero .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tag {
+    font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 0.6px; padding: 6px 12px;
+    border-radius: 999px; text-transform: uppercase;
+  }
+  .tag.gold {
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--gold-2);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+  }
+  .tag.green {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.5);
+  }
+  .hero h1 {
+    font-size: 2rem; font-weight: 800;
+    line-height: 1.2; margin-bottom: 12px;
+    position: relative;
+  }
+  .hero h1 .cash { color: var(--gold-2); }
+  .hero p {
+    color: #ddd6fe; font-size: 0.98rem;
+    max-width: 640px; line-height: 1.55;
+    position: relative;
+  }
+  .hero p strong { color: #fbbf24; }
+  .date-badge {
+    position: absolute; top: 28px; right: 30px;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    border-radius: 14px; padding: 12px 18px;
+    text-align: center; color: #fff;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+  }
+  .date-badge .m { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 800; }
+  .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
+  .date-badge .y { font-size: 0.7rem; font-weight: 600; }
 
-  .tourney-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 20px;
-    margin-bottom: 14px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
+  .float-share, .float-wa {
+    position: fixed; right: 20px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 1.3rem; cursor: pointer;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.4);
+    z-index: 60;
   }
-  .tourney-card .icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-    line-height: 1;
+  .float-share {
+    bottom: 90px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
   }
-  .tourney-card .main { flex: 1; }
-  .tourney-card .name {
-    font-weight: 800;
-    font-size: 1.05rem;
-    margin-bottom: 6px;
-    color: #fbbf24;
-  }
-  .tourney-card .meta {
-    color: var(--muted);
-    font-size: 0.82rem;
-    margin-bottom: 6px;
-    line-height: 1.5;
-  }
-  .tourney-card .status {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    margin-top: 6px;
-  }
-  .status.pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-  .status.confirmed,
-  .status.approved { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
-  .status.rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
-  .empty .big {
-    font-size: 3.5rem;
-    margin-bottom: 12px;
-  }
-  .empty .title {
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
-  .empty .sub {
-    font-size: 0.85rem;
-    margin-bottom: 20px;
-  }
-  .empty .btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.9rem;
-  }
+  .float-wa { bottom: 24px; background: #25d366; text-decoration: none; }
 
   @media (max-width: 720px) {
     .topnav { padding: 10px 10px; gap: 6px; }
@@ -255,7 +273,6 @@
     .nav-links { gap: 4px; font-size: 0.68rem; }
     .nav-links > a.winners-link,
     .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
-    .nav-links > a[href="/member.html"],
     .nav-links > a[href="/teams.html"],
     .nav-links > a[href="/profile.html"],
     .nav-links > a[href="/support.html"] { display: none; }
@@ -263,19 +280,19 @@
     .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
     .user-chip .uname { display: none; }
     .user-chip .caret { font-size: 0.45rem; }
-    .user-menu {
-      min-width: 180px;
-      padding: 6px;
-      max-width: calc(100vw - 20px);
-    }
-    .user-menu a,
-    .user-menu .menu-btn {
-      padding: 10px 12px;
-      font-size: 0.82rem;
-    }
-    h1.page-title { font-size: 1.35rem; }
-    .tourney-card { padding: 14px; gap: 12px; }
-    .tourney-card .icon { font-size: 1.6rem; }
+    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
+    .social-row { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.5rem; }
+    .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
+    .date-badge .d { font-size: 1.4rem; }
+    .winners-banner::after { display: none; }
+    .wb-grid { gap: 14px; }
+  }
+  @media (max-width: 380px) {
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
+    .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
   }
 </style>
 </head>
@@ -287,11 +304,13 @@
     <span class="brand-text">Nepal Gaming</span>
   </a>
   <div class="nav-links">
-    <a href="/member.html">Home</a>
+    <a href="/member.html" class="active">Home</a>
     <a href="/tournaments.html">Tournaments</a>
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
     <a href="/store.html" class="store-link">🛒 Store</a>
-    <a href="/my-tournaments.html" class="active">My Tournaments</a>
+    <a href="/teams.html">Teams</a>
+    <a href="/profile.html">My Profile</a>
+    <a href="/support.html">Support</a>
 
     <div class="user-chip-wrap">
       <input type="checkbox" id="chipToggle" />
@@ -313,31 +332,88 @@
 </nav>
 
 <div class="container">
-  <h1 class="page-title">🏆 My Tournaments</h1>
-  <p class="page-sub">All your tournament registrations across NEPPLAY.</p>
 
-  <div id="loading" class="loading">⏳ Loading your tournaments…</div>
-  <div id="list" style="display:none;"></div>
-  <div id="empty" class="empty" style="display:none;">
-    <div class="big">📭</div>
-    <div class="title">No tournaments yet</div>
-    <div class="sub">Join a tournament from the Tournaments page to see it here.</div>
-    <a href="/tournaments.html" class="btn">Browse Tournaments</a>
+  <a href="/winners.html" class="winners-banner">
+    <div class="wb-label">NEPPLAY WINNERS — 25 SEPTEMBER</div>
+    <div class="wb-grid">
+      <div class="wb-item">
+        <span class="trophy">🏆</span>
+        <div>
+          <div class="name">🏅 Prasanna.F</div>
+          <div class="meta">Free Fire Mini · Won Rs. 250 via eSewa</div>
+        </div>
+      </div>
+      <div class="wb-item">
+        <span class="trophy">🎯</span>
+        <div>
+          <div class="name">RITIKA</div>
+          <div class="meta">Top Killer · 3 kills · Won Rs. 80</div>
+        </div>
+      </div>
+    </div>
+    <span class="wb-view">View Full Leaderboard →</span>
+  </a>
+
+  <div class="social-row">
+    <div class="social-card">
+      <div class="left">
+        <div class="icon fb">f</div>
+        <div>
+          <div class="title">Follow on Facebook</div>
+          <div class="sub">Tournament announcements · Winners · Updates</div>
+        </div>
+      </div>
+      <a href="https://facebook.com/nepplay" target="_blank" rel="noopener" class="btn fb">Follow</a>
+    </div>
+
+    <div class="social-card">
+      <div class="left">
+        <div class="icon wa">💬</div>
+        <div>
+          <div class="title">Join WhatsApp Group</div>
+          <div class="sub">Match alerts · Team up · Community chat</div>
+        </div>
+      </div>
+      <a href="https://chat.whatsapp.com/" target="_blank" rel="noopener" class="btn wa">Join</a>
+    </div>
   </div>
+
+  <section class="hero">
+    <div class="tags">
+      <span class="tag gold">● REGISTRATIONS OPEN</span>
+      <span class="tag green">● PAID TOURNAMENTS</span>
+    </div>
+
+    <h1>Ready to win <span class="cash">real cash?</span> 💰</h1>
+    <p>
+      <strong>NEPPLAY</strong> paid tournaments are live! 8 games · real cash prizes ·
+      professional competition. Pick your game, choose Solo · Duo · Squad, and compete
+      with Nepal's best players. <strong>Multiple modes allowed</strong> — play as many as you want!
+    </p>
+
+    <div class="date-badge">
+      <div class="m">SEPTEMBER</div>
+      <div class="d">28</div>
+      <div class="y">2026</div>
+    </div>
+  </section>
+
 </div>
+
+<div class="float-share" onclick="sharePage()">🔗</div>
+<a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" rel="noopener" class="float-wa">💬</a>
 
 <script>
 (function () {
     var logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
         logoutBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             if (!confirm("Logout now?")) return;
             import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
-                .then(function (appMod) {
+                .then(function (a) {
                     return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
-                        .then(function (authMod) {
+                        .then(function (b) {
                             var cfg = {
                                 apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
                                 authDomain: "nepplaygaming.firebaseapp.com",
@@ -346,28 +422,33 @@
                                 messagingSenderId: "893565645520",
                                 appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
                             };
-                            var app = appMod.getApp ? appMod.getApp() : appMod.initializeApp(cfg);
-                            var auth = authMod.getAuth(app);
-                            return authMod.signOut(auth);
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
                         });
                 })
-                .catch(function (err) { console.warn("Signout error:", err); })
+                .catch(function () {})
                 .finally(function () { window.location.href = "/login.html"; });
         });
     }
 })();
+
+window.sharePage = window.sharePage || function () {
+    var url = window.location.origin + '/tournaments.html';
+    if (navigator.share) {
+        navigator.share({ title: 'NEPPLAY', url: url }).catch(function () {});
+    } else {
+        navigator.clipboard.writeText(url);
+        alert('Link copied!');
+    }
+};
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, query, where, getDocs, doc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  getAuth, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const firebaseConfig = {
+const cfg = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
     projectId: "nepplaygaming",
@@ -375,108 +456,26 @@ const firebaseConfig = {
     messagingSenderId: "893565645520",
     appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
-
-const app  = initializeApp(firebaseConfig);
+const app  = initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
-
-function fmtDate(ts) {
-    if (!ts || !ts.toDate) return "—";
-    return ts.toDate().toLocaleString("en-GB", {
-        day: "2-digit", month: "short", year: "numeric",
-        hour: "2-digit", minute: "2-digit"
-    });
-}
-
-function escHTML(v) {
-    return String(v == null ? "" : v)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
 
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
     const nameEl = document.getElementById("userName");
-    const loading = document.getElementById("loading");
-    const list = document.getElementById("list");
-    const empty = document.getElementById("empty");
 
     if (!user) {
-        window.location.href = "/login.html?redirect=" + encodeURIComponent("/my-tournaments.html");
+        window.location.href = "/login.html?redirect=" + encodeURIComponent("/member.html");
         return;
     }
 
-    // User chip
-    let display = user.email || user.uid;
+    let display = user.email || user.uid || "Member";
     try {
         const uDoc = await getDoc(doc(db, "users", user.uid));
         if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
     } catch (e) {}
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
     if (nameEl) nameEl.textContent = display;
-
-    // Load registrations
-    try {
-        const snap = await getDocs(
-            query(
-                collection(db, "tournament_registrations"),
-                where("userId", "==", user.uid)
-            )
-        );
-        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        items.sort((a, b) =>
-            (b.registeredAt?.toMillis?.() || 0) -
-            (a.registeredAt?.toMillis?.() || 0)
-        );
-
-        loading.style.display = "none";
-
-        if (!items.length) {
-            empty.style.display = "block";
-            return;
-        }
-
-        list.style.display = "block";
-        list.innerHTML = items.map(r => {
-            const status = String(r.status || "pending").toLowerCase();
-            const statusClass =
-                status === "confirmed" || status === "approved"
-                    ? "confirmed"
-                    : status;
-            const icon = r.entryType === "paid" ? "💵" : "🏆";
-
-            const players = Array.isArray(r.players)
-                ? r.players.filter(Boolean).join(", ")
-                : (r.player1 || "");
-
-            const modeLabel = r.playingAs
-                ? r.playingAs.charAt(0).toUpperCase() + r.playingAs.slice(1)
-                : (r.tournamentMode || "");
-
-            return `
-                <div class="tourney-card">
-                    <div class="icon">${icon}</div>
-                    <div class="main">
-                        <div class="name">${escHTML(r.tournamentTitle || "Tournament")}</div>
-                        <div class="meta">
-                            🎮 ${escHTML(r.game || "")}${modeLabel ? " · " + escHTML(modeLabel) : ""}
-                            ${r.teamName ? " · 👥 " + escHTML(r.teamName) : ""}
-                        </div>
-                        ${players ? `<div class="meta">🎯 ${escHTML(players)}</div>` : ""}
-                        ${r.amount ? `<div class="meta">💰 Rs ${escHTML(r.amount)}</div>` : ""}
-                        <div class="meta">🕐 ${fmtDate(r.registeredAt)}</div>
-                        <span class="status ${statusClass}">${escHTML(status.toUpperCase())}</span>
-                    </div>
-                </div>
-            `;
-        }).join("");
-    } catch (err) {
-        console.error("my-tournaments load error:", err);
-        loading.textContent = "❌ Could not load tournaments: " + err.message;
-    }
 });
 </script>
 
