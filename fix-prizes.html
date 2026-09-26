@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fix Prize Pools + Delete Unused Modes — Run Once</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #080d18;
+    color: #fff;
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  h1 { color: #22c55e; }
+  .info { color: #8da2bc; margin-bottom: 20px; line-height: 1.6; }
+  button {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; border: 0;
+    padding: 14px 28px; border-radius: 10px;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; margin-bottom: 20px;
+  }
+  button.danger {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    margin-left: 10px;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #log {
+    background: #0b1320;
+    border: 1px solid #2b3d56;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .ok { color: #4ade80; }
+  .err { color: #fca5a5; }
+  .warn { color: #fbbf24; }
+  .dim { color: #6b7280; }
+</style>
+</head>
+<body>
+
+<h1>🔧 Fix Prize Pools + Cleanup</h1>
+<p class="info">
+  This will:<br>
+  1. Update <b>prizePool</b> per mode (Solo 500 / Duo 750 / Squad 1000)<br>
+  2. Update <b>topKillsPrize</b> to 250 for Free Fire / PUBG / COD / Valorant<br>
+  3. Set Chess to <b>Rs 250</b> (Solo only)<br>
+  4. Set Ludo to <b>Rs 500</b> (Solo only, 4-player)<br>
+  5. Delete unused modes: Chess Duo/Squad, Ludo Duo/Squad<br>
+  <br>
+  Run once, verify in Firebase, then delete this file.
+</p>
+
+<button id="fixBtn" onclick="fixAll()">🚀 Fix Everything</button>
+<button id="deleteBtn" class="danger" onclick="deleteUnused()" disabled>🗑️ Delete Unused (Click after Fix)</button>
+
+<div id="log">Ready. Click "Fix Everything" first.</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, query, where,
+  updateDoc, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const log = document.getElementById("log");
+function out(msg, cls) {
+  const span = document.createElement("span");
+  span.className = cls || "";
+  span.textContent = msg + "\n";
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+// Prize structure: [game] => { solo, duo, squad, topKills }
+const PRIZES = {
+  ff:       { solo: 500,  duo: 750, squad: 1000, topKills: 250 },
+  pubg:     { solo: 500,  duo: 750, squad: 1000, topKills: 250 },
+  cod:      { solo: 500,  duo: 750, squad: 1000, topKills: 250 },
+  valorant: { solo: 500,  duo: 750, squad: 1000, topKills: 250 },
+  efoot:    { solo: 500,  duo: 750, squad: 1000, topKills: 0   },
+  ecricket: { solo: 500,  duo: 750, squad: 1000, topKills: 0   },
+  chess:    { solo: 250,  duo: 0,   squad: 0,    topKills: 0   },
+  ludo:     { solo: 500,  duo: 0,   squad: 0,    topKills: 0   }
+};
+
+window.fixAll = async function() {
+  const btn = document.getElementById("fixBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Fixing…";
+  log.innerHTML = "";
+
+  let updated = 0, notFound = 0;
+
+  out("🔧 Updating prize pools + top killer values…\n", "warn");
+
+  for (const gameKey of Object.keys(PRIZES)) {
+    const cfg = PRIZES[gameKey];
+    const modes = ["solo", "duo", "squad"];
+
+    for (const mode of modes) {
+      const seedKey = `seed_paid_${gameKey}_${mode}`;
+      const prizePool = cfg[mode];
+      const topKillsPrize = cfg.topKills;
+
+      // Skip modes with 0 prize (means not applicable)
+      if (prizePool === 0 && topKillsPrize === 0) {
+        out(`  ⏭️  ${seedKey} — not applicable, skip`, "dim");
+        continue;
+      }
+
+      try {
+        const q = await getDocs(query(
+          collection(db, "tournaments"),
+          where("seedKey", "==", seedKey)
+        ));
+        if (q.empty) {
+          out(`  ⚠️  ${seedKey} — not found in Firestore`, "warn");
+          notFound++;
+          continue;
+        }
+
+        for (const d of q.docs) {
+          await updateDoc(doc(db, "tournaments", d.id), {
+            prizePool,
+            topKillsPrize
+          });
+          out(`  ✅ ${seedKey} → prize Rs ${prizePool}${topKillsPrize ? " + topKiller Rs " + topKillsPrize : ""}`, "ok");
+          updated++;
+        }
+      } catch (err) {
+        out(`  ❌ ${seedKey} — ${err.message}`, "err");
+      }
+    }
+  }
+
+  out("", "");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out(`✅ Updated: ${updated}`, "ok");
+  out(`⚠️  Not found: ${notFound}`, notFound ? "warn" : "dim");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out("", "");
+  out("👉 Next: click the red 'Delete Unused' button to clean up Chess Duo/Squad and Ludo Duo/Squad", "warn");
+
+  btn.disabled = false;
+  btn.textContent = "🚀 Re-run Fix (safe)";
+  document.getElementById("deleteBtn").disabled = false;
+};
+
+window.deleteUnused = async function() {
+  const btn = document.getElementById("deleteBtn");
+  if (!confirm("Delete Chess Duo, Chess Squad, Ludo Duo, Ludo Squad?\n\nThis removes 4 docs permanently. Confirm?")) {
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "⏳ Deleting…";
+
+  const toDelete = [
+    "seed_paid_chess_duo",
+    "seed_paid_chess_squad",
+    "seed_paid_ludo_duo",
+    "seed_paid_ludo_squad"
+  ];
+
+  out("", "");
+  out("🗑️ Deleting unused modes…\n", "warn");
+
+  let deleted = 0;
+
+  for (const seedKey of toDelete) {
+    try {
+      const q = await getDocs(query(
+        collection(db, "tournaments"),
+        where("seedKey", "==", seedKey)
+      ));
+      if (q.empty) {
+        out(`  ⏭️  ${seedKey} — not found, skip`, "dim");
+        continue;
+      }
+      for (const d of q.docs) {
+        await deleteDoc(doc(db, "tournaments", d.id));
+        out(`  ✅ Deleted ${seedKey}`, "ok");
+        deleted++;
+      }
+    } catch (err) {
+      out(`  ❌ ${seedKey} — ${err.message}`, "err");
+    }
+  }
+
+  out("", "");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out(`✅ Deleted: ${deleted}`, "ok");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out("", "");
+  out("👉 Done! Now update tournaments.html to reflect new prizes + remove Chess/Ludo extra buttons.", "warn");
+  out("👉 Then delete both fix-prizes.html and seed-tournaments.html from your repo.", "warn");
+
+  btn.textContent = "✅ Deleted";
+};
+</script>
+
+</body>
+</html>
