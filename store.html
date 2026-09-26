@@ -143,7 +143,7 @@
   .step .t { font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
   .step .d { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
 
-  /* ===== PAYMENT INFO SECTION ===== */
+  /* ===== PAYMENT SECTION WITH TABS ===== */
   .pay-section {
     background: var(--card);
     border: 1px solid var(--border);
@@ -170,7 +170,71 @@
     color: var(--muted); font-size: 0.88rem;
     margin-bottom: 20px; line-height: 1.5;
   }
-  .pay-layout {
+
+  /* TABS */
+  .pay-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .pay-tab {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(124, 58, 237, 0.12);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pay-tab:hover {
+    background: rgba(124, 58, 237, 0.25);
+    transform: translateY(-1px);
+  }
+  .pay-tab.active {
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.5);
+  }
+  .pay-tab .tab-logo {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .pay-tab .tab-logo.esewa { background: #60bb46; }
+  .pay-tab .tab-logo.khalti { background: #5c2d91; }
+  .pay-tab .tab-logo.imepay { background: #d9261c; }
+  .pay-tab .tab-logo.bank { background: #0369a1; }
+  .pay-tab .tab-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-2);
+    box-shadow: 0 0 8px var(--gold-2);
+  }
+
+  /* PANEL */
+  .pay-panel {
+    display: none;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    animation: fadeIn 0.25s ease;
+  }
+  .pay-panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .panel-inner {
     display: grid;
     grid-template-columns: 260px 1fr;
     gap: 24px;
@@ -183,93 +247,158 @@
     text-align: center;
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   }
-  .qr-box img {
-    width: 100%; max-width: 220px;
-    display: block; margin: 0 auto; border-radius: 8px;
+  .qr-img-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    background: #f3f0ff;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .qr-img-wrap img {
+    width: 100%; height: 100%; object-fit: contain;
+    display: block;
+  }
+  .qr-noimg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    text-align: center;
+    color: #4c1d95;
+    height: 100%;
+  }
+  .qr-noimg .big { font-size: 3rem; }
+  .qr-noimg .txt {
+    font-weight: 800;
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  .qr-noimg .hint {
+    font-size: 0.7rem;
+    color: #6d28d9;
+    opacity: 0.85;
+    line-height: 1.3;
   }
   .qr-box .qr-label {
     margin-top: 10px; color: #1a0b3d;
-    font-weight: 800; font-size: 0.85rem; letter-spacing: 0.3px;
+    font-weight: 800; font-size: 0.9rem; letter-spacing: 0.3px;
   }
   .qr-box .qr-sub {
     color: #555; font-size: 0.75rem; margin-top: 2px;
   }
-  .pay-methods { display: flex; flex-direction: column; gap: 12px; }
-  .pay-method {
-    display: flex; align-items: center; gap: 14px;
-    background: rgba(124, 58, 237, 0.1);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
+  .panel-details { flex: 1; }
+  .panel-details h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
   }
-  .pay-method .logo {
-    width: 46px; height: 46px; border-radius: 12px;
-    display: grid; place-items: center;
-    font-size: 1.4rem; font-weight: 900;
-    flex-shrink: 0;
-  }
-  .pay-method .logo.esewa { background: #60bb46; color: #fff; }
-  .pay-method .logo.khalti { background: #5c2d91; color: #fff; }
-  .pay-method .logo.imepay { background: #d9261c; color: #fff; }
-  .pay-method .logo.bank { background: #0369a1; color: #fff; font-size: 1rem; }
-  .pay-method .info { flex: 1; }
-  .pay-method .info .name {
-    font-weight: 800; font-size: 0.95rem;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .pay-method .info .name .no-qr {
+  .panel-details .badge-no-qr {
     font-size: 0.6rem;
     font-weight: 800;
     background: rgba(168, 85, 247, 0.2);
     color: var(--purple-2);
-    padding: 2px 7px;
+    padding: 3px 8px;
     border-radius: 999px;
     letter-spacing: 0.4px;
   }
-  .pay-method .info .name .soon {
+  .panel-details .badge-soon {
     font-size: 0.6rem;
     font-weight: 800;
     background: rgba(245, 158, 11, 0.2);
     color: var(--gold-2);
-    padding: 2px 7px;
+    padding: 3px 8px;
     border-radius: 999px;
     letter-spacing: 0.4px;
   }
-  .pay-method .info .number {
-    font-size: 1.05rem; font-weight: 900;
-    color: var(--gold-2);
-    letter-spacing: 1px; margin-top: 2px;
+  .panel-details .desc {
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .num-box {
+    background: rgba(15, 8, 35, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .num-box .lbl {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 800;
+  }
+  .num-box .val {
     font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--gold-2);
+    letter-spacing: 2px;
+    margin-top: 2px;
   }
-  .pay-method .info .hint {
-    font-size: 0.72rem; color: var(--muted); margin-top: 2px;
-  }
-  .pay-method .copy-btn {
-    background: rgba(168, 85, 247, 0.2);
+  .num-box .copy-btn {
+    background: rgba(168, 85, 247, 0.25);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: inherit;
     font-weight: 700;
-    font-size: 0.75rem;
-    padding: 7px 12px;
+    font-size: 0.78rem;
+    padding: 9px 16px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
   }
-  .pay-method .copy-btn:hover {
-    background: rgba(168, 85, 247, 0.4);
+  .num-box .copy-btn:hover {
+    background: rgba(168, 85, 247, 0.45);
     transform: translateY(-1px);
   }
-  .pay-method .copy-btn.copied {
-    background: rgba(34, 197, 94, 0.3);
+  .num-box .copy-btn.copied {
+    background: rgba(34, 197, 94, 0.35);
     border-color: rgba(34, 197, 94, 0.6);
     color: #4ade80;
   }
-  .pay-method .copy-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  .steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
   }
+  .steps-list li {
+    font-size: 0.82rem;
+    color: #ddd6fe;
+    line-height: 1.6;
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  .steps-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0; top: 0;
+    color: var(--green);
+    font-weight: 900;
+  }
+  .bank-msg {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid var(--gold-2);
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #fde68a;
+    line-height: 1.5;
+  }
+
   .pay-warning {
     margin-top: 18px;
     background: rgba(245, 158, 11, 0.1);
@@ -492,8 +621,11 @@
     .product { padding: 14px; }
     .product .price { font-size: 1.1rem; }
     .proof-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .pay-layout { grid-template-columns: 1fr; }
+    .panel-inner { grid-template-columns: 1fr; }
     .qr-box { max-width: 260px; margin: 0 auto; }
+    .pay-tab { flex: 1; justify-content: center; }
+    .pay-tab .tab-name { display: none; }
+    .num-box .val { font-size: 1.05rem; letter-spacing: 1px; }
   }
   @media (max-width: 460px) {
     .product-grid { grid-template-columns: 1fr; }
@@ -551,8 +683,8 @@
       </div>
       <div class="step">
         <div class="num">3</div>
-        <div class="t">Pay via eSewa / Khalti / IME Pay</div>
-        <div class="d">Scan the QR below or send to the number shown.</div>
+        <div class="t">Choose Payment Method</div>
+        <div class="d">Select eSewa / Khalti / IME Pay below.</div>
       </div>
       <div class="step">
         <div class="num">4</div>
@@ -562,70 +694,166 @@
     </div>
   </section>
 
-  <!-- ===== PAYMENT INFO SECTION ===== -->
+  <!-- ===== PAYMENT SECTION (TABS) ===== -->
   <section class="pay-section">
     <div class="pay-header">
       <h2>💳 Payment Details</h2>
       <span class="secure-tag">🔒 100% Secure</span>
     </div>
     <p class="pay-sub">
-      Kunai pani payment method bata pay garnus. QR scan gare pani, number ma
-      send gare pani — same account ma aauxa. Payment paxi screenshot
-      WhatsApp <strong>9816023400</strong> ma pathaunus.
+      Tap on the payment method you want to use — QR code and number will show below.
+      Payment paxi screenshot WhatsApp <strong>9816023400</strong> ma pathaunus.
     </p>
 
-    <div class="pay-layout">
+    <!-- TABS -->
+    <div class="pay-tabs">
+      <button class="pay-tab active" data-tab="esewa">
+        <span class="tab-logo esewa">e</span>
+        <span class="tab-name">eSewa</span>
+      </button>
+      <button class="pay-tab" data-tab="khalti">
+        <span class="tab-logo khalti">K</span>
+        <span class="tab-name">Khalti</span>
+      </button>
+      <button class="pay-tab" data-tab="imepay">
+        <span class="tab-logo imepay">i</span>
+        <span class="tab-name">IME Pay</span>
+      </button>
+      <button class="pay-tab" data-tab="bank">
+        <span class="tab-logo bank">🏦</span>
+        <span class="tab-name">Bank</span>
+      </button>
+    </div>
 
-      <!-- QR IMAGE (shared by eSewa + Khalti) -->
-      <div class="qr-box">
-        <img src="/images/qr.png" alt="NEPPLAY Payment QR — eSewa / Khalti" />
-        <div class="qr-label">Scan to Pay</div>
-        <div class="qr-sub">Works with eSewa & Khalti</div>
+    <!-- eSewa PANEL -->
+    <div class="pay-panel active" data-panel="esewa">
+      <div class="panel-inner">
+        <div class="qr-box">
+          <div class="qr-img-wrap">
+            <img src="/images/esewa-qr.png" alt="eSewa QR"
+                 onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'qr-noimg',innerHTML:'<div class=&quot;big&quot;>📱</div><div class=&quot;txt&quot;>QR Coming Soon</div><div class=&quot;hint&quot;>Use number below</div>'}))" />
+          </div>
+          <div class="qr-label">Scan with eSewa</div>
+          <div class="qr-sub">eSewa App → Scan QR</div>
+        </div>
+        <div class="panel-details">
+          <h3>eSewa Payment</h3>
+          <p class="desc">
+            eSewa app kholnus, QR scan garnus, wa tala ko number ma direct
+            Send Money garnus.
+          </p>
+          <div class="num-box">
+            <div>
+              <div class="lbl">eSewa Number</div>
+              <div class="val">9748835184</div>
+            </div>
+            <button class="copy-btn" onclick="copyNum(this, '9748835184')">Copy Number</button>
+          </div>
+          <ul class="steps-list">
+            <li>Open eSewa app</li>
+            <li>Tap "Send Money" or scan QR</li>
+            <li>Enter amount (Rs. your order total)</li>
+            <li>Confirm with MPIN</li>
+            <li>Screenshot & send to WhatsApp 9816023400</li>
+          </ul>
+        </div>
       </div>
+    </div>
 
-      <!-- PAYMENT METHODS -->
-      <div class="pay-methods">
-
-        <div class="pay-method">
-          <div class="logo esewa">e</div>
-          <div class="info">
-            <div class="name">eSewa</div>
-            <div class="number">9748835184</div>
-            <div class="hint">Send Money → enter number → confirm (QR also works)</div>
+    <!-- Khalti PANEL -->
+    <div class="pay-panel" data-panel="khalti">
+      <div class="panel-inner">
+        <div class="qr-box">
+          <div class="qr-img-wrap">
+            <img src="/images/khalti-qr.png" alt="Khalti QR"
+                 onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'qr-noimg',innerHTML:'<div class=&quot;big&quot;>📱</div><div class=&quot;txt&quot;>QR Coming Soon</div><div class=&quot;hint&quot;>Use number below</div>'}))" />
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9748835184')">Copy</button>
+          <div class="qr-label">Scan with Khalti</div>
+          <div class="qr-sub">Khalti App → Scan QR</div>
         </div>
-
-        <div class="pay-method">
-          <div class="logo khalti">K</div>
-          <div class="info">
-            <div class="name">Khalti</div>
-            <div class="number">9766258368</div>
-            <div class="hint">Send Money → enter number → confirm (QR also works)</div>
+        <div class="panel-details">
+          <h3>Khalti Payment</h3>
+          <p class="desc">
+            Khalti app kholnus, QR scan garnus, wa tala ko number ma direct
+            Send Money garnus.
+          </p>
+          <div class="num-box">
+            <div>
+              <div class="lbl">Khalti Number</div>
+              <div class="val">9766258368</div>
+            </div>
+            <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy Number</button>
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy</button>
+          <ul class="steps-list">
+            <li>Open Khalti app</li>
+            <li>Tap "Send Money" or scan QR</li>
+            <li>Enter amount (Rs. your order total)</li>
+            <li>Confirm with MPIN</li>
+            <li>Screenshot & send to WhatsApp 9816023400</li>
+          </ul>
         </div>
+      </div>
+    </div>
 
-        <div class="pay-method">
-          <div class="logo imepay">i</div>
-          <div class="info">
-            <div class="name">IME Pay <span class="no-qr">NUMBER ONLY</span></div>
-            <div class="number">9766258368</div>
-            <div class="hint">Send Money → enter number → confirm</div>
+    <!-- IME Pay PANEL -->
+    <div class="pay-panel" data-panel="imepay">
+      <div class="panel-inner">
+        <div class="qr-box">
+          <div class="qr-img-wrap">
+            <div class="qr-noimg">
+              <div class="big">📱</div>
+              <div class="txt">Number Only</div>
+              <div class="hint">IME Pay — no QR needed</div>
+            </div>
           </div>
-          <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy</button>
+          <div class="qr-label">Send to Number</div>
+          <div class="qr-sub">IME Pay App → Send Money</div>
         </div>
-
-        <div class="pay-method">
-          <div class="logo bank">🏦</div>
-          <div class="info">
-            <div class="name">Bank Transfer <span class="soon">COMING SOON</span></div>
-            <div class="number">— — —</div>
-            <div class="hint">Mobile banking / bank deposit — coming soon</div>
+        <div class="panel-details">
+          <h3>IME Pay Payment <span class="badge-no-qr">NUMBER ONLY</span></h3>
+          <p class="desc">
+            IME Pay ma QR chhaina — tala ko number ma Send Money garnus.
+          </p>
+          <div class="num-box">
+            <div>
+              <div class="lbl">IME Pay Number</div>
+              <div class="val">9766258368</div>
+            </div>
+            <button class="copy-btn" onclick="copyNum(this, '9766258368')">Copy Number</button>
           </div>
-          <button class="copy-btn" disabled>Soon</button>
+          <ul class="steps-list">
+            <li>Open IME Pay app</li>
+            <li>Tap "Send Money"</li>
+            <li>Enter number 9766258368</li>
+            <li>Enter amount & confirm with MPIN</li>
+            <li>Screenshot & send to WhatsApp 9816023400</li>
+          </ul>
         </div>
+      </div>
+    </div>
 
+    <!-- BANK PANEL -->
+    <div class="pay-panel" data-panel="bank">
+      <div class="panel-inner">
+        <div class="qr-box">
+          <div class="qr-img-wrap">
+            <div class="qr-noimg">
+              <div class="big">🏦</div>
+              <div class="txt">Coming Soon</div>
+              <div class="hint">Bank transfer option</div>
+            </div>
+          </div>
+          <div class="qr-label">Coming Soon</div>
+          <div class="qr-sub">Mobile banking / bank deposit</div>
+        </div>
+        <div class="panel-details">
+          <h3>Bank Transfer <span class="badge-soon">COMING SOON</span></h3>
+          <div class="bank-msg">
+            🏦 Bank transfer option chhito aauchha! Ahile ko lagi kripaya
+            eSewa, Khalti, wa IME Pay use garnus. Bank details yaha update
+            hunechha.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -971,20 +1199,40 @@
    target="_blank">💬</a>
 
 <script>
+  // Copy-to-clipboard
   function copyNum(btn, num) {
     navigator.clipboard.writeText(num).then(() => {
       const original = btn.textContent;
-      btn.textContent = 'Copied!';
+      btn.textContent = '✓ Copied!';
       btn.classList.add('copied');
       setTimeout(() => {
         btn.textContent = original;
         btn.classList.remove('copied');
       }, 1500);
-    }).catch(() => {
-      alert('Number: ' + num);
-    });
+    }).catch(() => alert('Number: ' + num));
   }
 
+  // Payment method tabs
+  const payTabs = document.querySelectorAll('.pay-tab');
+  const payPanels = document.querySelectorAll('.pay-panel');
+
+  payTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.tab;
+      payTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      payPanels.forEach(panel => {
+        if (panel.dataset.panel === key) {
+          panel.classList.add('active');
+        } else {
+          panel.classList.remove('active');
+        }
+      });
+    });
+  });
+
+  // Product category filter
   const filterBtns = document.querySelectorAll('.filter-btn');
   const sections = document.querySelectorAll('.section-title[data-cat], .product-grid[data-cat]');
 
@@ -993,13 +1241,8 @@
       const filter = btn.dataset.filter;
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       sections.forEach(el => {
-        if (filter === 'all' || el.dataset.cat === filter) {
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
-        }
+        el.style.display = (filter === 'all' || el.dataset.cat === filter) ? '' : 'none';
       });
     });
   });
