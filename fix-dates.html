@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fix Tournament Dates → 28 Sept 2026</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #080d18;
+    color: #fff;
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  h1 { color: #22c55e; }
+  .info { color: #8da2bc; margin-bottom: 20px; line-height: 1.6; }
+  button {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; border: 0;
+    padding: 14px 28px; border-radius: 10px;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; margin-bottom: 20px;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #log {
+    background: #0b1320;
+    border: 1px solid #2b3d56;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    max-height: 500px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .ok { color: #4ade80; }
+  .err { color: #fca5a5; }
+  .warn { color: #fbbf24; }
+  .dim { color: #6b7280; }
+</style>
+</head>
+<body>
+
+<h1>📅 Fix Tournament Dates</h1>
+<p class="info">
+  This will update <b>every tournament doc</b> to:<br>
+  • <code>date: "2026-09-28"</code> (was 2026-09-26)<br>
+  • <code>time: "13:00"</code> (stays 1:00 PM NPT)<br>
+  <br>
+  Run once, verify in Firebase Console, then delete this file.
+</p>
+
+<button id="fixBtn" onclick="fixDates()">📅 Update All Dates to 28 Sept</button>
+
+<div id="log">Ready. Click the button above to start.</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, updateDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const NEW_DATE = "2026-09-28";   // 28 September 2026
+const NEW_TIME = "13:00";        // 1:00 PM NPT
+
+const log = document.getElementById("log");
+function out(msg, cls) {
+  const span = document.createElement("span");
+  span.className = cls || "";
+  span.textContent = msg + "\n";
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+window.fixDates = async function() {
+  const btn = document.getElementById("fixBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Updating…";
+  log.innerHTML = "";
+
+  out("📅 Updating tournament dates to 28 September 2026…\n", "warn");
+
+  let updated = 0, skipped = 0, failed = 0;
+
+  try {
+    const snap = await getDocs(collection(db, "tournaments"));
+    out(`📦 Found ${snap.size} tournaments total\n`, "dim");
+
+    for (const d of snap.docs) {
+      const data = d.data();
+      const title = data.title || data.seedKey || d.id;
+      const oldDate = data.date || "(none)";
+
+      // Skip if already 28 Sept
+      if (oldDate === NEW_DATE && data.time === NEW_TIME) {
+        out(`  ⏭️  ${title} — already ${NEW_DATE}, skip`, "dim");
+        skipped++;
+        continue;
+      }
+
+      try {
+        await updateDoc(doc(db, "tournaments", d.id), {
+          date: NEW_DATE,
+          time: NEW_TIME
+        });
+        out(`  ✅ ${title} — ${oldDate} → ${NEW_DATE}`, "ok");
+        updated++;
+      } catch (err) {
+        out(`  ❌ ${title} — ${err.message}`, "err");
+        failed++;
+      }
+    }
+  } catch (err) {
+    out(`❌ Could not read tournaments: ${err.message}`, "err");
+  }
+
+  out("", "");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out(`✅ Updated: ${updated}`, "ok");
+  out(`⏭️  Skipped: ${skipped}`, "dim");
+  out(`❌ Failed: ${failed}`, failed ? "err" : "dim");
+  out("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", "");
+  out("", "");
+  out("👉 Next: verify in Firebase Console → tournaments collection", "warn");
+  out("👉 Then delete fix-dates.html from your repo:", "warn");
+  out("   git rm fix-dates.html && git commit -m 'chore: remove one-time script' && git push", "dim");
+  out("", "");
+  out("👉 Also remember to LOCK Firestore rules back down.", "warn");
+
+  btn.disabled = false;
+  btn.textContent = "🚀 Re-run (safe)";
+};
+</script>
+
+</body>
+</html>
