@@ -30,8 +30,7 @@ body{
 .brand{
     display:flex; align-items:center; gap:10px;
     font-weight:800; font-size:1.1rem;
-    color:#fff;
-    text-decoration:none;
+    color:#fff; text-decoration:none;
     flex-shrink:0;
 }
 .brand .logo{
@@ -63,7 +62,6 @@ body{
     box-shadow:0 4px 14px rgba(124,58,237,.5);
 }
 
-/* user chip */
 .user-chip{
     position:relative;
     display:flex; align-items:center; gap:8px;
@@ -81,21 +79,13 @@ body{
     background:linear-gradient(135deg,#6d28d9,#a855f7);
     display:grid; place-items:center;
     font-weight:700; font-size:.8rem;
-    color:#fff;
-    flex-shrink:0;
+    color:#fff; flex-shrink:0;
 }
 .user-chip .uname{
-    color:#f5f3ff;
-    font-weight:700;
-    font-size:.82rem;
-    max-width:100px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    color:#f5f3ff; font-weight:700; font-size:.82rem;
+    max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.user-chip .caret{
-    font-size:.55rem; color:#a8a3c9;
-}
+.user-chip .caret{ font-size:.55rem; color:#a8a3c9; }
 .user-menu{
     position:absolute;
     top:calc(100% + 8px);
@@ -112,21 +102,13 @@ body{
 .user-menu.open{ display:block; }
 .user-menu a,
 .user-menu button{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    width:100%;
-    padding:10px 14px;
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:10px 14px;
     border-radius:8px;
-    color:#e9e5ff;
-    text-decoration:none;
-    font-size:.85rem;
-    font-weight:600;
-    background:none;
-    border:0;
-    text-align:left;
-    cursor:pointer;
-    font-family:inherit;
+    color:#e9e5ff; text-decoration:none;
+    font-size:.85rem; font-weight:600;
+    background:none; border:0;
+    text-align:left; cursor:pointer; font-family:inherit;
 }
 .user-menu a:hover,
 .user-menu button:hover{
@@ -164,6 +146,95 @@ body{
 .tournament-name{ font-size:21px; font-weight:bold; color:#ff3b30; }
 .game{ margin-top:6px; color:#9cb5d3; }
 .fee{ margin-top:10px; font-size:20px; font-weight:bold; }
+.mode-badge{
+    display:inline-block;
+    padding:4px 12px;
+    border-radius:999px;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    margin-left:10px;
+    vertical-align:middle;
+}
+.mode-badge.solo  { background:rgba(34,197,94,.2);  color:#4ade80; border:1px solid rgba(34,197,94,.5); }
+.mode-badge.duo   { background:rgba(59,130,246,.2); color:#7db7ff; border:1px solid rgba(59,130,246,.5); }
+.mode-badge.squad { background:rgba(245,158,11,.2); color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
+
+/* ===== PLAYING-AS SELECTOR ===== */
+.playing-as{
+    margin-bottom:22px;
+}
+.playing-as-label{
+    display:block;
+    margin-bottom:10px;
+    color:#c8d5e5;
+    font-weight:bold;
+    font-size:15px;
+}
+.playing-as-options{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+.playing-option{
+    background:#0b1320;
+    border:2px solid #30435e;
+    border-radius:12px;
+    padding:16px 12px;
+    cursor:pointer;
+    text-align:center;
+    transition:all .2s;
+    user-select:none;
+}
+.playing-option:hover{
+    border-color:#4a5f7d;
+    background:#101b2e;
+    transform:translateY(-1px);
+}
+.playing-option.active{
+    border-color:#22c55e;
+    background:rgba(34,197,94,.12);
+    box-shadow:0 0 0 3px rgba(34,197,94,.15);
+}
+.playing-option .icon{
+    font-size:28px;
+    margin-bottom:6px;
+}
+.playing-option .label{
+    font-weight:800;
+    font-size:15px;
+    color:#fff;
+    margin-bottom:2px;
+}
+.playing-option .desc{
+    font-size:11px;
+    color:#8da2bc;
+    line-height:1.4;
+}
+.playing-option.active .desc{ color:#a4f2c7; }
+
+/* Show/hide sections based on mode */
+body.mode-solo  .team-only,
+body.mode-solo  .duo-plus-only,
+body.mode-solo  .squad-only { display:none; }
+
+body.mode-duo   .squad-only { display:none; }
+body.mode-duo   .team-only  { display:block; }
+
+body.mode-squad .team-only  { display:block; }
+
+.solo-note{
+    display:none;
+    background:rgba(34,197,94,.1);
+    border-left:3px solid #22c55e;
+    padding:12px 16px;
+    border-radius:8px;
+    font-size:.85rem;
+    color:#a4f2c7;
+    margin-bottom:16px;
+}
+body.mode-solo .solo-note{ display:block; }
 
 .form-group{ margin-bottom:17px; }
 label{
@@ -305,6 +376,7 @@ textarea{ min-height:100px; resize:vertical; }
     .nav-links a[href="/tournaments.html"] { color:#fbbf24; font-weight:700; }
     .user-chip .uname { display:none; }
     .user-chip { padding:4px; }
+    .playing-as-options { grid-template-columns:1fr; }
 }
 @media(max-width:650px){
     .grid, .payment-options{ grid-template-columns:1fr; }
@@ -349,7 +421,7 @@ textarea{ min-height:100px; resize:vertical; }
     <div class="card">
         <h1 class="title">Tournament Registration</h1>
         <p class="subtitle">
-            Complete your team information and payment details.
+            Choose how you want to play, fill in your details and payment info.
             Your registration will remain <b>Pending</b> until the admin verifies your payment.
         </p>
 
@@ -358,45 +430,108 @@ textarea{ min-height:100px; resize:vertical; }
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
 
         <div id="tournamentBox" class="tournament-box" style="display:none;">
-            <div id="tournamentName" class="tournament-name">—</div>
+            <div>
+                <span id="tournamentName" class="tournament-name">—</span>
+                <span id="modeBadge" class="mode-badge"></span>
+            </div>
             <div id="gameName" class="game"></div>
             <div id="entryFee" class="fee"></div>
         </div>
 
         <form id="registrationForm" style="display:none;">
 
-            <h2 class="section-title">Team Information</h2>
-
-            <div class="form-group">
-                <label>Team Name *</label>
-                <input id="teamName" required>
-            </div>
-
-            <div class="grid">
-                <div class="form-group">
-                    <label>Captain Name *</label>
-                    <input id="captainName" required>
+            <!-- ===== PLAYING AS SELECTOR ===== -->
+            <div class="playing-as">
+                <label class="playing-as-label">🎮 How are you playing?</label>
+                <div class="playing-as-options">
+                    <div class="playing-option" id="optSolo" onclick="setPlayingMode('solo')">
+                        <div class="icon">👤</div>
+                        <div class="label">Solo</div>
+                        <div class="desc">Just me (1 player)</div>
+                    </div>
+                    <div class="playing-option" id="optDuo" onclick="setPlayingMode('duo')">
+                        <div class="icon">👥</div>
+                        <div class="label">Duo</div>
+                        <div class="desc">Me + 1 friend (2 players)</div>
+                    </div>
+                    <div class="playing-option" id="optSquad" onclick="setPlayingMode('squad')">
+                        <div class="icon">🏆</div>
+                        <div class="label">Squad</div>
+                        <div class="desc">Me + friends (up to 6)</div>
+                    </div>
                 </div>
+            </div>
+
+            <div class="solo-note">
+                🎯 <b>Solo Match</b> — Just fill in your IGN, phone, and payment. No team details needed.
+            </div>
+
+            <!-- ===== SOLO FIELDS ===== -->
+            <div id="soloFields">
+                <h2 class="section-title">Your Details</h2>
+
                 <div class="form-group">
-                    <label>Phone *</label>
-                    <input id="phone" required>
+                    <label>Your IGN (In-Game Name) *</label>
+                    <input id="soloIgn" placeholder="e.g. ProGamer99">
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input id="soloPhone" placeholder="98XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Email</label>
+                        <input id="soloEmail" type="email" readonly>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Account Email</label>
-                <input id="email" type="email" readonly>
+            <!-- ===== TEAM FIELDS (Duo + Squad) ===== -->
+            <div id="teamFields">
+                <h2 class="section-title">Team Information</h2>
+
+                <div class="form-group">
+                    <label>Team Name *</label>
+                    <input id="teamName" placeholder="e.g. Nepali Warriors">
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Captain Name *</label>
+                        <input id="captainName">
+                    </div>
+                    <div class="form-group">
+                        <label>Captain Phone *</label>
+                        <input id="phone">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Account Email</label>
+                    <input id="email" type="email" readonly>
+                </div>
             </div>
 
-            <h2 class="section-title">Players</h2>
+            <!-- ===== PLAYER ROSTERS ===== -->
+            <!-- Duo: Player 1 & 2 -->
+            <div id="duoPlayers">
+                <h2 class="section-title">Players (2)</h2>
+                <div class="grid">
+                    <div class="form-group"><label>Player 1 IGN *</label><input id="player1"></div>
+                    <div class="form-group"><label>Player 2 IGN *</label><input id="player2"></div>
+                </div>
+            </div>
 
-            <div class="grid">
-                <div class="form-group"><label>Player 1 *</label><input id="player1" required></div>
-                <div class="form-group"><label>Player 2 *</label><input id="player2" required></div>
-                <div class="form-group"><label>Player 3 *</label><input id="player3" required></div>
-                <div class="form-group"><label>Player 4 *</label><input id="player4" required></div>
-                <div class="form-group"><label>Player 5</label><input id="player5"></div>
-                <div class="form-group"><label>Player 6</label><input id="player6"></div>
+            <!-- Squad: Player 3-6 (shown only in squad mode) -->
+            <div id="squadPlayers" class="squad-only">
+                <h2 class="section-title">Additional Players</h2>
+                <div class="grid">
+                    <div class="form-group"><label>Player 3 IGN</label><input id="player3"></div>
+                    <div class="form-group"><label>Player 4 IGN</label><input id="player4"></div>
+                    <div class="form-group"><label>Player 5 IGN</label><input id="player5"></div>
+                    <div class="form-group"><label>Player 6 IGN</label><input id="player6"></div>
+                </div>
             </div>
 
             <h2 class="section-title">Payment</h2>
@@ -469,6 +604,7 @@ let currentUser = null;
 let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
+let playingMode = "squad"; // solo | duo | squad
 
 const $ = id => document.getElementById(id);
 
@@ -488,7 +624,7 @@ function escapeHTML(v) {
 }
 
 // ============================================================
-// USER CHIP + DROPDOWN
+// USER CHIP
 // ============================================================
 window.toggleUserMenu = function(e) {
     if (e) e.stopPropagation();
@@ -524,6 +660,43 @@ async function loadUserChip(user) {
 }
 
 // ============================================================
+// PLAYING MODE SELECTOR
+// ============================================================
+window.setPlayingMode = function(mode) {
+    playingMode = mode;
+
+    // Body class for CSS
+    document.body.classList.remove("mode-solo", "mode-duo", "mode-squad");
+    document.body.classList.add("mode-" + mode);
+
+    // Button highlights
+    ["optSolo","optDuo","optSquad"].forEach(id => {
+        const el = $(id);
+        if (el) el.classList.remove("active");
+    });
+    const active = mode === "solo" ? $("optSolo") : mode === "duo" ? $("optDuo") : $("optSquad");
+    if (active) active.classList.add("active");
+
+    // Show/hide sections
+    if (mode === "solo") {
+        $("soloFields").style.display = "block";
+        $("teamFields").style.display = "none";
+        $("duoPlayers").style.display = "none";
+        $("squadPlayers").style.display = "none";
+    } else if (mode === "duo") {
+        $("soloFields").style.display = "none";
+        $("teamFields").style.display = "block";
+        $("duoPlayers").style.display = "block";
+        $("squadPlayers").style.display = "none";
+    } else { // squad
+        $("soloFields").style.display = "none";
+        $("teamFields").style.display = "block";
+        $("duoPlayers").style.display = "block";
+        $("squadPlayers").style.display = "block";
+    }
+};
+
+// ============================================================
 // AUTH GATE
 // ============================================================
 onAuthStateChanged(auth, (user) => {
@@ -538,16 +711,16 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================================================
-// SMART GAME MATCHING
+// GAME MATCHING
 // ============================================================
 function normalizeGame(s) {
     return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 const GAME_ALIASES = {
-    freefire:  ["freefire", "ff", "freefiremini", "freefirepaidchampionship"],
+    freefire:  ["freefire", "ff", "freefiremini"],
     pubg:      ["pubg", "pubgm", "pubgmobile"],
-    cod:       ["cod", "codm", "callofduty", "callofdutymobile"],
+    cod:       ["cod", "codm", "callofduty"],
     valorant:  ["valorant", "val"],
     efootball: ["efootball", "efoot", "efootballmobile"],
     ecricket:  ["ecricket", "cricket"],
@@ -557,11 +730,7 @@ const GAME_ALIASES = {
 
 function matchGame(game, title, id, urlParam) {
     const aliases = GAME_ALIASES[urlParam] || [urlParam];
-    const haystack = [
-        normalizeGame(game),
-        normalizeGame(title),
-        normalizeGame(id)
-    ];
+    const haystack = [normalizeGame(game), normalizeGame(title), normalizeGame(id)];
     return aliases.some(alias => {
         const na = normalizeGame(alias);
         return haystack.some(h => h === na || h.includes(na));
@@ -569,7 +738,7 @@ function matchGame(game, title, id, urlParam) {
 }
 
 // ============================================================
-// LOAD TOURNAMENT + PAYMENT
+// LOAD TOURNAMENT
 // ============================================================
 async function loadRegistrationPage() {
     try {
@@ -579,39 +748,29 @@ async function loadRegistrationPage() {
 
         const snap = await getDocs(collection(db, "tournaments"));
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        console.log("🗂️ Tournaments:", all.length, all.map(t => ({ id: t.id, game: t.game, title: t.title })));
 
         if (!all.length) {
-            showMessage("❌ No tournaments in database yet. Please create one from the admin panel first.", "error");
+            showMessage("❌ No tournaments found. Please create one from admin panel first.", "error");
             $("loading").style.display = "none";
             return;
         }
 
         // Priority 1: exact tournamentId
-        if (tidParam) {
-            tournament = all.find(t => t.id === tidParam);
-        }
+        if (tidParam) tournament = all.find(t => t.id === tidParam);
 
-        // Priority 2: match by game param
+        // Priority 2: game match
         if (!tournament && gameParam) {
             const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
             const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : matching;
-            tournament = pool.sort((a, b) =>
-                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
-            )[0];
+            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
         }
 
-        // Priority 3: latest open tournament (any game)
+        // Priority 3: latest open
         if (!tournament) {
             const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
             const pool = open.length ? open : all;
-            tournament = pool.sort((a, b) =>
-                (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
-            )[0];
-            if (tournament && gameParam) {
-                showMessage("ℹ️ Exact game not found — loaded latest open tournament instead.", "success");
-            }
+            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
         }
 
         if (!tournament) {
@@ -620,29 +779,51 @@ async function loadRegistrationPage() {
             return;
         }
 
+        // Determine default mode
+        const defaultMode = String(tournament.mode || "Squad").trim().toLowerCase();
+        const initialMode = defaultMode === "solo" ? "solo" : defaultMode === "duo" ? "duo" : "squad";
+
+        // Fill tournament box
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
         $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
         $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
 
+        const badge = $("modeBadge");
+        badge.textContent = "Default: " + (tournament.mode || "Squad");
+        badge.classList.add(initialMode);
+
         $("loading").style.display = "none";
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
-        // Prefill
+        // Prefill from user data
         if (currentUser) {
-            $("email").value = currentUser.email || "";
+            const uEmail = currentUser.email || "";
+            $("email").value = uEmail;
+            $("soloEmail").value = uEmail;
             try {
                 const uDoc = await getDoc(doc(db, "users", currentUser.uid));
                 if (uDoc.exists()) {
                     const u = uDoc.data();
-                    if (u.username) $("captainName").value = u.username;
-                    if (u.phone)    $("phone").value = u.phone;
+                    const uname = u.username || "";
+                    const uphone = u.phone || "";
+                    if (uname) {
+                        $("soloIgn").value = uname;
+                        $("captainName").value = uname;
+                    }
+                    if (uphone) {
+                        $("soloPhone").value = uphone;
+                        $("phone").value = uphone;
+                    }
                 }
             } catch (e) {}
         }
 
         await loadPaymentMethods();
+
+        // Apply initial mode
+        setPlayingMode(initialMode);
 
         const status = String(tournament.status || "").toLowerCase();
         if (status === "completed" || tournament.isFull) {
@@ -657,6 +838,9 @@ async function loadRegistrationPage() {
     }
 }
 
+// ============================================================
+// PAYMENT METHODS
+// ============================================================
 async function loadPaymentMethods() {
     let methods = [];
     try {
@@ -674,9 +858,7 @@ async function loadPaymentMethods() {
                 }
             }
         }
-    } catch (e) {
-        console.warn("payment_settings load failed:", e);
-    }
+    } catch (e) { console.warn(e); }
 
     if (!methods.length) {
         methods = [
@@ -695,8 +877,7 @@ function renderPaymentMethods(methods) {
 
     if (!paymentMethods.length) {
         container.innerHTML = "";
-        detailsContainer.innerHTML =
-            '<div class="payment-no-methods">No payment methods available. Contact admin.</div>';
+        detailsContainer.innerHTML = '<div class="payment-no-methods">No payment methods available. Contact admin.</div>';
         $("submitButton").disabled = true;
         return;
     }
@@ -705,32 +886,22 @@ function renderPaymentMethods(methods) {
         const id = escapeHTML(String(m.id || ""));
         return `
           <label class="payment-option" id="payment-opt-${id}" onclick="selectPayment('${id}')">
-            <input type="radio" name="paymentMethod" value="${id}"
-                   onclick="event.stopPropagation(); selectPayment('${id}')">
+            <input type="radio" name="paymentMethod" value="${id}" onclick="event.stopPropagation(); selectPayment('${id}')">
             <span class="payment-name">${escapeHTML(m.name || "Method")}</span>
           </label>`;
     }).join("");
 
     detailsContainer.innerHTML = paymentMethods.map(m => {
         const id = escapeHTML(String(m.id || ""));
-        const qr = m.qrImage
-            ? `<img src="${escapeHTML(m.qrImage)}" class="qr" alt="${escapeHTML(m.name)} QR">`
-            : "";
+        const qr = m.qrImage ? `<img src="${escapeHTML(m.qrImage)}" class="qr" alt="${escapeHTML(m.name)} QR">` : "";
         const wallet = m.number
-            ? `<div class="wallet">${escapeHTML(m.name)} Number:
-                 <strong>${escapeHTML(m.number)}</strong>
-                 <button type="button" class="wallet-copy" onclick="copyToClipboard('${escapeHTML(m.number)}')">Copy</button>
-               </div>`
+            ? `<div class="wallet">${escapeHTML(m.name)} Number: <strong>${escapeHTML(m.number)}</strong> <button type="button" class="wallet-copy" onclick="copyToClipboard('${escapeHTML(m.number)}')">Copy</button></div>`
             : `<div class="wallet" style="color:#a87918;">No number provided. Contact admin.</div>`;
-        const instr = m.instructions
-            ? `<div class="payment-instructions">${escapeHTML(m.instructions)}</div>`
-            : "";
+        const instr = m.instructions ? `<div class="payment-instructions">${escapeHTML(m.instructions)}</div>` : "";
         return `
           <div class="payment-details" id="payment-details-${id}">
             <div class="payment-details-title">Pay using ${escapeHTML(m.name)}</div>
-            ${qr}
-            ${wallet}
-            ${instr}
+            ${qr}${wallet}${instr}
           </div>`;
     }).join("");
 
@@ -756,18 +927,14 @@ window.selectPayment = function(methodId) {
 
 window.copyToClipboard = function(text) {
     if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(text)
-            .then(() => showToast("Copied: " + text))
-            .catch(() => fallbackCopy(text));
+        navigator.clipboard.writeText(text).then(() => showToast("Copied: " + text)).catch(() => fallbackCopy(text));
     } else fallbackCopy(text);
 };
 
 function fallbackCopy(text) {
     const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
     try { document.execCommand("copy"); showToast("Copied: " + text); }
     catch (e) { showToast("Copy failed"); }
     document.body.removeChild(ta);
@@ -799,9 +966,93 @@ $("registrationForm").addEventListener("submit", async (event) => {
     if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
 
     const transactionId = $("transactionId").value.trim();
-    if (transactionId.length < 3) {
-        showMessage("Please enter a valid transaction ID.", "error");
-        return;
+    if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+
+    // Validate based on mode
+    let body = {
+        userId:          currentUser.uid,
+        userEmail:       currentUser.email || "",
+        tournamentId:    tournament.id,
+        tournamentTitle: tournament.title || tournament.name || "",
+        game:            tournament.game || "",
+        tournamentMode:  tournament.mode || "Squad",
+        playingAs:       playingMode,
+        transactionId,
+        paymentMethod:   selectedMethod.name,
+        paymentMethodId: selectedMethod.id,
+        amount:          Number(tournament.entryFee || tournament.entry_fee || 0),
+        message:         $("messageText").value.trim(),
+        payerName:       $("payerName").value.trim(),
+        payerPhone:      $("payerPhone").value.trim(),
+        status:          "pending",
+        entryType:       "paid",
+        registeredAt:    serverTimestamp()
+    };
+
+    if (playingMode === "solo") {
+        const soloIgn = $("soloIgn").value.trim();
+        const soloPhone = $("soloPhone").value.trim();
+        if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
+        if (!soloPhone) { showMessage("Please enter your phone.", "error"); return; }
+
+        body.teamSize = 1;
+        body.teamName = soloIgn + " (Solo)";
+        body.captainName = soloIgn;
+        body.phone = soloPhone;
+        body.ign = soloIgn;
+        body.players = [soloIgn];
+
+    } else if (playingMode === "duo") {
+        const teamName = $("teamName").value.trim();
+        const captainName = $("captainName").value.trim();
+        const phone = $("phone").value.trim();
+        const p1 = $("player1").value.trim();
+        const p2 = $("player2").value.trim();
+
+        if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
+        if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
+        if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
+        if (!p1 || !p2) { showMessage("Both player IGNs are required for Duo.", "error"); return; }
+
+        body.teamSize = 2;
+        body.teamName = teamName;
+        body.captainName = captainName;
+        body.phone = phone;
+        body.ign = captainName;
+        body.player1 = p1;
+        body.player2 = p2;
+        body.players = [p1, p2];
+
+    } else { // squad
+        const teamName = $("teamName").value.trim();
+        const captainName = $("captainName").value.trim();
+        const phone = $("phone").value.trim();
+        const p1 = $("player1").value.trim();
+        const p2 = $("player2").value.trim();
+
+        if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
+        if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
+        if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
+        if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
+
+        const p3 = $("player3").value.trim();
+        const p4 = $("player4").value.trim();
+        const p5 = $("player5").value.trim();
+        const p6 = $("player6").value.trim();
+
+        body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
+        body.teamName = teamName;
+        body.captainName = captainName;
+        body.phone = phone;
+        body.ign = captainName;
+        body.email = $("email").value.trim();
+        body.player1 = p1;
+        body.player2 = p2;
+        body.player3 = p3;
+        body.player4 = p4;
+        body.player5 = p5;
+        body.player6 = p6;
+        body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
     }
 
     const btn = $("submitButton");
@@ -809,41 +1060,10 @@ $("registrationForm").addEventListener("submit", async (event) => {
     btn.textContent = "Submitting…";
 
     try {
-        const body = {
-            userId:          currentUser.uid,
-            userEmail:       currentUser.email || "",
-            tournamentId:    tournament.id,
-            tournamentTitle: tournament.title || tournament.name || "",
-            game:            tournament.game || "",
-            teamName:        $("teamName").value.trim(),
-            captainName:     $("captainName").value.trim(),
-            phone:           $("phone").value.trim(),
-            email:           $("email").value.trim(),
-            player1:         $("player1").value.trim(),
-            player2:         $("player2").value.trim(),
-            player3:         $("player3").value.trim(),
-            player4:         $("player4").value.trim(),
-            player5:         $("player5").value.trim(),
-            player6:         $("player6").value.trim(),
-            payerName:       $("payerName").value.trim(),
-            payerPhone:      $("payerPhone").value.trim(),
-            transactionId,
-            paymentMethod:   selectedMethod.name,
-            paymentMethodId: selectedMethod.id,
-            amount:          Number(tournament.entryFee || tournament.entry_fee || 0),
-            message:         $("messageText").value.trim(),
-            status:          "pending",
-            entryType:       "paid",
-            registeredAt:    serverTimestamp()
-        };
-
         await addDoc(collection(db, "tournament_registrations"), body);
-
         showMessage("✅ Registration submitted! Admin will verify your payment.", "success");
         $("registrationForm").reset();
-
         setTimeout(() => { window.location.href = "/member.html"; }, 1800);
-
     } catch (err) {
         console.error("submit error:", err);
         showMessage("❌ " + (err.message || "Submission failed."), "error");
