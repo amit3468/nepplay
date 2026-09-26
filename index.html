@@ -11,8 +11,6 @@
 <meta property="og:title" content="🎮 NEPPLAY — 28 Sept Paid Tournaments">
 <meta property="og:description" content="8 games. Rs. 150 entry. Real cash prizes. Register now on Nepal's esports platform.">
 <meta property="og:image" content="https://nepplay.onrender.com/images/promo-poster.jpg">
-<meta property="og:image:width" content="1080">
-<meta property="og:image:height" content="1920">
 <meta property="og:url" content="https://nepplay.onrender.com/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎮 NEPPLAY — 28 Sept Paid Tournaments">
@@ -22,13 +20,148 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
+  /* ============ SITE HEADER (with user chip) ============ */
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    background: rgba(15, 8, 35, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.25);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: 12px;
+  }
+  .site-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #fff;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .site-header nav {
+    display: flex;
+    gap: 16px;
+    font-size: 0.9rem;
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header nav a {
+    color: #a8a3c9;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+  .site-header nav a:hover { color: #fff; }
+  .site-header nav a.active { color: #fbbf24; }
+  .nav-toggle {
+    background: none;
+    border: 0;
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 6px;
+    display: none;
+  }
+  @media (max-width: 720px) {
+    .nav-toggle { display: block; }
+    .site-header nav {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: #1e293b;
+      flex-direction: column;
+      padding: 12px;
+      gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      z-index: 60;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .site-header nav.open { display: flex; }
+    .site-header nav a {
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+    .site-header nav a:hover { background: rgba(168,85,247,.15); }
+  }
+
+  /* ============ USER CHIP ============ */
+  .user-chip-wrap { position: relative; flex-shrink: 0; }
+  #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+  .user-chip {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; padding: 4px 8px 4px 4px;
+    border-radius: 999px;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(168,85,247,.3);
+  }
+  #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
+  .user-chip .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg,#6d28d9,#a855f7);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: .78rem;
+    color: #fff; flex-shrink: 0;
+  }
+  .user-chip .uname {
+    color: #f5f3ff; font-weight: 700; font-size: .78rem;
+    max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
+  #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
+  .user-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: #1a0b3d; border: 1px solid rgba(168,85,247,.35);
+    border-radius: 12px; min-width: 210px; padding: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    display: none; z-index: 100;
+  }
+  #chipToggle:checked ~ .user-menu { display: block; }
+  .user-menu a,
+  .user-menu .menu-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border-radius: 8px; color: #e9e5ff;
+    text-decoration: none; font-size: .85rem;
+    font-weight: 600; background: none; border: 0;
+    text-align: left; cursor: pointer; font-family: inherit;
+  }
+  .user-menu a:hover, .user-menu .menu-btn:hover {
+    background: rgba(124,58,237,.25); color: #fff;
+  }
+  .user-menu .divider {
+    height: 1px; background: rgba(168,85,247,.25);
+    margin: 6px 4px; display: block;
+  }
+  .user-menu .menu-btn.danger { color: #fca5a5; }
+  .chip-backdrop {
+    position: fixed; inset: 0; background: transparent;
+    display: none; z-index: 90;
+  }
+  #chipToggle:checked ~ .chip-backdrop { display: block; }
+  .user-chip, .user-menu { position: relative; z-index: 100; }
+
+  /* ============ Live Now section ============ */
   .home-live-section { max-width: 1300px; margin: 0 auto 32px; padding: 0 24px; }
   .home-live-inner {
     background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%);
     border: 2px solid #ef4444;
-    border-radius: 18px;
-    padding: 22px 24px;
+    border-radius: 18px; padding: 22px 24px;
     box-shadow: 0 0 40px rgba(220,38,38,0.35);
   }
   .home-live-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -40,21 +173,18 @@
     background: rgba(0,0,0,0.32);
     border: 1px solid rgba(255,255,255,0.18);
     border-radius: 12px; padding: 14px;
-    transition: transform .15s;
   }
-  .home-stream-card:hover { transform: translateY(-2px); }
-  .home-stream-card .sname { color: #fff; font-weight: 800; font-size: 15px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .home-stream-card .stourney { color: #fecaca; font-size: 12px; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .home-stream-card .sname { color: #fff; font-weight: 800; font-size: 15px; margin-bottom: 6px; }
+  .home-stream-card .stourney { color: #fecaca; font-size: 12px; margin-bottom: 12px; }
   .home-stream-btn {
     display: inline-flex; align-items: center; gap: 6px;
     background: linear-gradient(135deg,#dc2626,#991b1b);
     color: #fff; padding: 9px 14px; border-radius: 10px;
     text-decoration: none; font-size: 13px; font-weight: 700;
-    transition: transform .15s;
   }
-  .home-stream-btn:hover { transform: scale(1.05); }
   @keyframes homePulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.6; transform:scale(1.15); } }
 
+  /* ============ Next Event card ============ */
   .grand-opening-section { max-width: 900px; margin: 0 auto 40px; padding: 0 24px; }
   .grand-opening-card {
     background:
@@ -105,9 +235,7 @@
     background: rgba(15,23,42,0.75);
     border: 1px solid rgba(99,102,241,0.28);
     border-radius: 12px; padding: 14px 16px; text-align: left;
-    transition: border-color 0.2s, transform 0.2s;
   }
-  .next-event-item:hover { border-color: rgba(99,102,241,0.55); transform: translateY(-1px); }
   .next-event-item .k { font-size: 11px; color: #818cf8; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 5px; }
   .next-event-item .v { font-size: 16px; color: #fff; font-weight: 800; }
   .next-event-deadline { color: #fca5a5; font-size: 13px; font-weight: 700; margin: 0 0 24px; position: relative; z-index: 2; }
@@ -116,43 +244,49 @@
     display: inline-flex; align-items: center; gap: 10px;
     padding: 15px 28px; border-radius: 12px;
     font-weight: 800; font-size: 14px; text-decoration: none;
-    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .go-btn:hover { transform: translateY(-2px); }
   .go-btn-primary {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #fff; box-shadow: 0 10px 30px rgba(34,197,94,0.4);
   }
-  .go-btn-primary:hover { box-shadow: 0 14px 36px rgba(34,197,94,0.55); }
   .go-btn-wa {
     background: linear-gradient(135deg, #25D366, #128C7E);
     color: #fff; box-shadow: 0 10px 30px rgba(37,211,102,0.35);
-  }
-  .go-btn-wa:hover { box-shadow: 0 14px 36px rgba(37,211,102,0.5); }
-  @media (max-width: 640px) {
-    .grand-opening-section { padding: 0 16px; }
-    .grand-opening-card { padding: 28px 18px; }
-    .grand-opening-title { font-size: 22px; }
   }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <div class="logo">🎮 <b>Nepal Gaming</b></div>
+  <a href="index.html" class="logo">🎮 <b>Nepal Gaming</b></a>
+  <button class="nav-toggle" onclick="toggleSiteNav()" aria-label="Menu">
+    <i class="fa-solid fa-bars"></i>
+  </button>
   <nav>
     <a href="index.html" class="active">Home</a>
     <a href="tournaments.html">Tournaments</a>
-    <a href="tournaments.html#live">🔴 Live</a>
     <a href="winners.html">Winners</a>
     <a href="leaderboard.html">Leaderboard</a>
     <a href="teams.html">Teams</a>
     <a href="support.html">Support</a>
+
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Login</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/player.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+      </div>
+    </div>
   </nav>
-  <button class="nav-toggle" id="navToggle" onclick="toggleSiteNav()" aria-label="Menu">
-    <i class="fa-solid fa-bars"></i>
-  </button>
-  <a href="member.html" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">Login</a>
 </header>
 
 <section class="landing-hero">
@@ -170,34 +304,27 @@
   </p>
 
   <div class="landing-ctas">
-    <a href="tournaments.html" class="btn-hero btn-hero-primary">
-      🎮 Register Now
-    </a>
-    <a href="tournaments.html#live" class="btn-hero btn-hero-outline">
-      👁️ View Tournaments
-    </a>
-    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-hero btn-hero-green">
-      💬 Join Community
-    </a>
+    <a href="tournaments.html" class="btn-hero btn-hero-primary">🎮 Register Now</a>
+    <a href="tournaments.html" class="btn-hero btn-hero-outline">👁️ View Tournaments</a>
+    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-hero btn-hero-green">💬 Join Community</a>
   </div>
 
   <div class="landing-stats">
     <div class="landing-stat">
-      <div class="num purple" id="stat-tournaments">8</div>
+      <div class="num purple">8</div>
       <div class="lbl">Games</div>
     </div>
     <div class="landing-stat">
-      <div class="num green" id="stat-players">Rs. 150</div>
+      <div class="num green">Rs. 150</div>
       <div class="lbl">Entry</div>
     </div>
     <div class="landing-stat">
-      <div class="num gold" id="stat-prizes">Rs. 500–1000</div>
+      <div class="num gold">Rs. 500–1000</div>
       <div class="lbl">Prize Pool</div>
     </div>
   </div>
 </section>
 
-<!-- NEXT EVENT CARD (28 Sept paid tournament) -->
 <section class="grand-opening-section">
   <div class="grand-opening-card">
     <div class="grand-opening-tag">
@@ -228,17 +355,12 @@
     <p class="next-event-deadline">🔓 Registration OPEN · Room details at 12:30 PM NPT</p>
 
     <div class="grand-opening-ctas">
-      <a href="tournaments.html" class="go-btn go-btn-primary">
-        🎮 Register for a Tournament
-      </a>
-      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="go-btn go-btn-wa">
-        💬 Join WhatsApp Group
-      </a>
+      <a href="tournaments.html" class="go-btn go-btn-primary">🎮 Register for a Tournament</a>
+      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="go-btn go-btn-wa">💬 Join WhatsApp Group</a>
     </div>
   </div>
 </section>
 
-<!-- LIVE NOW — hidden until streamers exist -->
 <section class="home-live-section" id="homeLiveSection" style="display:none;">
   <div class="home-live-inner">
     <div class="home-live-head">
@@ -250,111 +372,11 @@
   </div>
 </section>
 
-<section class="landing-section" style="padding-top:20px;">
-  <div class="featured-tournament">
-    <div>
-      <div class="label">🎯 Featured Tournament</div>
-      <h3 id="featured-title">Free Fire Championship</h3>
-      <div class="meta">
-        <span>📅 28 September 2026</span>
-        <span>🕐 1:00 PM NPT</span>
-        <span>🎮 Free Fire · Squad</span>
-      </div>
-      <div class="meta" style="margin-bottom:20px;">
-        <span>💰 Entry: Rs. 150</span>
-        <span>🏆 Prize: Rs. 1,000</span>
-        <span>🎯 Top Kills: Rs. 250</span>
-      </div>
-      <a href="tournaments.html" style="padding:12px 26px;background:#fff;color:#7c3aed;border-radius:12px;font-weight:800;text-decoration:none;display:inline-block;font-size:14px;">
-        Register Now →
-      </a>
-    </div>
-    <div style="text-align:center;">
-      <div style="font-size:80px;line-height:1;">🏆</div>
-    </div>
-  </div>
-</section>
-
-<section class="landing-section">
-  <h2>Why Play on NEPPLAY</h2>
-  <p class="section-sub">Built for Nepali gamers — real cash prizes, real payouts, no hassle.</p>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="icon purple">🎮</div>
-      <h3>8 Games, 8 Tournaments</h3>
-      <p>Free Fire, PUBG, COD, Valorant, eFootball, eCricket, Ludo, Chess — pick your game and compete.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon green">💰</div>
-      <h3>Real Cash Prizes</h3>
-      <p>Winners paid directly via eSewa, Khalti, or IME Pay. Solo Rs 500, Duo Rs 750, Squad Rs 1000. No delays, no hidden fees.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon orange">⚡</div>
-      <h3>Fast Payouts</h3>
-      <p>Prize money sent within 30 minutes of match end. Compete with confidence.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon purple">🎯</div>
-      <h3>Low Entry, High Reward</h3>
-      <p>Rs. 150 entry per game. Squad winners take Rs. 1,000 — over 6x return on your entry.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon green">📱</div>
-      <h3>Mobile-First Platform</h3>
-      <p>Register, pay, submit proof, and check results — all from your phone.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon orange">🤝</div>
-      <h3>Real Community</h3>
-      <p>Join our WhatsApp &amp; Telegram. Find teammates, make friends, run matches together.</p>
-    </div>
-  </div>
-</section>
-
-<section class="landing-section" style="padding-top:20px;">
-  <h2>How It Works</h2>
-  <p class="section-sub">Three simple steps to your first victory.</p>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="icon purple">1️⃣</div>
-      <h3>Create Account</h3>
-      <p>Sign up in 30 seconds with just your email and password.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon green">2️⃣</div>
-      <h3>Register &amp; Pay</h3>
-      <p>Pick a game and mode (Solo / Duo / Squad), pay Rs. 150, and submit your payment proof.</p>
-    </div>
-    <div class="feature-card">
-      <div class="icon orange">3️⃣</div>
-      <h3>Play &amp; Win</h3>
-      <p>Get room ID &amp; password at 12:30 PM NPT, compete, and receive your prize money within 30 minutes.</p>
-    </div>
-  </div>
-</section>
-
-<section class="landing-section" style="text-align:center;">
-  <h2>Ready to Compete?</h2>
-  <p class="section-sub">8 games. Rs. 150 entry. Solo, Duo, and Squad modes. Room details at 12:30 PM NPT.</p>
-  <div class="landing-ctas">
-    <a href="tournaments.html" class="btn-hero btn-hero-primary">
-      🚀 Register Now
-    </a>
-    <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" class="btn-hero btn-hero-green">
-      💬 Join WhatsApp Community
-    </a>
-  </div>
-</section>
-
 <footer class="landing-footer">
   <div style="margin-bottom:16px;font-size:16px;font-weight:700;color:#fff;">🎮 NEPPLAY</div>
   <div style="margin-bottom:16px;">
     <a href="index.html">Home</a>
     <a href="tournaments.html">Tournaments</a>
-    <a href="tournaments.html#live">🔴 Live</a>
     <a href="winners.html">Winners</a>
     <a href="leaderboard.html">Leaderboard</a>
     <a href="teams.html">Teams</a>
@@ -368,24 +390,82 @@
   <div>© 2026 NEPPLAY · Nepal's Esports Platform</div>
 </footer>
 
+<script>
+function toggleSiteNav() {
+  const nav = document.querySelector('.site-header nav');
+  if (!nav) return;
+  nav.classList.toggle('open');
+}
+</script>
+
+<script>
+(function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm("Logout now?")) return;
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                .then(function (a) {
+                    return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                        .then(function (b) {
+                            var cfg = {
+                                apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                authDomain: "nepplaygaming.firebaseapp.com",
+                                projectId: "nepplaygaming",
+                                storageBucket: "nepplaygaming.firebasestorage.app",
+                                messagingSenderId: "893565645520",
+                                appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                            };
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
+                        });
+                })
+                .catch(function () {})
+                .finally(function () { window.location.href = "/login.html"; });
+        });
+    }
+})();
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs }
+import { getFirestore, doc, getDoc, collection, getDocs }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const firebaseConfig = {
+const cfg = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
     authDomain: "nepplaygaming.firebaseapp.com",
     projectId: "nepplaygaming",
     storageBucket: "nepplaygaming.firebasestorage.app",
     messagingSenderId: "893565645520",
-    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5",
-    measurementId: "G-3PXN38XFG9"
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
+const app  = initializeApp(cfg);
+const db   = getFirestore(app);
+const auth = getAuth(app);
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// ============ USER CHIP ============
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+    if (!user) {
+        if (avatar) avatar.textContent = "?";
+        if (nameEl) nameEl.textContent = "Login";
+        return;
+    }
+    let display = user.email || user.uid || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+});
 
+// ============ LIVE STREAMERS ============
 function escHome(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -414,9 +494,7 @@ async function loadHomeLive() {
       <div class="home-stream-card">
         <div class="sname">🎮 ${escHome(s.ign || s.username || 'Player')}</div>
         <div class="stourney">${escHome(s.tournamentTitle || 'Tournament')}</div>
-        <a class="home-stream-btn" href="${escHome(s.streamUrl)}" target="_blank" rel="noopener">
-          ▶ Watch Live
-        </a>
+        <a class="home-stream-btn" href="${escHome(s.streamUrl)}" target="_blank" rel="noopener">▶ Watch Live</a>
       </div>
     `).join('');
   } catch (err) {
@@ -427,18 +505,6 @@ async function loadHomeLive() {
 
 loadHomeLive();
 setInterval(loadHomeLive, 60000);
-</script>
-
-<script>
-function toggleSiteNav() {
-  const nav = document.querySelector('.site-header > nav');
-  const icon = document.querySelector('#navToggle i');
-  if (!nav) return;
-  nav.classList.toggle('open');
-  if (icon) {
-    icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-  }
-}
 </script>
 
 </body>
