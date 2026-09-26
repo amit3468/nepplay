@@ -354,12 +354,12 @@
   <div class="auto-counter" id="autoCounter">
     <h2>● Registration Countdown</h2>
     <div class="big" id="counterDisplay">--:--:--</div>
-    <div class="sub">Loading counter… auto-syncs from server.</div>
+    <div class="sub">Counting down to 28 September · 1:00 PM NPT</div>
   </div>
 
-  <h1 class="page-title">26 September — 8-Game Tournament Day 🎮</h1>
+  <h1 class="page-title">28 September — 8-Game Tournament Day 🎮</h1>
   <p class="page-sub">
-    Aaja 1:00 PM NPT · Rs 150 entry · Win real cash
+    1:00 PM NPT · Rs 150 entry · Win real cash
   </p>
 
   <div class="room-note">
@@ -614,17 +614,22 @@
     }
 })();
 
+// Auto-counter — counts down to 28 Sept 2026, 1:00 PM NPT
 (function tick() {
-    const target = new Date();
-    target.setHours(13, 0, 0, 0);
+    const target = new Date(2026, 8, 28, 13, 0, 0); // 28 Sept 2026, 1:00 PM
     function update() {
         const now = new Date();
         let diff = Math.max(0, target - now);
-        const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+        const days = Math.floor(diff / 86400000);
+        const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
         const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
         const el = document.getElementById('counterDisplay');
-        if (el) el.textContent = `${h}:${m}:${s}`;
+        if (el) {
+            el.textContent = days > 0
+                ? `${days}d ${h}:${m}:${s}`
+                : `${h}:${m}:${s}`;
+        }
     }
     update();
     setInterval(update, 1000);
