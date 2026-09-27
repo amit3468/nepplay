@@ -250,6 +250,128 @@
   .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
   .date-badge .y { font-size: 0.7rem; font-weight: 600; }
 
+  /* ---------- NEW: Quick Actions ---------- */
+  .section-title {
+    font-size: 1.05rem; font-weight: 800;
+    margin: 0 0 14px; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .accent { color: var(--gold-2); }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .qa-card {
+    display: flex; flex-direction: column;
+    align-items: flex-start; gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.15s, border-color 0.2s, background 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .qa-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(168,85,247,.6);
+    background: rgba(40, 22, 80, 0.85);
+  }
+  .qa-card .qa-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+  }
+  .qa-card.gold .qa-icon {
+    background: linear-gradient(135deg, #d97706, #fbbf24);
+  }
+  .qa-card.green .qa-icon {
+    background: linear-gradient(135deg, #15803d, #22c55e);
+  }
+  .qa-card.pink .qa-icon {
+    background: linear-gradient(135deg, #be185d, #ec4899);
+  }
+  .qa-card .qa-title {
+    font-weight: 800; font-size: 0.95rem;
+  }
+  .qa-card .qa-sub {
+    font-size: 0.75rem; color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ---------- NEW: Upcoming event strip ---------- */
+  .upcoming {
+    background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(168,85,247,.15));
+    border: 1px solid rgba(168,85,247,.4);
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+  .upcoming .up-left {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .upcoming .up-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    display: grid; place-items: center;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 18px rgba(239,68,68,.4);
+  }
+  .upcoming .up-title {
+    font-weight: 800; font-size: 1rem;
+  }
+  .upcoming .up-meta {
+    font-size: 0.82rem; color: var(--muted);
+    margin-top: 3px;
+  }
+  .upcoming .up-cta {
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    color: #fff; font-weight: 800; font-size: 0.85rem;
+    padding: 11px 20px; border-radius: 10px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(124,58,237,.4);
+    transition: transform .15s;
+  }
+  .upcoming .up-cta:hover { transform: translateY(-2px); }
+
+  /* ---------- NEW: Footer ---------- */
+  .site-footer {
+    max-width: 1100px; margin: 30px auto 0;
+    padding: 24px 18px 10px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+  }
+  .site-footer .f-left {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .site-footer .f-brand {
+    color: var(--text); font-weight: 800;
+    font-size: 0.9rem;
+  }
+  .site-footer .f-links {
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .site-footer .f-links a {
+    color: var(--muted); text-decoration: none;
+    transition: color .2s;
+  }
+  .site-footer .f-links a:hover { color: var(--gold-2); }
+
   .float-share, .float-wa {
     position: fixed; right: 20px;
     width: 52px; height: 52px;
@@ -288,11 +410,16 @@
     .date-badge .d { font-size: 1.4rem; }
     .winners-banner::after { display: none; }
     .wb-grid { gap: 14px; }
+    .quick-actions { grid-template-columns: 1fr 1fr; }
+    .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
+    .upcoming .up-cta { text-align: center; }
+    .site-footer { flex-direction: column; align-items: flex-start; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link,
     .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
     .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
+    .quick-actions { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -373,7 +500,7 @@
           <div class="sub">Match alerts · Team up · Community chat</div>
         </div>
       </div>
-      <a href="https://chat.whatsapp.com/" target="_blank" rel="noopener" class="btn wa">Join</a>
+      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" rel="noopener" class="btn wa">Join</a>
     </div>
   </div>
 
@@ -397,7 +524,59 @@
     </div>
   </section>
 
+  <!-- ============ QUICK ACTIONS ============ -->
+  <h2 class="section-title">⚡ Quick <span class="accent">Actions</span></h2>
+  <div class="quick-actions">
+    <a href="/tournaments.html" class="qa-card">
+      <div class="qa-icon">🎮</div>
+      <div class="qa-title">Browse Tournaments</div>
+      <div class="qa-sub">22 live events · Solo · Duo · Squad</div>
+    </a>
+    <a href="/my-tournaments.html" class="qa-card gold">
+      <div class="qa-icon">🏆</div>
+      <div class="qa-title">My Tournaments</div>
+      <div class="qa-sub">Track your registrations & results</div>
+    </a>
+    <a href="/winners.html" class="qa-card green">
+      <div class="qa-icon">🥇</div>
+      <div class="qa-title">Winners & Payouts</div>
+      <div class="qa-sub">See who won & how much was paid</div>
+    </a>
+    <a href="/store.html" class="qa-card pink">
+      <div class="qa-icon">🛒</div>
+      <div class="qa-title">NEPPLAY Store</div>
+      <div class="qa-sub">Diamonds · UC · Gift cards</div>
+    </a>
+  </div>
+
+  <!-- ============ UPCOMING EVENT ============ -->
+  <h2 class="section-title">📅 Upcoming <span class="accent">Event</span></h2>
+  <div class="upcoming">
+    <div class="up-left">
+      <div class="up-icon">🔥</div>
+      <div>
+        <div class="up-title">NEPPLAY Day 2 — 22 Tournaments</div>
+        <div class="up-meta">28 September 2026 · 1:00 PM NPT · Entry Rs 150 all modes</div>
+      </div>
+    </div>
+    <a href="/tournaments.html" class="up-cta">Register Now →</a>
+  </div>
+
 </div>
+
+<footer class="site-footer">
+  <div class="f-left">
+    <div class="f-brand">🎮 NEPPLAY</div>
+    <div>Nepal's trusted paid esports platform · Since 2026</div>
+  </div>
+  <div class="f-links">
+    <a href="/tournaments.html">Tournaments</a>
+    <a href="/winners.html">Winners</a>
+    <a href="/store.html">Store</a>
+    <a href="/support.html">Support</a>
+    <a href="https://wa.me/9779816023400" target="_blank" rel="noopener">WhatsApp</a>
+  </div>
+</footer>
 
 <div class="float-share" onclick="sharePage()">🔗</div>
 <a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" rel="noopener" class="float-wa">💬</a>
