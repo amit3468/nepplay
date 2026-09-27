@@ -250,7 +250,66 @@
   .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
   .date-badge .y { font-size: 0.7rem; font-weight: 600; }
 
-  /* ---------- NEW: Quick Actions ---------- */
+  /* ---------- ⭐ EARNINGS CARD ---------- */
+  .earn-card {
+    display: block; text-decoration: none; color: inherit;
+    background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(16,185,129,.06));
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin-bottom: 26px;
+    transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .earn-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.25);
+    border-color: rgba(34, 197, 94, 0.6);
+  }
+  .earn-card .ec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .earn-card .ec-title {
+    font-size: 1rem; font-weight: 800; color: #fff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .earn-card .ec-cta {
+    font-size: 0.78rem; font-weight: 800;
+    color: #4ade80;
+  }
+  .earn-card .ec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .earn-card .ec-stat {
+    background: rgba(15, 8, 35, 0.55);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .earn-card .ec-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.6px; color: #a8a3c9;
+    font-weight: 800; margin-bottom: 5px;
+  }
+  .earn-card .ec-value {
+    font-size: 1.25rem; font-weight: 900;
+    line-height: 1.1;
+  }
+  .earn-card .ec-value.green { color: #4ade80; }
+  .earn-card .ec-value.gold  { color: #fbbf24; }
+  .earn-card .ec-value.blue  { color: #60a5fa; }
+  .earn-card .ec-note {
+    font-size: 0.8rem;
+    color: #ddd6fe;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .earn-card[hidden] { display: none; }
+
+  /* ---------- Quick Actions ---------- */
   .section-title {
     font-size: 1.05rem; font-weight: 800;
     margin: 0 0 14px; color: var(--text);
@@ -288,24 +347,13 @@
     font-size: 1.3rem;
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
   }
-  .qa-card.gold .qa-icon {
-    background: linear-gradient(135deg, #d97706, #fbbf24);
-  }
-  .qa-card.green .qa-icon {
-    background: linear-gradient(135deg, #15803d, #22c55e);
-  }
-  .qa-card.pink .qa-icon {
-    background: linear-gradient(135deg, #be185d, #ec4899);
-  }
-  .qa-card .qa-title {
-    font-weight: 800; font-size: 0.95rem;
-  }
-  .qa-card .qa-sub {
-    font-size: 0.75rem; color: var(--muted);
-    line-height: 1.4;
-  }
+  .qa-card.gold .qa-icon { background: linear-gradient(135deg, #d97706, #fbbf24); }
+  .qa-card.green .qa-icon { background: linear-gradient(135deg, #15803d, #22c55e); }
+  .qa-card.pink .qa-icon { background: linear-gradient(135deg, #be185d, #ec4899); }
+  .qa-card .qa-title { font-weight: 800; font-size: 0.95rem; }
+  .qa-card .qa-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 
-  /* ---------- NEW: Upcoming event strip ---------- */
+  /* ---------- Upcoming event strip ---------- */
   .upcoming {
     background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(168,85,247,.15));
     border: 1px solid rgba(168,85,247,.4);
@@ -317,9 +365,7 @@
     margin-bottom: 26px;
     flex-wrap: wrap;
   }
-  .upcoming .up-left {
-    display: flex; align-items: center; gap: 14px;
-  }
+  .upcoming .up-left { display: flex; align-items: center; gap: 14px; }
   .upcoming .up-icon {
     width: 52px; height: 52px; border-radius: 12px;
     background: linear-gradient(135deg, #ef4444, #f97316);
@@ -327,13 +373,8 @@
     font-size: 1.5rem;
     box-shadow: 0 6px 18px rgba(239,68,68,.4);
   }
-  .upcoming .up-title {
-    font-weight: 800; font-size: 1rem;
-  }
-  .upcoming .up-meta {
-    font-size: 0.82rem; color: var(--muted);
-    margin-top: 3px;
-  }
+  .upcoming .up-title { font-weight: 800; font-size: 1rem; }
+  .upcoming .up-meta { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
   .upcoming .up-cta {
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
     color: #fff; font-weight: 800; font-size: 0.85rem;
@@ -345,7 +386,7 @@
   }
   .upcoming .up-cta:hover { transform: translateY(-2px); }
 
-  /* ---------- NEW: Footer ---------- */
+  /* ---------- Footer ---------- */
   .site-footer {
     max-width: 1100px; margin: 30px auto 0;
     padding: 24px 18px 10px;
@@ -356,20 +397,10 @@
     justify-content: space-between;
     gap: 14px; flex-wrap: wrap;
   }
-  .site-footer .f-left {
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .site-footer .f-brand {
-    color: var(--text); font-weight: 800;
-    font-size: 0.9rem;
-  }
-  .site-footer .f-links {
-    display: flex; gap: 16px; flex-wrap: wrap;
-  }
-  .site-footer .f-links a {
-    color: var(--muted); text-decoration: none;
-    transition: color .2s;
-  }
+  .site-footer .f-left { display: flex; flex-direction: column; gap: 4px; }
+  .site-footer .f-brand { color: var(--text); font-weight: 800; font-size: 0.9rem; }
+  .site-footer .f-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-footer .f-links a { color: var(--muted); text-decoration: none; transition: color .2s; }
   .site-footer .f-links a:hover { color: var(--gold-2); }
 
   .float-share, .float-wa {
@@ -381,10 +412,7 @@
     box-shadow: 0 10px 26px rgba(0,0,0,0.4);
     z-index: 60;
   }
-  .float-share {
-    bottom: 90px;
-    background: linear-gradient(135deg, var(--purple), var(--purple-2));
-  }
+  .float-share { bottom: 90px; background: linear-gradient(135deg, var(--purple), var(--purple-2)); }
   .float-wa { bottom: 24px; background: #25d366; text-decoration: none; }
 
   @media (max-width: 720px) {
@@ -414,12 +442,15 @@
     .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
     .upcoming .up-cta { text-align: center; }
     .site-footer { flex-direction: column; align-items: flex-start; }
+    .earn-card .ec-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .earn-card .ec-value { font-size: 1rem; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link,
     .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
     .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
     .quick-actions { grid-template-columns: 1fr; }
+    .earn-card .ec-value { font-size: 0.9rem; }
   }
 </style>
 </head>
@@ -448,7 +479,7 @@
       <label class="chip-backdrop" for="chipToggle"></label>
       <div class="user-menu">
         <a href="/member.html">📊 My Dashboard</a>
-        <a href="/player.html">👤 My Profile</a>
+        <a href="/player.html">👤 My Profile &amp; Earnings</a>
         <a href="/my-tournaments.html">🏆 My Tournaments</a>
         <div class="divider"></div>
         <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
@@ -509,14 +540,12 @@
       <span class="tag gold">● REGISTRATIONS OPEN</span>
       <span class="tag green">● PAID TOURNAMENTS</span>
     </div>
-
     <h1>Ready to win <span class="cash">real cash?</span> 💰</h1>
     <p>
       <strong>NEPPLAY</strong> paid tournaments are live! 8 games · real cash prizes ·
       professional competition. Pick your game, choose Solo · Duo · Squad, and compete
       with Nepal's best players. <strong>Multiple modes allowed</strong> — play as many as you want!
     </p>
-
     <div class="date-badge">
       <div class="m">SEPTEMBER</div>
       <div class="d">28</div>
@@ -524,7 +553,29 @@
     </div>
   </section>
 
-  <!-- ============ QUICK ACTIONS ============ -->
+  <!-- ⭐ EARNINGS CARD (only shows if logged in) -->
+  <a href="/player.html" id="earnCard" class="earn-card" hidden>
+    <div class="ec-head">
+      <div class="ec-title">💰 Your Earnings</div>
+      <div class="ec-cta">View details →</div>
+    </div>
+    <div class="ec-grid">
+      <div class="ec-stat">
+        <div class="ec-label">Total Won</div>
+        <div id="mc-total" class="ec-value green">Rs. 0</div>
+      </div>
+      <div class="ec-stat">
+        <div class="ec-label">Pending</div>
+        <div id="mc-pending" class="ec-value gold">Rs. 0</div>
+      </div>
+      <div class="ec-stat">
+        <div class="ec-label">Paid</div>
+        <div id="mc-paid" class="ec-value blue">Rs. 0</div>
+      </div>
+    </div>
+    <div id="mc-note" class="ec-note" hidden></div>
+  </a>
+
   <h2 class="section-title">⚡ Quick <span class="accent">Actions</span></h2>
   <div class="quick-actions">
     <a href="/tournaments.html" class="qa-card">
@@ -549,7 +600,6 @@
     </a>
   </div>
 
-  <!-- ============ UPCOMING EVENT ============ -->
   <h2 class="section-title">📅 Upcoming <span class="accent">Event</span></h2>
   <div class="upcoming">
     <div class="up-left">
@@ -623,7 +673,7 @@ window.sharePage = window.sharePage || function () {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const cfg = {
@@ -638,6 +688,8 @@ const app  = initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
+function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
+
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
     const nameEl = document.getElementById("userName");
@@ -648,12 +700,84 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     let display = user.email || user.uid || "Member";
+    let profile = {};
     try {
         const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+        if (uDoc.exists()) {
+            profile = uDoc.data();
+            display = profile.fullName || profile.username || profile.email || display;
+        }
     } catch (e) {}
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
     if (nameEl) nameEl.textContent = display;
+
+    // ============================================
+    // ⭐ EARNINGS CARD — fetch & show
+    // ============================================
+    try {
+        // Payouts: match by userId OR by winnerName == username/fullName (legacy)
+        const unameLower = (profile.username || '').toLowerCase();
+        const fullNameLower = (profile.fullName || '').toLowerCase();
+
+        let byUid = [];
+        try {
+            const s = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', user.uid)));
+            byUid = s.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) {}
+
+        let byName = [];
+        try {
+            const s = await getDocs(collection(db, 'tournament_payouts'));
+            byName = s.docs.map(d => ({ id: d.id, ...d.data() }))
+                .filter(p => {
+                    if (p.userId) return false;
+                    const w = (p.winnerName || '').toLowerCase();
+                    return w && (w === unameLower || w === fullNameLower);
+                });
+        } catch (e) {}
+
+        const payoutMap = new Map();
+        byUid.forEach(p => payoutMap.set(p.id, p));
+        byName.forEach(p => payoutMap.set(p.id, p));
+        const payouts = Array.from(payoutMap.values());
+
+        // Referrals
+        let referrals = [];
+        try {
+            const s = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', user.uid)));
+            referrals = s.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) {}
+
+        const paidPayouts = payouts.filter(p => p.status === 'paid');
+        const pendPayouts = payouts.filter(p => p.status !== 'paid');
+        const paidRefs = referrals.filter(r => r.status === 'paid');
+        const pendRefs = referrals.filter(r => r.status !== 'paid');
+
+        const paidAmt = paidPayouts.reduce((s,p) => s + Number(p.prize || p.amount || 0), 0)
+                      + paidRefs.reduce((s,r) => s + Number(r.amount || 0), 0);
+        const pendAmt = pendPayouts.reduce((s,p) => s + Number(p.prize || p.amount || 0), 0)
+                      + pendRefs.reduce((s,r) => s + Number(r.amount || 0), 0);
+        const total = paidAmt + pendAmt;
+
+        const card = document.getElementById('earnCard');
+        document.getElementById('mc-total').textContent   = fmtRs(total);
+        document.getElementById('mc-pending').textContent = fmtRs(pendAmt);
+        document.getElementById('mc-paid').textContent    = fmtRs(paidAmt);
+
+        // Friendly note under the numbers
+        const note = document.getElementById('mc-note');
+        if (total === 0) {
+            note.hidden = false;
+            note.textContent = "No earnings yet — win a tournament or refer a friend to start 💪";
+        } else if (pendAmt > 0) {
+            note.hidden = false;
+            note.textContent = `${fmtRs(pendAmt)} pending payout — will be sent soon 💸`;
+        }
+
+        card.hidden = false;
+    } catch (e) {
+        console.warn('earnings card error:', e);
+    }
 });
 </script>
 
