@@ -333,7 +333,7 @@
 
             <!-- STATS -->
             <div id="profile-stats" class="hidden grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-                <div class="glass-panel rounded-xl p-4 border border-gray-700/50">
+                <div class="glass-panel rounded-xl p-4 border border-gray-700/50" id="stat-earnings-card">
                     <p class="text-xs text-gray-400 uppercase mb-1">Total Earnings</p>
                     <p id="stat-earnings" class="text-xl sm:text-2xl font-bold text-green-400">Rs. 0</p>
                     <p id="stat-earnings-sub" class="text-xs text-gray-600 mt-1">No winnings yet</p>
@@ -355,13 +355,13 @@
                 </div>
             </div>
 
-            <!-- ⭐ NEW: EARNINGS PANEL -->
+            <!-- EARNINGS PANEL — only visible on OWN profile -->
             <div id="profile-earnings" class="hidden glass-panel rounded-xl p-5 sm:p-6 mb-6">
                 <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                     <h2 class="text-lg font-bold text-white">
                         <i class="fa-solid fa-sack-dollar text-green-400 mr-2"></i>My Earnings
                     </h2>
-                    <span class="text-xs text-gray-500">Live · updates as admin marks payouts</span>
+                    <span class="text-xs text-gray-500">Only visible to you</span>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3 mb-5">
@@ -645,10 +645,20 @@
             header.classList.remove('hidden');
             header.classList.add('flex');
 
-            await Promise.all([
-                loadStats(viewedUid),
-                loadMatches(viewedUid)
-            ]);
+            if (isSelf) {
+                // Own profile — full stats + earnings panel
+                await Promise.all([
+                    loadStats(viewedUid),
+                    loadMatches(viewedUid)
+                ]);
+            } else {
+                // Someone else's profile — public stats only, NO earnings
+                earnBox.classList.add('hidden');
+                await Promise.all([
+                    loadPublicStats(viewedUid),
+                    loadMatches(viewedUid)
+                ]);
+            }
         }
 
         async function buildProfileActions() {
@@ -709,13 +719,12 @@
         };
 
         // ================================================
-        // ⭐ EARNINGS + STATS (v2 — matches by UID OR username)
+        // EARNINGS FETCH (shared by loadStats)
         // ================================================
         async function fetchAllEarnings(uid, profile) {
             const unameLower = (profile?.username || '').toLowerCase();
             const fullNameLower = (profile?.fullName || '').toLowerCase();
 
-            // 1. Payouts — try BOTH userId AND winnerName
             let payoutsByUid = [];
             let payoutsByUsername = [];
             try {
@@ -728,19 +737,17 @@
                 payoutsByUsername = allPayoutsSnap.docs
                     .map(d => ({ id: d.id, ...d.data() }))
                     .filter(p => {
-                        if (p.userId) return false; // already caught by uid query
+                        if (p.userId) return false;
                         const wname = (p.winnerName || '').toLowerCase();
                         return wname && (wname === unameLower || wname === fullNameLower);
                     });
             } catch (e) { console.warn('payouts by username failed:', e.message); }
 
-            // Merge & dedupe by id
             const payoutMap = new Map();
             payoutsByUid.forEach(p => payoutMap.set(p.id, p));
             payoutsByUsername.forEach(p => payoutMap.set(p.id, p));
             const payouts = Array.from(payoutMap.values());
 
-            // 2. Referral bonuses by referrerUid
             let referrals = [];
             try {
                 const snap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
@@ -750,10 +757,76 @@
             return { payouts, referrals };
         }
 
+        // ================================================
+        // ⭐ PUBLIC STATS — no earnings, safe for other profiles
+        // ================================================
+        async function loadPublicStats(uid) {
+            let regs = [];
+            try {
+                const rSnap = await getDocs(query(
+                    collection(db, 'tournament_registrations'),
+                    where('userId', '==', uid)
+                ));
+                regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('regs read failed:', e.message); }
+
+            let payouts = [];
+            try {
+                const pSnap = await getDocs(query(
+                    collection(db, 'tournament_payouts'),
+                    where('userId', '==', uid)
+                ));
+                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('payouts read failed:', e.message); }
+
+            const totalTournaments = regs.length;
+            const wins = payouts.filter(p => {
+                const rk = String(p.rank || '');
+                return rk === '1' || rk.startsWith('1 ');
+            }).length;
+            const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
+
+            // Replace the earnings card with "Rank — Hidden"
+            const card = document.getElementById('stat-earnings-card');
+            if (card) {
+                card.querySelector('p:first-child').textContent = 'Earnings';
+                const valEl = document.getElementById('stat-earnings');
+                valEl.textContent = '🔒';
+                valEl.className = 'text-xl sm:text-2xl font-bold text-gray-500';
+                const subEl = document.getElementById('stat-earnings-sub');
+                subEl.textContent = 'Private';
+                subEl.className = 'text-xs text-gray-600 mt-1';
+            }
+
+            document.getElementById('stat-tournaments').textContent = totalTournaments;
+            document.getElementById('stat-tournaments-sub').textContent =
+                totalTournaments > 0 ? `${regs.filter(r => r.status === 'confirmed').length} confirmed` : 'Not started';
+
+            document.getElementById('stat-wins').textContent = wins;
+            document.getElementById('stat-wins-sub').textContent =
+                wins > 0 ? `🥇 ${wins} first-place finish${wins !== 1 ? 'es' : ''}` : '—';
+
+            document.getElementById('stat-winrate').textContent = winRate === null ? '—%' : winRate + '%';
+            document.getElementById('stat-winrate-sub').textContent =
+                winRate === null ? '—' : (winRate >= 50 ? '🔥 Strong player' : 'Keep pushing!');
+
+            unlockIf('ach-shield', totalTournaments >= 1);
+            unlockIf('ach-bolt',   totalTournaments >= 5);
+            unlockIf('ach-fire',   wins >= 3);
+            unlockIf('ach-king',   wins >= 10);
+
+            statsBox.classList.remove('hidden');
+            achBox.classList.remove('hidden');
+            statsBox.classList.add('grid');
+            achBox.classList.add('block');
+        }
+
+        // ================================================
+        // ⭐ PRIVATE STATS — own profile only
+        // ================================================
         async function loadStats(uid) {
             const { payouts, referrals } = await fetchAllEarnings(uid, viewedProfile);
 
-            // regs for tournaments count
             let regs = [];
             try {
                 const rSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
@@ -777,11 +850,10 @@
             const totalTournaments = regs.length;
             const wins = payouts.filter(p => {
                 const rk = String(p.rank || '');
-                return rk === '1' || rk.startsWith('1 ') || rk.includes('Top Killer') && rk.startsWith('1');
+                return rk === '1' || rk.startsWith('1 ') || (rk.includes('Top Killer') && rk.startsWith('1'));
             }).length;
             const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
 
-            // Top stat "Total Earnings"
             document.getElementById('stat-earnings').textContent = 'Rs. ' + grandTotal.toLocaleString();
             let subText = 'No winnings yet';
             if (grandTotal > 0) {
@@ -815,7 +887,6 @@
             statsBox.classList.add('grid');
             achBox.classList.add('block');
 
-            // ============ EARNINGS PANEL ============
             renderEarningsPanel({
                 total: grandTotal,
                 pending: totalPending,
@@ -830,7 +901,6 @@
             document.getElementById('earn-pending').textContent = 'Rs. ' + pending.toLocaleString();
             document.getElementById('earn-paid').textContent = 'Rs. ' + paid.toLocaleString();
 
-            // Build combined timeline
             const timeline = [];
 
             payouts.forEach(p => {
@@ -844,8 +914,7 @@
 
                 timeline.push({
                     kind: 'payout',
-                    icon,
-                    label,
+                    icon, label,
                     title: p.tournamentTitle || 'Tournament',
                     amount: Number(p.prize || p.amount || 0),
                     status: p.status || 'pending',
@@ -867,7 +936,6 @@
                 });
             });
 
-            // Sort newest first
             timeline.sort((a, b) => {
                 const ta = a.date?.seconds || (a.date?.toMillis?.() ? a.date.toMillis() / 1000 : 0);
                 const tb = b.date?.seconds || (b.date?.toMillis?.() ? b.date.toMillis() / 1000 : 0);
@@ -930,7 +998,29 @@
                 regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             } catch (e) { console.warn('regs read failed:', e.message); }
 
-            const { payouts } = await fetchAllEarnings(uid, viewedProfile);
+            let payouts = [];
+            try {
+                const pSnap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
+                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('payouts read failed:', e.message); }
+
+            // For own profile also try username fallback (so old payouts still show rank/prize)
+            if (isSelf && viewedProfile) {
+                const unameLower = (viewedProfile.username || '').toLowerCase();
+                const fullNameLower = (viewedProfile.fullName || '').toLowerCase();
+                try {
+                    const allSnap = await getDocs(collection(db, 'tournament_payouts'));
+                    const fallbacks = allSnap.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .filter(p => {
+                            if (p.userId) return false;
+                            const wname = (p.winnerName || '').toLowerCase();
+                            return wname && (wname === unameLower || wname === fullNameLower);
+                        });
+                    const seen = new Set(payouts.map(p => p.id));
+                    fallbacks.forEach(p => { if (!seen.has(p.id)) payouts.push(p); });
+                } catch (e) { /* ignore */ }
+            }
 
             regs.sort((a, b) => {
                 const ta = a.registeredAt?.seconds || 0;
@@ -973,6 +1063,9 @@
                 const isPaid = r.entryType === 'paid';
                 const isStreaming = r.streamUrl && r.status === 'confirmed';
 
+                // Only show prize amounts if viewing own profile
+                const showPrize = isSelf && prize > 0;
+
                 return `
                     <div class="match-row">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:${s.bg};color:${s.color};">
@@ -989,7 +1082,7 @@
                             </p>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            ${prize > 0
+                            ${showPrize
                                 ? `<p class="font-bold text-green-400 text-sm">${medal} Rs. ${prize.toLocaleString()}</p>
                                    <p class="text-[10px] text-gray-500">${payout.status === 'paid' ? 'Paid' : 'Pending'}</p>`
                                 : `<span class="status-pill-mini" style="background:${s.bg};color:${s.color};">${s.label}</span>`
