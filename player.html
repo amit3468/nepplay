@@ -153,7 +153,7 @@
             text-transform: uppercase;
         }
 
-        /* ===== USER CHIP NAV (checkbox hack) ===== */
+        /* ===== USER CHIP NAV ===== */
         .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
         #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
         .user-chip {
@@ -266,7 +266,7 @@
                 <label class="chip-backdrop" for="chipToggle"></label>
                 <div class="user-menu">
                     <a href="/member.html">📊 My Dashboard</a>
-                    <a href="/player.html">👤 My Profile</a>
+                    <a href="/player.html">👤 My Profile &amp; Earnings</a>
                     <a href="/my-tournaments.html">🏆 My Tournaments</a>
                     <div class="divider"></div>
                     <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
@@ -352,6 +352,39 @@
                     <p class="text-xs text-gray-400 uppercase mb-1">Win Rate</p>
                     <p id="stat-winrate" class="text-xl sm:text-2xl font-bold text-purple-400">—%</p>
                     <p id="stat-winrate-sub" class="text-xs text-gray-600 mt-1">—</p>
+                </div>
+            </div>
+
+            <!-- ⭐ REFER & EARN CARD — own profile only -->
+            <div id="profile-refCard" class="hidden glass-panel rounded-xl p-5 sm:p-6 mb-6">
+                <div class="flex items-center gap-3 mb-4 flex-wrap">
+                    <div class="w-11 h-11 rounded-lg flex items-center justify-center text-xl flex-shrink-0" style="background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 6px 18px rgba(124,58,237,.4);">🤝</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Refer &amp; Earn Rs 20</h2>
+                        <p class="text-xs text-gray-400">Invite friends · Earn Rs 20 per paid signup</p>
+                    </div>
+                </div>
+
+                <div class="rounded-lg p-4 mb-4" style="background:rgba(15,8,35,.55);">
+                    <ol class="text-sm leading-7 text-purple-100" style="padding-left:18px;">
+                        <li>Share your link with a friend</li>
+                        <li>They sign up &amp; join <b style="color:#fbbf24;">any paid tournament</b></li>
+                        <li>You get <b style="color:#fbbf24;">Rs 20</b> in your earnings</li>
+                    </ol>
+                </div>
+
+                <div class="rounded-lg p-3 mb-3 flex items-center gap-3" style="background:rgba(15,8,35,.75);border:1px dashed rgba(168,85,247,.5);">
+                    <input type="text" id="p-refLink" readonly class="flex-1 bg-transparent text-white text-xs font-mono outline-none truncate" value="Loading..." />
+                </div>
+
+                <div class="flex gap-3 flex-wrap">
+                    <button id="p-refCopy" class="flex-1 min-w-[130px] py-2.5 rounded-lg font-bold text-sm text-white transition" style="background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 6px 18px rgba(124,58,237,.4);" onclick="copyRefLink()">📋 Copy Link</button>
+                    <a id="p-refWa" href="#" target="_blank" rel="noopener" class="flex-1 min-w-[130px] py-2.5 rounded-lg font-bold text-sm text-center text-white transition" style="background:linear-gradient(135deg,#25d366,#16a34a);box-shadow:0 6px 18px rgba(37,211,102,.35);">💬 Share on WhatsApp</a>
+                </div>
+
+                <div class="mt-4 text-sm text-purple-200 flex gap-5 flex-wrap">
+                    <span>Referrals: <b id="p-refCount" style="color:#fbbf24;">0</b></span>
+                    <span>Earned: <b id="p-refEarned" style="color:#fbbf24;">Rs. 0</b></span>
                 </div>
             </div>
 
@@ -490,6 +523,31 @@
                 });
             }
         })();
+
+        // ⭐ Copy referral link
+        window.copyRefLink = function() {
+            const inp = document.getElementById('p-refLink');
+            if (!inp) return;
+            const btn = document.getElementById('p-refCopy');
+            const orig = btn.textContent;
+            const doDone = () => {
+                btn.textContent = '✅ Copied!';
+                btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+                setTimeout(() => {
+                    btn.textContent = orig;
+                    btn.style.background = 'linear-gradient(135deg,#7c3aed,#a855f7)';
+                }, 1600);
+            };
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(inp.value).then(doDone).catch(() => {
+                    inp.select();
+                    try { document.execCommand('copy'); doDone(); } catch (e) {}
+                });
+            } else {
+                inp.select();
+                try { document.execCommand('copy'); doDone(); } catch (e) {}
+            }
+        };
     </script>
 
     <script type="module">
@@ -520,6 +578,7 @@
         const achBox     = document.getElementById('profile-achievements');
         const matchesBox = document.getElementById('profile-matches');
         const earnBox    = document.getElementById('profile-earnings');
+        const refCardBox = document.getElementById('profile-refCard');
 
         const params = new URLSearchParams(window.location.search);
         const urlUid = params.get('uid');
@@ -605,6 +664,7 @@
             achBox.classList.add('hidden');
             matchesBox.classList.add('hidden');
             earnBox.classList.add('hidden');
+            refCardBox.classList.add('hidden');
         }
 
         async function loadProfile() {
@@ -646,14 +706,15 @@
             header.classList.add('flex');
 
             if (isSelf) {
-                // Own profile — full stats + earnings panel
+                // Own profile — full stats + earnings + referral
                 await Promise.all([
                     loadStats(viewedUid),
                     loadMatches(viewedUid)
                 ]);
             } else {
-                // Someone else's profile — public stats only, NO earnings
+                // Someone else's profile — public stats only, no earnings, no referral
                 earnBox.classList.add('hidden');
+                refCardBox.classList.add('hidden');
                 await Promise.all([
                     loadPublicStats(viewedUid),
                     loadMatches(viewedUid)
@@ -719,7 +780,7 @@
         };
 
         // ================================================
-        // EARNINGS FETCH (shared by loadStats)
+        // EARNINGS FETCH
         // ================================================
         async function fetchAllEarnings(uid, profile) {
             const unameLower = (profile?.username || '').toLowerCase();
@@ -758,7 +819,7 @@
         }
 
         // ================================================
-        // ⭐ PUBLIC STATS — no earnings, safe for other profiles
+        // PUBLIC STATS — no earnings
         // ================================================
         async function loadPublicStats(uid) {
             let regs = [];
@@ -786,7 +847,6 @@
             }).length;
             const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
 
-            // Replace the earnings card with "Rank — Hidden"
             const card = document.getElementById('stat-earnings-card');
             if (card) {
                 card.querySelector('p:first-child').textContent = 'Earnings';
@@ -822,7 +882,7 @@
         }
 
         // ================================================
-        // ⭐ PRIVATE STATS — own profile only
+        // PRIVATE STATS — own profile only
         // ================================================
         async function loadStats(uid) {
             const { payouts, referrals } = await fetchAllEarnings(uid, viewedProfile);
@@ -894,6 +954,28 @@
                 payouts,
                 referrals
             });
+
+            // ⭐ Referral card (own profile only)
+            if (viewedProfile.username) {
+                const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(viewedProfile.username);
+                const inp = document.getElementById('p-refLink');
+                if (inp) inp.value = refUrl;
+                const wa = document.getElementById('p-refWa');
+                if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(
+                    '🎮 Join NEPPLAY and win real cash!\n\n' +
+                    'Sign up here: ' + refUrl + '\n\n' +
+                    'Paid tournaments every week · Rs 150 entry · Rs 500–1000 prizes'
+                );
+                document.getElementById('profile-refCard').hidden = false;
+
+                try {
+                    const s = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', viewedUid)));
+                    const bonuses = s.docs.map(d => d.data());
+                    const total = bonuses.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+                    document.getElementById('p-refCount').textContent = bonuses.length;
+                    document.getElementById('p-refEarned').textContent = 'Rs. ' + total.toLocaleString();
+                } catch (e) { console.warn('ref stats error:', e); }
+            }
         }
 
         function renderEarningsPanel({ total, pending, paid, payouts, referrals }) {
@@ -1004,7 +1086,7 @@
                 payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             } catch (e) { console.warn('payouts read failed:', e.message); }
 
-            // For own profile also try username fallback (so old payouts still show rank/prize)
+            // For own profile also try username fallback
             if (isSelf && viewedProfile) {
                 const unameLower = (viewedProfile.username || '').toLowerCase();
                 const fullNameLower = (viewedProfile.fullName || '').toLowerCase();
@@ -1063,7 +1145,6 @@
                 const isPaid = r.entryType === 'paid';
                 const isStreaming = r.streamUrl && r.status === 'confirmed';
 
-                // Only show prize amounts if viewing own profile
                 const showPrize = isSelf && prize > 0;
 
                 return `
