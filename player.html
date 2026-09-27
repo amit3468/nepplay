@@ -92,6 +92,67 @@
             50% { box-shadow: 0 0 0 8px rgba(220,38,38,0); }
         }
 
+        /* ===== EARNINGS PANEL ===== */
+        .earn-stat {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+        }
+        .earn-stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .earn-stat-value {
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+        .earn-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+        }
+        .earn-row:last-child { margin-bottom: 0; }
+        .earn-row .er-icon {
+            width: 36px; height: 36px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+        }
+        .earn-row .er-body { flex: 1; min-width: 0; }
+        .earn-row .er-title {
+            color: #e2e8f0; font-size: 13px; font-weight: 700;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .earn-row .er-sub {
+            color: #94a3b8; font-size: 11px; margin-top: 2px;
+        }
+        .earn-row .er-right {
+            text-align: right; flex-shrink: 0;
+        }
+        .earn-row .er-amt {
+            font-size: 14px; font-weight: 900;
+        }
+        .earn-row .er-status {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+
         /* ===== USER CHIP NAV (checkbox hack) ===== */
         .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
         #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
@@ -119,15 +180,11 @@
             max-width: 90px; overflow: hidden;
             text-overflow: ellipsis; white-space: nowrap;
         }
-        .user-chip .caret {
-            font-size: .5rem; color: #a8a3c9;
-            transition: transform .2s;
-        }
+        .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
         #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
         .user-menu {
             position: absolute; top: calc(100% + 8px); right: 0;
-            background: #1a0b3d;
-            border: 1px solid rgba(168,85,247,.35);
+            background: #1a0b3d; border: 1px solid rgba(168,85,247,.35);
             border-radius: 12px; min-width: 210px; padding: 8px;
             box-shadow: 0 12px 40px rgba(0,0,0,.55);
             display: none; z-index: 100;
@@ -137,28 +194,17 @@
         .user-menu .menu-btn {
             display: flex; align-items: center; gap: 10px;
             width: 100%; padding: 11px 14px;
-            border-radius: 8px;
-            color: #e9e5ff; text-decoration: none;
-            font-size: .85rem; font-weight: 600;
-            background: none; border: 0;
+            border-radius: 8px; color: #e9e5ff;
+            text-decoration: none; font-size: .85rem;
+            font-weight: 600; background: none; border: 0;
             text-align: left; cursor: pointer; font-family: inherit;
             -webkit-tap-highlight-color: transparent;
         }
-        .user-menu a:hover,
-        .user-menu .menu-btn:hover {
-            background: rgba(124,58,237,.25); color: #fff;
-        }
-        .user-menu .divider {
-            height: 1px; background: rgba(168,85,247,.25);
-            margin: 6px 4px; display: block;
-        }
+        .user-menu a:hover, .user-menu .menu-btn:hover { background: rgba(124,58,237,.25); color: #fff; }
+        .user-menu .divider { height: 1px; background: rgba(168,85,247,.25); margin: 6px 4px; display: block; }
         .user-menu .menu-btn.danger { color: #fca5a5; }
         .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
-        .chip-backdrop {
-            position: fixed; inset: 0;
-            background: transparent;
-            display: none; z-index: 90;
-        }
+        .chip-backdrop { position: fixed; inset: 0; background: transparent; display: none; z-index: 90; }
         #chipToggle:checked ~ .chip-backdrop { display: block; }
         .user-chip, .user-menu { position: relative; z-index: 100; }
 
@@ -166,13 +212,8 @@
             .user-chip .uname { display: none; }
             .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
             .user-chip .avatar { width: 26px; height: 26px; font-size: .72rem; }
-            .user-menu {
-                min-width: 180px; padding: 6px;
-                max-width: calc(100vw - 20px);
-                right: 0;
-            }
-            .user-menu a,
-            .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
+            .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); right: 0; }
+            .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
         }
     </style>
 </head>
@@ -215,7 +256,6 @@
             <a href="teams.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Teams</a>
             <a href="support.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded hover:bg-gray-800 md:hover:bg-transparent">Support</a>
 
-            <!-- USER CHIP -->
             <div class="user-chip-wrap">
                 <input type="checkbox" id="chipToggle" />
                 <label class="user-chip" for="chipToggle">
@@ -239,7 +279,6 @@
         <div class="profile-banner"></div>
         <div class="container mx-auto px-4 sm:px-6 -mt-20 sm:-mt-24 relative z-10">
 
-            <!-- LOADING -->
             <div id="profile-loading" class="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
                 <div class="skeleton w-24 h-24 sm:w-32 sm:h-32 rounded-full flex-shrink-0"></div>
                 <div class="flex-grow text-center md:text-left space-y-2">
@@ -248,7 +287,6 @@
                 </div>
             </div>
 
-            <!-- NOT FOUND -->
             <div id="profile-notfound" class="hidden flex flex-col items-center text-center mb-6">
                 <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0 mb-4">
                     <i class="fa-solid fa-user-slash text-4xl sm:text-5xl text-gray-500"></i>
@@ -262,7 +300,6 @@
                 </div>
             </div>
 
-            <!-- LOGGED-OUT + NO UID -->
             <div id="profile-logged-out" class="hidden flex flex-col items-center text-center mb-6">
                 <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-700 flex items-center justify-center avatar-ring flex-shrink-0 mb-4">
                     <i class="fa-solid fa-user text-4xl sm:text-5xl text-gray-500"></i>
@@ -279,7 +316,6 @@
                 </div>
             </div>
 
-            <!-- PROFILE HEADER -->
             <div id="profile-header" class="hidden flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-6">
                 <div id="profile-avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center avatar-ring flex-shrink-0 text-4xl sm:text-5xl font-black text-white">?</div>
                 <div class="flex-grow text-center md:text-left">
@@ -316,6 +352,42 @@
                     <p class="text-xs text-gray-400 uppercase mb-1">Win Rate</p>
                     <p id="stat-winrate" class="text-xl sm:text-2xl font-bold text-purple-400">—%</p>
                     <p id="stat-winrate-sub" class="text-xs text-gray-600 mt-1">—</p>
+                </div>
+            </div>
+
+            <!-- ⭐ NEW: EARNINGS PANEL -->
+            <div id="profile-earnings" class="hidden glass-panel rounded-xl p-5 sm:p-6 mb-6">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h2 class="text-lg font-bold text-white">
+                        <i class="fa-solid fa-sack-dollar text-green-400 mr-2"></i>My Earnings
+                    </h2>
+                    <span class="text-xs text-gray-500">Live · updates as admin marks payouts</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-5">
+                    <div class="earn-stat">
+                        <div class="earn-stat-label">Total Won</div>
+                        <div id="earn-total" class="earn-stat-value text-green-400">Rs. 0</div>
+                    </div>
+                    <div class="earn-stat">
+                        <div class="earn-stat-label">Pending</div>
+                        <div id="earn-pending" class="earn-stat-value text-yellow-400">Rs. 0</div>
+                    </div>
+                    <div class="earn-stat">
+                        <div class="earn-stat-label">Paid</div>
+                        <div id="earn-paid" class="earn-stat-value text-blue-400">Rs. 0</div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-purple-400"></i> Recent Activity
+                </h3>
+
+                <div id="earn-list"></div>
+                <div id="earn-empty" class="hidden empty-state-box">
+                    <i class="fa-solid fa-sack-dollar text-4xl text-gray-600 mb-3"></i>
+                    <p class="text-white font-bold mb-1">No earnings yet</p>
+                    <p class="text-sm text-gray-400">Win a tournament or refer a friend to start earning.</p>
                 </div>
             </div>
 
@@ -377,7 +449,6 @@
         </div>
     </footer>
 
-    <!-- UI helpers -->
     <script>
         function toggleMobileNav() {
             const nav = document.getElementById('mobileNav');
@@ -392,7 +463,6 @@
             if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
         });
 
-        // Chip logout
         (function () {
             var logoutBtn = document.getElementById("logoutBtn");
             if (logoutBtn) {
@@ -422,7 +492,6 @@
         })();
     </script>
 
-    <!-- Firebase + profile logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit }
@@ -450,8 +519,8 @@
         const statsBox   = document.getElementById('profile-stats');
         const achBox     = document.getElementById('profile-achievements');
         const matchesBox = document.getElementById('profile-matches');
+        const earnBox    = document.getElementById('profile-earnings');
 
-        // Parse URL params
         const params = new URLSearchParams(window.location.search);
         const urlUid = params.get('uid');
         const urlUsername = params.get('u') || params.get('username');
@@ -472,14 +541,11 @@
             if (isNaN(d.getTime())) return '—';
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
+        function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 
-        // ================================================
-        // AUTH — decide whose profile to show
-        // ================================================
         onAuthStateChanged(auth, async (user) => {
             viewerUid = user ? user.uid : null;
 
-            // Fill the chip
             const chipAvatar = document.getElementById('userAvatar');
             const chipName = document.getElementById('userName');
             if (user) {
@@ -498,7 +564,6 @@
                 if (chipName) chipName.textContent = 'Login';
             }
 
-            // Decide which profile to show
             if (urlUid || urlUsername) {
                 viewedUid = urlUid;
                 await loadByUrl();
@@ -539,11 +604,9 @@
             statsBox.classList.add('hidden');
             achBox.classList.add('hidden');
             matchesBox.classList.add('hidden');
+            earnBox.classList.add('hidden');
         }
 
-        // ================================================
-        // PROFILE HEADER
-        // ================================================
         async function loadProfile() {
             if (!viewedUid) { showNotFound(); return; }
 
@@ -646,29 +709,89 @@
         };
 
         // ================================================
-        // STATS
+        // ⭐ EARNINGS + STATS (v2 — matches by UID OR username)
         // ================================================
-        async function loadStats(uid) {
-            let payouts = [];
-            let regs = [];
+        async function fetchAllEarnings(uid, profile) {
+            const unameLower = (profile?.username || '').toLowerCase();
+            const fullNameLower = (profile?.fullName || '').toLowerCase();
+
+            // 1. Payouts — try BOTH userId AND winnerName
+            let payoutsByUid = [];
+            let payoutsByUsername = [];
             try {
-                const pSnap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
-                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            } catch (e) { console.warn('payouts read failed:', e.message); }
+                const snap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
+                payoutsByUid = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (e) { console.warn('payouts by uid failed:', e.message); }
+
+            try {
+                const allPayoutsSnap = await getDocs(collection(db, 'tournament_payouts'));
+                payoutsByUsername = allPayoutsSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(p => {
+                        if (p.userId) return false; // already caught by uid query
+                        const wname = (p.winnerName || '').toLowerCase();
+                        return wname && (wname === unameLower || wname === fullNameLower);
+                    });
+            } catch (e) { console.warn('payouts by username failed:', e.message); }
+
+            // Merge & dedupe by id
+            const payoutMap = new Map();
+            payoutsByUid.forEach(p => payoutMap.set(p.id, p));
+            payoutsByUsername.forEach(p => payoutMap.set(p.id, p));
+            const payouts = Array.from(payoutMap.values());
+
+            // 2. Referral bonuses by referrerUid
+            let referrals = [];
+            try {
+                const snap = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', uid)));
+                referrals = snap.docs.map(d => ({ id: d.id, ...d.data(), _kind: 'referral' }));
+            } catch (e) { console.warn('referrals read failed:', e.message); }
+
+            return { payouts, referrals };
+        }
+
+        async function loadStats(uid) {
+            const { payouts, referrals } = await fetchAllEarnings(uid, viewedProfile);
+
+            // regs for tournaments count
+            let regs = [];
             try {
                 const rSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
                 regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             } catch (e) { console.warn('registrations read failed:', e.message); }
 
             const paidPayouts = payouts.filter(p => p.status === 'paid');
-            const totalEarnings = paidPayouts.reduce((s, p) => s + Number(p.prize || p.amount || 0), 0);
+            const pendingPayouts = payouts.filter(p => p.status !== 'paid');
+            const paidReferrals = referrals.filter(r => r.status === 'paid');
+            const pendingReferrals = referrals.filter(r => r.status !== 'paid');
+
+            const paidPrize = paidPayouts.reduce((s, p) => s + Number(p.prize || p.amount || 0), 0);
+            const paidRef = paidReferrals.reduce((s, r) => s + Number(r.amount || 0), 0);
+            const pendingPrize = pendingPayouts.reduce((s, p) => s + Number(p.prize || p.amount || 0), 0);
+            const pendingRef = pendingReferrals.reduce((s, r) => s + Number(r.amount || 0), 0);
+
+            const totalWon = paidPrize + paidRef;
+            const totalPending = pendingPrize + pendingRef;
+            const grandTotal = totalWon + totalPending;
+
             const totalTournaments = regs.length;
-            const wins = payouts.filter(p => Number(p.rank) === 1 || p.rank === '1').length;
+            const wins = payouts.filter(p => {
+                const rk = String(p.rank || '');
+                return rk === '1' || rk.startsWith('1 ') || rk.includes('Top Killer') && rk.startsWith('1');
+            }).length;
             const winRate = totalTournaments > 0 ? Math.round((wins / totalTournaments) * 100) : null;
 
-            document.getElementById('stat-earnings').textContent = 'Rs. ' + totalEarnings.toLocaleString();
-            document.getElementById('stat-earnings-sub').textContent =
-                totalEarnings > 0 ? `${paidPayouts.length} prize(s) won` : 'No winnings yet';
+            // Top stat "Total Earnings"
+            document.getElementById('stat-earnings').textContent = 'Rs. ' + grandTotal.toLocaleString();
+            let subText = 'No winnings yet';
+            if (grandTotal > 0) {
+                const parts = [];
+                if (paidPrize > 0) parts.push(`${paidPayouts.length} prize(s) paid`);
+                if (paidRef > 0) parts.push(`${paidReferrals.length} referral(s)`);
+                if (totalPending > 0) parts.push(`${fmtRs(totalPending)} pending`);
+                subText = parts.join(' · ');
+            }
+            document.getElementById('stat-earnings-sub').textContent = subText;
 
             document.getElementById('stat-tournaments').textContent = totalTournaments;
             document.getElementById('stat-tournaments-sub').textContent =
@@ -691,6 +814,101 @@
             achBox.classList.remove('hidden');
             statsBox.classList.add('grid');
             achBox.classList.add('block');
+
+            // ============ EARNINGS PANEL ============
+            renderEarningsPanel({
+                total: grandTotal,
+                pending: totalPending,
+                paid: totalWon,
+                payouts,
+                referrals
+            });
+        }
+
+        function renderEarningsPanel({ total, pending, paid, payouts, referrals }) {
+            document.getElementById('earn-total').textContent = 'Rs. ' + total.toLocaleString();
+            document.getElementById('earn-pending').textContent = 'Rs. ' + pending.toLocaleString();
+            document.getElementById('earn-paid').textContent = 'Rs. ' + paid.toLocaleString();
+
+            // Build combined timeline
+            const timeline = [];
+
+            payouts.forEach(p => {
+                const rank = String(p.rank || '');
+                let icon = '🏆';
+                let label = 'Prize Win';
+                if (rank.includes('Top Killer')) { icon = '🎯'; label = 'Top Killer'; }
+                else if (rank === '1') { icon = '🥇'; label = '1st Place'; }
+                else if (rank === '2') { icon = '🥈'; label = '2nd Place'; }
+                else if (rank === '3') { icon = '🥉'; label = '3rd Place'; }
+
+                timeline.push({
+                    kind: 'payout',
+                    icon,
+                    label,
+                    title: p.tournamentTitle || 'Tournament',
+                    amount: Number(p.prize || p.amount || 0),
+                    status: p.status || 'pending',
+                    date: p.paidAt || p.createdAt,
+                    method: p.method || 'esewa'
+                });
+            });
+
+            referrals.forEach(r => {
+                timeline.push({
+                    kind: 'referral',
+                    icon: '🤝',
+                    label: 'Referral Bonus',
+                    title: `From ${r.referredName || 'a referred friend'}`,
+                    amount: Number(r.amount || 0),
+                    status: r.status || 'pending',
+                    date: r.paidAt || r.createdAt,
+                    method: r.paymentMethod || 'esewa'
+                });
+            });
+
+            // Sort newest first
+            timeline.sort((a, b) => {
+                const ta = a.date?.seconds || (a.date?.toMillis?.() ? a.date.toMillis() / 1000 : 0);
+                const tb = b.date?.seconds || (b.date?.toMillis?.() ? b.date.toMillis() / 1000 : 0);
+                return tb - ta;
+            });
+
+            const listEl = document.getElementById('earn-list');
+            const emptyEl = document.getElementById('earn-empty');
+
+            if (!timeline.length) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+
+            listEl.innerHTML = timeline.slice(0, 15).map(item => {
+                const isPaid = item.status === 'paid';
+                const statusColor = isPaid ? '#4ade80' : '#fbbf24';
+                const statusLabel = isPaid ? '✅ PAID' : '⏳ PENDING';
+                const iconBg = item.kind === 'referral'
+                    ? 'rgba(168, 85, 247, 0.2)'
+                    : 'rgba(59, 130, 246, 0.2)';
+                const iconColor = item.kind === 'referral' ? '#c084fc' : '#60a5fa';
+
+                return `
+                    <div class="earn-row">
+                        <div class="er-icon" style="background:${iconBg};color:${iconColor};">${item.icon}</div>
+                        <div class="er-body">
+                            <div class="er-title">${escapeHtml(item.title)}</div>
+                            <div class="er-sub">${escapeHtml(item.label)} · ${fmtDate(item.date)}</div>
+                        </div>
+                        <div class="er-right">
+                            <div class="er-amt" style="color:${isPaid ? '#4ade80' : '#fbbf24'};">Rs. ${item.amount.toLocaleString()}</div>
+                            <div class="er-status" style="color:${statusColor};">${statusLabel}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            earnBox.classList.remove('hidden');
         }
 
         function unlockIf(id, condition) {
@@ -707,15 +925,12 @@
         // ================================================
         async function loadMatches(uid) {
             let regs = [];
-            let payouts = [];
             try {
                 const rSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
                 regs = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             } catch (e) { console.warn('regs read failed:', e.message); }
-            try {
-                const pSnap = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', uid)));
-                payouts = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            } catch (e) { console.warn('payouts read failed:', e.message); }
+
+            const { payouts } = await fetchAllEarnings(uid, viewedProfile);
 
             regs.sort((a, b) => {
                 const ta = a.registeredAt?.seconds || 0;
