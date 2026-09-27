@@ -25,8 +25,6 @@
         @media (min-width: 768px) { .mobile-nav-menu { display: flex !important; flex-direction: row !important; position: static !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; } }
         .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Referral banner (shows if user arrived via a ref link) */
         .referral-notice {
             display: none;
             background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.12));
@@ -36,7 +34,6 @@
             margin-bottom: 20px;
             font-size: 13px;
             color: #c7d2fe;
-            display: flex;
             align-items: center;
             gap: 10px;
         }
@@ -78,10 +75,9 @@
                 <p class="text-gray-400 text-xs sm:text-sm mt-1">Register now to be notified when we launch tournaments</p>
             </div>
 
-            <!-- REFERRAL NOTICE (shows only when ?ref= is in URL) -->
             <div id="referralNotice" class="referral-notice">
                 <i class="fa-solid fa-user-plus"></i>
-                <span>You were invited by a friend — signing up will credit them on their profile.</span>
+                <span id="referralNoticeText">You were invited by a friend — signing up will credit them on their profile.</span>
             </div>
 
             <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
@@ -145,7 +141,6 @@
                 </p>
             </div>
 
-            <!-- Debug info (only shown if Firebase fails) -->
             <div id="debug-info" class="hidden mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
                 <p class="text-xs text-red-400 font-bold mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Setup Error</p>
                 <p id="debug-message" class="text-xs text-red-300"></p>
@@ -154,16 +149,10 @@
     </main>
 
     <script type="module">
-        // ============================================================
-        // FIREBASE IMPORTS
-        // ============================================================
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        // ============================================================
-        // FIREBASE CONFIG
-        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
             authDomain: "nepplaygaming.firebaseapp.com",
@@ -174,7 +163,6 @@
             measurementId: "G-3PXN38XFG9"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -182,33 +170,49 @@
         console.log("🔥 Firebase initialized for register page");
 
         // ============================================================
-        // REFERRAL CAPTURE (from URL ?ref= OR from localStorage saved by member.html)
+        // REFERRAL CAPTURE
+        // Supports BOTH:
+        //   ?u=<username>  (new — friendlier)
+        //   ?ref=<uid>     (old — still works for existing links)
         // ============================================================
-        let pendingReferral = null;
+        let pendingReferralUid = null;
+        let pendingReferralUsername = null;
+
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const refFromUrl = urlParams.get('ref');
+            const refFromUrlU = urlParams.get('u');         // new
+            const refFromUrlUid = urlParams.get('ref');     // old
             const refFromStorage = localStorage.getItem('inviteRef');
-            pendingReferral = refFromUrl || refFromStorage || null;
 
-            // Save to localStorage so it survives page reloads
-            if (refFromUrl && refFromUrl.length > 10) {
-                localStorage.setItem('inviteRef', refFromUrl);
+            if (refFromUrlU) {
+                pendingReferralUsername = refFromUrlU;
+                localStorage.setItem('inviteRefU', refFromUrlU);
+                console.log('📥 Referral detected (username):', refFromUrlU);
+            } else if (refFromUrlUid) {
+                pendingReferralUid = refFromUrlUid;
+                localStorage.setItem('inviteRef', refFromUrlUid);
+                console.log('📥 Referral detected (uid):', refFromUrlUid);
+            } else {
+                // restore from localStorage
+                const storedU = localStorage.getItem('inviteRefU');
+                const storedUid = refFromStorage;
+                if (storedU) { pendingReferralUsername = storedU; }
+                else if (storedUid) { pendingReferralUid = storedUid; }
             }
 
-            // Show referral notice if we have a ref
-            if (pendingReferral && pendingReferral.length > 10) {
+            // Show the notice
+            if (pendingReferralUsername || pendingReferralUid) {
                 const notice = document.getElementById('referralNotice');
+                const text = document.getElementById('referralNoticeText');
                 if (notice) notice.classList.add('show');
-                console.log('📥 Referral detected:', pendingReferral);
+                if (text && pendingReferralUsername) {
+                    text.innerHTML = `You were invited by <b>@${pendingReferralUsername}</b> — signing up will credit them with Rs 20 on their first paid tournament.`;
+                }
             }
         } catch (e) {
             console.warn('Referral capture failed:', e);
         }
 
-        // ============================================================
-        // MOBILE NAV
-        // ============================================================
         window.toggleMobileNav = function() {
             const nav = document.getElementById('mobileNav');
             const icon = document.getElementById('hamburgerIcon');
@@ -216,9 +220,6 @@
             icon.className = nav.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
         };
 
-        // ============================================================
-        // PASSWORD STRENGTH
-        // ============================================================
         window.checkPasswordStrength = function() {
             const password = document.getElementById('password').value;
             const bars = [document.getElementById('strength-1'), document.getElementById('strength-2'), document.getElementById('strength-3'), document.getElementById('strength-4')];
@@ -253,9 +254,6 @@
             return score;
         };
 
-        // ============================================================
-        // HELPERS
-        // ============================================================
         function showError(id, msg) {
             const el = document.getElementById('error-' + id);
             el.textContent = msg;
@@ -270,16 +268,37 @@
         }
 
         // ============================================================
-        // MAIN REGISTER HANDLER
+        // ⭐ Resolve referral username → UID
         // ============================================================
+        async function resolveReferral() {
+            // If we have a username, look up the UID
+            if (pendingReferralUsername) {
+                try {
+                    const snap = await getDocs(query(
+                        collection(db, 'users'),
+                        where('username', '==', pendingReferralUsername),
+                        limit(1)
+                    ));
+                    if (!snap.empty) {
+                        return snap.docs[0].id;
+                    } else {
+                        console.warn('⚠️ Referral username not found:', pendingReferralUsername);
+                    }
+                } catch (e) {
+                    console.warn('Referral lookup failed:', e);
+                }
+            }
+            // Fall back to UID if we have it
+            if (pendingReferralUid) return pendingReferralUid;
+            return null;
+        }
+
         window.handleRegister = async function(event) {
             event.preventDefault();
 
-            // Clear all errors
             ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
             document.getElementById('debug-info').classList.add('hidden');
 
-            // Get values
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -289,7 +308,6 @@
             const msgBox = document.getElementById('register-message');
             const btn = document.getElementById('register-btn');
 
-            // Validation
             let hasError = false;
             if (fullName.length < 2) { showError('fullName', 'Please enter your full name'); hasError = true; }
             if (username.length < 3) { showError('username', 'Username must be at least 3 characters'); hasError = true; }
@@ -306,19 +324,19 @@
                 return;
             }
 
-            // Show loading state
             btn.innerHTML = '<span class="spinner"></span>Creating your account...';
             btn.disabled = true;
             msgBox.classList.add('hidden');
 
             try {
-                // STEP 1: Create Firebase Auth account
+                // ⭐ Resolve referral BEFORE creating account
+                const referredByUid = await resolveReferral();
+
                 console.log("🔥 Creating Firebase account for:", email);
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log("✅ Firebase account created. UID:", user.uid);
 
-                // STEP 2: Save user profile to Firestore
                 const userProfile = {
                     uid: user.uid,
                     fullName: fullName,
@@ -332,29 +350,27 @@
                     tournamentsWon: 0
                 };
 
-                // Attach referral if present
-                if (pendingReferral && pendingReferral.length > 10 && pendingReferral !== user.uid) {
-                    userProfile.referredBy = pendingReferral;
+                if (referredByUid && referredByUid !== user.uid) {
+                    userProfile.referredBy = referredByUid;
                     userProfile.referredAt = new Date().toISOString();
-                    console.log("🔗 Attaching referral:", pendingReferral);
+                    console.log("🔗 Attaching referral UID:", referredByUid);
                 }
 
                 console.log("🔥 Saving user profile to Firestore...");
                 await setDoc(doc(db, "users", user.uid), userProfile);
                 console.log("✅ User profile saved to Firestore");
 
-                // Clear the pending referral from localStorage
-                try { localStorage.removeItem('inviteRef'); } catch (e) {}
+                try {
+                    localStorage.removeItem('inviteRef');
+                    localStorage.removeItem('inviteRefU');
+                } catch (e) {}
 
-                // Success!
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-green-400";
                 msgBox.innerHTML = '✅ <strong>Account created successfully!</strong><br><span class="text-xs text-gray-400">Redirecting to dashboard...</span>';
 
-                // Clear localStorage (we're now using Firebase)
                 localStorage.removeItem('currentUser');
 
-                // Redirect after 1.5 seconds
                 setTimeout(() => {
                     window.location.href = 'member.html';
                 }, 1500);
@@ -365,7 +381,6 @@
                 let errorMessage = "Registration failed. Please try again.";
                 let debugMessage = error.message;
 
-                // Handle common Firebase errors
                 if (error.code === 'auth/email-already-in-use') {
                     errorMessage = "This email is already registered. Try logging in instead.";
                 } else if (error.code === 'auth/weak-password') {
@@ -385,13 +400,11 @@
 
                 showDebugError(debugMessage);
 
-                // Reset button
                 btn.innerHTML = 'Create Free Account';
                 btn.disabled = false;
             }
         };
 
-        // Real-time error clearing
         ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
