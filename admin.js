@@ -1,7 +1,11 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.4)
-// + Activity feed (#6)
-// + Manual notifications (#7)
+// NEPPLAY — admin.js (v4.5)
+// v4.5 changes:
+//  + Payout docs now store userId + userEmail (from username lookup)
+//  + Payout rows are clickable → detail modal
+//  + openPayoutDetail() / savePayoutEdit() / deletePayout()
+//  + addPayout() now stores userId too
+//  + Backfill helper: backfillPayoutUserIds()
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -31,14 +35,12 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 const auth = getAuth(app);
 
-// Initialize activity module with the same Firebase instances
 initActivity(db, auth);
 
-// Expose activity loaders to the HTML sidebar loader map
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.4 — awaiting auth");
+console.log("🔥 Admin v4.5 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL (for password-only login)
@@ -64,15 +66,9 @@ function showGatePanel(panelId) {
 async function verifyAdminAndBoot(user) {
   try {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists()) {
-      console.warn('⛔ No users doc — access denied');
-      return false;
-    }
+    if (!userDoc.exists()) return false;
     const data = userDoc.data();
-    if (data.role !== 'admin') {
-      console.warn('⛔ role is not admin — access denied');
-      return false;
-    }
+    if (data.role !== 'admin') return false;
     currentAdminEmail = user.email || data.email || '—';
     return true;
   } catch (err) {
@@ -83,23 +79,16 @@ async function verifyAdminAndBoot(user) {
 
 onAuthStateChanged(auth, async (user) => {
   console.log('👤 Auth state:', user ? user.email : 'signed out');
-  if (!user) {
-    showGatePanel('adminLoginForm');
-    return;
-  }
+  if (!user) { showGatePanel('adminLoginForm'); return; }
   showGatePanel('adminLoadingMsg');
   const ok = await verifyAdminAndBoot(user);
-  if (!ok) {
-    showGatePanel('adminDeniedMsg');
-    return;
-  }
+  if (!ok) { showGatePanel('adminDeniedMsg'); return; }
   document.getElementById('auth-gate').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('adminEmailDisplay').textContent = 'Admin';
   console.log('✅ Admin access granted:', currentAdminEmail);
   logActivity({
-    action: 'admin_login',
-    category: 'system',
+    action: 'admin_login', category: 'system',
     summary: `Admin logged in (${currentAdminEmail})`,
     metadata: { email: currentAdminEmail }
   });
@@ -109,26 +98,15 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ============================================================
-// PASSWORD-ONLY LOGIN
-// ============================================================
 window.handleAdminLogin = async function(e) {
   e.preventDefault();
   const btn = document.getElementById('adminLoginBtn');
   const msg = document.getElementById('adminLoginMsg');
   const password = document.getElementById('adminPassword').value;
-
-  if (!password) {
-    msg.style.display = 'block';
-    msg.style.color = '#f87171';
-    msg.textContent = '❌ Password required';
-    return;
-  }
-
+  if (!password) { msg.style.display='block'; msg.style.color='#f87171'; msg.textContent='❌ Password required'; return; }
   btn.disabled = true;
   btn.textContent = 'Logging in...';
   msg.style.display = 'none';
-
   try {
     await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
   } catch (err) {
@@ -143,19 +121,11 @@ window.handleAdminLogin = async function(e) {
   }
 };
 
-window.adminSignOut = async function() {
-  await signOut(auth);
-};
-
+window.adminSignOut = async function() { await signOut(auth); };
 window.adminLogout = async function() {
   if (!confirm('Logout?')) return;
-  try {
-    await signOut(auth);
-    window.location.reload();
-  } catch (err) {
-    console.error('Logout error:', err);
-    window.location.reload();
-  }
+  try { await signOut(auth); window.location.reload(); }
+  catch (err) { window.location.reload(); }
 };
 
 // ============================================================
@@ -188,10 +158,7 @@ function fmtShort(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
 }
-function dayKey(ts) {
-  if (!ts?.toDate) return null;
-  return ts.toDate().toISOString().slice(0,10);
-}
+function dayKey(ts) { if (!ts?.toDate) return null; return ts.toDate().toISOString().slice(0,10); }
 function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(n) { return (n || 'U')[0].toUpperCase(); }
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
@@ -215,8 +182,34 @@ function registerScreenshot(d) {
 }
 
 // ============================================================
-// NOTIFICATIONS (admin bell — this is the ADMIN-side bell,
-// different from the notifications WE SEND to users in #7)
+// ⭐ NEW in v4.5 — Find UID by username
+// ============================================================
+async function findUidByUsername(username) {
+  if (!username) return null;
+  const uname = String(username).trim();
+  if (!uname) return null;
+
+  // 1. try exact match on 'username'
+  let snap = await getDocs(query(collection(db, 'users'), where('username', '==', uname), limit(1)));
+  if (!snap.empty) return { uid: snap.docs[0].id, data: snap.docs[0].data() };
+
+  // 2. try fullName
+  snap = await getDocs(query(collection(db, 'users'), where('fullName', '==', uname), limit(1)));
+  if (!snap.empty) return { uid: snap.docs[0].id, data: snap.docs[0].data() };
+
+  // 3. case-insensitive scan of already-loaded users
+  const lower = uname.toLowerCase();
+  const found = allUsers.find(u =>
+    (u.username || '').toLowerCase() === lower ||
+    (u.fullName || '').toLowerCase() === lower
+  );
+  if (found) return { uid: found.id, data: found };
+
+  return null;
+}
+
+// ============================================================
+// NOTIFICATIONS (admin bell)
 // ============================================================
 let notifications = [];
 
@@ -337,10 +330,7 @@ const REFERRAL_BONUS_AMOUNT = 20;
 async function handleReferralBonus(paymentId) {
   try {
     const paySnap = await getDoc(doc(db, 'tournament_payments', paymentId));
-    if (!paySnap.exists()) {
-      console.warn('handleReferralBonus: payment not found', paymentId);
-      return;
-    }
+    if (!paySnap.exists()) return;
     const payment = paySnap.data();
     const payerUid = payment.userId;
     if (!payerUid) return;
@@ -349,49 +339,35 @@ async function handleReferralBonus(paymentId) {
       collection(db, 'referral_bonuses'),
       where('referredPaymentId', '==', paymentId)
     ));
-    if (!dupSnap.empty) {
-      console.log('Referral bonus already exists for payment', paymentId);
-      return;
-    }
+    if (!dupSnap.empty) return;
 
     const payerDoc = await getDoc(doc(db, 'users', payerUid));
     if (!payerDoc.exists()) return;
     const payer = payerDoc.data();
     const referrerUid = payer.referredBy;
-    if (!referrerUid) {
-      console.log('Payer was not referred — no bonus created');
-      return;
-    }
+    if (!referrerUid) return;
 
     const refDoc = await getDoc(doc(db, 'users', referrerUid));
     const referrer = refDoc.exists() ? refDoc.data() : {};
 
     await addDoc(collection(db, 'referral_bonuses'), {
-      referrerUid: referrerUid,
-      referrerName: referrer.username || referrer.fullName || 'Unknown',
+      referrerUid, referrerName: referrer.username || referrer.fullName || 'Unknown',
       referrerEmail: referrer.email || '',
-      referredUid: payerUid,
-      referredName: payer.username || payer.fullName || 'Unknown',
+      referredUid: payerUid, referredName: payer.username || payer.fullName || 'Unknown',
       referredEmail: payer.email || '',
-      referredIgn: payment.ign || '',
-      referredPhone: payment.phone || '',
+      referredIgn: payment.ign || '', referredPhone: payment.phone || '',
       referredPaymentId: paymentId,
-      tournamentId: payment.tournamentId || '',
-      tournamentTitle: payment.tournamentTitle || '',
-      paymentMethod: payment.method || '',
-      txnId: payment.txnId || '',
+      tournamentId: payment.tournamentId || '', tournamentTitle: payment.tournamentTitle || '',
+      paymentMethod: payment.method || '', txnId: payment.txnId || '',
       amount: REFERRAL_BONUS_AMOUNT,
       status: 'pending',
       createdAt: serverTimestamp(),
-      paidAt: null,
-      adminNote: ''
+      paidAt: null, adminNote: ''
     });
 
     logActivity({
-      action: 'referral_credited',
-      category: 'referrals',
-      targetId: payerUid,
-      targetType: 'user',
+      action: 'referral_credited', category: 'referrals',
+      targetId: payerUid, targetType: 'user',
       summary: `Referral credited — ${referrer.username || 'referrer'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'referred user'}`,
       metadata: { referrer: referrer.username || '', referred: payer.username || '', amount: REFERRAL_BONUS_AMOUNT },
       actorType: 'system'
@@ -406,11 +382,7 @@ async function handleReferralBonus(paymentId) {
 
     addNotif('referral', '🤝 Referral bonus earned',
       `${referrer.username || 'A member'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'a referred friend'}`);
-
-    console.log(`✅ Referral bonus created: ${referrerUid} → ${payerUid}`);
-  } catch (err) {
-    console.error('handleReferralBonus error:', err);
-  }
+  } catch (err) { console.error('handleReferralBonus error:', err); }
 }
 
 // ============================================================
@@ -430,9 +402,7 @@ async function loadReferralBonuses() {
       badge.style.display = pending > 0 ? 'inline-block' : 'none';
     }
     renderReferralBonuses();
-  } catch (err) {
-    console.warn('loadReferralBonuses error:', err);
-  }
+  } catch (err) { console.warn('loadReferralBonuses error:', err); }
 }
 window.loadReferralBonuses = loadReferralBonuses;
 
@@ -447,6 +417,7 @@ window.filterRefSearch = function() {
   currentRefSearch = (document.getElementById('refSearch')?.value || '').toLowerCase().trim();
   renderReferralBonuses();
 };
+
 function renderReferralBonuses() {
   const totalCount = allReferralBonuses.length;
   const pending = allReferralBonuses.filter(b => b.status === 'pending');
@@ -474,7 +445,6 @@ function renderReferralBonuses() {
     const sub = el('refTopReferrerSub');
     if (sub) sub.innerText = top ? `${top.count} referral${top.count !== 1 ? 's' : ''} · ${fmtRs(top.total)}` : 'No referrers yet';
   }
-
   if (el('refCntPending')) el('refCntPending').innerText = pending.length;
   if (el('refCntPaid')) el('refCntPaid').innerText = paid.length;
   if (el('refCntAll')) el('refCntAll').innerText = totalCount;
@@ -492,34 +462,21 @@ function renderReferralBonuses() {
   });
 
   if (!allReferralBonuses.length) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <span class="icon">🤝</span>
-        No referral bonuses yet. Bonuses appear here when a referred member joins a paid tournament.
-      </div>
-    `;
+    list.innerHTML = `<div class="empty-state"><span class="icon">🤝</span>No referral bonuses yet. Bonuses appear here when a referred member joins a paid tournament.</div>`;
     return;
   }
-
   if (!filtered.length) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <span class="icon">🔍</span>
-        No referral bonuses match your filter.
-      </div>
-    `;
+    list.innerHTML = `<div class="empty-state"><span class="icon">🔍</span>No referral bonuses match your filter.</div>`;
     return;
   }
 
   list.innerHTML = filtered.map(b => {
     const isPaid = b.status === 'paid';
-
     const payment = allPayments.find(p => p.id === b.referredPaymentId);
     const shotId = payment ? registerScreenshot(payment) : null;
     const shotHtml = shotId
       ? `<img src="${screenshotCache[shotId]}" class="ref-thumb" onclick="event.stopPropagation(); openShotById('${shotId}')" alt="Payment">`
       : '';
-
     const safeReferrer = (b.referrerName || '').replace(/'/g, '');
 
     return `
@@ -535,21 +492,17 @@ function renderReferralBonuses() {
               ${escapeDetail(b.referredName || 'Unknown')}
             </b>
           </div>
-
           ${b.referredEmail ? `<div class="reg-line-2">📧 ${escapeDetail(b.referredEmail)}${b.referredPhone ? ' · 📱 ' + escapeDetail(b.referredPhone) : ''}${b.referredIgn ? ' · 🎮 ' + escapeDetail(b.referredIgn) : ''}</div>` : ''}
-
           <div class="reg-line-2">
             🏆 ${escapeDetail(b.tournamentTitle || 'Paid tournament')}
             · 💰 <b style="color:#fbbf24;">${fmtRs(b.amount || REFERRAL_BONUS_AMOUNT)}</b>
             ${b.paymentMethod ? ' · 💳 ' + escapeDetail(b.paymentMethod).toUpperCase() : ''}
             ${b.txnId ? ' · 🔖 <code>' + escapeDetail(b.txnId) + '</code>' : ''}
           </div>
-
           <div class="reg-line-2" style="font-size:11px;color:#6b7280;">
             🕐 ${fmtShort(b.createdAt)}
             ${b.referrerUid ? ' · 🔗 referrer: <code>' + escapeDetail(b.referrerUid).slice(0,8) + '...</code>' : ''}
           </div>
-
           ${isPaid && b.paidAt ? `<div class="reg-line-2" style="color:#4ade80;">✅ Paid ${fmtShort(b.paidAt)}${b.adminNote ? ' · ' + escapeDetail(b.adminNote) : ''}</div>` : ''}
         </div>
         ${shotHtml ? `<div class="ref-shot-wrap">${shotHtml}</div>` : ''}
@@ -571,10 +524,8 @@ window.markReferralPaid = async function(bonusId, referrerName) {
       adminNote: 'Manually marked paid by admin'
     });
     logActivity({
-      action: 'referral_marked_paid',
-      category: 'referrals',
-      targetId: bonusId,
-      targetType: 'referral_bonus',
+      action: 'referral_marked_paid', category: 'referrals',
+      targetId: bonusId, targetType: 'referral_bonus',
       summary: `Referral bonus paid to ${referrerName} (Rs. ${REFERRAL_BONUS_AMOUNT})`,
       metadata: { referrerName, amount: REFERRAL_BONUS_AMOUNT }
     });
@@ -587,24 +538,14 @@ window.markReferralPaid = async function(bonusId, referrerName) {
 };
 
 window.exportReferralsCSV = function() {
-  if (!allReferralBonuses.length) {
-    window.showToast('❌ No referral bonuses to export');
-    return;
-  }
+  if (!allReferralBonuses.length) { window.showToast('❌ No referral bonuses to export'); return; }
   const rows = [['Referrer','Referrer Email','Referred','Referred Email','Referred IGN','Referred Phone','Tournament','Payment Method','Txn ID','Amount','Status','Created','Paid At','Note']];
   allReferralBonuses.forEach(b => {
     rows.push([
-      b.referrerName || '',
-      b.referrerEmail || '',
-      b.referredName || '',
-      b.referredEmail || '',
-      b.referredIgn || '',
-      b.referredPhone || '',
-      b.tournamentTitle || '',
-      b.paymentMethod || '',
-      b.txnId || '',
-      b.amount || 0,
-      b.status || '',
+      b.referrerName || '', b.referrerEmail || '',
+      b.referredName || '', b.referredEmail || '', b.referredIgn || '', b.referredPhone || '',
+      b.tournamentTitle || '', b.paymentMethod || '', b.txnId || '',
+      b.amount || 0, b.status || '',
       b.createdAt?.toDate ? b.createdAt.toDate().toISOString() : '',
       b.paidAt?.toDate ? b.paidAt.toDate().toISOString() : '',
       b.adminNote || ''
@@ -651,11 +592,7 @@ async function loadSentNotifications() {
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
-    const snap = await getDocs(query(
-      collection(db, 'notifications'),
-      orderBy('createdAt', 'desc'),
-      limit(30)
-    ));
+    const snap = await getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(30)));
     allSentNotifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!allSentNotifications.length) {
       list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No notifications sent yet.</div>';
@@ -670,18 +607,14 @@ async function loadSentNotifications() {
       const truncMsg = (n.message || '').length > 140 ? n.message.slice(0, 140) + '…' : (n.message || '');
       return `
         <div class="sent-notif-item">
-          <div class="sent-notif-dot" style="background:${meta.color}20; border-color:${meta.color}; color:${meta.color};">
-            ${meta.icon}
-          </div>
+          <div class="sent-notif-dot" style="background:${meta.color}20; border-color:${meta.color}; color:${meta.color};">${meta.icon}</div>
           <div class="sent-notif-body">
             <div class="sent-notif-target">${targetLabel}</div>
             <div class="sent-notif-title">${escapeDetail(n.title || '(no title)')}</div>
             <div class="sent-notif-msg">${escapeDetail(truncMsg)}</div>
             <div class="sent-notif-meta">🕐 ${sentAt} · 👤 ${escapeDetail(n.createdBy || '—')}${!isBroadcast ? ' · ✅ read by ' + readCount : ''}</div>
           </div>
-          <div>
-            <button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete this notification">🗑️</button>
-          </div>
+          <div><button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete this notification">🗑️</button></div>
         </div>
       `;
     }).join('');
@@ -704,15 +637,12 @@ window.sendNotification = async function(e) {
   const type = document.getElementById('notifType').value || 'info';
   const title = document.getElementById('notifTitle').value.trim();
   const message = document.getElementById('notifMessage').value.trim();
-
   if (!targetUidRaw) { window.showToast('❌ Pick a recipient'); return; }
   if (!title) { window.showToast('❌ Title required'); return; }
   if (!message) { window.showToast('❌ Message required'); return; }
-
   btn.disabled = true;
   const origText = btn.textContent;
   btn.textContent = '⏳ Sending...';
-
   try {
     const isBroadcast = targetUidRaw === 'ALL';
     let targetName = 'All users';
@@ -720,27 +650,20 @@ window.sendNotification = async function(e) {
       const u = allUsers.find(x => x.id === targetUidRaw);
       targetName = u ? (u.username || u.email || targetUidRaw) : targetUidRaw;
     }
-
     await addDoc(collection(db, 'notifications'), {
-      targetUid: isBroadcast ? 'ALL' : targetUidRaw,
-      targetName: targetName,
-      type: type,
-      title: title,
-      message: message,
+      targetUid: isBroadcast ? 'ALL' : targetUidRaw, targetName,
+      type, title, message,
       createdBy: currentAdminEmail || 'admin',
       createdAt: serverTimestamp(),
       readBy: []
     });
-
     logActivity({
-      action: 'notification_sent',
-      category: 'system',
+      action: 'notification_sent', category: 'system',
       targetId: isBroadcast ? null : targetUidRaw,
       targetType: isBroadcast ? 'broadcast' : 'user',
       summary: `Notification sent to ${isBroadcast ? 'ALL users' : targetName}: "${title}"`,
       metadata: { targetUid: isBroadcast ? 'ALL' : targetUidRaw, targetName, type, title }
     });
-
     window.showToast('✅ Notification sent');
     document.getElementById('notifTitle').value = '';
     document.getElementById('notifMessage').value = '';
@@ -757,15 +680,12 @@ window.sendNotification = async function(e) {
 };
 
 window.deleteNotification = async function(id) {
-  if (!confirm('Delete this notification? Recipients will stop seeing it in their bell.')) return;
+  if (!confirm('Delete this notification?')) return;
   try {
     await deleteDoc(doc(db, 'notifications', id));
     window.showToast('🗑️ Notification deleted');
     await loadSentNotifications();
-  } catch (err) {
-    console.error('deleteNotification error:', err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 // ============================================================
@@ -774,56 +694,41 @@ window.deleteNotification = async function(id) {
 function loadLiveStats() {
   const t = todayKey();
   const el = id => document.getElementById(id);
-
   if (el('lsUsers')) el('lsUsers').innerText = allUsers.length;
   if (el('lsRegs')) el('lsRegs').innerText = allRegs.length;
-
   const pending = allPayments.filter(p => p.status === 'pending').length;
   if (el('lsPending')) el('lsPending').innerText = pending;
-
   const confirmedToday = allRegs.filter(r => r.status === 'confirmed' && dayKey(r.registeredAt) === t).length;
   if (el('lsConfirmedToday')) el('lsConfirmedToday').innerText = confirmedToday;
-
   const liveStreamers = allRegs.filter(r => r.streamUrl && r.status === 'confirmed').length;
   if (el('lsLiveStreamers')) el('lsLiveStreamers').innerText = liveStreamers;
-
   const todayCollected = allPayments
     .filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t)
     .reduce((s,p) => s + (Number(p.amount)||0), 0);
   if (el('lsCollectedToday')) el('lsCollectedToday').innerText = fmtRs(todayCollected);
-
   const todayPayouts = allPayouts
     .filter(x => dayKey(x.paidAt || x.createdAt) === t)
     .reduce((s,p) => s + (Number(p.amount)||0), 0);
   if (el('lsPaidToday')) el('lsPaidToday').innerText = fmtRs(todayPayouts);
-
   const net = todayCollected - todayPayouts;
   if (el('lsNetToday')) {
     el('lsNetToday').innerText = fmtRs(net);
     el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
   }
 }
-
 setInterval(() => {
-  if (document.getElementById('admin-panel')?.style.display === 'block') {
-    loadLiveStats();
-  }
+  if (document.getElementById('admin-panel')?.style.display === 'block') loadLiveStats();
 }, 30000);
 
 // ============================================================
 // DETAIL MODAL — Users
 // ============================================================
-window.closeDetailModal = function() {
-  document.getElementById('detailModal').classList.remove('open');
-};
+window.closeDetailModal = function() { document.getElementById('detailModal').classList.remove('open'); };
 
 window.openUserDetail = function(uid) {
   if (!uid) return;
   const u = allUsers.find(x => x.id === uid);
-  if (!u) {
-    window.showToast('❌ User not found — may have been deleted');
-    return;
-  }
+  if (!u) { window.showToast('❌ User not found'); return; }
   const myRegs = allRegs.filter(r => r.userId === uid);
   const myPays = allPayments.filter(p => p.userId === uid);
   const myPayouts = allPayouts.filter(p =>
@@ -842,8 +747,7 @@ window.openUserDetail = function(uid) {
       <div class="dm-row">
         <span class="dm-k">${escapeDetail(r.tournamentTitle || 'Tournament')}</span>
         <span class="dm-v">${r.entryType === 'paid' ? 'Rs. ' + (r.amount||0) : 'FREE'} · ${(r.status||'').toUpperCase()}</span>
-      </div>
-    `).join('')
+      </div>`).join('')
     : '<div class="dm-row"><span class="dm-k">No registrations yet</span><span class="dm-v">—</span></div>';
 
   document.getElementById('detailModalContent').innerHTML = `
@@ -857,7 +761,6 @@ window.openUserDetail = function(uid) {
       <div class="dm-row"><span class="dm-k">🎭 Role</span><span class="dm-v">${u.role || 'member'}</span></div>
       ${referredMe ? `<div class="dm-row"><span class="dm-k">🔗 Referred by</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${referredMe.id}')" style="color:#a5b4fc;text-decoration:none;font-weight:700;">${escapeDetail(referredMe.username || referredMe.email || 'Unknown')} →</a></span></div>` : ''}
     </div>
-
     <div class="dm-section">
       <h3>📊 Activity Summary</h3>
       <div class="dm-rows">
@@ -868,12 +771,10 @@ window.openUserDetail = function(uid) {
         <div class="dm-row"><span class="dm-k">🤝 Referral earnings</span><span class="dm-v" style="color:#c084fc;">${fmtRs(totalReferralEarnings)} (${myReferrals.length})</span></div>
       </div>
     </div>
-
     <div class="dm-section">
       <h3>📋 Registrations</h3>
       <div class="dm-rows">${regsHtml}</div>
     </div>
-
     <div class="dm-actions">
       <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
       <button class="dm-btn-primary" onclick="closeDetailModal(); showSection('notifications', document.querySelector('[data-section=notifications]')); setTimeout(()=>{ document.getElementById('notifTarget').value='${u.id}'; }, 200);">🔔 Send Notification</button>
@@ -881,6 +782,146 @@ window.openUserDetail = function(uid) {
     </div>
   `;
   document.getElementById('detailModal').classList.add('open');
+};
+
+// ============================================================
+// ⭐ NEW v4.5 — DETAIL MODAL — Payouts
+// ============================================================
+window.openPayoutDetail = async function(payoutId) {
+  const w = allPayouts.find(x => x.id === payoutId);
+  if (!w) { window.showToast('❌ Payout not found'); return; }
+
+  // Try to find the user
+  let linkedUser = null;
+  if (w.userId) linkedUser = allUsers.find(u => u.id === w.userId);
+  if (!linkedUser && w.winnerName) {
+    const lower = w.winnerName.toLowerCase();
+    linkedUser = allUsers.find(u =>
+      (u.username || '').toLowerCase() === lower ||
+      (u.fullName || '').toLowerCase() === lower
+    );
+  }
+
+  const isPaid = w.status === 'paid';
+  const amount = Number(w.amount || w.prize || 0);
+
+  document.getElementById('detailModalContent').innerHTML = `
+    <h2>🏆 Payout Details</h2>
+    <p class="dm-sub">${escapeDetail(w.tournamentTitle || 'Tournament')}</p>
+
+    <div class="dm-rows">
+      <div class="dm-row"><span class="dm-k">👤 Winner</span><span class="dm-v">${escapeDetail(w.winnerName || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">🥇 Rank</span><span class="dm-v">${escapeDetail(w.rank || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">🎯 Kills</span><span class="dm-v">${w.kills != null ? w.kills : '—'}</span></div>
+      <div class="dm-row"><span class="dm-k">💰 Amount</span><span class="dm-v" style="color:#fbbf24;font-size:18px;">${fmtRs(amount)}</span></div>
+      <div class="dm-row"><span class="dm-k">💳 Method</span><span class="dm-v">${(w.method || '—').toUpperCase()}</span></div>
+      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${isPaid ? '#4ade80' : '#fbbf24'};font-weight:800;">${isPaid ? '✅ PAID' : '⏳ PENDING'}</span></div>
+      ${w.note ? `<div class="dm-row"><span class="dm-k">📝 Note</span><span class="dm-v">${escapeDetail(w.note)}</span></div>` : ''}
+      <div class="dm-row"><span class="dm-k">🕐 Created</span><span class="dm-v">${fmtDate(w.createdAt)}</span></div>
+      ${w.paidAt ? `<div class="dm-row"><span class="dm-k">✅ Paid at</span><span class="dm-v">${fmtDate(w.paidAt)}</span></div>` : ''}
+      <div class="dm-row"><span class="dm-k">🔑 Payout ID</span><span class="dm-v"><code>${escapeDetail(w.id)}</code></span></div>
+    </div>
+
+    <div class="dm-section">
+      <h3>👥 Linked Member Account</h3>
+      ${linkedUser ? `
+        <div class="dm-rows">
+          <div class="dm-row"><span class="dm-k">Username</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${linkedUser.id}')" style="color:#a5b4fc;font-weight:700;">${escapeDetail(linkedUser.username || linkedUser.fullName || '—')} →</a></span></div>
+          <div class="dm-row"><span class="dm-k">Email</span><span class="dm-v">${escapeDetail(linkedUser.email || '—')}</span></div>
+          <div class="dm-row"><span class="dm-k">UID</span><span class="dm-v"><code>${escapeDetail(linkedUser.id)}</code></span></div>
+          ${w.userId ? '' : '<div class="dm-row"><span class="dm-k">⚠️ Notice</span><span class="dm-v" style="color:#fbbf24;">Payout has no userId — matched by username</span></div>'}
+        </div>
+      ` : `
+        <div class="dm-rows">
+          <div class="dm-row"><span class="dm-k">Status</span><span class="dm-v" style="color:#f87171;">⚠️ No matching member found for username "${escapeDetail(w.winnerName || '')}"</span></div>
+        </div>
+      `}
+    </div>
+
+    <div class="dm-section">
+      <h3>⚙️ Quick Actions</h3>
+      <div class="dm-actions" style="margin-top:0;">
+        ${!isPaid ? `<button class="dm-btn-green" onclick="markPayoutPaid('${w.id}')">✅ Mark as Paid</button>` : `<button class="dm-btn-ghost" onclick="markPayoutPending('${w.id}')">↺ Mark as Pending</button>`}
+        <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
+      </div>
+    </div>
+
+    <div class="dm-actions">
+      <button class="dm-btn-primary" onclick="editPayoutField('${w.id}')">✏️ Edit Amount / Rank</button>
+      <button class="dm-btn-danger" onclick="deletePayout('${w.id}','${(w.winnerName||'').replace(/'/g,"\\'")}')">🗑️ Delete Payout</button>
+    </div>
+  `;
+  document.getElementById('detailModal').classList.add('open');
+};
+
+window.markPayoutPaid = async function(payoutId) {
+  if (!confirm('Mark this payout as PAID?')) return;
+  try {
+    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
+      status: 'paid',
+      paidAt: serverTimestamp()
+    });
+    logActivity({
+      action: 'payout_marked_paid', category: 'payments',
+      targetId: payoutId, targetType: 'payout',
+      summary: `Payout marked paid`,
+      metadata: {}
+    });
+    window.showToast('✅ Marked paid');
+    closeDetailModal();
+    await loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+window.markPayoutPending = async function(payoutId) {
+  if (!confirm('Mark this payout as PENDING again?')) return;
+  try {
+    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
+      status: 'pending',
+      paidAt: null
+    });
+    window.showToast('↺ Marked pending');
+    closeDetailModal();
+    await loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+window.editPayoutField = async function(payoutId) {
+  const w = allPayouts.find(x => x.id === payoutId);
+  if (!w) return;
+  const newAmt = prompt('Amount (Rs.):', w.amount || w.prize || 0);
+  if (newAmt === null) return;
+  const newRank = prompt('Rank (1, 2, 3, "Top Killer", "1 + Top Killer"):', w.rank || '1');
+  if (newRank === null) return;
+  const newNote = prompt('Note:', w.note || '');
+  if (newNote === null) return;
+  try {
+    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
+      amount: Number(newAmt) || 0,
+      prize: Number(newAmt) || 0,
+      rank: newRank,
+      note: newNote
+    });
+    window.showToast('✅ Payout updated');
+    closeDetailModal();
+    await loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+window.deletePayout = async function(payoutId, winnerName) {
+  if (!confirm(`Delete payout for "${winnerName}"? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, 'tournament_payouts', payoutId));
+    logActivity({
+      action: 'payout_deleted', category: 'payments',
+      targetId: payoutId, targetType: 'payout',
+      summary: `Deleted payout for ${winnerName}`,
+      metadata: { winnerName }
+    });
+    window.showToast('🗑️ Payout deleted');
+    closeDetailModal();
+    await loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 // ============================================================
@@ -908,7 +949,6 @@ window.openRegDetail = function(regId) {
       <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
       ${r.streamUrl ? `<div class="dm-row"><span class="dm-k">🔴 Stream URL</span><span class="dm-v"><a href="${escapeDetail(r.streamUrl)}" target="_blank" style="color:#f87171;">Watch →</a></span></div>` : ''}
     </div>
-
     ${isPaid && payment ? `
       <div class="dm-section">
         <h3>💳 Payment Details</h3>
@@ -921,7 +961,6 @@ window.openRegDetail = function(regId) {
         ${shotSrc ? `<img class="dm-shot" src="${shotSrc}" onclick="openShot('${shotSrc}')">` : ''}
       </div>
     ` : ''}
-
     <div class="dm-actions">
       ${r.status === 'pending' ? `<button class="dm-btn-green" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','approve','registration');">✔ Approve</button>` : ''}
       ${r.status === 'pending' ? `<button class="dm-btn-primary" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','reject','registration');">✘ Reject</button>` : ''}
@@ -1003,12 +1042,9 @@ window.submitCreateTournament = async function(e) {
       date, time, max, filled: 0, description: desc,
       status: 'upcoming', createdAt: serverTimestamp()
     });
-    console.log("✅ Created tournament:", docRef.id);
     logActivity({
-      action: 'tournament_created',
-      category: 'tournaments',
-      targetId: docRef.id,
-      targetType: 'tournament',
+      action: 'tournament_created', category: 'tournaments',
+      targetId: docRef.id, targetType: 'tournament',
       summary: `Created tournament "${title}" (${game} · ${mode})`,
       metadata: { title, game, mode, entryType }
     });
@@ -1086,48 +1122,25 @@ window.editTournament = async function(id) {
     const newMax = prompt('Max Players:', t.max || 100);
     if (newMax === null) return;
     await updateDoc(doc(db, 'tournaments', id), {
-      title: newTitle.trim(),
-      prizePool: Number(newPrizePool) || 0,
+      title: newTitle.trim(), prizePool: Number(newPrizePool) || 0,
       topKillsPrize: Number(newTopKills) || 0,
       date: newDate.trim(), time: newTime.trim(),
       max: Number(newMax) || 100,
       updatedAt: serverTimestamp()
     });
-    logActivity({
-      action: 'tournament_updated',
-      category: 'tournaments',
-      targetId: id,
-      targetType: 'tournament',
-      summary: `Updated tournament "${newTitle.trim()}"`,
-      metadata: { title: newTitle.trim() }
-    });
     window.showToast('✅ Tournament updated');
     await loadRecentCreated();
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
-  } catch (err) {
-    console.error('editTournament error:', err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 window.deleteTournament = async function(id, title) {
   if (!confirm(`Delete tournament "${title}"?`)) return;
   try {
     await deleteDoc(doc(db, 'tournaments', id));
-    logActivity({
-      action: 'tournament_deleted',
-      category: 'tournaments',
-      targetId: id,
-      targetType: 'tournament',
-      summary: `Deleted tournament "${title}"`,
-      metadata: { title }
-    });
     window.showToast('🗑️ Tournament deleted');
     await loadRecentCreated();
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
-  } catch (err) {
-    console.error('deleteTournament error:', err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 // ============================================================
@@ -1254,7 +1267,6 @@ window.togglePayCheck = function(id, checked) {
   else selectedPaymentIds.delete(id);
   updateBulkBar();
 };
-
 window.toggleSelectAllPayments = function(checked) {
   let filtered = allPayments.filter(p => {
     if (currentStatusFilter !== 'all' && p.status !== currentStatusFilter) return false;
@@ -1265,12 +1277,10 @@ window.toggleSelectAllPayments = function(checked) {
     }
     return true;
   }).filter(p => p.status === 'pending');
-
   if (checked) filtered.forEach(p => selectedPaymentIds.add(p.id));
   else filtered.forEach(p => selectedPaymentIds.delete(p.id));
   renderPayments();
 };
-
 function updateBulkBar() {
   const bar = document.getElementById('bulkApproveBar');
   const cnt = document.getElementById('bulkCount');
@@ -1282,47 +1292,35 @@ function updateBulkBar() {
     bar.classList.remove('show');
   }
 }
-
 window.clearBulkSelection = function() {
   selectedPaymentIds.clear();
   const selAll = document.getElementById('paySelectAll');
   if (selAll) selAll.checked = false;
   renderPayments();
 };
-
 window.bulkApproveSelected = async function() {
   if (selectedPaymentIds.size === 0) return;
   const ids = Array.from(selectedPaymentIds);
-  if (!confirm(`Approve ${ids.length} payment${ids.length !== 1 ? 's' : ''}? This will confirm the related registrations.`)) return;
-
+  if (!confirm(`Approve ${ids.length} payment${ids.length !== 1 ? 's' : ''}?`)) return;
   let ok = 0, fail = 0;
   for (const id of ids) {
     try {
       await updateDoc(doc(db, 'tournament_payments', id), {
-        status: 'approved',
-        adminNote: 'Bulk approved',
-        reviewedAt: serverTimestamp()
+        status: 'approved', adminNote: 'Bulk approved', reviewedAt: serverTimestamp()
       });
-      const regSnap = await getDocs(query(
-        collection(db, 'tournament_registrations'),
-        where('paymentId', '==', id)
-      ));
+      const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('paymentId', '==', id)));
       for (const d of regSnap.docs) {
         await updateDoc(doc(db, 'tournament_registrations', d.id), { status: 'confirmed' });
       }
       await handleReferralBonus(id);
       ok++;
-    } catch (e) {
-      console.error('Bulk approve failed for', id, e);
-      fail++;
-    }
+    } catch (e) { fail++; }
   }
   selectedPaymentIds.clear();
   const selAll = document.getElementById('paySelectAll');
   if (selAll) selAll.checked = false;
   logActivity({
-    action: 'payment_bulk_approved',
-    category: 'payments',
+    action: 'payment_bulk_approved', category: 'payments',
     summary: `Bulk approved ${ok} payment${ok !== 1 ? 's' : ''}${fail ? ` · ${fail} failed` : ''}`,
     metadata: { ok, fail }
   });
@@ -1352,9 +1350,7 @@ window.loadRegistrations = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.filterRegistrations = function() { renderRegistrations(); };
-
 function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
@@ -1407,7 +1403,6 @@ function renderRegistrations() {
     `;
   }).join('');
 }
-
 window.editRegistration = async function(id) {
   const reg = allRegs.find(r => r.id === id);
   if (!reg) return;
@@ -1421,7 +1416,6 @@ window.editRegistration = async function(id) {
     window.loadRegistrations();
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
-
 window.deleteRegistration = async function(id, name) {
   if (!confirm('Delete registration for ' + name + '?')) return;
   try {
@@ -1519,6 +1513,8 @@ window.updateResultTotal = function() {
   const topKillerPayout = sameAsFirst ? 0 : killsPrize;
   document.getElementById('resultTotalPayout').innerText = fmtRs(p1 + p2 + p3 + topKillerPayout);
 };
+
+// ⭐ v4.5 — submitMatchResults now looks up UIDs
 window.submitMatchResults = async function() {
   if (!selectedResultTournament) { window.showToast('❌ No tournament selected'); return; }
   const t = selectedResultTournament;
@@ -1547,16 +1543,29 @@ window.submitMatchResults = async function() {
   btn.disabled = true;
   btn.innerText = '⏳ Saving...';
   try {
+    // ⭐ Look up UIDs for each winner
+    window.showToast('🔍 Matching usernames...');
+    const u1 = await findUidByUsername(w1Name);
+    const u2 = w2Name ? await findUidByUsername(w2Name) : null;
+    const u3 = w3Name ? await findUidByUsername(w3Name) : null;
+    const uTK = tkName ? await findUidByUsername(tkName) : null;
+
     const payoutRecords = [];
     payoutRecords.push({
-      winnerName: w1Name, tournamentId: tid, tournamentTitle: tTitle,
+      winnerName: w1Name,
+      userId: u1?.uid || null,
+      userEmail: u1?.data?.email || null,
+      tournamentId: tid, tournamentTitle: tTitle,
       amount: p1, prize: p1, rank: '1', kills: w1Kills, method: w1Method,
       note: `1st place, ${w1Kills} kills`,
       status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
     if (w2Name) {
       payoutRecords.push({
-        winnerName: w2Name, tournamentId: tid, tournamentTitle: tTitle,
+        winnerName: w2Name,
+        userId: u2?.uid || null,
+        userEmail: u2?.data?.email || null,
+        tournamentId: tid, tournamentTitle: tTitle,
         amount: p2, prize: p2, rank: '2', kills: w2Kills, method: w2Method,
         note: `2nd place, ${w2Kills} kills`,
         status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
@@ -1564,7 +1573,10 @@ window.submitMatchResults = async function() {
     }
     if (w3Name) {
       payoutRecords.push({
-        winnerName: w3Name, tournamentId: tid, tournamentTitle: tTitle,
+        winnerName: w3Name,
+        userId: u3?.uid || null,
+        userEmail: u3?.data?.email || null,
+        tournamentId: tid, tournamentTitle: tTitle,
         amount: p3, prize: p3, rank: '3', kills: w3Kills, method: w3Method,
         note: `3rd place, ${w3Kills} kills`,
         status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
@@ -1573,7 +1585,10 @@ window.submitMatchResults = async function() {
     const sameAsFirst = !tkName || (tkName.toLowerCase() === w1Name.toLowerCase());
     if (!sameAsFirst && killsPrize > 0) {
       payoutRecords.push({
-        winnerName: tkName, tournamentId: tid, tournamentTitle: tTitle,
+        winnerName: tkName,
+        userId: uTK?.uid || null,
+        userEmail: uTK?.data?.email || null,
+        tournamentId: tid, tournamentTitle: tTitle,
         amount: killsPrize, prize: killsPrize, rank: 'Top Killer', kills: tkKills, method: tkMethod,
         note: `Top killer, ${tkKills} kills`,
         status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
@@ -1589,27 +1604,32 @@ window.submitMatchResults = async function() {
     }
     await addDoc(collection(db, 'match_results'), {
       tournamentId: tid, tournamentTitle: tTitle,
-      winner1: { name: w1Name, kills: w1Kills, prize: p1, method: w1Method },
-      winner2: w2Name ? { name: w2Name, kills: w2Kills, prize: p2, method: w2Method } : null,
-      winner3: w3Name ? { name: w3Name, kills: w3Kills, prize: p3, method: w3Method } : null,
+      winner1: { name: w1Name, kills: w1Kills, prize: p1, method: w1Method, userId: u1?.uid || null },
+      winner2: w2Name ? { name: w2Name, kills: w2Kills, prize: p2, method: w2Method, userId: u2?.uid || null } : null,
+      winner3: w3Name ? { name: w3Name, kills: w3Kills, prize: p3, method: w3Method, userId: u3?.uid || null } : null,
       topKiller: sameAsFirst
         ? { name: w1Name, kills: w1Kills, prize: killsPrize, sameAsFirst: true }
-        : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod },
+        : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod, userId: uTK?.uid || null },
       highlightUrl: highlightUrl || null,
       totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
       completedAt: serverTimestamp(), createdAt: serverTimestamp()
     });
     await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
+
+    const unmatched = payoutRecords.filter(p => !p.userId).map(p => p.winnerName);
+    if (unmatched.length) {
+      window.showToast(`⚠️ Saved. Could NOT match UID for: ${unmatched.join(', ')}`);
+    } else {
+      window.showToast('✅ Results saved + UIDs matched!');
+    }
+
     logActivity({
-      action: 'results_submitted',
-      category: 'tournaments',
-      targetId: tid,
-      targetType: 'tournament',
+      action: 'results_submitted', category: 'tournaments',
+      targetId: tid, targetType: 'tournament',
       summary: `Results saved for "${tTitle}" — 🥇 ${w1Name}, ${payoutRecords.length} payout${payoutRecords.length !== 1 ? 's' : ''}`,
-      metadata: { tournament: tTitle, winner: w1Name, payouts: payoutRecords.length }
+      metadata: { tournament: tTitle, winner: w1Name, payouts: payoutRecords.length, unmatched }
     });
     addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
-    window.showToast('✅ Results saved! ' + payoutRecords.length + ' payouts created');
     resetResultsForm();
     await loadRecentResults();
     await loadPayouts();
@@ -1815,7 +1835,7 @@ window.loadEarnings = function() {
 };
 
 // ============================================================
-// PAYOUTS
+// PAYOUTS (v4.5 — clickable rows)
 // ============================================================
 window.loadPayouts = async function() {
   const list = document.getElementById('payoutList');
@@ -1838,11 +1858,17 @@ window.loadPayouts = async function() {
     }
     list.innerHTML = allPayouts.map(w => {
       const isPaid = w.status === 'paid';
+      const hasUid = !!w.userId;
       return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
+        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openPayoutDetail('${w.id}')">
           <div class="reg-icon">🏆</div>
           <div class="reg-main">
-            <div class="reg-line-1"><b>${w.winnerName || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${w.tournamentTitle || 'Tournament'}</span></div>
+            <div class="reg-line-1">
+              <b>${w.winnerName || 'Unknown'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${w.tournamentTitle || 'Tournament'}</span>
+              ${hasUid ? '<span class="tourney-count" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#4ade80;">🔗 linked</span>' : '<span class="tourney-count" style="background:rgba(234,179,8,0.15);border-color:rgba(234,179,8,0.4);color:#fbbf24;">⚠️ no UID</span>'}
+            </div>
             <div class="reg-line-2">🥇 ${w.rank || '—'}${w.kills ? ' · ' + w.kills + ' kills' : ''} · ${fmtRs(w.amount || w.prize || 0)}${w.method ? ' · ' + w.method : ''}${w.note ? ' · ' + w.note : ''}</div>
           </div>
           <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'PAID' : 'PENDING'}</span><small>${fmtShort(w.paidAt || w.createdAt)}</small></div>
@@ -1853,6 +1879,8 @@ window.loadPayouts = async function() {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+
+// ⭐ v4.5 — addPayout() also stores UID
 window.addPayout = async function() {
   const winnerName = prompt('Winner name (username):');
   if (!winnerName) return;
@@ -1864,20 +1892,57 @@ window.addPayout = async function() {
   const method = prompt('Payout method (esewa/khalti/imepay/bank/cash):', 'esewa');
   const note = prompt('Note (optional):', '');
   try {
+    window.showToast('🔍 Matching user...');
+    const found = await findUidByUsername(winnerName);
     await addDoc(collection(db, 'tournament_payouts'), {
       winnerName, tournamentTitle, amount, prize: amount,
+      userId: found?.uid || null,
+      userEmail: found?.data?.email || null,
       rank: rank || '1', method: method || 'cash', note: note || '',
       status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
     logActivity({
-      action: 'payout_recorded',
-      category: 'payments',
+      action: 'payout_recorded', category: 'payments',
       summary: `Manual payout Rs. ${amount} to ${winnerName} (${tournamentTitle})`,
-      metadata: { winnerName, amount, tournamentTitle, method }
+      metadata: { winnerName, amount, tournamentTitle, method, uidMatched: !!found }
     });
-    window.showToast('✅ Payout recorded');
+    window.showToast(found ? '✅ Payout recorded + UID linked' : '⚠️ Payout recorded (no UID match)');
     window.loadPayouts();
   } catch (err) { window.showToast('❌ ' + err.message); }
+};
+
+// ============================================================
+// ⭐ v4.5 — BACKFILL utility (run once from console)
+// ============================================================
+window.backfillPayoutUserIds = async function() {
+  if (!confirm('Backfill userId on all tournament_payouts missing it?\n\nThis scans every payout and looks up the user by username. Safe to re-run.')) return;
+  const snap = await getDocs(collection(db, 'tournament_payouts'));
+  const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const missing = all.filter(p => !p.userId);
+  if (!missing.length) {
+    window.showToast('✅ All payouts already have userId');
+    return;
+  }
+  console.log(`🔧 Backfilling ${missing.length} payouts...`);
+  let ok = 0, fail = 0;
+  for (const p of missing) {
+    try {
+      const found = await findUidByUsername(p.winnerName);
+      if (found) {
+        await updateDoc(doc(db, 'tournament_payouts', p.id), {
+          userId: found.uid,
+          userEmail: found.data?.email || null
+        });
+        ok++;
+        console.log(`  ✅ ${p.winnerName} → ${found.uid}`);
+      } else {
+        fail++;
+        console.warn(`  ⚠️  No user found for "${p.winnerName}"`);
+      }
+    } catch (e) { fail++; console.error(e); }
+  }
+  window.showToast(`✅ Backfilled ${ok} · ⚠️ ${fail} unmatched`);
+  await window.loadPayouts();
 };
 
 // ============================================================
@@ -1933,10 +1998,7 @@ window.loadRoomDetailsForm = async function() {
       roomTournaments.map(t =>
         `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} (${t.game || 'Game'})</option>`
       ).join('');
-  } catch (err) {
-    console.warn('loadRoomDetailsForm fetch failed:', err);
-    return;
-  }
+  } catch (err) { console.warn('loadRoomDetailsForm fetch failed:', err); return; }
   const tid = select.value;
   const form = document.getElementById('roomDetailsForm');
   if (!tid) { form.style.display = 'none'; return; }
@@ -1980,10 +2042,8 @@ window.saveRoomDetails = async function() {
     });
     const tName = document.getElementById('roomTournamentName')?.textContent || 'tournament';
     logActivity({
-      action: 'room_details_updated',
-      category: 'system',
-      targetId: tid,
-      targetType: 'tournament',
+      action: 'room_details_updated', category: 'system',
+      targetId: tid, targetType: 'tournament',
       summary: `Room details updated for "${tName}"`,
       metadata: { tournamentId: tid, tournamentName: tName }
     });
@@ -2011,15 +2071,12 @@ window.loadUsers = async function() {
     renderUsers();
     renderDashboardRecent();
     loadLiveStats();
-    // Refresh notification target dropdown if the notifications section is already visible
     if (document.getElementById('notifTarget')) renderNotificationTargetOptions();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
-
 window.filterUsers = function() { renderUsers(); };
-
 function renderUsers() {
   const list = document.getElementById('userList');
   if (!list) return;
@@ -2044,7 +2101,6 @@ function renderUsers() {
     </div>
   `).join('');
 }
-
 window.deleteUser = async function(uid, username, fromModal) {
   if (fromModal) closeDetailModal();
   const confirmText = prompt(`⚠️ Delete user "${username}"?\n\nThis deletes their Firestore user doc + all their registrations + payments. Auth account must be deleted manually in Firebase Console.\n\nType DELETE to confirm:`);
@@ -2055,18 +2111,12 @@ window.deleteUser = async function(uid, username, fromModal) {
   try {
     await deleteDoc(doc(db, 'users', uid));
     const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
-    for (const d of regSnap.docs) {
-      await deleteDoc(doc(db, 'tournament_registrations', d.id));
-    }
+    for (const d of regSnap.docs) await deleteDoc(doc(db, 'tournament_registrations', d.id));
     const paySnap = await getDocs(query(collection(db, 'tournament_payments'), where('userId', '==', uid)));
-    for (const d of paySnap.docs) {
-      await deleteDoc(doc(db, 'tournament_payments', d.id));
-    }
+    for (const d of paySnap.docs) await deleteDoc(doc(db, 'tournament_payments', d.id));
     logActivity({
-      action: 'user_deleted',
-      category: 'users',
-      targetId: uid,
-      targetType: 'user',
+      action: 'user_deleted', category: 'users',
+      targetId: uid, targetType: 'user',
       summary: `Deleted user "${username}" (+${regSnap.size} registrations, ${paySnap.size} payments)`,
       metadata: { username, uid, regs: regSnap.size, payments: paySnap.size }
     });
@@ -2102,63 +2152,37 @@ function downloadCSV(filename, rows) {
   URL.revokeObjectURL(url);
   window.showToast('✅ Downloaded ' + filename);
 }
-
 window.exportUsersCSV = function() {
   if (!allUsers.length) { window.showToast('❌ No users to export'); return; }
   const rows = [['Username','Email','Phone','Role','User ID','Referred By','Referral Count','Referral Earnings','Joined']];
   allUsers.forEach(u => {
     rows.push([
-      u.username || '',
-      u.email || '',
-      u.phone || '',
-      u.role || 'member',
-      u.id,
-      u.referredBy || '',
-      u.referralCount || 0,
-      u.referralEarnings || 0,
+      u.username || '', u.email || '', u.phone || '', u.role || 'member', u.id,
+      u.referredBy || '', u.referralCount || 0, u.referralEarnings || 0,
       u.createdAt?.toDate ? u.createdAt.toDate().toISOString() : ''
     ]);
   });
   downloadCSV(`nepplay-users-${todayKey()}.csv`, rows);
 };
-
 window.exportRegistrationsCSV = function() {
   if (!allRegs.length) { window.showToast('❌ No registrations to export'); return; }
   const rows = [['Username','Email','IGN','Phone','Tournament','Entry Type','Amount','Txn ID','Method','Status','Stream URL','Registered']];
   allRegs.forEach(r => {
     rows.push([
-      r.username || '',
-      r.email || '',
-      r.ign || '',
-      r.phone || '',
-      r.tournamentTitle || '',
-      r.entryType || '',
-      r.amount || 0,
-      r.txnId || '',
-      r.method || '',
-      r.status || '',
-      r.streamUrl || '',
+      r.username || '', r.email || '', r.ign || '', r.phone || '', r.tournamentTitle || '',
+      r.entryType || '', r.amount || 0, r.txnId || '', r.method || '', r.status || '', r.streamUrl || '',
       r.registeredAt?.toDate ? r.registeredAt.toDate().toISOString() : ''
     ]);
   });
   downloadCSV(`nepplay-registrations-${todayKey()}.csv`, rows);
 };
-
 window.exportPaymentsCSV = function() {
   if (!allPayments.length) { window.showToast('❌ No payments to export'); return; }
   const rows = [['Username','Email','IGN','Phone','Tournament','Amount','Txn ID','Method','Status','Admin Note','Submitted','Reviewed']];
   allPayments.forEach(p => {
     rows.push([
-      p.username || '',
-      p.email || '',
-      p.ign || '',
-      p.phone || '',
-      p.tournamentTitle || '',
-      p.amount || 0,
-      p.txnId || '',
-      p.method || '',
-      p.status || '',
-      p.adminNote || '',
+      p.username || '', p.email || '', p.ign || '', p.phone || '', p.tournamentTitle || '',
+      p.amount || 0, p.txnId || '', p.method || '', p.status || '', p.adminNote || '',
       p.submittedAt?.toDate ? p.submittedAt.toDate().toISOString() : '',
       p.reviewedAt?.toDate ? p.reviewedAt.toDate().toISOString() : ''
     ]);
@@ -2256,12 +2280,6 @@ window.postAnnouncement = async function(e) {
   if (!title || !message) { window.showToast('❌ Title and message required'); return; }
   try {
     await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp() });
-    logActivity({
-      action: 'announcement_posted',
-      category: 'system',
-      summary: `Announcement posted: "${title}"`,
-      metadata: { title }
-    });
     document.getElementById('annTitle').value = '';
     document.getElementById('annMsg').value = '';
     window.showToast('✅ Announcement posted');
@@ -2348,10 +2366,7 @@ window.confirmReview = async function(e) {
       await updateDoc(doc(db, 'tournament_payments', id), {
         status, adminNote: note, reviewedAt: serverTimestamp()
       });
-      const regSnap = await getDocs(query(
-        collection(db, 'tournament_registrations'),
-        where('paymentId', '==', id)
-      ));
+      const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('paymentId', '==', id)));
       for (const d of regSnap.docs) {
         await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
       }
@@ -2364,30 +2379,24 @@ window.confirmReview = async function(e) {
     }
     closeReview();
     const actionLabel = action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Reset to pending';
-
     if (type === 'payment') {
       const pay = allPayments.find(x => x.id === id) || {};
       const actionMap = { approve: 'payment_approved', reject: 'payment_rejected', reset: 'payment_reset' };
       logActivity({
-        action: actionMap[action] || 'payment_approved',
-        category: 'payments',
-        targetId: id,
-        targetType: 'payment',
+        action: actionMap[action] || 'payment_approved', category: 'payments',
+        targetId: id, targetType: 'payment',
         summary: `${actionLabel} Rs. ${pay.amount || 0} — ${pay.username || 'user'} (${pay.tournamentTitle || 'tournament'})`,
         metadata: { amount: pay.amount || 0, user: pay.username || '', tournament: pay.tournamentTitle || '' }
       });
     } else {
       const reg = allRegs.find(x => x.id === id) || {};
       logActivity({
-        action: action === 'approve' ? 'user_registered' : 'payment_reset',
-        category: 'users',
-        targetId: id,
-        targetType: 'registration',
+        action: action === 'approve' ? 'user_registered' : 'payment_reset', category: 'users',
+        targetId: id, targetType: 'registration',
         summary: `${actionLabel} registration — ${reg.username || 'user'} (${reg.tournamentTitle || 'tournament'})`,
         metadata: { user: reg.username || '' }
       });
     }
-
     window.showToast('✅ ' + actionLabel);
     window.loadPayments();
     window.loadRegistrations();
