@@ -74,6 +74,111 @@
     font-weight: 800; font-size: 0.82rem;
   }
 
+  /* ⭐ BELL */
+  .bell-wrap {
+    position: relative;
+    flex-shrink: 0;
+    margin-right: 6px;
+  }
+  .bell-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(124,58,237,.15);
+    border: 1px solid rgba(168,85,247,.35);
+    display: grid; place-items: center;
+    cursor: pointer;
+    color: #f5f3ff;
+    font-size: 0.95rem;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .bell-btn:hover { background: rgba(124,58,237,.3); }
+  .bell-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    min-width: 16px; height: 16px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    display: none;
+    place-items: center;
+    padding: 0 4px;
+    border: 2px solid #0a0618;
+  }
+  .bell-badge.show { display: grid; }
+
+  .bell-dropdown {
+    position: absolute;
+    top: calc(100% + 10px); right: 0;
+    width: 340px;
+    max-width: calc(100vw - 20px);
+    max-height: 420px;
+    overflow-y: auto;
+    background: #1a0b3d;
+    border: 1px solid rgba(168,85,247,.35);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.6);
+    display: none;
+    z-index: 100;
+  }
+  .bell-dropdown.open { display: block; }
+  .bell-dropdown .bd-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(168,85,247,.2);
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  .bell-dropdown .bd-head button {
+    background: none; border: 0; color: var(--gold-2);
+    font-size: 0.72rem; font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .bell-item {
+    display: flex; gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(168,85,247,.12);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s;
+  }
+  .bell-item:last-child { border-bottom: none; }
+  .bell-item:hover { background: rgba(124,58,237,.15); }
+  .bell-item.unread { background: rgba(124,58,237,.08); }
+  .bell-item .bi-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+  .bell-item .bi-body { flex: 1; min-width: 0; }
+  .bell-item .bi-title {
+    font-weight: 800; font-size: 0.82rem; color: #fff;
+    margin-bottom: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .bell-item .bi-msg {
+    font-size: 0.75rem; color: var(--muted);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bell-item .bi-time {
+    font-size: 0.65rem; color: #6b7280; margin-top: 4px;
+  }
+  .bell-empty {
+    padding: 30px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
   .user-chip-wrap { position: relative; flex-shrink: 0; }
   #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
   .user-chip {
@@ -250,7 +355,7 @@
   .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
   .date-badge .y { font-size: 0.7rem; font-weight: 600; }
 
-  /* ---------- ⭐ EARNINGS CARD ---------- */
+  /* ⭐ Earnings card */
   .earn-card {
     display: block; text-decoration: none; color: inherit;
     background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(16,185,129,.06));
@@ -273,10 +378,7 @@
     font-size: 1rem; font-weight: 800; color: #fff;
     display: flex; align-items: center; gap: 8px;
   }
-  .earn-card .ec-cta {
-    font-size: 0.78rem; font-weight: 800;
-    color: #4ade80;
-  }
+  .earn-card .ec-cta { font-size: 0.78rem; font-weight: 800; color: #4ade80; }
   .earn-card .ec-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -295,21 +397,127 @@
     font-weight: 800; margin-bottom: 5px;
   }
   .earn-card .ec-value {
-    font-size: 1.25rem; font-weight: 900;
-    line-height: 1.1;
+    font-size: 1.25rem; font-weight: 900; line-height: 1.1;
   }
   .earn-card .ec-value.green { color: #4ade80; }
   .earn-card .ec-value.gold  { color: #fbbf24; }
   .earn-card .ec-value.blue  { color: #60a5fa; }
   .earn-card .ec-note {
-    font-size: 0.8rem;
-    color: #ddd6fe;
-    margin-top: 12px;
-    text-align: center;
+    font-size: 0.8rem; color: #ddd6fe;
+    margin-top: 12px; text-align: center;
   }
   .earn-card[hidden] { display: none; }
 
-  /* ---------- Quick Actions ---------- */
+  /* ⭐ Referral card */
+  .ref-card {
+    background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(124,58,237,.08));
+    border: 1px solid rgba(168,85,247,.4);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ref-card::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(168,85,247,.25), transparent 70%);
+    border-radius: 50%;
+  }
+  .ref-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .ref-head .rf-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center;
+    font-size: 1.4rem;
+    box-shadow: 0 6px 18px rgba(124,58,237,.4);
+  }
+  .ref-head h3 {
+    font-size: 1.1rem; font-weight: 900;
+  }
+  .ref-head p {
+    font-size: 0.82rem; color: var(--muted); margin-top: 2px;
+  }
+  .ref-steps {
+    background: rgba(15, 8, 35, 0.55);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    position: relative;
+  }
+  .ref-steps ol {
+    padding-left: 18px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: #ddd6fe;
+  }
+  .ref-steps b { color: var(--gold-2); }
+
+  .ref-link-box {
+    background: rgba(15, 8, 35, 0.75);
+    border: 1px dashed rgba(168,85,247,.5);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ref-link-box .rl-input {
+    flex: 1; min-width: 0;
+    background: none; border: 0;
+    color: #fff; font-size: 0.82rem;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .ref-btn-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .ref-btn {
+    flex: 1; min-width: 130px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-weight: 800; font-size: 0.82rem;
+    cursor: pointer;
+    border: 0; font-family: inherit;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .15s, box-shadow .2s;
+  }
+  .ref-btn.copy {
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(124,58,237,.4);
+  }
+  .ref-btn.wa {
+    background: linear-gradient(135deg, #25d366, #16a34a);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(37,211,102,.35);
+  }
+  .ref-btn:hover { transform: translateY(-1px); }
+  .ref-btn.copy.copied {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 6px 18px rgba(34,197,94,.4);
+  }
+  .ref-stats {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: #ddd6fe;
+  }
+  .ref-stats b { color: var(--gold-2); }
+
   .section-title {
     font-size: 1.05rem; font-weight: 800;
     margin: 0 0 14px; color: var(--text);
@@ -353,7 +561,6 @@
   .qa-card .qa-title { font-weight: 800; font-size: 0.95rem; }
   .qa-card .qa-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
 
-  /* ---------- Upcoming event strip ---------- */
   .upcoming {
     background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(168,85,247,.15));
     border: 1px solid rgba(168,85,247,.4);
@@ -386,7 +593,6 @@
   }
   .upcoming .up-cta:hover { transform: translateY(-2px); }
 
-  /* ---------- Footer ---------- */
   .site-footer {
     max-width: 1100px; margin: 30px auto 0;
     padding: 24px 18px 10px;
@@ -424,7 +630,6 @@
     .nav-links > a.winners-link,
     .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
     .nav-links > a[href="/teams.html"],
-    .nav-links > a[href="/profile.html"],
     .nav-links > a[href="/support.html"] { display: none; }
     .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
     .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
@@ -432,6 +637,8 @@
     .user-chip .caret { font-size: 0.45rem; }
     .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
+    .bell-btn { width: 30px; height: 30px; font-size: 0.82rem; }
+    .bell-dropdown { width: 300px; }
     .social-row { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.5rem; }
     .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
@@ -442,8 +649,10 @@
     .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
     .upcoming .up-cta { text-align: center; }
     .site-footer { flex-direction: column; align-items: flex-start; }
-    .earn-card .ec-grid { grid-template-columns: 1fr 1fr 1fr; }
     .earn-card .ec-value { font-size: 1rem; }
+    .ref-card { padding: 18px 16px; }
+    .ref-head .rf-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+    .ref-head h3 { font-size: 1rem; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link,
@@ -468,6 +677,22 @@
     <a href="/store.html" class="store-link">🛒 Store</a>
     <a href="/teams.html">Teams</a>
     <a href="/support.html">Support</a>
+
+    <!-- ⭐ BELL -->
+    <div class="bell-wrap">
+      <div class="bell-btn" id="bellBtn" title="Notifications">🔔
+        <span class="bell-badge" id="bellBadge">0</span>
+      </div>
+      <div class="bell-dropdown" id="bellDropdown">
+        <div class="bd-head">
+          <span>🔔 Notifications</span>
+          <button onclick="markAllNotificationsRead()">Mark all read</button>
+        </div>
+        <div id="bellList">
+          <div class="bell-empty">Loading...</div>
+        </div>
+      </div>
+    </div>
 
     <div class="user-chip-wrap">
       <input type="checkbox" id="chipToggle" />
@@ -553,7 +778,7 @@
     </div>
   </section>
 
-  <!-- ⭐ EARNINGS CARD (only shows if logged in) -->
+  <!-- ⭐ EARNINGS CARD -->
   <a href="/player.html" id="earnCard" class="earn-card" hidden>
     <div class="ec-head">
       <div class="ec-title">💰 Your Earnings</div>
@@ -575,6 +800,38 @@
     </div>
     <div id="mc-note" class="ec-note" hidden></div>
   </a>
+
+  <!-- ⭐ REFER & EARN CARD -->
+  <div class="ref-card" id="refCard" hidden>
+    <div class="ref-head">
+      <div class="rf-icon">🤝</div>
+      <div>
+        <h3>Refer &amp; Earn Rs 20</h3>
+        <p>Invite friends · Earn Rs 20 per paid signup</p>
+      </div>
+    </div>
+
+    <div class="ref-steps">
+      <ol>
+        <li>Share your referral link with a friend</li>
+        <li>They sign up and join <b>any paid tournament</b></li>
+        <li>You get <b>Rs 20</b> credited to your earnings</li>
+      </ol>
+    </div>
+
+    <div class="ref-link-box">
+      <input type="text" class="rl-input" id="refLinkInput" readonly value="Loading..." />
+    </div>
+    <div class="ref-btn-row">
+      <button class="ref-btn copy" id="refCopyBtn" onclick="copyReferralLink()">📋 Copy Link</button>
+      <a class="ref-btn wa" id="refWaBtn" href="#" target="_blank" rel="noopener">💬 Share on WhatsApp</a>
+    </div>
+
+    <div class="ref-stats">
+      <span>Referrals: <b id="refCount">0</b></span>
+      <span>Earned: <b id="refEarned">Rs. 0</b></span>
+    </div>
+  </div>
 
   <h2 class="section-title">⚡ Quick <span class="accent">Actions</span></h2>
   <div class="quick-actions">
@@ -669,11 +926,28 @@ window.sharePage = window.sharePage || function () {
         alert('Link copied!');
     }
 };
+
+// Bell dropdown toggle
+window.toggleBell = function(e) {
+    if (e) e.stopPropagation();
+    var dd = document.getElementById('bellDropdown');
+    if (dd) dd.classList.toggle('open');
+};
+document.addEventListener('click', function(e) {
+    var dd = document.getElementById('bellDropdown');
+    var btn = document.getElementById('bellBtn');
+    if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore, doc, getDoc, collection, query, where, getDocs,
+  updateDoc, arrayUnion, orderBy, limit
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const cfg = {
@@ -690,6 +964,9 @@ const auth = getAuth(app);
 
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 
+let currentUid = null;
+let currentUsername = null;
+
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
     const nameEl = document.getElementById("userName");
@@ -698,6 +975,7 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "/login.html?redirect=" + encodeURIComponent("/member.html");
         return;
     }
+    currentUid = user.uid;
 
     let display = user.email || user.uid || "Member";
     let profile = {};
@@ -706,16 +984,41 @@ onAuthStateChanged(auth, async (user) => {
         if (uDoc.exists()) {
             profile = uDoc.data();
             display = profile.fullName || profile.username || profile.email || display;
+            currentUsername = profile.username || null;
         }
     } catch (e) {}
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
     if (nameEl) nameEl.textContent = display;
 
-    // ============================================
-    // ⭐ EARNINGS CARD — fetch & show
-    // ============================================
+    // ============ REFERRAL CARD ============
+    if (currentUsername) {
+        const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(currentUsername);
+        const inp = document.getElementById('refLinkInput');
+        if (inp) inp.value = refUrl;
+        const wa = document.getElementById('refWaBtn');
+        if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(
+            '🎮 Join NEPPLAY and win real cash!\n\n' +
+            'Sign up here: ' + refUrl + '\n\n' +
+            'Paid tournaments every week · Rs 150 entry · Rs 500–1000 prizes'
+        );
+        const card = document.getElementById('refCard');
+        if (card) card.hidden = false;
+    }
+
+    // Fetch referral bonuses for me
     try {
-        // Payouts: match by userId OR by winnerName == username/fullName (legacy)
+        const rSnap = await getDocs(query(
+            collection(db, 'referral_bonuses'),
+            where('referrerUid', '==', user.uid)
+        ));
+        const bonuses = rSnap.docs.map(d => d.data());
+        const total = bonuses.reduce((s, b) => s + Number(b.amount || 0), 0);
+        document.getElementById('refCount').textContent = bonuses.length;
+        document.getElementById('refEarned').textContent = fmtRs(total);
+    } catch (e) { console.warn('ref stats error:', e); }
+
+    // ============ EARNINGS CARD ============
+    try {
         const unameLower = (profile.username || '').toLowerCase();
         const fullNameLower = (profile.fullName || '').toLowerCase();
 
@@ -741,7 +1044,6 @@ onAuthStateChanged(auth, async (user) => {
         byName.forEach(p => payoutMap.set(p.id, p));
         const payouts = Array.from(payoutMap.values());
 
-        // Referrals
         let referrals = [];
         try {
             const s = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', user.uid)));
@@ -759,12 +1061,10 @@ onAuthStateChanged(auth, async (user) => {
                       + pendRefs.reduce((s,r) => s + Number(r.amount || 0), 0);
         const total = paidAmt + pendAmt;
 
-        const card = document.getElementById('earnCard');
         document.getElementById('mc-total').textContent   = fmtRs(total);
         document.getElementById('mc-pending').textContent = fmtRs(pendAmt);
         document.getElementById('mc-paid').textContent    = fmtRs(paidAmt);
 
-        // Friendly note under the numbers
         const note = document.getElementById('mc-note');
         if (total === 0) {
             note.hidden = false;
@@ -774,10 +1074,214 @@ onAuthStateChanged(auth, async (user) => {
             note.textContent = `${fmtRs(pendAmt)} pending payout — will be sent soon 💸`;
         }
 
-        card.hidden = false;
+        document.getElementById('earnCard').hidden = false;
     } catch (e) {
         console.warn('earnings card error:', e);
     }
+
+    // ============ BELL — NOTIFICATIONS ============
+    loadBellNotifications(user.uid);
+});
+
+// ============================================
+// Copy referral link
+// ============================================
+window.copyReferralLink = function() {
+    const inp = document.getElementById('refLinkInput');
+    if (!inp) return;
+    const btn = document.getElementById('refCopyBtn');
+    const doCopy = () => {
+        navigator.clipboard.writeText(inp.value).then(() => {
+            btn.classList.add('copied');
+            const orig = btn.textContent;
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1600);
+        }).catch(() => {
+            inp.select();
+            document.execCommand('copy');
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 1600);
+        });
+    };
+    if (navigator.share) {
+        // Still copy — but offer share
+        doCopy();
+    } else {
+        doCopy();
+    }
+};
+
+// ============================================
+// ⭐ BELL — notifications
+// ============================================
+let bellItems = [];
+
+async function loadBellNotifications(uid) {
+    const listEl = document.getElementById('bellList');
+    if (!listEl) return;
+
+    try {
+        // Get notifications for me (targetUid == me) OR broadcast (ALL)
+        const [personalSnap, allSnap] = await Promise.all([
+            getDocs(query(
+                collection(db, 'notifications'),
+                where('targetUid', '==', uid),
+                orderBy('createdAt', 'desc'),
+                limit(20)
+            )).catch(() => ({ docs: [] })),
+            getDocs(query(
+                collection(db, 'notifications'),
+                where('targetUid', '==', 'ALL'),
+                orderBy('createdAt', 'desc'),
+                limit(20)
+            )).catch(() => ({ docs: [] }))
+        ]);
+
+        const personal = personalSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const broadcast = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const combined = [...personal, ...broadcast];
+
+        // Sort by createdAt
+        combined.sort((a, b) => {
+            const ta = a.createdAt?.seconds || 0;
+            const tb = b.createdAt?.seconds || 0;
+            return tb - ta;
+        });
+
+        bellItems = combined.slice(0, 20);
+
+        const unread = bellItems.filter(n => {
+            const readBy = Array.isArray(n.readBy) ? n.readBy : [];
+            return !readBy.includes(uid);
+        });
+
+        const badge = document.getElementById('bellBadge');
+        if (badge) {
+            if (unread.length > 0) {
+                badge.textContent = unread.length > 9 ? '9+' : unread.length;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+
+        renderBellList(uid);
+    } catch (e) {
+        console.warn('loadBellNotifications error:', e);
+        listEl.innerHTML = '<div class="bell-empty">Could not load notifications</div>';
+    }
+}
+
+function renderBellList(uid) {
+    const listEl = document.getElementById('bellList');
+    if (!listEl) return;
+
+    if (!bellItems.length) {
+        listEl.innerHTML = '<div class="bell-empty">No notifications yet</div>';
+        return;
+    }
+
+    const iconMap = {
+        info:    { icon: 'ℹ️', color: '#60a5fa' },
+        success: { icon: '✅', color: '#4ade80' },
+        warning: { icon: '⚠️', color: '#facc15' },
+        error:   { icon: '❌', color: '#f87171' },
+        trophy:  { icon: '🏆', color: '#fbbf24' },
+        money:   { icon: '💰', color: '#4ade80' }
+    };
+
+    listEl.innerHTML = bellItems.map(n => {
+        const meta = iconMap[n.type] || iconMap.info;
+        const readBy = Array.isArray(n.readBy) ? n.readBy : [];
+        const isUnread = !readBy.includes(uid);
+        const timeStr = fmtTimeAgo(n.createdAt);
+        return `
+            <div class="bell-item ${isUnread ? 'unread' : ''}" onclick="openBellItem('${n.id}')">
+                <div class="bi-icon" style="background:${meta.color}22;color:${meta.color};">${meta.icon}</div>
+                <div class="bi-body">
+                    <div class="bi-title">${escapeHtml(n.title || '(no title)')}</div>
+                    <div class="bi-msg">${escapeHtml(n.message || '')}</div>
+                    <div class="bi-time">${timeStr}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.openBellItem = async function(id) {
+    const item = bellItems.find(x => x.id === id);
+    if (!item || !currentUid) return;
+
+    // Mark as read
+    try {
+        await updateDoc(doc(db, 'notifications', id), {
+            readBy: arrayUnion(currentUid)
+        });
+        // Update local state
+        item.readBy = [...(item.readBy || []), currentUid];
+        renderBellList(currentUid);
+
+        // Update badge
+        const unread = bellItems.filter(n => {
+            const rb = Array.isArray(n.readBy) ? n.readBy : [];
+            return !rb.includes(currentUid);
+        });
+        const badge = document.getElementById('bellBadge');
+        if (badge) {
+            if (unread.length > 0) {
+                badge.textContent = unread.length > 9 ? '9+' : unread.length;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+    } catch (e) {
+        console.warn('mark read error:', e);
+    }
+};
+
+window.markAllNotificationsRead = async function() {
+    if (!currentUid) return;
+    const unread = bellItems.filter(n => {
+        const rb = Array.isArray(n.readBy) ? n.readBy : [];
+        return !rb.includes(currentUid);
+    });
+    for (const n of unread) {
+        try {
+            await updateDoc(doc(db, 'notifications', n.id), {
+                readBy: arrayUnion(currentUid)
+            });
+            n.readBy = [...(n.readBy || []), currentUid];
+        } catch (e) {}
+    }
+    renderBellList(currentUid);
+    const badge = document.getElementById('bellBadge');
+    if (badge) badge.classList.remove('show');
+};
+
+function fmtTimeAgo(ts) {
+    if (!ts?.seconds) return '';
+    const diff = Date.now() - ts.seconds * 1000;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    return new Date(ts.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
+
+// Wire up the bell button
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('bellBtn');
+    if (btn) btn.addEventListener('click', window.toggleBell);
 });
 </script>
 
