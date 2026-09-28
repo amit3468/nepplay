@@ -1078,7 +1078,11 @@ window.loadRecentCreated = async function() {
       const isPaid = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
-      const is1v1 = String(t.mode || '').toLowerCase() === '1v1';
+            const tTitle = String(t.title || '').toLowerCase();
+      const is1v1 = String(t.mode || '').toLowerCase() === '1v1'
+                    || tTitle.includes('1v1')
+                    || tTitle.includes('1 vs 1')
+                    || tTitle.includes('1vs1');
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isCompleted ? '✅' : (isPaid ? '💵' : '🏆')}</div>
@@ -2541,7 +2545,11 @@ window.loadTournamentsAdmin = async function() {
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
       const hasRoom = t.roomId && t.roomPassword;
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
-      const is1v1 = String(t.mode || '').toLowerCase() === '1v1';
+            const tTitle = String(t.title || '').toLowerCase();
+      const is1v1 = String(t.mode || '').toLowerCase() === '1v1'
+                    || tTitle.includes('1v1')
+                    || tTitle.includes('1 vs 1')
+                    || tTitle.includes('1vs1');
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const c = counts[t.id] || { total: 0, confirmed: 0, pending: 0 };
       return `
