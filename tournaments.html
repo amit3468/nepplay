@@ -24,11 +24,97 @@
   html, body { overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+    background: #05030f;
     color: var(--text);
     min-height: 100vh;
     padding-bottom: 60px;
+    position: relative;
   }
+
+  /* ⭐ Animated background layers */
+  .bg-layer {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-layer::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(124,58,237,0.35) 0%, transparent 45%),
+      radial-gradient(circle at 80% 100%, rgba(251,191,36,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+  }
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .bg-blob.b1 {
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, #7c3aed, transparent 70%);
+    top: -140px; left: -100px;
+    animation: drift1 24s ease-in-out infinite;
+  }
+  .bg-blob.b2 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, #a855f7, transparent 70%);
+    top: 30%; right: -140px;
+    animation: drift2 28s ease-in-out infinite;
+  }
+  .bg-blob.b3 {
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, #fbbf24, transparent 70%);
+    bottom: -120px; left: 20%;
+    opacity: 0.35;
+    animation: drift3 32s ease-in-out infinite;
+  }
+  .bg-blob.b4 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #ec4899, transparent 70%);
+    top: 60%; left: 40%;
+    opacity: 0.25;
+    animation: drift1 36s ease-in-out infinite reverse;
+  }
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(60px, 40px) scale(1.1); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-80px, 30px) scale(1.15); }
+  }
+  @keyframes drift3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(40px, -50px) scale(1.05); }
+  }
+  /* Grid overlay */
+  .bg-grid {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(168,85,247,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(168,85,247,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  /* Vignette */
+  .bg-vignette {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bg-blob { animation: none; }
+  }
+
+  .topnav, .container { position: relative; z-index: 1; }
 
   .topnav {
     display: flex; align-items: center; justify-content: space-between;
@@ -143,18 +229,32 @@
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
     padding: 34px 30px;
-    box-shadow: var(--shadow);
+    box-shadow: 0 20px 60px rgba(124,58,237,.4);
     margin-bottom: 22px;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(168,85,247,.35);
   }
   .hero::before {
     content: '';
     position: absolute;
     top: -80px; right: -80px;
     width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(251,191,36,.25), transparent 70%);
+    background: radial-gradient(circle, rgba(251,191,36,.3), transparent 70%);
     border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
   .hero .h-tag {
     display: inline-block;
@@ -165,22 +265,22 @@
     border: 1px solid rgba(251,191,36,.5);
     padding: 5px 12px; border-radius: 999px;
     margin-bottom: 12px;
-    position: relative;
+    position: relative; z-index: 1;
   }
   .hero h1 {
     font-size: 1.9rem; font-weight: 900;
     line-height: 1.2; margin-bottom: 10px;
-    position: relative;
+    position: relative; z-index: 1;
   }
   .hero h1 .cash { color: var(--gold-2); }
   .hero p {
     color: #ddd6fe; font-size: 0.95rem;
     max-width: 620px; line-height: 1.55;
-    position: relative;
+    position: relative; z-index: 1;
   }
   .hero-stats {
     display: flex; flex-wrap: wrap; gap: 10px;
-    margin-top: 18px; position: relative;
+    margin-top: 18px; position: relative; z-index: 1;
   }
   .hero-stat {
     background: rgba(15,8,35,.55);
@@ -190,6 +290,7 @@
     display: flex; align-items: center; gap: 8px;
     font-size: 0.82rem; color: #ddd6fe;
     font-weight: 700;
+    backdrop-filter: blur(8px);
   }
   .hero-stat b { color: var(--gold-2); font-weight: 900; font-size: 1rem; }
 
@@ -232,17 +333,26 @@
     margin-bottom: 26px;
   }
   .game-card {
-    background: var(--card);
+    background: linear-gradient(180deg, rgba(30,18,60,.85), rgba(20,12,45,.9));
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 18px;
     display: flex; flex-direction: column; gap: 14px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,85,247,.5), transparent);
   }
   .game-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.35);
-    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 20px 50px rgba(124, 58, 237, 0.5);
+    border-color: rgba(168, 85, 247, 0.6);
   }
   .game-card.featured {
     border-color: rgba(245,158,11,.5);
@@ -250,8 +360,11 @@
   }
   .game-card.popular {
     border-color: rgba(245,158,11,.6);
-    background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(30,18,60,.75));
+    background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(30,18,60,.85));
     box-shadow: 0 0 30px rgba(245,158,11,.2);
+  }
+  .game-card.popular::before {
+    background: linear-gradient(90deg, transparent, rgba(251,191,36,.7), transparent);
   }
   .game-head {
     display: flex; align-items: center; gap: 12px;
@@ -375,6 +488,7 @@
     color: var(--gold-2);
     margin-bottom: 22px;
     line-height: 1.5;
+    backdrop-filter: blur(8px);
   }
 
   .loading-state {
@@ -391,6 +505,7 @@
   .empty-state a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
 
   @media (max-width: 720px) {
+    .bg-blob { filter: blur(60px); opacity: 0.4; }
     .topnav { padding: 10px 10px; gap: 6px; }
     .brand { font-size: 0.85rem; gap: 5px; }
     .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
@@ -423,6 +538,16 @@
 </style>
 </head>
 <body>
+
+<!-- ⭐ Animated background -->
+<div class="bg-layer">
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
+  <div class="bg-blob b4"></div>
+</div>
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
 
 <nav class="topnav">
   <a href="/member.html" class="brand">
@@ -528,14 +653,9 @@ const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// ⭐ Tonight's 1v1 hardcoded ID
 const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
-
-// ⭐ Popular games — featured cards with both day+night rows
 const POPULAR_GAMES = ['free fire', 'pubg'];
 
-// ⭐ Game name aliases — map variations to a single canonical key
-// Prevents "PUBG" and "PUBG Mobile" from splitting into two cards
 const GAME_ALIASES = {
   'freefire':       'freefire',
   'free fire':      'freefire',
@@ -558,8 +678,6 @@ const GAME_ALIASES = {
   'ludo':           'ludo',
   'ludo king':      'ludo'
 };
-
-// Canonical display name for each key
 const GAME_DISPLAY = {
   freefire:  'Free Fire',
   pubgmobile:'PUBG Mobile',
@@ -570,18 +688,15 @@ const GAME_DISPLAY = {
   chess:     'Chess',
   ludo:      'Ludo'
 };
-
 function gameKey(game) {
   const g = String(game || '').toLowerCase().trim().replace(/\s+/g, ' ');
   return GAME_ALIASES[g] || GAME_ALIASES[g.replace(/\s/g, '')] || g.replace(/\s/g, '');
 }
-
 function gameDisplayName(game) {
   const k = gameKey(game);
   return GAME_DISPLAY[k] || game || 'Game';
 }
 
-// ── Helpers ─────────────────────────────────────
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -623,13 +738,19 @@ function slotOf(time) {
   return 'night';
 }
 function isPopular(key) {
-  return POPULAR_GAMES.some(k => {
-    const kk = gameKey(k);
-    return kk === key;
-  });
+  return POPULAR_GAMES.some(k => gameKey(k) === key);
 }
 
-// ── Fetch ───────────────────────────────────────
+// ⭐ Pick highest topKillsPrize among all tournaments in a group
+function bestTopKills(list) {
+  let best = 0;
+  list.forEach(t => {
+    const v = Number(t.topKillsPrize || t.top_kills_prize || t.topKillPrize || 0);
+    if (v > best) best = v;
+  });
+  return best;
+}
+
 async function fetchTournaments() {
   let docs = [];
   try {
@@ -663,23 +784,16 @@ function classifySection(t) {
   return 'other';
 }
 
-// ⭐ Group tournaments by canonical game key, splitting into day/night
 function buildGameGroups(list) {
   const groups = {};
   list.forEach(t => {
     const key = gameKey(t.game);
     if (!groups[key]) {
-      groups[key] = {
-        key,
-        displayName: gameDisplayName(t.game),
-        day: [],
-        night: []
-      };
+      groups[key] = { key, displayName: gameDisplayName(t.game), day: [], night: [] };
     }
     const slot = slotOf(t.time);
     groups[key][slot].push(t);
   });
-  // Sort modes: Solo, Duo, Squad, FFA, then alpha
   const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
   Object.values(groups).forEach(g => {
     ['day','night'].forEach(slot => {
@@ -693,19 +807,16 @@ function buildGameGroups(list) {
   return groups;
 }
 
-// ⭐ Merge duplicates within a slot: same mode → one button with highest prize
-// Keeps the tournament with the highest prizePool's seedKey for the link
 function dedupeByMode(list) {
   const byMode = {};
   list.forEach(t => {
     const modeKey = String(t.mode || '').toLowerCase().trim();
     if (!byMode[modeKey]) {
-      byMode[modeKey] = { mode: t.mode, best: t, count: 1 };
+      byMode[modeKey] = { mode: t.mode, best: t };
     } else {
-      byMode[modeKey].count++;
-      const currentPrize = Number(byMode[modeKey].best.prizePool || byMode[modeKey].best.prize_pool || 0);
-      const newPrize = Number(t.prizePool || t.prize_pool || 0);
-      if (newPrize > currentPrize) byMode[modeKey].best = t;
+      const cur = Number(byMode[modeKey].best.prizePool || byMode[modeKey].best.prize_pool || 0);
+      const nw  = Number(t.prizePool || t.prize_pool || 0);
+      if (nw > cur) byMode[modeKey].best = t;
     }
   });
   return Object.values(byMode).map(x => x.best);
@@ -732,10 +843,11 @@ function renderModeButtons(list) {
 
 function renderGameCard(group, opts = {}) {
   const { day, night, displayName, key } = group;
-  const iconField = (day[0] || night[0])?.icon;
+  const all = [...day, ...night];
+  const iconField = all.find(t => t.icon)?.icon;
   const icon = gameIcon(key, iconField);
-  const entryFee = (day[0] || night[0])?.entryFee || (day[0] || night[0])?.entry_fee || 0;
-  const topKills = (day[0] || night[0])?.topKillsPrize || 0;
+  const entryFee = all[0]?.entryFee || all[0]?.entry_fee || 0;
+  const topKills = bestTopKills(all);
   const featured = day.length > 0 && night.length > 0;
   const isPopularCard = opts.popular === true;
 
@@ -786,7 +898,6 @@ function renderGameCard(group, opts = {}) {
   `;
 }
 
-// ── Render everything ───────────────────────────
 function renderAll(tournaments) {
   const content = document.getElementById('tournamentContent');
   const heroStats = document.getElementById('heroStats');
@@ -811,7 +922,6 @@ function renderAll(tournaments) {
     else other.push(t);
   });
 
-  // Hero stats — dedupe by game key
   if (heroStats) {
     const totalTourneys = tournaments.length;
     const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
@@ -827,7 +937,7 @@ function renderAll(tournaments) {
 
   let html = '';
 
-  // ⭐ TONIGHT
+  // TONIGHT
   if (tonight.length) {
     html += `
       <h2 class="section-title tonight">
@@ -839,6 +949,7 @@ function renderAll(tournaments) {
       const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
       const prize = t.prizePool || t.prize_pool || 0;
       const entry = t.entryFee || t.entry_fee || 0;
+      const tk = Number(t.topKillsPrize || 0);
       const link = t.seedKey
         ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
         : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
@@ -851,6 +962,7 @@ function renderAll(tournaments) {
               <div class="meta">
                 <span>Entry: <strong>Rs ${esc(entry)}</strong></span>
                 ${prize ? `<span class="tk-badge" style="background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.5);">🏆 Prize Rs ${esc(prize)}</span>` : ''}
+                ${tk ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(tk)}</span>` : ''}
               </div>
             </div>
           </div>
@@ -872,13 +984,12 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // ⭐ POPULAR GAMES
+  // POPULAR
   const allDayNight = [...day, ...night];
   const allGroups = buildGameGroups(allDayNight);
   const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
 
   if (popularKeys.length > 0) {
-    // Sort alphabetically
     popularKeys.sort((a, b) =>
       String(allGroups[a].displayName || '').localeCompare(String(allGroups[b].displayName || ''))
     );
@@ -894,11 +1005,10 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // Filter popular from Day/Night buckets
   const dayOnly   = day.filter(t => !isPopular(gameKey(t.game)));
   const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
 
-  // ☀️ DAY
+  // DAY
   if (dayOnly.length) {
     html += `
       <h2 class="section-title day">
@@ -913,7 +1023,7 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // 🌙 NIGHT
+  // NIGHT
   if (nightOnly.length) {
     html += `
       <h2 class="section-title night">
@@ -928,7 +1038,7 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // 📅 OTHER
+  // OTHER
   if (other.length) {
     html += `
       <h2 class="section-title">
@@ -946,7 +1056,6 @@ function renderAll(tournaments) {
   content.innerHTML = html;
 }
 
-// ── Main ────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   const avatar = document.getElementById('userAvatar');
   const nameEl = document.getElementById('userName');
