@@ -1042,7 +1042,6 @@ window.sharePage = window.sharePage || function () {
     }
 };
 
-// Bell dropdown toggle
 window.toggleBell = function(e) {
     if (e) e.stopPropagation();
     var dd = document.getElementById('bellDropdown');
@@ -1198,9 +1197,6 @@ onAuthStateChanged(auth, async (user) => {
     loadBellNotifications(user.uid);
 });
 
-// ============================================
-// Copy referral link
-// ============================================
 window.copyReferralLink = function() {
     const inp = document.getElementById('refLinkInput');
     if (!inp) return;
@@ -1221,9 +1217,6 @@ window.copyReferralLink = function() {
     doCopy();
 };
 
-// ============================================
-// ⭐ BELL — notifications
-// ============================================
 let bellItems = [];
 
 async function loadBellNotifications(uid) {
@@ -1383,14 +1376,13 @@ function escapeHtml(s) {
     }[c]));
 }
 
-// Wire up the bell button
 document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('bellBtn');
     if (btn) btn.addEventListener('click', window.toggleBell);
 });
 </script>
 
-<!-- ⭐ NEW: Upcoming events + my registrations -->
+<!-- ⭐ NEW: Upcoming events + my registrations (Option B: date ASC, createdAt DESC, limit 20) -->
 <script type="module">
 (async function () {
   try {
@@ -1459,7 +1451,8 @@ document.addEventListener('DOMContentLoaded', function() {
           collection(db, "tournaments"),
           where("status", "==", "upcoming"),
           orderBy("date", "asc"),
-          limit(6)
+          orderBy("createdAt", "desc"),
+          limit(20)
         ));
         docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       } catch (e) {
@@ -1468,8 +1461,12 @@ document.addEventListener('DOMContentLoaded', function() {
           const snap = await getDocs(collection(db, "tournaments"));
           docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .filter(t => String(t.status || "").toLowerCase() === "upcoming")
-            .sort((a, b) => String(a.date||"").localeCompare(String(b.date||"")))
-            .slice(0, 6);
+            .sort((a, b) => {
+              const d = String(a.date||"").localeCompare(String(b.date||""));
+              if (d !== 0) return d;
+              return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0);
+            })
+            .slice(0, 20);
         } catch (e2) {
           console.warn("[upcoming] fallback failed:", e2 && e2.message);
         }
