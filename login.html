@@ -113,18 +113,77 @@ button:disabled{
     color:#72e08a;
 }
 
+.info{
+    background:#1a2d45;
+    color:#84c1ff;
+}
+
 .links{
     text-align:center;
     margin-top:20px;
 }
 
-.links a{
+.links a,
+.forgot-link{
     color:#ff3b30;
     text-decoration:none;
+    cursor:pointer;
+    font-size:14px;
 }
 
-.links a:hover{
+.links a:hover,
+.forgot-link:hover{
     text-decoration:underline;
+}
+
+.forgot-wrap{
+    text-align:right;
+    margin-top:-8px;
+    margin-bottom:14px;
+}
+
+.reset-header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.reset-header h2{
+    font-size:20px;
+    margin-bottom:6px;
+    color:#fff;
+}
+
+.reset-header p{
+    color:#aaa;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.back-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:8px;
+}
+
+.btn-secondary{
+    background:transparent !important;
+    border:1px solid #444 !important;
+    color:#ddd !important;
+    font-weight:normal !important;
+    width:auto !important;
+    padding:13px 20px !important;
+    flex-shrink:0;
+}
+
+.btn-secondary:hover{
+    border-color:#ff3b30 !important;
+    color:#fff !important;
+}
+
+#resetFormWrap{
+    display:none;
 }
 
 </style>
@@ -143,49 +202,108 @@ button:disabled{
         Member Login
     </div>
 
-    <form id="loginForm">
+    <!-- ─── LOGIN FORM ─────────────────────────── -->
+    <div id="loginFormWrap">
 
-        <label for="login">
-            Username or Email
-        </label>
+        <form id="loginForm">
 
-        <input
-            type="text"
-            id="login"
-            name="login"
-            autocomplete="username"
-            placeholder="Enter username or email"
-            required
-        >
+            <label for="login">
+                Username or Email
+            </label>
 
-        <label for="password">
-            Password
-        </label>
+            <input
+                type="text"
+                id="login"
+                name="login"
+                autocomplete="username"
+                placeholder="Enter username or email"
+                required
+            >
 
-        <input
-            type="password"
-            id="password"
-            name="password"
-            autocomplete="current-password"
-            placeholder="Enter password"
-            required
-        >
+            <label for="password">
+                Password
+            </label>
 
-        <button
-            type="submit"
-            id="loginButton"
-        >
-            Login
-        </button>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                autocomplete="current-password"
+                placeholder="Enter password"
+                required
+            >
 
-    </form>
+            <button
+                type="submit"
+                id="loginButton"
+            >
+                Login
+            </button>
 
+        </form>
+
+        <div class="forgot-wrap">
+            <span
+                class="forgot-link"
+                onclick="showResetForm()"
+            >
+                Forgot password?
+            </span>
+        </div>
+
+    </div>
+
+    <!-- ─── RESET PASSWORD FORM ────────────────── -->
+    <div id="resetFormWrap">
+
+        <div class="reset-header">
+            <h2>Reset Password</h2>
+            <p>Enter your account email and we'll send you a password reset link.</p>
+        </div>
+
+        <form id="resetForm">
+
+            <label for="resetEmail">
+                Account Email
+            </label>
+
+            <input
+                type="email"
+                id="resetEmail"
+                name="resetEmail"
+                autocomplete="email"
+                placeholder="you@example.com"
+                required
+            >
+
+            <div class="back-row">
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="showLoginForm()"
+                >
+                    ← Back
+                </button>
+                <button
+                    type="submit"
+                    id="resetButton"
+                    style="flex:1;"
+                >
+                    Send Reset Link
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- ─── MESSAGE ────────────────────────────── -->
     <div
         id="message"
         class="message"
     ></div>
 
-    <div class="links">
+    <div class="links" id="bottomLinks">
 
         <a href="register.html">
             Create Account
@@ -196,6 +314,7 @@ button:disabled{
 </div>
 
 
+<!-- ─── SCRIPT: existing login flow ─────────────── -->
 <script>
 
 const form =
@@ -360,7 +479,6 @@ form.addEventListener(
             setTimeout(
                 function(){
 
-                    // ✅ Respect ?redirect= param
                     const params =
                         new URLSearchParams(
                             window.location.search
@@ -410,6 +528,113 @@ form.addEventListener(
 
     }
 );
+
+</script>
+
+
+<!-- ─── SCRIPT: forgot password (Firebase) ──────── -->
+<script type="module">
+
+import { initializeApp, getApps }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import { getAuth, sendPasswordResetEmail }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
+const auth = getAuth(app);
+
+// Make these available globally for the onclick handlers
+window.showResetForm = function () {
+    document.getElementById('loginFormWrap').style.display = 'none';
+    document.getElementById('resetFormWrap').style.display = 'block';
+    // Clear any old message
+    const m = document.getElementById('message');
+    m.style.display = 'none';
+    // Focus the email input
+    setTimeout(() => {
+        document.getElementById('resetEmail')?.focus();
+    }, 50);
+};
+
+window.showLoginForm = function () {
+    document.getElementById('resetFormWrap').style.display = 'none';
+    document.getElementById('loginFormWrap').style.display = 'block';
+    const m = document.getElementById('message');
+    m.style.display = 'none';
+    // Clear reset email field
+    document.getElementById('resetEmail').value = '';
+};
+
+const resetForm = document.getElementById('resetForm');
+const resetBtn  = document.getElementById('resetButton');
+
+resetForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById('resetEmail').value.trim();
+
+    if (!email) {
+        showMessage('Please enter your account email.', 'error');
+        return;
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+        showMessage('Please enter a valid email address.', 'error');
+        return;
+    }
+
+    resetBtn.disabled = true;
+    resetBtn.textContent = 'Sending…';
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+
+        showMessage(
+            '✅ Reset link sent to ' + email + '. Check your inbox (and spam folder).',
+            'success'
+        );
+
+        // Auto-return to login after 4 seconds
+        setTimeout(() => {
+            window.showLoginForm();
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Send Reset Link';
+            // Keep the success message visible
+            showMessage(
+                '✅ Check your email for the reset link. Then log in here.',
+                'success'
+            );
+        }, 4000);
+
+    } catch (err) {
+        console.error('Password reset error:', err);
+
+        let friendly = 'Could not send reset email. Please try again.';
+        if (err.code === 'auth/invalid-email') {
+            friendly = 'That email address looks invalid.';
+        } else if (err.code === 'auth/user-not-found') {
+            // Firebase intentionally returns success for security,
+            // but some versions throw. Handle gracefully.
+            friendly = 'If that email is registered, a reset link has been sent.';
+        } else if (err.code === 'auth/too-many-requests') {
+            friendly = 'Too many requests. Please wait a few minutes and try again.';
+        }
+
+        showMessage('❌ ' + friendly, 'error');
+        resetBtn.disabled = false;
+        resetBtn.textContent = 'Send Reset Link';
+    }
+});
 
 </script>
 
