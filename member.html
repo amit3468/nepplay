@@ -661,6 +661,105 @@
     .quick-actions { grid-template-columns: 1fr; }
     .earn-card .ec-value { font-size: 0.9rem; }
   }
+
+  /* ⭐ NEW: member tournament sections */
+  .member-tourneys { margin-bottom: 26px; }
+  .member-tourneys .mt-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .mt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform .15s, border-color .2s, box-shadow .2s;
+  }
+  .mt-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(168,85,247,.55);
+    box-shadow: 0 10px 28px rgba(124,58,237,.3);
+  }
+  .mt-card .mt-top { display: flex; align-items: center; gap: 10px; }
+  .mt-card .mt-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    display: grid; place-items: center; font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .mt-card .mt-title { font-weight: 800; font-size: .95rem; line-height: 1.2; }
+  .mt-card .mt-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .mt-card .mt-meta {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    font-size: .72rem; color: var(--muted);
+    border-top: 1px solid rgba(168,85,247,.15);
+    border-bottom: 1px solid rgba(168,85,247,.15);
+    padding: 8px 0;
+    align-items: center;
+  }
+  .mt-card .mt-meta strong { color: var(--gold-2); }
+  .mt-card .mt-mode {
+    padding: 2px 8px; border-radius: 999px;
+    font-size: .62rem; font-weight: 800;
+    letter-spacing: .3px; text-transform: uppercase;
+  }
+  .mt-mode.solo  { background: rgba(34,197,94,.18);  color:#4ade80; border:1px solid rgba(34,197,94,.45); }
+  .mt-mode.duo   { background: rgba(59,130,246,.18); color:#7db7ff; border:1px solid rgba(59,130,246,.45); }
+  .mt-mode.squad { background: rgba(245,158,11,.18); color:#fbbf24; border:1px solid rgba(245,158,11,.45); }
+  .mt-mode.other { background: rgba(168,85,247,.18); color:#d8b4fe; border:1px solid rgba(168,85,247,.45); }
+  .mt-card .mt-actions { display: flex; gap: 8px; margin-top: 2px; }
+  .mt-btn {
+    flex: 1; padding: 9px 12px;
+    border-radius: 9px; border: 0;
+    font-weight: 800; font-size: .78rem;
+    cursor: pointer; text-decoration: none;
+    text-align: center; font-family: inherit;
+    display: inline-flex; align-items: center;
+    justify-content: center; gap: 6px;
+    transition: transform .15s, background .2s;
+  }
+  .mt-btn.register {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(34,197,94,.35);
+  }
+  .mt-btn.register:hover { transform: translateY(-1px); }
+  .mt-btn.registered {
+    background: rgba(34,197,94,.12);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,.5);
+    cursor: default;
+  }
+  .mt-btn.view {
+    background: linear-gradient(135deg, var(--purple), var(--purple-2));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124,58,237,.35);
+  }
+  .mt-empty {
+    background: rgba(15, 8, 35, 0.5);
+    border: 1px dashed rgba(168,85,247,.35);
+    border-radius: 12px;
+    padding: 22px;
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  .mt-empty a { color: var(--gold-2); font-weight: 700; text-decoration: none; }
+  .mt-status {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 999px; font-size: .62rem;
+    font-weight: 800; letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .mt-status.pending   { background: rgba(245,158,11,.2);  color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
+  .mt-status.confirmed { background: rgba(34,197,94,.2);   color:#4ade80; border:1px solid rgba(34,197,94,.5); }
+  .mt-status.rejected  { background: rgba(239,68,68,.2);   color:#fca5a5; border:1px solid rgba(239,68,68,.5); }
+  .mt-status.other     { background: rgba(168,85,247,.2);  color:#d8b4fe; border:1px solid rgba(168,85,247,.5); }
+  @media (max-width: 720px) {
+    .member-tourneys .mt-list { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -832,6 +931,22 @@
       <span>Earned: <b id="refEarned">Rs. 0</b></span>
     </div>
   </div>
+
+  <!-- ⭐ NEW: Upcoming Events -->
+  <section class="member-tourneys" id="upcomingSection" hidden>
+    <h2 class="section-title">🎮 Upcoming <span class="accent">Events</span></h2>
+    <div class="mt-list" id="upcomingList">
+      <div class="mt-empty">Loading events…</div>
+    </div>
+  </section>
+
+  <!-- ⭐ NEW: My Registrations -->
+  <section class="member-tourneys" id="myRegsSection" hidden>
+    <h2 class="section-title">🏆 My <span class="accent">Registrations</span></h2>
+    <div class="mt-list" id="myRegsList">
+      <div class="mt-empty">Loading your registrations…</div>
+    </div>
+  </section>
 
   <h2 class="section-title">⚡ Quick <span class="accent">Actions</span></h2>
   <div class="quick-actions">
@@ -1103,12 +1218,7 @@ window.copyReferralLink = function() {
             setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 1600);
         });
     };
-    if (navigator.share) {
-        // Still copy — but offer share
-        doCopy();
-    } else {
-        doCopy();
-    }
+    doCopy();
 };
 
 // ============================================
@@ -1121,7 +1231,6 @@ async function loadBellNotifications(uid) {
     if (!listEl) return;
 
     try {
-        // Get notifications for me (targetUid == me) OR broadcast (ALL)
         const [personalSnap, allSnap] = await Promise.all([
             getDocs(query(
                 collection(db, 'notifications'),
@@ -1141,7 +1250,6 @@ async function loadBellNotifications(uid) {
         const broadcast = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         const combined = [...personal, ...broadcast];
 
-        // Sort by createdAt
         combined.sort((a, b) => {
             const ta = a.createdAt?.seconds || 0;
             const tb = b.createdAt?.seconds || 0;
@@ -1212,16 +1320,13 @@ window.openBellItem = async function(id) {
     const item = bellItems.find(x => x.id === id);
     if (!item || !currentUid) return;
 
-    // Mark as read
     try {
         await updateDoc(doc(db, 'notifications', id), {
             readBy: arrayUnion(currentUid)
         });
-        // Update local state
         item.readBy = [...(item.readBy || []), currentUid];
         renderBellList(currentUid);
 
-        // Update badge
         const unread = bellItems.filter(n => {
             const rb = Array.isArray(n.readBy) ? n.readBy : [];
             return !rb.includes(currentUid);
@@ -1283,6 +1388,217 @@ document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('bellBtn');
     if (btn) btn.addEventListener('click', window.toggleBell);
 });
+</script>
+
+<!-- ⭐ NEW: Upcoming events + my registrations -->
+<script type="module">
+(async function () {
+  try {
+    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const {
+      getFirestore, collection, query, where, orderBy, limit, getDocs
+    } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+
+    const cfg = {
+      apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+      authDomain: "nepplaygaming.firebaseapp.com",
+      projectId: "nepplaygaming",
+      storageBucket: "nepplaygaming.firebasestorage.app",
+      messagingSenderId: "893565645520",
+      appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+    };
+
+    const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+    function modeClass(m) {
+      const x = String(m || "").toLowerCase();
+      if (x === "solo") return "solo";
+      if (x === "duo")  return "duo";
+      if (x === "squad") return "squad";
+      return "other";
+    }
+    function statusClass(s) {
+      const x = String(s || "").toLowerCase();
+      if (x === "pending")   return "pending";
+      if (x === "confirmed" || x === "approved" || x === "paid") return "confirmed";
+      if (x === "rejected" || x === "cancelled") return "rejected";
+      return "other";
+    }
+    function fmtDate(d, t) {
+      let out = "";
+      if (typeof d === "string" && d) out = d;
+      else if (d && d.seconds) out = new Date(d.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
+      else if (d && d.toDate) out = d.toDate().toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
+      if (t) out += " · " + t;
+      return out || "—";
+    }
+    function fmtRegDate(ts) {
+      if (!ts) return "";
+      if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
+      if (ts.toDate) return ts.toDate().toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
+      return "";
+    }
+
+    // ============ 1. UPCOMING EVENTS ============
+    async function renderUpcoming(uid, myRegTournamentTitles) {
+      const listEl = document.getElementById("upcomingList");
+      const secEl  = document.getElementById("upcomingSection");
+      if (!listEl || !secEl) return;
+
+      let docs = [];
+      try {
+        const snap = await getDocs(query(
+          collection(db, "tournaments"),
+          where("status", "==", "upcoming"),
+          orderBy("date", "asc"),
+          limit(6)
+        ));
+        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (e) {
+        console.warn("[upcoming] query failed:", e && e.message);
+        try {
+          const snap = await getDocs(collection(db, "tournaments"));
+          docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .filter(t => String(t.status || "").toLowerCase() === "upcoming")
+            .sort((a, b) => String(a.date||"").localeCompare(String(b.date||"")))
+            .slice(0, 6);
+        } catch (e2) {
+          console.warn("[upcoming] fallback failed:", e2 && e2.message);
+        }
+      }
+
+      if (!docs.length) {
+        listEl.innerHTML = '<div class="mt-empty">No upcoming events right now. <a href="/tournaments.html">Browse tournaments →</a></div>';
+        secEl.hidden = false;
+        return;
+      }
+
+      listEl.innerHTML = docs.map(t => {
+        const title = t.title || (t.game ? (t.game + " " + (t.mode || "")) : "Tournament");
+        const icon  = t.icon || "🎮";
+        const mc    = modeClass(t.mode);
+        const date  = fmtDate(t.date, t.time);
+        const fee   = t.entryFee || t.entry_fee || 0;
+        const prize = t.prizePool || t.prize_pool || 0;
+        const already = myRegTournamentTitles.has(String(t.title||"").toLowerCase())
+                     || myRegTournamentTitles.has(String(t.id||"").toLowerCase());
+        const btn = already
+          ? `<button class="mt-btn registered" disabled>✓ Registered</button>`
+          : `<a class="mt-btn register" href="/registration.html?tournamentId=${encodeURIComponent(t.id)}">Register →</a>`;
+        return `
+          <div class="mt-card">
+            <div class="mt-top">
+              <div class="mt-icon">${esc(icon)}</div>
+              <div style="min-width:0;flex:1;">
+                <div class="mt-title">${esc(title)}</div>
+                <div class="mt-sub">${esc(t.game || "")} ${t.mode ? "· "+esc(t.mode) : ""}</div>
+              </div>
+            </div>
+            <div class="mt-meta">
+              <span class="mt-mode ${mc}">${esc(t.mode || "—")}</span>
+              <span>📅 ${esc(date)}</span>
+              <span>Entry: <strong>Rs ${esc(fee)}</strong></span>
+              ${prize ? `<span>Prize: <strong>Rs ${esc(prize)}</strong></span>` : ""}
+            </div>
+            <div class="mt-actions">${btn}</div>
+          </div>
+        `;
+      }).join("");
+      secEl.hidden = false;
+    }
+
+    // ============ 2. MY REGISTRATIONS ============
+    async function renderMyRegs(uid) {
+      const listEl = document.getElementById("myRegsList");
+      const secEl  = document.getElementById("myRegsSection");
+      if (!listEl || !secEl) return [];
+
+      let docs = [];
+      try {
+        const snap = await getDocs(query(
+          collection(db, "tournament_registrations"),
+          where("userId", "==", uid),
+          orderBy("registeredAt", "desc"),
+          limit(6)
+        ));
+        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (e) {
+        console.warn("[myregs] query failed (index may be missing):", e && e.message);
+        try {
+          const snap = await getDocs(query(
+            collection(db, "tournament_registrations"),
+            where("userId", "==", uid)
+          ));
+          docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => (b.registeredAt?.seconds||0) - (a.registeredAt?.seconds||0))
+            .slice(0, 6);
+        } catch (e2) {
+          console.warn("[myregs] fallback failed:", e2 && e2.message);
+          listEl.innerHTML = '<div class="mt-empty">Could not load your registrations right now.</div>';
+          secEl.hidden = false;
+          return [];
+        }
+      }
+
+      if (!docs.length) {
+        listEl.innerHTML = '<div class="mt-empty">You haven\'t registered for any tournament yet. <a href="/tournaments.html">Browse tournaments →</a></div>';
+        secEl.hidden = false;
+        return [];
+      }
+
+      listEl.innerHTML = docs.map(r => {
+        const title = r.tournamentTitle || r.tournamentName || r.game || "Tournament";
+        const icon  = r.icon || (r.game ? "🎮" : "🏆");
+        const mc    = modeClass(r.tournamentMode || r.playingAs);
+        const sc    = statusClass(r.status);
+        const when  = fmtRegDate(r.registeredAt);
+        return `
+          <div class="mt-card">
+            <div class="mt-top">
+              <div class="mt-icon">${esc(icon)}</div>
+              <div style="min-width:0;flex:1;">
+                <div class="mt-title">${esc(title)}</div>
+                <div class="mt-sub">${esc(r.game || "")} ${r.teamName ? "· "+esc(r.teamName) : ""}</div>
+              </div>
+            </div>
+            <div class="mt-meta">
+              <span class="mt-mode ${mc}">${esc(r.tournamentMode || r.playingAs || "—")}</span>
+              <span class="mt-status ${sc}">${esc(r.status || "pending")}</span>
+              ${when ? `<span>📅 ${esc(when)}</span>` : ""}
+              ${r.amount ? `<span>Rs <strong>${esc(r.amount)}</strong></span>` : ""}
+            </div>
+            <div class="mt-actions">
+              <a class="mt-btn view" href="/my-tournaments.html">View details →</a>
+            </div>
+          </div>
+        `;
+      }).join("");
+      secEl.hidden = false;
+
+      return docs.map(r => String(r.tournamentTitle || r.tournamentId || "").toLowerCase());
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try {
+        const myTitles = await renderMyRegs(user.uid);
+        await renderUpcoming(user.uid, new Set(myTitles || []));
+      } catch (e) {
+        console.warn("member tournaments block error:", e);
+      }
+    });
+  } catch (outerErr) {
+    console.warn("member tournaments module failed to load:", outerErr);
+  }
+})();
 </script>
 
 </body>
