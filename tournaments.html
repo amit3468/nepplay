@@ -139,7 +139,6 @@
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
-  /* ⭐ NEW hero — replaces countdown */
   .hero {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
@@ -218,6 +217,13 @@
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #fff;
   }
+  .section-title.popular {
+    border-bottom-color: rgba(245,158,11,.4);
+  }
+  .section-title.popular .st-tag {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
+  }
 
   .game-grid {
     display: grid;
@@ -242,6 +248,11 @@
     border-color: rgba(245,158,11,.5);
     box-shadow: 0 0 30px rgba(245,158,11,.15);
   }
+  .game-card.popular {
+    border-color: rgba(245,158,11,.6);
+    background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(30,18,60,.75));
+    box-shadow: 0 0 30px rgba(245,158,11,.2);
+  }
   .game-head {
     display: flex; align-items: center; gap: 12px;
   }
@@ -265,8 +276,18 @@
     letter-spacing: 0.3px;
     white-space: nowrap;
   }
+  .popular-badge {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
 
-  /* ⭐ Time rows inside each game card */
   .time-slot {
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 0;
@@ -510,6 +531,9 @@ const auth = getAuth(app);
 // ⭐ Tonight's 1v1 hardcoded ID
 const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 
+// ⭐ Popular games — get featured cards with BOTH day+night rows
+const POPULAR_GAMES = ['free fire', 'pubg'];
+
 // ── Helpers ─────────────────────────────────────
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
@@ -545,15 +569,17 @@ function gameIcon(game, fallbackIcon) {
   if (g.includes('ludo')) return '🎲';
   return '🎮';
 }
-// Group key — normalize "Free Fire" == "FreeFire" etc.
 function gameKey(game) {
   return String(game || '').toLowerCase().replace(/\s+/g, '');
 }
-// Time slot classifier
 function slotOf(time) {
   const hour = parseInt(String(time || '0').split(':')[0], 10);
-  if (hour < 18) return 'day';   // before 6 PM
-  return 'night';                // 6 PM or later
+  if (hour < 18) return 'day';
+  return 'night';
+}
+function isPopular(game) {
+  const g = String(game || '').toLowerCase();
+  return POPULAR_GAMES.some(k => g.includes(k));
 }
 
 // ── Fetch ───────────────────────────────────────
@@ -586,13 +612,12 @@ function classifySection(t) {
   if (t.id === TONIGHT_1V1_ID) return 'tonight';
   const date = String(t.date || '');
   if (date === '2026-09-30') {
-    return slotOf(t.time); // 'day' or 'night'
+    return slotOf(t.time);
   }
   return 'other';
 }
 
-// ── Build a game card ──────────────────────────
-// Group tournaments: gameKey → { game, day: [...], night: [...] }
+// ── Group tournaments by game ───────────────────
 function buildGameGroups(list) {
   const groups = {};
   list.forEach(t => {
@@ -601,7 +626,6 @@ function buildGameGroups(list) {
     const slot = slotOf(t.time);
     groups[key][slot].push(t);
   });
-  // Sort each slot: Solo, Duo, Squad, else alpha
   const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
   Object.values(groups).forEach(g => {
     ['day','night'].forEach(slot => {
@@ -633,13 +657,14 @@ function renderModeButtons(list) {
   }).join('');
 }
 
-function renderGameCard(group) {
+function renderGameCard(group, opts = {}) {
   const { game, day, night } = group;
   const iconField = (day[0] || night[0])?.icon;
   const icon = gameIcon(game, iconField);
   const entryFee = (day[0] || night[0])?.entryFee || (day[0] || night[0])?.entry_fee || 0;
   const topKills = (day[0] || night[0])?.topKillsPrize || 0;
   const featured = day.length > 0 && night.length > 0;
+  const isPopularCard = opts.popular === true;
 
   let slots = '';
 
@@ -671,7 +696,7 @@ function renderGameCard(group) {
   }
 
   return `
-    <div class="game-card ${featured ? 'featured' : ''}">
+    <div class="game-card ${isPopularCard ? 'popular' : (featured ? 'featured' : '')}">
       <div class="game-head">
         <div class="icon">${esc(icon)}</div>
         <div class="info">
@@ -679,7 +704,7 @@ function renderGameCard(group) {
           <div class="meta">
             <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
             ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
-            ${featured ? `<span style="color:#4ade80;">● 2 schedules</span>` : ''}
+            ${isPopularCard ? `<span class="popular-badge">⭐ Popular</span>` : ''}
           </div>
         </div>
       </div>
@@ -700,7 +725,6 @@ function renderAll(tournaments) {
     return;
   }
 
-  // Split into buckets
   const tonight = [];
   const day = [];
   const night = [];
@@ -718,7 +742,8 @@ function renderAll(tournaments) {
   if (heroStats) {
     const totalTourneys = tournaments.length;
     const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
-    const entry = (day[0] || night[0] || tonight[0])?.entryFee || (day[0] || night[0] || tonight[0])?.entry_fee || 150;
+    const entry = (day[0] || night[0] || tonight[0])?.entryFee
+               || (day[0] || night[0] || tonight[0])?.entry_fee || 150;
     heroStats.innerHTML = `
       <div class="hero-stat"><b>${totalTourneys}</b> tournaments</div>
       <div class="hero-stat"><b>${uniqueGames}</b> games</div>
@@ -729,7 +754,7 @@ function renderAll(tournaments) {
 
   let html = '';
 
-  // TONIGHT
+  // ⭐ TONIGHT
   if (tonight.length) {
     html += `
       <h2 class="section-title tonight">
@@ -774,38 +799,62 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // DAY (30 Sept 1 PM)
-  if (day.length) {
+  // ⭐ POPULAR GAMES — Free Fire + PUBG get featured cards with both slots
+  const allDayNight = [...day, ...night];
+  const popularGroups = buildGameGroups(allDayNight);
+  const popularKeys = Object.keys(popularGroups).filter(k => isPopular(popularGroups[k].game));
+
+  if (popularKeys.length > 0) {
+    popularKeys.sort((a, b) =>
+      String(popularGroups[a].game || '').localeCompare(String(popularGroups[b].game || ''))
+    );
+    html += `
+      <h2 class="section-title popular">
+        ⭐ Popular Games <span class="st-tag">Both Schedules</span>
+      </h2>
+      <div class="game-grid">
+    `;
+    popularKeys.forEach(k => {
+      html += renderGameCard(popularGroups[k], { popular: true });
+    });
+    html += '</div>';
+  }
+
+  // Filter out popular from Day/Night
+  const dayOnly   = day.filter(t => !isPopular(t.game));
+  const nightOnly = night.filter(t => !isPopular(t.game));
+
+  // ☀️ DAY SESSION (popular removed)
+  if (dayOnly.length) {
     html += `
       <h2 class="section-title day">
         ☀️ 30 September · Day Session <span class="st-tag">1:00 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
-    const groups = buildGameGroups(day);
-    // Only include games that have a day entry (they all will here)
+    const groups = buildGameGroups(dayOnly);
     Object.values(groups).forEach(g => {
       if (g.day.length) html += renderGameCard({ game: g.game, day: g.day, night: [] });
     });
     html += '</div>';
   }
 
-  // NIGHT (30 Sept 9 PM)
-  if (night.length) {
+  // 🌙 NIGHT SESSION (popular removed)
+  if (nightOnly.length) {
     html += `
       <h2 class="section-title night">
         🌙 30 September · Night Session <span class="st-tag">9:00 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
-    const groups = buildGameGroups(night);
+    const groups = buildGameGroups(nightOnly);
     Object.values(groups).forEach(g => {
       if (g.night.length) html += renderGameCard({ game: g.game, day: [], night: g.night });
     });
     html += '</div>';
   }
 
-  // OTHER (fallback)
+  // 📅 OTHER (fallback)
   if (other.length) {
     html += `
       <h2 class="section-title">
