@@ -531,8 +531,55 @@ const auth = getAuth(app);
 // ⭐ Tonight's 1v1 hardcoded ID
 const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 
-// ⭐ Popular games — get featured cards with BOTH day+night rows
+// ⭐ Popular games — featured cards with both day+night rows
 const POPULAR_GAMES = ['free fire', 'pubg'];
+
+// ⭐ Game name aliases — map variations to a single canonical key
+// Prevents "PUBG" and "PUBG Mobile" from splitting into two cards
+const GAME_ALIASES = {
+  'freefire':       'freefire',
+  'free fire':      'freefire',
+  'ff':             'freefire',
+  'pubg':           'pubgmobile',
+  'pubgm':          'pubgmobile',
+  'pubg mobile':    'pubgmobile',
+  'pubgmobile':     'pubgmobile',
+  'cod':            'cod',
+  'cod mobile':     'cod',
+  'call of duty':   'cod',
+  'callofduty':     'cod',
+  'valorant':       'valorant',
+  'efootball':      'efootball',
+  'efoot':          'efootball',
+  'e football':     'efootball',
+  'ecricket':       'ecricket',
+  'e cricket':      'ecricket',
+  'chess':          'chess',
+  'ludo':           'ludo',
+  'ludo king':      'ludo'
+};
+
+// Canonical display name for each key
+const GAME_DISPLAY = {
+  freefire:  'Free Fire',
+  pubgmobile:'PUBG Mobile',
+  cod:       'Call of Duty',
+  valorant:  'Valorant',
+  efootball: 'eFootball',
+  ecricket:  'eCricket',
+  chess:     'Chess',
+  ludo:      'Ludo'
+};
+
+function gameKey(game) {
+  const g = String(game || '').toLowerCase().trim().replace(/\s+/g, ' ');
+  return GAME_ALIASES[g] || GAME_ALIASES[g.replace(/\s/g, '')] || g.replace(/\s/g, '');
+}
+
+function gameDisplayName(game) {
+  const k = gameKey(game);
+  return GAME_DISPLAY[k] || game || 'Game';
+}
 
 // ── Helpers ─────────────────────────────────────
 function esc(s) {
@@ -556,30 +603,30 @@ function modeIcon(mode) {
   if (x === 'ffa') return '🎲';
   return '🎮';
 }
-function gameIcon(game, fallbackIcon) {
+function gameIcon(key, fallbackIcon) {
   if (fallbackIcon) return fallbackIcon;
-  const g = String(game || '').toLowerCase();
-  if (g.includes('free fire') || g === 'ff') return '🔥';
-  if (g.includes('pubg')) return '🎯';
-  if (g.includes('call of duty') || g.includes('cod')) return '🎖️';
-  if (g.includes('valorant')) return '⚔️';
-  if (g.includes('efoot') || g.includes('football')) return '⚽';
-  if (g.includes('ecricket') || g.includes('cricket')) return '🏏';
-  if (g.includes('chess')) return '♟️';
-  if (g.includes('ludo')) return '🎲';
-  return '🎮';
-}
-function gameKey(game) {
-  return String(game || '').toLowerCase().replace(/\s+/g, '');
+  switch (key) {
+    case 'freefire':  return '🔥';
+    case 'pubgmobile':return '🎯';
+    case 'cod':       return '🎖️';
+    case 'valorant':  return '⚔️';
+    case 'efootball': return '⚽';
+    case 'ecricket':  return '🏏';
+    case 'chess':     return '♟️';
+    case 'ludo':      return '🎲';
+    default:          return '🎮';
+  }
 }
 function slotOf(time) {
   const hour = parseInt(String(time || '0').split(':')[0], 10);
   if (hour < 18) return 'day';
   return 'night';
 }
-function isPopular(game) {
-  const g = String(game || '').toLowerCase();
-  return POPULAR_GAMES.some(k => g.includes(k));
+function isPopular(key) {
+  return POPULAR_GAMES.some(k => {
+    const kk = gameKey(k);
+    return kk === key;
+  });
 }
 
 // ── Fetch ───────────────────────────────────────
@@ -607,7 +654,6 @@ async function fetchTournaments() {
   return docs;
 }
 
-// ── Classify top-level section ──────────────────
 function classifySection(t) {
   if (t.id === TONIGHT_1V1_ID) return 'tonight';
   const date = String(t.date || '');
@@ -617,15 +663,23 @@ function classifySection(t) {
   return 'other';
 }
 
-// ── Group tournaments by game ───────────────────
+// ⭐ Group tournaments by canonical game key, splitting into day/night
 function buildGameGroups(list) {
   const groups = {};
   list.forEach(t => {
     const key = gameKey(t.game);
-    if (!groups[key]) groups[key] = { game: t.game, day: [], night: [] };
+    if (!groups[key]) {
+      groups[key] = {
+        key,
+        displayName: gameDisplayName(t.game),
+        day: [],
+        night: []
+      };
+    }
     const slot = slotOf(t.time);
     groups[key][slot].push(t);
   });
+  // Sort modes: Solo, Duo, Squad, FFA, then alpha
   const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
   Object.values(groups).forEach(g => {
     ['day','night'].forEach(slot => {
@@ -639,8 +693,27 @@ function buildGameGroups(list) {
   return groups;
 }
 
+// ⭐ Merge duplicates within a slot: same mode → one button with highest prize
+// Keeps the tournament with the highest prizePool's seedKey for the link
+function dedupeByMode(list) {
+  const byMode = {};
+  list.forEach(t => {
+    const modeKey = String(t.mode || '').toLowerCase().trim();
+    if (!byMode[modeKey]) {
+      byMode[modeKey] = { mode: t.mode, best: t, count: 1 };
+    } else {
+      byMode[modeKey].count++;
+      const currentPrize = Number(byMode[modeKey].best.prizePool || byMode[modeKey].best.prize_pool || 0);
+      const newPrize = Number(t.prizePool || t.prize_pool || 0);
+      if (newPrize > currentPrize) byMode[modeKey].best = t;
+    }
+  });
+  return Object.values(byMode).map(x => x.best);
+}
+
 function renderModeButtons(list) {
-  return list.map(t => {
+  const deduped = dedupeByMode(list);
+  return deduped.map(t => {
     const cls = modeClass(t.mode);
     const prize = t.prizePool || t.prize_pool || 0;
     const link = t.seedKey
@@ -658,9 +731,9 @@ function renderModeButtons(list) {
 }
 
 function renderGameCard(group, opts = {}) {
-  const { game, day, night } = group;
+  const { day, night, displayName, key } = group;
   const iconField = (day[0] || night[0])?.icon;
-  const icon = gameIcon(game, iconField);
+  const icon = gameIcon(key, iconField);
   const entryFee = (day[0] || night[0])?.entryFee || (day[0] || night[0])?.entry_fee || 0;
   const topKills = (day[0] || night[0])?.topKillsPrize || 0;
   const featured = day.length > 0 && night.length > 0;
@@ -700,7 +773,7 @@ function renderGameCard(group, opts = {}) {
       <div class="game-head">
         <div class="icon">${esc(icon)}</div>
         <div class="info">
-          <div class="name">${esc(game)}</div>
+          <div class="name">${esc(displayName)}</div>
           <div class="meta">
             <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
             ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
@@ -738,7 +811,7 @@ function renderAll(tournaments) {
     else other.push(t);
   });
 
-  // Hero stats
+  // Hero stats — dedupe by game key
   if (heroStats) {
     const totalTourneys = tournaments.length;
     const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
@@ -763,7 +836,7 @@ function renderAll(tournaments) {
       <div class="game-grid">
     `;
     tonight.forEach(t => {
-      const title = t.title || `${t.game || 'Game'} ${t.mode || ''}`.trim();
+      const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
       const prize = t.prizePool || t.prize_pool || 0;
       const entry = t.entryFee || t.entry_fee || 0;
       const link = t.seedKey
@@ -799,14 +872,15 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // ⭐ POPULAR GAMES — Free Fire + PUBG get featured cards with both slots
+  // ⭐ POPULAR GAMES
   const allDayNight = [...day, ...night];
-  const popularGroups = buildGameGroups(allDayNight);
-  const popularKeys = Object.keys(popularGroups).filter(k => isPopular(popularGroups[k].game));
+  const allGroups = buildGameGroups(allDayNight);
+  const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
 
   if (popularKeys.length > 0) {
+    // Sort alphabetically
     popularKeys.sort((a, b) =>
-      String(popularGroups[a].game || '').localeCompare(String(popularGroups[b].game || ''))
+      String(allGroups[a].displayName || '').localeCompare(String(allGroups[b].displayName || ''))
     );
     html += `
       <h2 class="section-title popular">
@@ -815,16 +889,16 @@ function renderAll(tournaments) {
       <div class="game-grid">
     `;
     popularKeys.forEach(k => {
-      html += renderGameCard(popularGroups[k], { popular: true });
+      html += renderGameCard(allGroups[k], { popular: true });
     });
     html += '</div>';
   }
 
-  // Filter out popular from Day/Night
-  const dayOnly   = day.filter(t => !isPopular(t.game));
-  const nightOnly = night.filter(t => !isPopular(t.game));
+  // Filter popular from Day/Night buckets
+  const dayOnly   = day.filter(t => !isPopular(gameKey(t.game)));
+  const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
 
-  // ☀️ DAY SESSION (popular removed)
+  // ☀️ DAY
   if (dayOnly.length) {
     html += `
       <h2 class="section-title day">
@@ -834,12 +908,12 @@ function renderAll(tournaments) {
     `;
     const groups = buildGameGroups(dayOnly);
     Object.values(groups).forEach(g => {
-      if (g.day.length) html += renderGameCard({ game: g.game, day: g.day, night: [] });
+      if (g.day.length) html += renderGameCard({ ...g, night: [] });
     });
     html += '</div>';
   }
 
-  // 🌙 NIGHT SESSION (popular removed)
+  // 🌙 NIGHT
   if (nightOnly.length) {
     html += `
       <h2 class="section-title night">
@@ -849,12 +923,12 @@ function renderAll(tournaments) {
     `;
     const groups = buildGameGroups(nightOnly);
     Object.values(groups).forEach(g => {
-      if (g.night.length) html += renderGameCard({ game: g.game, day: [], night: g.night });
+      if (g.night.length) html += renderGameCard({ ...g, day: [] });
     });
     html += '</div>';
   }
 
-  // 📅 OTHER (fallback)
+  // 📅 OTHER
   if (other.length) {
     html += `
       <h2 class="section-title">
