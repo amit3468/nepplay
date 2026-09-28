@@ -139,59 +139,89 @@
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
-  .auto-counter {
+  /* ⭐ NEW hero — replaces countdown */
+  .hero {
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px;
-    padding: 30px; text-align: center;
-    box-shadow: var(--shadow); margin-bottom: 26px;
+    padding: 34px 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
   }
-  .auto-counter h2 {
-    font-size: 1rem; color: var(--gold-2);
-    letter-spacing: 1.5px; text-transform: uppercase;
-    margin-bottom: 8px;
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(251,191,36,.25), transparent 70%);
+    border-radius: 50%;
   }
-  .auto-counter .big {
-    font-size: 2.6rem; font-weight: 900;
-    background: linear-gradient(135deg, #fbbf24, #f97316);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .hero .h-tag {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    background: rgba(251,191,36,.18);
+    color: var(--gold-2);
+    border: 1px solid rgba(251,191,36,.5);
+    padding: 5px 12px; border-radius: 999px;
+    margin-bottom: 12px;
+    position: relative;
   }
-  .auto-counter .sub {
-    color: #ddd6fe; font-size: 0.9rem; margin-top: 8px;
+  .hero h1 {
+    font-size: 1.9rem; font-weight: 900;
+    line-height: 1.2; margin-bottom: 10px;
+    position: relative;
   }
+  .hero h1 .cash { color: var(--gold-2); }
+  .hero p {
+    color: #ddd6fe; font-size: 0.95rem;
+    max-width: 620px; line-height: 1.55;
+    position: relative;
+  }
+  .hero-stats {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 18px; position: relative;
+  }
+  .hero-stat {
+    background: rgba(15,8,35,.55);
+    border: 1px solid rgba(168,85,247,.25);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; color: #ddd6fe;
+    font-weight: 700;
+  }
+  .hero-stat b { color: var(--gold-2); font-weight: 900; font-size: 1rem; }
 
-  .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
-  .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
-
-  .slot-header {
-    font-size: 1.15rem; font-weight: 900;
+  .section-title {
+    font-size: 1.2rem; font-weight: 900;
     margin: 26px 0 14px;
     display: flex; align-items: center; gap: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid rgba(168,85,247,.25);
   }
-  .slot-header .slot-tag {
+  .section-title .st-tag {
     font-size: 0.72rem; font-weight: 800;
     padding: 4px 10px; border-radius: 999px;
     letter-spacing: 0.5px; text-transform: uppercase;
   }
-  .slot-header.tonight .slot-tag {
+  .section-title.tonight .st-tag {
     background: linear-gradient(135deg, #ef4444, #f97316);
     color: #fff;
   }
-  .slot-header.day .slot-tag {
+  .section-title.day .st-tag {
     background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #1a0b3d;
   }
-  .slot-header.night .slot-tag {
+  .section-title.night .st-tag {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #fff;
   }
 
   .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px;
     margin-bottom: 26px;
   }
@@ -200,7 +230,7 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 18px;
-    display: flex; flex-direction: column; gap: 12px;
+    display: flex; flex-direction: column; gap: 14px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
   .game-card:hover {
@@ -208,70 +238,91 @@
     box-shadow: 0 12px 32px rgba(124, 58, 237, 0.35);
     border-color: rgba(168, 85, 247, 0.5);
   }
-  .game-card .icon { font-size: 2rem; line-height: 1; }
-  .game-card .name { font-weight: 800; font-size: 1.15rem; }
-  .game-card .meta {
-    display: flex; justify-content: space-between;
-    font-size: 0.78rem; color: var(--muted);
-    margin-bottom: 4px;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
+  .game-card.featured {
+    border-color: rgba(245,158,11,.5);
+    box-shadow: 0 0 30px rgba(245,158,11,.15);
   }
-  .game-card .meta strong { color: var(--gold-2); }
+  .game-head {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .game-head .icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+  .game-head .info { min-width: 0; flex: 1; }
+  .game-head .name { font-weight: 800; font-size: 1.15rem; }
+  .game-head .meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 0.76rem; color: var(--muted);
+    margin-top: 3px; align-items: center;
+  }
+  .game-head .meta strong { color: var(--gold-2); }
   .tk-badge {
     background: rgba(239, 68, 68, 0.18);
     color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, 0.5);
-    padding: 3px 9px;
+    padding: 2px 8px;
     border-radius: 999px;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 800;
     letter-spacing: 0.3px;
     white-space: nowrap;
   }
 
+  /* ⭐ Time rows inside each game card */
+  .time-slot {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 0;
+    border-top: 1px dashed rgba(168,85,247,.2);
+  }
+  .time-slot:first-of-type { border-top: none; padding-top: 4px; }
+  .time-slot-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; font-weight: 800;
+    color: #fff;
+  }
+  .time-slot-head .t-pill {
+    font-size: 0.68rem; font-weight: 900;
+    padding: 3px 9px; border-radius: 999px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .time-slot-head.day .t-pill {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a0b3d;
+  }
+  .time-slot-head.night .t-pill {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+
   .mode-buttons {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
     gap: 8px;
-    margin-top: 6px;
   }
-  .mode-buttons.two-col { grid-template-columns: repeat(2, 1fr); }
-  .mode-buttons.one-col { grid-template-columns: 1fr; }
-
   .mode-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 12px 6px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px;
+    padding: 11px 6px;
     border-radius: 10px;
     text-decoration: none;
-    font-weight: 800;
-    font-size: 0.82rem;
+    font-weight: 800; font-size: 0.8rem;
     color: #fff;
     border: 1px solid transparent;
     transition: transform 0.15s, box-shadow 0.2s;
     text-align: center;
+    min-width: 0;
   }
   .mode-btn:hover { transform: translateY(-1px); }
-  .mode-btn .mode-icon {
-    font-size: 1.15rem; line-height: 1; margin-bottom: 2px;
-  }
-  .mode-btn .mode-label {
-    font-size: 0.68rem; font-weight: 700;
-    opacity: 0.85; letter-spacing: 0.3px;
+  .mode-btn .mode-icon { font-size: 1.1rem; line-height: 1; }
+  .mode-btn .mode-name {
+    font-size: 0.78rem; font-weight: 800;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 100%;
   }
   .mode-btn .mode-prize {
-    font-size: 0.72rem;
-    font-weight: 900;
+    font-size: 0.68rem; font-weight: 900;
     background: rgba(0,0,0,0.3);
-    padding: 2px 8px;
-    border-radius: 999px;
-    margin-top: 3px;
-    letter-spacing: 0.3px;
+    padding: 2px 7px; border-radius: 999px;
+    margin-top: 2px; letter-spacing: 0.3px;
   }
   .mode-btn.solo {
     background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -337,22 +388,16 @@
     .user-chip .caret { font-size: 0.45rem; }
     .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
+    .hero { padding: 26px 20px; }
+    .hero h1 { font-size: 1.5rem; }
     .game-grid { grid-template-columns: 1fr; gap: 14px; }
     .game-card { padding: 14px; }
-    .auto-counter .big { font-size: 2rem; }
-    .page-title { font-size: 1.25rem; }
-    .slot-header { font-size: 1rem; }
-    .mode-buttons { gap: 6px; }
-    .mode-btn { padding: 11px 4px; font-size: 0.78rem; }
-    .mode-btn .mode-icon { font-size: 1.05rem; }
-    .mode-btn .mode-label { font-size: 0.62rem; }
-    .mode-btn .mode-prize { font-size: 0.64rem; padding: 2px 6px; }
+    .section-title { font-size: 1.05rem; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link,
     .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
     .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
-    .mode-btn .mode-label { display: none; }
   }
 </style>
 </head>
@@ -392,18 +437,21 @@
 
 <div class="container">
 
-  <div class="auto-counter" id="autoCounter">
-    <h2>● Next Event Starts In</h2>
-    <div class="big" id="counterDisplay">--:--:--</div>
-    <div class="sub" id="counterSub">Loading…</div>
-  </div>
-
-  <h1 class="page-title" id="pageTitle">Tournaments 🎮</h1>
-  <p class="page-sub" id="pageSub">Loading tournaments…</p>
+  <section class="hero">
+    <span class="h-tag">🎮 NEPPLAY Tournaments</span>
+    <h1>Choose your game. <span class="cash">Win real cash.</span> 💰</h1>
+    <p>
+      8 games · multiple modes · two daily schedules.
+      Pick the game and mode you love — we'll handle the rest.
+    </p>
+    <div class="hero-stats" id="heroStats">
+      <div class="hero-stat">⏳ Loading…</div>
+    </div>
+  </section>
 
   <div class="room-note">
-    🎯 <strong>Pick your mode:</strong> Solo · Duo · Squad — different prize for each.<br>
-    🔓 Room details reveal 30 minutes before each match.
+    🎯 <strong>How to register:</strong> Tap any mode button (Solo · Duo · Squad) — it opens the registration form.<br>
+    🔓 Room details reveal <strong>30 minutes before</strong> each match.
   </div>
 
   <div id="tournamentContent">
@@ -459,6 +507,9 @@ const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
+// ⭐ Tonight's 1v1 hardcoded ID
+const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
+
 // ── Helpers ─────────────────────────────────────
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
@@ -481,14 +532,6 @@ function modeIcon(mode) {
   if (x === 'ffa') return '🎲';
   return '🎮';
 }
-function modeLabel(mode, max) {
-  const x = String(mode || '').toLowerCase();
-  if (x === 'solo') return '1 player';
-  if (x === 'duo') return '2 players';
-  if (x === 'squad') return `Up to ${max || 6}`;
-  if (x === 'ffa') return '4-player FFA';
-  return mode || '';
-}
 function gameIcon(game, fallbackIcon) {
   if (fallbackIcon) return fallbackIcon;
   const g = String(game || '').toLowerCase();
@@ -502,12 +545,18 @@ function gameIcon(game, fallbackIcon) {
   if (g.includes('ludo')) return '🎲';
   return '🎮';
 }
-// Normalize for grouping — strips spaces, case
+// Group key — normalize "Free Fire" == "FreeFire" etc.
 function gameKey(game) {
   return String(game || '').toLowerCase().replace(/\s+/g, '');
 }
+// Time slot classifier
+function slotOf(time) {
+  const hour = parseInt(String(time || '0').split(':')[0], 10);
+  if (hour < 18) return 'day';   // before 6 PM
+  return 'night';                // 6 PM or later
+}
 
-// ── Fetch all tournaments ───────────────────────
+// ── Fetch ───────────────────────────────────────
 async function fetchTournaments() {
   let docs = [];
   try {
@@ -515,11 +564,11 @@ async function fetchTournaments() {
       collection(db, 'tournaments'),
       where('status', '==', 'upcoming'),
       orderBy('date', 'asc'),
-      limit(50)
+      limit(80)
     ));
     docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {
-    console.warn('[tournaments] indexed query failed, using fallback:', e && e.message);
+    console.warn('[tournaments] indexed query failed:', e && e.message);
     try {
       const snap = await getDocs(collection(db, 'tournaments'));
       docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -532,73 +581,109 @@ async function fetchTournaments() {
   return docs;
 }
 
-// ── Classify by section ─────────────────────────
-function classifyTournament(t) {
-  const title = String(t.title || '').toLowerCase();
-  const mode = String(t.mode || '').toLowerCase();
+// ── Classify top-level section ──────────────────
+function classifySection(t) {
+  if (t.id === TONIGHT_1V1_ID) return 'tonight';
   const date = String(t.date || '');
-  const time = String(t.time || '');
-
-  // Tonight's 1v1 special
-  if (title.includes('1v1') || title.includes('1 vs 1') || title.includes('1vs1')) {
-    return { section: 'tonight', sortKey: 0 };
-  }
-  // 30 Sept — split by time
   if (date === '2026-09-30') {
-    const hour = parseInt((time.split(':')[0] || '0'), 10);
-    if (hour < 18) return { section: 'day', sortKey: 1 };       // before 6 PM → day
-    return { section: 'night', sortKey: 2 };                    // 6 PM or later → night
+    return slotOf(t.time); // 'day' or 'night'
   }
-  // Fallback — sort by date
-  return { section: 'other', sortKey: 3 + (parseInt(date.replace(/-/g,''),10) || 0) };
+  return 'other';
 }
 
-// ── Render one game card (with mode buttons) ────
-function renderGameCard(game, tournaments) {
-  // Choose icon from first tournament that has one
-  const iconField = tournaments.find(t => t.icon)?.icon;
-  const icon = gameIcon(game, iconField);
-  const entryFee = tournaments[0]?.entryFee || tournaments[0]?.entry_fee || 0;
-  const topKills = tournaments[0]?.topKillsPrize || 0;
-
-  // Sort modes: Solo, Duo, Squad, else alpha
-  const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
-  const sorted = [...tournaments].sort((a,b) => {
-    const ao = order[String(a.mode||'').toLowerCase()] ?? 99;
-    const bo = order[String(b.mode||'').toLowerCase()] ?? 99;
-    return ao - bo;
+// ── Build a game card ──────────────────────────
+// Group tournaments: gameKey → { game, day: [...], night: [...] }
+function buildGameGroups(list) {
+  const groups = {};
+  list.forEach(t => {
+    const key = gameKey(t.game);
+    if (!groups[key]) groups[key] = { game: t.game, day: [], night: [] };
+    const slot = slotOf(t.time);
+    groups[key][slot].push(t);
   });
+  // Sort each slot: Solo, Duo, Squad, else alpha
+  const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
+  Object.values(groups).forEach(g => {
+    ['day','night'].forEach(slot => {
+      g[slot].sort((a,b) => {
+        const ao = order[String(a.mode||'').toLowerCase()] ?? 99;
+        const bo = order[String(b.mode||'').toLowerCase()] ?? 99;
+        return ao - bo;
+      });
+    });
+  });
+  return groups;
+}
 
-  const buttons = sorted.map(t => {
-    const m = String(t.mode || '').toLowerCase();
-    const cls = modeClass(m);
+function renderModeButtons(list) {
+  return list.map(t => {
+    const cls = modeClass(t.mode);
     const prize = t.prizePool || t.prize_pool || 0;
     const link = t.seedKey
       ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
       : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+    const modeName = t.mode || 'Mode';
     return `
       <a href="${link}" class="mode-btn ${cls}">
         <span class="mode-icon">${modeIcon(t.mode)}</span>
-        <span>${esc(t.mode || 'Mode')}</span>
-        <span class="mode-label">${esc(modeLabel(t.mode, t.max))}</span>
+        <span class="mode-name">${esc(modeName)}</span>
         <span class="mode-prize">Rs ${prize}</span>
       </a>
     `;
   }).join('');
+}
 
-  const colClass = sorted.length === 1 ? 'one-col' : sorted.length === 2 ? 'two-col' : '';
+function renderGameCard(group) {
+  const { game, day, night } = group;
+  const iconField = (day[0] || night[0])?.icon;
+  const icon = gameIcon(game, iconField);
+  const entryFee = (day[0] || night[0])?.entryFee || (day[0] || night[0])?.entry_fee || 0;
+  const topKills = (day[0] || night[0])?.topKillsPrize || 0;
+  const featured = day.length > 0 && night.length > 0;
+
+  let slots = '';
+
+  if (day.length > 0) {
+    slots += `
+      <div class="time-slot">
+        <div class="time-slot-head day">
+          <span class="t-pill">☀️ 1:00 PM</span>
+          <span style="color:#fbbf24;">Day Session</span>
+        </div>
+        <div class="mode-buttons">
+          ${renderModeButtons(day)}
+        </div>
+      </div>
+    `;
+  }
+  if (night.length > 0) {
+    slots += `
+      <div class="time-slot">
+        <div class="time-slot-head night">
+          <span class="t-pill">🌙 9:00 PM</span>
+          <span style="color:#d8b4fe;">Night Session</span>
+        </div>
+        <div class="mode-buttons">
+          ${renderModeButtons(night)}
+        </div>
+      </div>
+    `;
+  }
 
   return `
-    <div class="game-card">
-      <div class="icon">${esc(icon)}</div>
-      <div class="name">${esc(game)}</div>
-      <div class="meta">
-        <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
-        ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
+    <div class="game-card ${featured ? 'featured' : ''}">
+      <div class="game-head">
+        <div class="icon">${esc(icon)}</div>
+        <div class="info">
+          <div class="name">${esc(game)}</div>
+          <div class="meta">
+            <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
+            ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
+            ${featured ? `<span style="color:#4ade80;">● 2 schedules</span>` : ''}
+          </div>
+        </div>
       </div>
-      <div class="mode-buttons ${colClass}">
-        ${buttons}
-      </div>
+      ${slots}
     </div>
   `;
 }
@@ -606,31 +691,53 @@ function renderGameCard(game, tournaments) {
 // ── Render everything ───────────────────────────
 function renderAll(tournaments) {
   const content = document.getElementById('tournamentContent');
+  const heroStats = document.getElementById('heroStats');
   if (!content) return;
 
   if (!tournaments.length) {
     content.innerHTML = '<div class="empty-state">No upcoming tournaments right now. Check back soon! 🎮</div>';
+    if (heroStats) heroStats.innerHTML = '<div class="hero-stat">No live events</div>';
     return;
   }
 
-  // Classify
-  const buckets = { tonight: [], day: [], night: [], other: [] };
+  // Split into buckets
+  const tonight = [];
+  const day = [];
+  const night = [];
+  const other = [];
+
   tournaments.forEach(t => {
-    const { section } = classifyTournament(t);
-    (buckets[section] = buckets[section] || []).push(t);
+    const sec = classifySection(t);
+    if (sec === 'tonight') tonight.push(t);
+    else if (sec === 'day') day.push(t);
+    else if (sec === 'night') night.push(t);
+    else other.push(t);
   });
+
+  // Hero stats
+  if (heroStats) {
+    const totalTourneys = tournaments.length;
+    const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
+    const entry = (day[0] || night[0] || tonight[0])?.entryFee || (day[0] || night[0] || tonight[0])?.entry_fee || 150;
+    heroStats.innerHTML = `
+      <div class="hero-stat"><b>${totalTourneys}</b> tournaments</div>
+      <div class="hero-stat"><b>${uniqueGames}</b> games</div>
+      <div class="hero-stat">Entry <b>Rs ${entry}</b></div>
+      <div class="hero-stat">🎁 <b>Real cash</b> prizes</div>
+    `;
+  }
 
   let html = '';
 
-  // Tonight section
-  if (buckets.tonight && buckets.tonight.length) {
+  // TONIGHT
+  if (tonight.length) {
     html += `
-      <h2 class="slot-header tonight">
-        🔥 Tonight <span class="slot-tag">9:00 PM NPT</span>
+      <h2 class="section-title tonight">
+        🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
       </h2>
+      <div class="game-grid">
     `;
-    html += '<div class="game-grid">';
-    buckets.tonight.forEach(t => {
+    tonight.forEach(t => {
       const title = t.title || `${t.game || 'Game'} ${t.mode || ''}`.trim();
       const prize = t.prizePool || t.prize_pool || 0;
       const entry = t.entryFee || t.entry_fee || 0;
@@ -638,20 +745,28 @@ function renderAll(tournaments) {
         ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
         : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
       html += `
-        <div class="game-card" style="border-color:rgba(245,158,11,.6);box-shadow:0 0 30px rgba(245,158,11,.2);">
-          <div class="icon">${esc(t.icon || '🎯')}</div>
-          <div class="name">${esc(title)}</div>
-          <div class="meta">
-            <span>Entry: <strong>Rs ${esc(entry)}</strong></span>
-            ${prize ? `<span class="tk-badge" style="background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.5);">🏆 Prize Rs ${esc(prize)}</span>` : ''}
+        <div class="game-card featured">
+          <div class="game-head">
+            <div class="icon">${esc(t.icon || '🎯')}</div>
+            <div class="info">
+              <div class="name">${esc(title)}</div>
+              <div class="meta">
+                <span>Entry: <strong>Rs ${esc(entry)}</strong></span>
+                ${prize ? `<span class="tk-badge" style="background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.5);">🏆 Prize Rs ${esc(prize)}</span>` : ''}
+              </div>
+            </div>
           </div>
-          <div class="mode-buttons one-col">
-            <a href="${link}" class="mode-btn solo">
-              <span class="mode-icon">👤</span>
-              <span>Register Solo</span>
-              <span class="mode-label">Bracket 1v1</span>
-              <span class="mode-prize">Rs ${esc(entry)} entry</span>
-            </a>
+          <div class="time-slot">
+            <div class="time-slot-head night">
+              <span class="t-pill">🔥 Live Tonight</span>
+            </div>
+            <div class="mode-buttons">
+              <a href="${link}" class="mode-btn solo">
+                <span class="mode-icon">👤</span>
+                <span class="mode-name">Register Solo</span>
+                <span class="mode-prize">Rs ${esc(entry)}</span>
+              </a>
+            </div>
           </div>
         </div>
       `;
@@ -659,47 +774,48 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // Day section (30 Sept 1 PM)
-  if (buckets.day && buckets.day.length) {
+  // DAY (30 Sept 1 PM)
+  if (day.length) {
     html += `
-      <h2 class="slot-header day">
-        ☀️ 30 September — Day Session <span class="slot-tag">1:00 PM NPT</span>
+      <h2 class="section-title day">
+        ☀️ 30 September · Day Session <span class="st-tag">1:00 PM NPT</span>
       </h2>
+      <div class="game-grid">
     `;
-    const byGame = groupByGame(buckets.day);
-    html += '<div class="game-grid">';
-    Object.entries(byGame).forEach(([game, list]) => {
-      html += renderGameCard(list[0].game, list);
+    const groups = buildGameGroups(day);
+    // Only include games that have a day entry (they all will here)
+    Object.values(groups).forEach(g => {
+      if (g.day.length) html += renderGameCard({ game: g.game, day: g.day, night: [] });
     });
     html += '</div>';
   }
 
-  // Night section (30 Sept 9 PM)
-  if (buckets.night && buckets.night.length) {
+  // NIGHT (30 Sept 9 PM)
+  if (night.length) {
     html += `
-      <h2 class="slot-header night">
-        🌙 30 September — Night Session <span class="slot-tag">9:00 PM NPT</span>
+      <h2 class="section-title night">
+        🌙 30 September · Night Session <span class="st-tag">9:00 PM NPT</span>
       </h2>
+      <div class="game-grid">
     `;
-    const byGame = groupByGame(buckets.night);
-    html += '<div class="game-grid">';
-    Object.entries(byGame).forEach(([game, list]) => {
-      html += renderGameCard(list[0].game, list);
+    const groups = buildGameGroups(night);
+    Object.values(groups).forEach(g => {
+      if (g.night.length) html += renderGameCard({ game: g.game, day: [], night: g.night });
     });
     html += '</div>';
   }
 
-  // Other (fallback)
-  if (buckets.other && buckets.other.length) {
+  // OTHER (fallback)
+  if (other.length) {
     html += `
-      <h2 class="slot-header">
-        📅 Other Tournaments
+      <h2 class="section-title">
+        📅 Upcoming Tournaments
       </h2>
+      <div class="game-grid">
     `;
-    const byGame = groupByGame(buckets.other);
-    html += '<div class="game-grid">';
-    Object.entries(byGame).forEach(([game, list]) => {
-      html += renderGameCard(list[0].game, list);
+    const groups = buildGameGroups(other);
+    Object.values(groups).forEach(g => {
+      html += renderGameCard(g);
     });
     html += '</div>';
   }
@@ -707,19 +823,8 @@ function renderAll(tournaments) {
   content.innerHTML = html;
 }
 
-function groupByGame(list) {
-  const out = {};
-  list.forEach(t => {
-    const key = gameKey(t.game);
-    if (!out[key]) out[key] = [];
-    out[key].push(t);
-  });
-  return out;
-}
-
 // ── Main ────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
-  // Update avatar
   const avatar = document.getElementById('userAvatar');
   const nameEl = document.getElementById('userName');
   if (user) {
@@ -735,81 +840,15 @@ onAuthStateChanged(auth, async (user) => {
     if (nameEl) nameEl.textContent = "Login";
   }
 
-  // Load tournaments
   try {
     const tournaments = await fetchTournaments();
     renderAll(tournaments);
-
-    // Update page title & sub
-    const todayCount = tournaments.filter(t => String(t.date||'') === '2026-09-28').length;
-    const day30Count = tournaments.filter(t => String(t.date||'') === '2026-09-30').length;
-    const titleEl = document.getElementById('pageTitle');
-    const subEl   = document.getElementById('pageSub');
-    if (titleEl) titleEl.textContent = 'Live Tournaments 🎮';
-    if (subEl) {
-      const parts = [];
-      if (todayCount) parts.push(`${todayCount} tonight`);
-      if (day30Count) parts.push(`${day30Count} on 30 Sept`);
-      subEl.textContent = parts.join(' · ') + ' · Rs 150 entry · Win real cash';
-    }
-
-    // Update countdown to next upcoming event
-    updateCountdown(tournaments);
   } catch (e) {
     console.error('load error:', e);
     const content = document.getElementById('tournamentContent');
     if (content) content.innerHTML = '<div class="empty-state">Could not load tournaments. Please refresh the page. 🔄</div>';
   }
 });
-
-// ── Countdown ───────────────────────────────────
-function updateCountdown(tournaments) {
-  const el = document.getElementById('counterDisplay');
-  const sub = document.getElementById('counterSub');
-  if (!el) return;
-
-  // Find earliest future tournament
-  const now = new Date();
-  const upcoming = tournaments
-    .map(t => {
-      const dt = parseTournamentDate(t.date, t.time);
-      return { t, dt };
-    })
-    .filter(x => x.dt && x.dt > now)
-    .sort((a, b) => a.dt - b.dt);
-
-  if (!upcoming.length) {
-    el.textContent = '—';
-    if (sub) sub.textContent = 'No upcoming events';
-    return;
-  }
-
-  const next = upcoming[0];
-  const label = next.t.title || `${next.t.game || ''} ${next.t.mode || ''}`.trim();
-  if (sub) sub.textContent = `Next: ${label} · ${next.t.date || ''} ${next.t.time || ''}`;
-
-  function tick() {
-    const diff = Math.max(0, next.dt - new Date());
-    const days = Math.floor(diff / 86400000);
-    const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-    el.textContent = days > 0 ? `${days}d ${h}:${m}:${s}` : `${h}:${m}:${s}`;
-  }
-  tick();
-  setInterval(tick, 1000);
-}
-
-function parseTournamentDate(dateStr, timeStr) {
-  if (!dateStr) return null;
-  const [y, mo, d] = String(dateStr).split('-').map(Number);
-  const [hh, mm] = String(timeStr || '00:00').split(':').map(Number);
-  if (!y || !mo || !d) return null;
-  // NPT is UTC+5:45 — build date as UTC then subtract offset
-  const asUTC = Date.UTC(y, mo - 1, d, hh || 0, mm || 0);
-  const nptOffsetMs = (5 * 60 + 45) * 60 * 1000;
-  return new Date(asUTC - nptOffsetMs);
-}
 </script>
 
 </body>
