@@ -23,11 +23,95 @@
   html, body { overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: radial-gradient(circle at 20% 0%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+    background: #05030f;
     color: var(--text);
     min-height: 100vh;
     padding-bottom: 60px;
+    position: relative;
   }
+
+  /* ⭐ Animated background */
+  .bg-layer {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-layer::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(124,58,237,0.35) 0%, transparent 45%),
+      radial-gradient(circle at 80% 100%, rgba(251,191,36,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, #1a0b3d 0%, #0a0618 55%, #05030f 100%);
+  }
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .bg-blob.b1 {
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, #7c3aed, transparent 70%);
+    top: -140px; left: -100px;
+    animation: drift1 24s ease-in-out infinite;
+  }
+  .bg-blob.b2 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, #a855f7, transparent 70%);
+    top: 30%; right: -140px;
+    animation: drift2 28s ease-in-out infinite;
+  }
+  .bg-blob.b3 {
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, #fbbf24, transparent 70%);
+    bottom: -120px; left: 20%;
+    opacity: 0.35;
+    animation: drift3 32s ease-in-out infinite;
+  }
+  .bg-blob.b4 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #ec4899, transparent 70%);
+    top: 60%; left: 40%;
+    opacity: 0.25;
+    animation: drift1 36s ease-in-out infinite reverse;
+  }
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(60px, 40px) scale(1.1); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-80px, 30px) scale(1.15); }
+  }
+  @keyframes drift3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(40px, -50px) scale(1.05); }
+  }
+  .bg-grid {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(168,85,247,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(168,85,247,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  .bg-vignette {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bg-blob { animation: none; }
+  }
+
+  .topnav, .container { position: relative; z-index: 1; }
 
   .topnav {
     display: flex; align-items: center; justify-content: space-between;
@@ -74,6 +158,7 @@
     font-weight: 800; font-size: 0.82rem;
   }
 
+  /* BELL */
   .bell-wrap { position: relative; flex-shrink: 0; margin-right: 6px; }
   .bell-btn {
     width: 34px; height: 34px;
@@ -81,25 +166,17 @@
     background: rgba(124,58,237,.15);
     border: 1px solid rgba(168,85,247,.35);
     display: grid; place-items: center;
-    cursor: pointer;
-    color: #f5f3ff;
-    font-size: 0.95rem;
-    position: relative;
+    cursor: pointer; color: #f5f3ff;
+    font-size: 0.95rem; position: relative;
     transition: background 0.15s;
   }
   .bell-btn:hover { background: rgba(124,58,237,.3); }
   .bell-badge {
-    position: absolute;
-    top: -2px; right: -2px;
+    position: absolute; top: -2px; right: -2px;
     min-width: 16px; height: 16px;
-    border-radius: 999px;
-    background: #ef4444;
-    color: #fff;
-    font-size: 0.6rem;
-    font-weight: 800;
-    display: none;
-    place-items: center;
-    padding: 0 4px;
+    border-radius: 999px; background: #ef4444;
+    color: #fff; font-size: 0.6rem; font-weight: 800;
+    display: none; place-items: center; padding: 0 4px;
     border: 2px solid #0a0618;
   }
   .bell-badge.show { display: grid; }
@@ -115,41 +192,34 @@
     border: 1px solid rgba(168,85,247,.35);
     border-radius: 14px;
     box-shadow: 0 20px 50px rgba(0,0,0,.6);
-    display: none;
-    z-index: 100;
+    display: none; z-index: 100;
   }
   .bell-dropdown.open { display: block; }
   .bell-dropdown .bd-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
     border-bottom: 1px solid rgba(168,85,247,.2);
-    font-weight: 800;
-    font-size: 0.85rem;
+    font-weight: 800; font-size: 0.85rem;
   }
   .bell-dropdown .bd-head button {
     background: none; border: 0; color: var(--gold-2);
     font-size: 0.72rem; font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
+    cursor: pointer; font-family: inherit;
   }
   .bell-item {
     display: flex; gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid rgba(168,85,247,.12);
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.15s;
-    cursor: pointer;
+    text-decoration: none; color: inherit;
+    transition: background 0.15s; cursor: pointer;
   }
   .bell-item:last-child { border-bottom: none; }
   .bell-item:hover { background: rgba(124,58,237,.15); }
   .bell-item.unread { background: rgba(124,58,237,.08); }
   .bell-item .bi-icon {
-    width: 32px; height: 32px;
-    border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 50%;
     display: grid; place-items: center;
-    flex-shrink: 0;
-    font-size: 0.9rem;
+    flex-shrink: 0; font-size: 0.9rem;
   }
   .bell-item .bi-body { flex: 1; min-width: 0; }
   .bell-item .bi-title {
@@ -171,8 +241,7 @@
   .bell-empty {
     padding: 30px 16px;
     text-align: center;
-    color: var(--muted);
-    font-size: 0.82rem;
+    color: var(--muted); font-size: 0.82rem;
   }
 
   .user-chip-wrap { position: relative; flex-shrink: 0; }
@@ -282,6 +351,7 @@
     display: flex; align-items: center; justify-content: space-between;
     background: var(--card); border: 1px solid var(--border);
     border-radius: 14px; padding: 14px 18px; gap: 14px;
+    backdrop-filter: blur(10px);
   }
   .social-card .left { display: flex; align-items: center; gap: 12px; }
   .social-card .icon {
@@ -303,16 +373,30 @@
     background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%);
     border-radius: 22px; padding: 32px 30px;
     position: relative; overflow: hidden;
-    box-shadow: var(--shadow); margin-bottom: 26px;
+    box-shadow: 0 20px 60px rgba(124,58,237,.4);
+    margin-bottom: 26px;
+    border: 1px solid rgba(168,85,247,.35);
   }
   .hero::before {
     content: ''; position: absolute;
     top: -60px; right: -60px;
     width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.3), transparent 70%);
     border-radius: 50%;
   }
-  .hero .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .hero .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; position: relative; z-index: 1; }
   .tag {
     font-size: 0.72rem; font-weight: 800;
     letter-spacing: 0.6px; padding: 6px 12px;
@@ -331,13 +415,13 @@
   .hero h1 {
     font-size: 2rem; font-weight: 800;
     line-height: 1.2; margin-bottom: 12px;
-    position: relative;
+    position: relative; z-index: 1;
   }
   .hero h1 .cash { color: var(--gold-2); }
   .hero p {
     color: #ddd6fe; font-size: 0.98rem;
     max-width: 640px; line-height: 1.55;
-    position: relative;
+    position: relative; z-index: 1;
   }
   .hero p strong { color: #fbbf24; }
   .date-badge {
@@ -346,6 +430,7 @@
     border-radius: 14px; padding: 12px 18px;
     text-align: center; color: #fff;
     box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+    z-index: 1;
   }
   .date-badge .m { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 800; }
   .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
@@ -359,6 +444,7 @@
     padding: 18px 22px;
     margin-bottom: 26px;
     transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+    backdrop-filter: blur(10px);
   }
   .earn-card:hover {
     transform: translateY(-2px);
@@ -375,25 +461,20 @@
   }
   .earn-card .ec-cta { font-size: 0.78rem; font-weight: 800; color: #4ade80; }
   .earn-card .ec-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
   }
   .earn-card .ec-stat {
     background: rgba(15, 8, 35, 0.55);
     border: 1px solid rgba(34, 197, 94, 0.2);
     border-radius: 12px;
-    padding: 12px 14px;
-    text-align: center;
+    padding: 12px 14px; text-align: center;
   }
   .earn-card .ec-label {
     font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.6px; color: #a8a3c9;
     font-weight: 800; margin-bottom: 5px;
   }
-  .earn-card .ec-value {
-    font-size: 1.25rem; font-weight: 900; line-height: 1.1;
-  }
+  .earn-card .ec-value { font-size: 1.25rem; font-weight: 900; line-height: 1.1; }
   .earn-card .ec-value.green { color: #4ade80; }
   .earn-card .ec-value.gold  { color: #fbbf24; }
   .earn-card .ec-value.blue  { color: #60a5fa; }
@@ -411,6 +492,7 @@
     margin-bottom: 26px;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
   }
   .ref-card::before {
     content: '';
@@ -422,12 +504,10 @@
   }
   .ref-head {
     display: flex; align-items: center; gap: 12px;
-    margin-bottom: 8px;
-    position: relative;
+    margin-bottom: 8px; position: relative;
   }
   .ref-head .rf-icon {
-    width: 46px; height: 46px;
-    border-radius: 12px;
+    width: 46px; height: 46px; border-radius: 12px;
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
     display: grid; place-items: center;
     font-size: 1.4rem;
@@ -438,18 +518,15 @@
   .ref-steps {
     background: rgba(15, 8, 35, 0.55);
     border-radius: 12px;
-    padding: 14px 18px;
-    margin: 16px 0;
+    padding: 14px 18px; margin: 16px 0;
     position: relative;
   }
   .ref-steps ol {
     padding-left: 18px;
-    font-size: 0.85rem;
-    line-height: 1.8;
+    font-size: 0.85rem; line-height: 1.8;
     color: #ddd6fe;
   }
   .ref-steps b { color: var(--gold-2); }
-
   .ref-link-box {
     background: rgba(15, 8, 35, 0.75);
     border: 1px dashed rgba(168,85,247,.5);
@@ -457,8 +534,7 @@
     padding: 12px 14px;
     margin-bottom: 12px;
     display: flex; align-items: center; gap: 10px;
-    overflow: hidden;
-    position: relative;
+    overflow: hidden; position: relative;
   }
   .ref-link-box .rl-input {
     flex: 1; min-width: 0;
@@ -476,9 +552,8 @@
     padding: 11px 16px;
     border-radius: 10px;
     font-weight: 800; font-size: 0.82rem;
-    cursor: pointer;
-    border: 0; font-family: inherit;
-    text-align: center;
+    cursor: pointer; border: 0;
+    font-family: inherit; text-align: center;
     text-decoration: none;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     transition: transform .15s, box-shadow .2s;
@@ -500,8 +575,7 @@
   }
   .ref-stats {
     display: flex; gap: 20px; flex-wrap: wrap;
-    margin-top: 14px;
-    font-size: 0.82rem;
+    margin-top: 14px; font-size: 0.82rem;
     color: #ddd6fe;
   }
   .ref-stats b { color: var(--gold-2); }
@@ -514,10 +588,8 @@
   .section-title .accent { color: var(--gold-2); }
 
   .quick-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 26px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 26px;
   }
   .qa-card {
     display: flex; flex-direction: column;
@@ -526,10 +598,10 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px 16px;
-    text-decoration: none;
-    color: var(--text);
+    text-decoration: none; color: var(--text);
     transition: transform 0.15s, border-color 0.2s, background 0.2s;
     position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
   }
   .qa-card:hover {
     transform: translateY(-3px);
@@ -556,9 +628,9 @@
     padding: 20px 22px;
     display: flex; align-items: center;
     justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 26px;
+    gap: 18px; margin-bottom: 26px;
     flex-wrap: wrap;
+    backdrop-filter: blur(10px);
   }
   .upcoming .up-left { display: flex; align-items: center; gap: 14px; }
   .upcoming .up-icon {
@@ -574,8 +646,7 @@
     background: linear-gradient(135deg, var(--purple), var(--purple-2));
     color: #fff; font-weight: 800; font-size: 0.85rem;
     padding: 11px 20px; border-radius: 10px;
-    text-decoration: none;
-    white-space: nowrap;
+    text-decoration: none; white-space: nowrap;
     box-shadow: 0 6px 18px rgba(124,58,237,.4);
     transition: transform .15s;
   }
@@ -585,8 +656,7 @@
     max-width: 1100px; margin: 30px auto 0;
     padding: 24px 18px 10px;
     border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.82rem;
+    color: var(--muted); font-size: 0.82rem;
     display: flex; align-items: center;
     justify-content: space-between;
     gap: 14px; flex-wrap: wrap;
@@ -609,147 +679,220 @@
   .float-share { bottom: 90px; background: linear-gradient(135deg, var(--purple), var(--purple-2)); }
   .float-wa { bottom: 24px; background: #25d366; text-decoration: none; }
 
-  @media (max-width: 720px) {
-    .topnav { padding: 10px 10px; gap: 6px; }
-    .brand { font-size: 0.85rem; gap: 5px; }
-    .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
-    .brand .brand-text { display: none; }
-    .nav-links { gap: 4px; font-size: 0.68rem; }
-    .nav-links > a.winners-link,
-    .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
-    .nav-links > a[href="/teams.html"],
-    .nav-links > a[href="/support.html"] { display: none; }
-    .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
-    .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
-    .user-chip .uname { display: none; }
-    .user-chip .caret { font-size: 0.45rem; }
-    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
-    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
-    .bell-btn { width: 30px; height: 30px; font-size: 0.82rem; }
-    .bell-dropdown { width: 300px; }
-    .social-row { grid-template-columns: 1fr; }
-    .hero h1 { font-size: 1.5rem; }
-    .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
-    .date-badge .d { font-size: 1.4rem; }
-    .winners-banner::after { display: none; }
-    .wb-grid { gap: 14px; }
-    .quick-actions { grid-template-columns: 1fr 1fr; }
-    .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
-    .upcoming .up-cta { text-align: center; }
-    .site-footer { flex-direction: column; align-items: flex-start; }
-    .earn-card .ec-value { font-size: 1rem; }
-    .ref-card { padding: 18px 16px; }
-    .ref-head .rf-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-    .ref-head h3 { font-size: 1rem; }
+  /* Member tournament sections */
+  .member-tourneys { margin-bottom: 26px; }
+
+  .section-title-mt {
+    font-size: 1.15rem; font-weight: 900;
+    margin: 26px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(168,85,247,.25);
   }
-  @media (max-width: 380px) {
-    .nav-links > a.winners-link,
-    .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
-    .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
-    .quick-actions { grid-template-columns: 1fr; }
-    .earn-card .ec-value { font-size: 0.9rem; }
+  .section-title-mt .st-tag {
+    font-size: 0.72rem; font-weight: 800;
+    padding: 4px 10px; border-radius: 999px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .section-title-mt.tonight .st-tag {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: #fff;
+  }
+  .section-title-mt.day .st-tag {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a0b3d;
+  }
+  .section-title-mt.night .st-tag {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+  .section-title-mt.popular {
+    border-bottom-color: rgba(245,158,11,.4);
+  }
+  .section-title-mt.popular .st-tag {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
   }
 
-  /* ⭐ member tournament sections */
-  .member-tourneys { margin-bottom: 26px; }
-  .member-tourneys .mt-list {
+  .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
   }
-  .mt-card {
-    background: var(--card);
+  .game-card {
+    background: linear-gradient(180deg, rgba(30,18,60,.85), rgba(20,12,45,.9));
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    transition: transform .15s, border-color .2s, box-shadow .2s;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
   }
-  .mt-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(168,85,247,.55);
-    box-shadow: 0 10px 28px rgba(124,58,237,.3);
+  .game-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,85,247,.5), transparent);
   }
-  .mt-card .mt-top { display: flex; align-items: center; gap: 10px; }
-  .mt-card .mt-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: linear-gradient(135deg, var(--purple), var(--purple-2));
-    display: grid; place-items: center; font-size: 1.2rem;
-    flex-shrink: 0;
+  .game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 50px rgba(124, 58, 237, 0.5);
+    border-color: rgba(168, 85, 247, 0.6);
   }
-  .mt-card .mt-title { font-weight: 800; font-size: .95rem; line-height: 1.2; }
-  .mt-card .mt-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
-  .mt-card .mt-meta {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    font-size: .72rem; color: var(--muted);
-    border-top: 1px solid rgba(168,85,247,.15);
-    border-bottom: 1px solid rgba(168,85,247,.15);
-    padding: 8px 0;
-    align-items: center;
+  .game-card.featured {
+    border-color: rgba(245,158,11,.5);
+    box-shadow: 0 0 30px rgba(245,158,11,.15);
   }
-  .mt-card .mt-meta strong { color: var(--gold-2); }
-  .mt-card .mt-mode {
-    padding: 2px 8px; border-radius: 999px;
-    font-size: .62rem; font-weight: 800;
-    letter-spacing: .3px; text-transform: uppercase;
+  .game-card.popular {
+    border-color: rgba(245,158,11,.6);
+    background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(30,18,60,.85));
+    box-shadow: 0 0 30px rgba(245,158,11,.2);
   }
-  .mt-mode.solo  { background: rgba(34,197,94,.18);  color:#4ade80; border:1px solid rgba(34,197,94,.45); }
-  .mt-mode.duo   { background: rgba(59,130,246,.18); color:#7db7ff; border:1px solid rgba(59,130,246,.45); }
-  .mt-mode.squad { background: rgba(245,158,11,.18); color:#fbbf24; border:1px solid rgba(245,158,11,.45); }
-  .mt-mode.other { background: rgba(168,85,247,.18); color:#d8b4fe; border:1px solid rgba(168,85,247,.45); }
-  .mt-card .mt-actions { display: flex; gap: 8px; margin-top: 2px; }
-  .mt-btn {
-    flex: 1; padding: 9px 12px;
-    border-radius: 9px; border: 0;
-    font-weight: 800; font-size: .78rem;
-    cursor: pointer; text-decoration: none;
-    text-align: center; font-family: inherit;
-    display: inline-flex; align-items: center;
-    justify-content: center; gap: 6px;
-    transition: transform .15s, background .2s;
+  .game-card.popular::before {
+    background: linear-gradient(90deg, transparent, rgba(251,191,36,.7), transparent);
   }
-  .mt-btn.register {
-    background: linear-gradient(135deg, var(--green), #16a34a);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(34,197,94,.35);
+  .game-head {
+    display: flex; align-items: center; gap: 12px;
   }
-  .mt-btn.register:hover { transform: translateY(-1px); }
-  .mt-btn.registered {
-    background: rgba(34,197,94,.12);
+  .game-head .icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+  .game-head .info { min-width: 0; flex: 1; }
+  .game-head .name { font-weight: 800; font-size: 1.15rem; }
+  .game-head .meta {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 0.76rem; color: var(--muted);
+    margin-top: 3px; align-items: center;
+  }
+  .game-head .meta strong { color: var(--gold-2); }
+  .tk-badge {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .popular-badge {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .registered-badge {
+    background: rgba(34,197,94,.2);
     color: #4ade80;
     border: 1px solid rgba(34,197,94,.5);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .time-slot {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 0;
+    border-top: 1px dashed rgba(168,85,247,.2);
+  }
+  .time-slot:first-of-type { border-top: none; padding-top: 4px; }
+  .time-slot-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; font-weight: 800;
+    color: #fff;
+  }
+  .time-slot-head .t-pill {
+    font-size: 0.68rem; font-weight: 900;
+    padding: 3px 9px; border-radius: 999px;
+    letter-spacing: 0.3px; text-transform: uppercase;
+  }
+  .time-slot-head.day .t-pill {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a0b3d;
+  }
+  .time-slot-head.night .t-pill {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+
+  .mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 8px;
+  }
+  .mode-btn {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px;
+    padding: 11px 6px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800; font-size: 0.8rem;
+    color: #fff;
+    border: 1px solid transparent;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-align: center; min-width: 0;
+  }
+  .mode-btn:hover { transform: translateY(-1px); }
+  .mode-btn .mode-icon { font-size: 1.1rem; line-height: 1; }
+  .mode-btn .mode-name {
+    font-size: 0.78rem; font-weight: 800;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 100%;
+  }
+  .mode-btn .mode-prize {
+    font-size: 0.68rem; font-weight: 900;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 7px; border-radius: 999px;
+    margin-top: 2px; letter-spacing: 0.3px;
+  }
+  .mode-btn.solo {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+  }
+  .mode-btn.duo {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  }
+  .mode-btn.squad {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  }
+  .mode-btn.ffa {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+  }
+  .mode-btn.other {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  }
+  .mode-btn.registered {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    opacity: 0.65;
     cursor: default;
   }
-  .mt-btn.view {
-    background: linear-gradient(135deg, var(--purple), var(--purple-2));
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(124,58,237,.35);
-  }
+  .mode-btn.registered:hover { transform: none; }
+
   .mt-empty {
     background: rgba(15, 8, 35, 0.5);
     border: 1px dashed rgba(168,85,247,.35);
     border-radius: 12px;
-    padding: 22px;
-    text-align: center;
-    color: var(--muted);
-    font-size: .85rem;
+    padding: 22px; text-align: center;
+    color: var(--muted); font-size: .85rem;
   }
   .mt-empty a { color: var(--gold-2); font-weight: 700; text-decoration: none; }
-  .mt-status {
-    display: inline-block; padding: 2px 8px;
-    border-radius: 999px; font-size: .62rem;
-    font-weight: 800; letter-spacing: .3px;
-    text-transform: uppercase;
-  }
-  .mt-status.pending   { background: rgba(245,158,11,.2);  color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
-  .mt-status.confirmed { background: rgba(34,197,94,.2);   color:#4ade80; border:1px solid rgba(34,197,94,.5); }
-  .mt-status.rejected  { background: rgba(239,68,68,.2);   color:#fca5a5; border:1px solid rgba(239,68,68,.5); }
-  .mt-status.other     { background: rgba(168,85,247,.2);  color:#d8b4fe; border:1px solid rgba(168,85,247,.5); }
-  @media (max-width: 720px) {
-    .member-tourneys .mt-list { grid-template-columns: 1fr; }
-  }
 
-  /* ⭐ NEW: My 1v1 Matches */
+  /* My Matches */
   .match-section { margin-bottom: 26px; }
   .match-section .mm-list {
     display: grid;
@@ -762,6 +905,7 @@
     border-radius: 14px;
     padding: 16px;
     display: flex; flex-direction: column; gap: 10px;
+    backdrop-filter: blur(10px);
   }
   .mm-card.pending {
     background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(168,85,247,.04));
@@ -801,8 +945,7 @@
   }
   .mm-vs-badge {
     font-size: .7rem; font-weight: 900;
-    color: #fbbf24;
-    padding: 0 2px;
+    color: #fbbf24; padding: 0 2px;
   }
   .mm-room {
     background: rgba(15,8,35,.6);
@@ -841,12 +984,65 @@
     padding: 22px; text-align: center;
     color: #a8a3c9; font-size: .85rem;
   }
+
   @media (max-width: 720px) {
+    .bg-blob { filter: blur(60px); opacity: 0.4; }
+    .topnav { padding: 10px 10px; gap: 6px; }
+    .brand { font-size: 0.85rem; gap: 5px; }
+    .brand .logo { width: 26px; height: 26px; font-size: 0.85rem; }
+    .brand .brand-text { display: none; }
+    .nav-links { gap: 4px; font-size: 0.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/support.html"] { display: none; }
+    .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
+    .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
+    .user-chip .uname { display: none; }
+    .user-chip .caret { font-size: 0.45rem; }
+    .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
+    .bell-btn { width: 30px; height: 30px; font-size: 0.82rem; }
+    .bell-dropdown { width: 300px; }
+    .social-row { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.5rem; }
+    .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
+    .date-badge .d { font-size: 1.4rem; }
+    .winners-banner::after { display: none; }
+    .wb-grid { gap: 14px; }
+    .quick-actions { grid-template-columns: 1fr 1fr; }
+    .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
+    .upcoming .up-cta { text-align: center; }
+    .site-footer { flex-direction: column; align-items: flex-start; }
+    .earn-card .ec-value { font-size: 1rem; }
+    .ref-card { padding: 18px 16px; }
+    .ref-head .rf-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+    .ref-head h3 { font-size: 1rem; }
+    .game-grid { grid-template-columns: 1fr; gap: 14px; }
+    .game-card { padding: 14px; }
+    .section-title-mt { font-size: 1.05rem; }
     .match-section .mm-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 380px) {
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
+    .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
+    .quick-actions { grid-template-columns: 1fr; }
+    .earn-card .ec-value { font-size: 0.9rem; }
   }
 </style>
 </head>
 <body>
+
+<!-- ⭐ Animated background -->
+<div class="bg-layer">
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
+  <div class="bg-blob b4"></div>
+</div>
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
 
 <nav class="topnav">
   <a href="/member.html" class="brand">
@@ -954,12 +1150,13 @@
       with Nepal's best players. <strong>Multiple modes allowed</strong> — play as many as you want!
     </p>
     <div class="date-badge">
-      <div class="m">SEPTEMBER</div>
+      <div class="m">SEPT</div>
       <div class="d">28</div>
       <div class="y">2026</div>
     </div>
   </section>
 
+  <!-- EARNINGS -->
   <a href="/player.html" id="earnCard" class="earn-card" hidden>
     <div class="ec-head">
       <div class="ec-title">💰 Your Earnings</div>
@@ -982,6 +1179,7 @@
     <div id="mc-note" class="ec-note" hidden></div>
   </a>
 
+  <!-- REFERRAL -->
   <div class="ref-card" id="refCard" hidden>
     <div class="ref-head">
       <div class="rf-icon">🤝</div>
@@ -1013,23 +1211,7 @@
     </div>
   </div>
 
-  <!-- ⭐ Upcoming Events -->
-  <section class="member-tourneys" id="upcomingSection" hidden>
-    <h2 class="section-title">🎮 Upcoming <span class="accent">Events</span></h2>
-    <div class="mt-list" id="upcomingList">
-      <div class="mt-empty">Loading events…</div>
-    </div>
-  </section>
-
-  <!-- ⭐ My Registrations -->
-  <section class="member-tourneys" id="myRegsSection" hidden>
-    <h2 class="section-title">🏆 My <span class="accent">Registrations</span></h2>
-    <div class="mt-list" id="myRegsList">
-      <div class="mt-empty">Loading your registrations…</div>
-    </div>
-  </section>
-
-  <!-- ⭐ My 1v1 Matches -->
+  <!-- ⭐ MY MATCHES -->
   <section class="match-section" id="myMatchesSection" hidden>
     <h2 class="section-title">🎯 My <span class="accent">Matches</span></h2>
     <div class="mm-list" id="myMatchesList">
@@ -1037,12 +1219,26 @@
     </div>
   </section>
 
-  <h2 class="section-title">⚡ Quick <span class="accent">Actions</span></h2>
+  <!-- ⭐ UPCOMING EVENTS (grouped) -->
+  <div id="upcomingSection" hidden>
+    <h2 class="section-title">🎮 Upcoming <span class="accent">Tournaments</span></h2>
+    <div id="upcomingContent">
+      <div class="mt-empty">Loading tournaments…</div>
+    </div>
+  </div>
+
+  <!-- ⭐ MY REGISTRATIONS (compact list — keep) -->
+  <section class="member-tourneys" id="myRegsSection" hidden style="margin-top:26px;">
+    <h2 class="section-title">🏆 My <span class="accent">Registrations</span></h2>
+    <div class="mt-empty" id="myRegsList">Loading your registrations…</div>
+  </section>
+
+  <h2 class="section-title" style="margin-top:26px;">⚡ Quick <span class="accent">Actions</span></h2>
   <div class="quick-actions">
     <a href="/tournaments.html" class="qa-card">
       <div class="qa-icon">🎮</div>
       <div class="qa-title">Browse Tournaments</div>
-      <div class="qa-sub">22 live events · Solo · Duo · Squad</div>
+      <div class="qa-sub">All games · Solo · Duo · Squad</div>
     </a>
     <a href="/my-tournaments.html" class="qa-card gold">
       <div class="qa-icon">🏆</div>
@@ -1059,18 +1255,6 @@
       <div class="qa-title">NEPPLAY Store</div>
       <div class="qa-sub">Diamonds · UC · Gift cards</div>
     </a>
-  </div>
-
-  <h2 class="section-title">📅 Upcoming <span class="accent">Event</span></h2>
-  <div class="upcoming">
-    <div class="up-left">
-      <div class="up-icon">🔥</div>
-      <div>
-        <div class="up-title">NEPPLAY Day 2 — 22 Tournaments</div>
-        <div class="up-meta">28 September 2026 · 1:00 PM NPT · Entry Rs 150 all modes</div>
-      </div>
-    </div>
-    <a href="/tournaments.html" class="up-cta">Register Now →</a>
   </div>
 
 </div>
@@ -1146,7 +1330,7 @@ document.addEventListener('click', function(e) {
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, doc, getDoc, collection, query, where, getDocs,
   updateDoc, arrayUnion, orderBy, limit
@@ -1161,14 +1345,91 @@ const cfg = {
     messagingSenderId: "893565645520",
     appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
-const app  = initializeApp(cfg);
+const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
+const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
+const POPULAR_GAMES = ['free fire', 'pubg'];
+
+const GAME_ALIASES = {
+  'freefire':'freefire','free fire':'freefire','ff':'freefire',
+  'pubg':'pubgmobile','pubgm':'pubgmobile','pubg mobile':'pubgmobile','pubgmobile':'pubgmobile',
+  'cod':'cod','cod mobile':'cod','call of duty':'cod','callofduty':'cod',
+  'valorant':'valorant',
+  'efootball':'efootball','efoot':'efootball','e football':'efootball',
+  'ecricket':'ecricket','e cricket':'ecricket',
+  'chess':'chess','ludo':'ludo','ludo king':'ludo'
+};
+const GAME_DISPLAY = {
+  freefire:'Free Fire', pubgmobile:'PUBG Mobile', cod:'Call of Duty',
+  valorant:'Valorant', efootball:'eFootball', ecricket:'eCricket',
+  chess:'Chess', ludo:'Ludo'
+};
+function gameKey(game) {
+  const g = String(game || '').toLowerCase().trim().replace(/\s+/g, ' ');
+  return GAME_ALIASES[g] || GAME_ALIASES[g.replace(/\s/g, '')] || g.replace(/\s/g, '');
+}
+function gameDisplayName(game) {
+  const k = gameKey(game);
+  return GAME_DISPLAY[k] || game || 'Game';
+}
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
+function modeClass(mode) {
+  const x = String(mode || '').toLowerCase();
+  if (x === 'solo') return 'solo';
+  if (x === 'duo') return 'duo';
+  if (x === 'squad') return 'squad';
+  if (x === 'ffa' || x === '4-player ffa' || x === '4 player ffa') return 'ffa';
+  return 'other';
+}
+function modeIcon(mode) {
+  const x = String(mode || '').toLowerCase();
+  if (x === 'solo') return '👤';
+  if (x === 'duo') return '👥';
+  if (x === 'squad') return '🏆';
+  if (x === 'ffa') return '🎲';
+  return '🎮';
+}
+function gameIcon(key, fallbackIcon) {
+  if (fallbackIcon) return fallbackIcon;
+  switch (key) {
+    case 'freefire':return '🔥';
+    case 'pubgmobile':return '🎯';
+    case 'cod':return '🎖️';
+    case 'valorant':return '⚔️';
+    case 'efootball':return '⚽';
+    case 'ecricket':return '🏏';
+    case 'chess':return '♟️';
+    case 'ludo':return '🎲';
+    default:return '🎮';
+  }
+}
+function slotOf(time) {
+  const hour = parseInt(String(time || '0').split(':')[0], 10);
+  if (hour < 18) return 'day';
+  return 'night';
+}
+function isPopular(key) {
+  return POPULAR_GAMES.some(k => gameKey(k) === key);
+}
+function bestTopKills(list) {
+  let best = 0;
+  list.forEach(t => {
+    const v = Number(t.topKillsPrize || t.top_kills_prize || t.topKillPrize || 0);
+    if (v > best) best = v;
+  });
+  return best;
+}
 
 let currentUid = null;
 let currentUsername = null;
+let myRegisteredTitles = new Set();
 
 onAuthStateChanged(auth, async (user) => {
     const avatar = document.getElementById("userAvatar");
@@ -1193,6 +1454,7 @@ onAuthStateChanged(auth, async (user) => {
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
     if (nameEl) nameEl.textContent = display;
 
+    // Referral card
     if (currentUsername) {
         const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(currentUsername);
         const inp = document.getElementById('refLinkInput');
@@ -1218,6 +1480,7 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('refEarned').textContent = fmtRs(total);
     } catch (e) { console.warn('ref stats error:', e); }
 
+    // Earnings card
     try {
         const unameLower = (profile.username || '').toLowerCase();
         const fullNameLower = (profile.fullName || '').toLowerCase();
@@ -1279,418 +1542,39 @@ onAuthStateChanged(auth, async (user) => {
         console.warn('earnings card error:', e);
     }
 
+    // Load all tournament sections
+    await loadMyMatches(user.uid);
+    await loadMyRegistrations(user.uid);
+    await loadUpcomingTournaments(user.uid);
+
+    // Bell
     loadBellNotifications(user.uid);
 });
 
-window.copyReferralLink = function() {
-    const inp = document.getElementById('refLinkInput');
-    if (!inp) return;
-    const btn = document.getElementById('refCopyBtn');
-    const doCopy = () => {
-        navigator.clipboard.writeText(inp.value).then(() => {
-            btn.classList.add('copied');
-            const orig = btn.textContent;
-            btn.textContent = '✅ Copied!';
-            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1600);
-        }).catch(() => {
-            inp.select();
-            document.execCommand('copy');
-            btn.textContent = '✅ Copied!';
-            setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 1600);
-        });
-    };
-    doCopy();
-};
+// ========== MY MATCHES ==========
+async function loadMyMatches(uid) {
+    const listEl = document.getElementById("myMatchesList");
+    const secEl  = document.getElementById("myMatchesSection");
+    if (!listEl || !secEl) return;
 
-let bellItems = [];
-
-async function loadBellNotifications(uid) {
-    const listEl = document.getElementById('bellList');
-    if (!listEl) return;
-
+    let matches = [];
     try {
-        const [personalSnap, allSnap] = await Promise.all([
-            getDocs(query(
-                collection(db, 'notifications'),
-                where('targetUid', '==', uid),
-                orderBy('createdAt', 'desc'),
-                limit(20)
-            )).catch(() => ({ docs: [] })),
-            getDocs(query(
-                collection(db, 'notifications'),
-                where('targetUid', '==', 'ALL'),
-                orderBy('createdAt', 'desc'),
-                limit(20)
-            )).catch(() => ({ docs: [] }))
-        ]);
-
-        const personal = personalSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const broadcast = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const combined = [...personal, ...broadcast];
-
-        combined.sort((a, b) => {
-            const ta = a.createdAt?.seconds || 0;
-            const tb = b.createdAt?.seconds || 0;
-            return tb - ta;
-        });
-
-        bellItems = combined.slice(0, 20);
-
-        const unread = bellItems.filter(n => {
-            const readBy = Array.isArray(n.readBy) ? n.readBy : [];
-            return !readBy.includes(uid);
-        });
-
-        const badge = document.getElementById('bellBadge');
-        if (badge) {
-            if (unread.length > 0) {
-                badge.textContent = unread.length > 9 ? '9+' : unread.length;
-                badge.classList.add('show');
-            } else {
-                badge.classList.remove('show');
-            }
-        }
-
-        renderBellList(uid);
-    } catch (e) {
-        console.warn('loadBellNotifications error:', e);
-        listEl.innerHTML = '<div class="bell-empty">Could not load notifications</div>';
-    }
-}
-
-function renderBellList(uid) {
-    const listEl = document.getElementById('bellList');
-    if (!listEl) return;
-
-    if (!bellItems.length) {
-        listEl.innerHTML = '<div class="bell-empty">No notifications yet</div>';
-        return;
-    }
-
-    const iconMap = {
-        info:    { icon: 'ℹ️', color: '#60a5fa' },
-        success: { icon: '✅', color: '#4ade80' },
-        warning: { icon: '⚠️', color: '#facc15' },
-        error:   { icon: '❌', color: '#f87171' },
-        trophy:  { icon: '🏆', color: '#fbbf24' },
-        money:   { icon: '💰', color: '#4ade80' }
-    };
-
-    listEl.innerHTML = bellItems.map(n => {
-        const meta = iconMap[n.type] || iconMap.info;
-        const readBy = Array.isArray(n.readBy) ? n.readBy : [];
-        const isUnread = !readBy.includes(uid);
-        const timeStr = fmtTimeAgo(n.createdAt);
-        return `
-            <div class="bell-item ${isUnread ? 'unread' : ''}" onclick="openBellItem('${n.id}')">
-                <div class="bi-icon" style="background:${meta.color}22;color:${meta.color};">${meta.icon}</div>
-                <div class="bi-body">
-                    <div class="bi-title">${escapeHtml(n.title || '(no title)')}</div>
-                    <div class="bi-msg">${escapeHtml(n.message || '')}</div>
-                    <div class="bi-time">${timeStr}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-window.openBellItem = async function(id) {
-    const item = bellItems.find(x => x.id === id);
-    if (!item || !currentUid) return;
-
-    try {
-        await updateDoc(doc(db, 'notifications', id), {
-            readBy: arrayUnion(currentUid)
-        });
-        item.readBy = [...(item.readBy || []), currentUid];
-        renderBellList(currentUid);
-
-        const unread = bellItems.filter(n => {
-            const rb = Array.isArray(n.readBy) ? n.readBy : [];
-            return !rb.includes(currentUid);
-        });
-        const badge = document.getElementById('bellBadge');
-        if (badge) {
-            if (unread.length > 0) {
-                badge.textContent = unread.length > 9 ? '9+' : unread.length;
-                badge.classList.add('show');
-            } else {
-                badge.classList.remove('show');
-            }
-        }
-    } catch (e) {
-        console.warn('mark read error:', e);
-    }
-};
-
-window.markAllNotificationsRead = async function() {
-    if (!currentUid) return;
-    const unread = bellItems.filter(n => {
-        const rb = Array.isArray(n.readBy) ? n.readBy : [];
-        return !rb.includes(currentUid);
-    });
-    for (const n of unread) {
-        try {
-            await updateDoc(doc(db, 'notifications', n.id), {
-                readBy: arrayUnion(currentUid)
-            });
-            n.readBy = [...(n.readBy || []), currentUid];
-        } catch (e) {}
-    }
-    renderBellList(currentUid);
-    const badge = document.getElementById('bellBadge');
-    if (badge) badge.classList.remove('show');
-};
-
-function fmtTimeAgo(ts) {
-    if (!ts?.seconds) return '';
-    const diff = Date.now() - ts.seconds * 1000;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return mins + 'm ago';
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + 'h ago';
-    const days = Math.floor(hrs / 24);
-    if (days < 7) return days + 'd ago';
-    return new Date(ts.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('bellBtn');
-    if (btn) btn.addEventListener('click', window.toggleBell);
-});
-</script>
-
-<script type="module">
-(async function () {
-  try {
-    const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const {
-      getFirestore, collection, query, where, orderBy, limit, getDocs
-    } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-
-    const cfg = {
-      apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
-      authDomain: "nepplaygaming.firebaseapp.com",
-      projectId: "nepplaygaming",
-      storageBucket: "nepplaygaming.firebasestorage.app",
-      messagingSenderId: "893565645520",
-      appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
-    };
-
-    const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
-    const db   = getFirestore(app);
-    const auth = getAuth(app);
-
-    function esc(s) {
-      return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[c]));
-    }
-    function modeClass(m) {
-      const x = String(m || "").toLowerCase();
-      if (x === "solo") return "solo";
-      if (x === "duo")  return "duo";
-      if (x === "squad") return "squad";
-      return "other";
-    }
-    function statusClass(s) {
-      const x = String(s || "").toLowerCase();
-      if (x === "pending")   return "pending";
-      if (x === "confirmed" || x === "approved" || x === "paid") return "confirmed";
-      if (x === "rejected" || x === "cancelled") return "rejected";
-      return "other";
-    }
-    function fmtDate(d, t) {
-      let out = "";
-      if (typeof d === "string" && d) out = d;
-      else if (d && d.seconds) out = new Date(d.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
-      else if (d && d.toDate) out = d.toDate().toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
-      if (t) out += " · " + t;
-      return out || "—";
-    }
-    function fmtRegDate(ts) {
-      if (!ts) return "";
-      if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
-      if (ts.toDate) return ts.toDate().toLocaleDateString("en-GB", { day:"2-digit", month:"short" });
-      return "";
-    }
-
-    async function renderUpcoming(uid, myRegTournamentTitles) {
-      const listEl = document.getElementById("upcomingList");
-      const secEl  = document.getElementById("upcomingSection");
-      if (!listEl || !secEl) return;
-
-      let docs = [];
-      try {
-        const snap = await getDocs(query(
-          collection(db, "tournaments"),
-          where("status", "==", "upcoming"),
-          orderBy("date", "asc"),
-          orderBy("createdAt", "desc"),
-          limit(20)
-        ));
-        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (e) {
-        console.warn("[upcoming] query failed:", e && e.message);
-        try {
-          const snap = await getDocs(collection(db, "tournaments"));
-          docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-            .filter(t => String(t.status || "").toLowerCase() === "upcoming")
-            .sort((a, b) => {
-              const d = String(a.date||"").localeCompare(String(b.date||""));
-              if (d !== 0) return d;
-              return (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0);
-            })
-            .slice(0, 20);
-        } catch (e2) {
-          console.warn("[upcoming] fallback failed:", e2 && e2.message);
-        }
-      }
-
-      if (!docs.length) {
-        listEl.innerHTML = '<div class="mt-empty">No upcoming events right now. <a href="/tournaments.html">Browse tournaments →</a></div>';
-        secEl.hidden = false;
-        return;
-      }
-
-      listEl.innerHTML = docs.map(t => {
-        const title = t.title || (t.game ? (t.game + " " + (t.mode || "")) : "Tournament");
-        const icon  = t.icon || "🎮";
-        const mc    = modeClass(t.mode);
-        const date  = fmtDate(t.date, t.time);
-        const fee   = t.entryFee || t.entry_fee || 0;
-        const prize = t.prizePool || t.prize_pool || 0;
-        const already = myRegTournamentTitles.has(String(t.title||"").toLowerCase())
-                     || myRegTournamentTitles.has(String(t.id||"").toLowerCase());
-        const btn = already
-          ? `<button class="mt-btn registered" disabled>✓ Registered</button>`
-          : `<a class="mt-btn register" href="/registration.html?tournamentId=${encodeURIComponent(t.id)}">Register →</a>`;
-        return `
-          <div class="mt-card">
-            <div class="mt-top">
-              <div class="mt-icon">${esc(icon)}</div>
-              <div style="min-width:0;flex:1;">
-                <div class="mt-title">${esc(title)}</div>
-                <div class="mt-sub">${esc(t.game || "")} ${t.mode ? "· "+esc(t.mode) : ""}</div>
-              </div>
-            </div>
-            <div class="mt-meta">
-              <span class="mt-mode ${mc}">${esc(t.mode || "—")}</span>
-              <span>📅 ${esc(date)}</span>
-              <span>Entry: <strong>Rs ${esc(fee)}</strong></span>
-              ${prize ? `<span>Prize: <strong>Rs ${esc(prize)}</strong></span>` : ""}
-            </div>
-            <div class="mt-actions">${btn}</div>
-          </div>
-        `;
-      }).join("");
-      secEl.hidden = false;
-    }
-
-    async function renderMyRegs(uid) {
-      const listEl = document.getElementById("myRegsList");
-      const secEl  = document.getElementById("myRegsSection");
-      if (!listEl || !secEl) return [];
-
-      let docs = [];
-      try {
-        const snap = await getDocs(query(
-          collection(db, "tournament_registrations"),
-          where("userId", "==", uid),
-          orderBy("registeredAt", "desc"),
-          limit(6)
-        ));
-        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (e) {
-        console.warn("[myregs] query failed:", e && e.message);
-        try {
-          const snap = await getDocs(query(
-            collection(db, "tournament_registrations"),
-            where("userId", "==", uid)
-          ));
-          docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-            .sort((a, b) => (b.registeredAt?.seconds||0) - (a.registeredAt?.seconds||0))
-            .slice(0, 6);
-        } catch (e2) {
-          console.warn("[myregs] fallback failed:", e2 && e2.message);
-          listEl.innerHTML = '<div class="mt-empty">Could not load your registrations right now.</div>';
-          secEl.hidden = false;
-          return [];
-        }
-      }
-
-      if (!docs.length) {
-        listEl.innerHTML = '<div class="mt-empty">You haven\'t registered for any tournament yet. <a href="/tournaments.html">Browse tournaments →</a></div>';
-        secEl.hidden = false;
-        return [];
-      }
-
-      listEl.innerHTML = docs.map(r => {
-        const title = r.tournamentTitle || r.tournamentName || r.game || "Tournament";
-        const icon  = r.icon || (r.game ? "🎮" : "🏆");
-        const mc    = modeClass(r.tournamentMode || r.playingAs);
-        const sc    = statusClass(r.status);
-        const when  = fmtRegDate(r.registeredAt);
-        return `
-          <div class="mt-card">
-            <div class="mt-top">
-              <div class="mt-icon">${esc(icon)}</div>
-              <div style="min-width:0;flex:1;">
-                <div class="mt-title">${esc(title)}</div>
-                <div class="mt-sub">${esc(r.game || "")} ${r.teamName ? "· "+esc(r.teamName) : ""}</div>
-              </div>
-            </div>
-            <div class="mt-meta">
-              <span class="mt-mode ${mc}">${esc(r.tournamentMode || r.playingAs || "—")}</span>
-              <span class="mt-status ${sc}">${esc(r.status || "pending")}</span>
-              ${when ? `<span>📅 ${esc(when)}</span>` : ""}
-              ${r.amount ? `<span>Rs <strong>${esc(r.amount)}</strong></span>` : ""}
-            </div>
-            <div class="mt-actions">
-              <a class="mt-btn view" href="/my-tournaments.html">View details →</a>
-            </div>
-          </div>
-        `;
-      }).join("");
-      secEl.hidden = false;
-
-      return docs.map(r => String(r.tournamentTitle || r.tournamentId || "").toLowerCase());
-    }
-
-    async function renderMyMatches(uid) {
-      const listEl = document.getElementById("myMatchesList");
-      const secEl  = document.getElementById("myMatchesSection");
-      if (!listEl || !secEl) return;
-
-      let matches = [];
-      try {
         const q1 = query(collection(db, "matches"), where("player1.uid", "==", uid));
         const q2 = query(collection(db, "matches"), where("player2.uid", "==", uid));
         const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
         const seen = new Set();
         [...s1.docs, ...s2.docs].forEach(d => {
-          if (!seen.has(d.id)) { seen.add(d.id); matches.push({ id: d.id, ...d.data() }); }
+            if (!seen.has(d.id)) { seen.add(d.id); matches.push({ id: d.id, ...d.data() }); }
         });
-      } catch (e) {
+    } catch (e) {
         console.warn("[mymatches] query failed:", e && e.message);
         secEl.hidden = true;
         return;
-      }
+    }
 
-      if (!matches.length) {
-        secEl.hidden = true;
-        return;
-      }
+    if (!matches.length) { secEl.hidden = true; return; }
 
-      listEl.innerHTML = matches.map(m => {
+    listEl.innerHTML = matches.map(m => {
         const p1 = m.player1 || {};
         const p2 = m.player2 || {};
         const you = p1.uid === uid ? p1 : p2;
@@ -1699,37 +1583,37 @@ document.addEventListener('DOMContentLoaded', function() {
         const oppIgn = opp?.ign || opp?.username || "TBD";
 
         if (m.bye) {
-          return `
-            <div class="mm-card bye">
-              <div class="mm-title">🎉 You got a bye!</div>
-              <div style="font-size:.82rem;color:#ddd6fe;line-height:1.5;">
-                <b>${esc(m.tournamentTitle || "Tournament")}</b><br>
-                No opponent this round — you auto-advance.
+            return `
+              <div class="mm-card bye">
+                <div class="mm-title">🎉 You got a bye!</div>
+                <div style="font-size:.82rem;color:#ddd6fe;line-height:1.5;">
+                  <b>${esc(m.tournamentTitle || "Tournament")}</b><br>
+                  No opponent this round — you auto-advance.
+                </div>
               </div>
-            </div>
-          `;
+            `;
         }
 
         if (!m.publishedAt) {
-          return `
-            <div class="mm-card pending">
-              <div class="mm-title">⏳ ${esc(m.tournamentTitle || "1v1 Match")}</div>
-              <div class="mm-vs">
-                <div class="mm-player you">
-                  <span class="mm-label">You</span>
-                  <div class="mm-player-name">${esc(youIgn)}</div>
+            return `
+              <div class="mm-card pending">
+                <div class="mm-title">⏳ ${esc(m.tournamentTitle || "1v1 Match")}</div>
+                <div class="mm-vs">
+                  <div class="mm-player you">
+                    <span class="mm-label">You</span>
+                    <div class="mm-player-name">${esc(youIgn)}</div>
+                  </div>
+                  <span class="mm-vs-badge">VS</span>
+                  <div class="mm-player">
+                    <span class="mm-label">Opponent</span>
+                    <div class="mm-player-name">TBD</div>
+                  </div>
                 </div>
-                <span class="mm-vs-badge">VS</span>
-                <div class="mm-player">
-                  <span class="mm-label">Opponent</span>
-                  <div class="mm-player-name">TBD</div>
+                <div style="font-size:.76rem;color:#a8a3c9;text-align:center;">
+                  Your opponent will be revealed before match time.
                 </div>
               </div>
-              <div style="font-size:.76rem;color:#a8a3c9;text-align:center;">
-                Your opponent will be revealed before match time.
-              </div>
-            </div>
-          `;
+            `;
         }
 
         return `
@@ -1769,24 +1653,454 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           </div>
         `;
-      }).join("");
-      secEl.hidden = false;
+    }).join("");
+    secEl.hidden = false;
+}
+
+// ========== MY REGISTRATIONS (simple list) ==========
+async function loadMyRegistrations(uid) {
+    const listEl = document.getElementById("myRegsList");
+    const secEl  = document.getElementById("myRegsSection");
+    if (!listEl || !secEl) return [];
+
+    let docs = [];
+    try {
+        const snap = await getDocs(query(
+            collection(db, "tournament_registrations"),
+            where("userId", "==", uid),
+            orderBy("registeredAt", "desc"),
+            limit(6)
+        ));
+        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+        console.warn("[myregs] query failed:", e && e.message);
+        try {
+            const snap = await getDocs(query(
+                collection(db, "tournament_registrations"),
+                where("userId", "==", uid)
+            ));
+            docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => (b.registeredAt?.seconds||0) - (a.registeredAt?.seconds||0))
+                .slice(0, 6);
+        } catch (e2) {
+            console.warn("[myregs] fallback failed:", e2 && e2.message);
+            listEl.innerHTML = 'Could not load your registrations right now.';
+            secEl.hidden = false;
+            return [];
+        }
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const myTitles = await renderMyRegs(user.uid);
-        await renderUpcoming(user.uid, new Set(myTitles || []));
-        await renderMyMatches(user.uid);
-      } catch (e) {
-        console.warn("member tournaments block error:", e);
-      }
+    if (!docs.length) {
+        listEl.innerHTML = `You haven't registered for any tournament yet. <a href="/tournaments.html">Browse tournaments →</a>`;
+        secEl.hidden = false;
+        return [];
+    }
+
+    myRegisteredTitles = new Set();
+    listEl.innerHTML = docs.map(r => {
+        const title = r.tournamentTitle || r.tournamentName || r.game || "Tournament";
+        const status = r.status || "pending";
+        const sc = status === 'confirmed' ? 'confirmed' : status === 'pending' ? 'pending' : 'other';
+        const when = r.registeredAt?.seconds
+            ? new Date(r.registeredAt.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" })
+            : "";
+        if (title) myRegisteredTitles.add(String(title).toLowerCase());
+        if (r.tournamentId) myRegisteredTitles.add(String(r.tournamentId).toLowerCase());
+        return `
+          <div style="padding:12px;border-bottom:1px solid rgba(168,85,247,.15);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:800;font-size:.9rem;color:#fff;">${esc(title)}</div>
+              <div style="font-size:.75rem;color:#a8a3c9;margin-top:2px;">
+                ${esc(r.game || '')}${r.tournamentMode ? ' · ' + esc(r.tournamentMode) : ''}${when ? ' · 📅 ' + when : ''}
+              </div>
+            </div>
+            <span style="font-size:.62rem;font-weight:900;letter-spacing:.3px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.2);color:${sc==='confirmed'?'#4ade80':'#fbbf24'};border:1px solid rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.5);">
+              ${esc(status)}
+            </span>
+          </div>
+        `;
+    }).join('');
+    secEl.hidden = false;
+    return docs.map(r => String(r.tournamentTitle || r.tournamentId || "").toLowerCase());
+}
+
+// ========== UPCOMING TOURNAMENTS (grouped) ==========
+async function loadUpcomingTournaments(uid) {
+    const secEl = document.getElementById("upcomingSection");
+    const content = document.getElementById("upcomingContent");
+    if (!secEl || !content) return;
+
+    let docs = [];
+    try {
+        const snap = await getDocs(query(
+            collection(db, "tournaments"),
+            where("status", "==", "upcoming"),
+            orderBy("date", "asc"),
+            limit(80)
+        ));
+        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+        console.warn("[upcoming] indexed query failed:", e && e.message);
+        try {
+            const snap = await getDocs(collection(db, "tournaments"));
+            docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .filter(t => String(t.status || "").toLowerCase() === "upcoming")
+                .sort((a, b) => String(a.date||"").localeCompare(String(b.date||"")));
+        } catch (e2) { console.warn(e2); }
+    }
+
+    if (!docs.length) {
+        content.innerHTML = '<div class="mt-empty">No upcoming events right now. <a href="/tournaments.html">Browse tournaments →</a></div>';
+        secEl.hidden = false;
+        return;
+    }
+
+    // Classify
+    const tonight = [];
+    const day = [];
+    const night = [];
+    const other = [];
+    docs.forEach(t => {
+        if (t.id === TONIGHT_1V1_ID) { tonight.push(t); return; }
+        const date = String(t.date || '');
+        if (date === '2026-09-30') {
+            (slotOf(t.time) === 'day' ? day : night).push(t);
+        } else {
+            other.push(t);
+        }
     });
-  } catch (outerErr) {
-    console.warn("member tournaments module failed to load:", outerErr);
-  }
-})();
+
+    let html = '';
+
+    // TONIGHT
+    if (tonight.length) {
+        html += `<h3 class="section-title-mt tonight">🔥 Tonight <span class="st-tag">9:00 PM NPT</span></h3><div class="game-grid">`;
+        tonight.forEach(t => {
+            const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
+            const prize = t.prizePool || 0;
+            const entry = t.entryFee || 0;
+            const tk = Number(t.topKillsPrize || 0);
+            const link = t.seedKey
+                ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
+                : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+            html += `
+              <div class="game-card featured">
+                <div class="game-head">
+                  <div class="icon">${esc(t.icon || '🎯')}</div>
+                  <div class="info">
+                    <div class="name">${esc(title)}</div>
+                    <div class="meta">
+                      <span>Entry: <strong>Rs ${esc(entry)}</strong></span>
+                      ${prize ? `<span class="tk-badge" style="background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.5);">🏆 Prize Rs ${esc(prize)}</span>` : ''}
+                      ${tk ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(tk)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="time-slot">
+                  <div class="time-slot-head night"><span class="t-pill">🔥 Live Tonight</span></div>
+                  <div class="mode-buttons">
+                    <a href="${link}" class="mode-btn solo">
+                      <span class="mode-icon">👤</span>
+                      <span class="mode-name">Register Solo</span>
+                      <span class="mode-prize">Rs ${esc(entry)}</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `;
+        });
+        html += '</div>';
+    }
+
+    // POPULAR
+    const allDayNight = [...day, ...night];
+    const allGroups = buildGroups(allDayNight);
+    const popularKeys = Object.keys(allGroups).filter(k => isPopular(k)).sort((a,b) =>
+      String(allGroups[a].displayName).localeCompare(String(allGroups[b].displayName)));
+    if (popularKeys.length > 0) {
+        html += `<h3 class="section-title-mt popular">⭐ Popular Games <span class="st-tag">Both Schedules</span></h3><div class="game-grid">`;
+        popularKeys.forEach(k => { html += renderGameCard(allGroups[k], { popular: true }); });
+        html += '</div>';
+    }
+
+    // DAY / NIGHT (non-popular only)
+    const dayOnly = day.filter(t => !isPopular(gameKey(t.game)));
+    const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
+
+    if (dayOnly.length) {
+        html += `<h3 class="section-title-mt day">☀️ 30 September · Day Session <span class="st-tag">1:00 PM NPT</span></h3><div class="game-grid">`;
+        const groups = buildGroups(dayOnly);
+        Object.values(groups).forEach(g => {
+            if (g.day.length) html += renderGameCard({ ...g, night: [] });
+        });
+        html += '</div>';
+    }
+    if (nightOnly.length) {
+        html += `<h3 class="section-title-mt night">🌙 30 September · Night Session <span class="st-tag">9:00 PM NPT</span></h3><div class="game-grid">`;
+        const groups = buildGroups(nightOnly);
+        Object.values(groups).forEach(g => {
+            if (g.night.length) html += renderGameCard({ ...g, day: [] });
+        });
+        html += '</div>';
+    }
+    if (other.length) {
+        html += `<h3 class="section-title-mt">📅 Upcoming Tournaments</h3><div class="game-grid">`;
+        const groups = buildGroups(other);
+        Object.values(groups).forEach(g => { html += renderGameCard(g); });
+        html += '</div>';
+    }
+
+    content.innerHTML = html;
+    secEl.hidden = false;
+}
+
+function buildGroups(list) {
+    const groups = {};
+    list.forEach(t => {
+        const key = gameKey(t.game);
+        if (!groups[key]) groups[key] = { key, displayName: gameDisplayName(t.game), day: [], night: [] };
+        const slot = slotOf(t.time);
+        groups[key][slot].push(t);
+    });
+    const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
+    Object.values(groups).forEach(g => {
+        ['day','night'].forEach(slot => {
+            g[slot].sort((a,b) => {
+                const ao = order[String(a.mode||'').toLowerCase()] ?? 99;
+                const bo = order[String(b.mode||'').toLowerCase()] ?? 99;
+                return ao - bo;
+            });
+        });
+    });
+    return groups;
+}
+
+function dedupeByMode(list) {
+    const byMode = {};
+    list.forEach(t => {
+        const mk = String(t.mode || '').toLowerCase().trim();
+        if (!byMode[mk]) byMode[mk] = { best: t };
+        else {
+            const cur = Number(byMode[mk].best.prizePool || 0);
+            const nw  = Number(t.prizePool || 0);
+            if (nw > cur) byMode[mk].best = t;
+        }
+    });
+    return Object.values(byMode).map(x => x.best);
+}
+
+function renderModeButtons(list) {
+    const deduped = dedupeByMode(list);
+    return deduped.map(t => {
+        const cls = modeClass(t.mode);
+        const prize = t.prizePool || 0;
+        const link = t.seedKey
+            ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
+            : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+        // Check if already registered
+        const alreadyReg = myRegisteredTitles.has(String(t.title || '').toLowerCase())
+                        || myRegisteredTitles.has(String(t.id).toLowerCase());
+        const registeredClass = alreadyReg ? ' registered' : '';
+        const label = alreadyReg ? '✓ Registered' : (t.mode || 'Mode');
+        return `
+          <a href="${alreadyReg ? '#' : link}" class="mode-btn ${cls}${registeredClass}"
+             ${alreadyReg ? 'onclick="return false;"' : ''}>
+            <span class="mode-icon">${alreadyReg ? '✓' : modeIcon(t.mode)}</span>
+            <span class="mode-name">${esc(label)}</span>
+            <span class="mode-prize">Rs ${prize}</span>
+          </a>
+        `;
+    }).join('');
+}
+
+function renderGameCard(group, opts = {}) {
+    const { day, night, displayName, key } = group;
+    const all = [...day, ...night];
+    const iconField = all.find(t => t.icon)?.icon;
+    const icon = gameIcon(key, iconField);
+    const entryFee = all[0]?.entryFee || 0;
+    const topKills = bestTopKills(all);
+    const featured = day.length > 0 && night.length > 0;
+    const isPopularCard = opts.popular === true;
+
+    let slots = '';
+    if (day.length > 0) {
+        slots += `
+          <div class="time-slot">
+            <div class="time-slot-head day"><span class="t-pill">☀️ 1:00 PM</span><span style="color:#fbbf24;">Day Session</span></div>
+            <div class="mode-buttons">${renderModeButtons(day)}</div>
+          </div>
+        `;
+    }
+    if (night.length > 0) {
+        slots += `
+          <div class="time-slot">
+            <div class="time-slot-head night"><span class="t-pill">🌙 9:00 PM</span><span style="color:#d8b4fe;">Night Session</span></div>
+            <div class="mode-buttons">${renderModeButtons(night)}</div>
+          </div>
+        `;
+    }
+    return `
+      <div class="game-card ${isPopularCard ? 'popular' : (featured ? 'featured' : '')}">
+        <div class="game-head">
+          <div class="icon">${esc(icon)}</div>
+          <div class="info">
+            <div class="name">${esc(displayName)}</div>
+            <div class="meta">
+              <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
+              ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
+              ${isPopularCard ? `<span class="popular-badge">⭐ Popular</span>` : ''}
+            </div>
+          </div>
+        </div>
+        ${slots}
+      </div>
+    `;
+}
+
+// ========== BELL ==========
+window.copyReferralLink = function() {
+    const inp = document.getElementById('refLinkInput');
+    if (!inp) return;
+    const btn = document.getElementById('refCopyBtn');
+    const doCopy = () => {
+        navigator.clipboard.writeText(inp.value).then(() => {
+            btn.classList.add('copied');
+            const orig = btn.textContent;
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1600);
+        }).catch(() => {
+            inp.select();
+            document.execCommand('copy');
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 1600);
+        });
+    };
+    doCopy();
+};
+
+let bellItems = [];
+
+async function loadBellNotifications(uid) {
+    const listEl = document.getElementById('bellList');
+    if (!listEl) return;
+    try {
+        const [personalSnap, allSnap] = await Promise.all([
+            getDocs(query(collection(db, 'notifications'), where('targetUid', '==', uid), orderBy('createdAt', 'desc'), limit(20))).catch(() => ({ docs: [] })),
+            getDocs(query(collection(db, 'notifications'), where('targetUid', '==', 'ALL'), orderBy('createdAt', 'desc'), limit(20))).catch(() => ({ docs: [] }))
+        ]);
+        const personal = personalSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const broadcast = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const combined = [...personal, ...broadcast];
+        combined.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        bellItems = combined.slice(0, 20);
+        const unread = bellItems.filter(n => {
+            const readBy = Array.isArray(n.readBy) ? n.readBy : [];
+            return !readBy.includes(uid);
+        });
+        const badge = document.getElementById('bellBadge');
+        if (badge) {
+            if (unread.length > 0) {
+                badge.textContent = unread.length > 9 ? '9+' : unread.length;
+                badge.classList.add('show');
+            } else badge.classList.remove('show');
+        }
+        renderBellList(uid);
+    } catch (e) {
+        console.warn('loadBellNotifications error:', e);
+        listEl.innerHTML = '<div class="bell-empty">Could not load notifications</div>';
+    }
+}
+
+function renderBellList(uid) {
+    const listEl = document.getElementById('bellList');
+    if (!listEl) return;
+    if (!bellItems.length) {
+        listEl.innerHTML = '<div class="bell-empty">No notifications yet</div>';
+        return;
+    }
+    const iconMap = {
+        info:{icon:'ℹ️',color:'#60a5fa'}, success:{icon:'✅',color:'#4ade80'},
+        warning:{icon:'⚠️',color:'#facc15'}, error:{icon:'❌',color:'#f87171'},
+        trophy:{icon:'🏆',color:'#fbbf24'}, money:{icon:'💰',color:'#4ade80'}
+    };
+    listEl.innerHTML = bellItems.map(n => {
+        const meta = iconMap[n.type] || iconMap.info;
+        const readBy = Array.isArray(n.readBy) ? n.readBy : [];
+        const isUnread = !readBy.includes(uid);
+        const timeStr = fmtTimeAgo(n.createdAt);
+        return `
+            <div class="bell-item ${isUnread ? 'unread' : ''}" onclick="openBellItem('${n.id}')">
+                <div class="bi-icon" style="background:${meta.color}22;color:${meta.color};">${meta.icon}</div>
+                <div class="bi-body">
+                    <div class="bi-title">${escapeHtml(n.title || '(no title)')}</div>
+                    <div class="bi-msg">${escapeHtml(n.message || '')}</div>
+                    <div class="bi-time">${timeStr}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.openBellItem = async function(id) {
+    const item = bellItems.find(x => x.id === id);
+    if (!item || !currentUid) return;
+    try {
+        await updateDoc(doc(db, 'notifications', id), { readBy: arrayUnion(currentUid) });
+        item.readBy = [...(item.readBy || []), currentUid];
+        renderBellList(currentUid);
+        const unread = bellItems.filter(n => {
+            const rb = Array.isArray(n.readBy) ? n.readBy : [];
+            return !rb.includes(currentUid);
+        });
+        const badge = document.getElementById('bellBadge');
+        if (badge) {
+            if (unread.length > 0) {
+                badge.textContent = unread.length > 9 ? '9+' : unread.length;
+                badge.classList.add('show');
+            } else badge.classList.remove('show');
+        }
+    } catch (e) { console.warn('mark read error:', e); }
+};
+
+window.markAllNotificationsRead = async function() {
+    if (!currentUid) return;
+    const unread = bellItems.filter(n => {
+        const rb = Array.isArray(n.readBy) ? n.readBy : [];
+        return !rb.includes(currentUid);
+    });
+    for (const n of unread) {
+        try {
+            await updateDoc(doc(db, 'notifications', n.id), { readBy: arrayUnion(currentUid) });
+            n.readBy = [...(n.readBy || []), currentUid];
+        } catch (e) {}
+    }
+    renderBellList(currentUid);
+    const badge = document.getElementById('bellBadge');
+    if (badge) badge.classList.remove('show');
+};
+
+function fmtTimeAgo(ts) {
+    if (!ts?.seconds) return '';
+    const diff = Date.now() - ts.seconds * 1000;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    return new Date(ts.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('bellBtn');
+    if (btn) btn.addEventListener('click', window.toggleBell);
+});
 </script>
 
 </body>
