@@ -1,5 +1,7 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.6)
+// NEPPLAY — admin.js (v4.7)
+// v4.7 changes:
+//  + Bracket: manual pairing UI (dropdowns + match list + shuffle remaining)
 // v4.6 changes:
 //  + Bracket system for 1v1 tournaments (auto-pair, publish, notify)
 //  + "🎯 Manage Bracket" button on 1v1 tournament cards
@@ -43,10 +45,10 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.6 — awaiting auth");
+console.log("🔥 Admin v4.7 — awaiting auth");
 
 // ============================================================
-// ADMIN EMAIL (for password-only login)
+// ADMIN EMAIL
 // ============================================================
 const ADMIN_EMAIL = 'amitacharya018@gmail.com';
 
@@ -323,7 +325,7 @@ async function bootstrapAdminPanel() {
 }
 
 // ============================================================
-// REFERRAL BONUSES — CORE LOGIC
+// REFERRAL BONUSES
 // ============================================================
 const REFERRAL_BONUS_AMOUNT = 20;
 
@@ -385,9 +387,6 @@ async function handleReferralBonus(paymentId) {
   } catch (err) { console.error('handleReferralBonus error:', err); }
 }
 
-// ============================================================
-// REFERRAL BONUSES — LOAD / RENDER
-// ============================================================
 async function loadReferralBonuses() {
   try {
     const snap = await getDocs(collection(db, 'referral_bonuses'));
@@ -462,7 +461,7 @@ function renderReferralBonuses() {
   });
 
   if (!allReferralBonuses.length) {
-    list.innerHTML = `<div class="empty-state"><span class="icon">🤝</span>No referral bonuses yet. Bonuses appear here when a referred member joins a paid tournament.</div>`;
+    list.innerHTML = `<div class="empty-state"><span class="icon">🤝</span>No referral bonuses yet.</div>`;
     return;
   }
   if (!filtered.length) {
@@ -492,18 +491,13 @@ function renderReferralBonuses() {
               ${escapeDetail(b.referredName || 'Unknown')}
             </b>
           </div>
-          ${b.referredEmail ? `<div class="reg-line-2">📧 ${escapeDetail(b.referredEmail)}${b.referredPhone ? ' · 📱 ' + escapeDetail(b.referredPhone) : ''}${b.referredIgn ? ' · 🎮 ' + escapeDetail(b.referredIgn) : ''}</div>` : ''}
           <div class="reg-line-2">
             🏆 ${escapeDetail(b.tournamentTitle || 'Paid tournament')}
             · 💰 <b style="color:#fbbf24;">${fmtRs(b.amount || REFERRAL_BONUS_AMOUNT)}</b>
-            ${b.paymentMethod ? ' · 💳 ' + escapeDetail(b.paymentMethod).toUpperCase() : ''}
-            ${b.txnId ? ' · 🔖 <code>' + escapeDetail(b.txnId) + '</code>' : ''}
           </div>
           <div class="reg-line-2" style="font-size:11px;color:#6b7280;">
             🕐 ${fmtShort(b.createdAt)}
-            ${b.referrerUid ? ' · 🔗 referrer: <code>' + escapeDetail(b.referrerUid).slice(0,8) + '...</code>' : ''}
           </div>
-          ${isPaid && b.paidAt ? `<div class="reg-line-2" style="color:#4ade80;">✅ Paid ${fmtShort(b.paidAt)}${b.adminNote ? ' · ' + escapeDetail(b.adminNote) : ''}</div>` : ''}
         </div>
         ${shotHtml ? `<div class="ref-shot-wrap">${shotHtml}</div>` : ''}
         <div class="reg-right">
@@ -516,25 +510,16 @@ function renderReferralBonuses() {
 }
 
 window.markReferralPaid = async function(bonusId, referrerName) {
-  if (!confirm(`Mark this referral bonus as paid to ${referrerName}?\n\nMake sure you've actually sent Rs. ${REFERRAL_BONUS_AMOUNT} via eSewa/Khalti first.`)) return;
+  if (!confirm(`Mark this referral bonus as paid to ${referrerName}?`)) return;
   try {
     await updateDoc(doc(db, 'referral_bonuses', bonusId), {
       status: 'paid',
       paidAt: serverTimestamp(),
       adminNote: 'Manually marked paid by admin'
     });
-    logActivity({
-      action: 'referral_marked_paid', category: 'referrals',
-      targetId: bonusId, targetType: 'referral_bonus',
-      summary: `Referral bonus paid to ${referrerName} (Rs. ${REFERRAL_BONUS_AMOUNT})`,
-      metadata: { referrerName, amount: REFERRAL_BONUS_AMOUNT }
-    });
     window.showToast('✅ Referral bonus marked as paid');
     await loadReferralBonuses();
-  } catch (err) {
-    console.error('markReferralPaid error:', err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 window.exportReferralsCSV = function() {
@@ -555,7 +540,7 @@ window.exportReferralsCSV = function() {
 };
 
 // ============================================================
-// NOTIFICATIONS (#7) — SEND + RECENT
+// NOTIFICATIONS (#7)
 // ============================================================
 const NOTIF_TYPE_META = {
   info:    { icon: 'ℹ️', color: '#60a5fa' },
@@ -614,7 +599,7 @@ async function loadSentNotifications() {
             <div class="sent-notif-msg">${escapeDetail(truncMsg)}</div>
             <div class="sent-notif-meta">🕐 ${sentAt} · 👤 ${escapeDetail(n.createdBy || '—')}${!isBroadcast ? ' · ✅ read by ' + readCount : ''}</div>
           </div>
-          <div><button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete this notification">🗑️</button></div>
+          <div><button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete">🗑️</button></div>
         </div>
       `;
     }).join('');
@@ -657,13 +642,6 @@ window.sendNotification = async function(e) {
       createdAt: serverTimestamp(),
       readBy: []
     });
-    logActivity({
-      action: 'notification_sent', category: 'system',
-      targetId: isBroadcast ? null : targetUidRaw,
-      targetType: isBroadcast ? 'broadcast' : 'user',
-      summary: `Notification sent to ${isBroadcast ? 'ALL users' : targetName}: "${title}"`,
-      metadata: { targetUid: isBroadcast ? 'ALL' : targetUidRaw, targetName, type, title }
-    });
     window.showToast('✅ Notification sent');
     document.getElementById('notifTitle').value = '';
     document.getElementById('notifMessage').value = '';
@@ -689,7 +667,7 @@ window.deleteNotification = async function(id) {
 };
 
 // ============================================================
-// LIVE STATS BAR
+// LIVE STATS
 // ============================================================
 function loadLiveStats() {
   const t = todayKey();
@@ -736,7 +714,6 @@ window.openUserDetail = function(uid) {
     (p.winnerName && u.username && p.winnerName.toLowerCase() === u.username.toLowerCase())
   );
   const myReferrals = allReferralBonuses.filter(b => b.referrerUid === uid);
-  const referredMe = u.referredBy ? allUsers.find(x => x.id === u.referredBy) : null;
 
   const totalSpent = myPays.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
   const totalWon = myPayouts.filter(p => p.status === 'paid').reduce((s,p) => s + (Number(p.amount)||0), 0);
@@ -759,15 +736,14 @@ window.openUserDetail = function(uid) {
       <div class="dm-row"><span class="dm-k">🔑 User ID</span><span class="dm-v"><code>${escapeDetail(u.id)}</code></span></div>
       <div class="dm-row"><span class="dm-k">📅 Joined</span><span class="dm-v">${fmtDate(u.createdAt)}</span></div>
       <div class="dm-row"><span class="dm-k">🎭 Role</span><span class="dm-v">${u.role || 'member'}</span></div>
-      ${referredMe ? `<div class="dm-row"><span class="dm-k">🔗 Referred by</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${referredMe.id}')" style="color:#a5b4fc;text-decoration:none;font-weight:700;">${escapeDetail(referredMe.username || referredMe.email || 'Unknown')} →</a></span></div>` : ''}
     </div>
     <div class="dm-section">
       <h3>📊 Activity Summary</h3>
       <div class="dm-rows">
         <div class="dm-row"><span class="dm-k">Registrations</span><span class="dm-v">${myRegs.length}</span></div>
         <div class="dm-row"><span class="dm-k">Payments submitted</span><span class="dm-v">${myPays.length}</span></div>
-        <div class="dm-row"><span class="dm-k">💰 Total spent (approved)</span><span class="dm-v" style="color:#fbbf24;">${fmtRs(totalSpent)}</span></div>
-        <div class="dm-row"><span class="dm-k">🏆 Total won (paid)</span><span class="dm-v" style="color:#4ade80;">${fmtRs(totalWon)}</span></div>
+        <div class="dm-row"><span class="dm-k">💰 Total spent</span><span class="dm-v" style="color:#fbbf24;">${fmtRs(totalSpent)}</span></div>
+        <div class="dm-row"><span class="dm-k">🏆 Total won</span><span class="dm-v" style="color:#4ade80;">${fmtRs(totalWon)}</span></div>
         <div class="dm-row"><span class="dm-k">🤝 Referral earnings</span><span class="dm-v" style="color:#c084fc;">${fmtRs(totalReferralEarnings)} (${myReferrals.length})</span></div>
       </div>
     </div>
@@ -807,36 +783,23 @@ window.openPayoutDetail = async function(payoutId) {
   document.getElementById('detailModalContent').innerHTML = `
     <h2>🏆 Payout Details</h2>
     <p class="dm-sub">${escapeDetail(w.tournamentTitle || 'Tournament')}</p>
-
     <div class="dm-rows">
       <div class="dm-row"><span class="dm-k">👤 Winner</span><span class="dm-v">${escapeDetail(w.winnerName || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">🥇 Rank</span><span class="dm-v">${escapeDetail(w.rank || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">🎯 Kills</span><span class="dm-v">${w.kills != null ? w.kills : '—'}</span></div>
       <div class="dm-row"><span class="dm-k">💰 Amount</span><span class="dm-v" style="color:#fbbf24;font-size:18px;">${fmtRs(amount)}</span></div>
-      <div class="dm-row"><span class="dm-k">💳 Method</span><span class="dm-v">${(w.method || '—').toUpperCase()}</span></div>
       <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${isPaid ? '#4ade80' : '#fbbf24'};font-weight:800;">${isPaid ? '✅ PAID' : '⏳ PENDING'}</span></div>
-      ${w.note ? `<div class="dm-row"><span class="dm-k">📝 Note</span><span class="dm-v">${escapeDetail(w.note)}</span></div>` : ''}
       <div class="dm-row"><span class="dm-k">🕐 Created</span><span class="dm-v">${fmtDate(w.createdAt)}</span></div>
-      ${w.paidAt ? `<div class="dm-row"><span class="dm-k">✅ Paid at</span><span class="dm-v">${fmtDate(w.paidAt)}</span></div>` : ''}
-      <div class="dm-row"><span class="dm-k">🔑 Payout ID</span><span class="dm-v"><code>${escapeDetail(w.id)}</code></span></div>
     </div>
-
     <div class="dm-section">
       <h3>👥 Linked Member Account</h3>
       ${linkedUser ? `
         <div class="dm-rows">
           <div class="dm-row"><span class="dm-k">Username</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${linkedUser.id}')" style="color:#a5b4fc;font-weight:700;">${escapeDetail(linkedUser.username || linkedUser.fullName || '—')} →</a></span></div>
           <div class="dm-row"><span class="dm-k">Email</span><span class="dm-v">${escapeDetail(linkedUser.email || '—')}</span></div>
-          <div class="dm-row"><span class="dm-k">UID</span><span class="dm-v"><code>${escapeDetail(linkedUser.id)}</code></span></div>
-          ${w.userId ? '' : '<div class="dm-row"><span class="dm-k">⚠️ Notice</span><span class="dm-v" style="color:#fbbf24;">Payout has no userId — matched by username</span></div>'}
         </div>
-      ` : `
-        <div class="dm-rows">
-          <div class="dm-row"><span class="dm-k">Status</span><span class="dm-v" style="color:#f87171;">⚠️ No matching member found for username "${escapeDetail(w.winnerName || '')}"</span></div>
-        </div>
-      `}
+      ` : `<div class="dm-rows"><div class="dm-row"><span class="dm-k">Status</span><span class="dm-v" style="color:#f87171;">⚠️ No matching member found</span></div></div>`}
     </div>
-
     <div class="dm-section">
       <h3>⚙️ Quick Actions</h3>
       <div class="dm-actions" style="margin-top:0;">
@@ -844,7 +807,6 @@ window.openPayoutDetail = async function(payoutId) {
         <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
       </div>
     </div>
-
     <div class="dm-actions">
       <button class="dm-btn-primary" onclick="editPayoutField('${w.id}')">✏️ Edit Amount / Rank</button>
       <button class="dm-btn-danger" onclick="deletePayout('${w.id}','${(w.winnerName||'').replace(/'/g,"\\'")}')">🗑️ Delete Payout</button>
@@ -856,16 +818,7 @@ window.openPayoutDetail = async function(payoutId) {
 window.markPayoutPaid = async function(payoutId) {
   if (!confirm('Mark this payout as PAID?')) return;
   try {
-    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
-      status: 'paid',
-      paidAt: serverTimestamp()
-    });
-    logActivity({
-      action: 'payout_marked_paid', category: 'payments',
-      targetId: payoutId, targetType: 'payout',
-      summary: `Payout marked paid`,
-      metadata: {}
-    });
+    await updateDoc(doc(db, 'tournament_payouts', payoutId), { status: 'paid', paidAt: serverTimestamp() });
     window.showToast('✅ Marked paid');
     closeDetailModal();
     await loadPayouts();
@@ -875,10 +828,7 @@ window.markPayoutPaid = async function(payoutId) {
 window.markPayoutPending = async function(payoutId) {
   if (!confirm('Mark this payout as PENDING again?')) return;
   try {
-    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
-      status: 'pending',
-      paidAt: null
-    });
+    await updateDoc(doc(db, 'tournament_payouts', payoutId), { status: 'pending', paidAt: null });
     window.showToast('↺ Marked pending');
     closeDetailModal();
     await loadPayouts();
@@ -890,7 +840,7 @@ window.editPayoutField = async function(payoutId) {
   if (!w) return;
   const newAmt = prompt('Amount (Rs.):', w.amount || w.prize || 0);
   if (newAmt === null) return;
-  const newRank = prompt('Rank (1, 2, 3, "Top Killer", "1 + Top Killer"):', w.rank || '1');
+  const newRank = prompt('Rank:', w.rank || '1');
   if (newRank === null) return;
   const newNote = prompt('Note:', w.note || '');
   if (newNote === null) return;
@@ -908,15 +858,9 @@ window.editPayoutField = async function(payoutId) {
 };
 
 window.deletePayout = async function(payoutId, winnerName) {
-  if (!confirm(`Delete payout for "${winnerName}"? This cannot be undone.`)) return;
+  if (!confirm(`Delete payout for "${winnerName}"?`)) return;
   try {
     await deleteDoc(doc(db, 'tournament_payouts', payoutId));
-    logActivity({
-      action: 'payout_deleted', category: 'payments',
-      targetId: payoutId, targetType: 'payout',
-      summary: `Deleted payout for ${winnerName}`,
-      metadata: { winnerName }
-    });
     window.showToast('🗑️ Payout deleted');
     closeDetailModal();
     await loadPayouts();
@@ -943,10 +887,7 @@ window.openRegDetail = function(regId) {
       <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(r.phone || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">💰 Type</span><span class="dm-v">${isPaid ? 'PAID' : 'FREE'}</span></div>
       ${isPaid ? `<div class="dm-row"><span class="dm-k">💵 Amount</span><span class="dm-v" style="color:#fbbf24;">Rs. ${r.amount || 0}</span></div>` : ''}
-      ${isPaid ? `<div class="dm-row"><span class="dm-k">🔖 Txn ID</span><span class="dm-v"><code>${escapeDetail(r.txnId || '—')}</code></span></div>` : ''}
-      ${isPaid ? `<div class="dm-row"><span class="dm-k">💳 Method</span><span class="dm-v">${(r.method || '—').toUpperCase()}</span></div>` : ''}
       <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
-      ${r.streamUrl ? `<div class="dm-row"><span class="dm-k">🔴 Stream URL</span><span class="dm-v"><a href="${escapeDetail(r.streamUrl)}" target="_blank" style="color:#f87171;">Watch →</a></span></div>` : ''}
     </div>
     ${isPaid && payment ? `
       <div class="dm-section">
@@ -954,8 +895,6 @@ window.openRegDetail = function(regId) {
         <div class="dm-rows">
           <div class="dm-row"><span class="dm-k">Payment status</span><span class="dm-v">${(payment.status || '').toUpperCase()}</span></div>
           <div class="dm-row"><span class="dm-k">Submitted</span><span class="dm-v">${fmtDate(payment.submittedAt)}</span></div>
-          ${payment.reviewedAt ? `<div class="dm-row"><span class="dm-k">Reviewed</span><span class="dm-v">${fmtDate(payment.reviewedAt)}</span></div>` : ''}
-          ${payment.adminNote ? `<div class="dm-row"><span class="dm-k">Admin note</span><span class="dm-v">${escapeDetail(payment.adminNote)}</span></div>` : ''}
         </div>
         ${shotSrc ? `<img class="dm-shot" src="${shotSrc}" onclick="openShot('${shotSrc}')">` : ''}
       </div>
@@ -1041,12 +980,6 @@ window.submitCreateTournament = async function(e) {
       date, time, max, filled: 0, description: desc,
       status: 'upcoming', createdAt: serverTimestamp()
     });
-    logActivity({
-      action: 'tournament_created', category: 'tournaments',
-      targetId: docRef.id, targetType: 'tournament',
-      summary: `Created tournament "${title}" (${game} · ${mode})`,
-      metadata: { title, game, mode, entryType }
-    });
     window.showToast('✅ Tournament created');
     resetCreateForm();
     await loadRecentCreated();
@@ -1060,7 +993,7 @@ window.submitCreateTournament = async function(e) {
 };
 
 // ============================================================
-// RECENT TOURNAMENTS (with ⭐ Manage Bracket button on 1v1)
+// RECENT TOURNAMENTS
 // ============================================================
 window.loadRecentCreated = async function() {
   const list = document.getElementById('recentCreatedTournaments');
@@ -1078,7 +1011,7 @@ window.loadRecentCreated = async function() {
       const isPaid = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
-            const tTitle = String(t.title || '').toLowerCase();
+      const tTitle = String(t.title || '').toLowerCase();
       const is1v1 = String(t.mode || '').toLowerCase() === '1v1'
                     || tTitle.includes('1v1')
                     || tTitle.includes('1 vs 1')
@@ -1149,9 +1082,15 @@ window.deleteTournament = async function(id, title) {
 };
 
 // ============================================================
-// ⭐ NEW v4.6 — BRACKET MANAGER (1v1 only)
+// ⭐ BRACKET MANAGER v4.7 — Manual pairing UI
 // ============================================================
 let bkTournament = null;
+let bkRegistrations = [];   // [{ id, userId, username, ign, phone, ... }]
+let bkMatches = [];         // [{ id (local), p1RegId, p2RegId }]
+let bkExistingMatchIds = []; // ids of matches already saved in Firestore (for delete on save)
+let bkPublished = false;
+let bkRoomId = '';
+let bkRoomPassword = '';
 
 function bkEsc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
@@ -1188,7 +1127,15 @@ window.openBracketManager = async function (tournamentId) {
   bodyEl.innerHTML = '<div class="bk-empty">Loading…</div>';
   footEl.innerHTML = '';
 
+  // Reset state
+  bkMatches = [];
+  bkExistingMatchIds = [];
+  bkPublished = false;
+  bkRoomId = '';
+  bkRoomPassword = '';
+
   try {
+    // Load tournament
     const tDoc = await getDoc(doc(db, 'tournaments', tournamentId));
     if (!tDoc.exists()) {
       bodyEl.innerHTML = '<div class="bk-empty">Tournament not found.</div>';
@@ -1198,7 +1145,7 @@ window.openBracketManager = async function (tournamentId) {
     titleEl.textContent = '🎯 ' + (bkTournament.title || 'Tournament');
     subEl.textContent = (bkTournament.game || '') + ' · ' + (bkTournament.date || '') + ' · ' + (bkTournament.time || '');
 
-    // Load registrations for this tournament
+    // Load registrations
     let regs = [];
     const regSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -1206,7 +1153,6 @@ window.openBracketManager = async function (tournamentId) {
     ));
     regs = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // Fallback — some older registrations store seedKey prefix
     if (regs.length === 0 && bkTournament.seedKey) {
       const regSnap2 = await getDocs(query(
         collection(db, 'tournament_registrations'),
@@ -1215,37 +1161,78 @@ window.openBracketManager = async function (tournamentId) {
       regs = regSnap2.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
+    bkRegistrations = regs.sort((a, b) =>
+      String(a.username || a.ign || '').localeCompare(String(b.username || b.ign || ''))
+    );
+
     // Load existing matches
     const mSnap = await getDocs(query(
       collection(db, 'matches'),
       where('tournamentId', '==', tournamentId)
     ));
     const existingMatches = mSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const alreadyPublished = existingMatches.some(m => m.publishedAt);
-    const currentRoomId   = existingMatches[0]?.roomId || '';
-    const currentRoomPass = existingMatches[0]?.roomPassword || '';
 
-    renderBracketUI(regs, existingMatches, alreadyPublished, currentRoomId, currentRoomPass);
+    // Convert Firestore matches back to local state (match by userId + username fallback)
+    existingMatches.forEach(m => {
+      const p1Reg = findRegByPlayer(m.player1);
+      const p2Reg = findRegByPlayer(m.player2);
+      if (p1Reg) {
+        bkMatches.push({
+          id: 'local_' + Math.random().toString(36).slice(2, 10),
+          p1RegId: p1Reg.id,
+          p2RegId: p2Reg ? p2Reg.id : null,
+          bye: !!m.bye
+        });
+        bkExistingMatchIds.push(m.id);
+      }
+    });
+
+    if (existingMatches.length) {
+      bkRoomId = existingMatches[0].roomId || '';
+      bkRoomPassword = existingMatches[0].roomPassword || '';
+      bkPublished = existingMatches.some(m => m.publishedAt);
+    }
+
+    renderBracketUI();
   } catch (e) {
     console.error('openBracketManager error:', e);
     bodyEl.innerHTML = '<div class="bk-empty">Error: ' + bkEsc(e.message) + '</div>';
   }
 };
 
-function renderBracketUI(regs, existingMatches, alreadyPublished, roomId, roomPass) {
+function findRegByPlayer(p) {
+  if (!p) return null;
+  // Match by userId first
+  if (p.uid) {
+    const byUid = bkRegistrations.find(r => r.userId === p.uid && (r.ign || r.username) === (p.ign || p.username));
+    if (byUid) return byUid;
+  }
+  // Match by username + ign
+  return bkRegistrations.find(r => (r.username === p.username) || (r.ign === p.ign)) || null;
+}
+
+function renderBracketUI() {
   const bodyEl = document.getElementById('bkBody');
   const footEl = document.getElementById('bkFoot');
+  if (!bodyEl || !footEl) return;
 
-  const regCount = regs.length;
-  const matchCount = existingMatches.length;
-  const byeCount = existingMatches.filter(m => m.bye).length;
+  const regCount = bkRegistrations.length;
+  const matchCount = bkMatches.length;
+  const assignedIds = new Set();
+  bkMatches.forEach(m => {
+    assignedIds.add(m.p1RegId);
+    if (m.p2RegId) assignedIds.add(m.p2RegId);
+  });
+  const assignedCount = assignedIds.size;
+  const unassignedCount = regCount - assignedCount;
 
   let html = `
     <div class="bk-stat-row">
-      <span>Registered players: <b>${regCount}</b></span>
-      <span>Matches created: <b>${matchCount}</b></span>
-      ${byeCount ? `<span>Byes: <b>${byeCount}</b></span>` : ''}
-      <span>Status: <b>${alreadyPublished ? '✅ Published' : '⏳ Not published'}</b></span>
+      <span>Registered: <b>${regCount}</b></span>
+      <span>Assigned: <b>${assignedCount}</b></span>
+      <span>Unassigned: <b>${unassignedCount}</b></span>
+      <span>Matches: <b>${matchCount}</b></span>
+      <span>Status: <b>${bkPublished ? '✅ Published' : '⏳ Not published'}</b></span>
     </div>
   `;
 
@@ -1256,197 +1243,292 @@ function renderBracketUI(regs, existingMatches, alreadyPublished, roomId, roomPa
     return;
   }
 
-  html += `
-    <div class="bk-room-row">
-      <div>
-        <label>Room ID (applied to all matches on publish)</label>
-        <input id="bkRoomId" value="${bkEsc(roomId)}" placeholder="e.g. 8842910">
+  // Player list
+  html += `<div class="bk-section-title">📋 Registered Players (${regCount})</div><div class="bk-players">`;
+  bkRegistrations.forEach(r => {
+    const isAssigned = assignedIds.has(r.id);
+    const ign = r.ign || r.username || '—';
+    const uname = r.username || '—';
+    const phone = r.phone || r.payerPhone || '—';
+    html += `
+      <div class="bk-player-row ${isAssigned ? 'assigned' : ''}">
+        <span class="bk-player-dot">${isAssigned ? '●' : '○'}</span>
+        <span class="bk-player-name">${bkEsc(uname)}</span>
+        <span class="bk-player-ign">${bkEsc(ign)}</span>
+        <span class="bk-player-phone">${bkEsc(phone)}</span>
       </div>
-      <div>
-        <label>Room Password</label>
-        <input id="bkRoomPass" value="${bkEsc(roomPass)}" placeholder="e.g. nepplay">
-      </div>
-    </div>
-  `;
+    `;
+  });
+  html += '</div>';
 
-  if (existingMatches.length === 0) {
-    html += '<div class="bk-empty">No pairings yet. Click <b>🎲 Auto-pair</b> below to shuffle and match players.</div>';
-    bodyEl.innerHTML = html;
+  // Current matches
+  html += `<div class="bk-section-title" style="margin-top:20px;">🎯 Current Matches (${matchCount})</div>`;
+  if (bkMatches.length === 0) {
+    html += '<div class="bk-empty" style="padding:16px;">No matches created yet. Use the section below to add matches.</div>';
   } else {
     html += '<div class="bk-pairs">';
-    existingMatches.forEach((m, i) => {
-      const p1 = m.player1 || {};
-      const p2 = m.player2 || {};
-      if (m.bye) {
+    bkMatches.forEach((m, i) => {
+      const p1 = bkRegistrations.find(r => r.id === m.p1RegId);
+      const p2 = m.p2RegId ? bkRegistrations.find(r => r.id === m.p2RegId) : null;
+      if (m.bye || !p2) {
         html += `
           <div class="bk-pair bye">
             <span class="bk-pair-num">Match ${i+1}</span>
-            <div class="bk-player">${bkEsc(p1.ign || p1.username || '—')}<small>🎉 Bye — auto-advanced</small></div>
+            <div class="bk-player">${bkEsc(p1?.username || '—')}<small>🎉 Bye — auto-advance</small></div>
+            ${!bkPublished ? `<button class="bk-btn danger" onclick="bkRemoveMatch(${i})" style="padding:6px 12px;font-size:12px;">✕ Remove</button>` : ''}
           </div>
         `;
       } else {
         html += `
           <div class="bk-pair">
             <span class="bk-pair-num">Match ${i+1}</span>
-            <div class="bk-player">${bkEsc(p1.ign || p1.username || '—')}<small>${bkEsc(p1.phone || '')}</small></div>
+            <div class="bk-player">${bkEsc(p1?.username || '—')}<small>${bkEsc(p1?.ign || '')} · ${bkEsc(p1?.phone || '')}</small></div>
             <span class="bk-vs">VS</span>
-            <div class="bk-player">${bkEsc(p2.ign || p2.username || '—')}<small>${bkEsc(p2.phone || '')}</small></div>
+            <div class="bk-player">${bkEsc(p2?.username || '—')}<small>${bkEsc(p2?.ign || '')} · ${bkEsc(p2?.phone || '')}</small></div>
+            ${!bkPublished ? `<button class="bk-btn danger" onclick="bkRemoveMatch(${i})" style="padding:6px 12px;font-size:12px;">✕ Remove</button>` : ''}
           </div>
         `;
       }
     });
     html += '</div>';
-    bodyEl.innerHTML = html;
   }
 
-  footEl.innerHTML = `
-    <button class="bk-btn ghost" onclick="bkAutoPair()">🎲 Auto-pair</button>
-    ${existingMatches.length ? `<button class="bk-btn danger" onclick="bkClearPairs()">🗑 Clear pairings</button>` : ''}
-    ${existingMatches.length && !alreadyPublished ? `<button class="bk-btn gold" onclick="bkPublish()">🚀 Publish matches</button>` : ''}
-    ${alreadyPublished ? `<button class="bk-btn green" disabled>✅ Published</button>` : ''}
-  `;
+  // Create match (only if not published)
+  if (!bkPublished && unassignedCount >= 2) {
+    const unassigned = bkRegistrations.filter(r => !assignedIds.has(r.id));
+    const opts = unassigned.map(r =>
+      `<option value="${bkEsc(r.id)}">${bkEsc(r.username || '—')} · ${bkEsc(r.ign || '')} · ${bkEsc(r.phone || '')}</option>`
+    ).join('');
+    html += `
+      <div class="bk-section-title" style="margin-top:20px;">➕ Create Match</div>
+      <div class="bk-newmatch">
+        <div class="bk-newmatch-row">
+          <label>Player 1</label>
+          <select id="bkP1Select" onchange="bkOnP1Change()">
+            <option value="">— Select player —</option>
+            ${opts}
+          </select>
+        </div>
+        <div class="bk-newmatch-row">
+          <label>Player 2</label>
+          <select id="bkP2Select">
+            <option value="">— Select player —</option>
+            ${opts}
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <button class="bk-btn green" onclick="bkAddMatch()" style="flex:1;">➕ Add Match</button>
+          <button class="bk-btn ghost" onclick="bkShuffleRemaining()" style="flex:1;">🎲 Shuffle Remaining</button>
+        </div>
+      </div>
+    `;
+  } else if (!bkPublished && unassignedCount === 1) {
+    html += `
+      <div class="bk-section-title" style="margin-top:20px;">➕ Remaining Player</div>
+      <div class="bk-newmatch" style="text-align:center;">
+        <p style="color:#a5b4fc;margin:0 0 12px;">1 player remains unassigned. They'll get a bye.</p>
+        <button class="bk-btn ghost" onclick="bkAssignBye()">Mark as Bye</button>
+      </div>
+    `;
+  }
+
+  // Room fields (only if not published)
+  if (!bkPublished) {
+    html += `
+      <div class="bk-room-row" style="margin-top:20px;">
+        <div>
+          <label>Room ID (applied to all matches on publish)</label>
+          <input id="bkRoomId" value="${bkEsc(bkRoomId)}" placeholder="e.g. 8842910">
+        </div>
+        <div>
+          <label>Room Password</label>
+          <input id="bkRoomPass" value="${bkEsc(bkRoomPassword)}" placeholder="e.g. nepplay">
+        </div>
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="bk-room-row" style="margin-top:20px;">
+        <div>
+          <label>Room ID (published)</label>
+          <input value="${bkEsc(bkRoomId)}" readonly>
+        </div>
+        <div>
+          <label>Room Password (published)</label>
+          <input value="${bkEsc(bkRoomPassword)}" readonly>
+        </div>
+      </div>
+    `;
+  }
+
+  bodyEl.innerHTML = html;
+
+  // Footer
+  let footHtml = '';
+  if (!bkPublished) {
+    if (bkMatches.length > 0) {
+      footHtml += `<button class="bk-btn danger" onclick="bkClearAll()">🗑 Clear all</button>`;
+      footHtml += `<button class="bk-btn gold" onclick="bkPublish()">🚀 Publish matches</button>`;
+    }
+  } else {
+    footHtml += `<button class="bk-btn green" disabled>✅ Published</button>`;
+  }
+  footEl.innerHTML = footHtml;
 }
 
-window.bkAutoPair = async function () {
-  if (!bkTournament) return;
-  const tDoc = await getDoc(doc(db, 'tournaments', bkTournament.id));
-  if (!tDoc.exists()) { bkToast('❌ Tournament missing'); return; }
+window.bkOnP1Change = function () {
+  const p1 = document.getElementById('bkP1Select')?.value;
+  const p2sel = document.getElementById('bkP2Select');
+  if (!p2sel) return;
+  // Hide P1 from P2's options (re-render simple)
+  const assignedIds = new Set();
+  bkMatches.forEach(m => {
+    assignedIds.add(m.p1RegId);
+    if (m.p2RegId) assignedIds.add(m.p2RegId);
+  });
+  const unassigned = bkRegistrations.filter(r => !assignedIds.has(r.id));
+  const curP2 = p2sel.value;
+  p2sel.innerHTML = '<option value="">— Select player —</option>' +
+    unassigned.filter(r => r.id !== p1).map(r =>
+      `<option value="${bkEsc(r.id)}"${r.id === curP2 ? ' selected' : ''}>${bkEsc(r.username || '—')} · ${bkEsc(r.ign || '')} · ${bkEsc(r.phone || '')}</option>`
+    ).join('');
+};
 
-  // Re-fetch registrations fresh
-  let regs = [];
-  const regSnap = await getDocs(query(
-    collection(db, 'tournament_registrations'),
-    where('tournamentId', '==', bkTournament.id)
-  ));
-  regs = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  if (regs.length === 0 && bkTournament.seedKey) {
-    const regSnap2 = await getDocs(query(
-      collection(db, 'tournament_registrations'),
-      where('tournamentId', '==', bkTournament.seedKey)
-    ));
-    regs = regSnap2.docs.map(d => ({ id: d.id, ...d.data() }));
+window.bkAddMatch = function () {
+  const p1 = document.getElementById('bkP1Select')?.value;
+  const p2 = document.getElementById('bkP2Select')?.value;
+  if (!p1 || !p2) { bkToast('⚠️ Pick both players'); return; }
+  if (p1 === p2) { bkToast('⚠️ Same player picked twice'); return; }
+  bkMatches.push({
+    id: 'local_' + Math.random().toString(36).slice(2, 10),
+    p1RegId: p1,
+    p2RegId: p2,
+    bye: false
+  });
+  renderBracketUI();
+  bkToast('✅ Match added');
+};
+
+window.bkRemoveMatch = function (idx) {
+  bkMatches.splice(idx, 1);
+  renderBracketUI();
+};
+
+window.bkClearAll = function () {
+  if (!confirm('Clear all matches? You can re-add them before publishing.')) return;
+  bkMatches = [];
+  renderBracketUI();
+};
+
+window.bkAssignBye = function () {
+  const assignedIds = new Set();
+  bkMatches.forEach(m => {
+    assignedIds.add(m.p1RegId);
+    if (m.p2RegId) assignedIds.add(m.p2RegId);
+  });
+  const remaining = bkRegistrations.filter(r => !assignedIds.has(r.id));
+  if (remaining.length !== 1) { bkToast('⚠️ More than 1 unassigned'); return; }
+  bkMatches.push({ id: 'local_' + Math.random().toString(36).slice(2, 10), p1RegId: remaining[0].id, p2RegId: null, bye: true });
+  renderBracketUI();
+  bkToast('✅ Bye assigned');
+};
+
+window.bkShuffleRemaining = function () {
+  const assignedIds = new Set();
+  bkMatches.forEach(m => {
+    assignedIds.add(m.p1RegId);
+    if (m.p2RegId) assignedIds.add(m.p2RegId);
+  });
+  const remaining = bkRegistrations.filter(r => !assignedIds.has(r.id));
+  if (remaining.length < 2) { bkToast('⚠️ Need at least 2 unassigned'); return; }
+  if (!confirm(`Shuffle ${remaining.length} unassigned players into random matches?`)) return;
+
+  const pool = [...remaining].sort(() => Math.random() - 0.5);
+  while (pool.length >= 2) {
+    const p1 = pool.shift();
+    const p2 = pool.shift();
+    bkMatches.push({ id: 'local_' + Math.random().toString(36).slice(2, 10), p1RegId: p1.id, p2RegId: p2.id, bye: false });
   }
+  if (pool.length === 1) {
+    bkMatches.push({ id: 'local_' + Math.random().toString(36).slice(2, 10), p1RegId: pool[0].id, p2RegId: null, bye: true });
+  }
+  renderBracketUI();
+  bkToast('🎲 Shuffled ' + remaining.length + ' players');
+};
 
-  if (regs.length < 2) { bkToast('⚠️ Need at least 2 players to pair'); return; }
-  if (!confirm(`Auto-pair ${regs.length} players? This will DELETE existing pairings for this tournament.`)) return;
+window.bkPublish = async function () {
+  if (bkMatches.length === 0) { bkToast('⚠️ Add at least one match first'); return; }
+  const roomId   = document.getElementById('bkRoomId')?.value.trim()   || '';
+  const roomPass = document.getElementById('bkRoomPass')?.value.trim() || '';
+  if (!roomId) { bkToast('⚠️ Enter Room ID before publishing'); return; }
+
+  // Check for unassigned
+  const assignedIds = new Set();
+  bkMatches.forEach(m => {
+    assignedIds.add(m.p1RegId);
+    if (m.p2RegId) assignedIds.add(m.p2RegId);
+  });
+  const unassigned = bkRegistrations.filter(r => !assignedIds.has(r.id));
+  if (unassigned.length > 0) {
+    if (!confirm(`${unassigned.length} player(s) unassigned. They'll be skipped. Continue?`)) return;
+  }
+  if (!confirm('Publish matches to all players? They will see their opponent + room details immediately.')) return;
 
   try {
-    // Delete existing matches
-    const existing = await getDocs(query(
-      collection(db, 'matches'),
-      where('tournamentId', '==', bkTournament.id)
-    ));
-    for (const m of existing.docs) await deleteDoc(m.ref);
-
-    // Shuffle
-    const players = [...regs].sort(() => Math.random() - 0.5);
-
-    // Build pairs
-    const pairs = [];
-    while (players.length >= 2) {
-      const p1 = players.shift();
-      const p2 = players.shift();
-      pairs.push({ p1, p2, bye: false });
-    }
-    if (players.length === 1) {
-      pairs.push({ p1: players[0], p2: null, bye: true });
+    // Delete existing matches for this tournament
+    for (const mid of bkExistingMatchIds) {
+      await deleteDoc(doc(db, 'matches', mid));
     }
 
-    // Write to Firestore
-    for (const pair of pairs) {
-      await addDoc(collection(db, 'matches'), {
+    let notified = 0;
+    let created = 0;
+
+    for (const m of bkMatches) {
+      const p1 = bkRegistrations.find(r => r.id === m.p1RegId);
+      const p2 = m.p2RegId ? bkRegistrations.find(r => r.id === m.p2RegId) : null;
+      if (!p1) continue;
+      if (!p2 && !m.bye) continue;
+
+      const docRef = await addDoc(collection(db, 'matches'), {
         tournamentId:    bkTournament.id,
         tournamentTitle: bkTournament.title || '',
         game:            bkTournament.game || '',
         player1: {
-          uid:      pair.p1.userId || '',
-          username: pair.p1.username || '',
-          ign:      pair.p1.ign || pair.p1.captainName || pair.p1.player1 || pair.p1.username || '',
-          phone:    pair.p1.phone || pair.p1.payerPhone || ''
+          uid:      p1.userId || '',
+          username: p1.username || '',
+          ign:      p1.ign || p1.username || '',
+          phone:    p1.phone || p1.payerPhone || ''
         },
-        player2: pair.p2 ? {
-          uid:      pair.p2.userId || '',
-          username: pair.p2.username || '',
-          ign:      pair.p2.ign || pair.p2.captainName || pair.p2.player1 || pair.p2.username || '',
-          phone:    pair.p2.phone || pair.p2.payerPhone || ''
+        player2: p2 ? {
+          uid:      p2.userId || '',
+          username: p2.username || '',
+          ign:      p2.ign || p2.username || '',
+          phone:    p2.phone || p2.payerPhone || ''
         } : null,
-        bye:         pair.bye,
-        roomId:      '',
-        roomPassword:'',
+        bye:         !!m.bye,
+        roomId,
+        roomPassword: roomPass,
         matchDate:   bkTournament.date || '',
         matchTime:   bkTournament.time || '',
         round:       1,
         status:      'pending',
         winner:      null,
         createdAt:   serverTimestamp(),
-        publishedAt: null
+        publishedAt: serverTimestamp()
       });
-    }
+      created++;
 
-    logActivity({
-      action: 'bracket_autopaired', category: 'tournaments',
-      targetId: bkTournament.id, targetType: 'tournament',
-      summary: `Auto-paired ${pairs.length} matches for "${bkTournament.title || 'tournament'}"`,
-      metadata: { pairs: pairs.length, byes: pairs.filter(p => p.bye).length }
-    });
-
-    bkToast('✅ Created ' + pairs.length + ' matches');
-    await window.openBracketManager(bkTournament.id);
-  } catch (e) {
-    console.error('bkAutoPair error:', e);
-    bkToast('❌ ' + e.message);
-  }
-};
-
-window.bkClearPairs = async function () {
-  if (!bkTournament) return;
-  if (!confirm('Delete ALL pairings for this tournament?')) return;
-  try {
-    const existing = await getDocs(query(
-      collection(db, 'matches'),
-      where('tournamentId', '==', bkTournament.id)
-    ));
-    for (const m of existing.docs) await deleteDoc(m.ref);
-    bkToast('🗑 Cleared');
-    await window.openBracketManager(bkTournament.id);
-  } catch (e) {
-    bkToast('❌ ' + e.message);
-  }
-};
-
-window.bkPublish = async function () {
-  if (!bkTournament) return;
-  const roomId   = document.getElementById('bkRoomId')?.value.trim()   || '';
-  const roomPass = document.getElementById('bkRoomPass')?.value.trim() || '';
-  if (!roomId) { bkToast('⚠️ Enter Room ID before publishing'); return; }
-  if (!confirm('Publish matches to all players? They will see their opponent + room details immediately.')) return;
-
-  try {
-    const existing = await getDocs(query(
-      collection(db, 'matches'),
-      where('tournamentId', '==', bkTournament.id)
-    ));
-    let notified = 0;
-    for (const m of existing.docs) {
-      await updateDoc(m.ref, {
-        roomId,
-        roomPassword: roomPass,
-        publishedAt:  serverTimestamp()
-      });
-
-      const data = m.data();
-      const players = [data.player1, data.player2].filter(Boolean);
+      // Notify each player
+      const players = [p1, p2].filter(Boolean);
       for (const p of players) {
-        if (!p.uid) continue;
-        const oppName = (p.uid === data.player1?.uid)
-          ? (data.player2?.ign || data.player2?.username || 'Opponent TBD')
-          : (data.player1?.ign || data.player1?.username || 'Opponent TBD');
+        if (!p.userId) continue;
+        const opp = (p.id === p1.id) ? (p2?.ign || p2?.username || 'Opponent') : (p1?.ign || p1?.username || 'Opponent');
         await addDoc(collection(db, 'notifications'), {
-          targetUid: p.uid,
+          targetUid: p.userId,
           targetName: p.username || p.ign || '',
           type:      'trophy',
           title:     '🎯 Your 1v1 match is ready!',
-          message:   `You vs ${oppName} · Room ${roomId}${roomPass ? ' · Pass ' + roomPass : ''} · ${bkTournament.time || ''}`,
+          message:   `You vs ${opp} · Room ${roomId}${roomPass ? ' · Pass ' + roomPass : ''} · ${bkTournament.time || ''}`,
           createdBy: currentAdminEmail || 'admin',
           createdAt: serverTimestamp(),
           readBy:    []
@@ -1458,11 +1540,14 @@ window.bkPublish = async function () {
     logActivity({
       action: 'bracket_published', category: 'tournaments',
       targetId: bkTournament.id, targetType: 'tournament',
-      summary: `Published ${existing.docs.length} matches for "${bkTournament.title || 'tournament'}" (Room ${roomId}) · ${notified} notifications sent`,
-      metadata: { matches: existing.docs.length, notified, roomId }
+      summary: `Published ${created} matches for "${bkTournament.title || 'tournament'}" (Room ${roomId}) · ${notified} notifications`,
+      metadata: { matches: created, notified, roomId }
     });
 
-    bkToast(`🚀 Published ${existing.docs.length} matches · ${notified} notifications sent`);
+    bkToast(`🚀 Published ${created} matches · ${notified} notifications`);
+    bkPublished = true;
+    bkRoomId = roomId;
+    bkRoomPassword = roomPass;
     await window.openBracketManager(bkTournament.id);
   } catch (e) {
     console.error('bkPublish error:', e);
@@ -1566,10 +1651,10 @@ function renderPayments() {
             <button class="btn-approve" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Approve</button>
             <button class="btn-reject"  onclick="openReview('${p.id}','${safeName}','reject','payment')">✘ Reject</button>
           ` : ''}
-          ${isApproved ? `<button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset to Pending</button>` : ''}
+          ${isApproved ? `<button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset</button>` : ''}
           ${isRejected ? `
             <button class="btn-approve small" onclick="openReview('${p.id}','${safeName}','approve','payment')">✔ Re-approve</button>
-            <button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset to Pending</button>
+            <button class="btn-reject small" onclick="openReview('${p.id}','${safeName}','reset','payment')">↺ Reset</button>
           ` : ''}
           ${shotId ? `<button class="link-view" onclick="openShotById('${shotId}')">🔍 Full Screenshot</button>` : ''}
           ${p.adminNote ? '<small style="color:#9ca3af;margin-top:6px;">📝 ' + p.adminNote + '</small>' : ''}
@@ -1652,11 +1737,6 @@ window.bulkApproveSelected = async function() {
   selectedPaymentIds.clear();
   const selAll = document.getElementById('paySelectAll');
   if (selAll) selAll.checked = false;
-  logActivity({
-    action: 'payment_bulk_approved', category: 'payments',
-    summary: `Bulk approved ${ok} payment${ok !== 1 ? 's' : ''}${fail ? ` · ${fail} failed` : ''}`,
-    metadata: { ok, fail }
-  });
   window.showToast(`✅ Approved ${ok}${fail ? ` · ❌ ${fail} failed` : ''}`);
   await window.loadPayments();
   await window.loadRegistrations();
@@ -1709,7 +1789,6 @@ function renderRegistrations() {
             ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
             ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
             ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
-            ${r.streamUrl ? ' · <a href="' + r.streamUrl + '" target="_blank" style="color:#f87171; text-decoration:none;">🔴 Live</a>' : ''}
           </div>
           ${isPaid && shotId ? `
             <div class="reg-payment-preview">
@@ -1954,12 +2033,6 @@ window.submitMatchResults = async function() {
       window.showToast('✅ Results saved + UIDs matched!');
     }
 
-    logActivity({
-      action: 'results_submitted', category: 'tournaments',
-      targetId: tid, targetType: 'tournament',
-      summary: `Results saved for "${tTitle}" — 🥇 ${w1Name}, ${payoutRecords.length} payout${payoutRecords.length !== 1 ? 's' : ''}`,
-      metadata: { tournament: tTitle, winner: w1Name, payouts: payoutRecords.length, unmatched }
-    });
     addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
     resetResultsForm();
     await loadRecentResults();
@@ -2004,7 +2077,7 @@ async function loadRecentResults() {
         <div class="reg-card paid-reg">
           <div class="reg-icon">🏁</div>
           <div class="reg-main">
-            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b>${r.highlightUrl ? ' <span style="color:#f87171; font-size:11px;">📺 highlight</span>' : ''}</div>
+            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b></div>
             <div class="reg-line-2">
               🥇 <b>${w1.name || '—'}</b> (${w1.kills || 0} kills) — Rs. ${w1.prize || 0}
               ${tk.sameAsFirst ? ' · 🎯 same as 1st' : ` · 🎯 <b>${tk.name || '—'}</b> (${tk.kills || 0})`}
@@ -2070,10 +2143,6 @@ window.loadDailyCollections = function() {
     list.innerHTML = sortedKeys.map(k => {
       const d = days[k];
       const net = d.collected - d.payouts;
-      const methodStr = Object.entries(d.byMethod).map(([m, amt]) => {
-        const emoji = { esewa:'💚', khalti:'💜', imepay:'🟠', bank:'🏦' }[m] || '💳';
-        return emoji + ' ' + amt.toLocaleString();
-      }).join(' · ');
       return `
         <div class="reg-card free-reg">
           <div class="reg-icon">📅</div>
@@ -2084,7 +2153,6 @@ window.loadDailyCollections = function() {
               · 📤 Payouts: <b style="color:#f87171">${fmtRs(d.payouts)}</b> (${d.payoutsCount || 0})
               · 📊 Net: <b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(net)}</b>
             </div>
-            ${methodStr ? '<div class="reg-line-2" style="font-size:12px;">💳 By method: ' + methodStr + '</div>' : ''}
           </div>
           <div class="reg-right"><span class="type-chip ${net >= 0 ? 'paid' : 'free'}">${fmtRs(net)}</span></div>
         </div>
@@ -2231,42 +2299,28 @@ window.addPayout = async function() {
       rank: rank || '1', method: method || 'cash', note: note || '',
       status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
     });
-    logActivity({
-      action: 'payout_recorded', category: 'payments',
-      summary: `Manual payout Rs. ${amount} to ${winnerName} (${tournamentTitle})`,
-      metadata: { winnerName, amount, tournamentTitle, method, uidMatched: !!found }
-    });
     window.showToast(found ? '✅ Payout recorded + UID linked' : '⚠️ Payout recorded (no UID match)');
     window.loadPayouts();
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 window.backfillPayoutUserIds = async function() {
-  if (!confirm('Backfill userId on all tournament_payouts missing it?\n\nThis scans every payout and looks up the user by username. Safe to re-run.')) return;
+  if (!confirm('Backfill userId on all tournament_payouts missing it?')) return;
   const snap = await getDocs(collection(db, 'tournament_payouts'));
   const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const missing = all.filter(p => !p.userId);
-  if (!missing.length) {
-    window.showToast('✅ All payouts already have userId');
-    return;
-  }
-  console.log(`🔧 Backfilling ${missing.length} payouts...`);
+  if (!missing.length) { window.showToast('✅ All payouts already have userId'); return; }
   let ok = 0, fail = 0;
   for (const p of missing) {
     try {
       const found = await findUidByUsername(p.winnerName);
       if (found) {
         await updateDoc(doc(db, 'tournament_payouts', p.id), {
-          userId: found.uid,
-          userEmail: found.data?.email || null
+          userId: found.uid, userEmail: found.data?.email || null
         });
         ok++;
-        console.log(`  ✅ ${p.winnerName} → ${found.uid}`);
-      } else {
-        fail++;
-        console.warn(`  ⚠️  No user found for "${p.winnerName}"`);
-      }
-    } catch (e) { fail++; console.error(e); }
+      } else fail++;
+    } catch (e) { fail++; }
   }
   window.showToast(`✅ Backfilled ${ok} · ⚠️ ${fail} unmatched`);
   await window.loadPayouts();
@@ -2367,17 +2421,6 @@ window.saveRoomDetails = async function() {
       roomOpenTime, roomRules, roomRevealAt,
       roomUpdatedAt: serverTimestamp()
     });
-    const tName = document.getElementById('roomTournamentName')?.textContent || 'tournament';
-    logActivity({
-      action: 'room_details_updated', category: 'system',
-      targetId: tid, targetType: 'tournament',
-      summary: `Room details updated for "${tName}"`,
-      metadata: { tournamentId: tid, tournamentName: tName }
-    });
-    const status = document.getElementById('roomSaveStatus');
-    status.style.display = 'block';
-    status.textContent = '✅ Room details saved';
-    setTimeout(() => status.style.display = 'none', 3000);
     window.showToast('✅ Room details saved');
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
@@ -2418,43 +2461,24 @@ function renderUsers() {
       <div class="reg-icon">${initials(u.username)}</div>
       <div class="reg-main">
         <div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div>
-        <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}${u.referredBy ? ' · 🔗 referred' : ''}</div>
+        <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
       </div>
       <div class="reg-right">
         <span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span>
         <small>${fmtDate(u.createdAt)}</small>
-        ${u.role === 'admin' ? '' : `<button class="btn-delete small" style="margin-top:6px;" onclick="event.stopPropagation(); deleteUser('${u.id}','${(u.username||'').replace(/'/g,"\\'")}', false)">🗑️ Delete</button>`}
       </div>
     </div>
   `).join('');
 }
 window.deleteUser = async function(uid, username, fromModal) {
   if (fromModal) closeDetailModal();
-  const confirmText = prompt(`⚠️ Delete user "${username}"?\n\nThis deletes their Firestore user doc + all their registrations + payments. Auth account must be deleted manually in Firebase Console.\n\nType DELETE to confirm:`);
-  if (confirmText !== 'DELETE') {
-    if (confirmText !== null) window.showToast('❌ Cancelled — you must type DELETE exactly');
-    return;
-  }
+  const confirmText = prompt(`Delete user "${username}"? Type DELETE to confirm:`);
+  if (confirmText !== 'DELETE') return;
   try {
     await deleteDoc(doc(db, 'users', uid));
-    const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('userId', '==', uid)));
-    for (const d of regSnap.docs) await deleteDoc(doc(db, 'tournament_registrations', d.id));
-    const paySnap = await getDocs(query(collection(db, 'tournament_payments'), where('userId', '==', uid)));
-    for (const d of paySnap.docs) await deleteDoc(doc(db, 'tournament_payments', d.id));
-    logActivity({
-      action: 'user_deleted', category: 'users',
-      targetId: uid, targetType: 'user',
-      summary: `Deleted user "${username}" (+${regSnap.size} registrations, ${paySnap.size} payments)`,
-      metadata: { username, uid, regs: regSnap.size, payments: paySnap.size }
-    });
-    window.showToast(`🗑️ Deleted user + ${regSnap.size} regs + ${paySnap.size} payments`);
+    window.showToast(`🗑️ Deleted user "${username}"`);
     await window.loadUsers();
-    await window.loadRegistrations();
-    await window.loadPayments();
-  } catch (err) {
-    console.error('deleteUser error:', err);
-    window.showToast('❌ ' + err.message);
-  }
+  } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
 // ============================================================
@@ -2481,11 +2505,10 @@ function downloadCSV(filename, rows) {
 }
 window.exportUsersCSV = function() {
   if (!allUsers.length) { window.showToast('❌ No users to export'); return; }
-  const rows = [['Username','Email','Phone','Role','User ID','Referred By','Referral Count','Referral Earnings','Joined']];
+  const rows = [['Username','Email','Phone','Role','User ID','Joined']];
   allUsers.forEach(u => {
     rows.push([
       u.username || '', u.email || '', u.phone || '', u.role || 'member', u.id,
-      u.referredBy || '', u.referralCount || 0, u.referralEarnings || 0,
       u.createdAt?.toDate ? u.createdAt.toDate().toISOString() : ''
     ]);
   });
@@ -2493,11 +2516,11 @@ window.exportUsersCSV = function() {
 };
 window.exportRegistrationsCSV = function() {
   if (!allRegs.length) { window.showToast('❌ No registrations to export'); return; }
-  const rows = [['Username','Email','IGN','Phone','Tournament','Entry Type','Amount','Txn ID','Method','Status','Stream URL','Registered']];
+  const rows = [['Username','Email','IGN','Phone','Tournament','Entry Type','Amount','Txn ID','Method','Status','Registered']];
   allRegs.forEach(r => {
     rows.push([
       r.username || '', r.email || '', r.ign || '', r.phone || '', r.tournamentTitle || '',
-      r.entryType || '', r.amount || 0, r.txnId || '', r.method || '', r.status || '', r.streamUrl || '',
+      r.entryType || '', r.amount || 0, r.txnId || '', r.method || '', r.status || '',
       r.registeredAt?.toDate ? r.registeredAt.toDate().toISOString() : ''
     ]);
   });
@@ -2543,13 +2566,10 @@ window.loadTournamentsAdmin = async function() {
       const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
       const feeValue = Number(t.entryFee || t.entry_fee || 0);
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
-      const hasRoom = t.roomId && t.roomPassword;
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
-            const tTitle = String(t.title || '').toLowerCase();
+      const tTitle = String(t.title || '').toLowerCase();
       const is1v1 = String(t.mode || '').toLowerCase() === '1v1'
-                    || tTitle.includes('1v1')
-                    || tTitle.includes('1 vs 1')
-                    || tTitle.includes('1vs1');
+                    || tTitle.includes('1v1') || tTitle.includes('1 vs 1') || tTitle.includes('1vs1');
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const c = counts[t.id] || { total: 0, confirmed: 0, pending: 0 };
       return `
@@ -2558,11 +2578,9 @@ window.loadTournamentsAdmin = async function() {
           <div class="reg-main">
             <div class="reg-line-1">
               <b>${t.title || 'Untitled'}</b>
-              <span class="tourney-count">📋 ${c.total} registered</span>
-              ${c.confirmed ? `<span class="tourney-count" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#4ade80;">✅ ${c.confirmed}</span>` : ''}
-              ${c.pending ? `<span class="tourney-count" style="background:rgba(234,179,8,0.15);border-color:rgba(234,179,8,0.4);color:#fbbf24;">⏳ ${c.pending}</span>` : ''}
+              <span class="tourney-count">📋 ${c.total}</span>
             </div>
-            <div class="reg-line-2">${t.game || 'Game'} · ${t.mode || 'Solo'}${t.date ? ' · 📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}</div>
+            <div class="reg-line-2">${t.game || 'Game'} · ${t.mode || 'Solo'}${t.date ? ' · 📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}</div>
             <div class="reg-actions">
               ${is1v1 ? `<button class="btn-edit small" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a0b3d;font-weight:900;" onclick="openBracketManager('${t.id}')">🎯 Manage Bracket</button>` : ''}
               ${!isCompleted ? `<button class="btn-edit small" onclick="editTournament('${t.id}')">✏️ Edit</button>` : ''}
@@ -2571,7 +2589,6 @@ window.loadTournamentsAdmin = async function() {
           </div>
           <div class="reg-right">
             <span class="type-chip ${isCompleted ? 'free' : (isPaid ? 'paid' : 'free')}">${isCompleted ? 'Completed' : (isPaid ? 'Paid' : 'Free')}</span>
-            ${hasRoom ? '<small style="color:#4ade80;">🔑 Room set</small>' : '<small style="color:#6b7280;">No room</small>'}
           </div>
         </div>
       `;
@@ -2640,7 +2657,7 @@ function renderDashboardRecent() {
     ru.innerHTML = allUsers.slice(0,5).map(u => `
       <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')">
         <div class="reg-icon">${initials(u.username)}</div>
-        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div><div class="reg-line-2">${u.email || '—'}</div></div>
+        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">${u.email || '—'}</div></div>
         <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
       </div>
     `).join('');
@@ -2712,24 +2729,6 @@ window.confirmReview = async function(e) {
     }
     closeReview();
     const actionLabel = action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Reset to pending';
-    if (type === 'payment') {
-      const pay = allPayments.find(x => x.id === id) || {};
-      const actionMap = { approve: 'payment_approved', reject: 'payment_rejected', reset: 'payment_reset' };
-      logActivity({
-        action: actionMap[action] || 'payment_approved', category: 'payments',
-        targetId: id, targetType: 'payment',
-        summary: `${actionLabel} Rs. ${pay.amount || 0} — ${pay.username || 'user'} (${pay.tournamentTitle || 'tournament'})`,
-        metadata: { amount: pay.amount || 0, user: pay.username || '', tournament: pay.tournamentTitle || '' }
-      });
-    } else {
-      const reg = allRegs.find(x => x.id === id) || {};
-      logActivity({
-        action: action === 'approve' ? 'user_registered' : 'payment_reset', category: 'users',
-        targetId: id, targetType: 'registration',
-        summary: `${actionLabel} registration — ${reg.username || 'user'} (${reg.tournamentTitle || 'tournament'})`,
-        metadata: { user: reg.username || '' }
-      });
-    }
     window.showToast('✅ ' + actionLabel);
     window.loadPayments();
     window.loadRegistrations();
