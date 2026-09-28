@@ -1,5 +1,8 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.5)
+// NEPPLAY — admin.js (v4.6)
+// v4.6 changes:
+//  + Bracket system for 1v1 tournaments (auto-pair, publish, notify)
+//  + "🎯 Manage Bracket" button on 1v1 tournament cards
 // v4.5 changes:
 //  + Payout docs now store userId + userEmail (from username lookup)
 //  + Payout rows are clickable → detail modal
@@ -40,7 +43,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.5 — awaiting auth");
+console.log("🔥 Admin v4.6 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL (for password-only login)
@@ -182,22 +185,19 @@ function registerScreenshot(d) {
 }
 
 // ============================================================
-// ⭐ NEW in v4.5 — Find UID by username
+// Find UID by username
 // ============================================================
 async function findUidByUsername(username) {
   if (!username) return null;
   const uname = String(username).trim();
   if (!uname) return null;
 
-  // 1. try exact match on 'username'
   let snap = await getDocs(query(collection(db, 'users'), where('username', '==', uname), limit(1)));
   if (!snap.empty) return { uid: snap.docs[0].id, data: snap.docs[0].data() };
 
-  // 2. try fullName
   snap = await getDocs(query(collection(db, 'users'), where('fullName', '==', uname), limit(1)));
   if (!snap.empty) return { uid: snap.docs[0].id, data: snap.docs[0].data() };
 
-  // 3. case-insensitive scan of already-loaded users
   const lower = uname.toLowerCase();
   const found = allUsers.find(u =>
     (u.username || '').toLowerCase() === lower ||
@@ -785,13 +785,12 @@ window.openUserDetail = function(uid) {
 };
 
 // ============================================================
-// ⭐ NEW v4.5 — DETAIL MODAL — Payouts
+// DETAIL MODAL — Payouts
 // ============================================================
 window.openPayoutDetail = async function(payoutId) {
   const w = allPayouts.find(x => x.id === payoutId);
   if (!w) { window.showToast('❌ Payout not found'); return; }
 
-  // Try to find the user
   let linkedUser = null;
   if (w.userId) linkedUser = allUsers.find(u => u.id === w.userId);
   if (!linkedUser && w.winnerName) {
@@ -1061,7 +1060,7 @@ window.submitCreateTournament = async function(e) {
 };
 
 // ============================================================
-// RECENT TOURNAMENTS
+// RECENT TOURNAMENTS (with ⭐ Manage Bracket button on 1v1)
 // ============================================================
 window.loadRecentCreated = async function() {
   const list = document.getElementById('recentCreatedTournaments');
@@ -1079,6 +1078,7 @@ window.loadRecentCreated = async function() {
       const isPaid = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
+      const is1v1 = String(t.mode || '').toLowerCase() === '1v1';
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'}">
           <div class="reg-icon">${isCompleted ? '✅' : (isPaid ? '💵' : '🏆')}</div>
@@ -1089,6 +1089,7 @@ window.loadRecentCreated = async function() {
               ${t.prizePool ? ' · 🏆 Rs. ' + t.prizePool : ''}
             </div>
             <div class="reg-actions">
+              ${is1v1 ? `<button class="btn-edit small" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a0b3d;font-weight:900;" onclick="openBracketManager('${t.id}')">🎯 Manage Bracket</button>` : ''}
               ${!isCompleted ? `<button class="btn-edit small" onclick="editTournament('${t.id}')">✏️ Edit</button>` : ''}
               <button class="btn-delete small" onclick="deleteTournament('${t.id}','${safeTitle}')">🗑️ Delete</button>
             </div>
@@ -1142,6 +1143,334 @@ window.deleteTournament = async function(id, title) {
     if (typeof window.loadTournamentsAdmin === 'function') await window.loadTournamentsAdmin();
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
+
+// ============================================================
+// ⭐ NEW v4.6 — BRACKET MANAGER (1v1 only)
+// ============================================================
+let bkTournament = null;
+
+function bkEsc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function bkToast(msg) {
+  const t = document.getElementById('bkToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__bkToastTimer);
+  window.__bkToastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+window.bkClose = function () {
+  const ov = document.getElementById('bkOverlay');
+  if (ov) ov.classList.remove('open');
+};
+
+window.openBracketManager = async function (tournamentId) {
+  const overlay = document.getElementById('bkOverlay');
+  const bodyEl  = document.getElementById('bkBody');
+  const footEl  = document.getElementById('bkFoot');
+  const titleEl = document.getElementById('bkTitle');
+  const subEl   = document.getElementById('bkSubtitle');
+  if (!overlay || !bodyEl || !footEl) {
+    window.showToast('❌ Bracket modal not found in DOM');
+    return;
+  }
+
+  overlay.classList.add('open');
+  bodyEl.innerHTML = '<div class="bk-empty">Loading…</div>';
+  footEl.innerHTML = '';
+
+  try {
+    const tDoc = await getDoc(doc(db, 'tournaments', tournamentId));
+    if (!tDoc.exists()) {
+      bodyEl.innerHTML = '<div class="bk-empty">Tournament not found.</div>';
+      return;
+    }
+    bkTournament = { id: tDoc.id, ...tDoc.data() };
+    titleEl.textContent = '🎯 ' + (bkTournament.title || 'Tournament');
+    subEl.textContent = (bkTournament.game || '') + ' · ' + (bkTournament.date || '') + ' · ' + (bkTournament.time || '');
+
+    // Load registrations for this tournament
+    let regs = [];
+    const regSnap = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('tournamentId', '==', tournamentId)
+    ));
+    regs = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Fallback — some older registrations store seedKey prefix
+    if (regs.length === 0 && bkTournament.seedKey) {
+      const regSnap2 = await getDocs(query(
+        collection(db, 'tournament_registrations'),
+        where('tournamentId', '==', bkTournament.seedKey)
+      ));
+      regs = regSnap2.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    // Load existing matches
+    const mSnap = await getDocs(query(
+      collection(db, 'matches'),
+      where('tournamentId', '==', tournamentId)
+    ));
+    const existingMatches = mSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const alreadyPublished = existingMatches.some(m => m.publishedAt);
+    const currentRoomId   = existingMatches[0]?.roomId || '';
+    const currentRoomPass = existingMatches[0]?.roomPassword || '';
+
+    renderBracketUI(regs, existingMatches, alreadyPublished, currentRoomId, currentRoomPass);
+  } catch (e) {
+    console.error('openBracketManager error:', e);
+    bodyEl.innerHTML = '<div class="bk-empty">Error: ' + bkEsc(e.message) + '</div>';
+  }
+};
+
+function renderBracketUI(regs, existingMatches, alreadyPublished, roomId, roomPass) {
+  const bodyEl = document.getElementById('bkBody');
+  const footEl = document.getElementById('bkFoot');
+
+  const regCount = regs.length;
+  const matchCount = existingMatches.length;
+  const byeCount = existingMatches.filter(m => m.bye).length;
+
+  let html = `
+    <div class="bk-stat-row">
+      <span>Registered players: <b>${regCount}</b></span>
+      <span>Matches created: <b>${matchCount}</b></span>
+      ${byeCount ? `<span>Byes: <b>${byeCount}</b></span>` : ''}
+      <span>Status: <b>${alreadyPublished ? '✅ Published' : '⏳ Not published'}</b></span>
+    </div>
+  `;
+
+  if (regCount === 0) {
+    html += '<div class="bk-empty">No players registered yet. Wait for registrations first.</div>';
+    bodyEl.innerHTML = html;
+    footEl.innerHTML = '';
+    return;
+  }
+
+  html += `
+    <div class="bk-room-row">
+      <div>
+        <label>Room ID (applied to all matches on publish)</label>
+        <input id="bkRoomId" value="${bkEsc(roomId)}" placeholder="e.g. 8842910">
+      </div>
+      <div>
+        <label>Room Password</label>
+        <input id="bkRoomPass" value="${bkEsc(roomPass)}" placeholder="e.g. nepplay">
+      </div>
+    </div>
+  `;
+
+  if (existingMatches.length === 0) {
+    html += '<div class="bk-empty">No pairings yet. Click <b>🎲 Auto-pair</b> below to shuffle and match players.</div>';
+    bodyEl.innerHTML = html;
+  } else {
+    html += '<div class="bk-pairs">';
+    existingMatches.forEach((m, i) => {
+      const p1 = m.player1 || {};
+      const p2 = m.player2 || {};
+      if (m.bye) {
+        html += `
+          <div class="bk-pair bye">
+            <span class="bk-pair-num">Match ${i+1}</span>
+            <div class="bk-player">${bkEsc(p1.ign || p1.username || '—')}<small>🎉 Bye — auto-advanced</small></div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="bk-pair">
+            <span class="bk-pair-num">Match ${i+1}</span>
+            <div class="bk-player">${bkEsc(p1.ign || p1.username || '—')}<small>${bkEsc(p1.phone || '')}</small></div>
+            <span class="bk-vs">VS</span>
+            <div class="bk-player">${bkEsc(p2.ign || p2.username || '—')}<small>${bkEsc(p2.phone || '')}</small></div>
+          </div>
+        `;
+      }
+    });
+    html += '</div>';
+    bodyEl.innerHTML = html;
+  }
+
+  footEl.innerHTML = `
+    <button class="bk-btn ghost" onclick="bkAutoPair()">🎲 Auto-pair</button>
+    ${existingMatches.length ? `<button class="bk-btn danger" onclick="bkClearPairs()">🗑 Clear pairings</button>` : ''}
+    ${existingMatches.length && !alreadyPublished ? `<button class="bk-btn gold" onclick="bkPublish()">🚀 Publish matches</button>` : ''}
+    ${alreadyPublished ? `<button class="bk-btn green" disabled>✅ Published</button>` : ''}
+  `;
+}
+
+window.bkAutoPair = async function () {
+  if (!bkTournament) return;
+  const tDoc = await getDoc(doc(db, 'tournaments', bkTournament.id));
+  if (!tDoc.exists()) { bkToast('❌ Tournament missing'); return; }
+
+  // Re-fetch registrations fresh
+  let regs = [];
+  const regSnap = await getDocs(query(
+    collection(db, 'tournament_registrations'),
+    where('tournamentId', '==', bkTournament.id)
+  ));
+  regs = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (regs.length === 0 && bkTournament.seedKey) {
+    const regSnap2 = await getDocs(query(
+      collection(db, 'tournament_registrations'),
+      where('tournamentId', '==', bkTournament.seedKey)
+    ));
+    regs = regSnap2.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
+  if (regs.length < 2) { bkToast('⚠️ Need at least 2 players to pair'); return; }
+  if (!confirm(`Auto-pair ${regs.length} players? This will DELETE existing pairings for this tournament.`)) return;
+
+  try {
+    // Delete existing matches
+    const existing = await getDocs(query(
+      collection(db, 'matches'),
+      where('tournamentId', '==', bkTournament.id)
+    ));
+    for (const m of existing.docs) await deleteDoc(m.ref);
+
+    // Shuffle
+    const players = [...regs].sort(() => Math.random() - 0.5);
+
+    // Build pairs
+    const pairs = [];
+    while (players.length >= 2) {
+      const p1 = players.shift();
+      const p2 = players.shift();
+      pairs.push({ p1, p2, bye: false });
+    }
+    if (players.length === 1) {
+      pairs.push({ p1: players[0], p2: null, bye: true });
+    }
+
+    // Write to Firestore
+    for (const pair of pairs) {
+      await addDoc(collection(db, 'matches'), {
+        tournamentId:    bkTournament.id,
+        tournamentTitle: bkTournament.title || '',
+        game:            bkTournament.game || '',
+        player1: {
+          uid:      pair.p1.userId || '',
+          username: pair.p1.username || '',
+          ign:      pair.p1.ign || pair.p1.captainName || pair.p1.player1 || pair.p1.username || '',
+          phone:    pair.p1.phone || pair.p1.payerPhone || ''
+        },
+        player2: pair.p2 ? {
+          uid:      pair.p2.userId || '',
+          username: pair.p2.username || '',
+          ign:      pair.p2.ign || pair.p2.captainName || pair.p2.player1 || pair.p2.username || '',
+          phone:    pair.p2.phone || pair.p2.payerPhone || ''
+        } : null,
+        bye:         pair.bye,
+        roomId:      '',
+        roomPassword:'',
+        matchDate:   bkTournament.date || '',
+        matchTime:   bkTournament.time || '',
+        round:       1,
+        status:      'pending',
+        winner:      null,
+        createdAt:   serverTimestamp(),
+        publishedAt: null
+      });
+    }
+
+    logActivity({
+      action: 'bracket_autopaired', category: 'tournaments',
+      targetId: bkTournament.id, targetType: 'tournament',
+      summary: `Auto-paired ${pairs.length} matches for "${bkTournament.title || 'tournament'}"`,
+      metadata: { pairs: pairs.length, byes: pairs.filter(p => p.bye).length }
+    });
+
+    bkToast('✅ Created ' + pairs.length + ' matches');
+    await window.openBracketManager(bkTournament.id);
+  } catch (e) {
+    console.error('bkAutoPair error:', e);
+    bkToast('❌ ' + e.message);
+  }
+};
+
+window.bkClearPairs = async function () {
+  if (!bkTournament) return;
+  if (!confirm('Delete ALL pairings for this tournament?')) return;
+  try {
+    const existing = await getDocs(query(
+      collection(db, 'matches'),
+      where('tournamentId', '==', bkTournament.id)
+    ));
+    for (const m of existing.docs) await deleteDoc(m.ref);
+    bkToast('🗑 Cleared');
+    await window.openBracketManager(bkTournament.id);
+  } catch (e) {
+    bkToast('❌ ' + e.message);
+  }
+};
+
+window.bkPublish = async function () {
+  if (!bkTournament) return;
+  const roomId   = document.getElementById('bkRoomId')?.value.trim()   || '';
+  const roomPass = document.getElementById('bkRoomPass')?.value.trim() || '';
+  if (!roomId) { bkToast('⚠️ Enter Room ID before publishing'); return; }
+  if (!confirm('Publish matches to all players? They will see their opponent + room details immediately.')) return;
+
+  try {
+    const existing = await getDocs(query(
+      collection(db, 'matches'),
+      where('tournamentId', '==', bkTournament.id)
+    ));
+    let notified = 0;
+    for (const m of existing.docs) {
+      await updateDoc(m.ref, {
+        roomId,
+        roomPassword: roomPass,
+        publishedAt:  serverTimestamp()
+      });
+
+      const data = m.data();
+      const players = [data.player1, data.player2].filter(Boolean);
+      for (const p of players) {
+        if (!p.uid) continue;
+        const oppName = (p.uid === data.player1?.uid)
+          ? (data.player2?.ign || data.player2?.username || 'Opponent TBD')
+          : (data.player1?.ign || data.player1?.username || 'Opponent TBD');
+        await addDoc(collection(db, 'notifications'), {
+          targetUid: p.uid,
+          targetName: p.username || p.ign || '',
+          type:      'trophy',
+          title:     '🎯 Your 1v1 match is ready!',
+          message:   `You vs ${oppName} · Room ${roomId}${roomPass ? ' · Pass ' + roomPass : ''} · ${bkTournament.time || ''}`,
+          createdBy: currentAdminEmail || 'admin',
+          createdAt: serverTimestamp(),
+          readBy:    []
+        });
+        notified++;
+      }
+    }
+
+    logActivity({
+      action: 'bracket_published', category: 'tournaments',
+      targetId: bkTournament.id, targetType: 'tournament',
+      summary: `Published ${existing.docs.length} matches for "${bkTournament.title || 'tournament'}" (Room ${roomId}) · ${notified} notifications sent`,
+      metadata: { matches: existing.docs.length, notified, roomId }
+    });
+
+    bkToast(`🚀 Published ${existing.docs.length} matches · ${notified} notifications sent`);
+    await window.openBracketManager(bkTournament.id);
+  } catch (e) {
+    console.error('bkPublish error:', e);
+    bkToast('❌ ' + e.message);
+  }
+};
+
+// Close overlay when clicking outside modal
+document.addEventListener('click', (e) => {
+  const ov = document.getElementById('bkOverlay');
+  if (ov && ov.classList.contains('open') && e.target === ov) bkClose();
+});
 
 // ============================================================
 // PAYMENTS
@@ -1514,7 +1843,6 @@ window.updateResultTotal = function() {
   document.getElementById('resultTotalPayout').innerText = fmtRs(p1 + p2 + p3 + topKillerPayout);
 };
 
-// ⭐ v4.5 — submitMatchResults now looks up UIDs
 window.submitMatchResults = async function() {
   if (!selectedResultTournament) { window.showToast('❌ No tournament selected'); return; }
   const t = selectedResultTournament;
@@ -1543,7 +1871,6 @@ window.submitMatchResults = async function() {
   btn.disabled = true;
   btn.innerText = '⏳ Saving...';
   try {
-    // ⭐ Look up UIDs for each winner
     window.showToast('🔍 Matching usernames...');
     const u1 = await findUidByUsername(w1Name);
     const u2 = w2Name ? await findUidByUsername(w2Name) : null;
@@ -1835,7 +2162,7 @@ window.loadEarnings = function() {
 };
 
 // ============================================================
-// PAYOUTS (v4.5 — clickable rows)
+// PAYOUTS
 // ============================================================
 window.loadPayouts = async function() {
   const list = document.getElementById('payoutList');
@@ -1880,7 +2207,6 @@ window.loadPayouts = async function() {
   }
 };
 
-// ⭐ v4.5 — addPayout() also stores UID
 window.addPayout = async function() {
   const winnerName = prompt('Winner name (username):');
   if (!winnerName) return;
@@ -1911,9 +2237,6 @@ window.addPayout = async function() {
   } catch (err) { window.showToast('❌ ' + err.message); }
 };
 
-// ============================================================
-// ⭐ v4.5 — BACKFILL utility (run once from console)
-// ============================================================
 window.backfillPayoutUserIds = async function() {
   if (!confirm('Backfill userId on all tournament_payouts missing it?\n\nThis scans every payout and looks up the user by username. Safe to re-run.')) return;
   const snap = await getDocs(collection(db, 'tournament_payouts'));
@@ -2218,6 +2541,7 @@ window.loadTournamentsAdmin = async function() {
       const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
       const hasRoom = t.roomId && t.roomPassword;
       const isCompleted = (t.status || '').toLowerCase() === 'completed';
+      const is1v1 = String(t.mode || '').toLowerCase() === '1v1';
       const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
       const c = counts[t.id] || { total: 0, confirmed: 0, pending: 0 };
       return `
@@ -2232,6 +2556,7 @@ window.loadTournamentsAdmin = async function() {
             </div>
             <div class="reg-line-2">${t.game || 'Game'} · ${t.mode || 'Solo'}${t.date ? ' · 📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}${t.prizePool || t.prize_pool ? ' · 🏆 Rs. ' + (t.prizePool || t.prize_pool) : ''}</div>
             <div class="reg-actions">
+              ${is1v1 ? `<button class="btn-edit small" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a0b3d;font-weight:900;" onclick="openBracketManager('${t.id}')">🎯 Manage Bracket</button>` : ''}
               ${!isCompleted ? `<button class="btn-edit small" onclick="editTournament('${t.id}')">✏️ Edit</button>` : ''}
               <button class="btn-delete small" onclick="deleteTournament('${t.id}','${safeTitle}')">🗑️ Delete</button>
             </div>
