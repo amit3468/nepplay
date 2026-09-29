@@ -1,5 +1,7 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.8)
+// NEPPLAY — admin.js (v4.9)
+// v4.9 changes:
+//  + Registration cards now show a mode badge (1v1 / 2v2 / squad)
 // v4.8 changes:
 //  + Announcements: Delete button on each announcement card
 // v4.7 changes:
@@ -47,7 +49,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.8 — awaiting auth");
+console.log("🔥 Admin v4.9 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL
@@ -175,6 +177,21 @@ function escapeDetail(s) {
   }[c]));
 }
 
+// ⭐ NEW: mode badge helper
+function modeBadgeHtml(playingAs) {
+  const m = String(playingAs || '').toLowerCase();
+  if (m === 'solo' || m === '1v1') {
+    return '<span class="mode-badge mode-badge-1v1">👤 1 vs 1</span>';
+  }
+  if (m === 'duo' || m === '2v2') {
+    return '<span class="mode-badge mode-badge-2v2">👥 2 vs 2</span>';
+  }
+  if (m === 'squad') {
+    return '<span class="mode-badge mode-badge-squad">🏆 Squad</span>';
+  }
+  return '';
+}
+
 function screenshotSrc(d) {
   if (!d) return null;
   if (d.screenshotBase64) return 'data:image/jpeg;base64,' + d.screenshotBase64;
@@ -291,7 +308,10 @@ function attachRealtimeListeners() {
     snap.docChanges().forEach(c => {
       if (c.type === 'added') {
         const r = c.doc.data();
-        addNotif('registration', `${r.entryType === 'paid' ? '💵' : '🆓'} New registration`, `${r.username || 'User'} joined ${r.tournamentTitle || 'a tournament'}`);
+        const modeLabel = (r.playingAs || r.mode || '').toLowerCase() === 'solo' ? '1v1'
+                       : (r.playingAs || r.mode || '').toLowerCase() === 'duo' ? '2v2'
+                       : '';
+        addNotif('registration', `${r.entryType === 'paid' ? '💵' : '🆓'} New registration${modeLabel ? ' · ' + modeLabel : ''}`, `${r.username || 'User'} joined ${r.tournamentTitle || 'a tournament'}`);
       }
     });
   });
@@ -725,7 +745,7 @@ window.openUserDetail = function(uid) {
     ? myRegs.map(r => `
       <div class="dm-row">
         <span class="dm-k">${escapeDetail(r.tournamentTitle || 'Tournament')}</span>
-        <span class="dm-v">${r.entryType === 'paid' ? 'Rs. ' + (r.amount||0) : 'FREE'} · ${(r.status||'').toUpperCase()}</span>
+        <span class="dm-v">${r.entryType === 'paid' ? 'Rs. ' + (r.amount||0) : 'FREE'} · ${(r.status||'').toUpperCase()} ${modeBadgeHtml(r.playingAs)}</span>
       </div>`).join('')
     : '<div class="dm-row"><span class="dm-k">No registrations yet</span><span class="dm-v">—</span></div>';
 
@@ -880,16 +900,17 @@ window.openRegDetail = function(regId) {
   const shotSrc = payment ? (payment.screenshotBase64 ? 'data:image/jpeg;base64,' + payment.screenshotBase64 : payment.screenshotUrl || null) : null;
 
   document.getElementById('detailModalContent').innerHTML = `
-    <h2>📋 ${escapeDetail(r.tournamentTitle || 'Registration')}</h2>
+    <h2>📋 ${escapeDetail(r.tournamentTitle || 'Registration')} ${modeBadgeHtml(r.playingAs)}</h2>
     <p class="dm-sub">Registered by ${escapeDetail(r.username || 'Unknown')} · ${fmtDate(r.registeredAt)}</p>
     <div class="dm-rows">
       <div class="dm-row"><span class="dm-k">👤 Username</span><span class="dm-v">${escapeDetail(r.username || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">📧 Email</span><span class="dm-v">${escapeDetail(r.email || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">🎮 IGN</span><span class="dm-v">${escapeDetail(r.ign || '—')}</span></div>
       <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(r.phone || '—')}</span></div>
+      <div class="dm-row"><span class="dm-k">🎯 Mode</span><span class="dm-v">${modeBadgeHtml(r.playingAs) || '—'}</span></div>
       <div class="dm-row"><span class="dm-k">💰 Type</span><span class="dm-v">${isPaid ? 'PAID' : 'FREE'}</span></div>
       ${isPaid ? `<div class="dm-row"><span class="dm-k">💵 Amount</span><span class="dm-v" style="color:#fbbf24;">Rs. ${r.amount || 0}</span></div>` : ''}
-      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
+      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' || r.status === 'approved' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
     </div>
     ${isPaid && payment ? `
       <div class="dm-section">
@@ -1749,6 +1770,8 @@ window.loadRegistrations = async function() {
   }
 };
 window.filterRegistrations = function() { renderRegistrations(); };
+
+// ⭐ v4.9: registration cards now show mode badge (1v1 / 2v2 / squad)
 function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
@@ -1764,11 +1787,17 @@ function renderRegistrations() {
     const isPending = r.status === 'pending';
     const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
     const shotId = payment ? registerScreenshot(payment) : null;
+    const modeBadge = modeBadgeHtml(r.playingAs);
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
         <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
         <div class="reg-main">
-          <div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div>
+          <div class="reg-line-1">
+            <b>${r.username || 'Unknown'}</b>
+            <span class="reg-sep">—</span>
+            <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+            ${modeBadge}
+          </div>
           <div class="reg-line-2">
             ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
             ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
@@ -2501,10 +2530,11 @@ window.exportUsersCSV = function() {
 };
 window.exportRegistrationsCSV = function() {
   if (!allRegs.length) { window.showToast('❌ No registrations to export'); return; }
-  const rows = [['Username','Email','IGN','Phone','Tournament','Entry Type','Amount','Txn ID','Method','Status','Registered']];
+  const rows = [['Username','Email','IGN','Phone','Tournament','Mode','Entry Type','Amount','Txn ID','Method','Status','Registered']];
   allRegs.forEach(r => {
     rows.push([
       r.username || '', r.email || '', r.ign || '', r.phone || '', r.tournamentTitle || '',
+      r.playingAs || r.mode || '',
       r.entryType || '', r.amount || 0, r.txnId || '', r.method || '', r.status || '',
       r.registeredAt?.toDate ? r.registeredAt.toDate().toISOString() : ''
     ]);
@@ -2584,7 +2614,7 @@ window.loadTournamentsAdmin = async function() {
 };
 
 // ============================================================
-// ANNOUNCEMENTS  ⭐ v4.8 — now with Delete button
+// ANNOUNCEMENTS
 // ============================================================
 window.loadAnnouncements = async function() {
   const list = document.getElementById('announcementList');
@@ -2674,10 +2704,19 @@ function renderDashboardRecent() {
   if (rr && allRegs.length) {
     rr.innerHTML = allRegs.slice(0,5).map(r => {
       const isPaid = r.entryType === 'paid';
+      const modeBadge = modeBadgeHtml(r.playingAs);
       return `
         <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
           <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-          <div class="reg-main"><div class="reg-line-1"><b>${r.username || 'Unknown'}</b><span class="reg-sep">—</span><span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span></div><div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div></div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${r.username || 'Unknown'}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+              ${modeBadge}
+            </div>
+            <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
+          </div>
           <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div>
         </div>
       `;
