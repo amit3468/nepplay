@@ -64,6 +64,7 @@
   .detail-modal h2 {
     color: #fff; font-size: 20px; margin: 0 0 4px;
     display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
   }
   .detail-modal .dm-sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
   .detail-modal .dm-close {
@@ -343,6 +344,23 @@
   .sent-notif-meta { color: #6b7280; font-size: 11px; margin-top: 6px; }
   .notif-help { display: block; color: #6b7280; font-size: 11px; margin-top: 6px; line-height: 1.4; }
 
+  /* ⭐ v4.9 — Mode badges */
+  .mode-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .mode-badge-1v1   { background: rgba(34,197,94,0.18);  color: #4ade80; border: 1px solid rgba(34,197,94,0.5); }
+  .mode-badge-2v2   { background: rgba(59,130,246,0.18); color: #7db7ff; border: 1px solid rgba(59,130,246,0.5); }
+  .mode-badge-squad { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.5); }
+
   /* ⭐ BRACKET MODAL */
   .bk-overlay {
     position: fixed; inset: 0;
@@ -498,7 +516,6 @@
   }
   .bk-toast.show { display: block; }
 
-  /* ⭐ BRACKET v4.7 — manual pairing additions */
   .bk-section-title {
     font-size: 12px; font-weight: 800;
     color: #a5b4fc; letter-spacing: 0.5px;
@@ -677,14 +694,14 @@
       <a href="#notifications" data-section="notifications" class="sidebar-link"><span>🔔</span> Notifications</a>
       <a href="#activity" data-section="activity" class="sidebar-link"><span>📜</span> Activity</a>
     </nav>
-    <div class="sidebar-footer">🟢 Live • v4.7 • 2026</div>
+    <div class="sidebar-footer">🟢 Live • v4.9 • 2026</div>
   </aside>
 
   <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
     <header class="admin-topbar">
       <div style="display:flex; align-items:center; gap:12px;">
         <h2>Admin Panel</h2>
-        <span style="font-size:12px; color:#6b7280;">v4.7</span>
+        <span style="font-size:12px; color:#6b7280;">v4.9</span>
       </div>
       <div class="admin-topbar-right">
         <div class="notif-bell-btn" onclick="toggleNotifPanel(event)">
