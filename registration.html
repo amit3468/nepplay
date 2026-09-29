@@ -190,7 +190,6 @@ body{
 .free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
 .free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
 
-/* ⭐ Duplicate-block banner */
 .duplicate-banner {
     background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(220,38,38,.1));
     border: 2px solid rgba(239,68,68,.6);
@@ -360,7 +359,6 @@ textarea{ min-height:100px; resize:vertical; }
 
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
 
-        <!-- ⭐ Duplicate block — shown if user already registered for tonight -->
         <div id="duplicateBlock" class="duplicate-banner" style="display:none;">
           <b>⛔ You already registered for tonight!</b>
           Only <b>one mode</b> per player — 1 vs 1 OR 2 vs 2, not both.<br>
@@ -533,8 +531,8 @@ textarea{ min-height:100px; resize:vertical; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, addDoc, setDoc, doc, getDoc,
-  query, where, serverTimestamp
+  getFirestore, collection, getDocs, addDoc,
+  serverTimestamp, doc, getDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
@@ -597,7 +595,7 @@ function applyMode(mode) {
     } else if (mode === "duo") {
         icon.textContent = "👥";
         title.textContent = "2 vs 2 Mode";
-        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers and pays for the team.";
+        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
     } else {
         icon.textContent = "🏆";
         title.textContent = "Squad Mode";
@@ -725,7 +723,7 @@ async function loadRegistrationPage() {
         }
         const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
 
-        // ⭐ STEP 1: Block duplicates — check if this user already registered for this tournament
+        // ⭐ Duplicate check on page load
         try {
             const dupSnap = await getDocs(query(
                 collection(db, "tournament_registrations"),
@@ -735,7 +733,7 @@ async function loadRegistrationPage() {
 
             if (!dupSnap.empty) {
                 const prior = dupSnap.docs[0].data();
-                const priorMode = String(prior.playingAs || prior.tournamentMode || "unknown").toLowerCase();
+                const priorMode = String(prior.playingAs || prior.mode || "unknown").toLowerCase();
                 const priorModeLabel = priorMode === "solo" ? "1 vs 1" : priorMode === "duo" ? "2 vs 2" : priorMode;
 
                 alreadyRegistered = true;
@@ -748,7 +746,6 @@ async function loadRegistrationPage() {
             }
         } catch (e) {
             console.warn("duplicate check failed:", e);
-            // Fail open — let them try if the check errors, Firestore rule will catch them
         }
 
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
@@ -1001,7 +998,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.player1 = p1;
         body.player2 = p2;
         body.players = [p1, p2];
-        body.partner = { ign: p2, phone: '' };
     } else {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
@@ -1048,21 +1044,21 @@ $("registrationForm").addEventListener("submit", async (event) => {
     btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
 
     try {
-        // ⭐ Deterministic doc ID: {uid}_{tournamentId}
-        // This makes duplicates impossible — same combo = same doc
-        const docId = `${currentUser.uid}_${tournament.id}`;
-        const regRef = doc(db, "tournament_registrations", docId);
-
-        // Check if it already exists (belt + suspenders)
-        const existing = await getDoc(regRef);
-        if (existing.exists()) {
+        // ⭐ Re-check duplicates right before writing (catch same-page duplicate)
+        const dupCheck = await getDocs(query(
+            collection(db, "tournament_registrations"),
+            where("userId", "==", currentUser.uid),
+            where("tournamentId", "==", tournament.id)
+        ));
+        if (!dupCheck.empty) {
             showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
             btn.disabled = false;
             btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
             return;
         }
 
-        await setDoc(regRef, body);
+        // ⭐ Save the registration (auto-generated doc ID)
+        await addDoc(collection(db, "tournament_registrations"), body);
 
         showMessage(
             isFreeEvent
