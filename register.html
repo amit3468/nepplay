@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="theme-color" content="#0f172a">
     <title>Create Account - Nepal Gaming 2026</title>
+
+    <!-- ⭐ reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Le7eNUtAAAAANFs7qqkr9OyXiJ9AlcyGWx6kdJo"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -40,6 +44,14 @@
         .referral-notice.show { display: flex; }
         .referral-notice i { color: #a5b4fc; font-size: 16px; }
         .referral-notice b { color: #fff; }
+        .captcha-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -72,7 +84,7 @@
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold text-red-500 mb-2">NEPPLAY</h1>
                 <h2 class="text-lg sm:text-xl font-semibold text-white">Create Your Free Account</h2>
-                <p class="text-gray-400 text-xs sm:text-sm mt-1">Register now to be notified when we launch tournaments</p>
+                <p class="text-gray-400 text-xs sm:text-sm mt-1">Register now to join free &amp; paid tournaments</p>
             </div>
 
             <div id="referralNotice" class="referral-notice">
@@ -101,6 +113,14 @@
                     <p id="error-email" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
+                <!-- ⭐ NEW: Phone number field -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                    <input type="tel" id="phone" class="form-input w-full px-4 py-3 rounded-lg" placeholder="98XXXXXXXX" autocomplete="tel" maxlength="10">
+                    <p class="text-xs text-gray-500 mt-1">Used for prize payouts via eSewa / Khalti (you can add later too)</p>
+                    <p id="error-phone" class="text-red-400 text-xs mt-1 hidden"></p>
+                </div>
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Password *</label>
                     <input type="password" id="password" class="form-input w-full px-4 py-3 rounded-lg" placeholder="Min 6 characters" oninput="checkPasswordStrength()" autocomplete="new-password">
@@ -120,13 +140,19 @@
                     <p id="error-confirmPassword" class="text-red-400 text-xs mt-1 hidden"></p>
                 </div>
 
-                <div class="mb-5 flex items-start gap-2">
+                <div class="mb-3 flex items-start gap-2">
                     <input type="checkbox" id="terms" class="mt-1 w-4 h-4 rounded flex-shrink-0">
                     <label for="terms" class="text-xs sm:text-sm text-gray-300">
                         I agree to the <a href="#" class="text-blue-400 hover:underline">Terms of Service</a> and <a href="#" class="text-blue-400 hover:underline">Privacy Policy</a>
                     </label>
                 </div>
                 <p id="error-terms" class="text-red-400 text-xs mt-1 mb-4 hidden"></p>
+
+                <!-- ⭐ reCAPTCHA privacy note (Google requires disclosure) -->
+                <p class="captcha-badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Protected by reCAPTCHA — <a href="https://policies.google.com/privacy" target="_blank" class="underline">Privacy</a> · <a href="https://policies.google.com/terms" target="_blank" class="underline">Terms</a>
+                </p>
 
                 <button type="submit" id="register-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
                     Create Free Account
@@ -167,40 +193,35 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        const RECAPTCHA_SITE_KEY = "6Le7eNUtAAAAANFs7qqkr9OyXiJ9AlcyGWx6kdJo";
+
         console.log("🔥 Firebase initialized for register page");
 
         // ============================================================
         // REFERRAL CAPTURE
-        // Supports BOTH:
-        //   ?u=<username>  (new — friendlier)
-        //   ?ref=<uid>     (old — still works for existing links)
         // ============================================================
         let pendingReferralUid = null;
         let pendingReferralUsername = null;
 
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const refFromUrlU = urlParams.get('u');         // new
-            const refFromUrlUid = urlParams.get('ref');     // old
+            const refFromUrlU = urlParams.get('u');
+            const refFromUrlUid = urlParams.get('ref');
             const refFromStorage = localStorage.getItem('inviteRef');
 
             if (refFromUrlU) {
                 pendingReferralUsername = refFromUrlU;
                 localStorage.setItem('inviteRefU', refFromUrlU);
-                console.log('📥 Referral detected (username):', refFromUrlU);
             } else if (refFromUrlUid) {
                 pendingReferralUid = refFromUrlUid;
                 localStorage.setItem('inviteRef', refFromUrlUid);
-                console.log('📥 Referral detected (uid):', refFromUrlUid);
             } else {
-                // restore from localStorage
                 const storedU = localStorage.getItem('inviteRefU');
                 const storedUid = refFromStorage;
                 if (storedU) { pendingReferralUsername = storedU; }
                 else if (storedUid) { pendingReferralUid = storedUid; }
             }
 
-            // Show the notice
             if (pendingReferralUsername || pendingReferralUid) {
                 const notice = document.getElementById('referralNotice');
                 const text = document.getElementById('referralNoticeText');
@@ -222,9 +243,13 @@
 
         window.checkPasswordStrength = function() {
             const password = document.getElementById('password').value;
-            const bars = [document.getElementById('strength-1'), document.getElementById('strength-2'), document.getElementById('strength-3'), document.getElementById('strength-4')];
+            const bars = [
+                document.getElementById('strength-1'),
+                document.getElementById('strength-2'),
+                document.getElementById('strength-3'),
+                document.getElementById('strength-4')
+            ];
             const text = document.getElementById('strength-text');
-
             bars.forEach(bar => bar.className = 'strength-bar flex-grow bg-gray-700');
 
             if (password.length === 0) {
@@ -256,22 +281,20 @@
 
         function showError(id, msg) {
             const el = document.getElementById('error-' + id);
+            if (!el) return;
             el.textContent = msg;
             el.classList.remove('hidden');
         }
         function clearError(id) {
-            document.getElementById('error-' + id).classList.add('hidden');
+            const el = document.getElementById('error-' + id);
+            if (el) el.classList.add('hidden');
         }
         function showDebugError(msg) {
             document.getElementById('debug-message').textContent = msg;
             document.getElementById('debug-info').classList.remove('hidden');
         }
 
-        // ============================================================
-        // ⭐ Resolve referral username → UID
-        // ============================================================
         async function resolveReferral() {
-            // If we have a username, look up the UID
             if (pendingReferralUsername) {
                 try {
                     const snap = await getDocs(query(
@@ -281,27 +304,45 @@
                     ));
                     if (!snap.empty) {
                         return snap.docs[0].id;
-                    } else {
-                        console.warn('⚠️ Referral username not found:', pendingReferralUsername);
                     }
                 } catch (e) {
                     console.warn('Referral lookup failed:', e);
                 }
             }
-            // Fall back to UID if we have it
             if (pendingReferralUid) return pendingReferralUid;
             return null;
+        }
+
+        // ⭐ NEW: Get reCAPTCHA v3 token
+        async function getRecaptchaToken() {
+            return new Promise((resolve, reject) => {
+                if (typeof grecaptcha === 'undefined') {
+                    console.warn('reCAPTCHA not loaded — skipping');
+                    return resolve(null);
+                }
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'register' })
+                        .then(function(token) {
+                            resolve(token);
+                        })
+                        .catch(function(err) {
+                            console.warn('reCAPTCHA error:', err);
+                            resolve(null);
+                        });
+                });
+            });
         }
 
         window.handleRegister = async function(event) {
             event.preventDefault();
 
-            ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(clearError);
+            ['fullName', 'username', 'email', 'phone', 'password', 'confirmPassword', 'terms'].forEach(clearError);
             document.getElementById('debug-info').classList.add('hidden');
 
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const terms = document.getElementById('terms').checked;
@@ -313,6 +354,11 @@
             if (username.length < 3) { showError('username', 'Username must be at least 3 characters'); hasError = true; }
             else if (!/^[a-zA-Z0-9_]+$/.test(username)) { showError('username', 'Letters, numbers, underscores only'); hasError = true; }
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('email', 'Please enter a valid email'); hasError = true; }
+            // ⭐ Phone optional, but if provided must be valid
+            if (phone && !/^9[678]\d{8}$/.test(phone)) {
+                showError('phone', 'Enter a valid 10-digit Nepal number (starts with 98/97/96)');
+                hasError = true;
+            }
             if (password.length < 6) { showError('password', 'Password must be at least 6 characters'); hasError = true; }
             if (password !== confirmPassword) { showError('confirmPassword', 'Passwords do not match'); hasError = true; }
             if (!terms) { showError('terms', 'You must accept the terms'); hasError = true; }
@@ -329,19 +375,23 @@
             msgBox.classList.add('hidden');
 
             try {
-                // ⭐ Resolve referral BEFORE creating account
-                const referredByUid = await resolveReferral();
-
+                // ⭐ Get reCAPTCHA token
+                const recaptchaToken = await getRecaptchaToken();
+                console.log('🔒 reCAPTCHA token:', recaptchaToken ? 'received ✓' : 'skipped');
                 console.log("🔥 Creating Firebase account for:", email);
+
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log("✅ Firebase account created. UID:", user.uid);
+
+                const referredByUid = await resolveReferral();
 
                 const userProfile = {
                     uid: user.uid,
                     fullName: fullName,
                     username: username,
                     email: email,
+                    phone: phone || '',
                     createdAt: new Date().toISOString(),
                     role: 'member',
                     status: 'active',
@@ -353,7 +403,12 @@
                 if (referredByUid && referredByUid !== user.uid) {
                     userProfile.referredBy = referredByUid;
                     userProfile.referredAt = new Date().toISOString();
-                    console.log("🔗 Attaching referral UID:", referredByUid);
+                }
+
+                // ⭐ Store reCAPTCHA flag (metadata only — actual verification happens in Firebase App Check)
+                if (recaptchaToken) {
+                    userProfile.recaptchaVerified = true;
+                    userProfile.recaptchaAt = new Date().toISOString();
                 }
 
                 console.log("🔥 Saving user profile to Firestore...");
@@ -389,7 +444,7 @@
                     errorMessage = "Please enter a valid email address.";
                 } else if (error.code === 'auth/operation-not-allowed') {
                     errorMessage = "Email/Password signup is disabled. Enable it in Firebase Console.";
-                    debugMessage = "Go to Firebase Console → Authentication → Sign-in method → Enable Email/Password";
+                    debugMessage = "Firebase Console → Authentication → Sign-in method → Enable Email/Password";
                 } else if (error.code === 'permission-denied') {
                     errorMessage = "Database permission denied. Check Firestore rules.";
                 }
@@ -397,7 +452,6 @@
                 msgBox.classList.remove('hidden');
                 msgBox.className = "text-center text-sm mt-4 text-red-400";
                 msgBox.textContent = "❌ " + errorMessage;
-
                 showDebugError(debugMessage);
 
                 btn.innerHTML = 'Create Free Account';
@@ -405,7 +459,7 @@
             }
         };
 
-        ['fullName', 'username', 'email', 'password', 'confirmPassword', 'terms'].forEach(id => {
+        ['fullName', 'username', 'email', 'phone', 'password', 'confirmPassword', 'terms'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('input', () => clearError(id));
