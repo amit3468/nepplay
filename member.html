@@ -228,6 +228,193 @@
     align-self: flex-end;
   }
 
+  /* ⭐ NEW: Registration Confirmed card */
+  .reg-confirmed {
+    display: none;
+    position: relative;
+    background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(20,12,45,0.92) 70%);
+    border: 1px solid rgba(34,197,94,0.6);
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 14px 40px rgba(34,197,94,.28), 0 0 0 1px rgba(34,197,94,.15) inset;
+    animation: regIn 0.5s ease-out both;
+    overflow: hidden;
+  }
+  .reg-confirmed.show { display: block; }
+  @keyframes regIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .reg-confirmed::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0; width: 5px;
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+  }
+  .reg-confirmed .rc-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .reg-confirmed .rc-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: grid; place-items: center;
+    font-size: 1.5rem;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(34,197,94,.5);
+  }
+  .reg-confirmed .rc-title-wrap { flex: 1; min-width: 0; }
+  .reg-confirmed .rc-title {
+    font-weight: 900;
+    font-size: 1rem;
+    color: #4ade80;
+    letter-spacing: 0.3px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .reg-confirmed .rc-title .pill {
+    background: rgba(34,197,94,.25);
+    color: #86efac;
+    font-size: 0.62rem;
+    font-weight: 900;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border: 1px solid rgba(34,197,94,.5);
+  }
+  .reg-confirmed .rc-sub {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .reg-confirmed .rc-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #cbd5e1;
+    font-size: 1rem;
+    cursor: pointer;
+    display: grid; place-items: center;
+    z-index: 3;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+    line-height: 1;
+    padding: 0;
+  }
+  .reg-confirmed .rc-close:hover {
+    background: rgba(239,68,68,0.4);
+    color: #fff;
+  }
+  .reg-confirmed .rc-body {
+    background: rgba(15,8,35,0.55);
+    border-radius: 12px;
+    padding: 14px 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .reg-confirmed .rc-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(168,85,247,0.12);
+    font-size: 0.86rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .reg-confirmed .rc-row:last-child { border-bottom: none; }
+  .reg-confirmed .rc-k {
+    color: #a8a3c9;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .reg-confirmed .rc-v {
+    color: #fff;
+    font-weight: 800;
+    text-align: right;
+    word-break: break-word;
+  }
+  .reg-confirmed .rc-v.gold { color: #fbbf24; }
+  .reg-confirmed .rc-v.green { color: #4ade80; }
+  .reg-confirmed .rc-v.blue { color: #7db7ff; }
+  .reg-confirmed .rc-mode-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .reg-confirmed .rc-mode-badge.solo  { background: rgba(34,197,94,.25);  color: #4ade80; border: 1px solid rgba(34,197,94,.5); }
+  .reg-confirmed .rc-mode-badge.duo   { background: rgba(59,130,246,.25); color: #7db7ff; border: 1px solid rgba(59,130,246,.5); }
+  .reg-confirmed .rc-mode-badge.squad { background: rgba(245,158,11,.25); color: #fbbf24; border: 1px solid rgba(245,158,11,.5); }
+  .reg-confirmed .rc-note {
+    margin-top: 12px;
+    padding: 11px 14px;
+    background: rgba(251,191,36,0.1);
+    border: 1px dashed rgba(251,191,36,0.5);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: #fde68a;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+  .reg-confirmed .rc-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .reg-confirmed .rc-action {
+    flex: 1;
+    min-width: 130px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.82rem;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform .15s;
+  }
+  .reg-confirmed .rc-action:hover { transform: translateY(-1px); }
+  .reg-confirmed .rc-action.primary {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(124,58,237,.45);
+  }
+  .reg-confirmed .rc-action.wa {
+    background: linear-gradient(135deg, #25d366, #16a34a);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(37,211,102,.4);
+  }
+
   /* Keep existing cards */
   .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
   .social-card { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; gap: 14px; backdrop-filter: blur(10px); }
@@ -431,6 +618,11 @@
     .ann-icon { width: 44px; height: 44px; font-size: 1.2rem; }
     .ann-title { font-size: 0.98rem; }
     .ann-text { font-size: 0.82rem; }
+    .reg-confirmed { padding: 16px 16px; }
+    .reg-confirmed .rc-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+    .reg-confirmed .rc-title { font-size: 0.95rem; }
+    .reg-confirmed .rc-row { font-size: 0.8rem; }
+    .reg-confirmed .rc-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 0.9rem; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link, .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
@@ -500,7 +692,32 @@
 
 <div class="container">
 
-  <!-- ⭐ ANNOUNCEMENTS (replaces old winners banner) -->
+  <!-- ⭐ REGISTRATION CONFIRMED CARD -->
+  <div id="regConfirmedCard" class="reg-confirmed">
+    <button class="rc-close" onclick="dismissRegConfirmed()" title="Dismiss">✕</button>
+    <div class="rc-top">
+      <div class="rc-icon">✅</div>
+      <div class="rc-title-wrap">
+        <div class="rc-title">
+          Registration Confirmed!
+          <span class="pill" id="rcStatusPill">CONFIRMED</span>
+        </div>
+        <div class="rc-sub">You're all set. See you on the battlefield! 🎮</div>
+      </div>
+    </div>
+    <div class="rc-body" id="rcBody">
+      <!-- Filled by JS -->
+    </div>
+    <div class="rc-note" id="rcNote">
+      ⏰ Room details will be shared 30 minutes before the match. Keep an eye on your WhatsApp group.
+    </div>
+    <div class="rc-actions">
+      <a href="/my-tournaments.html" class="rc-action primary">🏆 View My Tournaments</a>
+      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" rel="noopener" class="rc-action wa">💬 WhatsApp Group</a>
+    </div>
+  </div>
+
+  <!-- ⭐ ANNOUNCEMENTS -->
   <div id="announcementStack" class="announcement-stack"></div>
 
   <div class="social-row">
@@ -711,6 +928,23 @@ document.addEventListener('click', function(e) {
         dd.classList.remove('open');
     }
 });
+
+// ⭐ Dismiss Registration Confirmed card — remembers forever
+window.dismissRegConfirmed = function() {
+    var id = window.__regConfirmedId || '';
+    if (id) {
+        try {
+            localStorage.setItem('nep_reg_dismissed_' + id, '1');
+        } catch (e) {}
+    }
+    var card = document.getElementById('regConfirmedCard');
+    if (card) {
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        setTimeout(function() { card.classList.remove('show'); card.style.opacity = ''; card.style.transform = ''; }, 300);
+    }
+};
 </script>
 
 <script type="module">
@@ -736,7 +970,6 @@ const auth = getAuth(app);
 const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 const POPULAR_GAMES = ['free fire', 'pubg'];
 
-// ⭐ Tonight's free prize pool
 const TONIGHT_FREE = true;
 const TONIGHT_PRIZE_1V1 = 150;
 const TONIGHT_PRIZE_2V2 = 150;
@@ -951,13 +1184,133 @@ onAuthStateChanged(auth, async (user) => {
         console.warn('earnings card error:', e);
     }
 
+    await loadRegConfirmedCard(user.uid);
     await loadMyMatches(user.uid);
     await loadMyRegistrations(user.uid);
     await loadUpcomingTournaments(user.uid);
     loadBellNotifications(user.uid);
 });
 
-// ========== ANNOUNCEMENTS ⭐ ==========
+// ⭐ REGISTRATION CONFIRMED CARD
+async function loadRegConfirmedCard(uid) {
+    const card = document.getElementById('regConfirmedCard');
+    const bodyEl = document.getElementById('rcBody');
+    const noteEl = document.getElementById('rcNote');
+    const pillEl = document.getElementById('rcStatusPill');
+    if (!card || !bodyEl) return;
+
+    let latest = null;
+    try {
+        const snap = await getDocs(query(
+            collection(db, 'tournament_registrations'),
+            where('userId', '==', uid),
+            orderBy('registeredAt', 'desc'),
+            limit(1)
+        ));
+        if (!snap.empty) {
+            latest = { id: snap.docs[0].id, ...snap.docs[0].data() };
+        }
+    } catch (e) {
+        console.warn('[regConfirmed] query failed:', e && e.message);
+        try {
+            const snap = await getDocs(query(
+                collection(db, 'tournament_registrations'),
+                where('userId', '==', uid)
+            ));
+            const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
+            if (arr.length) latest = arr[0];
+        } catch (e2) {
+            console.warn('[regConfirmed] fallback failed:', e2 && e2.message);
+            return;
+        }
+    }
+
+    if (!latest) return;
+
+    // Check if user dismissed this specific registration
+    try {
+        if (localStorage.getItem('nep_reg_dismissed_' + latest.id) === '1') {
+            card.classList.remove('show');
+            return;
+        }
+    } catch (e) {}
+
+    // Store the id for the dismiss handler
+    window.__regConfirmedId = latest.id;
+
+    // Build the details
+    const title = latest.tournamentTitle || latest.game || 'Tournament';
+    const mode = String(latest.mode || latest.playingAs || '').toLowerCase();
+    const modeLabel = mode === '1v1' || mode === 'solo' ? '1 vs 1'
+                    : mode === '2v2' || mode === 'duo' ? '2 vs 2'
+                    : latest.tournamentMode || 'Squad';
+    const modeCls = mode === '1v1' || mode === 'solo' ? 'solo'
+                  : mode === '2v2' || mode === 'duo' ? 'duo'
+                  : 'squad';
+    const isPaid = String(latest.entryType || '').toLowerCase() === 'paid';
+    const entryLabel = isPaid ? ('Rs ' + (latest.amount || 0)) : 'FREE 🎁';
+    const ign = latest.ign || latest.captainName || '—';
+    const when = latest.registeredAt?.seconds
+        ? new Date(latest.registeredAt.seconds * 1000).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
+        : '—';
+    const status = String(latest.status || 'pending').toLowerCase();
+    const statusLabel = status === 'confirmed' || status === 'approved' ? 'CONFIRMED'
+                      : status === 'rejected' ? 'REJECTED'
+                      : 'PENDING';
+    const statusColor = status === 'confirmed' || status === 'approved' ? '#4ade80'
+                      : status === 'rejected' ? '#f87171'
+                      : '#fbbf24';
+
+    // Update the pill
+    if (pillEl) {
+        pillEl.textContent = statusLabel;
+        pillEl.style.background = statusColor + '40';
+        pillEl.style.color = statusColor;
+        pillEl.style.borderColor = statusColor;
+    }
+
+    // Build body rows
+    bodyEl.innerHTML = `
+        <div class="rc-row">
+            <span class="rc-k">🏆 Tournament</span>
+            <span class="rc-v">${esc(title)}</span>
+        </div>
+        <div class="rc-row">
+            <span class="rc-k">👤 Mode</span>
+            <span class="rc-v">
+                <span class="rc-mode-badge ${modeCls}">${esc(modeLabel)}</span>
+            </span>
+        </div>
+        <div class="rc-row">
+            <span class="rc-k">🎮 IGN</span>
+            <span class="rc-v">${esc(ign)}</span>
+        </div>
+        <div class="rc-row">
+            <span class="rc-k">💰 Entry</span>
+            <span class="rc-v ${isPaid ? 'gold' : 'green'}">${esc(entryLabel)}</span>
+        </div>
+        <div class="rc-row">
+            <span class="rc-k">🕐 Registered</span>
+            <span class="rc-v blue">${esc(when)}</span>
+        </div>
+    `;
+
+    // Update note based on status
+    if (noteEl) {
+        if (status === 'rejected') {
+            noteEl.innerHTML = '❌ This registration was rejected. Contact admin if you think this is a mistake.';
+        } else if (isPaid && status === 'pending') {
+            noteEl.innerHTML = '⏳ Payment under review. Admin will verify your transaction ID shortly.';
+        } else {
+            noteEl.innerHTML = '⏰ Room details will be shared 30 minutes before the match. Keep an eye on your WhatsApp group.';
+        }
+    }
+
+    card.classList.add('show');
+}
+
+// ========== ANNOUNCEMENTS ==========
 async function loadAnnouncements() {
     const stack = document.getElementById('announcementStack');
     if (!stack) return;
