@@ -190,7 +190,7 @@ body{
 .free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
 .free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
 
-/* ⭐ NEW: Payout info section */
+/* ⭐ Payout info section */
 .payout-section {
     background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(245,158,11,.04));
     border: 2px solid rgba(251,191,36,.5);
@@ -417,7 +417,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- ⭐ NEW: Payout info — required if not on profile -->
             <div id="payoutSection" class="payout-section" style="display:none;">
                 <div class="ps-head">
                     <div class="ps-icon">💳</div>
@@ -780,7 +779,6 @@ async function loadRegistrationPage() {
         }
         const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
 
-        // ⭐ Duplicate check on page load
         try {
             const dupSnap = await getDocs(query(
                 collection(db, "tournament_registrations"),
@@ -836,7 +834,6 @@ async function loadRegistrationPage() {
             $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:15 PM.";
         }
 
-        // ⭐ Payout info section — show if user profile missing phone/wallet
         if (needsPayoutInfo) {
             $("payoutSection").style.display = "block";
             if (userProfilePhone) $("userPhone").value = userProfilePhone;
@@ -994,7 +991,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
     if (alreadyRegistered) { showMessage("You already registered for tonight.", "error"); return; }
 
-    // ⭐ Validate payout info if missing from profile
     let finalPhone = userProfilePhone;
     let finalWallet = userProfileWallet;
 
@@ -1037,7 +1033,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
         message:         $("messageText").value.trim(),
         status:          isFreeEvent ? "approved" : "pending",
         entryType:       isFreeEvent ? "free" : "paid",
-        // ⭐ Save payout info to the registration doc
         phone:           finalPhone,
         wallet:          finalWallet,
         registeredAt:    serverTimestamp()
@@ -1102,24 +1097,13 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
     }
 
-    const tName = tournament.title || tournament.game || "this tournament";
-    const confirmMsg =
-        `You are about to register for "${tName}".\n\n` +
-        `Game: ${tournament.game || "—"}\n` +
-        `Mode: ${playingMode === "solo" ? "1 vs 1" : playingMode === "duo" ? "2 vs 2" : (tournament.mode || "—")}\n` +
-        (body.teamName ? `Team: ${body.teamName}\n` : "") +
-        (isFreeEvent ? `Entry: FREE 🎁\n\n` : `Amount: Rs ${body.amount}\n\n`) +
-        `Do you want to continue?`;
-    if (!confirm(confirmMsg)) {
-        return;
-    }
+    // ⭐ NO confirm() dialog — submit directly
 
     const btn = $("submitButton");
     btn.disabled = true;
     btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
 
     try {
-        // ⭐ Re-check duplicates right before writing
         const dupCheck = await getDocs(query(
             collection(db, "tournament_registrations"),
             where("userId", "==", currentUser.uid),
@@ -1132,10 +1116,8 @@ $("registrationForm").addEventListener("submit", async (event) => {
             return;
         }
 
-        // ⭐ Save registration
         await addDoc(collection(db, "tournament_registrations"), body);
 
-        // ⭐ Save phone + wallet to user profile (so next time it auto-fills)
         if (needsPayoutInfo) {
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), {
@@ -1146,7 +1128,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
                 console.log("✅ Payout info saved to profile");
             } catch (e) {
                 console.warn("⚠️ Could not save payout info to profile:", e);
-                // Don't fail the whole registration for this
             }
         }
 
