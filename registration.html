@@ -375,7 +375,6 @@ textarea{ min-height:100px; resize:vertical; }
             Your registration will remain <b>Pending</b> until the admin verifies your payment.
         </p>
 
-        <!-- SAFETY WARNING -->
         <div id="tournamentWarning" style="display:none; background:rgba(245,158,11,.15); border-left:3px solid #fbbf24; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:.9rem; color:#fde68a; line-height:1.6;">
           ⚠️ <b>Please confirm:</b> You are registering for <span id="confirmGameName" style="color:#fbbf24; font-weight:900; font-size:1.05rem;">this tournament</span>.
         </div>
@@ -403,7 +402,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- SOLO FIELDS -->
             <div id="soloFields">
                 <h2 class="section-title">Your Details</h2>
                 <div class="form-group">
@@ -422,7 +420,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- TEAM FIELDS -->
             <div id="teamFields" style="display:none;">
                 <h2 class="section-title">Team Information</h2>
                 <div class="form-group">
@@ -445,7 +442,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- DUO PLAYERS -->
             <div id="duoPlayers" style="display:none;">
                 <h2 class="section-title">Players (2)</h2>
                 <div class="grid">
@@ -454,7 +450,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- SQUAD PLAYERS -->
             <div id="squadPlayers" style="display:none;">
                 <h2 class="section-title">Additional Players</h2>
                 <div class="grid">
@@ -717,7 +712,16 @@ async function loadRegistrationPage() {
             return;
         }
 
-        const mode = String(tournament.mode || "Squad").trim().toLowerCase();
+        // ⭐ NEW: URL ?mode= overrides the tournament's own mode
+        const urlMode = String(params.get("mode") || "").toLowerCase();
+        let mode;
+        if (urlMode === "1v1" || urlMode === "solo") {
+            mode = "solo";
+        } else if (urlMode === "2v2" || urlMode === "duo") {
+            mode = "duo";
+        } else {
+            mode = String(tournament.mode || "Squad").trim().toLowerCase();
+        }
         const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
 
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
@@ -726,7 +730,7 @@ async function loadRegistrationPage() {
         $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
 
         const badge = $("modeBadge");
-        badge.textContent = "Mode: " + (tournament.mode || "Squad");
+        badge.textContent = "Mode: " + (lockedMode === "solo" ? "1 vs 1" : lockedMode === "duo" ? "2 vs 2" : (tournament.mode || "Squad"));
         badge.classList.add(lockedMode);
 
         const cg = $("confirmGameName");
@@ -975,12 +979,11 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
     }
 
-    // CONFIRMATION DIALOG — now fully English
     const tName = tournament.title || tournament.game || "this tournament";
     const confirmMsg =
         `You are about to register for "${tName}".\n\n` +
         `Game: ${tournament.game || "—"}\n` +
-        `Mode: ${tournament.mode || "—"}\n` +
+        `Mode: ${playingMode === "solo" ? "1 vs 1" : playingMode === "duo" ? "2 vs 2" : (tournament.mode || "—")}\n` +
         (body.teamName ? `Team: ${body.teamName}\n` : "") +
         `Amount: Rs ${body.amount}\n\n` +
         `Do you want to continue?`;
