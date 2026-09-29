@@ -146,6 +146,7 @@ body{
 .tournament-name{ font-size:21px; font-weight:bold; color:#ff3b30; }
 .game{ margin-top:6px; color:#9cb5d3; }
 .fee{ margin-top:10px; font-size:20px; font-weight:bold; }
+.fee-free{ color:#4ade80; }
 .mode-badge{
     display:inline-block; padding:4px 12px;
     border-radius:999px; font-size:.7rem; font-weight:800;
@@ -166,37 +167,28 @@ body{
     align-items: center;
     gap: 14px;
 }
-.mode-locked-banner .mlb-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-    line-height: 1;
+.mode-locked-banner .mlb-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.mode-locked-banner .mlb-text { flex: 1; }
+.mode-locked-banner .mlb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
+.mode-locked-banner .mlb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
+.mode-locked-banner.solo  { background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05)); border-color: rgba(34,197,94,.4); }
+.mode-locked-banner.duo   { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05)); border-color: rgba(59,130,246,.4); }
+.mode-locked-banner.squad { background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.05)); border-color: rgba(245,158,11,.4); }
+
+.free-banner {
+    background: linear-gradient(135deg, rgba(34,197,94,.18), rgba(34,197,94,.06));
+    border: 1px solid rgba(34,197,94,.5);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
-.mode-locked-banner .mlb-text {
-    flex: 1;
-}
-.mode-locked-banner .mlb-title {
-    font-weight: 800;
-    font-size: .95rem;
-    color: #fff;
-    margin-bottom: 2px;
-}
-.mode-locked-banner .mlb-sub {
-    font-size: .78rem;
-    color: #a8a3c9;
-    line-height: 1.4;
-}
-.mode-locked-banner.solo {
-    background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05));
-    border-color: rgba(34,197,94,.4);
-}
-.mode-locked-banner.duo {
-    background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05));
-    border-color: rgba(59,130,246,.4);
-}
-.mode-locked-banner.squad {
-    background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.05));
-    border-color: rgba(245,158,11,.4);
-}
+.free-banner .fb-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.free-banner .fb-text { flex: 1; }
+.free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
+.free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
 
 .form-group{ margin-bottom:17px; }
 label{ display:block; margin-bottom:7px; color:#c8d5e5; font-weight:bold; }
@@ -222,9 +214,7 @@ textarea{ min-height:100px; resize:vertical; }
 }
 .payment-option:hover{ border-color:#4a5f7d; background:#101b2e; }
 .payment-option.selected{ border-color:#ff3b30; background:#201517; }
-.payment-option input[type="radio"]{
-    width:auto; margin:0; accent-color:#ff3b30; flex-shrink:0;
-}
+.payment-option input[type="radio"]{ width:auto; margin:0; accent-color:#ff3b30; flex-shrink:0; }
 .payment-name{ font-weight:bold; font-size:16px; color:white; word-break:break-word; }
 
 .payment-details{
@@ -237,72 +227,23 @@ textarea{ min-height:100px; resize:vertical; }
     font-size:15px; font-weight:bold; color:#7db7ff;
     margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;
 }
-.qr{
-    width:200px; height:200px; object-fit:contain;
-    background:#fff; border-radius:8px;
-    display:block; margin:14px auto; padding:6px;
-}
-.wallet{
-    text-align:center; color:#b8c9dd;
-    margin-top:12px; font-size:14px; line-height:1.6;
-}
-.wallet strong{
-    color:#fff; font-family:'Courier New', monospace;
-    font-size:16px; letter-spacing:1px;
-    display:inline-block; padding:2px 8px;
-    background:#172033; border-radius:5px; margin-left:4px;
-}
-.wallet-copy{
-    display:inline-block; margin-left:8px;
-    background:#1e3a5f; color:#7db7ff;
-    border:none; border-radius:5px;
-    padding:4px 10px; font-size:11px;
-    font-weight:bold; text-transform:uppercase;
-    cursor:pointer;
-}
+.qr{ width:200px; height:200px; object-fit:contain; background:#fff; border-radius:8px; display:block; margin:14px auto; padding:6px; }
+.wallet{ text-align:center; color:#b8c9dd; margin-top:12px; font-size:14px; line-height:1.6; }
+.wallet strong{ color:#fff; font-family:'Courier New', monospace; font-size:16px; letter-spacing:1px; display:inline-block; padding:2px 8px; background:#172033; border-radius:5px; margin-left:4px; }
+.wallet-copy{ display:inline-block; margin-left:8px; background:#1e3a5f; color:#7db7ff; border:none; border-radius:5px; padding:4px 10px; font-size:11px; font-weight:bold; text-transform:uppercase; cursor:pointer; }
 .wallet-copy:hover{ background:#3b82f6; color:white; }
-.payment-instructions{
-    color:#9cb5d3; font-size:13px; line-height:1.6;
-    margin-top:12px; padding:12px;
-    background:#0b1a2e; border-left:3px solid #3b82f6;
-    border-radius:4px;
-}
-.payment-no-methods{
-    padding:30px 20px; text-align:center;
-    color:#a87918; background:#1a1408;
-    border:2px dashed #a87918; border-radius:10px;
-    font-size:14px; line-height:1.6;
-}
-.amount{
-    background:#153b2b; border:1px solid #267a55;
-    color:#8ef0bb; border-radius:10px;
-    padding:15px; margin-bottom:15px;
-    font-size:18px; font-weight:bold;
-}
-.submit{
-    width:100%; background:#ff3b30; color:white;
-    border:0; border-radius:9px; padding:15px;
-    font-size:17px; font-weight:bold;
-    cursor:pointer; margin-top:10px;
-}
+.payment-instructions{ color:#9cb5d3; font-size:13px; line-height:1.6; margin-top:12px; padding:12px; background:#0b1a2e; border-left:3px solid #3b82f6; border-radius:4px; }
+.payment-no-methods{ padding:30px 20px; text-align:center; color:#a87918; background:#1a1408; border:2px dashed #a87918; border-radius:10px; font-size:14px; line-height:1.6; }
+.amount{ background:#153b2b; border:1px solid #267a55; color:#8ef0bb; border-radius:10px; padding:15px; margin-bottom:15px; font-size:18px; font-weight:bold; }
+.amount.free { background:linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.05)); border-color:rgba(34,197,94,.5); color:#4ade80; }
+.submit{ width:100%; background:#ff3b30; color:white; border:0; border-radius:9px; padding:15px; font-size:17px; font-weight:bold; cursor:pointer; margin-top:10px; }
 .submit:disabled{ opacity:.5; cursor:not-allowed; }
-.message{
-    padding:15px; border-radius:9px;
-    margin-bottom:18px; display:none;
-}
-.message.error{
-    display:block; background:#411818;
-    border:1px solid #9e3030; color:#ffbaba;
-}
-.message.success{
-    display:block; background:#123c28;
-    border:1px solid #2c8d5e; color:#a4f2c7;
-}
+.submit.free { background:linear-gradient(135deg, #22c55e, #16a34a); }
+.message{ padding:15px; border-radius:9px; margin-bottom:18px; display:none; }
+.message.error{ display:block; background:#411818; border:1px solid #9e3030; color:#ffbaba; }
+.message.success{ display:block; background:#123c28; border:1px solid #2c8d5e; color:#a4f2c7; }
 .small{ color:#8096b0; font-size:13px; line-height:1.6; }
-.loading-state{
-    padding:40px 20px; text-align:center;
-    color:#8da2bc; font-size:15px;
-}
+.loading-state{ padding:40px 20px; text-align:center; color:#8da2bc; font-size:15px; }
 
 @media(max-width:720px){
     .topnav { padding:10px 10px; gap:6px; }
@@ -324,10 +265,10 @@ textarea{ min-height:100px; resize:vertical; }
     .user-menu { min-width:180px; padding:6px; max-width:calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding:10px 12px; font-size:.82rem; }
     .grid, .payment-options { grid-template-columns:1fr; }
-    .mode-locked-banner { padding: 12px 14px; gap: 10px; }
-    .mode-locked-banner .mlb-icon { font-size: 1.6rem; }
-    .mode-locked-banner .mlb-title { font-size: .88rem; }
-    .mode-locked-banner .mlb-sub { font-size: .72rem; }
+    .mode-locked-banner, .free-banner { padding: 12px 14px; gap: 10px; }
+    .mode-locked-banner .mlb-icon, .free-banner .fb-icon { font-size: 1.6rem; }
+    .mode-locked-banner .mlb-title, .free-banner .fb-title { font-size: .88rem; }
+    .mode-locked-banner .mlb-sub, .free-banner .fb-sub { font-size: .72rem; }
 }
 </style>
 </head>
@@ -371,8 +312,7 @@ textarea{ min-height:100px; resize:vertical; }
     <div class="card">
         <h1 class="title">Tournament Registration</h1>
         <p class="subtitle">
-            Complete your information and payment details.
-            Your registration will remain <b>Pending</b> until the admin verifies your payment.
+            Complete your information. Your registration will remain <b>Pending</b> until the admin verifies your entry.
         </p>
 
         <div id="tournamentWarning" style="display:none; background:rgba(245,158,11,.15); border-left:3px solid #fbbf24; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:.9rem; color:#fde68a; line-height:1.6;">
@@ -393,6 +333,15 @@ textarea{ min-height:100px; resize:vertical; }
         </div>
 
         <form id="registrationForm" style="display:none;">
+
+            <!-- FREE ENTRY BANNER (shown only for free events) -->
+            <div id="freeBanner" class="free-banner" style="display:none;">
+                <div class="fb-icon">🎁</div>
+                <div class="fb-text">
+                    <div class="fb-title">Free Entry Tonight!</div>
+                    <div class="fb-sub">No payment required. Just fill your details and submit — you're in!</div>
+                </div>
+            </div>
 
             <div id="modeLockedBanner" class="mode-locked-banner solo">
                 <div class="mlb-icon" id="mlbIcon">👤</div>
@@ -460,28 +409,31 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <h2 class="section-title">Payment</h2>
-            <div id="amountBox" class="amount">Amount: Loading…</div>
+            <!-- PAYMENT — hidden when free=1 -->
+            <div id="paymentSection">
+                <h2 class="section-title">Payment</h2>
+                <div id="amountBox" class="amount">Amount: Loading…</div>
 
-            <div id="paymentContainer">
-                <div class="payment-options" id="paymentOptions"></div>
-                <div id="paymentDetailsContainer"></div>
-            </div>
-
-            <div class="grid">
-                <div class="form-group">
-                    <label>Payer Name</label>
-                    <input id="payerName">
+                <div id="paymentContainer">
+                    <div class="payment-options" id="paymentOptions"></div>
+                    <div id="paymentDetailsContainer"></div>
                 </div>
-                <div class="form-group">
-                    <label>Payer Phone</label>
-                    <input id="payerPhone">
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label>Transaction ID *</label>
-                <input id="transactionId" required placeholder="Enter transaction ID">
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Payer Name</label>
+                        <input id="payerName">
+                    </div>
+                    <div class="form-group">
+                        <label>Payer Phone</label>
+                        <input id="payerPhone">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Transaction ID *</label>
+                    <input id="transactionId" placeholder="Enter transaction ID">
+                </div>
             </div>
 
             <div class="form-group">
@@ -489,7 +441,7 @@ textarea{ min-height:100px; resize:vertical; }
                 <textarea id="messageText" placeholder="Optional message"></textarea>
             </div>
 
-            <p class="small">
+            <p class="small" id="formNote">
                 Make sure the payment amount and transaction ID are correct.
                 The admin will verify the payment before approving your registration.
             </p>
@@ -561,6 +513,7 @@ let tournament  = null;
 let paymentMethods = [];
 let selectedPaymentId = "";
 let playingMode = "squad";
+let isFreeEvent = false;
 
 const $ = id => document.getElementById(id);
 
@@ -592,12 +545,12 @@ function applyMode(mode) {
 
     if (mode === "solo") {
         icon.textContent = "👤";
-        title.textContent = "Solo Mode";
-        sub.textContent = "You are registering as a single player. No team details needed.";
+        title.textContent = "1 vs 1 Mode";
+        sub.textContent = "You are registering as a single player. No partner needed.";
     } else if (mode === "duo") {
         icon.textContent = "👥";
-        title.textContent = "Duo Mode";
-        sub.textContent = "You + 1 teammate. Both player IGNs required.";
+        title.textContent = "2 vs 2 Mode";
+        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers and pays for the team.";
     } else {
         icon.textContent = "🏆";
         title.textContent = "Squad Mode";
@@ -678,6 +631,8 @@ async function loadRegistrationPage() {
         const seedKeyParam = params.get("seedKey") || "";
         const tidParam     = params.get("tournamentId") || params.get("tournament");
         const gameParam    = normalizeGame(params.get("game") || "");
+        const freeParam    = String(params.get("free") || "").toLowerCase();
+        isFreeEvent = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
 
         const snap = await getDocs(collection(db, "tournaments"));
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -712,7 +667,6 @@ async function loadRegistrationPage() {
             return;
         }
 
-        // ⭐ NEW: URL ?mode= overrides the tournament's own mode
         const urlMode = String(params.get("mode") || "").toLowerCase();
         let mode;
         if (urlMode === "1v1" || urlMode === "solo") {
@@ -726,8 +680,11 @@ async function loadRegistrationPage() {
 
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
-        $("entryFee").textContent = "Entry Fee: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
-        $("amountBox").textContent = "Amount to Pay: Rs " + (tournament.entryFee || tournament.entry_fee || 0);
+        const fee = tournament.entryFee || tournament.entry_fee || 0;
+        $("entryFee").innerHTML = isFreeEvent
+            ? 'Entry Fee: <span style="color:#4ade80;">FREE 🎁</span>'
+            : "Entry Fee: Rs " + fee;
+        $("amountBox").textContent = "Amount to Pay: Rs " + fee;
 
         const badge = $("modeBadge");
         badge.textContent = "Mode: " + (lockedMode === "solo" ? "1 vs 1" : lockedMode === "duo" ? "2 vs 2" : (tournament.mode || "Squad"));
@@ -741,6 +698,17 @@ async function loadRegistrationPage() {
         $("loading").style.display = "none";
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
+
+        // ⭐ Free event: hide payment section entirely, show banner, mark amount as FREE
+        if (isFreeEvent) {
+            $("paymentSection").style.display = "none";
+            $("freeBanner").style.display = "flex";
+            $("amountBox").classList.add("free");
+            $("amountBox").textContent = "🎁 Free Entry — no payment required";
+            $("submitButton").classList.add("free");
+            $("submitButton").textContent = "Register Free";
+            $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:15 PM.";
+        }
 
         if (currentUser) {
             const uEmail = currentUser.email || "";
@@ -763,7 +731,9 @@ async function loadRegistrationPage() {
             } catch (e) {}
         }
 
-        await loadPaymentMethods();
+        if (!isFreeEvent) {
+            await loadPaymentMethods();
+        }
         applyMode(lockedMode);
 
         const status = String(tournament.status || "").toLowerCase();
@@ -891,13 +861,15 @@ $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
-    if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
 
-    const selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
-    if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
-
-    const transactionId = $("transactionId").value.trim();
-    if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+    let selectedMethod = null;
+    if (!isFreeEvent) {
+        if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
+        selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
+        if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
+        const transactionId = $("transactionId").value.trim();
+        if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+    }
 
     let body = {
         username:        currentUsername || currentUser.email?.split("@")[0] || "Player",
@@ -909,17 +881,22 @@ $("registrationForm").addEventListener("submit", async (event) => {
         game:            tournament.game || "",
         tournamentMode:  tournament.mode || "Squad",
         playingAs:       playingMode,
-        transactionId,
-        paymentMethod:   selectedMethod.name,
-        paymentMethodId: selectedMethod.id,
-        amount:          Number(tournament.entryFee || tournament.entry_fee || 0),
+        amount:          isFreeEvent ? 0 : Number(tournament.entryFee || tournament.entry_fee || 0),
         message:         $("messageText").value.trim(),
-        payerName:       $("payerName").value.trim(),
-        payerPhone:      $("payerPhone").value.trim(),
-        status:          "pending",
-        entryType:       "paid",
+        status:          isFreeEvent ? "approved" : "pending",
+        entryType:       isFreeEvent ? "free" : "paid",
         registeredAt:    serverTimestamp()
     };
+
+    if (isFreeEvent) {
+        body.isFree = true;
+    } else {
+        body.transactionId   = $("transactionId").value.trim();
+        body.paymentMethod   = selectedMethod.name;
+        body.paymentMethodId = selectedMethod.id;
+        body.payerName       = $("payerName").value.trim();
+        body.payerPhone      = $("payerPhone").value.trim();
+    }
 
     if (playingMode === "solo") {
         const soloIgn = $("soloIgn").value.trim();
@@ -927,7 +904,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
         if (!soloPhone) { showMessage("Please enter your phone.", "error"); return; }
         body.teamSize = 1;
-        body.teamName = soloIgn + " (Solo)";
+        body.teamName = soloIgn + " (1v1)";
         body.captainName = soloIgn;
         body.phone = soloPhone;
         body.ign = soloIgn;
@@ -941,7 +918,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
         if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
-        if (!p1 || !p2) { showMessage("Both player IGNs are required for Duo.", "error"); return; }
+        if (!p1 || !p2) { showMessage("Both player IGNs are required for 2 vs 2.", "error"); return; }
         body.teamSize = 2;
         body.teamName = teamName;
         body.captainName = captainName;
@@ -985,7 +962,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         `Game: ${tournament.game || "—"}\n` +
         `Mode: ${playingMode === "solo" ? "1 vs 1" : playingMode === "duo" ? "2 vs 2" : (tournament.mode || "—")}\n` +
         (body.teamName ? `Team: ${body.teamName}\n` : "") +
-        `Amount: Rs ${body.amount}\n\n` +
+        (isFreeEvent ? `Entry: FREE 🎁\n\n` : `Amount: Rs ${body.amount}\n\n`) +
         `Do you want to continue?`;
     if (!confirm(confirmMsg)) {
         return;
@@ -993,18 +970,23 @@ $("registrationForm").addEventListener("submit", async (event) => {
 
     const btn = $("submitButton");
     btn.disabled = true;
-    btn.textContent = "Submitting…";
+    btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
 
     try {
         await addDoc(collection(db, "tournament_registrations"), body);
-        showMessage("✅ Registration submitted! Admin will verify your payment.", "success");
+        showMessage(
+            isFreeEvent
+              ? "✅ Registered! You're in for tonight. Room details will be shared 30 minutes before 9:15 PM."
+              : "✅ Registration submitted! Admin will verify your payment.",
+            "success"
+        );
         $("registrationForm").reset();
-        setTimeout(() => { window.location.href = "/member.html"; }, 1800);
+        setTimeout(() => { window.location.href = "/member.html"; }, 2000);
     } catch (err) {
         console.error("submit error:", err);
         showMessage("❌ " + (err.message || "Submission failed."), "error");
         btn.disabled = false;
-        btn.textContent = "Submit Registration";
+        btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
     }
 });
 </script>
