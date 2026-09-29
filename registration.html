@@ -190,6 +190,35 @@ body{
 .free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
 .free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
 
+/* ⭐ NEW: Payout info section */
+.payout-section {
+    background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(245,158,11,.04));
+    border: 2px solid rgba(251,191,36,.5);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 22px 0;
+}
+.payout-section .ps-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+}
+.payout-section .ps-icon {
+    font-size: 1.5rem; line-height: 1;
+}
+.payout-section .ps-title {
+    font-weight: 900; font-size: 1rem; color: #fbbf24;
+}
+.payout-section .ps-sub {
+    font-size: .82rem; color: #cbd5e1;
+    margin-bottom: 16px; line-height: 1.5;
+}
+.payout-section.saved {
+    background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.04));
+    border-color: rgba(34,197,94,.5);
+}
+.payout-section.saved .ps-title { color: #4ade80; }
+.payout-section.saved .ps-icon { color: #4ade80; }
+
 .duplicate-banner {
     background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(220,38,38,.1));
     border: 2px solid rgba(239,68,68,.6);
@@ -388,6 +417,33 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
+            <!-- ⭐ NEW: Payout info — required if not on profile -->
+            <div id="payoutSection" class="payout-section" style="display:none;">
+                <div class="ps-head">
+                    <div class="ps-icon">💳</div>
+                    <div class="ps-title">Payout Info (Required)</div>
+                </div>
+                <div class="ps-sub" id="payoutSectionSub">
+                    Enter your phone number and preferred wallet. We'll use this to pay you if you win. Saved once — auto-filled next time.
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input id="userPhone" type="tel" placeholder="98XXXXXXXX" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Wallet *</label>
+                        <select id="userWallet">
+                            <option value="">— Choose wallet —</option>
+                            <option value="esewa">💚 eSewa</option>
+                            <option value="khalti">💜 Khalti</option>
+                            <option value="imepay">🟠 IME Pay</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div id="modeLockedBanner" class="mode-locked-banner solo">
                 <div class="mlb-icon" id="mlbIcon">👤</div>
                 <div class="mlb-text">
@@ -402,15 +458,9 @@ textarea{ min-height:100px; resize:vertical; }
                     <label>Your IGN (In-Game Name) *</label>
                     <input id="soloIgn" placeholder="e.g. ProGamer99">
                 </div>
-                <div class="grid">
-                    <div class="form-group">
-                        <label>Phone *</label>
-                        <input id="soloPhone" placeholder="98XXXXXXXX">
-                    </div>
-                    <div class="form-group">
-                        <label>Account Email</label>
-                        <input id="soloEmail" type="email" readonly>
-                    </div>
+                <div class="form-group">
+                    <label>Account Email</label>
+                    <input id="soloEmail" type="email" readonly>
                 </div>
             </div>
 
@@ -426,13 +476,9 @@ textarea{ min-height:100px; resize:vertical; }
                         <input id="captainName">
                     </div>
                     <div class="form-group">
-                        <label>Captain Phone *</label>
-                        <input id="phone">
+                        <label>Account Email</label>
+                        <input id="email" type="email" readonly>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Account Email</label>
-                    <input id="email" type="email" readonly>
                 </div>
             </div>
 
@@ -531,7 +577,7 @@ textarea{ min-height:100px; resize:vertical; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, addDoc,
+  getFirestore, collection, getDocs, addDoc, updateDoc,
   serverTimestamp, doc, getDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
@@ -559,6 +605,9 @@ let selectedPaymentId = "";
 let playingMode = "squad";
 let isFreeEvent = false;
 let alreadyRegistered = false;
+let userProfilePhone = "";
+let userProfileWallet = "";
+let needsPayoutInfo = false;
 
 const $ = id => document.getElementById(id);
 
@@ -575,6 +624,10 @@ function escapeHTML(v) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function isValidPhone(p) {
+    return /^9[678]\d{8}$/.test(String(p || "").trim());
 }
 
 function applyMode(mode) {
@@ -638,6 +691,10 @@ onAuthStateChanged(auth, async (user) => {
             const u = uDoc.data();
             if (u.username) display = u.username;
             else if (u.fullName) display = u.fullName;
+
+            userProfilePhone = u.phone || "";
+            userProfileWallet = u.wallet || "";
+            needsPayoutInfo = !userProfilePhone || !userProfileWallet;
         }
     } catch (e) {}
     currentUsername = display;
@@ -779,6 +836,15 @@ async function loadRegistrationPage() {
             $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:15 PM.";
         }
 
+        // ⭐ Payout info section — show if user profile missing phone/wallet
+        if (needsPayoutInfo) {
+            $("payoutSection").style.display = "block";
+            if (userProfilePhone) $("userPhone").value = userProfilePhone;
+            if (userProfileWallet) $("userWallet").value = userProfileWallet;
+        } else {
+            $("payoutSection").style.display = "none";
+        }
+
         if (currentUser) {
             const uEmail = currentUser.email || "";
             $("email").value = uEmail;
@@ -791,10 +857,6 @@ async function loadRegistrationPage() {
                         $("soloIgn").value = u.username;
                         $("captainName").value = u.username;
                         $("player1").value = u.username;
-                    }
-                    if (u.phone) {
-                        $("soloPhone").value = u.phone;
-                        $("phone").value = u.phone;
                     }
                 }
             } catch (e) {}
@@ -932,6 +994,25 @@ $("registrationForm").addEventListener("submit", async (event) => {
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
     if (alreadyRegistered) { showMessage("You already registered for tonight.", "error"); return; }
 
+    // ⭐ Validate payout info if missing from profile
+    let finalPhone = userProfilePhone;
+    let finalWallet = userProfileWallet;
+
+    if (needsPayoutInfo) {
+        const phoneInput = $("userPhone")?.value.trim() || "";
+        const walletInput = $("userWallet")?.value || "";
+
+        if (!phoneInput) { showMessage("❌ Please enter your phone number.", "error"); return; }
+        if (!isValidPhone(phoneInput)) {
+            showMessage("❌ Enter a valid 10-digit Nepal number (starts with 98/97/96).", "error");
+            return;
+        }
+        if (!walletInput) { showMessage("❌ Please choose your preferred wallet.", "error"); return; }
+
+        finalPhone = phoneInput;
+        finalWallet = walletInput;
+    }
+
     let selectedMethod = null;
     if (!isFreeEvent) {
         if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
@@ -956,6 +1037,9 @@ $("registrationForm").addEventListener("submit", async (event) => {
         message:         $("messageText").value.trim(),
         status:          isFreeEvent ? "approved" : "pending",
         entryType:       isFreeEvent ? "free" : "paid",
+        // ⭐ Save payout info to the registration doc
+        phone:           finalPhone,
+        wallet:          finalWallet,
         registeredAt:    serverTimestamp()
     };
 
@@ -971,29 +1055,23 @@ $("registrationForm").addEventListener("submit", async (event) => {
 
     if (playingMode === "solo") {
         const soloIgn = $("soloIgn").value.trim();
-        const soloPhone = $("soloPhone").value.trim();
         if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
-        if (!soloPhone) { showMessage("Please enter your phone.", "error"); return; }
         body.teamSize = 1;
         body.teamName = soloIgn + " (1v1)";
         body.captainName = soloIgn;
-        body.phone = soloPhone;
         body.ign = soloIgn;
         body.players = [soloIgn];
     } else if (playingMode === "duo") {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
-        const phone = $("phone").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
-        if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
         if (!p1 || !p2) { showMessage("Both player IGNs are required for 2 vs 2.", "error"); return; }
         body.teamSize = 2;
         body.teamName = teamName;
         body.captainName = captainName;
-        body.phone = phone;
         body.ign = captainName;
         body.player1 = p1;
         body.player2 = p2;
@@ -1001,12 +1079,10 @@ $("registrationForm").addEventListener("submit", async (event) => {
     } else {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
-        const phone = $("phone").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
-        if (!phone) { showMessage("Please enter captain phone.", "error"); return; }
         if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
         const p3 = $("player3").value.trim();
         const p4 = $("player4").value.trim();
@@ -1015,7 +1091,6 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
         body.teamName = teamName;
         body.captainName = captainName;
-        body.phone = phone;
         body.ign = captainName;
         body.email = $("email").value.trim();
         body.player1 = p1;
@@ -1044,7 +1119,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
     btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
 
     try {
-        // ⭐ Re-check duplicates right before writing (catch same-page duplicate)
+        // ⭐ Re-check duplicates right before writing
         const dupCheck = await getDocs(query(
             collection(db, "tournament_registrations"),
             where("userId", "==", currentUser.uid),
@@ -1057,8 +1132,23 @@ $("registrationForm").addEventListener("submit", async (event) => {
             return;
         }
 
-        // ⭐ Save the registration (auto-generated doc ID)
+        // ⭐ Save registration
         await addDoc(collection(db, "tournament_registrations"), body);
+
+        // ⭐ Save phone + wallet to user profile (so next time it auto-fills)
+        if (needsPayoutInfo) {
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    phone: finalPhone,
+                    wallet: finalWallet,
+                    payoutUpdatedAt: serverTimestamp()
+                });
+                console.log("✅ Payout info saved to profile");
+            } catch (e) {
+                console.warn("⚠️ Could not save payout info to profile:", e);
+                // Don't fail the whole registration for this
+            }
+        }
 
         showMessage(
             isFreeEvent
