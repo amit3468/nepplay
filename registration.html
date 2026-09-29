@@ -190,6 +190,43 @@ body{
 .free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
 .free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
 
+/* ⭐ Duplicate-block banner */
+.duplicate-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(220,38,38,.1));
+    border: 2px solid rgba(239,68,68,.6);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    text-align: center;
+    color: #fca5a5;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.6;
+}
+.duplicate-banner b { color: #fff; font-size: 17px; display: block; margin-bottom: 8px; }
+.duplicate-banner .db-mode {
+    display: inline-block;
+    background: rgba(0,0,0,.35);
+    color: #fbbf24;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+}
+.duplicate-banner .db-cta {
+    display: inline-block;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 13px;
+}
+
 .form-group{ margin-bottom:17px; }
 label{ display:block; margin-bottom:7px; color:#c8d5e5; font-weight:bold; }
 input, textarea, select{
@@ -323,6 +360,17 @@ textarea{ min-height:100px; resize:vertical; }
 
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
 
+        <!-- ⭐ Duplicate block — shown if user already registered for tonight -->
+        <div id="duplicateBlock" class="duplicate-banner" style="display:none;">
+          <b>⛔ You already registered for tonight!</b>
+          Only <b>one mode</b> per player — 1 vs 1 OR 2 vs 2, not both.<br>
+          <div class="db-mode" id="duplicateBlockMode">Mode: —</div>
+          <br>
+          Room details will show on your dashboard. See you at 9:15 PM! 🎮
+          <br>
+          <a href="/member.html" class="db-cta">Go to My Dashboard →</a>
+        </div>
+
         <div id="tournamentBox" class="tournament-box" style="display:none;">
             <div>
                 <span id="tournamentName" class="tournament-name">—</span>
@@ -334,7 +382,6 @@ textarea{ min-height:100px; resize:vertical; }
 
         <form id="registrationForm" style="display:none;">
 
-            <!-- FREE ENTRY BANNER (shown only for free events) -->
             <div id="freeBanner" class="free-banner" style="display:none;">
                 <div class="fb-icon">🎁</div>
                 <div class="fb-text">
@@ -409,7 +456,6 @@ textarea{ min-height:100px; resize:vertical; }
                 </div>
             </div>
 
-            <!-- PAYMENT — hidden when free=1 -->
             <div id="paymentSection">
                 <h2 class="section-title">Payment</h2>
                 <div id="amountBox" class="amount">Amount: Loading…</div>
@@ -487,8 +533,8 @@ textarea{ min-height:100px; resize:vertical; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, addDoc,
-  serverTimestamp, doc, getDoc
+  getFirestore, collection, getDocs, addDoc, setDoc, doc, getDoc,
+  query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
@@ -514,6 +560,7 @@ let paymentMethods = [];
 let selectedPaymentId = "";
 let playingMode = "squad";
 let isFreeEvent = false;
+let alreadyRegistered = false;
 
 const $ = id => document.getElementById(id);
 
@@ -678,6 +725,32 @@ async function loadRegistrationPage() {
         }
         const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
 
+        // ⭐ STEP 1: Block duplicates — check if this user already registered for this tournament
+        try {
+            const dupSnap = await getDocs(query(
+                collection(db, "tournament_registrations"),
+                where("userId", "==", currentUser.uid),
+                where("tournamentId", "==", tournament.id)
+            ));
+
+            if (!dupSnap.empty) {
+                const prior = dupSnap.docs[0].data();
+                const priorMode = String(prior.playingAs || prior.tournamentMode || "unknown").toLowerCase();
+                const priorModeLabel = priorMode === "solo" ? "1 vs 1" : priorMode === "duo" ? "2 vs 2" : priorMode;
+
+                alreadyRegistered = true;
+                $("loading").style.display = "none";
+                $("duplicateBlock").style.display = "block";
+                $("duplicateBlockMode").textContent = "Your registered mode: " + priorModeLabel;
+                $("tournamentBox").style.display = "none";
+                $("registrationForm").style.display = "none";
+                return;
+            }
+        } catch (e) {
+            console.warn("duplicate check failed:", e);
+            // Fail open — let them try if the check errors, Firestore rule will catch them
+        }
+
         $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
         $("gameName").textContent = tournament.game || "";
         const fee = tournament.entryFee || tournament.entry_fee || 0;
@@ -699,7 +772,6 @@ async function loadRegistrationPage() {
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
-        // ⭐ Free event: hide payment section entirely, show banner, mark amount as FREE
         if (isFreeEvent) {
             $("paymentSection").style.display = "none";
             $("freeBanner").style.display = "flex";
@@ -861,6 +933,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
+    if (alreadyRegistered) { showMessage("You already registered for tonight.", "error"); return; }
 
     let selectedMethod = null;
     if (!isFreeEvent) {
@@ -881,6 +954,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         game:            tournament.game || "",
         tournamentMode:  tournament.mode || "Squad",
         playingAs:       playingMode,
+        mode:            playingMode === "solo" ? "1v1" : playingMode === "duo" ? "2v2" : "squad",
         amount:          isFreeEvent ? 0 : Number(tournament.entryFee || tournament.entry_fee || 0),
         message:         $("messageText").value.trim(),
         status:          isFreeEvent ? "approved" : "pending",
@@ -927,6 +1001,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.player1 = p1;
         body.player2 = p2;
         body.players = [p1, p2];
+        body.partner = { ign: p2, phone: '' };
     } else {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
@@ -973,7 +1048,22 @@ $("registrationForm").addEventListener("submit", async (event) => {
     btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
 
     try {
-        await addDoc(collection(db, "tournament_registrations"), body);
+        // ⭐ Deterministic doc ID: {uid}_{tournamentId}
+        // This makes duplicates impossible — same combo = same doc
+        const docId = `${currentUser.uid}_${tournament.id}`;
+        const regRef = doc(db, "tournament_registrations", docId);
+
+        // Check if it already exists (belt + suspenders)
+        const existing = await getDoc(regRef);
+        if (existing.exists()) {
+            showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
+            btn.disabled = false;
+            btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
+            return;
+        }
+
+        await setDoc(regRef, body);
+
         showMessage(
             isFreeEvent
               ? "✅ Registered! You're in for tonight. Room details will be shared 30 minutes before 9:15 PM."
@@ -984,7 +1074,12 @@ $("registrationForm").addEventListener("submit", async (event) => {
         setTimeout(() => { window.location.href = "/member.html"; }, 2000);
     } catch (err) {
         console.error("submit error:", err);
-        showMessage("❌ " + (err.message || "Submission failed."), "error");
+        const msg = (err && err.message) || "Submission failed.";
+        if (msg.toLowerCase().includes("permission")) {
+            showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
+        } else {
+            showMessage("❌ " + msg, "error");
+        }
         btn.disabled = false;
         btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
     }
