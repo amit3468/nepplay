@@ -138,6 +138,7 @@
   .game-head .meta strong { color: var(--gold-2); }
   .tk-badge { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); padding: 2px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.3px; white-space: nowrap; }
   .popular-badge { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; padding: 3px 10px; border-radius: 999px; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.4px; white-space: nowrap; text-transform: uppercase; }
+  .free-badge { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.4px; white-space: nowrap; text-transform: uppercase; }
 
   .time-slot { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px dashed rgba(168,85,247,.2); }
   .time-slot:first-of-type { border-top: none; padding-top: 4px; }
@@ -158,7 +159,8 @@
   .mode-btn.ffa { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35); }
   .mode-btn.other { background: linear-gradient(135deg, #6366f1, #4f46e5); box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
 
-  .room-note { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px 18px; font-size: 0.85rem; color: var(--gold-2); margin-bottom: 22px; line-height: 1.5; backdrop-filter: blur(8px); }
+  .room-note { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px 18px; font-size: 0.85rem; color: var(--gold-2); margin-bottom: 22px; line-height: 1.6; backdrop-filter: blur(8px); }
+  .room-note b { color: #fff; }
 
   .loading-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.95rem; }
   .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.9rem; background: rgba(30,18,60,0.4); border: 1px dashed rgba(168,85,247,.35); border-radius: 14px; }
@@ -241,8 +243,7 @@
     <span class="h-tag">🎮 NEPPLAY Tournaments</span>
     <h1>Choose your game. <span class="cash">Win real cash.</span> 💰</h1>
     <p>
-      8 games · multiple modes · two daily schedules.
-      Pick the game and mode you love — we'll handle the rest.
+      Free Fire 1 vs 1 and 2 vs 2 tonight at 9:15 PM · Bo1 · Winner takes all.
     </p>
     <div class="hero-stats" id="heroStats">
       <div class="hero-stat">⏳ Loading…</div>
@@ -250,8 +251,11 @@
   </section>
 
   <div class="room-note">
-    🎯 <strong>How to register:</strong> Tap any mode button (Solo · Duo · Squad) — it opens the registration form.<br>
-    🔓 Room details reveal <strong>30 minutes before</strong> each match.
+    🎯 <b>How to register:</b> Tap 1 vs 1 or 2 vs 2 — it opens the registration form.<br>
+    🔓 Room details reveal <b>30 minutes before</b> the match (9:15 PM).<br>
+    👥 <b>2 vs 2 = per team</b> — captain registers, partner plays with them (free).<br>
+    🏆 <b>Format:</b> Free Fire Clash Squad · Best of 1 · Winner takes all.<br>
+    🎁 <b>Tonight only:</b> FREE entry · Rs 300 prize pool (Rs 150 each mode).
   </div>
 
   <div id="tournamentContent">
@@ -309,6 +313,11 @@ const auth = getAuth(app);
 
 const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 const POPULAR_GAMES = ['free fire', 'pubg'];
+
+// ⭐ Tonight's free prize pool: Rs 300 total → Rs 150 per mode
+const TONIGHT_FREE = true;
+const TONIGHT_PRIZE_1V1 = 150;
+const TONIGHT_PRIZE_2V2 = 150;
 
 const GAME_ALIASES = {
   'freefire':       'freefire',
@@ -511,7 +520,6 @@ function renderModeButtons(list) {
       ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
       : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
     const modeName = t.mode || 'Mode';
-    // pass selected mode through URL so registration can pick it up
     const modeParam = String(t.mode || '').toLowerCase() === 'solo' ? '1v1' : (String(t.mode || '').toLowerCase() === 'duo' ? '2v2' : '');
     const finalLink = modeParam
       ? `${link}${link.includes('?') ? '&' : '?'}mode=${modeParam}`
@@ -625,51 +633,49 @@ function renderAll(tournaments) {
 
   let html = '';
 
-  // TONIGHT
+  // ⭐ TONIGHT — Free Fire FREE entry + Rs 150 prize per mode
   if (tonight.length) {
     html += `
       <h2 class="section-title tonight">
-        🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
+        🔥 Tonight <span class="st-tag">9:15 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
     tonight.forEach(t => {
       const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
-      const prize = t.prizePool || t.prize_pool || 0;
-      const entry = t.entryFee || t.entry_fee || 0;
-      const tk = Number(t.topKillsPrize || 0);
       const link = t.seedKey
         ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
         : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
-      // ⭐ tonight shows 1v1 + 2v2 buttons
       html += `
         <div class="game-card featured">
           <div class="game-head">
-            <div class="icon">${esc(t.icon || '🎯')}</div>
+            <div class="icon">${esc(t.icon || '🔥')}</div>
             <div class="info">
               <div class="name">${esc(title)}</div>
               <div class="meta">
-                <span>Entry: <strong>Rs ${esc(entry)}</strong></span>
-                ${prize ? `<span class="tk-badge" style="background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.5);">🏆 Prize Rs ${esc(prize)}</span>` : ''}
-                ${tk ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(tk)}</span>` : ''}
+                <span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
+                <span class="free-badge">🎁 Free Tonight</span>
               </div>
             </div>
           </div>
           <div class="time-slot">
             <div class="time-slot-head night">
-              <span class="t-pill">🔥 Live Tonight</span>
+              <span class="t-pill">🔥 Live Tonight · 9:15 PM</span>
             </div>
             <div class="mode-buttons">
-              <a href="${link}${link.includes('?') ? '&' : '?'}mode=1v1" class="mode-btn solo">
+              <a href="${link}${link.includes('?') ? '&' : '?'}mode=1v1&free=1" class="mode-btn solo">
                 <span class="mode-icon">👤</span>
                 <span class="mode-name">1 vs 1</span>
-                <span class="mode-prize">Rs ${esc(entry)}</span>
+                <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_1V1}</span>
               </a>
-              <a href="${link}${link.includes('?') ? '&' : '?'}mode=2v2" class="mode-btn duo">
+              <a href="${link}${link.includes('?') ? '&' : '?'}mode=2v2&free=1" class="mode-btn duo">
                 <span class="mode-icon">👥</span>
                 <span class="mode-name">2 vs 2</span>
-                <span class="mode-prize">Rs ${esc(entry)}</span>
+                <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_2V2} / team</span>
               </a>
+            </div>
+            <div style="font-size:.72rem;color:#a8a3c9;text-align:center;margin-top:4px;">
+              Winner takes all · Bo1 · Free Fire Clash Squad
             </div>
           </div>
         </div>
@@ -678,7 +684,6 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // POPULAR
   const allDayNight = [...day, ...night];
   const allGroups = buildGameGroups(allDayNight);
   const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
@@ -705,7 +710,6 @@ function renderAll(tournaments) {
   const dayDateLabel   = formatDateLabel(dominantDate(day));
   const nightDateLabel = formatDateLabel(dominantDate(night));
 
-  // DAY
   if (dayOnly.length) {
     html += `
       <h2 class="section-title day">
@@ -720,7 +724,6 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // NIGHT
   if (nightOnly.length) {
     html += `
       <h2 class="section-title night">
@@ -735,7 +738,6 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  // OTHER
   if (other.length) {
     html += `
       <h2 class="section-title">
