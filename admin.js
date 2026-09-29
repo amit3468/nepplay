@@ -1,5 +1,7 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.7)
+// NEPPLAY — admin.js (v4.8)
+// v4.8 changes:
+//  + Announcements: Delete button on each announcement card
 // v4.7 changes:
 //  + Bracket: manual pairing UI (dropdowns + match list + shuffle remaining)
 // v4.6 changes:
@@ -45,7 +47,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.7 — awaiting auth");
+console.log("🔥 Admin v4.8 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL
@@ -1085,9 +1087,9 @@ window.deleteTournament = async function(id, title) {
 // ⭐ BRACKET MANAGER v4.7 — Manual pairing UI
 // ============================================================
 let bkTournament = null;
-let bkRegistrations = [];   // [{ id, userId, username, ign, phone, ... }]
-let bkMatches = [];         // [{ id (local), p1RegId, p2RegId }]
-let bkExistingMatchIds = []; // ids of matches already saved in Firestore (for delete on save)
+let bkRegistrations = [];
+let bkMatches = [];
+let bkExistingMatchIds = [];
 let bkPublished = false;
 let bkRoomId = '';
 let bkRoomPassword = '';
@@ -1127,7 +1129,6 @@ window.openBracketManager = async function (tournamentId) {
   bodyEl.innerHTML = '<div class="bk-empty">Loading…</div>';
   footEl.innerHTML = '';
 
-  // Reset state
   bkMatches = [];
   bkExistingMatchIds = [];
   bkPublished = false;
@@ -1135,7 +1136,6 @@ window.openBracketManager = async function (tournamentId) {
   bkRoomPassword = '';
 
   try {
-    // Load tournament
     const tDoc = await getDoc(doc(db, 'tournaments', tournamentId));
     if (!tDoc.exists()) {
       bodyEl.innerHTML = '<div class="bk-empty">Tournament not found.</div>';
@@ -1145,7 +1145,6 @@ window.openBracketManager = async function (tournamentId) {
     titleEl.textContent = '🎯 ' + (bkTournament.title || 'Tournament');
     subEl.textContent = (bkTournament.game || '') + ' · ' + (bkTournament.date || '') + ' · ' + (bkTournament.time || '');
 
-    // Load registrations
     let regs = [];
     const regSnap = await getDocs(query(
       collection(db, 'tournament_registrations'),
@@ -1165,14 +1164,12 @@ window.openBracketManager = async function (tournamentId) {
       String(a.username || a.ign || '').localeCompare(String(b.username || b.ign || ''))
     );
 
-    // Load existing matches
     const mSnap = await getDocs(query(
       collection(db, 'matches'),
       where('tournamentId', '==', tournamentId)
     ));
     const existingMatches = mSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // Convert Firestore matches back to local state (match by userId + username fallback)
     existingMatches.forEach(m => {
       const p1Reg = findRegByPlayer(m.player1);
       const p2Reg = findRegByPlayer(m.player2);
@@ -1202,12 +1199,10 @@ window.openBracketManager = async function (tournamentId) {
 
 function findRegByPlayer(p) {
   if (!p) return null;
-  // Match by userId first
   if (p.uid) {
     const byUid = bkRegistrations.find(r => r.userId === p.uid && (r.ign || r.username) === (p.ign || p.username));
     if (byUid) return byUid;
   }
-  // Match by username + ign
   return bkRegistrations.find(r => (r.username === p.username) || (r.ign === p.ign)) || null;
 }
 
@@ -1243,7 +1238,6 @@ function renderBracketUI() {
     return;
   }
 
-  // Player list
   html += `<div class="bk-section-title">📋 Registered Players (${regCount})</div><div class="bk-players">`;
   bkRegistrations.forEach(r => {
     const isAssigned = assignedIds.has(r.id);
@@ -1261,7 +1255,6 @@ function renderBracketUI() {
   });
   html += '</div>';
 
-  // Current matches
   html += `<div class="bk-section-title" style="margin-top:20px;">🎯 Current Matches (${matchCount})</div>`;
   if (bkMatches.length === 0) {
     html += '<div class="bk-empty" style="padding:16px;">No matches created yet. Use the section below to add matches.</div>';
@@ -1293,7 +1286,6 @@ function renderBracketUI() {
     html += '</div>';
   }
 
-  // Create match (only if not published)
   if (!bkPublished && unassignedCount >= 2) {
     const unassigned = bkRegistrations.filter(r => !assignedIds.has(r.id));
     const opts = unassigned.map(r =>
@@ -1332,7 +1324,6 @@ function renderBracketUI() {
     `;
   }
 
-  // Room fields (only if not published)
   if (!bkPublished) {
     html += `
       <div class="bk-room-row" style="margin-top:20px;">
@@ -1363,7 +1354,6 @@ function renderBracketUI() {
 
   bodyEl.innerHTML = html;
 
-  // Footer
   let footHtml = '';
   if (!bkPublished) {
     if (bkMatches.length > 0) {
@@ -1380,7 +1370,6 @@ window.bkOnP1Change = function () {
   const p1 = document.getElementById('bkP1Select')?.value;
   const p2sel = document.getElementById('bkP2Select');
   if (!p2sel) return;
-  // Hide P1 from P2's options (re-render simple)
   const assignedIds = new Set();
   bkMatches.forEach(m => {
     assignedIds.add(m.p1RegId);
@@ -1462,7 +1451,6 @@ window.bkPublish = async function () {
   const roomPass = document.getElementById('bkRoomPass')?.value.trim() || '';
   if (!roomId) { bkToast('⚠️ Enter Room ID before publishing'); return; }
 
-  // Check for unassigned
   const assignedIds = new Set();
   bkMatches.forEach(m => {
     assignedIds.add(m.p1RegId);
@@ -1475,7 +1463,6 @@ window.bkPublish = async function () {
   if (!confirm('Publish matches to all players? They will see their opponent + room details immediately.')) return;
 
   try {
-    // Delete existing matches for this tournament
     for (const mid of bkExistingMatchIds) {
       await deleteDoc(doc(db, 'matches', mid));
     }
@@ -1518,7 +1505,6 @@ window.bkPublish = async function () {
       });
       created++;
 
-      // Notify each player
       const players = [p1, p2].filter(Boolean);
       for (const p of players) {
         if (!p.userId) continue;
@@ -1555,7 +1541,6 @@ window.bkPublish = async function () {
   }
 };
 
-// Close overlay when clicking outside modal
 document.addEventListener('click', (e) => {
   const ov = document.getElementById('bkOverlay');
   if (ov && ov.classList.contains('open') && e.target === ov) bkClose();
@@ -2599,11 +2584,12 @@ window.loadTournamentsAdmin = async function() {
 };
 
 // ============================================================
-// ANNOUNCEMENTS
+// ANNOUNCEMENTS  ⭐ v4.8 — now with Delete button
 // ============================================================
 window.loadAnnouncements = async function() {
   const list = document.getElementById('announcementList');
   if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
     const snap = await getDocs(collection(db, 'announcements'));
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -2612,17 +2598,39 @@ window.loadAnnouncements = async function() {
       list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>';
       return;
     }
-    list.innerHTML = items.map(a => `
-      <div class="reg-card free-reg">
-        <div class="reg-icon">📢</div>
-        <div class="reg-main"><div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div><div class="reg-line-2">${a.message || ''}</div></div>
-        <div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div>
-      </div>
-    `).join('');
+    list.innerHTML = items.map(a => {
+      const safeTitle = String(a.title || '').replace(/'/g, "\\'").slice(0, 60);
+      return `
+        <div class="reg-card free-reg">
+          <div class="reg-icon">📢</div>
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div>
+            <div class="reg-line-2">${a.message || ''}</div>
+            <div class="reg-actions" style="margin-top:8px;">
+              <button class="btn-delete small" onclick="deleteAnnouncement('${a.id}','${safeTitle}')">🗑️ Delete</button>
+            </div>
+          </div>
+          <div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div>
+        </div>
+      `;
+    }).join('');
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+
+window.deleteAnnouncement = async function(id, title) {
+  if (!confirm(`Delete announcement "${title}"?\n\nThis action cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, 'announcements', id));
+    window.showToast('🗑️ Announcement deleted');
+    await window.loadAnnouncements();
+  } catch (err) {
+    console.error('deleteAnnouncement error:', err);
+    window.showToast('❌ ' + err.message);
+  }
+};
+
 window.postAnnouncement = async function(e) {
   e.preventDefault();
   const title = document.getElementById('annTitle').value.trim();
