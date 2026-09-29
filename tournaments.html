@@ -741,6 +741,36 @@ function isPopular(key) {
   return POPULAR_GAMES.some(k => gameKey(k) === key);
 }
 
+// ⭐ Format YYYY-MM-DD → "1 October"
+function formatDateLabel(ymd) {
+  if (!ymd || typeof ymd !== 'string') return '';
+  const parts = ymd.split('-');
+  if (parts.length !== 3) return ymd;
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (!y || !m || !d) return ymd;
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  return `${d} ${months[m-1]}`;
+}
+
+// ⭐ Pick the most common date among a list of tournaments
+function dominantDate(list) {
+  if (!list || !list.length) return '';
+  const counts = {};
+  list.forEach(t => {
+    const d = String(t.date || '');
+    if (d) counts[d] = (counts[d] || 0) + 1;
+  });
+  let best = '';
+  let bestN = 0;
+  Object.keys(counts).forEach(k => {
+    if (counts[k] > bestN) { best = k; bestN = counts[k]; }
+  });
+  return best;
+}
+
 // ⭐ Pick highest topKillsPrize among all tournaments in a group
 function bestTopKills(list) {
   let best = 0;
@@ -777,8 +807,9 @@ async function fetchTournaments() {
 
 function classifySection(t) {
   if (t.id === TONIGHT_1V1_ID) return 'tonight';
+  // ⭐ Accept BOTH the old and new reschedule dates
   const date = String(t.date || '');
-  if (date === '2026-09-30') {
+  if (date === '2026-09-30' || date === '2026-10-01') {
     return slotOf(t.time);
   }
   return 'other';
@@ -851,6 +882,10 @@ function renderGameCard(group, opts = {}) {
   const featured = day.length > 0 && night.length > 0;
   const isPopularCard = opts.popular === true;
 
+  // ⭐ Date labels pulled from the data (no hardcoding)
+  const dayDateLabel   = formatDateLabel(dominantDate(day));
+  const nightDateLabel = formatDateLabel(dominantDate(night));
+
   let slots = '';
 
   if (day.length > 0) {
@@ -858,7 +893,7 @@ function renderGameCard(group, opts = {}) {
       <div class="time-slot">
         <div class="time-slot-head day">
           <span class="t-pill">☀️ 1:00 PM</span>
-          <span style="color:#fbbf24;">Day Session</span>
+          <span style="color:#fbbf24;">${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session</span>
         </div>
         <div class="mode-buttons">
           ${renderModeButtons(day)}
@@ -871,7 +906,7 @@ function renderGameCard(group, opts = {}) {
       <div class="time-slot">
         <div class="time-slot-head night">
           <span class="t-pill">🌙 9:00 PM</span>
-          <span style="color:#d8b4fe;">Night Session</span>
+          <span style="color:#d8b4fe;">${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session</span>
         </div>
         <div class="mode-buttons">
           ${renderModeButtons(night)}
@@ -1008,11 +1043,15 @@ function renderAll(tournaments) {
   const dayOnly   = day.filter(t => !isPopular(gameKey(t.game)));
   const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
 
+  // ⭐ Section date labels come from the data, not hardcoded
+  const dayDateLabel   = formatDateLabel(dominantDate(day));
+  const nightDateLabel = formatDateLabel(dominantDate(night));
+
   // DAY
   if (dayOnly.length) {
     html += `
       <h2 class="section-title day">
-        ☀️ 30 September · Day Session <span class="st-tag">1:00 PM NPT</span>
+        ☀️ ${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session <span class="st-tag">1:00 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
@@ -1027,7 +1066,7 @@ function renderAll(tournaments) {
   if (nightOnly.length) {
     html += `
       <h2 class="section-title night">
-        🌙 30 September · Night Session <span class="st-tag">9:00 PM NPT</span>
+        🌙 ${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session <span class="st-tag">9:00 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
