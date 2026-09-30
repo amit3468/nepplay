@@ -1052,7 +1052,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
         const soloIgn = $("soloIgn").value.trim();
         if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
         body.teamSize = 1;
-        body.teamName = soloIgn + " (1v1)";
+        body.teamName = soloIgn + " (Solo)";
         body.captainName = soloIgn;
         body.ign = soloIgn;
         body.players = [soloIgn];
