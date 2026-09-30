@@ -1238,8 +1238,10 @@ async function loadRegConfirmedCard(uid) {
     // Build the details
     const title = latest.tournamentTitle || latest.game || 'Tournament';
     const mode = String(latest.mode || latest.playingAs || '').toLowerCase();
-    const modeLabel = mode === '1v1' || mode === 'solo' ? '1 vs 1'
-                    : mode === '2v2' || mode === 'duo' ? '2 vs 2'
+    const modeLabel = mode === '1v1' ? '1 vs 1'
+                    : mode === 'solo' ? 'Solo'
+                    : mode === '2v2' ? '2 vs 2'
+                    : mode === 'duo' ? 'Duo'
                     : latest.tournamentMode || 'Squad';
     const modeCls = mode === '1v1' || mode === 'solo' ? 'solo'
                   : mode === '2v2' || mode === 'duo' ? 'duo'
