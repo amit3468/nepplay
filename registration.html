@@ -390,10 +390,10 @@ textarea{ min-height:100px; resize:vertical; }
 
         <div id="duplicateBlock" class="duplicate-banner" style="display:none;">
           <b>⛔ You already registered for tonight!</b>
-          Only <b>one mode</b> per player — 1 vs 1 OR 2 vs 2, not both.<br>
+          Only <b>one mode</b> per player for this tournament.<br>
           <div class="db-mode" id="duplicateBlockMode">Mode: —</div>
           <br>
-          Room details will show on your dashboard. See you at 9:15 PM! 🎮
+          Room details will show on your dashboard. See you at 9:00 PM! 🎮
           <br>
           <a href="/member.html" class="db-cta">Go to My Dashboard →</a>
         </div>
@@ -641,14 +641,14 @@ function applyMode(mode) {
     banner.classList.add(mode);
 
     if (mode === "solo") {
-        icon.textContent = "👤";
-        title.textContent = "1 vs 1 Mode";
-        sub.textContent = "You are registering as a single player. No partner needed.";
-    } else if (mode === "duo") {
-        icon.textContent = "👥";
-        title.textContent = "2 vs 2 Mode";
-        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
-    } else {
+    icon.textContent = "👤";
+    title.textContent = "Solo Mode";
+    sub.textContent = "You are registering as a single player. No partner needed.";
+} } else if (mode === "duo") {
+    icon.textContent = "👥";
+    title.textContent = "Duo Mode";
+    sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
+} else {
         icon.textContent = "🏆";
         title.textContent = "Squad Mode";
         sub.textContent = "Up to 6 players. At least 2 IGNs required.";
@@ -790,7 +790,7 @@ isFreeEvent = urlSaysFree;  // will be re-checked against tournament doc later
             if (!dupSnap.empty) {
                 const prior = dupSnap.docs[0].data();
                 const priorMode = String(prior.playingAs || prior.mode || "unknown").toLowerCase();
-                const priorModeLabel = priorMode === "solo" ? "1 vs 1" : priorMode === "duo" ? "2 vs 2" : priorMode;
+                const priorModeLabel = priorMode === "solo" ? "Solo" : priorMode === "duo" ? "Duo" : priorMode;
 
                 alreadyRegistered = true;
                 $("loading").style.display = "none";
