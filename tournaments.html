@@ -311,13 +311,7 @@ const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 const POPULAR_GAMES = ['free fire', 'pubg'];
-
-// ⭐ Tonight's free prize pool: Rs 300 total → Rs 150 per mode
-const TONIGHT_FREE = true;
-const TONIGHT_PRIZE_1V1 = 150;
-const TONIGHT_PRIZE_2V2 = 150;
 
 const GAME_ALIASES = {
   'freefire':       'freefire',
@@ -465,7 +459,7 @@ async function fetchTournaments() {
 }
 
 function classifySection(t) {
-  if (t.id === TONIGHT_1V1_ID) return 'tonight';
+  if (t.isTonight === true) return 'tonight';
   const date = String(t.date || '');
   if (date === '2026-09-30' || date === '2026-10-01') {
     return slotOf(t.time);
@@ -637,7 +631,7 @@ function renderAll(tournaments) {
   if (tonight.length) {
     html += `
       <h2 class="section-title tonight">
-        🔥 Tonight <span class="st-tag">9:15 PM NPT</span>
+        🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
       </h2>
       <div class="game-grid">
     `;
@@ -659,21 +653,18 @@ function renderAll(tournaments) {
             </div>
           </div>
           <div class="time-slot">
-            <div class="time-slot-head night">
-              <span class="t-pill">🔥 Live Tonight · 9:15 PM</span>
-            </div>
-            <div class="mode-buttons">
-              <a href="${link}${link.includes('?') ? '&' : '?'}mode=1v1&free=1" class="mode-btn solo">
-                <span class="mode-icon">👤</span>
-                <span class="mode-name">1 vs 1</span>
-                <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_1V1}</span>
-              </a>
-              <a href="${link}${link.includes('?') ? '&' : '?'}mode=2v2&free=1" class="mode-btn duo">
-                <span class="mode-icon">👥</span>
-                <span class="mode-name">2 vs 2</span>
-                <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_2V2} / team</span>
-              </a>
-            </div>
+    <div class="time-slot-head night">
+        <span class="t-pill">🔥 Live Tonight · 9:00 PM</span>
+    </div>
+    <div class="mode-buttons">
+        <a href="${link}${link.includes('?') ? '&' : '?'}mode=solo&free=1" class="mode-btn solo">
+            <span class="mode-icon">👤</span>
+            <span class="mode-name">Solo</span>
+            <span class="mode-prize">🏆 Rs ${t.prizePool || 250}</span>
+        </a>
+    </div>
+</div>
+</div>
             <div style="font-size:.72rem;color:#a8a3c9;text-align:center;margin-top:4px;">
               Winner takes all · Bo1 · Free Fire Clash Squad
             </div>
