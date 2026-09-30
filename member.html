@@ -967,12 +967,8 @@ const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const TONIGHT_1V1_ID = 'gQzWalf4e2TQE2xhAQsD';
 const POPULAR_GAMES = ['free fire', 'pubg'];
 
-const TONIGHT_FREE = true;
-const TONIGHT_PRIZE_1V1 = 150;
-const TONIGHT_PRIZE_2V2 = 150;
 
 const GAME_ALIASES = {
   'freefire':'freefire','free fire':'freefire','ff':'freefire',
@@ -1584,7 +1580,7 @@ async function loadUpcomingTournaments(uid) {
     const night = [];
     const other = [];
     docs.forEach(t => {
-        if (t.id === TONIGHT_1V1_ID) { tonight.push(t); return; }
+        if (t.isTonight === true) { tonight.push(t); return; }
         const date = String(t.date || '');
         if (date === '2026-09-30' || date === '2026-10-01') {
             (slotOf(t.time) === 'day' ? day : night).push(t);
@@ -1596,12 +1592,17 @@ async function loadUpcomingTournaments(uid) {
     let html = '';
 
     if (tonight.length) {
-        html += `<h3 class="section-title-mt tonight">🔥 Tonight <span class="st-tag">9:15 PM NPT</span></h3><div class="game-grid">`;
+        html += `<h3 class="section-title-mt tonight">🔥 Tonight <span class="st-tag">9:00 PM NPT</span></h3><div class="game-grid">`;
         tonight.forEach(t => {
             const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
             const link = t.seedKey
                 ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
                 : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+            const prize = Number(t.prizePool || 0);
+            const topKill = Number(t.topKillsPrize || 0);
+            const maxP = Number(t.max || 0);
+            const modeName = t.mode || 'Solo';
+            const modeCls = modeClass(t.mode);
             html += `
               <div class="game-card featured">
                 <div class="game-head">
@@ -1611,23 +1612,22 @@ async function loadUpcomingTournaments(uid) {
                     <div class="meta">
                       <span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
                       <span class="popular-badge">🎁 FREE TONIGHT</span>
+                      ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}
                     </div>
                   </div>
                 </div>
                 <div class="time-slot">
-                  <div class="time-slot-head night"><span class="t-pill">🔥 Live Tonight · 9:15 PM</span></div>
+                  <div class="time-slot-head night"><span class="t-pill">🔥 Live Tonight · 9:00 PM</span>${maxP ? `<span style="color:#d8b4fe;font-weight:600;">Max ${maxP} players</span>` : ''}</div>
                   <div class="mode-buttons">
-                    <a href="${link}${link.includes('?') ? '&' : '?'}mode=1v1&free=1" class="mode-btn solo">
-                      <span class="mode-icon">👤</span>
-                      <span class="mode-name">1 vs 1</span>
-                      <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_1V1}</span>
-                    </a>
-                    <a href="${link}${link.includes('?') ? '&' : '?'}mode=2v2&free=1" class="mode-btn duo">
-                      <span class="mode-icon">👥</span>
-                      <span class="mode-name">2 vs 2</span>
-                      <span class="mode-prize">🏆 Rs ${TONIGHT_PRIZE_2V2} / team</span>
+                    <a href="${link}${link.includes('?') ? '&' : '?'}mode=${encodeURIComponent(modeName.toLowerCase())}" class="mode-btn ${modeCls}">
+                      <span class="mode-icon">${modeIcon(modeName)}</span>
+                      <span class="mode-name">${esc(modeName)}</span>
+                      <span class="mode-prize">🏆 Rs ${prize}</span>
                     </a>
                   </div>
+                </div>
+                <div style="font-size:.72rem;color:#a8a3c9;text-align:center;padding-top:4px;">
+                  ⏰ Players ready early can adjust time in group
                 </div>
               </div>
             `;
