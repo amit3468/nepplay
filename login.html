@@ -315,219 +315,167 @@ button:disabled{
 
 
 <!-- ─── SCRIPT: existing login flow ─────────────── -->
-<script>
+<script type="module">
 
-const form =
-    document.getElementById("loginForm");
+import { initializeApp, getApps }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-const button =
-    document.getElementById("loginButton");
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    fetchSignInMethodsForEmail
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const message =
-    document.getElementById("message");
+import {
+    getFirestore, collection, query, where, getDocs, limit
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
 
-function showMessage(text, type){
+const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
+const form    = document.getElementById("loginForm");
+const button  = document.getElementById("loginButton");
+const message = document.getElementById("message");
+
+function showMessage(text, type) {
     message.textContent = text;
-
-    message.className =
-        "message " + type;
-
-    message.style.display =
-        "block";
+    message.className = "message " + type;
+    message.style.display = "block";
 }
 
-
-form.addEventListener(
-    "submit",
-    async function(event){
-
-        event.preventDefault();
-
-        button.disabled = true;
-
-        button.textContent =
-            "Logging in...";
-
-        message.style.display =
-            "none";
-
-
-        const login =
-            document
-                .getElementById("login")
-                .value
-                .trim();
-
-        const password =
-            document
-                .getElementById("password")
-                .value;
-
-
-        if(!login || !password){
-
-            showMessage(
-                "Please enter username/email and password.",
-                "error"
-            );
-
-            button.disabled = false;
-
-            button.textContent =
-                "Login";
-
-            return;
-        }
-
-
-        try{
-
-            const isEmail =
-                login.includes("@");
-
-
-            const loginData = {
-
-                login: login,
-
-                username:
-                    isEmail ? "" : login,
-
-                email:
-                    isEmail ? login : "",
-
-                password: password
-
-            };
-
-
-            const response =
-                await fetch(
-                    "/api/users/login",
-                    {
-                        method:"POST",
-
-                        credentials:"include",
-
-                        headers:{
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify(loginData)
-                    }
-                );
-
-
-            let data = {};
-
-            try{
-
-                data =
-                    await response.json();
-
-            }catch(jsonError){
-
-                throw new Error(
-                    "Server returned an invalid response."
-                );
-            }
-
-
-            if(!response.ok ||
-               !data.success){
-
-                throw new Error(
-                    data.message ||
-                    "Invalid username/email or password."
-                );
-            }
-
-
-            const meResponse =
-                await fetch(
-                    "/api/users/me",
-                    {
-                        method:"GET",
-                        credentials:"include"
-                    }
-                );
-
-
-            const meData =
-                await meResponse.json();
-
-
-            if(!meResponse.ok ||
-               !meData.success){
-
-                throw new Error(
-                    "Login succeeded, but the member session was not created. Please restart the server and try again."
-                );
-            }
-
-
-            showMessage(
-                "Login successful. Opening...",
-                "success"
-            );
-
-
-            setTimeout(
-                function(){
-
-                    const params =
-                        new URLSearchParams(
-                            window.location.search
-                        );
-
-                    const redirect =
-                        params.get("redirect");
-
-                    if(redirect){
-
-                        window.location.href =
-                            decodeURIComponent(redirect);
-
-                    }else{
-
-                        window.location.href =
-                            "member.html";
-                    }
-
-                },
-                700
-            );
-
-        }
-
-        catch(error){
-
-            console.error(
-                "NEPPLAY LOGIN ERROR:",
-                error
-            );
-
-
-            showMessage(
-                error.message ||
-                "Login failed. Please try again.",
-                "error"
-            );
-
-
-            button.disabled =
-                false;
-
-            button.textContent =
-                "Login";
-        }
-
+form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    button.disabled = true;
+    button.textContent = "Logging in...";
+    message.style.display = "none";
+
+    const loginInput = document.getElementById("login").value.trim();
+    const password   = document.getElementById("password").value;
+
+    if (!loginInput || !password) {
+        showMessage("Please enter username/email and password.", "error");
+        button.disabled = false;
+        button.textContent = "Login";
+        return;
     }
-);
+
+    try {
+        let email = loginInput;
+
+        // If user typed a username (not email), look up their email from Firestore
+        if (!loginInput.includes("@")) {
+            const snap = await getDocs(query(
+                collection(db, "users"),
+                where("username", "==", loginInput),
+                limit(1)
+            ));
+            if (snap.empty) {
+                throw new Error("No account found with that username.");
+            }
+            email = snap.docs[0].data().email;
+            if (!email) {
+                throw new Error("This account has no email set. Please contact admin.");
+            }
+        }
+
+        await signInWithEmailAndPassword(auth, email, password);
+
+        showMessage("Login successful. Opening...", "success");
+
+        setTimeout(function () {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get("redirect");
+            if (redirect) {
+                window.location.href = decodeURIComponent(redirect);
+            } else {
+                window.location.href = "member.html";
+            }
+        }, 700);
+
+    } catch (error) {
+        console.error("NEPPLAY LOGIN ERROR:", error);
+
+        let friendly = "Login failed. Please try again.";
+
+        if (error.code === "auth/invalid-credential" ||
+            error.code === "auth/wrong-password" ||
+            error.code === "auth/user-not-found") {
+            friendly = "❌ Wrong email/username or password. Please check and try again.";
+        } else if (error.code === "auth/invalid-email") {
+            friendly = "❌ Invalid email address.";
+        } else if (error.code === "auth/too-many-requests") {
+            friendly = "❌ Too many failed attempts. Please wait 15 minutes and try again.";
+        } else if (error.code === "auth/user-disabled") {
+            friendly = "❌ This account has been disabled. Contact admin.";
+        } else if (error.message) {
+            friendly = error.message;
+        }
+
+        showMessage(friendly, "error");
+        button.disabled = false;
+        button.textContent = "Login";
+    }
+});
+
+// ============ Forgot password ============
+window.showResetForm = function () {
+    document.getElementById('loginFormWrap').style.display = 'none';
+    document.getElementById('resetFormWrap').style.display = 'block';
+    document.getElementById('message').style.display = 'none';
+    setTimeout(() => document.getElementById('resetEmail')?.focus(), 50);
+};
+
+window.showLoginForm = function () {
+    document.getElementById('resetFormWrap').style.display = 'none';
+    document.getElementById('loginFormWrap').style.display = 'block';
+    document.getElementById('message').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+};
+
+const resetForm = document.getElementById('resetForm');
+const resetBtn  = document.getElementById('resetButton');
+
+resetForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email || !email.includes("@")) {
+        showMessage('Please enter a valid email.', 'error');
+        return;
+    }
+
+    resetBtn.disabled = true;
+    resetBtn.textContent = 'Sending…';
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage('✅ Reset link sent to ' + email + '. Check your inbox (and spam).', 'success');
+        setTimeout(() => {
+            window.showLoginForm();
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Send Reset Link';
+        }, 4000);
+    } catch (err) {
+        console.error('Reset error:', err);
+        let friendly = 'Could not send reset email. Please try again.';
+        if (err.code === 'auth/invalid-email') friendly = 'Invalid email.';
+        else if (err.code === 'auth/user-not-found') friendly = 'If that email is registered, a reset link has been sent.';
+        else if (err.code === 'auth/too-many-requests') friendly = 'Too many requests. Wait a few minutes.';
+        showMessage('❌ ' + friendly, 'error');
+        resetBtn.disabled = false;
+        resetBtn.textContent = 'Send Reset Link';
+    }
+});
 
 </script>
 
