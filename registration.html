@@ -644,7 +644,7 @@ function applyMode(mode) {
     icon.textContent = "👤";
     title.textContent = "Solo Mode";
     sub.textContent = "You are registering as a single player. No partner needed.";
-} } else if (mode === "duo") {
+} else if (mode === "duo") {
     icon.textContent = "👥";
     title.textContent = "Duo Mode";
     sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
@@ -1151,7 +1151,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
 
         showMessage(
             isFreeEvent
-              ? "✅ Registered! You're in for tonight. Room details will be shared 30 minutes before 9:15 PM."
+              ? "✅ Registered! You're in for tonight. Room details will be shared 30 minutes before 9:00 PM."
               : "✅ Registration submitted! Admin will verify your payment.",
             "success"
         );
