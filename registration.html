@@ -813,7 +813,7 @@ isFreeEvent = urlSaysFree;  // will be re-checked against tournament doc later
         $("amountBox").textContent = "Amount to Pay: Rs " + fee;
 
         const badge = $("modeBadge");
-        badge.textContent = "Mode: " + (lockedMode === "solo" ? "1 vs 1" : lockedMode === "duo" ? "2 vs 2" : (tournament.mode || "Squad"));
+        badge.textContent = "Mode: " + (lockedMode === "solo" ? "Solo" : lockedMode === "duo" ? "Duo" : (tournament.mode || "Squad"));
         badge.classList.add(lockedMode);
 
         const cg = $("confirmGameName");
