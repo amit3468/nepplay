@@ -1141,12 +1141,19 @@ $("registrationForm").addEventListener("submit", async (event) => {
         setTimeout(() => { window.location.href = "/member.html"; }, 2000);
     } catch (err) {
         console.error("submit error:", err);
-        const msg = (err && err.message) || "Submission failed.";
-        if (msg.toLowerCase().includes("permission")) {
+                const msg = (err && err.message) || "Submission failed.";
+
+        // Detect Firestore permission errors specifically
+        if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("insufficient")) {
+            showMessage("⚠️ Could not save your registration. Please try again in a moment. If this continues, contact admin on WhatsApp.", "error");
+        } else if (msg.toLowerCase().includes("already exists") || msg.toLowerCase().includes("duplicate")) {
             showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
+        } else if (msg.toLowerCase().includes("network") || msg.toLowerCase().includes("failed to fetch")) {
+            showMessage("📡 Network error. Check your internet and try again.", "error");
         } else {
             showMessage("❌ " + msg, "error");
         }
+
         btn.disabled = false;
         btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
     }
