@@ -733,7 +733,8 @@ async function loadRegistrationPage() {
         const tidParam     = params.get("tournamentId") || params.get("tournament");
         const gameParam    = normalizeGame(params.get("game") || "");
         const freeParam    = String(params.get("free") || "").toLowerCase();
-        isFreeEvent = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
+        let urlSaysFree = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
+isFreeEvent = urlSaysFree;  // will be re-checked against tournament doc later
 
         const snap = await getDocs(collection(db, "tournaments"));
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -824,6 +825,16 @@ async function loadRegistrationPage() {
         $("tournamentBox").style.display = "block";
         $("registrationForm").style.display = "block";
 
+                // ⭐ Auto-detect free tournament from Firestore data (not just URL)
+        if (!isFreeEvent) {
+            const tType = String(tournament.entryType || "").toLowerCase();
+            const tFee = Number(tournament.entryFee || tournament.entry_fee || 0);
+            if (tType === "free" || tFee === 0) {
+                isFreeEvent = true;
+                console.log("✅ Auto-detected free tournament from Firestore data");
+            }
+        }
+
         if (isFreeEvent) {
             $("paymentSection").style.display = "none";
             $("freeBanner").style.display = "flex";
@@ -831,7 +842,7 @@ async function loadRegistrationPage() {
             $("amountBox").textContent = "🎁 Free Entry — no payment required";
             $("submitButton").classList.add("free");
             $("submitButton").textContent = "Register Free";
-            $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:15 PM.";
+            $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:00 PM.";
         }
 
         if (needsPayoutInfo) {
@@ -1009,7 +1020,14 @@ $("registrationForm").addEventListener("submit", async (event) => {
         finalWallet = walletInput;
     }
 
-    let selectedMethod = null;
+        let selectedMethod = null;
+    // ⭐ Double-check free status — never require payment for free tournaments
+    const tType = String(tournament.entryType || "").toLowerCase();
+    const tFee = Number(tournament.entryFee || tournament.entry_fee || 0);
+    if (tType === "free" || tFee === 0) {
+        isFreeEvent = true;
+    }
+
     if (!isFreeEvent) {
         if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
         selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
