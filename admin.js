@@ -180,10 +180,16 @@ function escapeDetail(s) {
 // ⭐ NEW: mode badge helper
 function modeBadgeHtml(playingAs) {
   const m = String(playingAs || '').toLowerCase();
-  if (m === 'solo' || m === '1v1') {
+  if (m === 'solo') {
+    return '<span class="mode-badge mode-badge-1v1">👤 Solo</span>';
+  }
+  if (m === '1v1') {
     return '<span class="mode-badge mode-badge-1v1">👤 1 vs 1</span>';
   }
-  if (m === 'duo' || m === '2v2') {
+  if (m === 'duo') {
+    return '<span class="mode-badge mode-badge-2v2">👥 Duo</span>';
+  }
+  if (m === '2v2') {
     return '<span class="mode-badge mode-badge-2v2">👥 2 vs 2</span>';
   }
   if (m === 'squad') {
