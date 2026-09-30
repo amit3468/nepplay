@@ -93,6 +93,16 @@
             </div>
 
             <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+                                <button type="button" id="googleSignupBtn"
+                    style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;background:#fff;color:#1f2937;border:1px solid #e5e7eb;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:18px;">
+                    <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Continue with Google
+                </button>
+                <div style="display:flex;align-items:center;gap:12px;margin:0 0 18px;">
+                    <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+                    <span style="color:#64748b;font-size:12px;font-weight:600;">OR</span>
+                    <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+                </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-300 mb-2">Full Name *</label>
@@ -172,12 +182,30 @@
                 <p id="debug-message" class="text-xs text-red-300"></p>
             </div>
         </div>
+            <!-- ⭐ Google Sign-Up Username Picker Modal -->
+    <div id="googleUsernameModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+        <div class="glass-panel" style="max-width:420px;width:100%;padding:28px;border-radius:16px;">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div style="font-size:40px;margin-bottom:8px;">🎮</div>
+                <h3 style="color:#fff;font-size:18px;font-weight:700;margin:0 0 6px 0;">Almost there!</h3>
+                <p style="color:#94a3b8;font-size:13px;margin:0;">Choose your in-game username. It must be unique on NEPPLAY.</p>
+            </div>
+            <label style="display:block;color:#cbd5e1;font-size:13px;font-weight:600;margin-bottom:6px;">Username</label>
+            <input type="text" id="googleUsername" placeholder="e.g., amit_ff" maxlength="20" style="width:100%;padding:12px 14px;background:#f1f5f9;color:#0f172a;border-radius:10px;font-size:15px;font-weight:600;border:0;outline:none;box-sizing:border-box;">
+            <p style="color:#94a3b8;font-size:11px;margin:6px 0 0 0;">Letters, numbers, underscores. 3–20 chars.</p>
+            <p id="googleUsernameError" style="color:#f87171;font-size:12px;margin:8px 0 0 0;display:none;"></p>
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button type="button" id="googleUsernameCancel" style="flex:1;padding:12px;background:transparent;color:#94a3b8;border:1px solid rgba(255,255,255,0.15);border-radius:10px;font-weight:600;cursor:pointer;">Cancel</button>
+                <button type="button" id="googleUsernameConfirm" style="flex:2;padding:12px;background:#dc2626;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer;">Create Account</button>
+            </div>
+        </div>
+    </div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -467,6 +495,130 @@
             }
         });
 
+                // ⭐ GOOGLE SIGN-UP HANDLER
+        const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+        let pendingGoogleUser = null;
+        let pendingGoogleProfile = null;
+
+        document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('googleSignupBtn');
+            const msgBox = document.getElementById('register-message');
+            btn.disabled = true; btn.style.opacity = '0.6';
+            msgBox.classList.add('hidden');
+
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+
+                const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                const directSnap = await getDoc(doc(db, 'users', user.uid));
+
+                if (directSnap.exists()) {
+                    msgBox.classList.remove('hidden');
+                    msgBox.className = "text-center text-sm mt-4 text-green-400";
+                    msgBox.innerHTML = '✅ <strong>Welcome back!</strong>';
+                    setTimeout(() => { window.location.href = '/member.html'; }, 1200);
+                    return;
+                }
+
+                pendingGoogleUser = user;
+                pendingGoogleProfile = {
+                    displayName: user.displayName || '',
+                    email: user.email || '',
+                    photoURL: user.photoURL || ''
+                };
+
+                const suggested = (user.email || '').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
+                document.getElementById('googleUsername').value = suggested;
+
+                const modal = document.getElementById('googleUsernameModal');
+                modal.style.display = 'flex';
+                setTimeout(() => document.getElementById('googleUsername').focus(), 100);
+
+            } catch (err) {
+                console.error('Google signup error:', err);
+                let msg = 'Google sign-in failed. Please try again.';
+                if (err.code === 'auth/popup-closed-by-user') msg = 'Popup closed. Try again?';
+                else if (err.code === 'auth/popup-blocked') msg = 'Popup blocked by browser. Allow popups and retry.';
+                else if (err.code === 'auth/unauthorized-domain') msg = 'Domain not authorized.';
+                else if (err.code === 'auth/operation-not-allowed') msg = 'Google sign-in not enabled.';
+                msgBox.classList.remove('hidden');
+                msgBox.className = "text-center text-sm mt-4 text-red-400";
+                msgBox.textContent = '❌ ' + msg;
+            } finally {
+                btn.disabled = false; btn.style.opacity = '1';
+            }
+        });
+
+        document.getElementById('googleUsernameCancel').addEventListener('click', async () => {
+            document.getElementById('googleUsernameModal').style.display = 'none';
+            pendingGoogleUser = null; pendingGoogleProfile = null;
+            try { await signOut(auth); } catch (e) {}
+        });
+
+        document.getElementById('googleUsernameConfirm').addEventListener('click', async () => {
+            const unameInput = document.getElementById('googleUsername');
+            const errEl = document.getElementById('googleUsernameError');
+            const uname = unameInput.value.trim();
+            errEl.style.display = 'none';
+
+            if (uname.length < 3) { errEl.textContent = 'Username must be at least 3 characters'; errEl.style.display = 'block'; return; }
+            if (!/^[a-zA-Z0-9_]+$/.test(uname)) { errEl.textContent = 'Letters, numbers, underscores only'; errEl.style.display = 'block'; return; }
+
+            const btn = document.getElementById('googleUsernameConfirm');
+            btn.disabled = true; btn.textContent = 'Checking...';
+
+            try {
+                const takenSnap = await getDocs(query(collection(db, 'users'), where('username', '==', uname), limit(1)));
+                if (!takenSnap.empty) {
+                    errEl.textContent = 'This username is already taken. Try another.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false; btn.textContent = 'Create Account';
+                    return;
+                }
+
+                const referredByUid = await resolveReferral();
+
+                const userProfile = {
+                    uid: pendingGoogleUser.uid,
+                    fullName: pendingGoogleProfile.displayName || uname,
+                    username: uname,
+                    email: pendingGoogleProfile.email,
+                    phone: '',
+                    photoURL: pendingGoogleProfile.photoURL,
+                    createdAt: new Date().toISOString(),
+                    role: 'member',
+                    status: 'active',
+                    signupMethod: 'google',
+                    totalEarnings: 0,
+                    tournamentsPlayed: 0,
+                    tournamentsWon: 0
+                };
+
+                if (referredByUid && referredByUid !== pendingGoogleUser.uid) {
+                    userProfile.referredBy = referredByUid;
+                    userProfile.referredAt = new Date().toISOString();
+                }
+
+                await setDoc(doc(db, 'users', pendingGoogleUser.uid), userProfile);
+
+                try {
+                    localStorage.removeItem('inviteRef');
+                    localStorage.removeItem('inviteRefU');
+                } catch (e) {}
+
+                btn.textContent = '✅ Created!';
+                setTimeout(() => { window.location.href = '/member.html'; }, 800);
+
+            } catch (err) {
+                console.error('Username save error:', err);
+                errEl.textContent = 'Something went wrong. Please try again.';
+                errEl.style.display = 'block';
+                btn.disabled = false; btn.textContent = 'Create Account';
+            }
+        });
         console.log("🔥 Register page ready");
     </script>
 </body>
