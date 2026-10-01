@@ -1237,15 +1237,23 @@ async function loadRegConfirmedCard(uid) {
 
     // Build the details
     const title = latest.tournamentTitle || latest.game || 'Tournament';
-    const mode = String(latest.mode || latest.playingAs || '').toLowerCase();
-    const modeLabel = mode === '1v1' ? '1 vs 1'
-                    : mode === 'solo' ? 'Solo'
-                    : mode === '2v2' ? '2 vs 2'
-                    : mode === 'duo' ? 'Duo'
-                    : latest.tournamentMode || 'Squad';
-    const modeCls = mode === '1v1' || mode === 'solo' ? 'solo'
-                  : mode === '2v2' || mode === 'duo' ? 'duo'
-                  : 'squad';
+    const playingAs = String(latest.mode || latest.playingAs || '').toLowerCase();
+    const tourMode  = String(latest.tournamentMode || '').toLowerCase();
+
+    let modeLabel, modeCls;
+    if (tourMode === '1v1' || playingAs === '1v1') {
+        modeLabel = '1 vs 1';
+        modeCls   = 'solo';       // reuse the green pill style
+    } else if (playingAs === 'solo') {
+        modeLabel = 'Solo';
+        modeCls   = 'solo';
+    } else if (playingAs === '2v2' || playingAs === 'duo' || tourMode === '2v2' || tourMode === 'duo') {
+        modeLabel = playingAs === '2v2' ? '2 vs 2' : 'Duo';
+        modeCls   = 'duo';
+    } else {
+        modeLabel = latest.tournamentMode || 'Squad';
+        modeCls   = 'squad';
+    }
     const isPaid = String(latest.entryType || '').toLowerCase() === 'paid';
     const entryLabel = isPaid ? ('Rs ' + (latest.amount || 0)) : 'FREE 🎁';
     const ign = latest.ign || latest.captainName || '—';
