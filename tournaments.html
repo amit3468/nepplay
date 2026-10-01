@@ -166,6 +166,64 @@
   .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.9rem; background: rgba(30,18,60,0.4); border: 1px dashed rgba(168,85,247,.35); border-radius: 14px; }
   .empty-state a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
 
+    .winners-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .winner-card {
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(30,18,60,.85));
+    border: 1px solid rgba(251,191,36,.5);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(245,158,11,.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .winner-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  }
+  .wc-medal {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .wc-body { flex: 1; min-width: 0; }
+  .wc-name {
+    color: #fff;
+    font-weight: 900;
+    font-size: 1rem;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wc-game {
+    color: #a8a3c9;
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wc-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+  .wc-prize { color: #4ade80; }
+  .wc-date { color: #a8a3c9; font-weight: 600; }
+
   @media (max-width: 720px) {
     .bg-blob { filter: blur(60px); opacity: 0.4; }
     .topnav { padding: 10px 10px; gap: 6px; }
@@ -249,6 +307,8 @@
       <div class="hero-stat">⏳ Loading…</div>
     </div>
   </section>
+    <!-- ⭐ RECENT WINNERS -->
+  <div id="winnersStrip"></div>
 
   <div class="room-note">
   ⚡ <b>Tonight:</b> Free Fire 1v1 — Rs 50 entry · Rs 200 winner.<br>
@@ -433,6 +493,72 @@ function bestTopKills(list) {
   });
   return best;
 }
+  // ⭐ RECENT WINNERS STRIP
+async function loadWinnersStrip() {
+  const el = document.getElementById('winnersStrip');
+  if (!el) return;
+
+  let results = [];
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'match_results'),
+      orderBy('completedAt', 'desc'),
+      limit(5)
+    ));
+    results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn('[winners] indexed query failed:', e && e.message);
+    try {
+      const snap = await getDocs(collection(db, 'match_results'));
+      results = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.completedAt?.toMillis?.() || 0) - (a.completedAt?.toMillis?.() || 0))
+        .slice(0, 5);
+    } catch (e2) {
+      console.warn('[winners] fallback failed:', e2 && e2.message);
+      return;
+    }
+  }
+
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recent = results.filter(r => {
+    const ms = r.completedAt?.toMillis?.() || 0;
+    return ms > cutoff;
+  });
+
+  if (!recent.length) {
+    el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = `
+    <h2 class="section-title popular" style="margin-top:26px;">
+      🏆 Recent Winners <span class="st-tag">Verified Payouts</span>
+    </h2>
+    <div class="winners-strip">
+      ${recent.map(r => {
+        const w1 = r.winner1 || {};
+        const when = r.completedAt?.toDate
+          ? r.completedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+          : '';
+        const totalPayout = Number(r.totalPayouts || w1.prize || 0);
+        return `
+          <div class="winner-card">
+            <div class="wc-medal">🥇</div>
+            <div class="wc-body">
+              <div class="wc-name">${esc(w1.name || 'Winner')}</div>
+              <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')}</div>
+              <div class="wc-meta">
+                <span class="wc-prize">💰 Rs ${esc(totalPayout)}</span>
+                ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
 
 async function fetchTournaments() {
   let docs = [];
@@ -680,9 +806,14 @@ function renderAll(tournaments) {
   const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
 
   if (popularKeys.length > 0) {
-    popularKeys.sort((a, b) =>
-      String(allGroups[a].displayName || '').localeCompare(String(allGroups[b].displayName || ''))
-    );
+    // ⭐ Free Fire first, then PUBG, then others
+    const POPULAR_ORDER = { freefire: 0, pubgmobile: 1 };
+    popularKeys.sort((a, b) => {
+      const ao = POPULAR_ORDER[a] ?? 99;
+      const bo = POPULAR_ORDER[b] ?? 99;
+      if (ao !== bo) return ao - bo;
+      return String(allGroups[a].displayName || '').localeCompare(String(allGroups[b].displayName || ''));
+    });
     html += `
       <h2 class="section-title popular">
         ⭐ Popular Games <span class="st-tag">Both Schedules</span>
@@ -760,6 +891,7 @@ onAuthStateChanged(auth, async (user) => {
     if (nameEl) nameEl.textContent = "Login";
   }
 
+  loadWinnersStrip();
   try {
     const tournaments = await fetchTournaments();
     renderAll(tournaments);
