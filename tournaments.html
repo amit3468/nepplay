@@ -455,7 +455,8 @@ function slotOf(time) {
   return 'night';
 }
 function isPopular(key) {
-  return POPULAR_GAMES.some(k => gameKey(k) === key);
+  const popularKeys = ['freefire', 'pubgmobile'];
+  return popularKeys.includes(key);
 }
 
 function formatDateLabel(ymd) {
