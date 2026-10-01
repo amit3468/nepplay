@@ -1518,6 +1518,24 @@ async function loadMyRegistrations(uid) {
         return [];
     }
 
+    // ⭐ NEW: fetch tournament docs for each confirmed registration
+    // to get room details
+    const now = Date.now();
+    const tourCache = {};       // tournamentId -> tournament data
+    for (const r of docs) {
+        const st = String(r.status || '').toLowerCase();
+        const isConfirmed = (st === 'confirmed' || st === 'approved');
+        const tId = r.tournamentId;
+        if (!isConfirmed || !tId || tourCache[tId] !== undefined) continue;
+        try {
+            const tSnap = await getDoc(doc(db, 'tournaments', tId));
+            tourCache[tId] = tSnap.exists() ? tSnap.data() : null;
+        } catch (err) {
+            console.warn('[myregs] tournament fetch failed for', tId, err);
+            tourCache[tId] = null;
+        }
+    }
+
     myRegisteredTitles = new Set();
     listEl.innerHTML = docs.map(r => {
         const title = r.tournamentTitle || r.tournamentName || r.game || "Tournament";
@@ -1528,17 +1546,55 @@ async function loadMyRegistrations(uid) {
             : "";
         if (title) myRegisteredTitles.add(String(title).toLowerCase());
         if (r.tournamentId) myRegisteredTitles.add(String(r.tournamentId).toLowerCase());
+
+        // ⭐ Build the room details block (if confirmed + tournament + revealed)
+        let roomHtml = '';
+        const isConfirmed = (String(status).toLowerCase() === 'confirmed' || String(status).toLowerCase() === 'approved');
+        const t = r.tournamentId ? tourCache[r.tournamentId] : null;
+        if (isConfirmed && t) {
+            const revealMs = t.roomRevealAt?.toMillis?.() || 0;
+            const revealed = revealMs && now >= revealMs;
+            const hasRoom = t.roomId || t.roomPassword;
+
+            if (hasRoom && revealed) {
+                roomHtml = `
+                  <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(34,197,94,.12);border:1px dashed rgba(34,197,94,.5);font-size:.8rem;color:#ddd6fe;display:flex;flex-direction:column;gap:6px;">
+                    <div style="font-weight:900;color:#4ade80;font-size:.78rem;letter-spacing:.3px;">🎮 ROOM READY</div>
+                    <div style="display:flex;justify-content:space-between;gap:8px;">
+                      <span>Room ID:</span>
+                      <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${esc(t.roomId || '—')}</code></span>
+                    </div>
+                    ${t.roomPassword ? `
+                    <div style="display:flex;justify-content:space-between;gap:8px;">
+                      <span>Password:</span>
+                      <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${esc(t.roomPassword)}</code></span>
+                    </div>` : ''}
+                  </div>
+                `;
+            } else if (hasRoom && !revealed) {
+                const when2 = new Date(revealMs).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+                roomHtml = `
+                  <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);font-size:.78rem;color:#fde68a;">
+                    ⏰ Room details revealed at <b>${esc(when2)}</b>
+                  </div>
+                `;
+            }
+        }
+
         return `
-          <div style="padding:12px;border-bottom:1px solid rgba(168,85,247,.15);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-            <div>
-              <div style="font-weight:800;font-size:.9rem;color:#fff;">${esc(title)}</div>
-              <div style="font-size:.75rem;color:#a8a3c9;margin-top:2px;">
-                ${esc(r.game || '')}${r.tournamentMode ? ' · ' + esc(r.tournamentMode) : ''}${when ? ' · 📅 ' + when : ''}
+          <div style="padding:12px;border-bottom:1px solid rgba(168,85,247,.15);display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:800;font-size:.9rem;color:#fff;">${esc(title)}</div>
+                <div style="font-size:.75rem;color:#a8a3c9;margin-top:2px;">
+                  ${esc(r.game || '')}${r.tournamentMode ? ' · ' + esc(r.tournamentMode) : ''}${when ? ' · 📅 ' + when : ''}
+                </div>
               </div>
+              <span style="font-size:.62rem;font-weight:900;letter-spacing:.3px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.2);color:${sc==='confirmed'?'#4ade80':'#fbbf24'};border:1px solid rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.5);">
+                ${esc(status)}
+              </span>
             </div>
-            <span style="font-size:.62rem;font-weight:900;letter-spacing:.3px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.2);color:${sc==='confirmed'?'#4ade80':'#fbbf24'};border:1px solid rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.5);">
-              ${esc(status)}
-            </span>
+            ${roomHtml}
           </div>
         `;
     }).join('');
