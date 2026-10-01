@@ -826,8 +826,8 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-  const allDayNight = [...day, ...night];
-  const allGroups = buildGameGroups(allDayNight);
+    const popularPool = tournaments.filter(t => isPopular(gameKey(t.game)));
+  const allGroups = buildGameGroups(popularPool);
   const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
 
   if (popularKeys.length > 0) {
