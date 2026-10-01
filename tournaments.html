@@ -780,17 +780,14 @@ function renderAll(tournaments) {
 
   // ⭐ TONIGHT — Free Fire FREE entry + Rs 150 prize per mode
   if (tonight.length) {
-    html += `
-      <h2 class="section-title tonight">
-        🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
-      </h2>
-      <div class="game-grid">
-    `;
-    tonight.forEach(t => {
-      const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
-      const link = t.seedKey
-        ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
-        : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+          const isPaidT = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
+      const feeT = t.entryFee || t.entry_fee || 0;
+      const modeLabel = t.mode || 'Solo';
+      const modeCls = modeClass(modeLabel);
+      const modeParam = String(modeLabel).toLowerCase() === 'solo' ? '1v1'
+                      : String(modeLabel).toLowerCase() === 'duo'  ? '2v2'
+                      : '';
+
       html += `
         <div class="game-card featured">
           <div class="game-head">
@@ -798,27 +795,28 @@ function renderAll(tournaments) {
             <div class="info">
               <div class="name">${esc(title)}</div>
               <div class="meta">
-                <span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
-                <span class="free-badge">🎁 Free Tonight</span>
+                ${isPaidT
+                  ? `<span>Entry: <strong style="color:#fbbf24;">Rs ${feeT}</strong></span>
+                     <span class="popular-badge">💰 Paid Entry</span>`
+                  : `<span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
+                     <span class="free-badge">🎁 Free Tonight</span>`}
               </div>
             </div>
           </div>
           <div class="time-slot">
-    <div class="time-slot-head night">
-        <span class="t-pill">🔥 Live Tonight · 9:00 PM</span>
-    </div>
-    <div class="mode-buttons">
-        <a href="${link}${link.includes('?') ? '&' : '?'}mode=solo&free=1" class="mode-btn solo">
-            <span class="mode-icon">👤</span>
-            <span class="mode-name">Solo</span>
-            <span class="mode-prize">🏆 Rs ${t.prizePool || 250}</span>
-        </a>
-    </div>
-</div>
-</div>
-            <div style="font-size:.72rem;color:#a8a3c9;text-align:center;margin-top:4px;">
-              Winner takes all · Bo1 · Free Fire Clash Squad
+            <div class="time-slot-head night">
+              <span class="t-pill">🔥 Live Tonight · ${esc(t.time || '9:00 PM')}</span>
             </div>
+            <div class="mode-buttons">
+              <a href="${link}${link.includes('?') ? '&' : '?'}mode=${modeParam}${isPaidT ? '' : '&free=1'}" class="mode-btn ${modeCls}">
+                <span class="mode-icon">${modeIcon(modeLabel)}</span>
+                <span class="mode-name">${esc(modeLabel)}</span>
+                <span class="mode-prize">🏆 Rs ${esc(t.prizePool || 0)}</span>
+              </a>
+            </div>
+          </div>
+          <div style="font-size:.72rem;color:#a8a3c9;text-align:center;margin-top:4px;">
+            ${isPaidT ? `Entry Rs ${feeT} · Winner takes Rs ${esc(t.prizePool || 0)}` : 'Winner takes all · Free tonight'}
           </div>
         </div>
       `;
