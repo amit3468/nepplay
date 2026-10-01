@@ -530,30 +530,54 @@ async function loadWinnersStrip() {
     return;
   }
 
-  el.innerHTML = `
+    el.innerHTML = `
     <h2 class="section-title popular" style="margin-top:26px;">
       🏆 Recent Winners <span class="st-tag">Verified Payouts</span>
     </h2>
     <div class="winners-strip">
       ${recent.map(r => {
         const w1 = r.winner1 || {};
+        const tk = r.topKiller || {};
         const when = r.completedAt?.toDate
           ? r.completedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
           : '';
-        const totalPayout = Number(r.totalPayouts || w1.prize || 0);
-        return `
+
+        const winnerPrize = Number(w1.prize || 0);
+        const tkPrize = Number(tk.prize || 0);
+        const tkName = String(tk.name || '').trim();
+        const wName = String(w1.name || '').trim();
+
+        let cards = `
           <div class="winner-card">
             <div class="wc-medal">🥇</div>
             <div class="wc-body">
-              <div class="wc-name">${esc(w1.name || 'Winner')}</div>
+              <div class="wc-name">${esc(wName || 'Winner')}</div>
               <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')}</div>
               <div class="wc-meta">
-                <span class="wc-prize">💰 Rs ${esc(totalPayout)}</span>
+                <span class="wc-prize">💰 Rs ${esc(winnerPrize)}</span>
                 ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
               </div>
             </div>
           </div>
         `;
+
+        if (tkName && tkPrize > 0 && tkName !== wName) {
+          cards += `
+            <div class="winner-card" style="border-color:rgba(239,68,68,.5);background:linear-gradient(135deg, rgba(239,68,68,.12), rgba(30,18,60,.85));">
+              <div class="wc-medal">🔪</div>
+              <div class="wc-body">
+                <div class="wc-name">${esc(tkName)}</div>
+                <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')} · Top Killer</div>
+                <div class="wc-meta">
+                  <span class="wc-prize" style="color:#fca5a5;">💰 Rs ${esc(tkPrize)}</span>
+                  ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return cards;
       }).join('')}
     </div>
   `;
