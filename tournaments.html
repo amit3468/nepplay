@@ -560,7 +560,7 @@ function renderGameCard(group, opts = {}) {
     slots += `
       <div class="time-slot">
         <div class="time-slot-head night">
-          <span class="t-pill">🌙 9:00 PM</span>
+          <span class="t-pill">🌙 9 PM onwards</span>
           <span style="color:#d8b4fe;">${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session</span>
         </div>
         <div class="mode-buttons">
@@ -716,12 +716,10 @@ function renderAll(tournaments) {
   }
 
   if (nightOnly.length) {
-    html += `
-      <h2 class="section-title night">
-        🌙 ${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session <span class="st-tag">9:00 PM NPT</span>
-      </h2>
-      <div class="game-grid">
-    `;
+    const isTonight = nightOnly.some(t => String(t.date) === '2026-10-01');
+    const nightTag = isTonight ? '9:00 PM onwards' : '9:00 PM NPT';
+    const nightLabel = isTonight ? '🔥 Tonight' : '🌙 Night Session';
+    html += `<h3 class="section-title-mt night">${nightLabel}${nightDateLabel ? ' · ' + nightDateLabel : ''} <span class="st-tag">${nightTag}</span></h3><div class="game-grid">`;
     const groups = buildGameGroups(nightOnly);
     Object.values(groups).forEach(g => {
       if (g.night.length) html += renderGameCard({ ...g, day: [] });
