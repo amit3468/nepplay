@@ -393,7 +393,7 @@ onAuthStateChanged(auth, async (user) => {
                 where("userId", "==", user.uid)
             )
         );
-        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         items.sort((a, b) =>
             (b.registeredAt?.toMillis?.() || 0) -
             (a.registeredAt?.toMillis?.() || 0)
@@ -404,6 +404,23 @@ onAuthStateChanged(auth, async (user) => {
         if (!items.length) {
             empty.style.display = "block";
             return;
+        }
+
+        // ⭐ NEW: fetch tournament docs for confirmed regs (room details)
+        const now = Date.now();
+        const tourCache = {};
+        for (const r of items) {
+            const st = String(r.status || "").toLowerCase();
+            const isConfirmed = (st === "confirmed" || st === "approved");
+            const tId = r.tournamentId;
+            if (!isConfirmed || !tId || tourCache[tId] !== undefined) continue;
+            try {
+                const tSnap = await getDoc(doc(db, "tournaments", tId));
+                tourCache[tId] = tSnap.exists() ? tSnap.data() : null;
+            } catch (err) {
+                console.warn("[my-tournaments] tournament fetch failed for", tId, err);
+                tourCache[tId] = null;
+            }
         }
 
         list.style.display = "block";
@@ -423,6 +440,39 @@ onAuthStateChanged(auth, async (user) => {
                 ? r.playingAs.charAt(0).toUpperCase() + r.playingAs.slice(1)
                 : (r.tournamentMode || "");
 
+            // ⭐ NEW: room details block
+            let roomHtml = "";
+            const isConfirmed = (status === "confirmed" || status === "approved");
+            const t = r.tournamentId ? tourCache[r.tournamentId] : null;
+            if (isConfirmed && t) {
+                const revealMs = t.roomRevealAt?.toMillis?.() || 0;
+                const revealed = revealMs && now >= revealMs;
+                const hasRoom = t.roomId || t.roomPassword;
+                if (hasRoom && revealed) {
+                    roomHtml = `
+                        <div style="margin-top:12px;padding:12px 14px;border-radius:10px;background:rgba(34,197,94,.12);border:1px dashed rgba(34,197,94,.5);font-size:.82rem;color:#ddd6fe;display:flex;flex-direction:column;gap:6px;">
+                            <div style="font-weight:900;color:#4ade80;font-size:.78rem;letter-spacing:.3px;">🎮 ROOM READY</div>
+                            <div style="display:flex;justify-content:space-between;gap:8px;">
+                                <span>Room ID:</span>
+                                <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${escHTML(t.roomId || '—')}</code></span>
+                            </div>
+                            ${t.roomPassword ? `
+                            <div style="display:flex;justify-content:space-between;gap:8px;">
+                                <span>Password:</span>
+                                <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${escHTML(t.roomPassword)}</code></span>
+                            </div>` : ""}
+                        </div>
+                    `;
+                } else if (hasRoom && !revealed) {
+                    const when2 = new Date(revealMs).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+                    roomHtml = `
+                        <div style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);font-size:.78rem;color:#fde68a;">
+                            ⏰ Room details revealed at <b>${escHTML(when2)}</b>
+                        </div>
+                    `;
+                }
+            }
+
             return `
                 <div class="tourney-card">
                     <div class="icon">${icon}</div>
@@ -436,6 +486,7 @@ onAuthStateChanged(auth, async (user) => {
                         ${r.amount ? `<div class="meta">💰 Rs ${escHTML(r.amount)}</div>` : ""}
                         <div class="meta">🕐 ${fmtDate(r.registeredAt)}</div>
                         <span class="status ${statusClass}">${escHTML(status.toUpperCase())}</span>
+                        ${roomHtml}
                     </div>
                 </div>
             `;
