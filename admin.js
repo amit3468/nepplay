@@ -917,6 +917,12 @@ window.openRegDetail = function(regId) {
       <div class="dm-row"><span class="dm-k">💰 Type</span><span class="dm-v">${isPaid ? 'PAID' : 'FREE'}</span></div>
       ${isPaid ? `<div class="dm-row"><span class="dm-k">💵 Amount</span><span class="dm-v" style="color:#fbbf24;">Rs. ${r.amount || 0}</span></div>` : ''}
       <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' || r.status === 'approved' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
+            ${isPaid ? `
+        <div class="dm-row"><span class="dm-k">🔖 Transaction ID</span><span class="dm-v" style="color:${r.transactionId ? '#fbbf24' : '#f87171'};font-weight:800;">${escapeDetail(r.transactionId) || '⚠️ NOT PROVIDED'}</span></div>
+        ${r.paymentMethod ? `<div class="dm-row"><span class="dm-k">💳 Payment Method</span><span class="dm-v">${escapeDetail(r.paymentMethod)}</span></div>` : ''}
+        ${r.payerName ? `<div class="dm-row"><span class="dm-k">👤 Payer Name</span><span class="dm-v">${escapeDetail(r.payerName)}</span></div>` : ''}
+        ${r.payerPhone ? `<div class="dm-row"><span class="dm-k">📱 Payer Phone</span><span class="dm-v">${escapeDetail(r.payerPhone)}</span></div>` : ''}
+      ` : ''}
     </div>
     ${isPaid && payment ? `
       <div class="dm-section">
@@ -1807,7 +1813,8 @@ function renderRegistrations() {
           <div class="reg-line-2">
             ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
             ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
-            ${isPaid ? 'Txn: <code>' + (r.txnId||'—') + '</code> · ' : ''}
+            ${isPaid ? 'Txn: <code>' + (r.transactionId || r.txnId || '—') + '</code> · ' : ''}
+
             ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
           </div>
           ${isPaid && shotId ? `
