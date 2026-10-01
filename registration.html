@@ -640,15 +640,23 @@ function applyMode(mode) {
     banner.classList.remove("solo", "duo", "squad");
     banner.classList.add(mode);
 
+    const oneVone = (window.__is1v1 === true);
+
     if (mode === "solo") {
-    icon.textContent = "👤";
-    title.textContent = "Solo Mode";
-    sub.textContent = "You are registering as a single player. No partner needed.";
-} else if (mode === "duo") {
-    icon.textContent = "👥";
-    title.textContent = "Duo Mode";
-    sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
-} else {
+        if (oneVone) {
+            icon.textContent = "⚔️";
+            title.textContent = "1 vs 1 Mode";
+            sub.textContent = "Best of 3 · Single player · Only your IGN needed.";
+        } else {
+            icon.textContent = "👤";
+            title.textContent = "Solo Mode";
+            sub.textContent = "You are registering as a single player. No partner needed.";
+        }
+    } else if (mode === "duo") {
+        icon.textContent = "👥";
+        title.textContent = "Duo Mode";
+        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
+    } else {
         icon.textContent = "🏆";
         title.textContent = "Squad Mode";
         sub.textContent = "Up to 6 players. At least 2 IGNs required.";
@@ -769,16 +777,23 @@ isFreeEvent = urlSaysFree;  // will be re-checked against tournament doc later
             return;
         }
 
-        const urlMode = String(params.get("mode") || "").toLowerCase();
-        let mode;
-        if (urlMode === "1v1" || urlMode === "solo") {
-            mode = "solo";
-        } else if (urlMode === "2v2" || urlMode === "duo") {
-            mode = "duo";
-        } else {
-            mode = String(tournament.mode || "Squad").trim().toLowerCase();
-        }
-        const lockedMode = mode === "solo" ? "solo" : mode === "duo" ? "duo" : "squad";
+// Determine mode: URL param wins, otherwise fall back to tournament.mode
+const urlMode = String(params.get("mode") || "").toLowerCase();
+const tMode   = String(tournament.mode || "").trim().toLowerCase();
+const rawMode = urlMode || tMode || "squad";
+
+let lockedMode;
+let is1v1 = false;
+if (rawMode === "1v1" || rawMode === "solo") {
+    lockedMode = "solo";
+    is1v1 = (rawMode === "1v1");
+} else if (rawMode === "2v2" || rawMode === "duo") {
+    lockedMode = "duo";
+} else {
+    lockedMode = "squad";
+}
+// expose for the banner text
+window.__is1v1 = is1v1;
 
         try {
             const dupSnap = await getDocs(query(
@@ -813,7 +828,11 @@ isFreeEvent = urlSaysFree;  // will be re-checked against tournament doc later
         $("amountBox").textContent = "Amount to Pay: Rs " + fee;
 
         const badge = $("modeBadge");
-        badge.textContent = "Mode: " + (lockedMode === "solo" ? "Solo" : lockedMode === "duo" ? "Duo" : (tournament.mode || "Squad"));
+        const badgeLabel = (window.__is1v1) ? "1v1"
+                 : lockedMode === "solo" ? "Solo"
+                 : lockedMode === "duo"  ? "Duo"
+                 : (tournament.mode || "Squad");
+badge.textContent = "Mode: " + badgeLabel;
         badge.classList.add(lockedMode);
 
         const cg = $("confirmGameName");
