@@ -778,9 +778,21 @@ function renderAll(tournaments) {
 
   let html = '';
 
-  // ⭐ TONIGHT — Free Fire FREE entry + Rs 150 prize per mode
+    // ⭐ TONIGHT
   if (tonight.length) {
-          const isPaidT = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
+    html += `
+      <h2 class="section-title tonight">
+        🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
+      </h2>
+      <div class="game-grid">
+    `;
+    tonight.forEach(t => {
+      const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
+      const link = t.seedKey
+        ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
+        : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+
+      const isPaidT = (t.entryType || t.entry_type || 'free').toLowerCase() === 'paid';
       const feeT = t.entryFee || t.entry_fee || 0;
       const modeLabel = t.mode || 'Solo';
       const modeCls = modeClass(modeLabel);
@@ -822,7 +834,7 @@ function renderAll(tournaments) {
       `;
     });
     html += '</div>';
-  }
+  }}
 
     const popularPool = tournaments.filter(t => isPopular(gameKey(t.game)));
   const allGroups = buildGameGroups(popularPool);
