@@ -21,7 +21,7 @@
     --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { overflow-x: hidden; max-width: 100vw; }
+  html, body { overflow-x: hidden; max-width: 100vw; scroll-behavior: smooth; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: #05030f;
@@ -511,8 +511,8 @@
         </a>
       </div>
 
-      <div class="fc-cta">
-        <a href="/tournaments.html#upcoming">📝 See full tournament list</a>
+      <      <div class="fc-cta">
+        <a href="#tournamentContent" onclick="document.getElementById('tournamentContent').scrollIntoView({behavior:'smooth'});return false;">📝 See full tournament list</a>
       </div>
     </div>
 
