@@ -1675,11 +1675,13 @@ async function loadUpcomingTournaments(uid) {
                   <div class="icon">${esc(t.icon || '🔥')}</div>
                   <div class="info">
                     <div class="name">${esc(title)}</div>
-                    <div class="meta">
-                      <span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
-                      <span class="popular-badge">🎁 FREE TONIGHT</span>
-                      ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}
-                    </div>
+                    ${(t.entryType || t.entry_type || 'free').toLowerCase() === 'paid'
+  ? `<span>Entry: <strong style="color:#fbbf24;">Rs ${t.entryFee || t.entry_fee || 0}</strong></span>
+     <span class="popular-badge">💰 PAID ENTRY</span>
+     ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}`
+  : `<span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
+     <span class="popular-badge">🎁 FREE TONIGHT</span>
+     ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}`}
                   </div>
                 </div>
                 <div class="time-slot">
