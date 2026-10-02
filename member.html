@@ -580,6 +580,115 @@
   .mm-copy { background: rgba(124,58,237,.2); color: #d8b4fe; border: 1px solid rgba(168,85,247,.4); padding: 3px 9px; border-radius: 6px; font-size: .66rem; font-weight: 800; cursor: pointer; font-family: inherit; }
   .mm-copy:hover { background: rgba(124,58,237,.35); }
   .mm-empty { background: rgba(15,8,35,.5); border: 1px dashed rgba(168,85,247,.35); border-radius: 12px; padding: 22px; text-align: center; color: #a8a3c9; font-size: .85rem; }
+    /* ⭐ TOMORROW FEATURED */
+  .tomorrow-card {
+    background: linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95));
+    border: 2px solid rgba(168,85,247,.6);
+    border-radius: 18px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 10px 40px rgba(168,85,247,.15);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+  .tomorrow-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #a855f7, transparent);
+  }
+  .tomorrow-card .tc-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: fit-content;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+  .tomorrow-card .tc-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+  }
+  .tomorrow-card .tc-sub {
+    font-size: 0.85rem;
+    color: #a8a3c9;
+    margin-top: -6px;
+  }
+  .tomorrow-card .tc-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #e9e5ff;
+    font-weight: 700;
+  }
+  .tomorrow-card .tc-info span {
+    background: rgba(15,8,35,.55);
+    border: 1px solid rgba(168,85,247,.25);
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+  .tomorrow-card .tc-info b { color: #fbbf24; }
+  .tomorrow-card .tc-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .tomorrow-card .tc-mode {
+    text-align: center;
+    padding: 14px 8px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #fff;
+    text-decoration: none;
+    transition: transform .15s;
+  }
+  .tomorrow-card .tc-mode:hover { transform: translateY(-1px); }
+  .tomorrow-card .tc-mode.solo  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .tomorrow-card .tc-mode.duo   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .tomorrow-card .tc-mode.squad { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .tomorrow-card .tc-mode small {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 900;
+    margin-top: 4px;
+    background: rgba(0,0,0,.3);
+    padding: 2px 6px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tomorrow-card .tc-cta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .tomorrow-card .tc-cta a {
+    flex: 1;
+    min-width: 130px;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+  }
 
   @media (max-width: 720px) {
     .bg-blob { filter: blur(60px); opacity: 0.4; }
@@ -821,6 +930,26 @@
       <div class="mm-empty">Loading your matches…</div>
     </div>
   </section>
+
+    <!-- ⭐ TOMORROW FEATURED -->
+  <div class="tomorrow-card">
+    <span class="tc-tag">🔥 Tomorrow · 3 Oct</span>
+    <div class="tc-title">Free Fire Big Day</div>
+    <div class="tc-sub">🔥 Weekend Special · 1 PM &amp; 9 PM Sessions</div>
+    <div class="tc-info">
+      <span>💰 Solo <b>Rs 170</b></span>
+      <span>💰 Duo <b>Rs 200</b></span>
+      <span>💰 Squad <b>Rs 240</b></span>
+    </div>
+    <div class="tc-modes">
+      <a class="tc-mode solo" href="/tournaments.html">👤 Solo<small>Rs 800</small></a>
+      <a class="tc-mode duo" href="/tournaments.html">👥 Duo<small>Rs 800</small></a>
+      <a class="tc-mode squad" href="/tournaments.html">🏆 Squad<small>Rs 1000</small></a>
+    </div>
+    <div class="tc-cta">
+      <a href="/tournaments.html">📝 Register for 3 Oct</a>
+    </div>
+  </div>
 
   <div id="upcomingSection" hidden>
     <h2 class="section-title">🎮 Upcoming <span class="accent">Tournaments</span></h2>
