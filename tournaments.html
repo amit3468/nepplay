@@ -810,7 +810,7 @@ function renderAll(tournaments) {
           </div>
           <div class="time-slot">
             <div class="time-slot-head night">
-              <span class="t-pill">🔥 Live Tonight · ${esc(t.time || '9:00 PM')}</span>
+              <span class="t-pill">🔥 Live Tonight · 9:00 PM onwards</span>
             </div>
             <div class="mode-buttons">
               <a href="${link}${link.includes('?') ? '&' : '?'}mode=${modeParam}${isPaidT ? '' : '&free=1'}" class="mode-btn ${modeCls}">
@@ -821,7 +821,7 @@ function renderAll(tournaments) {
             </div>
           </div>
           <div style="font-size:.72rem;color:#a8a3c9;text-align:center;margin-top:4px;">
-            ${isPaidT ? `Entry Rs ${feeT} · Winner takes Rs ${esc(t.prizePool || 0)}` : 'Winner takes all · Free tonight'}
+            ${isPaidT ? `Entry Rs ${feeT} · Winner takes Rs ${esc(t.prizePool || 0)} · 🕐 Players ready early can adjust time in group` : 'Winner takes all · Free tonight · 🕐 Players ready early can adjust time'}
           </div>
         </div>
       `;
