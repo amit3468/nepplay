@@ -223,6 +223,142 @@
   }
   .wc-prize { color: #4ade80; }
   .wc-date { color: #a8a3c9; font-weight: 600; }
+    /* ⭐ FEATURED DUO — Tonight + Tomorrow side by side */
+  .featured-duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+  .featured-card {
+    background: linear-gradient(180deg, rgba(30,18,60,.9), rgba(20,12,45,.95));
+    border: 2px solid rgba(245,158,11,.5);
+    border-radius: 18px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 10px 40px rgba(245,158,11,.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .featured-card.tonight {
+    border-color: rgba(245,158,11,.6);
+    background: linear-gradient(180deg, rgba(245,158,11,.12), rgba(20,12,45,.95));
+  }
+  .featured-card.tomorrow {
+    border-color: rgba(168,85,247,.6);
+    background: linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95));
+  }
+  .featured-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  }
+  .featured-card.tomorrow::before {
+    background: linear-gradient(90deg, transparent, #a855f7, transparent);
+  }
+  .featured-card .fc-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+  .featured-card.tonight .fc-tag {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: #fff;
+  }
+  .featured-card.tomorrow .fc-tag {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+  .featured-card .fc-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+  }
+  .featured-card .fc-sub {
+    font-size: 0.85rem;
+    color: #a8a3c9;
+    margin-top: -6px;
+  }
+  .featured-card .fc-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #e9e5ff;
+    font-weight: 700;
+  }
+  .featured-card .fc-info span {
+    background: rgba(15,8,35,.55);
+    border: 1px solid rgba(168,85,247,.25);
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+  .featured-card .fc-info b { color: #fbbf24; }
+  .featured-card .fc-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .featured-card .fc-mode {
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #fff;
+  }
+  .featured-card .fc-mode.solo  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .featured-card .fc-mode.duo   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .featured-card .fc-mode.squad { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .featured-card .fc-mode small {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 900;
+    margin-top: 4px;
+    background: rgba(0,0,0,.3);
+    padding: 2px 6px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .featured-card .fc-cta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .featured-card .fc-cta a {
+    flex: 1;
+    min-width: 130px;
+    text-align: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #fff;
+    transition: transform .15s;
+  }
+  .featured-card .fc-cta a:hover { transform: translateY(-1px); }
+  .featured-card.tonight .fc-cta a {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
+  }
+  .featured-card.tomorrow .fc-cta a {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+  }
 
   @media (max-width: 720px) {
     .bg-blob { filter: blur(60px); opacity: 0.4; }
@@ -307,7 +443,49 @@
       <div class="hero-stat">⏳ Loading…</div>
     </div>
   </section>
-    <!-- ⭐ RECENT WINNERS -->
+      <!-- ⭐ TONIGHT + TOMORROW FEATURED -->
+  <div class="featured-duo">
+
+    <!-- Tonight: 2v2 -->
+    <div class="featured-card tonight">
+      <span class="fc-tag">🔥 Tonight · 9 PM onwards</span>
+      <div class="fc-title">Free Fire 2v2</div>
+      <div class="fc-sub">Duo · Best of 3 · Single Elimination</div>
+      <div class="fc-info">
+        <span>💰 Entry <b>Rs 200</b> / team</span>
+        <span>🏆 Winner <b>Rs 750</b></span>
+      </div>
+      <div class="fc-modes">
+        <div class="fc-mode duo">👥 Duo<small>Rs 750</small></div>
+      </div>
+      <div class="fc-cta">
+        <a href="/registration.html?tournamentId=Ru38AeF27bPuh019g9j1">📝 Register 2v2</a>
+      </div>
+    </div>
+
+    <!-- Tomorrow: Big Free Fire day -->
+    <div class="featured-card tomorrow">
+      <span class="fc-tag">🔥 Tomorrow · 3 Oct</span>
+      <div class="fc-title">Free Fire Big Day</div>
+      <div class="fc-sub">Holiday Special · 1 PM &amp; 9 PM Sessions</div>
+      <div class="fc-info">
+        <span>💰 Solo <b>Rs 170</b></span>
+        <span>💰 Duo <b>Rs 200</b></span>
+        <span>💰 Squad <b>Rs 200</b></span>
+      </div>
+      <div class="fc-modes">
+        <div class="fc-mode solo">👤 Solo<small>Rs 800</small></div>
+        <div class="fc-mode duo">👥 Duo<small>Rs 800</small></div>
+        <div class="fc-mode squad">🏆 Squad<small>Rs 1000</small></div>
+      </div>
+      <div class="fc-cta">
+        <a href="/tournaments.html#upcoming">📝 Register for 3 Oct</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ⭐ RECENT WINNERS -->
   <div id="winnersStrip"></div>
 
 
@@ -771,8 +949,8 @@ function renderAll(tournaments) {
 
   let html = '';
 
-    // ⭐ TONIGHT
-  if (tonight.length) {
+      // ⭐ TONIGHT
+  if (false && tonight.length) {
     html += `
       <h2 class="section-title tonight">
         🔥 Tonight <span class="st-tag">9:00 PM NPT</span>
