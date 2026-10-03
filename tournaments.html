@@ -1122,5 +1122,53 @@ onAuthStateChanged(auth, async (user) => {
 });
 </script>
 
+<script type="module">
+// ⭐ VISITOR TRACKER
+(async () => {
+  try {
+    const { getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, getDoc, setDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const app = getApps()[0];
+    if (!app) return;
+    const db = getFirestore(app);
+    const ref = doc(db, "site_stats", "main");
+
+    const SESSION_KEY = "nep_visit_logged";
+    const isNewSession = !sessionStorage.getItem(SESSION_KEY);
+
+    const now = new Date();
+    const nptMs = now.getTime() + (5 * 60 + 45) * 60 * 1000;
+    const today = new Date(nptMs).toISOString().slice(0, 10);
+
+    let lastDate = null;
+    try {
+      const snap = await getDoc(ref);
+      if (snap.exists()) lastDate = snap.data().todayDate;
+    } catch (e) {}
+
+    const patch = {
+      totalPageViews: increment(1),
+      lastVisitAt: new Date().toISOString()
+    };
+
+    if (isNewSession) {
+      patch.totalVisits = increment(1);
+      sessionStorage.setItem(SESSION_KEY, "1");
+    }
+
+    if (lastDate !== today) {
+      patch.todayDate = today;
+      patch.todayVisits = isNewSession ? 1 : 0;
+    } else if (isNewSession) {
+      patch.todayVisits = increment(1);
+    }
+
+    await setDoc(ref, patch, { merge: true });
+  } catch (e) {
+    console.warn("[visitor-tracker] failed:", e && e.message);
+  }
+})();
+</script>
 </body>
 </html>
