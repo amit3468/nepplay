@@ -721,7 +721,6 @@ function loadLiveStats() {
     el('lsNetToday').innerText = fmtRs(net);
     el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
   }
-}
 
   // ⭐ Visitor stats (site_stats/main)
   (async () => {
@@ -742,6 +741,7 @@ function loadLiveStats() {
       console.warn("[visitor stats] failed:", e && e.message);
     }
   })();
+}
 setInterval(() => {
   if (document.getElementById('admin-panel')?.style.display === 'block') loadLiveStats();
 }, 30000);
