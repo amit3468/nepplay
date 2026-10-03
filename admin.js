@@ -722,6 +722,26 @@ function loadLiveStats() {
     el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
   }
 }
+
+  // ⭐ Visitor stats (site_stats/main)
+  (async () => {
+    try {
+      const statsSnap = await getDoc(doc(db, "site_stats", "main"));
+      if (!statsSnap.exists()) return;
+      const s = statsSnap.data();
+      const totalVisits   = Number(s.totalVisits || 0);
+      const todayVisits   = Number(s.todayVisits || 0);
+      const totalViews    = Number(s.totalPageViews || 0);
+      const viewsPerVisit = totalVisits > 0 ? (totalViews / totalVisits).toFixed(1) : '0';
+
+      if (el('lsTotalVisits'))   el('lsTotalVisits').innerText   = totalVisits;
+      if (el('lsTodayVisits'))   el('lsTodayVisits').innerText   = todayVisits;
+      if (el('lsTotalViews'))    el('lsTotalViews').innerText    = totalViews;
+      if (el('lsViewsPerVisit')) el('lsViewsPerVisit').innerText = viewsPerVisit;
+    } catch (e) {
+      console.warn("[visitor stats] failed:", e && e.message);
+    }
+  })();
 setInterval(() => {
   if (document.getElementById('admin-panel')?.style.display === 'block') loadLiveStats();
 }, 30000);
