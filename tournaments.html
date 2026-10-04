@@ -1018,7 +1018,9 @@ function renderAll(tournaments) {
     html += '</div>';
   }
 
-    const popularPool = tournaments.filter(t => isPopular(gameKey(t.game)));
+    const popularPool = tournaments.filter(t => 
+  isPopular(gameKey(t.game)) && String(t.date) === '2026-10-05'
+);
   const allGroups = buildGameGroups(popularPool);
   const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
 
