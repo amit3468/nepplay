@@ -934,7 +934,10 @@ function renderAll(tournaments) {
   const night = [];
   const other = [];
 
-  tournaments.forEach(t => {
+    tournaments.forEach(t => {
+    // ⭐ Skip Free Fire — shown in hardcoded card at top
+    if (gameKey(t.game) === 'freefire') return;
+
     const sec = classifySection(t);
     if (sec === 'tonight') tonight.push(t);
     else if (sec === 'day') day.push(t);
