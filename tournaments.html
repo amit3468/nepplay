@@ -722,10 +722,10 @@ async function loadWinnersStrip() {
           ? r.completedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
           : '';
 
-        const winnerPrize = Number(w1.prize || 0) + (tkName === wName && tkPrize > 0 ? tkPrize : 0);
-        const tkPrize = Number(tk.prize || 0);
+                const tkPrize = Number(tk.prize || 0);
         const tkName = String(tk.name || '').trim();
         const wName = String(w1.name || '').trim();
+        const winnerPrize = Number(w1.prize || 0) + (tkName === wName && tkPrize > 0 ? tkPrize : 0);
 
         let cards = `
           <div class="winner-card">
