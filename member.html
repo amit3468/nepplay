@@ -1805,7 +1805,10 @@ async function loadUpcomingTournaments(uid) {
     const day = [];
     const night = [];
     const other = [];
-    docs.forEach(t => {
+        docs.forEach(t => {
+        // ⭐ Skip Free Fire — shown in hardcoded card at top
+        if (gameKey(t.game) === 'freefire') return;
+
         if (t.isTonight === true) { tonight.push(t); return; }
         const date = String(t.date || '');
         if (date === '2026-09-30' || date === '2026-10-01') {
