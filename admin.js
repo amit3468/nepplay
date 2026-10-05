@@ -1814,11 +1814,11 @@ function renderRegistrations() {
     return;
   }
   list.innerHTML = filtered.map(r => {
-    const isPaid = r.entryType === 'paid';
+        const isPaid = r.entryType === 'paid';
     const safeName = (r.username||'').replace(/'/g,'');
     const isPending = r.status === 'pending';
-    const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
-    const shotId = payment ? registerScreenshot(payment) : null;
+    // ⭐ Use paymentScreenshotUrl directly from the registration doc
+    const shotUrl = isPaid ? (r.paymentScreenshotUrl || null) : null;
     const modeBadge = modeBadgeHtml(r.playingAs);
     return `
       <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
@@ -1837,10 +1837,10 @@ function renderRegistrations() {
 
             ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
           </div>
-          ${isPaid && shotId ? `
+                    ${isPaid && shotUrl ? `
             <div class="reg-payment-preview">
-              <img src="${screenshotCache[shotId]}" class="thumb" onclick="event.stopPropagation(); openShotById('${shotId}')" alt="Screenshot">
-              <span class="method-tag">${(r.method||'').toUpperCase()}</span>
+              <img src="${shotUrl}" class="thumb" onclick="event.stopPropagation(); openShot('${shotUrl}')" alt="Payment Screenshot" title="Click to view full">
+              <span class="method-tag">${(r.paymentMethod || 'PAID').toUpperCase()}</span>
               <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
             </div>
           ` : ''}
