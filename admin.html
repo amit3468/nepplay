@@ -224,6 +224,59 @@
   }
   .clickable-name:hover { color: #fff; text-decoration: underline; }
 
+    /* ⭐ Registration payment thumbnail */
+  .reg-payment-preview {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #2a2d4a;
+    cursor: zoom-in;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .thumb:hover {
+    transform: scale(1.08);
+    border-color: #6366f1;
+    box-shadow: 0 4px 16px rgba(99,102,241,.4);
+  }
+  .method-tag {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(99,102,241,.18);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,.4);
+  }
+  .status-tag {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .status-tag.confirmed,
+  .status-tag.approved {
+    background: rgba(34,197,94,.18);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,.4);
+  }
+  .status-tag.pending {
+    background: rgba(245,158,11,.18);
+    color: #fbbf24;
+    border: 1px solid rgba(245,158,11,.4);
+  }
+  .status-tag.rejected {
+    background: rgba(239,68,68,.18);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,.4);
+  }
   .ref-thumb {
     width: 60px; height: 60px;
     object-fit: cover;
