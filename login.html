@@ -578,16 +578,22 @@ $("sendOtpBtn").addEventListener("click", async () => {
     btn.textContent = "Sending OTP...";
 
     try {
-        if (!recaptchaVerifier) {
-            recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                size: 'invisible',
-                callback: () => {},
-                'expired-callback': () => {
-                    showMessage("reCAPTCHA expired. Please try again.", "error");
-                    if (recaptchaVerifier) { recaptchaVerifier.clear(); recaptchaVerifier = null; }
-                }
-            });
+                // Always clear any previous verifier to avoid "already rendered" error
+        if (recaptchaVerifier) {
+            try { recaptchaVerifier.clear(); } catch (e) {}
+            recaptchaVerifier = null;
         }
+        const recaptchaContainer = document.getElementById('recaptcha-container');
+        if (recaptchaContainer) recaptchaContainer.innerHTML = '';
+
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => {},
+            'expired-callback': () => {
+                showMessage("reCAPTCHA expired. Please try again.", "error");
+                if (recaptchaVerifier) { try { recaptchaVerifier.clear(); } catch (e) {} recaptchaVerifier = null; }
+            }
+        });
 
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         $("phoneStep1").style.display = "none";
