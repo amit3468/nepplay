@@ -689,6 +689,18 @@
     color: #fff;
     background: linear-gradient(135deg, #7c3aed, #a855f7);
   }
+    /* ⭐ TONIGHT variant (red/orange) */
+  .tomorrow-card.tonight {
+    border-color: rgba(245,158,11,.6);
+    background: linear-gradient(180deg, rgba(245,158,11,.12), rgba(20,12,45,.95));
+    box-shadow: 0 10px 40px rgba(245,158,11,.15);
+  }
+  .tomorrow-card.tonight::before {
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  }
+  .tomorrow-card.tonight .tc-tag {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+  }
 
   @media (max-width: 720px) {
     .bg-blob { filter: blur(60px); opacity: 0.4; }
@@ -931,11 +943,11 @@
     </div>
   </section>
 
-                   <!-- ⭐ TOMORROW: 2v2 -->
-  <div class="tomorrow-card">
-    <span class="tc-tag">🔥 TOMORROW · 5 OCT · 9 PM</span>
+                          <!-- ⭐ TONIGHT: Free Fire 2v2 Duo -->
+  <div class="tomorrow-card tonight">
+    <span class="tc-tag">🔥 TONIGHT · 5 OCT · 9 PM onwards</span>
     <div class="tc-title">Free Fire 2v2 Duo Showdown</div>
-    <div class="tc-sub">🔥 Monday Night Special · Best of 3 · Real Cash</div>
+    <div class="tc-sub">🔥 Night Special · Best of 3 · Real Cash</div>
 
     <div style="background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:14px 18px; margin:8px 0; display:flex; align-items:center; gap:14px;">
       <div style="font-size:1.8rem; line-height:1;">🤝</div>
@@ -961,7 +973,7 @@
     </div>
 
     <div style="font-size:0.78rem;color:#c084fc;font-weight:900;letter-spacing:0.5px;margin-top:10px;margin-bottom:-6px;">🌙 9:00 PM SESSION</div>
-    <div class="tc-modes">
+    <div class="tc-modes" style="grid-template-columns: 1fr;">
       <a class="tc-mode duo" href="/registration.html?tournamentId=IsgwqLmra7mGGUkgkLzB">
         👥 Register 2v2 Team — Rs 90
       </a>
@@ -976,9 +988,58 @@
     </div>
   </div>
 
-    <div class="tc-cta">
-      <a href="/tournaments.html">📝 See full tournament list</a>
+       <!-- ⭐ TOMORROW: FF Solo + PUBG + Valorant -->
+  <div class="tomorrow-card">
+    <span class="tc-tag">🔥 TOMORROW · 6 OCT · 9 PM onwards</span>
+    <div class="tc-title">Multi-Game Solo Night</div>
+    <div class="tc-sub">🔥 Free Fire · PUBG · Valorant · Rs 50 entry · Rs 300 prize</div>
+
+    <!-- Free Fire Solo -->
+    <div style="background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="font-weight:900; color:#4ade80; font-size:0.95rem;">🔥 FREE FIRE — SOLO</div>
+        <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 50</b> · Prize <b style="color:#4ade80;">Rs 300</b> · 🔪 TK <b style="color:#fca5a5;">Rs 40</b></div>
+      </div>
+      <div class="tc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
+        <a class="tc-mode solo" href="/registration.html?tournamentId=TOMORROW_FF_SOLO_9PM">
+          👤 Register Solo — Rs 50
+        </a>
+      </div>
     </div>
+
+    <!-- PUBG Solo -->
+    <div style="background:linear-gradient(135deg, rgba(168,85,247,.12), rgba(20,12,45,.85)); border:1px solid rgba(168,85,247,.5); border-radius:12px; padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="font-weight:900; color:#c084fc; font-size:0.95rem;">🎯 PUBG MOBILE — SOLO</div>
+        <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 50</b> · Prize <b style="color:#4ade80;">Rs 300</b> · 🔪 TK <b style="color:#fca5a5;">Rs 40</b></div>
+      </div>
+      <div class="tc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
+        <a class="tc-mode solo" href="/registration.html?tournamentId=TOMORROW_PUBG_SOLO_9PM" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">
+          👤 Register Solo — Rs 50
+        </a>
+      </div>
+    </div>
+
+    <!-- Valorant Solo -->
+    <div style="background:linear-gradient(135deg, rgba(239,68,68,.12), rgba(20,12,45,.85)); border:1px solid rgba(239,68,68,.5); border-radius:12px; padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="font-weight:900; color:#fca5a5; font-size:0.95rem;">⚔️ VALORANT — SOLO</div>
+        <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 50</b> · Prize <b style="color:#4ade80;">Rs 300</b> · 🔪 TK <b style="color:#fca5a5;">Rs 40</b></div>
+      </div>
+      <div class="tc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
+        <a class="tc-mode solo" href="/registration.html?tournamentId=TOMORROW_VALORANT_SOLO_9PM" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
+          👤 Register Solo — Rs 50
+        </a>
+      </div>
+    </div>
+
+    <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
+      ⏰ Registration closes 8:30 PM · 🔑 Room details 8:40 PM · 🚀 Match 9:00 PM
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-bottom:26px;">
+    <a href="/tournaments.html" style="display:inline-block; padding:11px 20px; border-radius:10px; font-weight:800; font-size:0.85rem; text-decoration:none; color:#fff; background:linear-gradient(135deg,#7c3aed,#a855f7);">📝 See full tournament list</a>
   </div>
             
 
