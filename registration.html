@@ -299,6 +299,64 @@ textarea{ min-height:100px; resize:vertical; }
 .wallet-copy:hover{ background:#3b82f6; color:white; }
 .payment-instructions{ color:#9cb5d3; font-size:13px; line-height:1.6; margin-top:12px; padding:12px; background:#0b1a2e; border-left:3px solid #3b82f6; border-radius:4px; }
 .payment-no-methods{ padding:30px 20px; text-align:center; color:#a87918; background:#1a1408; border:2px dashed #a87918; border-radius:10px; font-size:14px; line-height:1.6; }
+
+/* ⭐ Payment Screenshot Upload */
+.upload-box {
+    border: 2px dashed #30435e;
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    background: #0b1320;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+}
+.upload-box:hover { border-color: #3b82f6; background: #101b2e; }
+.upload-box.has-file {
+    border-color: #22c55e;
+    background: rgba(34,197,94,.08);
+    border-style: solid;
+}
+.upload-box .ub-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 10px; }
+.upload-box .ub-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 4px; word-break: break-all; }
+.upload-box .ub-sub { font-size: .78rem; color: #8da2bc; line-height: 1.5; }
+.upload-box input[type="file"] { display: none; }
+.upload-box .ub-clear {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(239,68,68,.2); color: #fca5a5;
+    border: 1px solid rgba(239,68,68,.5);
+    border-radius: 50%; width: 26px; height: 26px;
+    cursor: pointer; font-size: 14px; font-weight: 900;
+    display: none; align-items: center; justify-content: center;
+    font-family: inherit; padding: 0; line-height: 1;
+}
+.upload-box.has-file .ub-clear { display: flex; }
+.upload-preview { display: none; margin-top: 14px; text-align: center; }
+.upload-preview img {
+    max-width: 100%; max-height: 220px;
+    border-radius: 10px;
+    border: 1px solid rgba(34,197,94,.5);
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+}
+.upload-preview.show { display: block; }
+.upload-progress {
+    display: none; margin-top: 12px;
+    background: #0a111d; border-radius: 999px;
+    height: 8px; overflow: hidden;
+    border: 1px solid #30435e;
+}
+.upload-progress.show { display: block; }
+.upload-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #a855f7);
+    width: 0%; transition: width .2s;
+}
+.upload-progress-text {
+    font-size: .78rem; color: #7db7ff;
+    text-align: center; margin-top: 6px;
+    display: none;
+}
+.upload-progress-text.show { display: block; }
 .amount{ background:#153b2b; border:1px solid #267a55; color:#8ef0bb; border-radius:10px; padding:15px; margin-bottom:15px; font-size:18px; font-weight:bold; }
 .amount.free { background:linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.05)); border-color:rgba(34,197,94,.5); color:#4ade80; }
 .submit{ width:100%; background:#ff3b30; color:white; border:0; border-radius:9px; padding:15px; font-size:17px; font-weight:bold; cursor:pointer; margin-top:10px; }
@@ -519,9 +577,27 @@ textarea{ min-height:100px; resize:vertical; }
                     </div>
                 </div>
 
-                <div class="form-group">
+                                <div class="form-group">
                     <label>Transaction ID *</label>
                     <input id="transactionId" placeholder="Enter transaction ID">
+                </div>
+
+                <div class="form-group" id="screenshotGroup">
+                    <label>📸 Payment Screenshot *</label>
+                    <div class="upload-box" id="uploadBox" onclick="document.getElementById('screenshotInput').click()">
+                        <input type="file" id="screenshotInput" accept="image/*" onchange="handleScreenshotSelect(event)">
+                        <div class="ub-icon" id="ubIcon">📤</div>
+                        <div class="ub-title" id="ubTitle">Tap to upload screenshot</div>
+                        <div class="ub-sub" id="ubSub">eSewa / Khalti payment confirmation · JPG or PNG · Max 5 MB</div>
+                        <button type="button" class="ub-clear" id="ubClear" onclick="event.stopPropagation(); clearScreenshot();" title="Remove">✕</button>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview">
+                        <img id="uploadPreviewImg" alt="Screenshot preview">
+                    </div>
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                    </div>
+                    <div class="upload-progress-text" id="uploadProgressText">Uploading… 0%</div>
                 </div>
             </div>
 
@@ -575,6 +651,7 @@ textarea{ min-height:100px; resize:vertical; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc,
   serverTimestamp, doc, getDoc, query, where
@@ -592,9 +669,10 @@ const firebaseConfig = {
     appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const auth    = getAuth(app);
+const storage = getStorage(app);
 
 let currentUser = null;
 let currentUsername = "";
@@ -607,6 +685,57 @@ let alreadyRegistered = false;
 let userProfilePhone = "";
 let userProfileWallet = "";
 let needsPayoutInfo = false;
+let selectedScreenshotFile = null;
+const MAX_SCREENSHOT_MB = 5;
+
+window.handleScreenshotSelect = function(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        showMessage("❌ Please upload an image file (JPG/PNG).", "error");
+        event.target.value = "";
+        return;
+    }
+    if (file.size > MAX_SCREENSHOT_MB * 1024 * 1024) {
+        showMessage(`❌ Screenshot too large. Max ${MAX_SCREENSHOT_MB} MB.`, "error");
+        event.target.value = "";
+        return;
+    }
+
+    selectedScreenshotFile = file;
+
+    const box = document.getElementById("uploadBox");
+    const title = document.getElementById("ubTitle");
+    const sub = document.getElementById("ubSub");
+    const icon = document.getElementById("ubIcon");
+    const preview = document.getElementById("uploadPreview");
+    const img = document.getElementById("uploadPreviewImg");
+
+    box.classList.add("has-file");
+    icon.textContent = "✅";
+    title.textContent = file.name;
+    sub.textContent = (file.size / 1024).toFixed(0) + " KB · Tap ✕ to remove";
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        img.src = e.target.result;
+        preview.classList.add("show");
+    };
+    reader.readAsDataURL(file);
+};
+
+window.clearScreenshot = function() {
+    selectedScreenshotFile = null;
+    const input = document.getElementById("screenshotInput");
+    if (input) input.value = "";
+
+    document.getElementById("uploadBox").classList.remove("has-file");
+    document.getElementById("ubIcon").textContent = "📤";
+    document.getElementById("ubTitle").textContent = "Tap to upload screenshot";
+    document.getElementById("ubSub").textContent = "eSewa / Khalti payment confirmation · JPG or PNG · Max 5 MB";
+    document.getElementById("uploadPreview").classList.remove("show");
+};
 
 const $ = id => document.getElementById(id);
 
@@ -854,8 +983,10 @@ badge.textContent = "Mode: " + badgeLabel;
             }
         }
 
-        if (isFreeEvent) {
+                if (isFreeEvent) {
             $("paymentSection").style.display = "none";
+            const sg = $("screenshotGroup");
+            if (sg) sg.style.display = "none";
             $("freeBanner").style.display = "flex";
             $("amountBox").classList.add("free");
             $("amountBox").textContent = "🎁 Free Entry — no payment required";
@@ -1047,12 +1178,19 @@ $("registrationForm").addEventListener("submit", async (event) => {
         isFreeEvent = true;
     }
 
-    if (!isFreeEvent) {
+        if (!isFreeEvent) {
         if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
         selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
         if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
         const transactionId = $("transactionId").value.trim();
         if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+
+        if (!selectedScreenshotFile) {
+            showMessage("❌ Please upload your payment screenshot.", "error");
+            const sg = $("screenshotGroup");
+            if (sg) sg.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
     }
 
     let body = {
@@ -1153,6 +1291,55 @@ $("registrationForm").addEventListener("submit", async (event) => {
             return;
         }
 
+                // ⭐ Upload payment screenshot (paid only)
+        let screenshotUrl = "";
+        if (!isFreeEvent && selectedScreenshotFile) {
+            const progWrap = $("uploadProgress");
+            const progBar  = $("uploadProgressBar");
+            const progText = $("uploadProgressText");
+            progWrap.classList.add("show");
+            progText.classList.add("show");
+            btn.textContent = "Uploading screenshot… 0%";
+
+            try {
+                const safeName = selectedScreenshotFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+                const path = `payment_screenshots/${currentUser.uid}/${tournament.id}_${Date.now()}_${safeName}`;
+                const fileRef = storageRef(storage, path);
+                const task = uploadBytesResumable(fileRef, selectedScreenshotFile);
+
+                screenshotUrl = await new Promise((resolve, reject) => {
+                    task.on("state_changed",
+                        snap => {
+                            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+                            progBar.style.width = pct + "%";
+                            progText.textContent = "Uploading… " + pct + "%";
+                            btn.textContent = "Uploading screenshot… " + pct + "%";
+                        },
+                        err => reject(err),
+                        async () => {
+                            try {
+                                const url = await getDownloadURL(task.snapshot.ref);
+                                resolve(url);
+                            } catch (e) { reject(e); }
+                        }
+                    );
+                });
+
+                progBar.style.width = "100%";
+                progText.textContent = "✅ Screenshot uploaded";
+                btn.textContent = "Saving registration…";
+                body.paymentScreenshotUrl = screenshotUrl;
+            } catch (upErr) {
+                console.error("screenshot upload failed:", upErr);
+                showMessage("❌ Screenshot upload failed. Please try again or use a smaller file.", "error");
+                btn.disabled = false;
+                btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
+                progWrap.classList.remove("show");
+                progText.classList.remove("show");
+                return;
+            }
+        }
+
         await addDoc(collection(db, "tournament_registrations"), body);
 
         if (needsPayoutInfo) {
@@ -1174,7 +1361,8 @@ $("registrationForm").addEventListener("submit", async (event) => {
               : "✅ Registration submitted! Admin will verify your payment.",
             "success"
         );
-        $("registrationForm").reset();
+                $("registrationForm").reset();
+        if (window.clearScreenshot) window.clearScreenshot();
         setTimeout(() => { window.location.href = "/member.html"; }, 2000);
     } catch (err) {
         console.error("submit error:", err);
