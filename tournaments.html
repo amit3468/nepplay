@@ -44,6 +44,10 @@
   .bg-blob.b2 { width: 380px; height: 380px; background: radial-gradient(circle, #a855f7, transparent 70%); top: 30%; right: -140px; animation: drift2 28s ease-in-out infinite; }
   .bg-blob.b3 { width: 340px; height: 340px; background: radial-gradient(circle, #fbbf24, transparent 70%); bottom: -120px; left: 20%; opacity: 0.35; animation: drift3 32s ease-in-out infinite; }
   .bg-blob.b4 { width: 300px; height: 300px; background: radial-gradient(circle, #ec4899, transparent 70%); top: 60%; left: 40%; opacity: 0.25; animation: drift1 36s ease-in-out infinite reverse; }
+    @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,.7); transform: scale(1); }
+    50%      { box-shadow: 0 0 32px rgba(251,191,36,1);  transform: scale(1.04); }
+  }
   @keyframes drift1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(60px, 40px) scale(1.1); } }
   @keyframes drift2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-80px, 30px) scale(1.15); } }
   @keyframes drift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(40px, -50px) scale(1.05); } }
@@ -514,6 +518,9 @@
 
       <!-- SATURDAY · 10 OCT · FF Squad -->
     <div class="featured-card" style="border-color:rgba(59,130,246,.6); background:linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95));">
+            <div style="display:flex; justify-content:center; margin-bottom:8px;">
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:999px; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a0b3d; font-size:0.85rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; box-shadow:0 0 20px rgba(251,191,36,.7); animation:pulseGlow 2s ease-in-out infinite;">🎉 BIG WEEKEND SPECIAL 🎉</span>
+      </div>
       <span class="fc-tag" style="background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff;">🔥 SATURDAY · 10 OCT · 9 PM</span>
       <div class="fc-title">Free Fire Squad — Fullmap</div>
       <div class="fc-sub">🏆 4-player squads · Full map · Real cash</div>
