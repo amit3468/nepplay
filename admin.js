@@ -953,6 +953,56 @@ window.deletePayout = async function(payoutId, winnerName) {
 // ============================================================
 // DETAIL MODAL — Registrations
 // ============================================================
+function renderTeammatesSection(r) {
+  // New format: teammates array with UIDs
+  if (Array.isArray(r.teammates) && r.teammates.length) {
+    const rows = r.teammates.map((t, i) => {
+      const ign = escapeDetail(t.ign || '—');
+      const uidHtml = t.uid
+        ? `<code style="background:rgba(251,191,36,.12);padding:3px 10px;border-radius:6px;font-size:12px;color:#fbbf24;font-family:'Courier New',monospace;font-weight:700;user-select:all;cursor:pointer;" title="Click to select">${escapeDetail(t.uid)}</code>`
+        : '<span style="color:#f87171;font-size:12px;font-weight:700;">⚠️ NO UID</span>';
+      const cap = t.isCaptain
+        ? ' <span style="background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:1px 7px;border-radius:999px;font-size:10px;font-weight:800;margin-left:6px;">CAPTAIN</span>'
+        : '';
+      return `<div class="dm-row"><span class="dm-k">#${i + 1} ${ign}${cap}</span><span class="dm-v">${uidHtml}</span></div>`;
+    }).join('');
+    return `
+      <div class="dm-section">
+        <h3>👥 Team Players (${r.teammates.length})</h3>
+        <div class="dm-rows">${rows}</div>
+      </div>`;
+  }
+
+  // Legacy format: player1..player6 without teammates array (pre-patch regs)
+  const legacy = [];
+  ['player1', 'player2', 'player3', 'player4', 'player5', 'player6'].forEach((k, i) => {
+    const v = r[k];
+    if (v) {
+      const uid = r[k + 'Uid'] || '';
+      legacy.push({ ign: v, uid, isCaptain: i === 0 });
+    }
+  });
+  const isTeam = legacy.length > 0 && r.playingAs !== 'solo' && String(r.teamSize || 0) !== '1';
+  if (isTeam) {
+    const rows = legacy.map((t, i) => {
+      const ign = escapeDetail(t.ign || '—');
+      const uidHtml = t.uid
+        ? `<code style="background:rgba(251,191,36,.12);padding:3px 10px;border-radius:6px;font-size:12px;color:#fbbf24;font-family:'Courier New',monospace;font-weight:700;user-select:all;">${escapeDetail(t.uid)}</code>`
+        : '<span style="color:#f87171;font-size:11px;">⚠️ no UID</span>';
+      const cap = t.isCaptain
+        ? ' <span style="background:rgba(251,191,36,.2);color:#fbbf24;border:1px solid rgba(251,191,36,.4);padding:1px 7px;border-radius:999px;font-size:10px;font-weight:800;margin-left:6px;">CAPTAIN</span>'
+        : '';
+      return `<div class="dm-row"><span class="dm-k">#${i + 1} ${ign}${cap}</span><span class="dm-v">${uidHtml}</span></div>`;
+    }).join('');
+    return `
+      <div class="dm-section">
+        <h3>👥 Team Players (${legacy.length}) <small style="color:#f87171;font-weight:400;font-size:11px;">— legacy, some UIDs may be missing</small></h3>
+        <div class="dm-rows">${rows}</div>
+      </div>`;
+  }
+
+  return '';
+}
 window.openRegDetail = function(regId) {
   const r = allRegs.find(x => x.id === regId);
   if (!r) return;
@@ -978,8 +1028,9 @@ window.openRegDetail = function(regId) {
         ${r.payerName ? `<div class="dm-row"><span class="dm-k">👤 Payer Name</span><span class="dm-v">${escapeDetail(r.payerName)}</span></div>` : ''}
         ${r.payerPhone ? `<div class="dm-row"><span class="dm-k">📱 Payer Phone</span><span class="dm-v">${escapeDetail(r.payerPhone)}</span></div>` : ''}
       ` : ''}
-    </div>
-    ${isPaid && payment ? `
+        </div>
+    ${renderTeammatesSection(r)}
+    ${isPaid && payment ? ` `
       <div class="dm-section">
         <h3>💳 Payment Details</h3>
         <div class="dm-rows">
@@ -1862,8 +1913,9 @@ function renderRegistrations() {
           <div class="reg-line-1">
             <b>${r.username || 'Unknown'}</b>
             <span class="reg-sep">—</span>
-            <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+                        <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
             ${modeBadge}
+            ${r.teammates && r.teammates.length ? `<span class="tourney-count" style="margin-left:6px;">👥 ${r.teammates.length} players</span>` : ''}
           </div>
           <div class="reg-line-2">
             ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
