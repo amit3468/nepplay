@@ -163,6 +163,24 @@ function fmtDate(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
+function timeAgo(ts) {
+  if (!ts?.toDate) return '—';
+  const diff = Date.now() - ts.toDate().getTime();
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return 'Just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + 'd ago';
+  if (days < 30) return Math.floor(days / 7) + 'w ago';
+  return Math.floor(days / 30) + 'mo ago';
+}
+function isNewUser(ts) {
+  if (!ts?.toDate) return false;
+  return (Date.now() - ts.toDate().getTime()) < 24 * 60 * 60 * 1000;
+}
 function fmtShort(ts) {
   if (!ts?.toDate) return '—';
   return ts.toDate().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
@@ -701,6 +719,8 @@ function loadLiveStats() {
   const t = todayKey();
   const el = id => document.getElementById(id);
   if (el('lsUsers')) el('lsUsers').innerText = allUsers.length;
+const newToday = allUsers.filter(u => dayKey(u.createdAt) === t).length;
+if (el('lsNewToday')) el('lsNewToday').innerText = newToday;
   if (el('lsRegs')) el('lsRegs').innerText = allRegs.length;
   const pending = allPayments.filter(p => p.status === 'pending').length;
   if (el('lsPending')) el('lsPending').innerText = pending;
@@ -2483,7 +2503,14 @@ window.loadUsers = async function() {
     const snap = await getDocs(collection(db, 'users'));
     allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (document.getElementById('usersBadge')) document.getElementById('usersBadge').innerText = allUsers.length;
+    if (document.getElementById('usersBadge')) {
+  const newToday = allUsers.filter(u => dayKey(u.createdAt) === todayKey()).length;
+  document.getElementById('usersBadge').innerText = allUsers.length;
+  if (newToday > 0) {
+    document.getElementById('usersBadge').style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    document.getElementById('usersBadge').style.color = '#fff';
+  }
+}
     if (document.getElementById('dashUsers')) document.getElementById('dashUsers').innerText = allUsers.length;
     renderUsers();
     renderDashboardRecent();
@@ -2503,19 +2530,33 @@ function renderUsers() {
     list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users.</div>';
     return;
   }
-  list.innerHTML = filtered.map(u => `
-    <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')">
-      <div class="reg-icon">${initials(u.username)}</div>
-      <div class="reg-main">
-        <div class="reg-line-1"><b>${u.username || 'Unknown'}</b>${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}</div>
-        <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
+  filtered = [...filtered].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+  list.innerHTML = filtered.map(u => {
+    const isNew = isNewUser(u.createdAt);
+    const ago = timeAgo(u.createdAt);
+    const fullDate = fmtDate(u.createdAt);
+    return `
+      <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')" style="${isNew ? 'border-left:4px solid #22c55e;' : ''}">
+        <div class="reg-icon" style="${isNew ? 'background:linear-gradient(135deg,#22c55e,#16a34a);' : ''}">${initials(u.username)}</div>
+        <div class="reg-main">
+          <div class="reg-line-1">
+            <b>${u.username || 'Unknown'}</b>
+            ${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}
+            ${isNew ? '<span class="type-chip" style="margin-left:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;font-weight:900;">🆕 NEW</span>' : ''}
+          </div>
+          <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
+          <div class="reg-line-2" style="margin-top:5px;font-size:12px;">
+            🕐 Joined <b style="color:${isNew ? '#4ade80' : '#a5b4fc'};">${ago}</b>
+            <span style="color:#6b7280;font-size:11px;"> · ${fullDate}</span>
+          </div>
+        </div>
+        <div class="reg-right">
+          <span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span>
+          <small style="color:${isNew ? '#4ade80' : '#9ca3af'};font-weight:${isNew ? '700' : '400'};margin-top:4px;">${ago}</small>
+        </div>
       </div>
-      <div class="reg-right">
-        <span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span>
-        <small>${fmtDate(u.createdAt)}</small>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 window.deleteUser = async function(uid, username, fromModal) {
   if (fromModal) closeDetailModal();
