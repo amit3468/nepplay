@@ -190,7 +190,12 @@ function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(n) { return (n || 'U')[0].toUpperCase(); }
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 function escapeDetail(s) {
-  // Accepts Firestore Timestamp | ISO string | null → milliseconds (or null)
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+// Accepts Firestore Timestamp | ISO string | null → milliseconds (or null)
 function toMillis(v) {
   if (!v) return null;
   if (typeof v === 'string') {
@@ -203,10 +208,6 @@ function toMillis(v) {
     return d ? d.getTime() : null;
   }
   return null;
-}
-  return String(s || '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
 }
 
 // ⭐ NEW: mode badge helper
