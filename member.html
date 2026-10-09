@@ -879,10 +879,10 @@
       professional competition. Pick your game, choose Solo · Duo · Squad, and compete
       with Nepal's best players. <strong>Multiple modes allowed</strong> — play as many as you want!
     </p>
-    <div class="date-badge">
-      <div class="m">OCT</div>
-      <div class="d">02</div>
-      <div class="y">2026</div>
+        <div class="date-badge">
+      <div class="m" id="heroDateMonth">—</div>
+      <div class="d" id="heroDateDay">—</div>
+      <div class="y" id="heroDateYear">—</div>
     </div>
   </section>
 
@@ -2274,6 +2274,35 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch (e) {
     console.warn("[visitor-tracker] failed:", e && e.message);
   }
+})();
+</script>
+<script>
+(function () {
+  // Nepal timezone: UTC+5:45
+  function setHeroDate() {
+    const now = new Date();
+    // Convert to NPT by adding the offset
+    const nptMs = now.getTime() + (5 * 60 + 45) * 60 * 1000;
+    const npt = new Date(nptMs);
+
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN',
+                    'JUL','AUG','SEP','OCT','NOV','DEC'];
+    const m = months[npt.getUTCMonth()];
+    const d = String(npt.getUTCDate()).padStart(2, '0');
+    const y = npt.getUTCFullYear();
+
+    const mEl = document.getElementById('heroDateMonth');
+    const dEl = document.getElementById('heroDateDay');
+    const yEl = document.getElementById('heroDateYear');
+    if (mEl) mEl.textContent = m;
+    if (dEl) dEl.textContent = d;
+    if (yEl) yEl.textContent = y;
+  }
+
+  setHeroDate();
+
+  // Re-check every 5 minutes in case user keeps the tab open past midnight
+  setInterval(setHeroDate, 5 * 60 * 1000);
 })();
 </script>
 </body>
