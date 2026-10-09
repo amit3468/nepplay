@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NEPPLAY — Member Dashboard</title>
+<title>NEPPLAY — Tournaments</title>
 <link rel="icon" href="/favicon.ico" />
+
 <style>
   :root {
+    --bg: #0a0618;
     --purple: #7c3aed;
     --purple-2: #a855f7;
     --gold: #f59e0b;
@@ -19,7 +21,7 @@
     --shadow: 0 10px 40px rgba(124, 58, 237, 0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { overflow-x: hidden; max-width: 100vw; }
+  html, body { overflow-x: hidden; max-width: 100vw; scroll-behavior: smooth; }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: #05030f;
@@ -28,7 +30,6 @@
     padding-bottom: 60px;
     position: relative;
   }
-
   .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .bg-layer::before {
     content: '';
@@ -87,29 +88,9 @@
   .nav-links > a.winners-link { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
   .nav-links > a.store-link { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
 
-  .bell-wrap { position: relative; flex-shrink: 0; margin-right: 6px; }
-  .bell-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(124,58,237,.15); border: 1px solid rgba(168,85,247,.35); display: grid; place-items: center; cursor: pointer; color: #f5f3ff; font-size: 0.95rem; position: relative; transition: background 0.15s; }
-  .bell-btn:hover { background: rgba(124,58,237,.3); }
-  .bell-badge { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; border-radius: 999px; background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 800; display: none; place-items: center; padding: 0 4px; border: 2px solid #0a0618; }
-  .bell-badge.show { display: grid; }
-  .bell-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 340px; max-width: calc(100vw - 20px); max-height: 420px; overflow-y: auto; background: #1a0b3d; border: 1px solid rgba(168,85,247,.35); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,.6); display: none; z-index: 100; }
-  .bell-dropdown.open { display: block; }
-  .bell-dropdown .bd-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(168,85,247,.2); font-weight: 800; font-size: 0.85rem; }
-  .bell-dropdown .bd-head button { background: none; border: 0; color: var(--gold-2); font-size: 0.72rem; font-weight: 800; cursor: pointer; font-family: inherit; }
-  .bell-item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(168,85,247,.12); text-decoration: none; color: inherit; transition: background 0.15s; cursor: pointer; }
-  .bell-item:last-child { border-bottom: none; }
-  .bell-item:hover { background: rgba(124,58,237,.15); }
-  .bell-item.unread { background: rgba(124,58,237,.08); }
-  .bell-item .bi-icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 0.9rem; }
-  .bell-item .bi-body { flex: 1; min-width: 0; }
-  .bell-item .bi-title { font-weight: 800; font-size: 0.82rem; color: #fff; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bell-item .bi-msg { font-size: 0.75rem; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .bell-item .bi-time { font-size: 0.65rem; color: #6b7280; margin-top: 4px; }
-  .bell-empty { padding: 30px 16px; text-align: center; color: var(--muted); font-size: 0.82rem; }
-
   .user-chip-wrap { position: relative; flex-shrink: 0; }
   #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
-  .user-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 999px; background: rgba(124,58,237,.15); border: 1px solid rgba(168,85,247,.35); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: rgba(168,85,247,.3); }
+  .user-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 999px; background: rgba(124,58,237,.15); border: 1px solid rgba(168,85,247,.35); transition: background .2s; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: rgba(168,85,247,.3); }
   .user-chip:hover { background: rgba(124,58,237,.3); }
   #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
   .user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#6d28d9,#a855f7); display: grid; place-items: center; font-weight: 700; font-size: .78rem; color: #fff; flex-shrink: 0; }
@@ -129,405 +110,25 @@
 
   .container { max-width: 1100px; margin: 0 auto; padding: 22px 18px; }
 
-  /* ⭐ ANNOUNCEMENTS BANNER */
-  .announcement-stack { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
-
-  .ann-banner {
-    display: flex; gap: 16px; align-items: flex-start;
-    padding: 18px 20px;
-    border-radius: 16px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(251, 191, 36, 0.5);
-    background: linear-gradient(135deg, rgba(124,58,237,0.28), rgba(245,158,11,0.18) 60%, rgba(20,12,45,0.9));
-    box-shadow: 0 12px 36px rgba(124,58,237,.35), 0 0 0 1px rgba(251,191,36,.15) inset;
-    animation: annFadeIn 0.5s ease-out both;
-  }
-  @keyframes annFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .ann-banner::before {
-    content: ''; position: absolute;
-    top: -80px; right: -80px;
-    width: 240px; height: 240px;
-    background: radial-gradient(circle, rgba(251,191,36,.3), transparent 70%);
-    border-radius: 50%; pointer-events: none;
-  }
-  .ann-banner::after {
-    content: ''; position: absolute;
-    left: 0; top: 0; bottom: 0; width: 5px;
-    background: linear-gradient(180deg, #fbbf24, #a855f7);
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-  }
-  .ann-banner.free {
-    border-color: rgba(34, 197, 94, 0.55);
-    background: linear-gradient(135deg, rgba(34,197,94,0.28), rgba(22,163,74,0.14) 60%, rgba(20,12,45,0.9));
-    box-shadow: 0 12px 36px rgba(34,197,94,.35), 0 0 0 1px rgba(34,197,94,.15) inset;
-  }
-  .ann-banner.free::before { background: radial-gradient(circle, rgba(34,197,94,.35), transparent 70%); }
-  .ann-banner.free::after { background: linear-gradient(180deg, #22c55e, #16a34a); }
-
-  .ann-icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: #1a0b3d;
-    display: grid; place-items: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    box-shadow: 0 6px 18px rgba(245,158,11,.45);
-    position: relative; z-index: 1;
-  }
-  .ann-banner.free .ann-icon {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(34,197,94,.5);
-    animation: annPulse 2.2s ease-in-out infinite;
-  }
-  @keyframes annPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 6px 18px rgba(34,197,94,.5); }
-    50%      { transform: scale(1.06); box-shadow: 0 8px 24px rgba(34,197,94,.7); }
-  }
-
-  .ann-body { flex: 1; min-width: 0; position: relative; z-index: 1; }
-
-  .ann-title {
-    font-weight: 900;
-    font-size: 1.08rem;
-    line-height: 1.25;
-    color: #fbbf24;
-    margin-bottom: 6px;
-    word-break: break-word;
-  }
-  .ann-banner.free .ann-title { color: #4ade80; }
-
-  .ann-text {
-    font-size: 0.88rem;
-    line-height: 1.55;
-    color: #e9e5ff;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .ann-text b, .ann-text strong { color: #fff; }
-
-  .ann-cta-row { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-  .ann-cta {
-    display: inline-flex; align-items: center; gap: 6px;
-    text-decoration: none;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.82rem;
-    padding: 9px 18px;
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(124,58,237,.45);
-    transition: transform .15s, box-shadow .2s;
-  }
-  .ann-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(124,58,237,.6); }
-  .ann-banner.free .ann-cta { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 6px 18px rgba(34,197,94,.5); }
-  .ann-banner.free .ann-cta:hover { box-shadow: 0 10px 26px rgba(34,197,94,.65); }
-
-  .ann-time {
-    font-size: 0.72rem;
-    color: #a8a3c9;
-    margin-left: auto;
-    align-self: flex-end;
-  }
-
-  /* ⭐ NEW: Registration Confirmed card */
-  .reg-confirmed {
-    display: none;
-    position: relative;
-    background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(20,12,45,0.92) 70%);
-    border: 1px solid rgba(34,197,94,0.6);
-    border-radius: 18px;
-    padding: 20px 22px;
-    margin-bottom: 22px;
-    box-shadow: 0 14px 40px rgba(34,197,94,.28), 0 0 0 1px rgba(34,197,94,.15) inset;
-    animation: regIn 0.5s ease-out both;
-    overflow: hidden;
-  }
-  .reg-confirmed.show { display: block; }
-  @keyframes regIn {
-    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .reg-confirmed::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0; width: 5px;
-    background: linear-gradient(180deg, #22c55e, #16a34a);
-    border-top-left-radius: 18px;
-    border-bottom-left-radius: 18px;
-  }
-  .reg-confirmed .rc-top {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
-    position: relative;
-    z-index: 1;
-  }
-  .reg-confirmed .rc-icon {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    display: grid; place-items: center;
-    font-size: 1.5rem;
-    color: #fff;
-    flex-shrink: 0;
-    box-shadow: 0 6px 18px rgba(34,197,94,.5);
-  }
-  .reg-confirmed .rc-title-wrap { flex: 1; min-width: 0; }
-  .reg-confirmed .rc-title {
-    font-weight: 900;
-    font-size: 1rem;
-    color: #4ade80;
-    letter-spacing: 0.3px;
-    margin-bottom: 3px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .reg-confirmed .rc-title .pill {
-    background: rgba(34,197,94,.25);
-    color: #86efac;
-    font-size: 0.62rem;
-    font-weight: 900;
-    padding: 3px 9px;
-    border-radius: 999px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    border: 1px solid rgba(34,197,94,.5);
-  }
-  .reg-confirmed .rc-sub {
-    font-size: 0.82rem;
-    color: #cbd5e1;
-    line-height: 1.5;
-  }
-  .reg-confirmed .rc-close {
-    position: absolute;
-    top: 12px; right: 12px;
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #cbd5e1;
-    font-size: 1rem;
-    cursor: pointer;
-    display: grid; place-items: center;
-    z-index: 3;
-    transition: background 0.15s, color 0.15s;
-    font-family: inherit;
-    line-height: 1;
-    padding: 0;
-  }
-  .reg-confirmed .rc-close:hover {
-    background: rgba(239,68,68,0.4);
-    color: #fff;
-  }
-  .reg-confirmed .rc-body {
-    background: rgba(15,8,35,0.55);
-    border-radius: 12px;
-    padding: 14px 16px;
-    position: relative;
-    z-index: 1;
-  }
-  .reg-confirmed .rc-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 7px 0;
-    border-bottom: 1px solid rgba(168,85,247,0.12);
-    font-size: 0.86rem;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .reg-confirmed .rc-row:last-child { border-bottom: none; }
-  .reg-confirmed .rc-k {
-    color: #a8a3c9;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .reg-confirmed .rc-v {
-    color: #fff;
-    font-weight: 800;
-    text-align: right;
-    word-break: break-word;
-  }
-  .reg-confirmed .rc-v.gold { color: #fbbf24; }
-  .reg-confirmed .rc-v.green { color: #4ade80; }
-  .reg-confirmed .rc-v.blue { color: #7db7ff; }
-  .reg-confirmed .rc-mode-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 900;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-  }
-  .reg-confirmed .rc-mode-badge.solo  { background: rgba(34,197,94,.25);  color: #4ade80; border: 1px solid rgba(34,197,94,.5); }
-  .reg-confirmed .rc-mode-badge.duo   { background: rgba(59,130,246,.25); color: #7db7ff; border: 1px solid rgba(59,130,246,.5); }
-  .reg-confirmed .rc-mode-badge.squad { background: rgba(245,158,11,.25); color: #fbbf24; border: 1px solid rgba(245,158,11,.5); }
-  .reg-confirmed .rc-note {
-    margin-top: 12px;
-    padding: 11px 14px;
-    background: rgba(251,191,36,0.1);
-    border: 1px dashed rgba(251,191,36,0.5);
-    border-radius: 10px;
-    font-size: 0.8rem;
-    color: #fde68a;
-    line-height: 1.5;
-    position: relative;
-    z-index: 1;
-  }
-  .reg-confirmed .rc-actions {
-    margin-top: 14px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-  }
-  .reg-confirmed .rc-action {
-    flex: 1;
-    min-width: 130px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    text-align: center;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 0.82rem;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: transform .15s;
-  }
-  .reg-confirmed .rc-action:hover { transform: translateY(-1px); }
-  .reg-confirmed .rc-action.primary {
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(124,58,237,.45);
-  }
-  .reg-confirmed .rc-action.wa {
-    background: linear-gradient(135deg, #25d366, #16a34a);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(37,211,102,.4);
-  }
-
-  /* Keep existing cards */
-  .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
-  .social-card { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; gap: 14px; backdrop-filter: blur(10px); }
-  .social-card .left { display: flex; align-items: center; gap: 12px; }
-  .social-card .icon { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; font-size: 1.3rem; }
-  .social-card .icon.fb { background: #1877f2; }
-  .social-card .icon.wa { background: #25d366; }
-  .social-card .title { font-weight: 700; font-size: 0.95rem; }
-  .social-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-  .social-card .btn { text-decoration: none; font-weight: 700; font-size: 0.82rem; padding: 8px 16px; border-radius: 8px; color: #fff; }
-  .social-card .btn.fb { background: #1877f2; }
-  .social-card .btn.wa { background: #25d366; }
-
-  .hero { background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%); border-radius: 22px; padding: 32px 30px; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(124,58,237,.4); margin-bottom: 26px; border: 1px solid rgba(168,85,247,.35); }
-  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px; background: radial-gradient(circle, rgba(251, 191, 36, 0.3), transparent 70%); border-radius: 50%; }
+  .hero { background: linear-gradient(135deg, #2a1065 0%, #4c1d95 45%, #6d28d9 100%); border-radius: 22px; padding: 34px 30px; box-shadow: 0 20px 60px rgba(124,58,237,.4); margin-bottom: 22px; position: relative; overflow: hidden; border: 1px solid rgba(168,85,247,.35); }
+  .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 260px; height: 260px; background: radial-gradient(circle, rgba(251,191,36,.3), transparent 70%); border-radius: 50%; }
   .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 8s linear infinite; pointer-events: none; }
   @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-  .hero .tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; position: relative; z-index: 1; }
-  .tag { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.6px; padding: 6px 12px; border-radius: 999px; text-transform: uppercase; }
-  .tag.gold { background: rgba(245, 158, 11, 0.18); color: var(--gold-2); border: 1px solid rgba(245, 158, 11, 0.5); }
-  .tag.green { background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.5); }
-  .hero h1 { font-size: 2rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; position: relative; z-index: 1; }
+  .hero .h-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: rgba(251,191,36,.18); color: var(--gold-2); border: 1px solid rgba(251,191,36,.5); padding: 5px 12px; border-radius: 999px; margin-bottom: 12px; position: relative; z-index: 1; }
+  .hero h1 { font-size: 1.9rem; font-weight: 900; line-height: 1.2; margin-bottom: 10px; position: relative; z-index: 1; }
   .hero h1 .cash { color: var(--gold-2); }
-  .hero p { color: #ddd6fe; font-size: 0.98rem; max-width: 640px; line-height: 1.55; position: relative; z-index: 1; }
-  .hero p strong { color: #fbbf24; }
-  .date-badge { position: absolute; top: 28px; right: 30px; background: linear-gradient(135deg, #ef4444, #f97316); border-radius: 14px; padding: 12px 18px; text-align: center; color: #fff; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45); z-index: 1; }
-  .date-badge .m { font-size: 0.7rem; letter-spacing: 1.5px; font-weight: 800; }
-  .date-badge .d { font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 4px 0; }
-  .date-badge .y { font-size: 0.7rem; font-weight: 600; }
+  .hero p { color: #ddd6fe; font-size: 0.95rem; max-width: 620px; line-height: 1.55; position: relative; z-index: 1; }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; position: relative; z-index: 1; }
+  .hero-stat { background: rgba(15,8,35,.55); border: 1px solid rgba(168,85,247,.25); border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #ddd6fe; font-weight: 700; backdrop-filter: blur(8px); }
+  .hero-stat b { color: var(--gold-2); font-weight: 900; font-size: 1rem; }
 
-  .earn-card { display: block; text-decoration: none; color: inherit; background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(16,185,129,.06)); border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 18px; padding: 18px 22px; margin-bottom: 26px; transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s; backdrop-filter: blur(10px); }
-  .earn-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(34, 197, 94, 0.25); border-color: rgba(34, 197, 94, 0.6); }
-  .earn-card .ec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .earn-card .ec-title { font-size: 1rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
-  .earn-card .ec-cta { font-size: 0.78rem; font-weight: 800; color: #4ade80; }
-  .earn-card .ec-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .earn-card .ec-stat { background: rgba(15, 8, 35, 0.55); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 12px 14px; text-align: center; }
-  .earn-card .ec-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #a8a3c9; font-weight: 800; margin-bottom: 5px; }
-  .earn-card .ec-value { font-size: 1.25rem; font-weight: 900; line-height: 1.1; }
-  .earn-card .ec-value.green { color: #4ade80; }
-  .earn-card .ec-value.gold  { color: #fbbf24; }
-  .earn-card .ec-value.blue  { color: #60a5fa; }
-  .earn-card .ec-note { font-size: 0.8rem; color: #ddd6fe; margin-top: 12px; text-align: center; }
-  .earn-card[hidden] { display: none; }
-
-  .ref-card { background: linear-gradient(135deg, rgba(168,85,247,.15), rgba(124,58,237,.08)); border: 1px solid rgba(168,85,247,.4); border-radius: 18px; padding: 22px; margin-bottom: 26px; position: relative; overflow: hidden; backdrop-filter: blur(10px); }
-  .ref-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(168,85,247,.25), transparent 70%); border-radius: 50%; }
-  .ref-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; position: relative; }
-  .ref-head .rf-icon { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, var(--purple), var(--purple-2)); display: grid; place-items: center; font-size: 1.4rem; box-shadow: 0 6px 18px rgba(124,58,237,.4); }
-  .ref-head h3 { font-size: 1.1rem; font-weight: 900; }
-  .ref-head p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
-  .ref-steps { background: rgba(15, 8, 35, 0.55); border-radius: 12px; padding: 14px 18px; margin: 16px 0; position: relative; }
-  .ref-steps ol { padding-left: 18px; font-size: 0.85rem; line-height: 1.8; color: #ddd6fe; }
-  .ref-steps b { color: var(--gold-2); }
-  .ref-link-box { background: rgba(15, 8, 35, 0.75); border: 1px dashed rgba(168,85,247,.5); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; overflow: hidden; position: relative; }
-  .ref-link-box .rl-input { flex: 1; min-width: 0; background: none; border: 0; color: #fff; font-size: 0.82rem; font-family: 'Courier New', monospace; outline: none; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-  .ref-btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .ref-btn { flex: 1; min-width: 130px; padding: 11px 16px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; border: 0; font-family: inherit; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .15s, box-shadow .2s; }
-  .ref-btn.copy { background: linear-gradient(135deg, var(--purple), var(--purple-2)); color: #fff; box-shadow: 0 6px 18px rgba(124,58,237,.4); }
-  .ref-btn.wa { background: linear-gradient(135deg, #25d366, #16a34a); color: #fff; box-shadow: 0 6px 18px rgba(37,211,102,.35); }
-  .ref-btn:hover { transform: translateY(-1px); }
-  .ref-btn.copy.copied { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 6px 18px rgba(34,197,94,.4); }
-  .ref-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 14px; font-size: 0.82rem; color: #ddd6fe; }
-  .ref-stats b { color: var(--gold-2); }
-
-  .section-title { font-size: 1.05rem; font-weight: 800; margin: 0 0 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .section-title .accent { color: var(--gold-2); }
-
-  .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
-  .qa-card { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px; text-decoration: none; color: var(--text); transition: transform 0.15s, border-color 0.2s, background 0.2s; position: relative; overflow: hidden; backdrop-filter: blur(10px); }
-  .qa-card:hover { transform: translateY(-3px); border-color: rgba(168,85,247,.6); background: rgba(40, 22, 80, 0.85); }
-  .qa-card .qa-icon { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; font-size: 1.3rem; background: linear-gradient(135deg, var(--purple), var(--purple-2)); }
-  .qa-card.gold .qa-icon { background: linear-gradient(135deg, #d97706, #fbbf24); }
-  .qa-card.green .qa-icon { background: linear-gradient(135deg, #15803d, #22c55e); }
-  .qa-card.pink .qa-icon { background: linear-gradient(135deg, #be185d, #ec4899); }
-  .qa-card .qa-title { font-weight: 800; font-size: 0.95rem; }
-  .qa-card .qa-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
-
-  .upcoming { background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(168,85,247,.15)); border: 1px solid rgba(168,85,247,.4); border-radius: 16px; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; backdrop-filter: blur(10px); }
-  .upcoming .up-left { display: flex; align-items: center; gap: 14px; }
-  .upcoming .up-icon { width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #ef4444, #f97316); display: grid; place-items: center; font-size: 1.5rem; box-shadow: 0 6px 18px rgba(239,68,68,.4); }
-  .upcoming .up-title { font-weight: 800; font-size: 1rem; }
-  .upcoming .up-meta { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
-  .upcoming .up-cta { background: linear-gradient(135deg, var(--purple), var(--purple-2)); color: #fff; font-weight: 800; font-size: 0.85rem; padding: 11px 20px; border-radius: 10px; text-decoration: none; white-space: nowrap; box-shadow: 0 6px 18px rgba(124,58,237,.4); transition: transform .15s; }
-  .upcoming .up-cta:hover { transform: translateY(-2px); }
-
-  .site-footer { max-width: 1100px; margin: 30px auto 0; padding: 24px 18px 10px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-  .site-footer .f-left { display: flex; flex-direction: column; gap: 4px; }
-  .site-footer .f-brand { color: var(--text); font-weight: 800; font-size: 0.9rem; }
-  .site-footer .f-links { display: flex; gap: 16px; flex-wrap: wrap; }
-  .site-footer .f-links a { color: var(--muted); text-decoration: none; transition: color .2s; }
-  .site-footer .f-links a:hover { color: var(--gold-2); }
-
-  .float-share, .float-wa { position: fixed; right: 20px; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 1.3rem; cursor: pointer; box-shadow: 0 10px 26px rgba(0,0,0,0.4); z-index: 60; }
-  .float-share { bottom: 90px; background: linear-gradient(135deg, var(--purple), var(--purple-2)); }
-  .float-wa { bottom: 24px; background: #25d366; text-decoration: none; }
-
-  .member-tourneys { margin-bottom: 26px; }
-
-  .section-title-mt { font-size: 1.15rem; font-weight: 900; margin: 26px 0 14px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(168,85,247,.25); }
-  .section-title-mt .st-tag { font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .section-title-mt.tonight .st-tag { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
-  .section-title-mt.day .st-tag { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a0b3d; }
-  .section-title-mt.night .st-tag { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; }
-  .section-title-mt.popular { border-bottom-color: rgba(245,158,11,.4); }
-  .section-title-mt.popular .st-tag { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; }
+  .section-title { font-size: 1.2rem; font-weight: 900; margin: 26px 0 14px; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(168,85,247,.25); }
+  .section-title .st-tag { font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .section-title.tonight .st-tag { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+  .section-title.day .st-tag { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a0b3d; }
+  .section-title.night .st-tag { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; }
+  .section-title.popular { border-bottom-color: rgba(245,158,11,.4); }
+  .section-title.popular .st-tag { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; }
 
   .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 26px; }
   .game-card { background: linear-gradient(180deg, rgba(30,18,60,.85), rgba(20,12,45,.9)); border: 1px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
@@ -536,6 +137,7 @@
   .game-card.featured { border-color: rgba(245,158,11,.5); box-shadow: 0 0 30px rgba(245,158,11,.15); }
   .game-card.popular { border-color: rgba(245,158,11,.6); background: linear-gradient(135deg, rgba(245,158,11,.1), rgba(30,18,60,.85)); box-shadow: 0 0 30px rgba(245,158,11,.2); }
   .game-card.popular::before { background: linear-gradient(90deg, transparent, rgba(251,191,36,.7), transparent); }
+
   .game-head { display: flex; align-items: center; gap: 12px; }
   .game-head .icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
   .game-head .info { min-width: 0; flex: 1; }
@@ -544,6 +146,7 @@
   .game-head .meta strong { color: var(--gold-2); }
   .tk-badge { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5); padding: 2px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.3px; white-space: nowrap; }
   .popular-badge { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; padding: 3px 10px; border-radius: 999px; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.4px; white-space: nowrap; text-transform: uppercase; }
+  .free-badge { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.4px; white-space: nowrap; text-transform: uppercase; }
 
   .time-slot { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px dashed rgba(168,85,247,.2); }
   .time-slot:first-of-type { border-top: none; padding-top: 4px; }
@@ -563,52 +166,109 @@
   .mode-btn.squad { background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); }
   .mode-btn.ffa { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35); }
   .mode-btn.other { background: linear-gradient(135deg, #6366f1, #4f46e5); box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
-  .mode-btn.registered { background: linear-gradient(135deg, #22c55e, #16a34a) !important; opacity: 0.65; cursor: default; }
-  .mode-btn.registered:hover { transform: none; }
 
-  .mt-empty { background: rgba(15, 8, 35, 0.5); border: 1px dashed rgba(168,85,247,.35); border-radius: 12px; padding: 22px; text-align: center; color: var(--muted); font-size: .85rem; }
-  .mt-empty a { color: var(--gold-2); font-weight: 700; text-decoration: none; }
+  .room-note { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px 18px; font-size: 0.85rem; color: var(--gold-2); margin-bottom: 22px; line-height: 1.6; backdrop-filter: blur(8px); }
+  .room-note b { color: #fff; }
 
-  .match-section { margin-bottom: 26px; }
-  .match-section .mm-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-  .mm-card { background: linear-gradient(135deg, rgba(245,158,11,.12), rgba(251,191,36,.04)); border: 1px solid rgba(245,158,11,.4); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(10px); }
-  .mm-card.pending { background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(168,85,247,.04)); border-color: rgba(168,85,247,.35); }
-  .mm-card.bye { background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(22,163,74,.05)); border-color: rgba(34,197,94,.4); }
-  .mm-title { font-weight: 800; font-size: .95rem; color: #fff; display: flex; align-items: center; gap: 8px; }
-  .mm-vs { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
-  .mm-player { flex: 1; min-width: 0; text-align: center; padding: 8px 6px; background: rgba(15,8,35,.55); border-radius: 8px; border: 1px solid rgba(168,85,247,.25); }
-  .mm-player.you { border-color: #fbbf24; background: rgba(245,158,11,.1); }
-  .mm-player .mm-label { font-size: .58rem; color: #a8a3c9; font-weight: 700; display: block; margin-bottom: 3px; letter-spacing: .4px; text-transform: uppercase; }
-  .mm-player-name { font-size: .9rem; font-weight: 900; color: #fff; word-break: break-word; line-height: 1.2; }
-  .mm-vs-badge { font-size: .7rem; font-weight: 900; color: #fbbf24; padding: 0 2px; }
-  .mm-room { background: rgba(15,8,35,.6); border: 1px dashed rgba(251,191,36,.5); border-radius: 10px; padding: 10px 12px; font-size: .8rem; color: #ddd6fe; display: flex; flex-direction: column; gap: 6px; }
-  .mm-room .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .mm-room .row code { background: rgba(251,191,36,.15); color: #fbbf24; padding: 2px 8px; border-radius: 5px; font-family: 'Courier New', monospace; font-weight: 800; letter-spacing: 1px; font-size: .82rem; }
-  .mm-copy { background: rgba(124,58,237,.2); color: #d8b4fe; border: 1px solid rgba(168,85,247,.4); padding: 3px 9px; border-radius: 6px; font-size: .66rem; font-weight: 800; cursor: pointer; font-family: inherit; }
-  .mm-copy:hover { background: rgba(124,58,237,.35); }
-  .mm-empty { background: rgba(15,8,35,.5); border: 1px dashed rgba(168,85,247,.35); border-radius: 12px; padding: 22px; text-align: center; color: #a8a3c9; font-size: .85rem; }
-    /* ⭐ TOMORROW FEATURED */
-  .tomorrow-card {
-    background: linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95));
-    border: 2px solid rgba(168,85,247,.6);
+  .loading-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.95rem; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.9rem; background: rgba(30,18,60,0.4); border: 1px dashed rgba(168,85,247,.35); border-radius: 14px; }
+  .empty-state a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
+
+  .winners-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .winner-card {
+    background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(30,18,60,.85));
+    border: 1px solid rgba(251,191,36,.5);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(245,158,11,.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .winner-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  }
+  .wc-medal {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .wc-body { flex: 1; min-width: 0; }
+  .wc-name {
+    color: #fff;
+    font-weight: 900;
+    font-size: 1rem;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wc-game {
+    color: #a8a3c9;
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wc-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+  .wc-prize { color: #4ade80; }
+  .wc-date { color: #a8a3c9; font-weight: 600; }
+
+  .featured-duo {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+  .featured-card {
+    background: linear-gradient(180deg, rgba(30,18,60,.9), rgba(20,12,45,.95));
+    border: 2px solid rgba(245,158,11,.5);
     border-radius: 18px;
     padding: 22px 24px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    box-shadow: 0 10px 40px rgba(168,85,247,.15);
+    box-shadow: 0 10px 40px rgba(245,158,11,.15);
     position: relative;
     overflow: hidden;
-    margin-bottom: 26px;
   }
-  .tomorrow-card::before {
+  .featured-card.tonight {
+    border-color: rgba(245,158,11,.6);
+    background: linear-gradient(180deg, rgba(245,158,11,.12), rgba(20,12,45,.95));
+  }
+  .featured-card.tomorrow {
+    border-color: rgba(168,85,247,.6);
+    background: linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95));
+  }
+  .featured-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
+    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  }
+  .featured-card.tomorrow::before {
     background: linear-gradient(90deg, transparent, #a855f7, transparent);
   }
-  .tomorrow-card .tc-tag {
+  .featured-card .fc-tag {
     display: inline-block;
     padding: 5px 12px;
     border-radius: 999px;
@@ -617,21 +277,27 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
     width: fit-content;
+  }
+  .featured-card.tonight .fc-tag {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: #fff;
+  }
+  .featured-card.tomorrow .fc-tag {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: #fff;
   }
-  .tomorrow-card .tc-title {
+  .featured-card .fc-title {
     font-size: 1.6rem;
     font-weight: 900;
     color: #fff;
     line-height: 1.15;
   }
-  .tomorrow-card .tc-sub {
+  .featured-card .fc-sub {
     font-size: 0.85rem;
     color: #a8a3c9;
     margin-top: -6px;
   }
-  .tomorrow-card .tc-info {
+  .featured-card .fc-info {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -639,34 +305,31 @@
     color: #e9e5ff;
     font-weight: 700;
   }
-  .tomorrow-card .tc-info span {
+  .featured-card .fc-info span {
     background: rgba(15,8,35,.55);
     border: 1px solid rgba(168,85,247,.25);
     padding: 6px 12px;
     border-radius: 8px;
   }
-  .tomorrow-card .tc-info b { color: #fbbf24; }
-  .tomorrow-card .tc-modes {
+  .featured-card .fc-info b { color: #fbbf24; }
+  .featured-card .fc-modes {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-top: 4px;
   }
-  .tomorrow-card .tc-mode {
+  .featured-card .fc-mode {
     text-align: center;
-    padding: 14px 8px;
+    padding: 12px 8px;
     border-radius: 10px;
     font-weight: 800;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #fff;
-    text-decoration: none;
-    transition: transform .15s;
   }
-  .tomorrow-card .tc-mode:hover { transform: translateY(-1px); }
-  .tomorrow-card .tc-mode.solo  { background: linear-gradient(135deg, #22c55e, #16a34a); }
-  .tomorrow-card .tc-mode.duo   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-  .tomorrow-card .tc-mode.squad { background: linear-gradient(135deg, #f59e0b, #f97316); }
-  .tomorrow-card .tc-mode small {
+  .featured-card .fc-mode.solo  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .featured-card .fc-mode.duo   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+  .featured-card .fc-mode.squad { background: linear-gradient(135deg, #f59e0b, #f97316); }
+  .featured-card .fc-mode small {
     display: block;
     font-size: 0.65rem;
     font-weight: 900;
@@ -678,13 +341,13 @@
     margin-left: auto;
     margin-right: auto;
   }
-  .tomorrow-card .tc-cta {
+  .featured-card .fc-cta {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin-top: 6px;
   }
-  .tomorrow-card .tc-cta a {
+  .featured-card .fc-cta a {
     flex: 1;
     min-width: 130px;
     text-align: center;
@@ -694,19 +357,15 @@
     font-size: 0.85rem;
     text-decoration: none;
     color: #fff;
+    transition: transform .15s;
+  }
+  .featured-card .fc-cta a:hover { transform: translateY(-1px); }
+  .featured-card.tonight .fc-cta a {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1a0b3d;
+  }
+  .featured-card.tomorrow .fc-cta a {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
-  }
-    /* ⭐ TONIGHT variant (red/orange) */
-  .tomorrow-card.tonight {
-    border-color: rgba(245,158,11,.6);
-    background: linear-gradient(180deg, rgba(245,158,11,.12), rgba(20,12,45,.95));
-    box-shadow: 0 10px 40px rgba(245,158,11,.15);
-  }
-  .tomorrow-card.tonight::before {
-    background: linear-gradient(90deg, transparent, #fbbf24, transparent);
-  }
-  .tomorrow-card.tonight .tc-tag {
-    background: linear-gradient(135deg, #ef4444, #f97316);
   }
 
   @media (max-width: 720px) {
@@ -717,46 +376,23 @@
     .brand .brand-text { display: none; }
     .nav-links { gap: 4px; font-size: 0.68rem; }
     .nav-links > a.winners-link, .nav-links > a.store-link { padding: 4px 8px; font-size: 0.68rem; }
-    .nav-links > a[href="/teams.html"], .nav-links > a[href="/support.html"] { display: none; }
+    .nav-links > a[href="/member.html"], .nav-links > a[href="/teams.html"], .nav-links > a[href="/profile.html"], .nav-links > a[href="/support.html"] { display: none; }
+    .nav-links > a[href="/tournaments.html"] { color: var(--gold-2); font-weight: 700; }
     .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
     .user-chip .avatar { width: 26px; height: 26px; font-size: 0.72rem; }
     .user-chip .uname { display: none; }
     .user-chip .caret { font-size: 0.45rem; }
     .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); }
     .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: 0.82rem; }
-    .bell-btn { width: 30px; height: 30px; font-size: 0.82rem; }
-    .bell-dropdown { width: 300px; }
-    .social-row { grid-template-columns: 1fr; }
+    .hero { padding: 26px 20px; }
     .hero h1 { font-size: 1.5rem; }
-    .date-badge { top: 16px; right: 16px; padding: 8px 12px; }
-    .date-badge .d { font-size: 1.4rem; }
-    .quick-actions { grid-template-columns: 1fr 1fr; }
-    .upcoming { flex-direction: column; align-items: stretch; text-align: left; }
-    .upcoming .up-cta { text-align: center; }
-    .site-footer { flex-direction: column; align-items: flex-start; }
-    .earn-card .ec-value { font-size: 1rem; }
-    .ref-card { padding: 18px 16px; }
-    .ref-head .rf-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-    .ref-head h3 { font-size: 1rem; }
     .game-grid { grid-template-columns: 1fr; gap: 14px; }
     .game-card { padding: 14px; }
-    .section-title-mt { font-size: 1.05rem; }
-    .match-section .mm-list { grid-template-columns: 1fr; }
-    .ann-banner { padding: 14px 14px; gap: 12px; }
-    .ann-icon { width: 44px; height: 44px; font-size: 1.2rem; }
-    .ann-title { font-size: 0.98rem; }
-    .ann-text { font-size: 0.82rem; }
-    .reg-confirmed { padding: 16px 16px; }
-    .reg-confirmed .rc-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-    .reg-confirmed .rc-title { font-size: 0.95rem; }
-    .reg-confirmed .rc-row { font-size: 0.8rem; }
-    .reg-confirmed .rc-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 0.9rem; }
+    .section-title { font-size: 1.05rem; }
   }
   @media (max-width: 380px) {
     .nav-links > a.winners-link, .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
     .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
-    .quick-actions { grid-template-columns: 1fr; }
-    .earn-card .ec-value { font-size: 0.9rem; }
   }
 </style>
 <link rel="manifest" href="/manifest.json">
@@ -783,27 +419,12 @@
     <span class="brand-text">Nepal Gaming</span>
   </a>
   <div class="nav-links">
-    <a href="/member.html" class="active">Home</a>
-    <a href="/tournaments.html">Tournaments</a>
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html" class="active">Tournaments</a>
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
     <a href="/store.html" class="store-link">🛒 Store</a>
     <a href="/teams.html">Teams</a>
     <a href="/support.html">Support</a>
-
-    <div class="bell-wrap">
-      <div class="bell-btn" id="bellBtn" title="Notifications">🔔
-        <span class="bell-badge" id="bellBadge">0</span>
-      </div>
-      <div class="bell-dropdown" id="bellDropdown">
-        <div class="bd-head">
-          <span>🔔 Notifications</span>
-          <button onclick="markAllNotificationsRead()">Mark all read</button>
-        </div>
-        <div id="bellList">
-          <div class="bell-empty">Loading...</div>
-        </div>
-      </div>
-    </div>
 
     <div class="user-chip-wrap">
       <input type="checkbox" id="chipToggle" />
@@ -815,7 +436,7 @@
       <label class="chip-backdrop" for="chipToggle"></label>
       <div class="user-menu">
         <a href="/member.html">📊 My Dashboard</a>
-        <a href="/player.html">👤 My Profile &amp; Earnings</a>
+        <a href="/player.html">👤 My Profile</a>
         <a href="/my-tournaments.html">🏆 My Tournaments</a>
         <div class="divider"></div>
         <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
@@ -826,252 +447,85 @@
 
 <div class="container">
 
-  <!-- ⭐ REGISTRATION CONFIRMED CARD -->
-  <div id="regConfirmedCard" class="reg-confirmed">
-    <button class="rc-close" onclick="dismissRegConfirmed()" title="Dismiss">✕</button>
-    <div class="rc-top">
-      <div class="rc-icon">✅</div>
-      <div class="rc-title-wrap">
-        <div class="rc-title">
-          Registration Confirmed!
-          <span class="pill" id="rcStatusPill">CONFIRMED</span>
-        </div>
-        <div class="rc-sub">You're all set. See you on the battlefield! 🎮</div>
-      </div>
-    </div>
-    <div class="rc-body" id="rcBody">
-      <!-- Filled by JS -->
-    </div>
-    <div class="rc-note" id="rcNote">
-      ⏰ Room details will be shared 30 minutes before the match. Keep an eye on your WhatsApp group.
-    </div>
-    <div class="rc-actions">
-      <a href="/my-tournaments.html" class="rc-action primary">🏆 View My Tournaments</a>
-      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" rel="noopener" class="rc-action wa">💬 WhatsApp Group</a>
-    </div>
-  </div>
-
-  <!-- ⭐ ANNOUNCEMENTS -->
-  <div id="announcementStack" class="announcement-stack"></div>
-
-  <div class="social-row">
-    <div class="social-card">
-      <div class="left">
-        <div class="icon fb">f</div>
-        <div>
-          <div class="title">Follow on Facebook</div>
-          <div class="sub">Tournament announcements · Winners · Updates</div>
-        </div>
-      </div>
-      <a href="https://www.facebook.com/profile.php?id=61594129844560" target="_blank" rel="noopener" class="btn fb">Follow</a>
-    </div>
-
-    <div class="social-card">
-      <div class="left">
-        <div class="icon wa">💬</div>
-        <div>
-          <div class="title">Join WhatsApp Group</div>
-          <div class="sub">Match alerts · Team up · Community chat</div>
-        </div>
-      </div>
-      <a href="https://chat.whatsapp.com/GAaDKkUFUqX5eo5fn4NPGb" target="_blank" rel="noopener" class="btn wa">Join</a>
-    </div>
-  </div>
-
   <section class="hero">
-    <div class="tags">
-      <span class="tag gold">● REGISTRATIONS OPEN</span>
-      <span class="tag green">● PAID TOURNAMENTS</span>
-    </div>
-    <h1>Ready to win <span class="cash">real cash?</span> 💰</h1>
-    <p>
-      <strong>NEPPLAY</strong> paid tournaments are live! Real cash prizes · professional
-      competition. Tonight is the <strong>BIG WEEKEND SPECIAL — FF Squad Fullmap</strong>
-      at 9 PM. Choose Solo · Duo · Squad, and compete with Nepal's best players.
-    </p>
-        <div class="date-badge">
-      <div class="m" id="heroDateMonth">—</div>
-      <div class="d" id="heroDateDay">—</div>
-      <div class="y" id="heroDateYear">—</div>
+    <span class="h-tag">🎮 NEPPLAY Tournaments</span>
+    <h1>Choose your game. <span class="cash">Win real cash.</span> 💰</h1>
+    <p>🔥 Tonight — Free Fire Squad Fullmap · Rs 160/team entry · Rs 650 prize · Rs 70 top killer · 9 PM. Limited to 8 team slots!</p>
+    <div class="hero-stats" id="heroStats">
+      <div class="hero-stat">⏳ Loading…</div>
     </div>
   </section>
 
-  <a href="/player.html" id="earnCard" class="earn-card" hidden>
-    <div class="ec-head">
-      <div class="ec-title">💰 Your Earnings</div>
-      <div class="ec-cta">View details →</div>
-    </div>
-    <div class="ec-grid">
-      <div class="ec-stat">
-        <div class="ec-label">Total Won</div>
-        <div id="mc-total" class="ec-value green">Rs. 0</div>
-      </div>
-      <div class="ec-stat">
-        <div class="ec-label">Pending</div>
-        <div id="mc-pending" class="ec-value gold">Rs. 0</div>
-      </div>
-      <div class="ec-stat">
-        <div class="ec-label">Paid</div>
-        <div id="mc-paid" class="ec-value blue">Rs. 0</div>
-      </div>
-    </div>
-    <div id="mc-note" class="ec-note" hidden></div>
-  </a>
+      </section>
 
-  <div class="ref-card" id="refCard" hidden>
-    <div class="ref-head">
-      <div class="rf-icon">🤝</div>
-      <div>
-        <h3>Refer &amp; Earn Rs 20</h3>
-        <p>Invite friends · Earn Rs 20 per paid signup</p>
-      </div>
-    </div>
+  <div class="featured-duo">
 
-    <div class="ref-steps">
-      <ol>
-        <li>Share your referral link with a friend</li>
-        <li>They sign up and join <b>any paid tournament</b></li>
-        <li>You get <b>Rs 20</b> credited to your earnings</li>
-      </ol>
-    </div>
-
-    <div class="ref-link-box">
-      <input type="text" class="rl-input" id="refLinkInput" readonly value="Loading..." />
-    </div>
-    <div class="ref-btn-row">
-      <button class="ref-btn copy" id="refCopyBtn" onclick="copyReferralLink()">📋 Copy Link</button>
-      <a class="ref-btn wa" id="refWaBtn" href="#" target="_blank" rel="noopener">💬 Share on WhatsApp</a>
-    </div>
-
-    <div class="ref-stats">
-      <span>Referrals: <b id="refCount">0</b></span>
-      <span>Earned: <b id="refEarned">Rs. 0</b></span>
-    </div>
-  </div>
-
-  <section class="match-section" id="myMatchesSection" hidden>
-    <h2 class="section-title">🎯 My <span class="accent">Matches</span></h2>
-    <div class="mm-list" id="myMatchesList">
-      <div class="mm-empty">Loading your matches…</div>
-    </div>
-  </section>
-
-                <!-- ⭐ TONIGHT · 10 OCT · FF Squad -->
-  <div class="tomorrow-card tonight" style="border-color:rgba(59,130,246,.6); background:linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95));">
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <!-- TONIGHT · 10 OCT · FF Squad -->
+    <div class="featured-card tonight" style="border-color:rgba(59,130,246,.6); background:linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95));">
             <div style="display:flex; justify-content:center; margin-bottom:8px;">
-      <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:999px; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a0b3d; font-size:0.85rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; box-shadow:0 0 20px rgba(251,191,36,.7); animation:pulseGlow 2s ease-in-out infinite;">🎉 BIG WEEKEND SPECIAL 🎉</span>
-    </div>
-    <span class="tc-tag" style="background:linear-gradient(135deg,#ef4444,#f97316);">🔥 TONIGHT · 10 OCT · 9 PM</span>
-    <div class="tc-title">Free Fire Squad — Fullmap</div>
-    <div class="tc-sub">🏆 4-player squads · Full map · Real cash</div>
-
-    <div style="background:linear-gradient(135deg, rgba(59,130,246,.12), rgba(20,12,45,.85)); border:1px solid rgba(59,130,246,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div style="font-weight:900; color:#60a5fa; font-size:0.95rem;">🔥 FREE FIRE — SQUAD</div>
-        <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 160</b>/team · Prize <b style="color:#4ade80;">Rs 650</b> · 🔪 TK <b style="color:#fca5a5;">Rs 70</b></div>
+        <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 20px; border-radius:999px; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a0b3d; font-size:0.85rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; box-shadow:0 0 20px rgba(251,191,36,.7); animation:pulseGlow 2s ease-in-out infinite;">🎉 BIG WEEKEND SPECIAL 🎉</span>
       </div>
-      <div class="tc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
-        <a class="tc-mode squad" href="/registration.html?tournamentId=DuaeBLnpsDfcUwJSFwCK" style="text-decoration:none; background:linear-gradient(135deg,#3b82f6,#2563eb);">
-          🏆 Register FF Squad — Rs 160/team
-        </a>
-      </div>
-    </div>
+      <span class="fc-tag" style="background:linear-gradient(135deg,#ef4444,#f97316); color:#fff;">🔥 TONIGHT · 10 OCT · 9 PM</span>
+      <div class="fc-title">Free Fire Squad — Fullmap</div>
+      <div class="fc-sub">🏆 4-player squads · Full map · Real cash</div>
 
-    <div style="background:linear-gradient(135deg, rgba(168,85,247,.12), rgba(20,12,45,.85)); border:1px solid rgba(168,85,247,.5); border-radius:12px; padding:12px 16px; margin-top:6px;">
-      <div style="font-weight:900; color:#c084fc; font-size:0.88rem; margin-bottom:8px;">📜 MATCH RULES</div>
-      <div style="font-size:0.82rem; color:#e9e5ff; line-height:1.7;">
-        <div>1️⃣ <b style="color:#fbbf24;">Character skills OFF</b></div>
-        <div>2️⃣ <b style="color:#fbbf24;">Gun attribute OFF</b></div>
-        <div>3️⃣ <b style="color:#fbbf24;">Headshot & body shots both count</b></div>
+      <div style="background:linear-gradient(135deg, rgba(59,130,246,.12), rgba(20,12,45,.85)); border:1px solid rgba(59,130,246,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:900; color:#60a5fa; font-size:0.95rem;">🔥 FREE FIRE — SQUAD</div>
+          <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 160</b>/team · Prize <b style="color:#4ade80;">Rs 650</b> · 🔪 TK <b style="color:#fca5a5;">Rs 70</b></div>
+        </div>
+        <div class="fc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
+          <a class="fc-mode squad" href="/registration.html?tournamentId=DuaeBLnpsDfcUwJSFwCK" style="text-decoration:none; background:linear-gradient(135deg,#3b82f6,#2563eb);">
+            🏆 Register FF Squad — Rs 160/team
+          </a>
+        </div>
       </div>
-    </div>
 
-    <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
-      ⏰ Registration closes 8:30 PM · 🔑 Room details 8:40 PM · 🚀 Match 9:00 PM
-    </div>
-  </div>
-                  <!-- ⭐ TOMORROW · 11 OCT · FF Solo -->
-  <div class="tomorrow-card" style="border-color:rgba(34,197,94,.6); background:linear-gradient(180deg, rgba(34,197,94,.12), rgba(20,12,45,.95));">
-    <span class="tc-tag" style="background:linear-gradient(135deg,#22c55e,#16a34a);">🔥 TOMORROW · 11 OCT · 9 PM</span>
-    <div class="tc-title">Free Fire Solo — Fullmap</div>
-    <div class="tc-sub">🎯 Full map · Real cash · Solo BR</div>
-
-    <div style="background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div style="font-weight:900; color:#4ade80; font-size:0.95rem;">🔥 FREE FIRE — SOLO</div>
-        <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 50</b> · Prize <b style="color:#4ade80;">Rs 200</b> · 🔪 TK <b style="color:#fca5a5;">Rs 50</b></div>
+      <div style="background:linear-gradient(135deg, rgba(168,85,247,.12), rgba(20,12,45,.85)); border:1px solid rgba(168,85,247,.5); border-radius:12px; padding:12px 16px; margin-top:6px;">
+                <div style="font-weight:900; color:#c084fc; font-size:0.88rem; margin-bottom:8px;">📜 MATCH RULES</div>
+        <div style="font-size:0.82rem; color:#e9e5ff; line-height:1.7;">
+          <div>1️⃣ <b style="color:#4ade80;">Character skills ON</b></div>
+          <div>2️⃣ <b style="color:#fbbf24;">Gun attribute OFF</b></div>
+          <div>3️⃣ <b style="color:#fbbf24;">Headshot & body shots both count</b></div>
+        </div>
       </div>
-      <div class="tc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
-        <a class="tc-mode solo" href="/registration.html?tournamentId=4BNOxaAKgVamzgcPTeLI" style="text-decoration:none;">
-          👤 Register FF Solo — Rs 50
-        </a>
+
+      <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
+        ⏰ Reg closes 8:30 PM · 🔑 Room 8:40 PM · 🚀 Match 9:00 PM
       </div>
     </div>
+      <!-- TOMORROW · 11 OCT · FF Solo -->
+    <div class="featured-card" style="border-color:rgba(34,197,94,.6); background:linear-gradient(180deg, rgba(34,197,94,.12), rgba(20,12,45,.95));">
+      <span class="fc-tag" style="background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff;">🔥 TOMORROW · 11 OCT · 9 PM</span>
+      <div class="fc-title">Free Fire Solo — Fullmap</div>
+      <div class="fc-sub">🎯 Full map · Real cash · Solo BR</div>
 
-    <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
-      ⏰ Registration closes 8:30 PM · 🔑 Room details 8:40 PM · 🚀 Match 9:00 PM
-    </div>
-  </div>
-  <div style="text-align:center; margin-bottom:26px;">
-    <a href="/tournaments.html" style="display:inline-block; padding:11px 20px; border-radius:10px; font-weight:800; font-size:0.85rem; text-decoration:none; color:#fff; background:linear-gradient(135deg,#7c3aed,#a855f7);">📝 See full tournament list</a>
-  </div>
-            
+      <div style="background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:900; color:#4ade80; font-size:0.95rem;">🔥 FREE FIRE — SOLO</div>
+          <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 50</b> · Prize <b style="color:#4ade80;">Rs 200</b> · 🔪 TK <b style="color:#fca5a5;">Rs 50</b></div>
+        </div>
+        <div class="fc-modes" style="margin-top:8px; grid-template-columns: 1fr;">
+          <a class="fc-mode solo" href="/registration.html?tournamentId=4BNOxaAKgVamzgcPTeLI" style="text-decoration:none;">
+            👤 Register FF Solo — Rs 50
+          </a>
+        </div>
+      </div>
 
-  <div id="upcomingSection" hidden>
-    <h2 class="section-title">🎮 Upcoming <span class="accent">Tournaments</span></h2>
-    <div id="upcomingContent">
-      <div class="mt-empty">Loading tournaments…</div>
+      <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
+        ⏰ Reg closes 8:30 PM · 🔑 Room 8:40 PM · 🚀 Match 9:00 PM
+      </div>
     </div>
   </div>
 
-  <section class="member-tourneys" id="myRegsSection" hidden style="margin-top:26px;">
-    <h2 class="section-title">🏆 My <span class="accent">Registrations</span></h2>
-    <div class="mt-empty" id="myRegsList">Loading your registrations…</div>
-  </section>
+  <!-- ⭐ RECENT WINNERS -->
+  <div id="winnersStrip"></div>
 
-  <h2 class="section-title" style="margin-top:26px;">⚡ Quick <span class="accent">Actions</span></h2>
-  <div class="quick-actions">
-    <a href="/tournaments.html" class="qa-card">
-      <div class="qa-icon">🎮</div>
-      <div class="qa-title">Browse Tournaments</div>
-      <div class="qa-sub">All games · Solo · Duo · Squad</div>
-    </a>
-    <a href="/my-tournaments.html" class="qa-card gold">
-      <div class="qa-icon">🏆</div>
-      <div class="qa-title">My Tournaments</div>
-      <div class="qa-sub">Track your registrations & results</div>
-    </a>
-    <a href="/winners.html" class="qa-card green">
-      <div class="qa-icon">🥇</div>
-      <div class="qa-title">Winners & Payouts</div>
-      <div class="qa-sub">See who won & how much was paid</div>
-    </a>
-    <a href="/store.html" class="qa-card pink">
-      <div class="qa-icon">🛒</div>
-      <div class="qa-title">NEPPLAY Store</div>
-      <div class="qa-sub">Diamonds · UC · Gift cards</div>
-    </a>
+  <div id="tournamentContent">
+    <div class="loading-state">⏳ Loading tournaments…</div>
   </div>
 
 </div>
-
-<footer class="site-footer">
-  <div class="f-left">
-    <div class="f-brand">🎮 NEPPLAY</div>
-    <div>Nepal's trusted paid esports platform · Since 2026</div>
-  </div>
-  <div class="f-links">
-    <a href="/tournaments.html">Tournaments</a>
-    <a href="/winners.html">Winners</a>
-    <a href="/store.html">Store</a>
-    <a href="/support.html">Support</a>
-    <a href="https://wa.me/9779816023400" target="_blank" rel="noopener">WhatsApp</a>
-  </div>
-</footer>
-
-<div class="float-share" onclick="sharePage()">🔗</div>
-<a href="https://wa.me/?text=Check%20out%20NEPPLAY%20Tournaments%20-%20nepplay.onrender.com/tournaments.html" target="_blank" rel="noopener" class="float-wa">💬</a>
 
 <script>
 (function () {
@@ -1101,54 +555,11 @@
         });
     }
 })();
-
-window.sharePage = window.sharePage || function () {
-    var url = window.location.origin + '/tournaments.html';
-    if (navigator.share) {
-        navigator.share({ title: 'NEPPLAY', url: url }).catch(function () {});
-    } else {
-        navigator.clipboard.writeText(url);
-        alert('Link copied!');
-    }
-};
-
-window.toggleBell = function(e) {
-    if (e) e.stopPropagation();
-    var dd = document.getElementById('bellDropdown');
-    if (dd) dd.classList.toggle('open');
-};
-document.addEventListener('click', function(e) {
-    var dd = document.getElementById('bellDropdown');
-    var btn = document.getElementById('bellBtn');
-    if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
-        dd.classList.remove('open');
-    }
-});
-
-// ⭐ Dismiss Registration Confirmed card — remembers forever
-window.dismissRegConfirmed = function() {
-    var id = window.__regConfirmedId || '';
-    if (id) {
-        try {
-            localStorage.setItem('nep_reg_dismissed_' + id, '1');
-        } catch (e) {}
-    }
-    var card = document.getElementById('regConfirmedCard');
-    if (card) {
-        card.style.transition = 'opacity 0.3s, transform 0.3s';
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(-10px)';
-        setTimeout(function() { card.classList.remove('show'); card.style.opacity = ''; card.style.transform = ''; }, 300);
-    }
-};
 </script>
 
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, doc, getDoc, collection, query, where, getDocs,
-  updateDoc, arrayUnion, orderBy, limit
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const cfg = {
@@ -1163,22 +574,39 @@ const app  = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-const POPULAR_GAMES = ['free fire', 'pubg', 'ludo'];
-
+const POPULAR_GAMES = ['free fire', 'pubg'];
 
 const GAME_ALIASES = {
-  'freefire':'freefire','free fire':'freefire','ff':'freefire',
-  'pubg':'pubgmobile','pubgm':'pubgmobile','pubg mobile':'pubgmobile','pubgmobile':'pubgmobile',
-  'cod':'cod','cod mobile':'cod','call of duty':'cod','callofduty':'cod',
-  'valorant':'valorant',
-  'efootball':'efootball','efoot':'efootball','e football':'efootball',
-  'ecricket':'ecricket','e cricket':'ecricket',
-  'chess':'chess','ludo':'ludo','ludo king':'ludo'
+  'freefire':       'freefire',
+  'free fire':      'freefire',
+  'ff':             'freefire',
+  'pubg':           'pubgmobile',
+  'pubgm':          'pubgmobile',
+  'pubg mobile':    'pubgmobile',
+  'pubgmobile':     'pubgmobile',
+  'cod':            'cod',
+  'cod mobile':     'cod',
+  'call of duty':   'cod',
+  'callofduty':     'cod',
+  'valorant':       'valorant',
+  'efootball':      'efootball',
+  'efoot':          'efootball',
+  'e football':     'efootball',
+  'ecricket':       'ecricket',
+  'e cricket':      'ecricket',
+  'chess':          'chess',
+  'ludo':           'ludo',
+  'ludo king':      'ludo'
 };
 const GAME_DISPLAY = {
-  freefire:'Free Fire', pubgmobile:'PUBG Mobile', cod:'Call of Duty',
-  valorant:'Valorant', efootball:'eFootball', ecricket:'eCricket',
-  chess:'Chess', ludo:'Ludo'
+  freefire:  'Free Fire',
+  pubgmobile:'PUBG Mobile',
+  cod:       'Call of Duty',
+  valorant:  'Valorant',
+  efootball: 'eFootball',
+  ecricket:  'eCricket',
+  chess:     'Chess',
+  ludo:      'Ludo'
 };
 function gameKey(game) {
   const g = String(game || '').toLowerCase().trim().replace(/\s+/g, ' ');
@@ -1188,24 +616,24 @@ function gameDisplayName(game) {
   const k = gameKey(game);
   return GAME_DISPLAY[k] || game || 'Game';
 }
+
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
-function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 function modeClass(mode) {
   const x = String(mode || '').toLowerCase();
   if (x === 'solo') return 'solo';
-  if (x === 'duo') return 'duo';
+  if (x === 'duo' || x === '2v2') return 'duo';
   if (x === 'squad') return 'squad';
   if (x === 'ffa' || x === '4-player ffa' || x === '4 player ffa') return 'ffa';
   return 'other';
 }
 function modeIcon(mode) {
   const x = String(mode || '').toLowerCase();
-  if (x === 'solo') return '👤';
-  if (x === 'duo') return '👥';
+  if (x === 'solo' || x === '1v1') return '👤';
+  if (x === 'duo' || x === '2v2') return '👥';
   if (x === 'squad') return '🏆';
   if (x === 'ffa') return '🎲';
   return '🎮';
@@ -1213,15 +641,15 @@ function modeIcon(mode) {
 function gameIcon(key, fallbackIcon) {
   if (fallbackIcon) return fallbackIcon;
   switch (key) {
-    case 'freefire':return '🔥';
+    case 'freefire':  return '🔥';
     case 'pubgmobile':return '🎯';
-    case 'cod':return '🎖️';
-    case 'valorant':return '⚔️';
-    case 'efootball':return '⚽';
-    case 'ecricket':return '🏏';
-    case 'chess':return '♟️';
-    case 'ludo':return '🎲';
-    default:return '🎮';
+    case 'cod':       return '🎖️';
+    case 'valorant':  return '⚔️';
+    case 'efootball': return '⚽';
+    case 'ecricket':  return '🏏';
+    case 'chess':     return '♟️';
+    case 'ludo':      return '🎲';
+    default:          return '🎮';
   }
 }
 function slotOf(time) {
@@ -1230,27 +658,23 @@ function slotOf(time) {
   return 'night';
 }
 function isPopular(key) {
-  return POPULAR_GAMES.some(k => gameKey(k) === key);
+  const popularKeys = ['freefire', 'pubgmobile', 'ludo'];
+  return popularKeys.includes(key);
 }
-function bestTopKills(list) {
-  let best = 0;
-  list.forEach(t => {
-    const v = Number(t.topKillsPrize || t.top_kills_prize || t.topKillPrize || 0);
-    if (v > best) best = v;
-  });
-  return best;
-}
+
 function formatDateLabel(ymd) {
   if (!ymd || typeof ymd !== 'string') return '';
   const parts = ymd.split('-');
   if (parts.length !== 3) return ymd;
+  const y = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
   const d = parseInt(parts[2], 10);
-  if (!m || !d) return ymd;
+  if (!y || !m || !d) return ymd;
   const months = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
   return `${d} ${months[m-1]}`;
 }
+
 function dominantDate(list) {
   if (!list || !list.length) return '';
   const counts = {};
@@ -1259,942 +683,406 @@ function dominantDate(list) {
     if (d) counts[d] = (counts[d] || 0) + 1;
   });
   let best = ''; let bestN = 0;
-  Object.keys(counts).forEach(k => { if (counts[k] > bestN) { best = k; bestN = counts[k]; } });
+  Object.keys(counts).forEach(k => {
+    if (counts[k] > bestN) { best = k; bestN = counts[k]; }
+  });
   return best;
 }
 
-let currentUid = null;
-let currentUsername = null;
-let myRegisteredTitles = new Set();
-
-onAuthStateChanged(auth, async (user) => {
-    const avatar = document.getElementById("userAvatar");
-    const nameEl = document.getElementById("userName");
-
-    if (!user) {
-        window.location.href = "/login.html?redirect=" + encodeURIComponent("/member.html");
-        return;
-    }
-    currentUid = user.uid;
-
-    let display = user.email || user.uid || "Member";
-    let profile = {};
-    try {
-        const uDoc = await getDoc(doc(db, "users", user.uid));
-        if (uDoc.exists()) {
-            profile = uDoc.data();
-            display = profile.fullName || profile.username || profile.email || display;
-            currentUsername = profile.username || null;
-        }
-    } catch (e) {}
-    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
-    if (nameEl) nameEl.textContent = display;
-
-    if (currentUsername) {
-        const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(currentUsername);
-        const inp = document.getElementById('refLinkInput');
-        if (inp) inp.value = refUrl;
-        const wa = document.getElementById('refWaBtn');
-        if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(
-            '🎮 Join NEPPLAY and win real cash!\n\n' +
-            'Sign up here: ' + refUrl + '\n\n' +
-            'Paid tournaments every week · Rs 150 entry · Rs 500–1000 prizes'
-        );
-        const card = document.getElementById('refCard');
-        if (card) card.hidden = false;
-    }
-
-    try {
-        const rSnap = await getDocs(query(
-            collection(db, 'referral_bonuses'),
-            where('referrerUid', '==', user.uid)
-        ));
-        const bonuses = rSnap.docs.map(d => d.data());
-        const total = bonuses.reduce((s, b) => s + Number(b.amount || 0), 0);
-        document.getElementById('refCount').textContent = bonuses.length;
-        document.getElementById('refEarned').textContent = fmtRs(total);
-    } catch (e) { console.warn('ref stats error:', e); }
-
-    try {
-        const unameLower = (profile.username || '').toLowerCase();
-        const fullNameLower = (profile.fullName || '').toLowerCase();
-
-        let byUid = [];
-        try {
-            const s = await getDocs(query(collection(db, 'tournament_payouts'), where('userId', '==', user.uid)));
-            byUid = s.docs.map(d => ({ id: d.id, ...d.data() }));
-        } catch (e) {}
-
-        let byName = [];
-        try {
-            const s = await getDocs(collection(db, 'tournament_payouts'));
-            byName = s.docs.map(d => ({ id: d.id, ...d.data() }))
-                .filter(p => {
-                    if (p.userId) return false;
-                    const w = (p.winnerName || '').toLowerCase();
-                    return w && (w === unameLower || w === fullNameLower);
-                });
-        } catch (e) {}
-
-        const payoutMap = new Map();
-        byUid.forEach(p => payoutMap.set(p.id, p));
-        byName.forEach(p => payoutMap.set(p.id, p));
-        const payouts = Array.from(payoutMap.values());
-
-        let referrals = [];
-        try {
-            const s = await getDocs(query(collection(db, 'referral_bonuses'), where('referrerUid', '==', user.uid)));
-            referrals = s.docs.map(d => ({ id: d.id, ...d.data() }));
-        } catch (e) {}
-
-        const paidPayouts = payouts.filter(p => p.status === 'paid');
-        const pendPayouts = payouts.filter(p => p.status !== 'paid');
-        const paidRefs = referrals.filter(r => r.status === 'paid');
-        const pendRefs = referrals.filter(r => r.status !== 'paid');
-
-        const paidAmt = paidPayouts.reduce((s,p) => s + Number(p.prize || p.amount || 0), 0)
-                      + paidRefs.reduce((s,r) => s + Number(r.amount || 0), 0);
-        const pendAmt = pendPayouts.reduce((s,p) => s + Number(p.prize || p.amount || 0), 0)
-                      + pendRefs.reduce((s,r) => s + Number(r.amount || 0), 0);
-        const total = paidAmt + pendAmt;
-
-        document.getElementById('mc-total').textContent   = fmtRs(total);
-        document.getElementById('mc-pending').textContent = fmtRs(pendAmt);
-        document.getElementById('mc-paid').textContent    = fmtRs(paidAmt);
-
-        const note = document.getElementById('mc-note');
-        if (total === 0) {
-            note.hidden = false;
-            note.textContent = "No earnings yet — win a tournament or refer a friend to start 💪";
-        } else if (pendAmt > 0) {
-            note.hidden = false;
-            note.textContent = `${fmtRs(pendAmt)} pending payout — will be sent soon 💸`;
-        }
-
-        document.getElementById('earnCard').hidden = false;
-    } catch (e) {
-        console.warn('earnings card error:', e);
-    }
-
-    await loadRegConfirmedCard(user.uid);
-    await loadMyMatches(user.uid);
-    await loadMyRegistrations(user.uid);
-    await loadUpcomingTournaments(user.uid);
-    loadBellNotifications(user.uid);
-});
-
-// ⭐ REGISTRATION CONFIRMED CARD
-async function loadRegConfirmedCard(uid) {
-    const card = document.getElementById('regConfirmedCard');
-    const bodyEl = document.getElementById('rcBody');
-    const noteEl = document.getElementById('rcNote');
-    const pillEl = document.getElementById('rcStatusPill');
-    if (!card || !bodyEl) return;
-
-    let latest = null;
-    try {
-        const snap = await getDocs(query(
-            collection(db, 'tournament_registrations'),
-            where('userId', '==', uid),
-            orderBy('registeredAt', 'desc'),
-            limit(1)
-        ));
-        if (!snap.empty) {
-            latest = { id: snap.docs[0].id, ...snap.docs[0].data() };
-        }
-    } catch (e) {
-        console.warn('[regConfirmed] query failed:', e && e.message);
-        try {
-            const snap = await getDocs(query(
-                collection(db, 'tournament_registrations'),
-                where('userId', '==', uid)
-            ));
-            const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
-            if (arr.length) latest = arr[0];
-        } catch (e2) {
-            console.warn('[regConfirmed] fallback failed:', e2 && e2.message);
-            return;
-        }
-    }
-
-    if (!latest) return;
-
-    // Check if user dismissed this specific registration
-    try {
-        if (localStorage.getItem('nep_reg_dismissed_' + latest.id) === '1') {
-            card.classList.remove('show');
-            return;
-        }
-    } catch (e) {}
-
-    // Store the id for the dismiss handler
-    window.__regConfirmedId = latest.id;
-
-    // Build the details
-    const title = latest.tournamentTitle || latest.game || 'Tournament';
-    const playingAs = String(latest.mode || latest.playingAs || '').toLowerCase();
-    const tourMode  = String(latest.tournamentMode || '').toLowerCase();
-
-    let modeLabel, modeCls;
-    if (tourMode === '1v1' || playingAs === '1v1') {
-        modeLabel = '1 vs 1';
-        modeCls   = 'solo';       // reuse the green pill style
-    } else if (playingAs === 'solo') {
-        modeLabel = 'Solo';
-        modeCls   = 'solo';
-    } else if (playingAs === '2v2' || playingAs === 'duo' || tourMode === '2v2' || tourMode === 'duo') {
-        modeLabel = playingAs === '2v2' ? '2 vs 2' : 'Duo';
-        modeCls   = 'duo';
-    } else {
-        modeLabel = latest.tournamentMode || 'Squad';
-        modeCls   = 'squad';
-    }
-    const isPaid = String(latest.entryType || '').toLowerCase() === 'paid';
-    const entryLabel = isPaid ? ('Rs ' + (latest.amount || 0)) : 'FREE 🎁';
-    const ign = latest.ign || latest.captainName || '—';
-    const when = latest.registeredAt?.seconds
-        ? new Date(latest.registeredAt.seconds * 1000).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
-        : '—';
-    const status = String(latest.status || 'pending').toLowerCase();
-    const statusLabel = status === 'confirmed' || status === 'approved' ? 'CONFIRMED'
-                      : status === 'rejected' ? 'REJECTED'
-                      : 'PENDING';
-    const statusColor = status === 'confirmed' || status === 'approved' ? '#4ade80'
-                      : status === 'rejected' ? '#f87171'
-                      : '#fbbf24';
-
-    // Update the pill
-    if (pillEl) {
-        pillEl.textContent = statusLabel;
-        pillEl.style.background = statusColor + '40';
-        pillEl.style.color = statusColor;
-        pillEl.style.borderColor = statusColor;
-    }
-
-    // Build body rows
-    bodyEl.innerHTML = `
-        <div class="rc-row">
-            <span class="rc-k">🏆 Tournament</span>
-            <span class="rc-v">${esc(title)}</span>
-        </div>
-        <div class="rc-row">
-            <span class="rc-k">👤 Mode</span>
-            <span class="rc-v">
-                <span class="rc-mode-badge ${modeCls}">${esc(modeLabel)}</span>
-            </span>
-        </div>
-        <div class="rc-row">
-            <span class="rc-k">🎮 IGN</span>
-            <span class="rc-v">${esc(ign)}</span>
-        </div>
-        <div class="rc-row">
-            <span class="rc-k">💰 Entry</span>
-            <span class="rc-v ${isPaid ? 'gold' : 'green'}">${esc(entryLabel)}</span>
-        </div>
-        <div class="rc-row">
-            <span class="rc-k">🕐 Registered</span>
-            <span class="rc-v blue">${esc(when)}</span>
-        </div>
-    `;
-
-    // Update note based on status
-    if (noteEl) {
-        if (status === 'rejected') {
-            noteEl.innerHTML = '❌ This registration was rejected. Contact admin if you think this is a mistake.';
-        } else if (isPaid && status === 'pending') {
-            noteEl.innerHTML = '⏳ Payment under review. Admin will verify your transaction ID shortly.';
-        } else {
-            noteEl.innerHTML = '⏰ Room details will be shared 30 minutes before the match. Keep an eye on your WhatsApp group.';
-        }
-    }
-
-    card.classList.add('show');
+function bestTopKills(list) {
+  let best = 0;
+  list.forEach(t => {
+    const v = Number(t.topKillsPrize || t.top_kills_prize || t.topKillPrize || 0);
+    if (v > best) best = v;
+  });
+  return best;
 }
+async function loadWinnersStrip() {
+  const el = document.getElementById('winnersStrip');
+  if (!el) return;
 
-// ========== ANNOUNCEMENTS ==========
-async function loadAnnouncements() {
-    const stack = document.getElementById('announcementStack');
-    if (!stack) return;
-    stack.innerHTML = '';
-
-    let docs = [];
+  let results = [];
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'match_results'),
+      orderBy('completedAt', 'desc'),
+      limit(5)
+    ));
+    results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn('[winners] indexed query failed:', e && e.message);
     try {
-        const snap = await getDocs(query(
-            collection(db, 'announcements'),
-            orderBy('createdAt', 'desc'),
-            limit(6)
-        ));
-        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) {
-        console.warn('[announcements] indexed query failed:', e && e.message);
-        try {
-            const snap = await getDocs(collection(db, 'announcements'));
-            docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        } catch (e2) {
-            console.warn('[announcements] fallback failed:', e2 && e2.message);
-            return;
-        }
+      const snap = await getDocs(collection(db, 'match_results'));
+      results = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (b.completedAt?.toMillis?.() || 0) - (a.completedAt?.toMillis?.() || 0))
+        .slice(0, 5);
+    } catch (e2) {
+      console.warn('[winners] fallback failed:', e2 && e2.message);
+      return;
     }
+  }
 
-    const now = Date.now();
-    const items = docs.filter(a => {
-        if (a.active === false) return false;
-        const exp = a.expiresAt?.toMillis?.();
-        if (exp && exp < now) return false;
-        return true;
-    }).slice(0, 3);
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recent = results.filter(r => {
+    const ms = r.completedAt?.toMillis?.() || 0;
+    return ms > cutoff;
+  });
 
-    if (!items.length) return;
+  if (!recent.length) {
+    el.innerHTML = '';
+    return;
+  }
 
-    stack.innerHTML = items.map(a => {
-        const title = a.title || 'Announcement';
-        const body  = a.body || a.message || '';
-        const lower = (title + ' ' + body).toLowerCase();
-        const isFree = a.type === 'free' || lower.includes('free');
-        const isWinner = a.type === 'winner';
-        const cls = isFree ? 'free' : '';
-        const icon = isFree ? '🎁' : (isWinner ? '🏆' : '📢');
-        const link = a.link || '/tournaments.html';
-        const linkText = a.linkText || 'Learn More →';
-        const timeStr = a.createdAt?.seconds
-            ? new Date(a.createdAt.seconds * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
-            : '';
-        return `
-          <div class="ann-banner ${cls}">
-            <div class="ann-icon">${icon}</div>
-            <div class="ann-body">
-              <div class="ann-title">${esc(title)}</div>
-              <div class="ann-text">${esc(body)}</div>
-              <div class="ann-cta-row">
-                <a class="ann-cta" href="${esc(link)}">${esc(linkText)}</a>
-                ${timeStr ? `<span class="ann-time">${esc(timeStr)}</span>` : ''}
+  el.innerHTML = `
+    <h2 class="section-title popular" style="margin-top:26px;">
+      🏆 Recent Winners <span class="st-tag">Verified Payouts</span>
+    </h2>
+    <div class="winners-strip">
+      ${recent.map(r => {
+        const w1 = r.winner1 || {};
+        const tk = r.topKiller || {};
+        const when = r.completedAt?.toDate
+          ? r.completedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+          : '';
+
+        const tkPrize = Number(tk.prize || 0);
+        const tkName = String(tk.name || '').trim();
+        const wName = String(w1.name || '').trim();
+        const winnerPrize = Number(w1.prize || 0) + (tkName === wName && tkPrize > 0 ? tkPrize : 0);
+
+        let cards = `
+          <div class="winner-card">
+            <div class="wc-medal">🥇</div>
+            <div class="wc-body">
+              <div class="wc-name">${esc(wName || 'Winner')}</div>
+              <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')}</div>
+              <div class="wc-meta">
+                <span class="wc-prize">💰 Rs ${esc(winnerPrize)}</span>
+                ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
               </div>
             </div>
           </div>
         `;
-    }).join('');
-}
 
-// ========== MY MATCHES ==========
-async function loadMyMatches(uid) {
-    const listEl = document.getElementById("myMatchesList");
-    const secEl  = document.getElementById("myMatchesSection");
-    if (!listEl || !secEl) return;
-
-    let matches = [];
-    try {
-        const q1 = query(collection(db, "matches"), where("player1.uid", "==", uid));
-        const q2 = query(collection(db, "matches"), where("player2.uid", "==", uid));
-        const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-        const seen = new Set();
-        [...s1.docs, ...s2.docs].forEach(d => {
-            if (!seen.has(d.id)) { seen.add(d.id); matches.push({ id: d.id, ...d.data() }); }
-        });
-    } catch (e) {
-        console.warn("[mymatches] query failed:", e && e.message);
-        secEl.hidden = true;
-        return;
-    }
-
-    if (!matches.length) { secEl.hidden = true; return; }
-
-    listEl.innerHTML = matches.map(m => {
-        const p1 = m.player1 || {};
-        const p2 = m.player2 || {};
-        const you = p1.uid === uid ? p1 : p2;
-        const opp = p1.uid === uid ? p2 : p1;
-        const youIgn = you?.ign || you?.username || "You";
-        const oppIgn = opp?.ign || opp?.username || "TBD";
-
-        if (m.bye) {
-            return `
-              <div class="mm-card bye">
-                <div class="mm-title">🎉 You got a bye!</div>
-                <div style="font-size:.82rem;color:#ddd6fe;line-height:1.5;">
-                  <b>${esc(m.tournamentTitle || "Tournament")}</b><br>
-                  No opponent this round — you auto-advance.
+        if (tkName && tkPrize > 0 && tkName !== wName) {
+          cards += `
+            <div class="winner-card" style="border-color:rgba(239,68,68,.5);background:linear-gradient(135deg, rgba(239,68,68,.12), rgba(30,18,60,.85));">
+              <div class="wc-medal">🔪</div>
+              <div class="wc-body">
+                <div class="wc-name">${esc(tkName)}</div>
+                <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')} · Top Killer</div>
+                <div class="wc-meta">
+                  <span class="wc-prize" style="color:#fca5a5;">💰 Rs ${esc(tkPrize)}</span>
+                  ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
                 </div>
-              </div>
-            `;
-        }
-
-        if (!m.publishedAt) {
-            return `
-              <div class="mm-card pending">
-                <div class="mm-title">⏳ ${esc(m.tournamentTitle || "1v1 Match")}</div>
-                <div class="mm-vs">
-                  <div class="mm-player you">
-                    <span class="mm-label">You</span>
-                    <div class="mm-player-name">${esc(youIgn)}</div>
-                  </div>
-                  <span class="mm-vs-badge">VS</span>
-                  <div class="mm-player">
-                    <span class="mm-label">Opponent</span>
-                    <div class="mm-player-name">TBD</div>
-                  </div>
-                </div>
-                <div style="font-size:.76rem;color:#a8a3c9;text-align:center;">
-                  Your opponent will be revealed before match time.
-                </div>
-              </div>
-            `;
-        }
-
-        return `
-          <div class="mm-card">
-            <div class="mm-title">🎯 ${esc(m.tournamentTitle || "1v1 Match")}</div>
-            <div class="mm-vs">
-              <div class="mm-player you">
-                <span class="mm-label">You</span>
-                <div class="mm-player-name">${esc(youIgn)}</div>
-              </div>
-              <span class="mm-vs-badge">VS</span>
-              <div class="mm-player">
-                <span class="mm-label">Opponent</span>
-                <div class="mm-player-name">${esc(oppIgn)}</div>
               </div>
             </div>
-            <div class="mm-room">
-              <div class="row">
-                <span>Room ID:</span>
-                <span>
-                  <code>${esc(m.roomId || '—')}</code>
-                  <button class="mm-copy" onclick="navigator.clipboard.writeText('${esc(m.roomId)}')">Copy</button>
-                </span>
-              </div>
-              ${m.roomPassword ? `
-              <div class="row">
-                <span>Password:</span>
-                <span>
-                  <code>${esc(m.roomPassword)}</code>
-                  <button class="mm-copy" onclick="navigator.clipboard.writeText('${esc(m.roomPassword)}')">Copy</button>
-                </span>
-              </div>` : ''}
-              <div class="row" style="border-top:1px solid rgba(168,85,247,.15);padding-top:6px;margin-top:2px;">
-                <span>Time:</span>
-                <span><b style="color:#fbbf24;">${esc(m.matchDate || '')} ${esc(m.matchTime || '')}</b></span>
-              </div>
-            </div>
-          </div>
-        `;
-    }).join("");
-    secEl.hidden = false;
+          `;
+        }
+
+        return cards;
+      }).join('')}
+    </div>
+  `;
 }
 
-// ========== MY REGISTRATIONS ==========
-async function loadMyRegistrations(uid) {
-    const listEl = document.getElementById("myRegsList");
-    const secEl  = document.getElementById("myRegsSection");
-    if (!listEl || !secEl) return [];
-
-    let docs = [];
+async function fetchTournaments() {
+  let docs = [];
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'tournaments'),
+      where('status', '==', 'upcoming'),
+      orderBy('date', 'asc'),
+      limit(80)
+    ));
+    docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn('[tournaments] indexed query failed:', e && e.message);
     try {
-        const snap = await getDocs(query(
-            collection(db, "tournament_registrations"),
-            where("userId", "==", uid),
-            orderBy("registeredAt", "desc"),
-            limit(6)
-        ));
-        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) {
-        console.warn("[myregs] query failed:", e && e.message);
-        try {
-            const snap = await getDocs(query(
-                collection(db, "tournament_registrations"),
-                where("userId", "==", uid)
-            ));
-            docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                .sort((a, b) => (b.registeredAt?.seconds||0) - (a.registeredAt?.seconds||0))
-                .slice(0, 6);
-        } catch (e2) {
-            console.warn("[myregs] fallback failed:", e2 && e2.message);
-            listEl.innerHTML = 'Could not load your registrations right now.';
-            secEl.hidden = false;
-            return [];
-        }
+      const snap = await getDocs(collection(db, 'tournaments'));
+      docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .filter(t => String(t.status || '').toLowerCase() === 'upcoming')
+        .sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
+    } catch (e2) {
+      console.warn('[tournaments] fallback failed:', e2 && e2.message);
     }
-
-    if (!docs.length) {
-        listEl.innerHTML = `You haven't registered for any tournament yet. <a href="/tournaments.html">Browse tournaments →</a>`;
-        secEl.hidden = false;
-        return [];
-    }
-
-    // ⭐ NEW: fetch tournament docs for each confirmed registration
-    // to get room details
-    const now = Date.now();
-    const tourCache = {};       // tournamentId -> tournament data
-    for (const r of docs) {
-        const st = String(r.status || '').toLowerCase();
-        const isConfirmed = (st === 'confirmed' || st === 'approved');
-        const tId = r.tournamentId;
-        if (!isConfirmed || !tId || tourCache[tId] !== undefined) continue;
-        try {
-            const tSnap = await getDoc(doc(db, 'tournaments', tId));
-            tourCache[tId] = tSnap.exists() ? tSnap.data() : null;
-        } catch (err) {
-            console.warn('[myregs] tournament fetch failed for', tId, err);
-            tourCache[tId] = null;
-        }
-    }
-
-    myRegisteredTitles = new Set();
-    listEl.innerHTML = docs.map(r => {
-        const title = r.tournamentTitle || r.tournamentName || r.game || "Tournament";
-        const status = r.status || "pending";
-        const sc = status === 'confirmed' ? 'confirmed' : status === 'pending' ? 'pending' : 'other';
-        const when = r.registeredAt?.seconds
-            ? new Date(r.registeredAt.seconds * 1000).toLocaleDateString("en-GB", { day:"2-digit", month:"short" })
-            : "";
-        if (title) myRegisteredTitles.add(String(title).toLowerCase());
-        if (r.tournamentId) myRegisteredTitles.add(String(r.tournamentId).toLowerCase());
-
-        // ⭐ Build the room details block (if confirmed + tournament + revealed)
-        let roomHtml = '';
-        const isConfirmed = (String(status).toLowerCase() === 'confirmed' || String(status).toLowerCase() === 'approved');
-        const t = r.tournamentId ? tourCache[r.tournamentId] : null;
-        if (isConfirmed && t) {
-            const revealMs = t.roomRevealAt?.toMillis?.() || 0;
-            const revealed = revealMs && now >= revealMs;
-            const hasRoom = t.roomId || t.roomPassword;
-
-            if (hasRoom && revealed) {
-                roomHtml = `
-                  <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(34,197,94,.12);border:1px dashed rgba(34,197,94,.5);font-size:.8rem;color:#ddd6fe;display:flex;flex-direction:column;gap:6px;">
-                    <div style="font-weight:900;color:#4ade80;font-size:.78rem;letter-spacing:.3px;">🎮 ROOM READY</div>
-                    <div style="display:flex;justify-content:space-between;gap:8px;">
-                      <span>Room ID:</span>
-                      <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${esc(t.roomId || '—')}</code></span>
-                    </div>
-                    ${t.roomPassword ? `
-                    <div style="display:flex;justify-content:space-between;gap:8px;">
-                      <span>Password:</span>
-                      <span><code style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:5px;font-family:'Courier New',monospace;font-weight:800;letter-spacing:1px;">${esc(t.roomPassword)}</code></span>
-                    </div>` : ''}
-                  </div>
-                `;
-            } else if (hasRoom && !revealed) {
-                const when2 = new Date(revealMs).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-                roomHtml = `
-                  <div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);font-size:.78rem;color:#fde68a;">
-                    ⏰ Room details revealed at <b>${esc(when2)}</b>
-                  </div>
-                `;
-            }
-        }
-
-        return `
-          <div style="padding:12px;border-bottom:1px solid rgba(168,85,247,.15);display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-              <div>
-                <div style="font-weight:800;font-size:.9rem;color:#fff;">${esc(title)}</div>
-                <div style="font-size:.75rem;color:#a8a3c9;margin-top:2px;">
-                  ${esc(r.game || '')}${r.tournamentMode ? ' · ' + esc(r.tournamentMode) : ''}${when ? ' · 📅 ' + when : ''}
-                </div>
-              </div>
-              <span style="font-size:.62rem;font-weight:900;letter-spacing:.3px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.2);color:${sc==='confirmed'?'#4ade80':'#fbbf24'};border:1px solid rgba(${sc==='confirmed'?'34,197,94':'245,158,11'},.5);">
-                ${esc(status)}
-              </span>
-            </div>
-            ${roomHtml}
-          </div>
-        `;
-    }).join('');
-    secEl.hidden = false;
-    return docs.map(r => String(r.tournamentTitle || r.tournamentId || "").toLowerCase());
+  }
+  return docs;
 }
 
-// ========== UPCOMING ==========
-async function loadUpcomingTournaments(uid) {
-    const secEl = document.getElementById("upcomingSection");
-    const content = document.getElementById("upcomingContent");
-    if (!secEl || !content) return;
-
-    let docs = [];
-    try {
-        const snap = await getDocs(query(
-            collection(db, "tournaments"),
-            where("status", "==", "upcoming"),
-            orderBy("date", "asc"),
-            limit(80)
-        ));
-        docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) {
-        console.warn("[upcoming] indexed query failed:", e && e.message);
-        try {
-            const snap = await getDocs(collection(db, "tournaments"));
-            docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-                .filter(t => String(t.status || "").toLowerCase() === "upcoming")
-                .sort((a, b) => String(a.date||"").localeCompare(String(b.date||"")));
-        } catch (e2) { console.warn(e2); }
-    }
-
-    if (!docs.length) {
-        content.innerHTML = '<div class="mt-empty">No upcoming events right now. <a href="/tournaments.html">Browse tournaments →</a></div>';
-        secEl.hidden = false;
-        return;
-    }
-
-    const tonight = [];
-    const day = [];
-    const night = [];
-    const other = [];
-        docs.forEach(t => {
-        // ⭐ Skip Free Fire — shown in hardcoded card at top
-        if (gameKey(t.game) === 'freefire') return;
-
-        if (t.isTonight === true) { tonight.push(t); return; }
-        const date = String(t.date || '');
-        if (date === '2026-09-30' || date === '2026-10-01') {
-            (slotOf(t.time) === 'day' ? day : night).push(t);
-        } else {
-            other.push(t);
-        }
-    });
-
-    let html = '';
-
-    if (tonight.length) {
-        html += `<h3 class="section-title-mt tonight">🔥 Tonight <span class="st-tag">9:00 PM NPT</span></h3><div class="game-grid">`;
-        tonight.forEach(t => {
-            const title = t.title || `${gameDisplayName(t.game)} ${t.mode || ''}`.trim();
-            const link = t.seedKey
-                ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
-                : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
-            const prize = Number(t.prizePool || 0);
-            const topKill = Number(t.topKillsPrize || 0);
-            const maxP = Number(t.max || 0);
-            const modeName = t.mode || 'Solo';
-            const modeCls = modeClass(t.mode);
-            html += `
-              <div class="game-card featured">
-                <div class="game-head">
-                  <div class="icon">${esc(t.icon || '🔥')}</div>
-                  <div class="info">
-                    <div class="name">${esc(title)}</div>
-                    ${(t.entryType || t.entry_type || 'free').toLowerCase() === 'paid'
-  ? `<span>Entry: <strong style="color:#fbbf24;">Rs ${t.entryFee || t.entry_fee || 0}</strong></span>
-     <span class="popular-badge">💰 PAID ENTRY</span>
-     ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}`
-  : `<span>Entry: <strong style="color:#4ade80;">FREE</strong></span>
-     <span class="popular-badge">🎁 FREE TONIGHT</span>
-     ${topKill ? `<span class="tk-badge">🔪 Top Killer Rs ${topKill}</span>` : ''}`}
-                  </div>
-                </div>
-                <div class="time-slot">
-                  <div class="time-slot-head night"><span class="t-pill">🔥 Live Tonight · 9:00 PM onwards</span>${maxP ? `<span style="color:#d8b4fe;font-weight:600;">Max ${maxP} players</span>` : ''}</div>
-                  <div class="mode-buttons">
-                    <a href="${link}${link.includes('?') ? '&' : '?'}mode=${encodeURIComponent(modeName.toLowerCase())}" class="mode-btn ${modeCls}">
-                      <span class="mode-icon">${modeIcon(modeName)}</span>
-                      <span class="mode-name">${esc(modeName)}</span>
-                      <span class="mode-prize">🏆 Rs ${prize}</span>
-                    </a>
-                  </div>
-                </div>
-                <div style="font-size:.72rem;color:#a8a3c9;text-align:center;padding-top:4px;">
-                  ⏰ 9 PM onwards — players ready early can adjust time in group
-                </div>
-              </div>
-            `;
-        });
-        html += '</div>';
-    }
-
-    const allDayNight = [...day, ...night];
-    const allGroups = buildGroups(allDayNight);
-    const popularKeys = Object.keys(allGroups).filter(k => isPopular(k)).sort((a,b) =>
-      String(allGroups[a].displayName).localeCompare(String(allGroups[b].displayName)));
-    if (popularKeys.length > 0) {
-        html += `<h3 class="section-title-mt popular">⭐ Popular Games <span class="st-tag">Both Schedules</span></h3><div class="game-grid">`;
-        popularKeys.forEach(k => { html += renderGameCard(allGroups[k], { popular: true }); });
-        html += '</div>';
-    }
-
-    const dayOnly = day.filter(t => !isPopular(gameKey(t.game)));
-    const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
-    const dayDateLabel   = formatDateLabel(dominantDate(day));
-    const nightDateLabel = formatDateLabel(dominantDate(night));
-
-    if (dayOnly.length) {
-        html += `<h3 class="section-title-mt day">☀️ ${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session <span class="st-tag">1:00 PM NPT</span></h3><div class="game-grid">`;
-        const groups = buildGroups(dayOnly);
-        Object.values(groups).forEach(g => { if (g.day.length) html += renderGameCard({ ...g, night: [] }); });
-        html += '</div>';
-    }
-    if (nightOnly.length) {
-        html += `<h3 class="section-title-mt night">🌙 ${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session <span class="st-tag">9:00 PM NPT</span></h3><div class="game-grid">`;
-        const groups = buildGroups(nightOnly);
-        Object.values(groups).forEach(g => { if (g.night.length) html += renderGameCard({ ...g, day: [] }); });
-        html += '</div>';
-    }
-    if (other.length) {
-        html += `<h3 class="section-title-mt">📅 Upcoming Tournaments</h3><div class="game-grid">`;
-        const groups = buildGroups(other);
-        Object.values(groups).forEach(g => { html += renderGameCard(g); });
-        html += '</div>';
-    }
-
-    content.innerHTML = html;
-    secEl.hidden = false;
+function classifySection(t) {
+  if (t.isTonight === true) return 'tonight';
+  const date = String(t.date || '');
+  if (date === '2026-09-30' || date === '2026-10-01') {
+    return slotOf(t.time);
+  }
+  return 'other';
 }
 
-function buildGroups(list) {
-    const groups = {};
-    list.forEach(t => {
-        const key = gameKey(t.game);
-        if (!groups[key]) groups[key] = { key, displayName: gameDisplayName(t.game), day: [], night: [] };
-        const slot = slotOf(t.time);
-        groups[key][slot].push(t);
+function buildGameGroups(list) {
+  const groups = {};
+  list.forEach(t => {
+    const key = gameKey(t.game);
+    if (!groups[key]) {
+      groups[key] = { key, displayName: gameDisplayName(t.game), day: [], night: [] };
+    }
+    const slot = slotOf(t.time);
+    groups[key][slot].push(t);
+  });
+  const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
+  Object.values(groups).forEach(g => {
+    ['day','night'].forEach(slot => {
+      g[slot].sort((a,b) => {
+        const ao = order[String(a.mode||'').toLowerCase()] ?? 99;
+        const bo = order[String(b.mode||'').toLowerCase()] ?? 99;
+        return ao - bo;
+      });
     });
-    const order = { solo: 0, duo: 1, squad: 2, ffa: 3 };
-    Object.values(groups).forEach(g => {
-        ['day','night'].forEach(slot => {
-            g[slot].sort((a,b) => {
-                const ao = order[String(a.mode||'').toLowerCase()] ?? 99;
-                const bo = order[String(b.mode||'').toLowerCase()] ?? 99;
-                return ao - bo;
-            });
-        });
-    });
-    return groups;
+  });
+  return groups;
 }
 
 function dedupeByMode(list) {
-    const byMode = {};
-    list.forEach(t => {
-        const mk = String(t.mode || '').toLowerCase().trim();
-        if (!byMode[mk]) byMode[mk] = { best: t };
-        else {
-            const cur = Number(byMode[mk].best.prizePool || 0);
-            const nw  = Number(t.prizePool || 0);
-            if (nw > cur) byMode[mk].best = t;
-        }
-    });
-    return Object.values(byMode).map(x => x.best);
+  const byMode = {};
+  list.forEach(t => {
+    const modeKey = String(t.mode || '').toLowerCase().trim();
+    if (!byMode[modeKey]) {
+      byMode[modeKey] = { mode: t.mode, best: t };
+    } else {
+      const cur = Number(byMode[modeKey].best.prizePool || byMode[modeKey].best.prize_pool || 0);
+      const nw  = Number(t.prizePool || t.prize_pool || 0);
+      if (nw > cur) byMode[modeKey].best = t;
+    }
+  });
+  return Object.values(byMode).map(x => x.best);
 }
 
 function renderModeButtons(list) {
-    const deduped = dedupeByMode(list);
-    return deduped.map(t => {
-        const cls = modeClass(t.mode);
-        const prize = t.prizePool || 0;
-        const link = t.seedKey
-            ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
-            : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
-        const alreadyReg = myRegisteredTitles.has(String(t.title || '').toLowerCase())
-                        || myRegisteredTitles.has(String(t.id).toLowerCase());
-        const registeredClass = alreadyReg ? ' registered' : '';
-        const label = alreadyReg ? '✓ Registered' : (t.mode || 'Mode');
-        return `
-          <a href="${alreadyReg ? '#' : link}" class="mode-btn ${cls}${registeredClass}"
-             ${alreadyReg ? 'onclick="return false;"' : ''}>
-            <span class="mode-icon">${alreadyReg ? '✓' : modeIcon(t.mode)}</span>
-            <span class="mode-name">${esc(label)}</span>
-            <span class="mode-prize">Rs ${prize}</span>
-          </a>
-        `;
-    }).join('');
+  const deduped = dedupeByMode(list);
+  return deduped.map(t => {
+    const cls = modeClass(t.mode);
+    const prize = t.prizePool || t.prize_pool || 0;
+    const link = t.seedKey
+      ? `/registration.html?seedKey=${encodeURIComponent(t.seedKey)}`
+      : `/registration.html?tournamentId=${encodeURIComponent(t.id)}`;
+    const modeName = t.mode || 'Mode';
+    const modeParam = String(t.mode || '').toLowerCase() === 'solo' ? '1v1' : (String(t.mode || '').toLowerCase() === 'duo' ? '2v2' : '');
+    const finalLink = modeParam
+      ? `${link}${link.includes('?') ? '&' : '?'}mode=${modeParam}`
+      : link;
+    return `
+      <a href="${finalLink}" class="mode-btn ${cls}">
+        <span class="mode-icon">${modeIcon(t.mode)}</span>
+        <span class="mode-name">${esc(modeName)}</span>
+        <span class="mode-prize">Rs ${prize}</span>
+      </a>
+    `;
+  }).join('');
 }
 
 function renderGameCard(group, opts = {}) {
-    const { day, night, displayName, key } = group;
-    const all = [...day, ...night];
-    const iconField = all.find(t => t.icon)?.icon;
-    const icon = gameIcon(key, iconField);
-    const entryFee = all[0]?.entryFee || 0;
-    const topKills = bestTopKills(all);
-    const featured = day.length > 0 && night.length > 0;
-    const isPopularCard = opts.popular === true;
+  const { day, night, displayName, key } = group;
+  const all = [...day, ...night];
+  const iconField = all.find(t => t.icon)?.icon;
+  const icon = gameIcon(key, iconField);
+  const entryFee = all[0]?.entryFee || all[0]?.entry_fee || 0;
+  const topKills = bestTopKills(all);
+  const featured = day.length > 0 && night.length > 0;
+  const isPopularCard = opts.popular === true;
 
-    const dayDateLabel = formatDateLabel(dominantDate(day));
-    const nightDateLabel = formatDateLabel(dominantDate(night));
+  const dayDateLabel   = formatDateLabel(dominantDate(day));
+  const nightDateLabel = formatDateLabel(dominantDate(night));
 
-    let slots = '';
-    if (day.length > 0) {
-        slots += `
-          <div class="time-slot">
-            <div class="time-slot-head day"><span class="t-pill">☀️ 1:00 PM</span><span style="color:#fbbf24;">${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session</span></div>
-            <div class="mode-buttons">${renderModeButtons(day)}</div>
-          </div>
-        `;
-    }
-    if (night.length > 0) {
-        slots += `
-          <div class="time-slot">
-            <div class="time-slot-head night"><span class="t-pill">🌙 9:00 PM</span><span style="color:#d8b4fe;">${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session</span></div>
-            <div class="mode-buttons">${renderModeButtons(night)}</div>
-          </div>
-        `;
-    }
-    return `
-      <div class="game-card ${isPopularCard ? 'popular' : (featured ? 'featured' : '')}">
-        <div class="game-head">
-          <div class="icon">${esc(icon)}</div>
-          <div class="info">
-            <div class="name">${esc(displayName)}</div>
-            <div class="meta">
-              <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
-              ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
-              ${isPopularCard ? `<span class="popular-badge">⭐ Popular</span>` : ''}
-            </div>
-          </div>
+  let slots = '';
+
+  if (day.length > 0) {
+    slots += `
+      <div class="time-slot">
+        <div class="time-slot-head day">
+          <span class="t-pill">☀️ 1:00 PM</span>
+          <span style="color:#fbbf24;">${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session</span>
         </div>
-        ${slots}
+        <div class="mode-buttons">
+          ${renderModeButtons(day)}
+        </div>
       </div>
     `;
+  }
+  if (night.length > 0) {
+    slots += `
+      <div class="time-slot">
+        <div class="time-slot-head night">
+          <span class="t-pill">🌙 9 PM onwards</span>
+          <span style="color:#d8b4fe;">${nightDateLabel ? nightDateLabel + ' · ' : ''}Night Session</span>
+        </div>
+        <div class="mode-buttons">
+          ${renderModeButtons(night)}
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="game-card ${isPopularCard ? 'popular' : (featured ? 'featured' : '')}">
+      <div class="game-head">
+        <div class="icon">${esc(icon)}</div>
+        <div class="info">
+          <div class="name">${esc(displayName)}</div>
+          <div class="meta">
+            <span>Entry: <strong>Rs ${esc(entryFee)}</strong></span>
+            ${topKills ? `<span class="tk-badge">🔪 Top Killer Rs ${esc(topKills)}</span>` : ''}
+            ${isPopularCard ? `<span class="popular-badge">⭐ Popular</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${slots}
+    </div>
+  `;
 }
 
-// ========== BELL ==========
-window.copyReferralLink = function() {
-    const inp = document.getElementById('refLinkInput');
-    if (!inp) return;
-    const btn = document.getElementById('refCopyBtn');
-    const doCopy = () => {
-        navigator.clipboard.writeText(inp.value).then(() => {
-            btn.classList.add('copied');
-            const orig = btn.textContent;
-            btn.textContent = '✅ Copied!';
-            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 1600);
-        }).catch(() => {
-            inp.select();
-            document.execCommand('copy');
-            btn.textContent = '✅ Copied!';
-            setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 1600);
-        });
-    };
-    doCopy();
-};
+function renderAll(tournaments) {
+  const content = document.getElementById('tournamentContent');
+  const heroStats = document.getElementById('heroStats');
+  if (!content) return;
 
-let bellItems = [];
+  if (!tournaments.length) {
+    content.innerHTML = '<div class="empty-state">No upcoming tournaments right now. Check back soon! 🎮</div>';
+    if (heroStats) heroStats.innerHTML = '<div class="hero-stat">No live events</div>';
+    return;
+  }
 
-async function loadBellNotifications(uid) {
-    const listEl = document.getElementById('bellList');
-    if (!listEl) return;
-    try {
-        const [personalSnap, allSnap] = await Promise.all([
-            getDocs(query(collection(db, 'notifications'), where('targetUid', '==', uid), orderBy('createdAt', 'desc'), limit(20))).catch(() => ({ docs: [] })),
-            getDocs(query(collection(db, 'notifications'), where('targetUid', '==', 'ALL'), orderBy('createdAt', 'desc'), limit(20))).catch(() => ({ docs: [] }))
-        ]);
-        const personal = personalSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const broadcast = allSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const combined = [...personal, ...broadcast];
-        combined.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        bellItems = combined.slice(0, 20);
-        const unread = bellItems.filter(n => {
-            const readBy = Array.isArray(n.readBy) ? n.readBy : [];
-            return !readBy.includes(uid);
-        });
-        const badge = document.getElementById('bellBadge');
-        if (badge) {
-            if (unread.length > 0) {
-                badge.textContent = unread.length > 9 ? '9+' : unread.length;
-                badge.classList.add('show');
-            } else badge.classList.remove('show');
-        }
-        renderBellList(uid);
-    } catch (e) {
-        console.warn('loadBellNotifications error:', e);
-        listEl.innerHTML = '<div class="bell-empty">Could not load notifications</div>';
-    }
-}
+  const tonight = [];
+  const day = [];
+  const night = [];
+  const other = [];
 
-function renderBellList(uid) {
-    const listEl = document.getElementById('bellList');
-    if (!listEl) return;
-    if (!bellItems.length) {
-        listEl.innerHTML = '<div class="bell-empty">No notifications yet</div>';
-        return;
-    }
-    const iconMap = {
-        info:{icon:'ℹ️',color:'#60a5fa'}, success:{icon:'✅',color:'#4ade80'},
-        warning:{icon:'⚠️',color:'#facc15'}, error:{icon:'❌',color:'#f87171'},
-        trophy:{icon:'🏆',color:'#fbbf24'}, money:{icon:'💰',color:'#4ade80'},
-        tournament:{icon:'🎮',color:'#a855f7'}, reminder:{icon:'⏰',color:'#fbbf24'}
-    };
-    listEl.innerHTML = bellItems.map(n => {
-        const meta = iconMap[n.type] || iconMap.info;
-        const readBy = Array.isArray(n.readBy) ? n.readBy : [];
-        const isUnread = !readBy.includes(uid);
-        const timeStr = fmtTimeAgo(n.createdAt);
-        return `
-            <div class="bell-item ${isUnread ? 'unread' : ''}" onclick="openBellItem('${n.id}')">
-                <div class="bi-icon" style="background:${meta.color}22;color:${meta.color};">${meta.icon}</div>
-                <div class="bi-body">
-                    <div class="bi-title">${escapeHtml(n.title || '(no title)')}</div>
-                    <div class="bi-msg">${escapeHtml(n.message || '')}</div>
-                    <div class="bi-time">${timeStr}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+  tournaments.forEach(t => {
+    if (gameKey(t.game) === 'freefire') return;
 
-window.openBellItem = async function(id) {
-    const item = bellItems.find(x => x.id === id);
-    if (!item || !currentUid) return;
-    try {
-        await updateDoc(doc(db, 'notifications', id), { readBy: arrayUnion(currentUid) });
-        item.readBy = [...(item.readBy || []), currentUid];
-        renderBellList(currentUid);
-        const unread = bellItems.filter(n => {
-            const rb = Array.isArray(n.readBy) ? n.readBy : [];
-            return !rb.includes(currentUid);
-        });
-        const badge = document.getElementById('bellBadge');
-        if (badge) {
-            if (unread.length > 0) {
-                badge.textContent = unread.length > 9 ? '9+' : unread.length;
-                badge.classList.add('show');
-            } else badge.classList.remove('show');
-        }
-    } catch (e) { console.warn('mark read error:', e); }
-};
+    const sec = classifySection(t);
+    if (sec === 'tonight') tonight.push(t);
+    else if (sec === 'day') day.push(t);
+    else if (sec === 'night') night.push(t);
+    else other.push(t);
+  });
 
-window.markAllNotificationsRead = async function() {
-    if (!currentUid) return;
-    const unread = bellItems.filter(n => {
-        const rb = Array.isArray(n.readBy) ? n.readBy : [];
-        return !rb.includes(currentUid);
+  if (heroStats) {
+    const totalTourneys = tournaments.length;
+    const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
+    const entry = (day[0] || night[0] || tonight[0])?.entryFee
+               || (day[0] || night[0] || tonight[0])?.entry_fee || 150;
+    heroStats.innerHTML = `
+      <div class="hero-stat"><b>${totalTourneys}</b> tournaments</div>
+      <div class="hero-stat"><b>${uniqueGames}</b> games</div>
+      <div class="hero-stat">Entry <b>Rs ${entry}</b></div>
+      <div class="hero-stat">🎁 <b>Real cash</b> prizes</div>
+    `;
+  }
+
+  let html = '';
+
+    const popularPool = tournaments.filter(t => isPopular(gameKey(t.game)));
+  const allGroups = buildGameGroups(popularPool);
+  const popularKeys = Object.keys(allGroups).filter(k => isPopular(k));
+
+  if (popularKeys.length > 0) {
+      const POPULAR_ORDER = { freefire: 0, pubgmobile: 1, ludo: 2 };
+    popularKeys.sort((a, b) => {
+      const ao = POPULAR_ORDER[a] ?? 99;
+      const bo = POPULAR_ORDER[b] ?? 99;
+      if (ao !== bo) return ao - bo;
+      return String(allGroups[a].displayName || '').localeCompare(String(allGroups[b].displayName || ''));
     });
-    for (const n of unread) {
-        try {
-            await updateDoc(doc(db, 'notifications', n.id), { readBy: arrayUnion(currentUid) });
-            n.readBy = [...(n.readBy || []), currentUid];
-        } catch (e) {}
-    }
-    renderBellList(currentUid);
-    const badge = document.getElementById('bellBadge');
-    if (badge) badge.classList.remove('show');
-};
+    html += `
+      <h2 class="section-title popular">
+        ⭐ Popular Games <span class="st-tag">Both Schedules</span>
+      </h2>
+      <div class="game-grid">
+    `;
+    popularKeys.forEach(k => {
+      html += renderGameCard(allGroups[k], { popular: true });
+    });
+    html += '</div>';
+  }
 
-function fmtTimeAgo(ts) {
-    if (!ts?.seconds) return '';
-    const diff = Date.now() - ts.seconds * 1000;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return mins + 'm ago';
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return hrs + 'h ago';
-    const days = Math.floor(hrs / 24);
-    if (days < 7) return days + 'd ago';
-    return new Date(ts.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const dayOnly   = day.filter(t => !isPopular(gameKey(t.game)));
+  const nightOnly = night.filter(t => !isPopular(gameKey(t.game)));
+
+  const dayDateLabel   = formatDateLabel(dominantDate(day));
+  const nightDateLabel = formatDateLabel(dominantDate(night));
+
+  if (dayOnly.length) {
+    html += `
+      <h2 class="section-title day">
+        ☀️ ${dayDateLabel ? dayDateLabel + ' · ' : ''}Day Session <span class="st-tag">1:00 PM NPT</span>
+      </h2>
+      <div class="game-grid">
+    `;
+    const groups = buildGameGroups(dayOnly);
+    Object.values(groups).forEach(g => {
+      if (g.day.length) html += renderGameCard({ ...g, night: [] });
+    });
+    html += '</div>';
+  }
+
+  if (nightOnly.length) {
+    const isTonight = nightOnly.some(t => String(t.date) === '2026-10-01');
+    const nightTag = isTonight ? '9:00 PM onwards' : '9:00 PM NPT';
+    const nightLabel = isTonight ? '🔥 Tonight' : '🌙 Night Session';
+    html += `<h3 class="section-title-mt night">${nightLabel}${nightDateLabel ? ' · ' + nightDateLabel : ''} <span class="st-tag">${nightTag}</span></h3><div class="game-grid">`;
+    const groups = buildGameGroups(nightOnly);
+    Object.values(groups).forEach(g => {
+      if (g.night.length) html += renderGameCard({ ...g, day: [] });
+    });
+    html += '</div>';
+  }
+
+  if (other.length) {
+    html += `
+      <h2 class="section-title">
+        📅 Upcoming Tournaments
+      </h2>
+      <div class="game-grid">
+    `;
+    const groups = buildGameGroups(other);
+    Object.values(groups).forEach(g => {
+      html += renderGameCard(g);
+    });
+    html += '</div>';
+  }
+
+  content.innerHTML = html;
 }
-function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
-}
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('bellBtn');
-    if (btn) btn.addEventListener('click', window.toggleBell);
-    loadAnnouncements();
+
+onAuthStateChanged(auth, async (user) => {
+  const avatar = document.getElementById('userAvatar');
+  const nameEl = document.getElementById('userName');
+  if (user) {
+    let display = user.email || user.uid || "Member";
+    try {
+      const uDoc = await getDoc(doc(db, "users", user.uid));
+      if (uDoc.exists() && uDoc.data().username) display = uDoc.data().username;
+    } catch (e) {}
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+  } else {
+    if (avatar) avatar.textContent = "?";
+    if (nameEl) nameEl.textContent = "Login";
+  }
+
+  loadWinnersStrip();
+  try {
+    const tournaments = await fetchTournaments();
+    renderAll(tournaments);
+  } catch (e) {
+    console.error('load error:', e);
+    const content = document.getElementById('tournamentContent');
+    if (content) content.innerHTML = '<div class="empty-state">Could not load tournaments. Please refresh the page. 🔄</div>';
+  }
 });
 </script>
 
 <script type="module">
-// ⭐ VISITOR TRACKER
 (async () => {
   try {
     const { getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
@@ -2239,35 +1127,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch (e) {
     console.warn("[visitor-tracker] failed:", e && e.message);
   }
-})();
-</script>
-<script>
-(function () {
-  // Nepal timezone: UTC+5:45
-  function setHeroDate() {
-    const now = new Date();
-    // Convert to NPT by adding the offset
-    const nptMs = now.getTime() + (5 * 60 + 45) * 60 * 1000;
-    const npt = new Date(nptMs);
-
-    const months = ['JAN','FEB','MAR','APR','MAY','JUN',
-                    'JUL','AUG','SEP','OCT','NOV','DEC'];
-    const m = months[npt.getUTCMonth()];
-    const d = String(npt.getUTCDate()).padStart(2, '0');
-    const y = npt.getUTCFullYear();
-
-    const mEl = document.getElementById('heroDateMonth');
-    const dEl = document.getElementById('heroDateDay');
-    const yEl = document.getElementById('heroDateYear');
-    if (mEl) mEl.textContent = m;
-    if (dEl) dEl.textContent = d;
-    if (yEl) yEl.textContent = y;
-  }
-
-  setHeroDate();
-
-  // Re-check every 5 minutes in case user keeps the tab open past midnight
-  setInterval(setHeroDate, 5 * 60 * 1000);
 })();
 </script>
 <script>
@@ -2330,7 +1189,6 @@ if ('serviceWorker' in navigator) {
   var isAndroid = /android/i.test(ua);
   var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
 
-  // ⭐ Insert button into the nav automatically — no HTML edit needed
   function insertButton() {
     if (document.getElementById('pwaInstallBtn')) return;
     var btn = document.createElement('button');
@@ -2339,7 +1197,6 @@ if ('serviceWorker' in navigator) {
     btn.title = 'Install NEPPLAY App';
     btn.innerHTML = '📥';
     btn.setAttribute('onclick', 'pwaInstall()');
-    // Find nav links container
     var nav = document.querySelector('.nav-links') || document.querySelector('nav');
     if (nav) {
       nav.insertBefore(btn, nav.firstChild);
@@ -2360,7 +1217,6 @@ if ('serviceWorker' in navigator) {
       });
       return;
     }
-    // Build guide
     var sub = document.getElementById('pwaGuideSub');
     var steps = document.getElementById('pwaGuideSteps');
     var html = '';
@@ -2420,14 +1276,12 @@ if ('serviceWorker' in navigator) {
     if (b) b.style.display = 'none';
   });
 
-  // ⭐ Auto-insert button after DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', insertButton);
   } else {
     insertButton();
   }
 
-  // Fallback re-try in case nav loads late
   setTimeout(insertButton, 1000);
   setTimeout(insertButton, 3000);
 })();
