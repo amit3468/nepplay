@@ -1177,5 +1177,70 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<!-- ⭐ PWA Install Button -->
+<div id="pwaInstallBtn" style="display:none;position:fixed;bottom:24px;left:24px;z-index:70;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50px;padding:12px 18px;display:none;align-items:center;gap:8px;cursor:pointer;box-shadow:0 10px 26px rgba(124,58,237,.55);color:#fff;font-weight:900;font-size:13px;letter-spacing:0.3px;transition:transform .15s, box-shadow .2s;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;" onclick="pwaInstall()">
+  <span style="font-size:18px;">📥</span>
+  <span>Install App</span>
+  <span id="pwaInstallClose" style="margin-left:4px;opacity:.7;font-size:14px;padding:2px 4px;" onclick="event.stopPropagation();pwaDismiss();">✕</span>
+</div>
+
+<script>
+(function(){
+  let deferredPrompt = null;
+  const btn = document.getElementById('pwaInstallBtn');
+  const DISMISS_KEY = 'nep_pwa_dismissed_v1';
+
+  // Already dismissed in last 7 days? Don't show again
+  try {
+    const dismissed = localStorage.getItem(DISMISS_KEY);
+    if (dismissed && (Date.now() - Number(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
+      return;
+    }
+  } catch(e) {}
+
+  // Already installed as PWA? Don't show
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (window.navigator.standalone === true) return;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btn) btn.style.display = 'flex';
+  });
+
+  window.pwaInstall = async function() {
+    if (!deferredPrompt) {
+      // Fallback: show manual instructions
+      alert('To install:\n\n' +
+        '1. Tap the browser menu (⋮ top-right)\n' +
+        '2. Tap "Install app" or "Add to Home screen"\n\n' +
+        'Then NEPPLAY appears on your home screen.');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+      if (btn) btn.style.display = 'none';
+    }
+    deferredPrompt = null;
+  };
+
+  window.pwaDismiss = function() {
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+    if (btn) {
+      btn.style.transition = 'opacity .2s, transform .2s';
+      btn.style.opacity = '0';
+      btn.style.transform = 'translateY(20px)';
+      setTimeout(() => { btn.style.display = 'none'; }, 250);
+    }
+  };
+
+  window.addEventListener('appinstalled', () => {
+    if (btn) btn.style.display = 'none';
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+  });
+})();
+</script>
 </body>
 </html>
