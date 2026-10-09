@@ -21,7 +21,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc,
   addDoc, query, where, serverTimestamp, onSnapshot, orderBy, limit,
-  arrayUnion
+  arrayUnion, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -190,6 +190,20 @@ function todayKey() { return new Date().toISOString().slice(0,10); }
 function initials(n) { return (n || 'U')[0].toUpperCase(); }
 function fmtRs(n) { return 'Rs. ' + (Number(n) || 0).toLocaleString(); }
 function escapeDetail(s) {
+  // Accepts Firestore Timestamp | ISO string | null → milliseconds (or null)
+function toMillis(v) {
+  if (!v) return null;
+  if (typeof v === 'string') {
+    const ms = new Date(v).getTime();
+    return isNaN(ms) ? null : ms;
+  }
+  if (typeof v.toMillis === 'function') return v.toMillis();
+  if (typeof v.toDate === 'function') {
+    const d = v.toDate();
+    return d ? d.getTime() : null;
+  }
+  return null;
+}
   return String(s || '').replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
@@ -2460,8 +2474,9 @@ window.loadRoomDetailsForm = async function() {
   document.getElementById('roomRounds').value = t.roomRounds || '';
   document.getElementById('roomOpenTime').value = t.roomOpenTime || '';
   document.getElementById('roomRules').value = t.roomRules || '';
-  if (t.roomRevealAt) {
-    const d = new Date(t.roomRevealAt);
+    const revealMs = toMillis(t.roomRevealAt);
+  if (revealMs != null) {
+    const d = new Date(revealMs);
     const pad = n => String(n).padStart(2, '0');
     document.getElementById('roomRevealAt').value =
       `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -2479,9 +2494,14 @@ window.saveRoomDetails = async function() {
   const roomRounds = document.getElementById('roomRounds').value.trim();
   const roomOpenTime = document.getElementById('roomOpenTime').value.trim();
   const roomRules = document.getElementById('roomRules').value.trim();
-  const revealRaw = document.getElementById('roomRevealAt').value;
+    const revealRaw = document.getElementById('roomRevealAt').value;
   let roomRevealAt = null;
-  if (revealRaw) roomRevealAt = new Date(revealRaw).toISOString();
+  if (revealRaw) {
+    // datetime-local gives "YYYY-MM-DDTHH:mm" in the admin's LOCAL timezone.
+    // Convert to a real Firestore Timestamp so any client can compare it cleanly.
+    const localDate = new Date(revealRaw);
+    if (!isNaN(localDate.getTime())) roomRevealAt = Timestamp.fromDate(localDate);
+  }
   try {
     await updateDoc(doc(db, 'tournaments', tid), {
       roomId, roomPassword, roomFormat, roomRounds,
