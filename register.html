@@ -204,7 +204,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -420,7 +420,7 @@
                     username: username,
                     email: email,
                     phone: phone || '',
-                    createdAt: new Date().toISOString(),
+                    createdAt: serverTimestamp(),
                     role: 'member',
                     status: 'active',
                     totalEarnings: 0,
@@ -588,7 +588,7 @@
                     email: pendingGoogleProfile.email,
                     phone: '',
                     photoURL: pendingGoogleProfile.photoURL,
-                    createdAt: new Date().toISOString(),
+                    createdAt: serverTimestamp(),
                     role: 'member',
                     status: 'active',
                     signupMethod: 'google',
@@ -599,7 +599,7 @@
 
                 if (referredByUid && referredByUid !== pendingGoogleUser.uid) {
                     userProfile.referredBy = referredByUid;
-                    userProfile.referredAt = new Date().toISOString();
+                    userProfile.referredAt = serverTimestamp();
                 }
 
                 await setDoc(doc(db, 'users', pendingGoogleUser.uid), userProfile);
