@@ -1177,53 +1177,120 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<!-- ⭐ PWA Install Button -->
-<div id="pwaInstallBtn" style="display:none;position:fixed;bottom:24px;left:24px;z-index:70;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50px;padding:12px 18px;display:none;align-items:center;gap:8px;cursor:pointer;box-shadow:0 10px 26px rgba(124,58,237,.55);color:#fff;font-weight:900;font-size:13px;letter-spacing:0.3px;transition:transform .15s, box-shadow .2s;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;" onclick="pwaInstall()">
+<!-- ⭐ PWA Install Button (Android + iOS) -->
+<div id="pwaInstallBtn" style="display:none;position:fixed;bottom:24px;left:24px;z-index:70;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50px;padding:12px 18px;align-items:center;gap:8px;cursor:pointer;box-shadow:0 10px 26px rgba(124,58,237,.55);color:#fff;font-weight:900;font-size:13px;letter-spacing:0.3px;transition:transform .15s, box-shadow .2s;font-family:'Segoe UI',Tahoma,sans-serif;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;" onclick="pwaInstall()">
   <span style="font-size:18px;">📥</span>
   <span>Install App</span>
   <span id="pwaInstallClose" style="margin-left:4px;opacity:.7;font-size:14px;padding:2px 4px;" onclick="event.stopPropagation();pwaDismiss();">✕</span>
+</div>
+
+<!-- ⭐ iOS install guide modal -->
+<div id="pwaIosModal" style="display:none;position:fixed;inset:0;background:rgba(5,3,15,.85);backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#1a0b3d;border:1px solid rgba(168,85,247,.5);border-radius:18px;padding:26px 22px;max-width:380px;width:100%;color:#f5f3ff;font-family:'Segoe UI',Tahoma,sans-serif;position:relative;box-shadow:0 25px 60px rgba(0,0,0,.7);">
+    <button onclick="pwaIosModalClose()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#a8a3c9;font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:grid;place-items:center;font-size:32px;margin:0 auto 12px;">🎮</div>
+      <h2 style="margin:0 0 6px;font-size:18px;font-weight:900;">Install NEPPLAY</h2>
+      <p style="color:#a8a3c9;font-size:13px;margin:0;">Add to your home screen for fullscreen app experience</p>
+    </div>
+
+    <div style="background:rgba(15,8,35,.6);border-radius:12px;padding:16px 18px;margin-bottom:12px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap the Share button</div>
+          <div style="color:#a8a3c9;font-size:12px;line-height:1.5;">It's the square with an arrow pointing up — usually at the bottom of Safari. <span style="font-size:16px;">⬆️</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">2</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;margin-bottom:3px;">Scroll down & tap "Add to Home Screen"</div>
+          <div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Look for the <b style="color:#fff;">➕</b> icon next to "Add to Home Screen"</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">3</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap "Add"</div>
+          <div style="color:#a8a3c9;font-size:12px;line-height:1.5;">NEPPLAY icon will appear on your home screen ✅</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);border-radius:10px;padding:10px 14px;font-size:11px;color:#fde68a;line-height:1.5;">
+      💡 <b>Important:</b> Only works in <b>Safari</b>, not Chrome on iPhone. If you're in Chrome, open this page in Safari first.
+    </div>
+  </div>
 </div>
 
 <script>
 (function(){
   let deferredPrompt = null;
   const btn = document.getElementById('pwaInstallBtn');
-  const DISMISS_KEY = 'nep_pwa_dismissed_v1';
+  const DISMISS_KEY = 'nep_pwa_dismissed_v2';
 
-  // Already dismissed in last 7 days? Don't show again
-  try {
-    const dismissed = localStorage.getItem(DISMISS_KEY);
-    if (dismissed && (Date.now() - Number(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
-      return;
-    }
-  } catch(e) {}
-
-  // Already installed as PWA? Don't show
+  // Already installed? Don't show button
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
 
+  // Check if dismissed recently (7-day cool-off)
+  let recentlyDismissed = false;
+  try {
+    const d = localStorage.getItem(DISMISS_KEY);
+    if (d && (Date.now() - Number(d)) < 7 * 24 * 60 * 60 * 1000) recentlyDismissed = true;
+  } catch(e) {}
+
+  // Detect iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+
+  // Android: wait for beforeinstallprompt
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    if (btn) btn.style.display = 'flex';
+    if (btn && !recentlyDismissed) btn.style.display = 'flex';
   });
 
-  window.pwaInstall = async function() {
+  // iOS: show button directly (Safari can't fire beforeinstallprompt)
+  if (isIOS && isSafari && !recentlyDismissed) {
+    // Small delay so page renders first
+    setTimeout(() => { if (btn) btn.style.display = 'flex'; }, 1500);
+  }
+
+  window.pwaInstall = function() {
+    // iOS → show step-by-step modal
+    if (isIOS) {
+      if (!isSafari) {
+        // User is on Chrome iOS — guide them to Safari
+        alert('To install NEPPLAY on iPhone:\n\n1. Copy this link\n2. Open it in SAFARI (not Chrome)\n3. Tap Share ⬆️\n4. Tap "Add to Home Screen"\n\niOS only allows install from Safari.');
+        return;
+      }
+      document.getElementById('pwaIosModal').style.display = 'flex';
+      return;
+    }
+
+    // Android/Desktop → native prompt
     if (!deferredPrompt) {
-      // Fallback: show manual instructions
-      alert('To install:\n\n' +
-        '1. Tap the browser menu (⋮ top-right)\n' +
-        '2. Tap "Install app" or "Add to Home screen"\n\n' +
-        'Then NEPPLAY appears on your home screen.');
+      alert('To install:\n\n1. Tap the browser menu (⋮ top-right)\n2. Tap "Install app" or "Add to Home screen"');
       return;
     }
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
-      if (btn) btn.style.display = 'none';
-    }
-    deferredPrompt = null;
+    deferredPrompt.userChoice.then(({ outcome }) => {
+      if (outcome === 'accepted') {
+        try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+        if (btn) btn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  };
+
+  window.pwaIosModalClose = function() {
+    document.getElementById('pwaIosModal').style.display = 'none';
   };
 
   window.pwaDismiss = function() {
