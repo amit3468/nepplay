@@ -453,16 +453,21 @@ textarea{ min-height:100px; resize:vertical; }
             </div>
 
             <div id="soloFields">
-                <h2 class="section-title">Your Details</h2>
-                <div class="form-group">
-                    <label>Your IGN (In-Game Name) *</label>
-                    <input id="soloIgn" placeholder="e.g. ProGamer99">
-                </div>
-                <div class="form-group">
-                    <label>Account Email</label>
-                    <input id="soloEmail" type="email" readonly>
-                </div>
-            </div>
+    <h2 class="section-title">Your Details</h2>
+    <div class="form-group">
+        <label>Your IGN (In-Game Name) *</label>
+        <input id="soloIgn" placeholder="e.g. ProGamer99">
+    </div>
+    <div class="form-group">
+        <label>Your Free Fire UID *</label>
+        <input id="soloUid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        <div class="small" style="margin-top:6px;">Find it in your in-game profile — top-left under your name.</div>
+    </div>
+    <div class="form-group">
+        <label>Account Email</label>
+        <input id="soloEmail" type="email" readonly>
+    </div>
+</div>
 
             <div id="teamFields" style="display:none;">
                 <h2 class="section-title">Team Information</h2>
@@ -483,22 +488,40 @@ textarea{ min-height:100px; resize:vertical; }
             </div>
 
             <div id="duoPlayers" style="display:none;">
-                <h2 class="section-title">Players (2)</h2>
-                <div class="grid">
-                    <div class="form-group"><label>Player 1 IGN *</label><input id="player1"></div>
-                    <div class="form-group"><label>Player 2 IGN *</label><input id="player2"></div>
-                </div>
-            </div>
+    <h2 class="section-title">Players (2)</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label>Player 1 IGN * <span style="color:#a8a3c9;font-weight:400;">(you / captain)</span></label>
+            <input id="player1">
+        </div>
+        <div class="form-group">
+            <label>Player 1 Free Fire UID *</label>
+            <input id="player1Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Player 2 IGN *</label>
+            <input id="player2">
+        </div>
+        <div class="form-group">
+            <label>Player 2 Free Fire UID *</label>
+            <input id="player2Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        </div>
+    </div>
+</div>
 
             <div id="squadPlayers" style="display:none;">
-                <h2 class="section-title">Additional Players</h2>
-                <div class="grid">
-                    <div class="form-group"><label>Player 3 IGN</label><input id="player3"></div>
-                    <div class="form-group"><label>Player 4 IGN</label><input id="player4"></div>
-                    <div class="form-group"><label>Player 5 IGN</label><input id="player5"></div>
-                    <div class="form-group"><label>Player 6 IGN</label><input id="player6"></div>
-                </div>
-            </div>
+    <h2 class="section-title">Additional Players (optional)</h2>
+    <div class="grid">
+        <div class="form-group"><label>Player 3 IGN</label><input id="player3"></div>
+        <div class="form-group"><label>Player 3 Free Fire UID</label><input id="player3Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+        <div class="form-group"><label>Player 4 IGN</label><input id="player4"></div>
+        <div class="form-group"><label>Player 4 Free Fire UID</label><input id="player4Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+        <div class="form-group"><label>Player 5 IGN</label><input id="player5"></div>
+        <div class="form-group"><label>Player 5 Free Fire UID</label><input id="player5Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+        <div class="form-group"><label>Player 6 IGN</label><input id="player6"></div>
+        <div class="form-group"><label>Player 6 Free Fire UID</label><input id="player6Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+    </div>
+</div>
 
             <div id="paymentSection">
                 <h2 class="section-title">Payment</h2>
@@ -875,16 +898,22 @@ async function loadRegistrationPage() {
             $("email").value = uEmail;
             $("soloEmail").value = uEmail;
             try {
-                const uDoc = await getDoc(doc(db, "users", currentUser.uid));
-                if (uDoc.exists()) {
-                    const u = uDoc.data();
-                    if (u.username) {
-                        $("soloIgn").value = u.username;
-                        $("captainName").value = u.username;
-                        $("player1").value = u.username;
-                    }
-                }
-            } catch (e) {}
+    const uDoc = await getDoc(doc(db, "users", currentUser.uid));
+    if (uDoc.exists()) {
+        const u = uDoc.data();
+        if (u.username) {
+            $("soloIgn").value = u.username;
+            $("captainName").value = u.username;
+            $("player1").value = u.username;
+        }
+        // Prefill captain UID if user has saved it before
+        const storedUid = u.freeFireUid || u.ffUid || "";
+        if (storedUid) {
+            $("soloUid").value = storedUid;
+            $("player1Uid").value = storedUid;
+        }
+    }
+} catch (e) {}
         }
 
         if (!isFreeEvent) {
@@ -1082,45 +1111,72 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.payerPhone      = $("payerPhone").value.trim();
     }
 
-    if (playingMode === "solo") {
+        if (playingMode === "solo") {
         const soloIgn = $("soloIgn").value.trim();
+        const soloUid = $("soloUid").value.trim();
         if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
+        if (!soloUid) { showMessage("Please enter your Free Fire UID.", "error"); return; }
+        if (!/^\d{6,15}$/.test(soloUid)) { showMessage("Free Fire UID must be 6–15 digits (numbers only).", "error"); return; }
         body.teamSize = 1;
         body.teamName = soloIgn + " (Solo)";
         body.captainName = soloIgn;
         body.ign = soloIgn;
+        body.uid = soloUid;
         body.players = [soloIgn];
+        body.playerUids = [soloUid];
+        body.teammates = [{ ign: soloIgn, uid: soloUid, isCaptain: true }];
     } else if (playingMode === "duo") {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
+        const p1Uid = $("player1Uid").value.trim();
+        const p2Uid = $("player2Uid").value.trim();
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
         if (!p1 || !p2) { showMessage("Both player IGNs are required for 2 vs 2.", "error"); return; }
+        if (!p1Uid || !p2Uid) { showMessage("Both Free Fire UIDs are required for 2 vs 2.", "error"); return; }
+        if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
         body.teamSize = 2;
         body.teamName = teamName;
         body.captainName = captainName;
         body.ign = captainName;
+        body.uid = p1Uid;
         body.player1 = p1;
         body.player2 = p2;
+        body.player1Uid = p1Uid;
+        body.player2Uid = p2Uid;
         body.players = [p1, p2];
+        body.playerUids = [p1Uid, p2Uid];
+        body.teammates = [
+            { ign: p1, uid: p1Uid, isCaptain: true },
+            { ign: p2, uid: p2Uid }
+        ];
     } else {
         const teamName = $("teamName").value.trim();
         const captainName = $("captainName").value.trim();
         const p1 = $("player1").value.trim();
         const p2 = $("player2").value.trim();
+        const p1Uid = $("player1Uid").value.trim();
+        const p2Uid = $("player2Uid").value.trim();
         if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
         if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
         if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
+        if (!p1Uid || !p2Uid) { showMessage("At least Player 1 and Player 2 Free Fire UIDs are required.", "error"); return; }
+        if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
         const p3 = $("player3").value.trim();
         const p4 = $("player4").value.trim();
         const p5 = $("player5").value.trim();
         const p6 = $("player6").value.trim();
+        const p3Uid = $("player3Uid").value.trim();
+        const p4Uid = $("player4Uid").value.trim();
+        const p5Uid = $("player5Uid").value.trim();
+        const p6Uid = $("player6Uid").value.trim();
         body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
         body.teamName = teamName;
         body.captainName = captainName;
         body.ign = captainName;
+        body.uid = p1Uid;
         body.email = $("email").value.trim();
         body.player1 = p1;
         body.player2 = p2;
@@ -1128,9 +1184,23 @@ $("registrationForm").addEventListener("submit", async (event) => {
         body.player4 = p4;
         body.player5 = p5;
         body.player6 = p6;
+        body.player1Uid = p1Uid;
+        body.player2Uid = p2Uid;
+        body.player3Uid = p3Uid;
+        body.player4Uid = p4Uid;
+        body.player5Uid = p5Uid;
+        body.player6Uid = p6Uid;
         body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
+        body.playerUids = [p1Uid, p2Uid, p3Uid, p4Uid, p5Uid, p6Uid].filter(Boolean);
+        body.teammates = [
+            { ign: p1, uid: p1Uid, isCaptain: true },
+            { ign: p2, uid: p2Uid },
+            p3 && p3Uid ? { ign: p3, uid: p3Uid } : null,
+            p4 && p4Uid ? { ign: p4, uid: p4Uid } : null,
+            p5 && p5Uid ? { ign: p5, uid: p5Uid } : null,
+            p6 && p6Uid ? { ign: p6, uid: p6Uid } : null
+        ].filter(Boolean);
     }
-
     const btn = $("submitButton");
     btn.disabled = true;
     btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
