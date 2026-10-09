@@ -805,8 +805,6 @@
       </div>
     </div>
 
-        <!-- ⭐ Install App icon -->
-    <button id="pwaInstallBtn" type="button" title="Install NEPPLAY App" onclick="pwaInstall()" style="display:none;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;cursor:pointer;color:#1a0b3d;font-size:16px;flex-shrink:0;box-shadow:0 4px 14px rgba(251,191,36,.5);align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;animation:pwaPulse 2s ease-in-out infinite;">📥</button>
     <div class="user-chip-wrap">
       <input type="checkbox" id="chipToggle" />
       <label class="user-chip" for="chipToggle">
@@ -2324,6 +2322,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<!-- ⭐ PWA: Install button + modal + script -->
+<style>
+  @keyframes pwaPulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(251,191,36,.5); transform: scale(1); }
+    50%      { box-shadow: 0 4px 22px rgba(251,191,36,.9); transform: scale(1.06); }
+  }
+  #pwaInstallBtn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border: none; cursor: pointer; color: #1a0b3d;
+    font-size: 17px; flex-shrink: 0;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(251,191,36,.5);
+    -webkit-tap-highlight-color: transparent;
+    animation: pwaPulse 2s ease-in-out infinite;
+    margin-right: 6px;
+  }
+  #pwaInstallBtn.show { display: inline-flex; }
+  @media (max-width: 720px) {
+    #pwaInstallBtn { width: 32px; height: 32px; font-size: 15px; }
+  }
+</style>
+
 <div id="pwaGuideModal" style="display:none;position:fixed;inset:0;background:rgba(5,3,15,.85);backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#1a0b3d;border:1px solid rgba(168,85,247,.5);border-radius:18px;padding:26px 22px;max-width:400px;width:100%;color:#f5f3ff;font-family:'Segoe UI',Tahoma,sans-serif;position:relative;box-shadow:0 25px 60px rgba(0,0,0,.7);">
     <button onclick="document.getElementById('pwaGuideModal').style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:none;color:#a8a3c9;font-size:22px;cursor:pointer;padding:4px 8px;">✕</button>
@@ -2332,117 +2353,128 @@ if ('serviceWorker' in navigator) {
       <h2 style="margin:0 0 6px;font-size:18px;font-weight:900;">Install NEPPLAY</h2>
       <p id="pwaGuideSub" style="color:#a8a3c9;font-size:13px;margin:0;">Add to your home screen</p>
     </div>
-    <div id="pwaGuideSteps" style="background:rgba(15,8,35,.6);border-radius:12px;padding:16px 18px;margin-bottom:12px;"></div>
-    <div id="pwaGuideTip" style="background:rgba(251,191,36,.1);border:1px dashed rgba(251,191,36,.5);border-radius:10px;padding:10px 14px;font-size:11px;color:#fde68a;line-height:1.5;display:none;"></div>
+    <div id="pwaGuideSteps" style="background:rgba(15,8,35,.6);border-radius:12px;padding:16px 18px;"></div>
   </div>
 </div>
 
 <script>
 (function(){
-  let deferredPrompt = null;
-  const btn = document.getElementById('pwaInstallBtn');
-  const DISMISS_KEY = 'nep_pwa_dismissed_v4';
+  var deferredPrompt = null;
+  var DISMISS_KEY = 'nep_pwa_dismissed_v6';
 
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
 
-  let recentlyDismissed = false;
   try {
-    const d = localStorage.getItem(DISMISS_KEY);
-    if (d && (Date.now() - Number(d)) < 7 * 24 * 60 * 60 * 1000) recentlyDismissed = true;
+    var d = localStorage.getItem(DISMISS_KEY);
+    if (d && (Date.now() - Number(d)) < 7 * 24 * 60 * 60 * 1000) return;
   } catch(e) {}
 
-  if (recentlyDismissed) return;
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /android/i.test(ua);
+  var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
 
-  const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isAndroid = /android/i.test(ua);
-  const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
-  const isMobile = isIOS || isAndroid;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (btn) btn.style.display = 'inline-flex';
-  });
-
-  // Always show icon on mobile after 2s
-  if (isMobile) {
-    setTimeout(() => { if (btn) btn.style.display = 'inline-flex'; }, 2000);
+  // ⭐ Insert button into the nav automatically — no HTML edit needed
+  function insertButton() {
+    if (document.getElementById('pwaInstallBtn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'pwaInstallBtn';
+    btn.type = 'button';
+    btn.title = 'Install NEPPLAY App';
+    btn.innerHTML = '📥';
+    btn.setAttribute('onclick', 'pwaInstall()');
+    // Find nav links container
+    var nav = document.querySelector('.nav-links') || document.querySelector('nav');
+    if (nav) {
+      nav.insertBefore(btn, nav.firstChild);
+      setTimeout(function(){ btn.classList.add('show'); }, 100);
+    }
   }
-  // Desktop: only when Chrome signals installability
-  // (beforeinstallprompt above handles that)
 
   window.pwaInstall = function() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(({ outcome }) => {
-        if (outcome === 'accepted') {
+      deferredPrompt.userChoice.then(function(choice){
+        if (choice.outcome === 'accepted') {
           try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
-          if (btn) btn.style.display = 'none';
+          var b = document.getElementById('pwaInstallBtn');
+          if (b) b.style.display = 'none';
         }
         deferredPrompt = null;
       });
       return;
     }
-    const steps = document.getElementById('pwaGuideSteps');
-    const sub = document.getElementById('pwaGuideSub');
-    const tip = document.getElementById('pwaGuideTip');
-    let html = '', tipHtml = '';
-
+    // Build guide
+    var sub = document.getElementById('pwaGuideSub');
+    var steps = document.getElementById('pwaGuideSteps');
+    var html = '';
     if (isIOS) {
       sub.textContent = 'Add to your home screen (Safari only)';
-      html = `
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap Share ⬆️</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Square with up-arrow at the bottom of Safari</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">2</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap "Add to Home Screen" ➕</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Scroll down in the menu</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">3</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap "Add"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">NEPPLAY icon appears on your home screen ✅</div></div>
-        </div>`;
-      tipHtml = !isSafari
-        ? '💡 <b>You are in Chrome.</b> iOS only allows installs from <b>Safari</b>. Copy this URL and open in Safari first.'
-        : '💡 After install, you can close Safari — the app runs on its own.';
+      html = ''
+        + '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap Share button</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Bottom of Safari — square with up arrow</div></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">2</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap "Add to Home Screen"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Scroll in the menu</div></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">3</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap Add</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Icon appears on home screen</div></div>'
+        + '</div>'
+        + (!isSafari ? '<div style="margin-top:12px;padding:10px 12px;background:rgba(251,191,36,.12);border-radius:8px;font-size:12px;color:#fde68a;">You are using Chrome. iOS only allows installs from Safari. Copy this link and open in Safari.</div>' : '');
     } else if (isAndroid) {
       sub.textContent = 'Add to your home screen (Chrome)';
-      html = `
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap ⋮ menu</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">3 dots at top-right of Chrome</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">2</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap "Install app" / "Add to Home screen"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Scroll down in the menu if you don't see it</div></div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">3</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Tap "Install"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Icon appears on your home screen ✅</div></div>
-        </div>`;
-      tipHtml = '💡 If you don\\'t see "Install app", tap ⋮ → Reload first, then ⋮ → Install again.';
+      html = ''
+        + '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap Chrome menu</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Three dots at top-right</div></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">2</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap "Install app"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Or "Add to Home screen" — scroll if needed</div></div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">3</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Tap Install</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">NEPPLAY icon on home screen</div></div>'
+        + '</div>';
     } else {
       sub.textContent = 'Install as desktop app';
-      html = `
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>
-          <div><div style="font-weight:800;font-size:14px;margin-bottom:3px;">Chrome menu (⋮) → "Install NEPPLAY"</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Or look for the ⊕ icon in the address bar</div></div>
-        </div>`;
-      tipHtml = '💡 Works in Chrome and Edge on Windows/Mac.';
+      html = ''
+        + '<div style="display:flex;gap:12px;align-items:flex-start;">'
+        + '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;flex-shrink:0;">1</div>'
+        + '<div><div style="font-weight:800;font-size:14px;">Chrome menu → Install NEPPLAY</div><div style="color:#a8a3c9;font-size:12px;line-height:1.5;">Or look for the install icon in the address bar</div></div>'
+        + '</div>';
     }
-
     steps.innerHTML = html;
-    if (tipHtml) { tip.innerHTML = tipHtml; tip.style.display = 'block'; } else { tip.style.display = 'none'; }
     document.getElementById('pwaGuideModal').style.display = 'flex';
   };
 
-  window.addEventListener('appinstalled', () => {
-    if (btn) btn.style.display = 'none';
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    var b = document.getElementById('pwaInstallBtn');
+    if (b) b.classList.add('show');
   });
+
+  window.addEventListener('appinstalled', function(){
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e) {}
+    var b = document.getElementById('pwaInstallBtn');
+    if (b) b.style.display = 'none';
+  });
+
+  // ⭐ Auto-insert button after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', insertButton);
+  } else {
+    insertButton();
+  }
+
+  // Fallback re-try in case nav loads late
+  setTimeout(insertButton, 1000);
+  setTimeout(insertButton, 3000);
 })();
 </script>
 </body>
