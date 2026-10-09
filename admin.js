@@ -1030,7 +1030,7 @@ window.openRegDetail = function(regId) {
       ` : ''}
         </div>
     ${renderTeammatesSection(r)}
-    ${isPaid && payment ? ` `
+    ${isPaid && payment ? `
       <div class="dm-section">
         <h3>💳 Payment Details</h3>
         <div class="dm-rows">
