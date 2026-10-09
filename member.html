@@ -755,6 +755,12 @@
     .earn-card .ec-value { font-size: 0.9rem; }
   }
 </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NEPPLAY">
+<meta name="theme-color" content="#7c3aed">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
 
@@ -2304,6 +2310,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Re-check every 5 minutes in case user keeps the tab open past midnight
   setInterval(setHeroDate, 5 * 60 * 1000);
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
