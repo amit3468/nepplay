@@ -423,8 +423,9 @@
     <a href="/tournaments.html" class="active">Tournaments</a>
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
     <a href="/store.html" class="store-link">🛒 Store</a>
-    <a href="/teams.html">Teams</a>
+        <a href="/teams.html">Teams</a>
     <a href="/support.html">Support</a>
+    <a href="https://discord.gg/43bmxybpkm" target="_blank" rel="noopener" style="color:#7289da;font-weight:700;">Discord</a>
 
     <div class="user-chip-wrap">
       <input type="checkbox" id="chipToggle" />
@@ -452,11 +453,9 @@
     <h1>Choose your game. <span class="cash">Win real cash.</span> 💰</h1>
     <p>🔥 Tonight — Free Fire Squad Fullmap · Rs 160/team entry · Rs 650 prize · Rs 70 top killer · 9 PM. Limited to 8 team slots!</p>
     <div class="hero-stats" id="heroStats">
-      <div class="hero-stat">⏳ Loading…</div>
+    <div class="hero-stat">⏳ Loading…</div>
     </div>
   </section>
-
-      </section>
 
   <div class="featured-duo">
 
@@ -512,8 +511,12 @@
         </div>
       </div>
 
-      <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
+            <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">
         ⏰ Reg closes 8:30 PM · 🔑 Room 8:40 PM · 🚀 Match 9:00 PM
+      </div>
+
+      <div style="text-align:center; margin-top:8px;">
+        <a href="https://discord.gg/43bmxybpkm" target="_blank" rel="noopener" style="display:inline-block;padding:8px 16px;border-radius:8px;background:linear-gradient(135deg,#5865f2,#3b45c9);color:#fff;text-decoration:none;font-weight:800;font-size:0.8rem;">🎮 Join Discord for updates</a>
       </div>
     </div>
   </div>
@@ -1029,7 +1032,7 @@ function renderAll(tournaments) {
     const isTonight = nightOnly.some(t => String(t.date) === '2026-10-01');
     const nightTag = isTonight ? '9:00 PM onwards' : '9:00 PM NPT';
     const nightLabel = isTonight ? '🔥 Tonight' : '🌙 Night Session';
-    html += `<h3 class="section-title-mt night">${nightLabel}${nightDateLabel ? ' · ' + nightDateLabel : ''} <span class="st-tag">${nightTag}</span></h3><div class="game-grid">`;
+    html += `<h3 class="section-title night" style="border-bottom-color:rgba(168,85,247,.4);">${nightLabel}${nightDateLabel ? ' · ' + nightDateLabel : ''} <span class="st-tag">${nightTag}</span></h3><div class="game-grid">`;
     const groups = buildGameGroups(nightOnly);
     Object.values(groups).forEach(g => {
       if (g.night.length) html += renderGameCard({ ...g, day: [] });
