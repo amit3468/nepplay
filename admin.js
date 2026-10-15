@@ -2158,7 +2158,17 @@ window.submitMatchResults = async function() {
       totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
       completedAt: serverTimestamp(), createdAt: serverTimestamp()
     });
-    await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
+        await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
+
+    // ⭐⭐⭐ WEEKLY BONUS AUTO-UPDATE ⭐⭐⭐
+    try {
+      if (typeof window.updateWeeklyStatsForMatch === 'function') {
+        await window.updateWeeklyStatsForMatch(tid, w1Name);
+      }
+    } catch (wbErr) {
+      console.warn('[weekly_stats] hook failed (non-fatal):', wbErr);
+    }
+    // ⭐⭐⭐ END WEEKLY BONUS ⭐⭐⭐
 
     const unmatched = payoutRecords.filter(p => !p.userId).map(p => p.winnerName);
     if (unmatched.length) {
