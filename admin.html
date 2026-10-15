@@ -1793,7 +1793,115 @@ window.exportWeeklyCSV = function() {
 };
 
 // ---- Auto-update stats when match ends ----
-window.updateWeeklyStatsForMatch = async function(tournamentId, winnerIgn) {
+window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn) {
+  const weekId = getWeekId();
+  const { start, end } = getWeekRange(weekId);
+  const winnerNeedle = String(winnerNameOrIgn || '').trim().toLowerCase();
+
+  try {
+    const regSnap = await getDocs(query(
+      collection(wbDb, 'tournament_registrations'),
+      where('tournamentId', '==', tournamentId),
+      where('status', '==', 'confirmed')
+    ));
+
+    // Collect every player from every registration
+    // For Solo/Duo/Squad: teammates[] holds each player (captain included)
+    // Fallback: use captain's userId + ign if teammates[] missing
+    const players = []; // { uid, username, ign }
+
+    regSnap.forEach(regDoc => {
+      const r = regDoc.data();
+      const teammates = Array.isArray(r.teammates) ? r.teammates : [];
+
+      if (teammates.length > 0) {
+        teammates.forEach(t => {
+          if (t.uid) {
+            players.push({
+              uid: t.uid,
+              username: r.username || t.ign || '',
+              ign: t.ign || ''
+            });
+          }
+        });
+      } else if (r.userId) {
+        // Legacy fallback — captain only
+        players.push({
+          uid: r.userId,
+          username: r.username || '',
+          ign: r.ign || r.captainName || ''
+        });
+      }
+    });
+
+    if (!players.length) {
+      console.log('[weekly_stats] no players found for', tournamentId);
+      return;
+    }
+
+    // Deduplicate by uid (in case of duplicate registrations)
+    const uniquePlayers = Array.from(
+      new Map(players.map(p => [p.uid, p])).values()
+    );
+
+    // Process each player
+    for (const p of uniquePlayers) {
+      const docId = `${weekId}_${p.uid}`;
+      const ref = doc(wbDb, 'weekly_stats', docId);
+      const existing = await getDoc(ref);
+
+      // Winner if their IGN or username matches the announced winner
+      const isWinner = winnerNeedle && (
+        (p.ign && p.ign.toLowerCase() === winnerNeedle) ||
+        (p.username && p.username.toLowerCase() === winnerNeedle)
+      );
+
+      if (existing.exists()) {
+        const data = existing.data();
+        const newMatches = (data.matchesPlayed || 0) + 1;
+        const newWins = (data.wins || 0) + (isWinner ? 1 : 0);
+        const { tier, amount, type } = calcTier(newMatches, newWins);
+
+        await updateDoc(ref, {
+          matchesPlayed: newMatches,
+          wins: newWins,
+          tier,
+          bonusAmount: amount,
+          bonusType: type,
+          // If bonus rose from 0 → >0, set status pending
+          bonusStatus: amount > 0 ? (data.bonusStatus === 'paid' ? 'paid' : 'pending') : data.bonusStatus,
+          updatedAt: new Date()
+        });
+      } else {
+        const newMatches = 1;
+        const newWins = isWinner ? 1 : 0;
+        const { tier, amount, type } = calcTier(newMatches, newWins);
+
+        await setDoc(ref, {
+          uid: p.uid,
+          username: p.username,
+          ign: p.ign,
+          weekId,
+          weekStart: start,
+          weekEnd: end,
+          matchesPlayed: newMatches,
+          wins: newWins,
+          topKills: 0,
+          tier,
+          bonusAmount: amount,
+          bonusType: type,
+          bonusStatus: amount > 0 ? 'pending' : null,
+          paidAt: null,
+          updatedAt: new Date()
+        });
+      }
+    }
+
+    console.log(`[weekly_stats] updated ${uniquePlayers.length} players for ${tournamentId} (winner: ${winnerNameOrIgn || 'none'})`);
+  } catch (e) {
+    console.error('[weekly_stats] update failed:', e);
+  }
+};
   const weekId = getWeekId();
   const { start, end } = getWeekRange(weekId);
   try {
