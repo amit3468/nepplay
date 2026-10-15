@@ -916,6 +916,37 @@
     </div>
     <div id="mc-note" class="ec-note" hidden></div>
   </a>
+    <!-- ⭐ MY WEEKLY BONUS -->
+  <section id="weeklyBonusCard" style="background:linear-gradient(135deg, rgba(251,191,36,.12), rgba(20,12,45,.95)); border:2px solid rgba(251,191,36,.5); border-radius:18px; padding:20px 22px; margin-bottom:26px; display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+      <div>
+        <div style="font-size:1.15rem; font-weight:900; color:#fbbf24;">🎁 My Weekly Bonus</div>
+        <div id="wb-week-label" style="font-size:.78rem; color:#a8a3c9; margin-top:3px;">—</div>
+      </div>
+      <div id="wb-tier-badge" style="padding:6px 14px; border-radius:999px; font-weight:900; font-size:.78rem;">—</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+      <div style="background:rgba(15,8,35,.55); border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:.68rem; color:#a8a3c9; text-transform:uppercase; letter-spacing:.5px;">Matches</div>
+        <div id="wb-matches" style="font-size:1.5rem; font-weight:900; color:#fff;">0</div>
+      </div>
+      <div style="background:rgba(15,8,35,.55); border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:.68rem; color:#a8a3c9; text-transform:uppercase; letter-spacing:.5px;">Wins</div>
+        <div id="wb-wins" style="font-size:1.5rem; font-weight:900; color:#4ade80;">0</div>
+      </div>
+      <div style="background:rgba(15,8,35,.55); border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:.68rem; color:#a8a3c9; text-transform:uppercase; letter-spacing:.5px;">Bonus</div>
+        <div id="wb-bonus" style="font-size:1.5rem; font-weight:900; color:#fbbf24;">Rs 0</div>
+      </div>
+    </div>
+
+    <div id="wb-progress" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+    <div id="wb-status-note" style="margin-top:14px; padding:10px 12px; border-radius:10px; font-size:.8rem; color:#a8a3c9; background:rgba(15,8,35,.5); text-align:center;">
+      Play more matches to climb the tiers!
+    </div>
+  </section>
 
   <div class="ref-card" id="refCard" hidden>
     <div class="ref-head">
@@ -1373,6 +1404,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadMyMatches(user.uid);
     await loadMyRegistrations(user.uid);
     await loadUpcomingTournaments(user.uid);
+    await loadMyWeeklyBonus(user.uid);
     loadBellNotifications(user.uid);
 });
 
@@ -2184,6 +2216,97 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btn) btn.addEventListener('click', window.toggleBell);
     loadAnnouncements();
 });
+// ============ MY WEEKLY BONUS WIDGET ============
+function wbGetWeekIdM(date) {
+    date = date || new Date();
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return d.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+}
+
+async function loadMyWeeklyBonus(uid) {
+    const card = document.getElementById('weeklyBonusCard');
+    if (!card) return;
+    const weekId = wbGetWeekIdM();
+    const docId = weekId + '_' + uid;
+
+    let data = null;
+    try {
+        const snap = await getDoc(doc(db, 'weekly_stats', docId));
+        if (snap.exists()) data = snap.data();
+    } catch (e) {
+        console.warn('weekly stats error:', e);
+    }
+
+    const matches = (data && data.matchesPlayed) || 0;
+    const wins = (data && data.wins) || 0;
+    const tier = (data && data.tier) || null;
+    const bonus = (data && data.bonusAmount) || 0;
+    const status = (data && data.bonusStatus) || null;
+
+    const tiers = [
+        { key: 'bronze',  icon: '🥉', label: 'Bronze',  req: 3, color: '#cd7f32', bonus: 20 },
+        { key: 'silver',  icon: '🥈', label: 'Silver',  req: 5, color: '#c0c0c0', bonus: 50 },
+        { key: 'gold',    icon: '🥇', label: 'Gold',    req: 7, color: '#fbbf24', bonus: 100 },
+        { key: 'diamond', icon: '💎', label: 'Diamond', req: 7, winsReq: 2, color: '#22d3ee', bonus: 200 }
+    ];
+
+    document.getElementById('wb-week-label').textContent = 'Week ' + weekId;
+    document.getElementById('wb-matches').textContent = matches;
+    document.getElementById('wb-wins').textContent = wins;
+    document.getElementById('wb-bonus').textContent = 'Rs ' + bonus;
+
+    const badge = document.getElementById('wb-tier-badge');
+    if (tier) {
+        const t = tiers.find(function(x) { return x.key === tier; });
+        badge.style.background = t.color + '33';
+        badge.style.color = t.color;
+        badge.style.border = '1px solid ' + t.color;
+        badge.textContent = t.icon + ' ' + t.label.toUpperCase();
+    } else {
+        badge.style.background = 'rgba(168,85,247,.2)';
+        badge.style.color = '#a8a3c9';
+        badge.style.border = '1px solid rgba(168,85,247,.4)';
+        badge.textContent = 'NO TIER YET';
+    }
+
+    document.getElementById('wb-progress').innerHTML = tiers.map(function(t) {
+        const percent = Math.min(100, (matches / t.req) * 100);
+        const met = matches >= t.req;
+        const winMet = t.winsReq ? wins >= t.winsReq : true;
+        const complete = met && winMet;
+        const label = t.winsReq
+            ? matches + '/' + t.req + ' matches · ' + wins + '/' + t.winsReq + ' wins'
+            : matches + '/' + t.req + ' matches';
+        return '<div>' +
+            '<div style="display:flex; justify-content:space-between; font-size:.78rem; margin-bottom:5px;">' +
+                '<span style="color:#e9e5ff; font-weight:800;">' + t.icon + ' ' + t.label + ' — Rs ' + t.bonus + '</span>' +
+                '<span style="color:' + (complete ? '#4ade80' : '#a8a3c9') + '; font-weight:700;">' + (complete ? '✅ Done' : label) + '</span>' +
+            '</div>' +
+            '<div style="height:8px; background:rgba(15,8,35,.7); border-radius:999px; overflow:hidden;">' +
+                '<div style="width:' + percent + '%; height:100%; background:' + (complete ? 'linear-gradient(90deg,#22c55e,#16a34a)' : t.color) + '; border-radius:999px; transition:width .4s;"></div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+
+    const note = document.getElementById('wb-status-note');
+    if (tier && bonus > 0) {
+        if (status === 'paid') {
+            note.innerHTML = '✅ <b style="color:#4ade80;">Bonus paid!</b> Rs ' + bonus + ' (' + (data.bonusType || '') + ') has been sent to you.';
+        } else {
+            note.innerHTML = '⏳ <b style="color:#fbbf24;">Bonus pending.</b> Rs ' + bonus + ' will be paid Monday evening.';
+        }
+    } else {
+        const next = tiers.find(function(t) { return matches < t.req; }) || tiers[tiers.length - 1];
+        const remaining = Math.max(0, next.req - matches);
+        note.innerHTML = '🎯 Play <b style="color:#fbbf24;">' + remaining + ' more match' + (remaining > 1 ? 'es' : '') + '</b> to unlock <b style="color:' + next.color + ';">' + next.label + '</b> (Rs ' + next.bonus + ').';
+    }
+
+    card.style.display = 'block';
+}
 </script>
 
 <script type="module">
