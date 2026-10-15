@@ -1592,7 +1592,7 @@ import {
   setDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const cfg = {
+const wbCfg = {
   apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
   authDomain: "nepplaygaming.firebaseapp.com",
   projectId: "nepplaygaming",
@@ -1600,24 +1600,25 @@ const cfg = {
   messagingSenderId: "893565645520",
   appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
 };
-const wbApp = getApps().length ? getApps()[0] : initializeApp(cfg);
+const wbApp = getApps().length ? getApps()[0] : initializeApp(wbCfg);
 const wbDb  = getFirestore(wbApp);
 window.__wbDb = wbDb;
 
-// ---- Helpers ----
-function getWeekId(date = new Date()) {
+function wbGetWeekId(date) {
+  date = date || new Date();
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+  return d.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
 }
 
-function getWeekRange(weekId) {
-  const [year, weekStr] = weekId.split('-W');
-  const week = parseInt(weekStr, 10);
-  const jan4 = new Date(Date.UTC(parseInt(year), 0, 4));
+function wbGetWeekRange(weekId) {
+  const parts = weekId.split('-W');
+  const year = parseInt(parts[0], 10);
+  const week = parseInt(parts[1], 10);
+  const jan4 = new Date(Date.UTC(year, 0, 4));
   const dayNum = jan4.getUTCDay() || 7;
   const weekStart = new Date(jan4);
   weekStart.setUTCDate(jan4.getUTCDate() - dayNum + 1 + (week - 1) * 7);
@@ -1629,21 +1630,20 @@ function getWeekRange(weekId) {
   };
 }
 
-function calcTier(matches, wins) {
+function wbCalcTier(matches, wins) {
   if (matches >= 7 && wins >= 2) return { tier: 'diamond', amount: 200, type: 'cash' };
-  if (matches >= 7) return { tier: 'gold', amount: 100, type: 'credit' };
-  if (matches >= 5) return { tier: 'silver', amount: 50, type: 'credit' };
-  if (matches >= 3) return { tier: 'bronze', amount: 20, type: 'credit' };
+  if (matches >= 7) return { tier: 'gold',    amount: 100, type: 'credit' };
+  if (matches >= 5) return { tier: 'silver',  amount: 50,  type: 'credit' };
+  if (matches >= 3) return { tier: 'bronze',  amount: 20,  type: 'credit' };
   return { tier: null, amount: 0, type: null };
 }
 
-function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])
-  );
+function wbEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
 }
 
-// ---- Week Picker ----
 window.loadWeekPicker = function() {
   const picker = document.getElementById('weekPicker');
   if (!picker || picker.dataset.loaded === '1') return;
@@ -1652,100 +1652,109 @@ window.loadWeekPicker = function() {
   for (let i = 0; i < 5; i++) {
     const d = new Date(now);
     d.setDate(d.getDate() - (i * 7));
-    weeks.push(getWeekId(d));
+    weeks.push(wbGetWeekId(d));
   }
-  picker.innerHTML = weeks.map(w => {
-    const r = getWeekRange(w);
-    return `<option value="${w}">${w} (${r.start} → ${r.end})</option>`;
+  picker.innerHTML = weeks.map(function(w) {
+    const r = wbGetWeekRange(w);
+    return '<option value="' + w + '">' + w + ' (' + r.start + ' to ' + r.end + ')</option>';
   }).join('');
   picker.dataset.loaded = '1';
 };
 
-// ---- Load Stats ----
 window.loadWeeklyStats = async function() {
   window.loadWeekPicker();
   const picker = document.getElementById('weekPicker');
-  const weekId = (picker && picker.value) || getWeekId();
+  const weekId = (picker && picker.value) || wbGetWeekId();
   const tbody = document.getElementById('wb-table-body');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:#9ca3af;">Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:#9ca3af;">Loading...</td></tr>';
 
   try {
     const snap = await getDocs(query(
       collection(wbDb, 'weekly_stats'),
       where('weekId', '==', weekId)
     ));
-    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const rows = snap.docs.map(function(d) {
+      return Object.assign({ id: d.id }, d.data());
+    });
 
     if (!rows.length) {
       tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:#9ca3af;">No stats for this week yet. Play matches to populate.</td></tr>';
-      updateSummary([]);
+      wbUpdateSummary([]);
       return;
     }
 
-    const tierOrder = { diamond: 0, gold: 1, silver: 2, bronze: 3, null: 4 };
-    rows.sort((a, b) => {
-      const t = (tierOrder[a.tier ?? 'null'] ?? 5) - (tierOrder[b.tier ?? 'null'] ?? 5);
-      if (t !== 0) return t;
+    const tierOrder = { diamond: 0, gold: 1, silver: 2, bronze: 3 };
+    rows.sort(function(a, b) {
+      const ta = (a.tier && tierOrder[a.tier] != null) ? tierOrder[a.tier] : 5;
+      const tb = (b.tier && tierOrder[b.tier] != null) ? tierOrder[b.tier] : 5;
+      if (ta !== tb) return ta - tb;
       return (b.matchesPlayed || 0) - (a.matchesPlayed || 0);
     });
 
-    tbody.innerHTML = rows.map(r => {
-      const tierBadge = r.tier
-        ? `<span class="wb-badge wb-badge-${r.tier}">${r.tier.toUpperCase()}</span>`
-        : '<span style="color:#6b7280;">—</span>';
-      const bonus = r.bonusAmount
-        ? `<span style="color:#fbbf24;font-weight:800;">Rs ${r.bonusAmount}</span> <small style="color:#9ca3af;">(${escapeHtml(r.bonusType || '')})</small>`
-        : '—';
-      const status = r.bonusStatus === 'paid'
-        ? '<span style="color:#4ade80;font-weight:700;">✅ Paid</span>'
-        : r.bonusAmount
-          ? '<span style="color:#fbbf24;">⏳ Pending</span>'
-          : '—';
-      const action = r.bonusAmount && r.bonusStatus !== 'paid'
-        ? `<button onclick="markBonusPaid('${r.id}')" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:6px 14px;border:0;border-radius:8px;cursor:pointer;font-weight:800;font-size:11px;">Mark Paid</button>`
-        : '—';
+    tbody.innerHTML = rows.map(function(r) {
+      let tierBadge = '<span style="color:#6b7280;">-</span>';
+      if (r.tier) {
+        tierBadge = '<span class="wb-badge wb-badge-' + r.tier + '">' + r.tier.toUpperCase() + '</span>';
+      }
 
-      return `
-        <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
-          <td style="padding:12px;">
-            <div style="font-weight:800;color:#fff;">${escapeHtml(r.username || r.ign || 'Player')}</div>
-            <div style="font-size:11px;color:#9ca3af;">${escapeHtml(r.ign || '')}</div>
-          </td>
-          <td style="padding:12px;font-weight:700;color:#fff;">${r.matchesPlayed || 0}</td>
-          <td style="padding:12px;font-weight:700;color:#4ade80;">${r.wins || 0}</td>
-          <td style="padding:12px;">${tierBadge}</td>
-          <td style="padding:12px;">${bonus}</td>
-          <td style="padding:12px;">${status}</td>
-          <td style="padding:12px;">${action}</td>
-        </tr>
-      `;
+      let bonus = '-';
+      if (r.bonusAmount) {
+        bonus = '<span style="color:#fbbf24;font-weight:800;">Rs ' + r.bonusAmount + '</span> <small style="color:#9ca3af;">(' + wbEsc(r.bonusType || '') + ')</small>';
+      }
+
+      let status = '-';
+      if (r.bonusStatus === 'paid') {
+        status = '<span style="color:#4ade80;font-weight:700;">Paid</span>';
+      } else if (r.bonusAmount) {
+        status = '<span style="color:#fbbf24;">Pending</span>';
+      }
+
+      let action = '-';
+      if (r.bonusAmount && r.bonusStatus !== 'paid') {
+        action = '<button onclick="markBonusPaid(\'' + r.id + '\')" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:6px 14px;border:0;border-radius:8px;cursor:pointer;font-weight:800;font-size:11px;">Mark Paid</button>';
+      }
+
+      return '<tr style="border-bottom:1px solid rgba(255,255,255,.05);">' +
+        '<td style="padding:12px;">' +
+          '<div style="font-weight:800;color:#fff;">' + wbEsc(r.username || r.ign || 'Player') + '</div>' +
+          '<div style="font-size:11px;color:#9ca3af;">' + wbEsc(r.ign || '') + '</div>' +
+        '</td>' +
+        '<td style="padding:12px;font-weight:700;color:#fff;">' + (r.matchesPlayed || 0) + '</td>' +
+        '<td style="padding:12px;font-weight:700;color:#4ade80;">' + (r.wins || 0) + '</td>' +
+        '<td style="padding:12px;">' + tierBadge + '</td>' +
+        '<td style="padding:12px;">' + bonus + '</td>' +
+        '<td style="padding:12px;">' + status + '</td>' +
+        '<td style="padding:12px;">' + action + '</td>' +
+      '</tr>';
     }).join('');
 
-    updateSummary(rows);
+    wbUpdateSummary(rows);
   } catch (e) {
     console.error('loadWeeklyStats error:', e);
     tbody.innerHTML = '<tr><td colspan="7" style="padding:30px;text-align:center;color:#f87171;">Failed to load. Check console.</td></tr>';
   }
 };
 
-function updateSummary(rows) {
+function wbUpdateSummary(rows) {
   const counts = { bronze: 0, silver: 0, gold: 0, diamond: 0 };
   let payout = 0;
-  rows.forEach(r => {
+  rows.forEach(function(r) {
     if (r.tier && counts[r.tier] !== undefined) counts[r.tier]++;
     payout += Number(r.bonusAmount || 0);
   });
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const set = function(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
   set('wb-total', rows.length);
   set('wb-bronze', counts.bronze);
   set('wb-silver', counts.silver);
   set('wb-gold', counts.gold);
   set('wb-diamond', counts.diamond);
-  set('wb-payout', `Rs ${payout}`);
+  set('wb-payout', 'Rs ' + payout);
 }
 
-// ---- Recalculate ----
 window.recalculateAllTiers = async function() {
   if (!confirm('Recalculate tiers for all players this week?')) return;
   const weekId = document.getElementById('weekPicker').value;
@@ -1753,49 +1762,49 @@ window.recalculateAllTiers = async function() {
   let updated = 0;
   for (const d of snap.docs) {
     const data = d.data();
-    const { tier, amount, type } = calcTier(data.matchesPlayed || 0, data.wins || 0);
+    const res = wbCalcTier(data.matchesPlayed || 0, data.wins || 0);
     await updateDoc(doc(wbDb, 'weekly_stats', d.id), {
-      tier, bonusAmount: amount, bonusType: type, updatedAt: new Date()
+      tier: res.tier,
+      bonusAmount: res.amount,
+      bonusType: res.type,
+      updatedAt: new Date()
     });
     updated++;
   }
-  alert(`✅ Recalculated ${updated} players`);
-  loadWeeklyStats();
+  alert('Recalculated ' + updated + ' players');
+  window.loadWeeklyStats();
 };
 
-// ---- Mark Paid ----
 window.markBonusPaid = async function(docId) {
   if (!confirm('Mark this bonus as paid?')) return;
   await updateDoc(doc(wbDb, 'weekly_stats', docId), {
     bonusStatus: 'paid',
     paidAt: new Date()
   });
-  loadWeeklyStats();
+  window.loadWeeklyStats();
 };
 
-// ---- Export CSV ----
 window.exportWeeklyCSV = function() {
   const rows = document.querySelectorAll('#wb-table-body tr');
   let csv = 'Player,Matches,Wins,Tier,Bonus,Status\n';
-  rows.forEach(r => {
+  rows.forEach(function(r) {
     const cells = r.querySelectorAll('td');
     if (cells.length < 6) return;
-    csv += Array.from(cells).slice(0, 6)
-      .map(c => `"${c.textContent.trim().replace(/"/g, '""')}"`)
-      .join(',') + '\n';
+    csv += Array.from(cells).slice(0, 6).map(function(c) {
+      return '"' + c.textContent.trim().replace(/"/g, '""') + '"';
+    }).join(',') + '\n';
   });
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `weekly-bonus-${getWeekId()}.csv`;
+  a.download = 'weekly-bonus-' + wbGetWeekId() + '.csv';
   a.click();
 };
 
-// ---- Auto-update stats when match ends ----
 window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn) {
-  const weekId = getWeekId();
-  const { start, end } = getWeekRange(weekId);
+  const weekId = wbGetWeekId();
+  const range = wbGetWeekRange(weekId);
   const winnerNeedle = String(winnerNameOrIgn || '').trim().toLowerCase();
 
   try {
@@ -1805,52 +1814,40 @@ window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn)
       where('status', '==', 'confirmed')
     ));
 
-    // Collect every player from every registration
-    // For Solo/Duo/Squad: teammates[] holds each player (captain included)
-    // Fallback: use captain's userId + ign if teammates[] missing
-    const players = []; // { uid, username, ign }
-
-    regSnap.forEach(regDoc => {
+    const players = [];
+    regSnap.forEach(function(regDoc) {
       const r = regDoc.data();
       const teammates = Array.isArray(r.teammates) ? r.teammates : [];
-
       if (teammates.length > 0) {
-        teammates.forEach(t => {
+        teammates.forEach(function(t) {
           if (t.uid) {
-            players.push({
-              uid: t.uid,
-              username: r.username || t.ign || '',
-              ign: t.ign || ''
-            });
+            players.push({ uid: t.uid, username: r.username || t.ign || '', ign: t.ign || '' });
           }
         });
       } else if (r.userId) {
-        // Legacy fallback — captain only
-        players.push({
-          uid: r.userId,
-          username: r.username || '',
-          ign: r.ign || r.captainName || ''
-        });
+        players.push({ uid: r.userId, username: r.username || '', ign: r.ign || r.captainName || '' });
       }
     });
 
     if (!players.length) {
-      console.log('[weekly_stats] no players found for', tournamentId);
+      console.log('[weekly_stats] no players for', tournamentId);
       return;
     }
 
-    // Deduplicate by uid (in case of duplicate registrations)
-    const uniquePlayers = Array.from(
-      new Map(players.map(p => [p.uid, p])).values()
-    );
+    const uniquePlayers = [];
+    const seen = {};
+    players.forEach(function(p) {
+      if (!seen[p.uid]) {
+        seen[p.uid] = true;
+        uniquePlayers.push(p);
+      }
+    });
 
-    // Process each player
     for (const p of uniquePlayers) {
-      const docId = `${weekId}_${p.uid}`;
+      const docId = weekId + '_' + p.uid;
       const ref = doc(wbDb, 'weekly_stats', docId);
       const existing = await getDoc(ref);
 
-      // Winner if their IGN or username matches the announced winner
       const isWinner = winnerNeedle && (
         (p.ign && p.ign.toLowerCase() === winnerNeedle) ||
         (p.username && p.username.toLowerCase() === winnerNeedle)
@@ -1860,106 +1857,46 @@ window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn)
         const data = existing.data();
         const newMatches = (data.matchesPlayed || 0) + 1;
         const newWins = (data.wins || 0) + (isWinner ? 1 : 0);
-        const { tier, amount, type } = calcTier(newMatches, newWins);
-
+        const res = wbCalcTier(newMatches, newWins);
         await updateDoc(ref, {
           matchesPlayed: newMatches,
           wins: newWins,
-          tier,
-          bonusAmount: amount,
-          bonusType: type,
-          // If bonus rose from 0 → >0, set status pending
-          bonusStatus: amount > 0 ? (data.bonusStatus === 'paid' ? 'paid' : 'pending') : data.bonusStatus,
+          tier: res.tier,
+          bonusAmount: res.amount,
+          bonusType: res.type,
+          bonusStatus: res.amount > 0 ? (data.bonusStatus === 'paid' ? 'paid' : 'pending') : data.bonusStatus,
           updatedAt: new Date()
         });
       } else {
-        const newMatches = 1;
-        const newWins = isWinner ? 1 : 0;
-        const { tier, amount, type } = calcTier(newMatches, newWins);
-
+        const res = wbCalcTier(1, isWinner ? 1 : 0);
         await setDoc(ref, {
           uid: p.uid,
           username: p.username,
           ign: p.ign,
-          weekId,
-          weekStart: start,
-          weekEnd: end,
-          matchesPlayed: newMatches,
-          wins: newWins,
+          weekId: weekId,
+          weekStart: range.start,
+          weekEnd: range.end,
+          matchesPlayed: 1,
+          wins: isWinner ? 1 : 0,
           topKills: 0,
-          tier,
-          bonusAmount: amount,
-          bonusType: type,
-          bonusStatus: amount > 0 ? 'pending' : null,
+          tier: res.tier,
+          bonusAmount: res.amount,
+          bonusType: res.type,
+          bonusStatus: res.amount > 0 ? 'pending' : null,
           paidAt: null,
           updatedAt: new Date()
         });
       }
     }
 
-    console.log(`[weekly_stats] updated ${uniquePlayers.length} players for ${tournamentId} (winner: ${winnerNameOrIgn || 'none'})`);
-  } catch (e) {
-    console.error('[weekly_stats] update failed:', e);
-  }
-};
-  const weekId = getWeekId();
-  const { start, end } = getWeekRange(weekId);
-  try {
-    const regSnap = await getDocs(query(
-      collection(wbDb, 'tournament_registrations'),
-      where('tournamentId', '==', tournamentId),
-      where('status', '==', 'confirmed')
-    ));
-
-    for (const regDoc of regSnap.docs) {
-      const reg = regDoc.data();
-      const uid = reg.userId;
-      if (!uid) continue;
-
-      const docId = `${weekId}_${uid}`;
-      const ref = doc(wbDb, 'weekly_stats', docId);
-      const existing = await getDoc(ref);
-      const isWinner = winnerIgn && (reg.ign === winnerIgn || reg.captainName === winnerIgn);
-
-      if (existing.exists()) {
-        const data = existing.data();
-        const newMatches = (data.matchesPlayed || 0) + 1;
-        const newWins = (data.wins || 0) + (isWinner ? 1 : 0);
-        const { tier, amount, type } = calcTier(newMatches, newWins);
-        await updateDoc(ref, {
-          matchesPlayed: newMatches,
-          wins: newWins,
-          tier, bonusAmount: amount, bonusType: type,
-          updatedAt: new Date()
-        });
-      } else {
-        const newMatches = 1;
-        const newWins = isWinner ? 1 : 0;
-        const { tier, amount, type } = calcTier(newMatches, newWins);
-        await setDoc(ref, {
-          uid,
-          username: reg.username || '',
-          ign: reg.ign || reg.captainName || '',
-          weekId, weekStart: start, weekEnd: end,
-          matchesPlayed: newMatches,
-          wins: newWins,
-          topKills: 0,
-          tier, bonusAmount: amount, bonusType: type,
-          bonusStatus: amount > 0 ? 'pending' : null,
-          paidAt: null,
-          updatedAt: new Date()
-        });
-      }
-    }
-    console.log('[weekly_stats] updated for', tournamentId);
+    console.log('[weekly_stats] updated ' + uniquePlayers.length + ' players for ' + tournamentId);
   } catch (e) {
     console.error('[weekly_stats] update failed:', e);
   }
 };
 
-// Pre-load picker on page load
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(loadWeekPicker, 1500);
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() { window.loadWeekPicker(); }, 1500);
 });
 </script>
 </body>
