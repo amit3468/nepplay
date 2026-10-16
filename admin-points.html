@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEPPLAY — Admin Points Table</title>
+<style>
+  :root {
+    --bg: #0a0618;
+    --purple: #7c3aed;
+    --purple-2: #a855f7;
+    --gold: #f59e0b;
+    --gold-2: #fbbf24;
+    --green: #22c55e;
+    --text: #f5f3ff;
+    --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25);
+    --card: rgba(30, 18, 60, 0.75);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #05030f;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .header h1 { font-size: 1.5rem; font-weight: 900; color: #fff; }
+  .header h1 span { color: var(--gold-2); }
+  
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: transform 0.15s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: linear-gradient(135deg, var(--purple), var(--purple-2)); color: #fff; }
+  .btn.gold { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; }
+  .btn.green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+  .btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+  
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 15px; color: #fff; border-bottom: 1px solid rgba(168,85,247,.25); padding-bottom: 10px; }
+  
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; padding: 10px; background: rgba(15,8,35,.6); color: var(--muted); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px; border-bottom: 1px solid rgba(168,85,247,.15); vertical-align: middle; }
+  tr:hover { background: rgba(124,58,237,.1); }
+  
+  input[type="number"] { width: 60px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(168,85,247,.4); background: rgba(15,8,35,.6); color: #fff; font-family: inherit; font-size: 0.85rem; text-align: center; }
+  input[type="number"]:focus { outline: none; border-color: var(--gold-2); }
+  
+  .total-cell { font-weight: 900; font-size: 1.1rem; color: var(--gold-2); }
+  .rank-1 { color: #fbbf24; font-weight: 900; }
+  .rank-2 { color: #c0c0c0; font-weight: 900; }
+  .rank-3 { color: #cd7f32; font-weight: 900; }
+  
+  .status-msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; font-weight: 700; font-size: 0.85rem; display: none; }
+  .status-msg.success { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4); color: #4ade80; display: block; }
+  .status-msg.error { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; display: block; }
+  
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  
+  .leaderboard-table th { background: rgba(251,191,36,.15); color: var(--gold-2); }
+  .leaderboard-table td { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🏆 Admin <span>Points Table</span></h1>
+    <div style="font-size: 0.85rem; color: var(--muted);">FF Squad Points League — 17 Oct</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" onclick="loadTeams()">🔄 Load Teams</button>
+    <button class="btn green" onclick="saveAllScores()">💾 Save All Scores</button>
+    <button class="btn gold" onclick="publishStandings()">📢 Publish Standings</button>
+  </div>
+
+  <div id="statusMsg" class="status-msg"></div>
+
+  <!-- INPUT TABLE -->
+  <div class="card">
+    <h2>📝 Enter Match Results (Map 1, 2, 3)</h2>
+    <div style="overflow-x: auto;">
+      <table id="inputTable">
+        <thead>
+          <tr>
+            <th>Team Name</th>
+            <th>Map 1 Place</th>
+            <th>Map 1 Kills</th>
+            <th>Map 2 Place</th>
+            <th>Map 2 Kills</th>
+            <th>Map 3 Place</th>
+            <th>Map 3 Kills</th>
+            <th>Penalty (-15/-3)</th>
+            <th>Total Pts</th>
+          </tr>
+        </thead>
+        <tbody id="inputBody">
+          <tr><td colspan="9" class="loading">⏳ Click "Load Teams" to fetch registered squads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top: 15px; font-size: 0.78rem; color: var(--muted);">
+      💡 <b>Rules:</b> 1 Kill = 1 Pt | 1st=12, 2nd=9, 3rd=8, 4th=7, 5th=6, 6th=5, 7th=4, 8th=3, 9th=2, 10th=1, 11th/12th=0. Penalties: Banned char (-15), Left spawn early (-3).
+    </div>
+  </div>
+
+  <!-- LEADERBOARD TABLE -->
+  <div class="card">
+    <h2>🏆 Live Leaderboard (Auto-Sorted)</h2>
+    <div style="overflow-x: auto;">
+      <table class="leaderboard-table" id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Team Name</th>
+            <th>Total Pts</th>
+            <th>Kills</th>
+            <th>Booyahs</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <tr><td colspan="5" class="loading">Leaderboard will appear here after you save scores.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+const db = getFirestore(app);
+
+const TOURNAMENT_ID = 'L3cGB1dUU6VlxIBegyDb';
+const PLACEMENT_PTS = {1:12, 2:9, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0, 12:0};
+
+let teamsData = [];
+
+// ⭐ LOAD TEAMS FROM REGISTRATIONS
+window.loadTeams = async function() {
+    const tbody = document.getElementById('inputBody');
+    const status = document.getElementById('statusMsg');
+    tbody.innerHTML = '<tr><td colspan="9" class="loading">⏳ Loading teams...</td></tr>';
+    status.className = 'status-msg';
+    
+    try {
+        const snap = await getDocs(query(
+            collection(db, 'tournament_registrations'),
+            where('tournamentId', '==', TOURNAMENT_ID),
+            where('status', '==', 'confirmed')
+        ));
+        
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">No confirmed teams found for this tournament.</td></tr>';
+            return;
+        }
+
+        teamsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Try to load existing scores
+        let existingScores = {};
+        try {
+            const scoreSnap = await getDocs(query(
+                collection(db, 'tournament_scores'),
+                where('tournamentId', '==', TOURNAMENT_ID)
+            ));
+            scoreSnap.forEach(d => {
+                const data = d.data();
+                existingScores[data.registrationId] = data;
+            });
+        } catch (e) { console.warn('No existing scores found'); }
+
+        tbody.innerHTML = teamsData.map(t => {
+            const teamName = t.teamName || t.captainName || 'Unknown Team';
+            const existing = existingScores[t.id] || {};
+            const m1 = existing.map1 || { place: '', kills: '' };
+            const m2 = existing.map2 || { place: '', kills: '' };
+            const m3 = existing.map3 || { place: '', kills: '' };
+            const penalty = existing.penalty || 0;
+            
+            return `
+            <tr id="row_${t.id}">
+                <td style="font-weight:800; color:#fff;">${escapeHtml(teamName)}</td>
+                <td><input type="number" min="1" max="12" placeholder="-" value="${m1.place}" onchange="calcRow('${t.id}')" id="m1_p_${t.id}"></td>
+                <td><input type="number" min="0" placeholder="0" value="${m1.kills}" onchange="calcRow('${t.id}')" id="m1_k_${t.id}"></td>
+                <td><input type="number" min="1" max="12" placeholder="-" value="${m2.place}" onchange="calcRow('${t.id}')" id="m2_p_${t.id}"></td>
+                <td><input type="number" min="0" placeholder="0" value="${m2.kills}" onchange="calcRow('${t.id}')" id="m2_k_${t.id}"></td>
+                <td><input type="number" min="1" max="12" placeholder="-" value="${m3.place}" onchange="calcRow('${t.id}')" id="m3_p_${t.id}"></td>
+                <td><input type="number" min="0" placeholder="0" value="${m3.kills}" onchange="calcRow('${t.id}')" id="m3_k_${t.id}"></td>
+                <td><input type="number" placeholder="0" value="${penalty}" onchange="calcRow('${t.id}')" id="penalty_${t.id}"></td>
+                <td class="total-cell" id="total_${t.id}">0</td>
+            </tr>
+            `;
+        }).join('');
+        
+        // Calculate all totals immediately
+        teamsData.forEach(t => calcRow(t.id));
+        showStatus('✅ Teams loaded successfully!', 'success');
+        
+    } catch (e) {
+        console.error('Load error:', e);
+        tbody.innerHTML = '<tr><td colspan="9" class="loading" style="color:#fca5a5;">Error loading teams. Check console (F12).</td></tr>';
+        showStatus('❌ Error: ' + e.message, 'error');
+    }
+};
+
+// ⭐ CALCULATE SINGLE ROW
+window.calcRow = function(teamId) {
+    const m1_p = parseInt(document.getElementById(`m1_p_${teamId}`).value) || 0;
+    const m1_k = parseInt(document.getElementById(`m1_k_${teamId}`).value) || 0;
+    const m2_p = parseInt(document.getElementById(`m2_p_${teamId}`).value) || 0;
+    const m2_k = parseInt(document.getElementById(`m2_k_${teamId}`).value) || 0;
+    const m3_p = parseInt(document.getElementById(`m3_p_${teamId}`).value) || 0;
+    const m3_k = parseInt(document.getElementById(`m3_k_${teamId}`).value) || 0;
+    const penalty = parseInt(document.getElementById(`penalty_${teamId}`).value) || 0;
+
+    const total = (PLACEMENT_PTS[m1_p] || 0) + m1_k +
+                  (PLACEMENT_PTS[m2_p] || 0) + m2_k +
+                  (PLACEMENT_PTS[m3_p] || 0) + m3_k - penalty;
+
+    document.getElementById(`total_${teamId}`).innerText = total;
+    return total;
+};
+
+// ⭐ SAVE ALL SCORES TO FIRESTORE
+window.saveAllScores = async function() {
+    const status = document.getElementById('statusMsg');
+    status.className = 'status-msg';
+    
+    if (teamsData.length === 0) {
+        showStatus('⚠️ No teams loaded. Click "Load Teams" first.', 'error');
+        return;
+    }
+
+    showStatus('⏳ Saving scores...', 'success');
+
+    try {
+        for (const t of teamsData) {
+            const total = calcRow(t.id);
+            const data = {
+                tournamentId: TOURNAMENT_ID,
+                registrationId: t.id,
+                teamName: t.teamName || t.captainName || 'Unknown',
+                map1: { place: parseInt(document.getElementById(`m1_p_${t.id}`).value) || 0, kills: parseInt(document.getElementById(`m1_k_${t.id}`).value) || 0 },
+                map2: { place: parseInt(document.getElementById(`m2_p_${t.id}`).value) || 0, kills: parseInt(document.getElementById(`m2_k_${t.id}`).value) || 0 },
+                map3: { place: parseInt(document.getElementById(`m3_p_${t.id}`).value) || 0, kills: parseInt(document.getElementById(`m3_k_${t.id}`).value) || 0 },
+                penalty: parseInt(document.getElementById(`penalty_${t.id}`).value) || 0,
+                totalPoints: total,
+                updatedAt: new Date().toISOString()
+            };
+            
+            const docId = `${TOURNAMENT_ID}_${t.id}`;
+            await setDoc(doc(db, 'tournament_scores', docId), data, { merge: true });
+        }
+        
+        showStatus('✅ All scores saved to Firestore!', 'success');
+        renderLeaderboard();
+    } catch (e) {
+        console.error('Save error:', e);
+        showStatus('❌ Error saving: ' + e.message, 'error');
+    }
+};
+
+// ⭐ RENDER LEADERBOARD (SORTED)
+window.renderLeaderboard = function() {
+    const tbody = document.getElementById('leaderboardBody');
+    
+    const scores = teamsData.map(t => {
+        const m1_k = parseInt(document.getElementById(`m1_k_${t.id}`).value) || 0;
+        const m2_k = parseInt(document.getElementById(`m2_k_${t.id}`).value) || 0;
+        const m3_k = parseInt(document.getElementById(`m3_k_${t.id}`).value) || 0;
+        const m1_p = parseInt(document.getElementById(`m1_p_${t.id}`).value) || 0;
+        const m2_p = parseInt(document.getElementById(`m2_p_${t.id}`).value) || 0;
+        const m3_p = parseInt(document.getElementById(`m3_p_${t.id}`).value) || 0;
+        
+        return {
+            name: t.teamName || t.captainName || 'Unknown',
+            total: parseInt(document.getElementById(`total_${t.id}`).innerText) || 0,
+            kills: m1_k + m2_k + m3_k,
+            booyahs: [m1_p, m2_p, m3_p].filter(p => p === 1).length
+        };
+    });
+
+    // Sort: Total Points -> Booyahs -> Kills
+    scores.sort((a, b) => {
+        if (b.total !== a.total) return b.total - a.total;
+        if (b.booyahs !== a.booyahs) return b.booyahs - a.booyahs;
+        return b.kills - a.kills;
+    });
+
+    tbody.innerHTML = scores.map((s, i) => {
+        const rank = i + 1;
+        let rankClass = '';
+        let rankIcon = rank;
+        if (rank === 1) { rankClass = 'rank-1'; rankIcon = '🥇'; }
+        else if (rank === 2) { rankClass = 'rank-2'; rankIcon = '🥈'; }
+        else if (rank === 3) { rankClass = 'rank-3'; rankIcon = '🥉'; }
+        
+        return `
+            <tr>
+                <td class="${rankClass}">${rankIcon}</td>
+                <td style="color:#fff;">${escapeHtml(s.name)}</td>
+                <td class="total-cell">${s.total}</td>
+                <td>${s.kills}</td>
+                <td>${s.booyahs}</td>
+            </tr>
+        `;
+    }).join('');
+};
+
+// ⭐ PUBLISH STANDINGS (Save sorted list for member side)
+window.publishStandings = async function() {
+    const status = document.getElementById('statusMsg');
+    
+    const scores = teamsData.map(t => ({
+        name: t.teamName || t.captainName || 'Unknown',
+        total: parseInt(document.getElementById(`total_${t.id}`).innerText) || 0,
+        kills: (parseInt(document.getElementById(`m1_k_${t.id}`).value)||0) + (parseInt(document.getElementById(`m2_k_${t.id}`).value)||0) + (parseInt(document.getElementById(`m3_k_${t.id}`).value)||0),
+        booyahs: [parseInt(document.getElementById(`m1_p_${t.id}`).value), parseInt(document.getElementById(`m2_p_${t.id}`).value), parseInt(document.getElementById(`m3_p_${t.id}`).value)].filter(p => p === 1).length
+    }));
+
+    scores.sort((a, b) => {
+        if (b.total !== a.total) return b.total - a.total;
+        if (b.booyahs !== a.booyahs) return b.booyahs - a.booyahs;
+        return b.kills - a.kills;
+    });
+
+    try {
+        await setDoc(doc(db, 'tournament_standings', TOURNAMENT_ID), {
+            tournamentId: TOURNAMENT_ID,
+            publishedAt: new Date().toISOString(),
+            standings: scores
+        });
+        showStatus('📢 Standings published! Members can now see the final results.', 'success');
+    } catch (e) {
+        showStatus('❌ Error publishing: ' + e.message, 'error');
+    }
+};
+
+function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+    setTimeout(() => { el.className = 'status-msg'; }, 5000);
+}
+
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
+
+// Auto-load on page open
+window.addEventListener('DOMContentLoaded', loadTeams);
+</script>
+</body>
+</html>
