@@ -151,7 +151,7 @@ const PLACEMENT_PTS = {1:12, 2:9, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0,
 
 let teamsData = [];
 
-// ⭐ LOAD TEAMS FROM REGISTRATIONS
+// ⭐ LOAD TEAMS FROM REGISTRATIONS (Fixed for Index Error)
 window.loadTeams = async function() {
     const tbody = document.getElementById('inputBody');
     const status = document.getElementById('statusMsg');
@@ -159,18 +159,27 @@ window.loadTeams = async function() {
     status.className = 'status-msg';
     
     try {
+        // ⭐ Fetch ONLY by tournamentId to avoid Firestore index error
         const snap = await getDocs(query(
             collection(db, 'tournament_registrations'),
-            where('tournamentId', '==', TOURNAMENT_ID),
-            where('status', '==', 'confirmed')
+            where('tournamentId', '==', TOURNAMENT_ID)
         ));
         
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="9" class="loading">No confirmed teams found for this tournament.</td></tr>';
+        // ⭐ Filter confirmed teams locally
+        const confirmedTeams = snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(t => {
+                const st = String(t.status || '').toLowerCase();
+                return st === 'confirmed' || st === 'approved';
+            });
+        
+        if (confirmedTeams.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">No confirmed teams found yet. Waiting for registrations.</td></tr>';
+            showStatus('⚠️ No confirmed teams yet. They will appear here once registrations are approved.', 'error');
             return;
         }
 
-        teamsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        teamsData = confirmedTeams;
         
         // Try to load existing scores
         let existingScores = {};
