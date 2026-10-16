@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEPPLAY — Live Standings</title>
+<link rel="icon" href="/favicon.ico" />
+<style>
+  :root {
+    --bg: #0a0618;
+    --purple: #7c3aed;
+    --purple-2: #a855f7;
+    --gold: #f59e0b;
+    --gold-2: #fbbf24;
+    --green: #22c55e;
+    --text: #f5f3ff;
+    --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25);
+    --card: rgba(30, 18, 60, 0.75);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #05030f;
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+  .bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; background: radial-gradient(circle at 50% 50%, #1a0b3d 0%, #0a0618 55%, #05030f 100%); }
+  .container { max-width: 1000px; margin: 0 auto; padding: 22px 18px; position: relative; z-index: 1; }
+  
+  .topnav { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; background: rgba(15, 8, 35, 0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; color: #fff; text-decoration: none; }
+  .brand .logo { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--purple-2)); display: grid; place-items: center; font-size: 1rem; }
+  .nav-links { display: flex; gap: 14px; font-size: 0.9rem; align-items: center; }
+  .nav-links > a { color: var(--muted); text-decoration: none; }
+  .nav-links > a:hover { color: var(--text); }
+  .nav-links > a.active { color: var(--gold-2); }
+
+  .header-card { background: linear-gradient(135deg, #2a1065 0%, #4c1d95 100%); border-radius: 18px; padding: 24px; margin-bottom: 20px; border: 1px solid rgba(168,85,247,.35); text-align: center; }
+  .header-card h1 { font-size: 1.6rem; font-weight: 900; color: #fff; margin-bottom: 6px; }
+  .header-card p { font-size: 0.85rem; color: #ddd6fe; }
+  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(239,68,68,.2); color: #fca5a5; border: 1px solid rgba(239,68,68,.5); padding: 4px 12px; border-radius: 999px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; }
+  .live-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 15px; color: #fff; border-bottom: 1px solid rgba(168,85,247,.25); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .card h2 span { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th { text-align: left; padding: 12px 10px; background: rgba(15,8,35,.6); color: var(--muted); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 14px 10px; border-bottom: 1px solid rgba(168,85,247,.15); vertical-align: middle; }
+  tr:hover { background: rgba(124,58,237,.1); }
+  
+  .rank-cell { font-weight: 900; font-size: 1.1rem; width: 60px; }
+  .team-cell { font-weight: 800; color: #fff; }
+  .pts-cell { font-weight: 900; font-size: 1.15rem; color: var(--gold-2); }
+  
+  .rank-1 { background: linear-gradient(90deg, rgba(251,191,36,.15), transparent); }
+  .rank-1 .rank-cell { color: #fbbf24; }
+  .rank-2 { background: linear-gradient(90deg, rgba(192,192,192,.1), transparent); }
+  .rank-2 .rank-cell { color: #c0c0c0; }
+  .rank-3 { background: linear-gradient(90deg, rgba(205,127,50,.1), transparent); }
+  .rank-3 .rank-cell { color: #cd7f32; }
+  
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.9rem; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.9rem; }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+  
+  @media (max-width: 600px) {
+    .topnav { padding: 10px 12px; flex-wrap: wrap; }
+    .brand { font-size: 0.9rem; }
+    .nav-links { font-size: 0.78rem; gap: 8px; }
+    .header-card h1 { font-size: 1.3rem; }
+    th, td { padding: 10px 6px; font-size: 0.8rem; }
+    .pts-cell { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+
+<nav class="topnav">
+  <a href="/member.html" class="brand">
+    <span class="logo">🎮</span>
+    <span>NEPPLAY</span>
+  </a>
+  <div class="nav-links">
+    <a href="/member.html">Dashboard</a>
+    <a href="/tournaments.html">Tournaments</a>
+    <a href="/standings.html" class="active">📊 Standings</a>
+    <a href="/winners.html">🏆 Winners</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header-card">
+    <div class="live-badge"><span class="dot"></span> LIVE UPDATES</div>
+    <h1>🏆 FF Squad Points League</h1>
+    <p>Bermuda ➔ Purgatory ➔ Kalahari · 3 Maps · Rs 380 Prize Pool</p>
+  </div>
+
+  <div class="card">
+    <h2>📊 Current Standings <span id="lastUpdated">—</span></h2>
+    <div id="tableContainer">
+      <div class="loading">⏳ Loading live standings...</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const cfg = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+const db = getFirestore(app);
+
+const TOURNAMENT_ID = 'L3cGB1dUU6VlxIBegyDb';
+const container = document.getElementById('tableContainer');
+const lastUpdatedEl = document.getElementById('lastUpdated');
+
+// ⭐ REAL-TIME LISTENER
+onSnapshot(
+  query(collection(db, 'tournament_scores'), where('tournamentId', '==', TOURNAMENT_ID)),
+  (snapshot) => {
+    if (snapshot.empty) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🎮</div>
+          <p>Matches haven't started yet.</p>
+          <p style="margin-top:8px; font-size:0.8rem;">Standings will appear here once the admin updates the scores.</p>
+        </div>`;
+      return;
+    }
+
+    const scores = snapshot.docs.map(d => {
+      const data = d.data();
+      const m1_p = data.map1?.place || 0;
+      const m2_p = data.map2?.place || 0;
+      const m3_p = data.map3?.place || 0;
+      
+      return {
+        name: data.teamName || 'Unknown Team',
+        total: data.totalPoints || 0,
+        kills: (data.map1?.kills || 0) + (data.map2?.kills || 0) + (data.map3?.kills || 0),
+        booyahs: [m1_p, m2_p, m3_p].filter(p => p === 1).length,
+        updatedAt: data.updatedAt
+      };
+    });
+
+    // Sort: Total Pts -> Booyahs -> Kills
+    scores.sort((a, b) => {
+      if (b.total !== a.total) return b.total - a.total;
+      if (b.booyahs !== a.booyahs) return b.booyahs - a.booyahs;
+      return b.kills - a.kills;
+    });
+
+    // Update "Last Updated"
+    const lastTime = scores.find(s => s.updatedAt)?.updatedAt;
+    if (lastTime) {
+      const time = new Date(lastTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      lastUpdatedEl.textContent = 'Updated ' + time;
+    }
+
+    // Render Table
+    container.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Team Name</th>
+              <th>Total Pts</th>
+              <th>Kills</th>
+              <th>Booyahs</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scores.map((s, i) => {
+              const rank = i + 1;
+              let rankClass = '';
+              let rankIcon = rank;
+              if (rank === 1) { rankClass = 'rank-1'; rankIcon = '🥇'; }
+              else if (rank === 2) { rankClass = 'rank-2'; rankIcon = '🥈'; }
+              else if (rank === 3) { rankClass = 'rank-3'; rankIcon = '🥉'; }
+              
+              return `
+                <tr class="${rankClass}">
+                  <td class="rank-cell">${rankIcon}</td>
+                  <td class="team-cell">${escapeHtml(s.name)}</td>
+                  <td class="pts-cell">${s.total}</td>
+                  <td>${s.kills}</td>
+                  <td>${s.booyahs}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+  (error) => {
+    console.error('Snapshot error:', error);
+    container.innerHTML = `<div class="empty-state"><p>⚠️ Could not load standings. Please refresh.</p></div>`;
+  }
+);
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+</script>
+</body>
+</html>
