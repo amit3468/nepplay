@@ -451,7 +451,8 @@
   <section class="hero">
     <span class="h-tag">🎮 NEPPLAY Tournaments</span>
     <h1>Choose your game. <span class="cash">Win real cash.</span> 💰</h1>
-            <p>🔥 Tonight — Free Fire Solo Fullmap · Rs 50 entry · Rs 200 + Rs 50 TK · 9 PM. Tomorrow — Squad Points League · Rs 40/squad · Rs 380 Prize Pool · 3 Maps.</p>
+            <p>🔥 Tonight — FF Squad Points League · Rs 40/squad · Rs 380 Prize Pool · 3 Maps. Tomorrow — Free Fire Solo Fullmap · Rs 50 entry · Rs 200 + Rs 50 TK.</p>
+
     <div class="hero-stats" id="heroStats">
     <div class="hero-stat">⏳ Loading…</div>
     </div>
@@ -1007,10 +1008,10 @@ function renderAll(tournaments) {
     const uniqueGames = new Set(tournaments.map(t => gameKey(t.game))).size;
     const entry = (day[0] || night[0] || tonight[0])?.entryFee
                || (day[0] || night[0] || tonight[0])?.entry_fee || 150;
-    heroStats.innerHTML = `
+        heroStats.innerHTML = `
       <div class="hero-stat"><b>${totalTourneys}</b> tournaments</div>
       <div class="hero-stat"><b>${uniqueGames}</b> games</div>
-      <div class="hero-stat">Entry <b>Rs ${entry}</b></div>
+      <div class="hero-stat">Entry from <b>Rs 40</b></div>
       <div class="hero-stat">🎁 <b>Real cash</b> prizes</div>
     `;
   }
