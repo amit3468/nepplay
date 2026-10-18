@@ -206,7 +206,7 @@ window.loadTeams = async function() {
             <tr id="row_${t.id}">
                 <td style="font-weight:800; color:#fff;">
     ${escapeHtml(teamName)}
-    <div style="font-size:0.75rem; color:#a8a3c9; font-weight:normal; margin-top:2px;">(IGN: ${escapeHtml(t.players && t.players[0] ? t.players[0].ign : t.captainName || 'Unknown')})</div>
+    <div style="font-size:0.75rem; color:#a8a3c9; font-weight:normal; margin-top:2px;">(IGN: ${escapeHtml(t.players && t.players[0] ? (typeof t.players[0] === 'string' ? t.players[0] : (t.players[0].ign || t.players[0].name || 'Unknown')) : (t.ign || t.captainName || 'Unknown'))})</div>
 </td>
                 <td><input type="number" min="1" max="12" placeholder="-" value="${m1.place}" onchange="calcRow('${t.id}')" id="m1_p_${t.id}"></td>
                 <td><input type="number" min="0" placeholder="0" value="${m1.kills}" onchange="calcRow('${t.id}')" id="m1_k_${t.id}"></td>
