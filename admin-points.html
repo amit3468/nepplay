@@ -204,7 +204,10 @@ window.loadTeams = async function() {
             
             return `
             <tr id="row_${t.id}">
-                <td style="font-weight:800; color:#fff;">${escapeHtml(teamName)}</td>
+                <td style="font-weight:800; color:#fff;">
+    ${escapeHtml(teamName)}
+    <div style="font-size:0.75rem; color:#a8a3c9; font-weight:normal; margin-top:2px;">(IGN: ${escapeHtml(t.captainName || t.ign || 'Unknown')})</div>
+</td>
                 <td><input type="number" min="1" max="12" placeholder="-" value="${m1.place}" onchange="calcRow('${t.id}')" id="m1_p_${t.id}"></td>
                 <td><input type="number" min="0" placeholder="0" value="${m1.kills}" onchange="calcRow('${t.id}')" id="m1_k_${t.id}"></td>
                 <td><input type="number" min="1" max="12" placeholder="-" value="${m2.place}" onchange="calcRow('${t.id}')" id="m2_p_${t.id}"></td>
