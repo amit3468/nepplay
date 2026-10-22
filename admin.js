@@ -1991,8 +1991,8 @@ async function populateResultTournamentDropdown() {
       })
       .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
 
-    select.innerHTML = '<option value="">— Choose a tournament —</option>' +
-      tournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
+        select.innerHTML = '<option value="">— Choose a tournament —</option>' +
+      tournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} — 📅 ${t.date || 'No Date'} [ID: ${t.id}]</option>`).join('');
   } catch (err) { console.warn(err); }
 }
 window.loadTournamentForResult = async function() {
@@ -2535,9 +2535,9 @@ window.loadRoomDetailsForm = async function() {
       })
       .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
 
-    select.innerHTML = '<option value="">— Select tournament —</option>' +
+        select.innerHTML = '<option value="">— Select tournament —</option>' +
       roomTournaments.map(t =>
-        `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} (${t.game || 'Game'})</option>`
+        `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} — 📅 ${t.date || 'No Date'} [ID: ${t.id}]</option>`
       ).join('');
   } catch (err) { console.warn('loadRoomDetailsForm fetch failed:', err); return; }
   
