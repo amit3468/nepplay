@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEPPLAY — Tournament Registration</title>
+
+<style>
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#080d18;
+    color:#fff;
+    min-height:100vh;
+}
+
+.topnav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 22px;
+    background:rgba(15,8,35,.85);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(168,85,247,.25);
+    position:sticky; top:0; z-index:50;
+    gap:10px;
+    max-width:100%;
+}
+.brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:800; font-size:1.1rem;
+    color:#fff;
+    text-decoration:none;
+    flex-shrink:0;
+}
+.brand .logo{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    display:grid; place-items:center; font-size:1rem;
+}
+.nav-links{
+    display:flex; gap:14px; font-size:.9rem; align-items:center;
+    overflow-x:auto; scrollbar-width:none; flex:1;
+    justify-content:flex-end;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links > a{
+    color:#a8a3c9; text-decoration:none; transition:color .2s;
+    display:inline-flex; align-items:center;
+    white-space:nowrap; flex-shrink:0;
+}
+.nav-links > a:hover{ color:#fff; }
+.nav-links > a.active{ color:#fbbf24; }
+.nav-links > a.winners-link{
+    background:linear-gradient(135deg,#f59e0b,#fbbf24);
+    color:#1a0b3d !important;
+    padding:6px 12px; border-radius:999px;
+    font-weight:800; font-size:.82rem;
+}
+.nav-links > a.store-link{
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    color:#fff !important;
+    padding:6px 12px; border-radius:999px;
+    font-weight:800; font-size:.82rem;
+}
+
+.user-chip-wrap { position:relative; flex-shrink:0; }
+#chipToggle { position:absolute; opacity:0; pointer-events:none; width:0; height:0; }
+.user-chip{
+    display:flex; align-items:center; gap:6px;
+    cursor:pointer; padding:4px 8px 4px 4px;
+    border-radius:999px;
+    background:rgba(124,58,237,.15);
+    border:1px solid rgba(168,85,247,.35);
+    transition:background .2s;
+    user-select:none; -webkit-user-select:none;
+    -webkit-tap-highlight-color:rgba(168,85,247,.3);
+}
+.user-chip:hover{ background:rgba(124,58,237,.3); }
+#chipToggle:checked ~ .user-chip{ background:rgba(124,58,237,.35); }
+.user-chip .avatar{
+    width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(135deg,#6d28d9,#a855f7);
+    display:grid; place-items:center;
+    font-weight:700; font-size:.78rem;
+    color:#fff; flex-shrink:0;
+}
+.user-chip .uname{
+    color:#f5f3ff; font-weight:700; font-size:.78rem;
+    max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.user-chip .caret{ font-size:.5rem; color:#a8a3c9; transition:transform .2s; }
+#chipToggle:checked ~ .user-chip .caret{ transform:rotate(180deg); }
+.user-menu{
+    position:absolute; top:calc(100% + 8px); right:0;
+    background:#1a0b3d; border:1px solid rgba(168,85,247,.35);
+    border-radius:12px; min-width:210px; padding:8px;
+    box-shadow:0 12px 40px rgba(0,0,0,.55);
+    display:none; z-index:100;
+}
+#chipToggle:checked ~ .user-menu{ display:block; }
+.user-menu a,
+.user-menu .menu-btn{
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:11px 14px;
+    border-radius:8px; color:#e9e5ff;
+    text-decoration:none; font-size:.85rem;
+    font-weight:600; background:none; border:0;
+    text-align:left; cursor:pointer; font-family:inherit;
+    -webkit-tap-highlight-color:transparent;
+}
+.user-menu a:hover,
+.user-menu .menu-btn:hover{
+    background:rgba(124,58,237,.25); color:#fff;
+}
+.user-menu .divider{
+    height:1px; background:rgba(168,85,247,.25);
+    margin:6px 4px; display:block;
+}
+.user-menu .menu-btn.danger{ color:#fca5a5; }
+.user-menu .menu-btn.danger:hover{ background:rgba(239,68,68,.2); }
+.chip-backdrop{
+    position:fixed; inset:0; background:transparent;
+    display:none; z-index:90;
+}
+#chipToggle:checked ~ .chip-backdrop{ display:block; }
+.user-chip, .user-menu{ position:relative; z-index:100; }
+
+.container{ width:min(850px,94%); margin:30px auto; }
+
+.card{
+    background:#111927;
+    border:1px solid #27364d;
+    border-radius:15px;
+    padding:25px;
+    margin-bottom:20px;
+}
+.title{ font-size:25px; margin-bottom:8px; }
+.subtitle{ color:#8da2bc; line-height:1.6; margin-bottom:20px; }
+
+.tournament-box{
+    background:#0b1320; border:1px solid #2b3d56;
+    border-radius:10px; padding:18px; margin-bottom:22px;
+}
+.tournament-name{ font-size:21px; font-weight:bold; color:#ff3b30; }
+.game{ margin-top:6px; color:#9cb5d3; }
+.fee{ margin-top:10px; font-size:20px; font-weight:bold; }
+.fee-free{ color:#4ade80; }
+.mode-badge{
+    display:inline-block; padding:4px 12px;
+    border-radius:999px; font-size:.7rem; font-weight:800;
+    letter-spacing:.5px; text-transform:uppercase;
+    margin-left:10px; vertical-align:middle;
+}
+.mode-badge.solo  { background:rgba(34,197,94,.2);  color:#4ade80; border:1px solid rgba(34,197,94,.5); }
+.mode-badge.duo   { background:rgba(59,130,246,.2); color:#7db7ff; border:1px solid rgba(59,130,246,.5); }
+.mode-badge.squad { background:rgba(245,158,11,.2); color:#fbbf24; border:1px solid rgba(245,158,11,.5); }
+
+.mode-locked-banner {
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(168,85,247,.1));
+    border: 1px solid rgba(168,85,247,.4);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.mode-locked-banner .mlb-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.mode-locked-banner .mlb-text { flex: 1; }
+.mode-locked-banner .mlb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
+.mode-locked-banner .mlb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
+.mode-locked-banner.solo  { background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05)); border-color: rgba(34,197,94,.4); }
+.mode-locked-banner.duo   { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05)); border-color: rgba(59,130,246,.4); }
+.mode-locked-banner.squad { background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.05)); border-color: rgba(245,158,11,.4); }
+
+.free-banner {
+    background: linear-gradient(135deg, rgba(34,197,94,.18), rgba(34,197,94,.06));
+    border: 1px solid rgba(34,197,94,.5);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.free-banner .fb-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.free-banner .fb-text { flex: 1; }
+.free-banner .fb-title { font-weight: 800; font-size: .95rem; color: #fff; margin-bottom: 2px; }
+.free-banner .fb-sub { font-size: .78rem; color: #a8a3c9; line-height: 1.4; }
+
+/* ⭐ Payout info section */
+.payout-section {
+    background: linear-gradient(135deg, rgba(251,191,36,.12), rgba(245,158,11,.04));
+    border: 2px solid rgba(251,191,36,.5);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 22px 0;
+}
+.payout-section .ps-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+}
+.payout-section .ps-icon {
+    font-size: 1.5rem; line-height: 1;
+}
+.payout-section .ps-title {
+    font-weight: 900; font-size: 1rem; color: #fbbf24;
+}
+.payout-section .ps-sub {
+    font-size: .82rem; color: #cbd5e1;
+    margin-bottom: 16px; line-height: 1.5;
+}
+.payout-section.saved {
+    background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.04));
+    border-color: rgba(34,197,94,.5);
+}
+.payout-section.saved .ps-title { color: #4ade80; }
+.payout-section.saved .ps-icon { color: #4ade80; }
+
+.duplicate-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(220,38,38,.1));
+    border: 2px solid rgba(239,68,68,.6);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 22px;
+    text-align: center;
+    color: #fca5a5;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.6;
+}
+.duplicate-banner b { color: #fff; font-size: 17px; display: block; margin-bottom: 8px; }
+.duplicate-banner .db-mode {
+    display: inline-block;
+    background: rgba(0,0,0,.35);
+    color: #fbbf24;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+}
+.duplicate-banner .db-cta {
+    display: inline-block;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.form-group{ margin-bottom:17px; }
+label{ display:block; margin-bottom:7px; color:#c8d5e5; font-weight:bold; }
+input, textarea, select{
+    width:100%; padding:12px; border-radius:8px;
+    border:1px solid #30435e; background:#0a111d;
+    color:#fff; font-size:15px; outline:none;
+}
+input:focus, textarea:focus, select:focus{ border-color:#ff3b30; }
+textarea{ min-height:100px; resize:vertical; }
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+.section-title{ font-size:19px; margin:25px 0 15px; color:#fff; }
+
+.payment-options{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+    gap:15px; margin-bottom:16px;
+}
+.payment-option{
+    border:1px solid #30435e; background:#0b1320;
+    border-radius:10px; padding:16px;
+    cursor:pointer; transition:.15s;
+    display:flex; align-items:center; gap:10px;
+}
+.payment-option:hover{ border-color:#4a5f7d; background:#101b2e; }
+.payment-option.selected{ border-color:#ff3b30; background:#201517; }
+.payment-option input[type="radio"]{ width:auto; margin:0; accent-color:#ff3b30; flex-shrink:0; }
+.payment-name{ font-weight:bold; font-size:16px; color:white; word-break:break-word; }
+
+.payment-details{
+    display:none; margin-top:15px; padding:18px;
+    border-radius:10px; background:#080d18;
+    border:1px solid #293a52;
+}
+.payment-details.active{ display:block; }
+.payment-details-title{
+    font-size:15px; font-weight:bold; color:#7db7ff;
+    margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;
+}
+.qr{ width:200px; height:200px; object-fit:contain; background:#fff; border-radius:8px; display:block; margin:14px auto; padding:6px; }
+.wallet{ text-align:center; color:#b8c9dd; margin-top:12px; font-size:14px; line-height:1.6; }
+.wallet strong{ color:#fff; font-family:'Courier New', monospace; font-size:16px; letter-spacing:1px; display:inline-block; padding:2px 8px; background:#172033; border-radius:5px; margin-left:4px; }
+.wallet-copy{ display:inline-block; margin-left:8px; background:#1e3a5f; color:#7db7ff; border:none; border-radius:5px; padding:4px 10px; font-size:11px; font-weight:bold; text-transform:uppercase; cursor:pointer; }
+.wallet-copy:hover{ background:#3b82f6; color:white; }
+.payment-instructions{ color:#9cb5d3; font-size:13px; line-height:1.6; margin-top:12px; padding:12px; background:#0b1a2e; border-left:3px solid #3b82f6; border-radius:4px; }
+.payment-no-methods{ padding:30px 20px; text-align:center; color:#a87918; background:#1a1408; border:2px dashed #a87918; border-radius:10px; font-size:14px; line-height:1.6; }
+
+.amount{ background:#153b2b; border:1px solid #267a55; color:#8ef0bb; border-radius:10px; padding:15px; margin-bottom:15px; font-size:18px; font-weight:bold; }
+.amount.free { background:linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.05)); border-color:rgba(34,197,94,.5); color:#4ade80; }
+.submit{ width:100%; background:#ff3b30; color:white; border:0; border-radius:9px; padding:15px; font-size:17px; font-weight:bold; cursor:pointer; margin-top:10px; }
+.submit:disabled{ opacity:.5; cursor:not-allowed; }
+.submit.free { background:linear-gradient(135deg, #22c55e, #16a34a); }
+.message{ padding:15px; border-radius:9px; margin-bottom:18px; display:none; }
+.message.error{ display:block; background:#411818; border:1px solid #9e3030; color:#ffbaba; }
+.message.success{ display:block; background:#123c28; border:1px solid #2c8d5e; color:#a4f2c7; }
+.small{ color:#8096b0; font-size:13px; line-height:1.6; }
+.loading-state{ padding:40px 20px; text-align:center; color:#8da2bc; font-size:15px; }
+
+@media(max-width:720px){
+    .topnav { padding:10px 10px; gap:6px; }
+    .brand { font-size:.85rem; gap:5px; }
+    .brand .logo { width:26px; height:26px; font-size:.85rem; }
+    .brand .brand-text { display:none; }
+    .nav-links { gap:4px; font-size:.68rem; }
+    .nav-links > a.winners-link,
+    .nav-links > a.store-link { padding:4px 8px; font-size:.68rem; }
+    .nav-links > a[href="/member.html"],
+    .nav-links > a[href="/teams.html"],
+    .nav-links > a[href="/profile.html"],
+    .nav-links > a[href="/support.html"] { display:none; }
+    .nav-links > a[href="/tournaments.html"] { color:#fbbf24; font-weight:700; }
+    .user-chip { padding:3px 6px 3px 3px; gap:4px; }
+    .user-chip .avatar { width:26px; height:26px; font-size:.72rem; }
+    .user-chip .uname { display:none; }
+    .user-chip .caret { font-size:.45rem; }
+    .user-menu { min-width:180px; padding:6px; max-width:calc(100vw - 20px); }
+    .user-menu a, .user-menu .menu-btn { padding:10px 12px; font-size:.82rem; }
+    .grid, .payment-options { grid-template-columns:1fr; }
+    .mode-locked-banner, .free-banner { padding: 12px 14px; gap: 10px; }
+    .mode-locked-banner .mlb-icon, .free-banner .fb-icon { font-size: 1.6rem; }
+    .mode-locked-banner .mlb-title, .free-banner .fb-title { font-size: .88rem; }
+    .mode-locked-banner .mlb-sub, .free-banner .fb-sub { font-size: .72rem; }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="topnav">
+  <a href="/member.html" class="brand">
+    <span class="logo">🎮</span>
+    <span class="brand-text">Nepal Gaming</span>
+  </a>
+  <div class="nav-links">
+    <a href="/member.html">Home</a>
+    <a href="/tournaments.html" class="active">Tournaments</a>
+    <a href="/winners.html" class="winners-link">🏆 Winners</a>
+    <a href="/store.html" class="store-link">🛒 Store</a>
+    <a href="/teams.html">Teams</a>
+    <a href="/support.html">Support</a>
+
+    <div class="user-chip-wrap">
+      <input type="checkbox" id="chipToggle" />
+      <label class="user-chip" for="chipToggle">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="uname" id="userName">Loading…</span>
+        <span class="caret">▼</span>
+      </label>
+      <label class="chip-backdrop" for="chipToggle"></label>
+      <div class="user-menu">
+        <a href="/member.html">📊 My Dashboard</a>
+        <a href="/player.html">👤 My Profile</a>
+        <a href="/my-tournaments.html">🏆 My Tournaments</a>
+        <div class="divider"></div>
+        <div class="menu-btn danger" id="logoutBtn" role="button" tabindex="0">🚪 Logout</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+    <div class="card">
+        <h1 class="title">Tournament Registration</h1>
+        <p class="subtitle">
+            Complete your information. Your registration will remain <b>Pending</b> until the admin verifies your entry.
+        </p>
+
+        <div id="tournamentWarning" style="display:none; background:rgba(245,158,11,.15); border-left:3px solid #fbbf24; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:.9rem; color:#fde68a; line-height:1.6;">
+          ⚠️ <b>Please confirm:</b> You are registering for <span id="confirmGameName" style="color:#fbbf24; font-weight:900; font-size:1.05rem;">this tournament</span>.
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div id="loading" class="loading-state">⏳ Loading tournament…</div>
+
+        <div id="duplicateBlock" class="duplicate-banner" style="display:none;">
+          <b>⛔ You already registered for tonight!</b>
+          Only <b>one mode</b> per player for this tournament.<br>
+          <div class="db-mode" id="duplicateBlockMode">Mode: —</div>
+          <br>
+          Room details will show on your dashboard. See you at 9:00 PM! 🎮
+          <br>
+          <a href="/member.html" class="db-cta">Go to My Dashboard →</a>
+        </div>
+
+        <div id="tournamentBox" class="tournament-box" style="display:none;">
+            <div>
+                <span id="tournamentName" class="tournament-name">—</span>
+                <span id="modeBadge" class="mode-badge"></span>
+            </div>
+            <div id="gameName" class="game"></div>
+            <div id="entryFee" class="fee"></div>
+        </div>
+
+        <form id="registrationForm" style="display:none;">
+
+            <div id="freeBanner" class="free-banner" style="display:none;">
+                <div class="fb-icon">🎁</div>
+                <div class="fb-text">
+                    <div class="fb-title">Free Entry Tonight!</div>
+                    <div class="fb-sub">No payment required. Just fill your details and submit — you're in!</div>
+                </div>
+            </div>
+
+            <div id="payoutSection" class="payout-section" style="display:none;">
+                <div class="ps-head">
+                    <div class="ps-icon">💳</div>
+                    <div class="ps-title">Payout Info (Required)</div>
+                </div>
+                <div class="ps-sub" id="payoutSectionSub">
+                    Enter your phone number and preferred wallet. We'll use this to pay you if you win. Saved once — auto-filled next time.
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input id="userPhone" type="tel" placeholder="98XXXXXXXX" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Wallet *</label>
+                        <select id="userWallet">
+                            <option value="">— Choose wallet —</option>
+                            <option value="esewa">💚 eSewa</option>
+                            <option value="khalti">💜 Khalti</option>
+                            <option value="imepay">🟠 IME Pay</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modeLockedBanner" class="mode-locked-banner solo">
+                <div class="mlb-icon" id="mlbIcon">👤</div>
+                <div class="mlb-text">
+                    <div class="mlb-title" id="mlbTitle">Solo Mode</div>
+                    <div class="mlb-sub" id="mlbSub">You are registering as a single player for this tournament.</div>
+                </div>
+            </div>
+
+            <div id="soloFields">
+    <h2 class="section-title">Your Details</h2>
+    <div class="form-group">
+        <label>Your IGN (In-Game Name) *</label>
+        <input id="soloIgn" placeholder="e.g. ProGamer99">
+    </div>
+    <div class="form-group">
+        <label>Your Free Fire UID *</label>
+        <input id="soloUid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        <div class="small" style="margin-top:6px;">Find it in your in-game profile — top-left under your name.</div>
+    </div>
+    <div class="form-group">
+        <label>Account Email</label>
+        <input id="soloEmail" type="email" readonly>
+    </div>
+</div>
+
+            <div id="teamFields" style="display:none;">
+                <h2 class="section-title">Team Information</h2>
+                <div class="form-group">
+                    <label>Team Name *</label>
+                    <input id="teamName" placeholder="e.g. Nepali Warriors">
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Captain Name *</label>
+                        <input id="captainName">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Email</label>
+                        <input id="email" type="email" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div id="duoPlayers" style="display:none;">
+    <h2 class="section-title">Players (2)</h2>
+    <div class="grid">
+        <div class="form-group">
+            <label>Player 1 IGN * <span style="color:#a8a3c9;font-weight:400;">(you / captain)</span></label>
+            <input id="player1">
+        </div>
+        <div class="form-group">
+            <label>Player 1 Free Fire UID *</label>
+            <input id="player1Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Player 2 IGN *</label>
+            <input id="player2">
+        </div>
+        <div class="form-group">
+            <label>Player 2 Free Fire UID *</label>
+            <input id="player2Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off">
+        </div>
+    </div>
+</div>
+
+            <div id="squadPlayers" style="display:none;">
+    <h2 class="section-title">Additional Players (optional)</h2>
+    <div class="grid">
+        <div class="form-group"><label>Player 3 IGN</label><input id="player3"></div>
+        <div class="form-group"><label>Player 3 Free Fire UID</label><input id="player3Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+        <div class="form-group"><label>Player 4 IGN</label><input id="player4"></div>
+        <div class="form-group"><label>Player 4 Free Fire UID</label><input id="player4Uid" placeholder="e.g. 1234567890" inputmode="numeric" autocomplete="off"></div>
+    </div>
+</div>
+
+            <div id="paymentSection">
+                <h2 class="section-title">Payment</h2>
+                <div id="amountBox" class="amount">Amount: Loading…</div>
+
+                <div id="paymentContainer">
+                    <div class="payment-options" id="paymentOptions"></div>
+                    <div id="paymentDetailsContainer"></div>
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Payer Name</label>
+                        <input id="payerName">
+                    </div>
+                    <div class="form-group">
+                        <label>Payer Phone</label>
+                        <input id="payerPhone">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Transaction ID *</label>
+                    <input id="transactionId" placeholder="Enter transaction ID">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="messageText" placeholder="Optional message"></textarea>
+            </div>
+
+            <p class="small" id="formNote">
+                Make sure the payment amount and transaction ID are correct.
+                The admin will verify the payment before approving your registration.
+            </p>
+
+            <button type="submit" id="submitButton" class="submit">
+                Submit Registration
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm("Logout now?")) return;
+            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js")
+                .then(function (a) {
+                    return import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
+                        .then(function (b) {
+                            var cfg = {
+                                apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+                                authDomain: "nepplaygaming.firebaseapp.com",
+                                projectId: "nepplaygaming",
+                                storageBucket: "nepplaygaming.firebasestorage.app",
+                                messagingSenderId: "893565645520",
+                                appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+                            };
+                            var app = a.getApp ? a.getApp() : a.initializeApp(cfg);
+                            return b.signOut(b.getAuth(app));
+                        });
+                })
+                .catch(function () {})
+                .finally(function () { window.location.href = "/login.html"; });
+        });
+    }
+})();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, updateDoc,
+  serverTimestamp, doc, getDoc, query, where
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+    authDomain: "nepplaygaming.firebaseapp.com",
+    projectId: "nepplaygaming",
+    storageBucket: "nepplaygaming.firebasestorage.app",
+    messagingSenderId: "893565645520",
+    appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentUsername = "";
+let tournament  = null;
+let paymentMethods = [];
+let selectedPaymentId = "";
+let playingMode = "squad";
+let isFreeEvent = false;
+let alreadyRegistered = false;
+let userProfilePhone = "";
+let userProfileWallet = "";
+let needsPayoutInfo = false;
+
+const $ = id => document.getElementById(id);
+
+function showMessage(text, type) {
+    const box = $("message");
+    box.textContent = text;
+    box.className = "message " + type;
+    // ⭐ FIX: Auto-scroll to the error so users actually see it when they click submit
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function escapeHTML(v) {
+    return String(v === undefined || v === null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function isValidPhone(p) {
+    return /^9[678]\d{8}$/.test(String(p || "").trim());
+}
+
+function applyMode(mode) {
+    playingMode = mode;
+
+    const banner = $("modeLockedBanner");
+    const icon = $("mlbIcon");
+    const title = $("mlbTitle");
+    const sub = $("mlbSub");
+
+    banner.classList.remove("solo", "duo", "squad");
+    banner.classList.add(mode);
+
+    const oneVone = (window.__is1v1 === true);
+
+    if (mode === "solo") {
+        if (oneVone) {
+            icon.textContent = "⚔️";
+            title.textContent = "1 vs 1 Mode";
+            sub.textContent = "Best of 3 · Single player · Only your IGN needed.";
+        } else {
+            icon.textContent = "👤";
+            title.textContent = "Solo Mode";
+            sub.textContent = "You are registering as a single player. No partner needed.";
+        }
+    } else if (mode === "duo") {
+        icon.textContent = "👥";
+        title.textContent = "Duo Mode";
+        sub.textContent = "You + 1 partner. Both player IGNs required. Captain registers for the team.";
+    } else {
+        icon.textContent = "🏆";
+        title.textContent = "Squad Mode";
+        sub.textContent = "Up to 6 players. At least 2 IGNs required.";
+    }
+
+    if (mode === "solo") {
+        $("soloFields").style.display = "block";
+        $("teamFields").style.display = "none";
+        $("duoPlayers").style.display = "none";
+        $("squadPlayers").style.display = "none";
+    } else if (mode === "duo") {
+        $("soloFields").style.display = "none";
+        $("teamFields").style.display = "block";
+        $("duoPlayers").style.display = "block";
+        $("squadPlayers").style.display = "none";
+    } else {
+        $("soloFields").style.display = "none";
+        $("teamFields").style.display = "block";
+        $("duoPlayers").style.display = "block";
+        $("squadPlayers").style.display = "block";
+    }
+}
+
+onAuthStateChanged(auth, async (user) => {
+    const avatar = document.getElementById("userAvatar");
+    const nameEl = document.getElementById("userName");
+
+    if (!user) {
+        const returnTo = window.location.pathname + window.location.search;
+        window.location.href = "/login.html?redirect=" + encodeURIComponent(returnTo);
+        return;
+    }
+    currentUser = user;
+
+    let display = user.displayName || (user.email ? user.email.split("@")[0] : user.uid) || "Member";
+    try {
+        const uDoc = await getDoc(doc(db, "users", user.uid));
+        if (uDoc.exists()) {
+            const u = uDoc.data();
+            if (u.username) display = u.username;
+            else if (u.fullName) display = u.fullName;
+
+            userProfilePhone = u.phone || "";
+            userProfileWallet = u.wallet || "";
+            needsPayoutInfo = !userProfilePhone || !userProfileWallet;
+        }
+    } catch (e) {}
+    currentUsername = display;
+
+    if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
+    if (nameEl) nameEl.textContent = display;
+
+    loadRegistrationPage();
+});
+
+function normalizeGame(s) {
+    return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+const GAME_ALIASES = {
+    freefire:  ["freefire", "ff", "freefiremini"],
+    pubg:      ["pubg", "pubgm", "pubgmobile"],
+    cod:       ["cod", "codm", "callofduty"],
+    valorant:  ["valorant", "val"],
+    efootball: ["efootball", "efoot", "efootballmobile"],
+    ecricket:  ["ecricket", "cricket"],
+    chess:     ["chess"],
+    ludo:      ["ludo"]
+};
+function matchGame(game, title, id, urlParam) {
+    const aliases = GAME_ALIASES[urlParam] || [urlParam];
+    const haystack = [normalizeGame(game), normalizeGame(title), normalizeGame(id)];
+    return aliases.some(alias => {
+        const na = normalizeGame(alias);
+        return haystack.some(h => h === na || h.includes(na));
+    });
+}
+
+async function loadRegistrationPage() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const seedKeyParam = params.get("seedKey") || "";
+        const tidParam     = params.get("tournamentId") || params.get("tournament");
+        const gameParam    = normalizeGame(params.get("game") || "");
+        const freeParam    = String(params.get("free") || "").toLowerCase();
+        let urlSaysFree = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
+        isFreeEvent = urlSaysFree;
+
+        const snap = await getDocs(collection(db, "tournaments"));
+        const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (!all.length) {
+            showMessage("❌ No tournaments found. Please contact admin.", "error");
+            $("loading").style.display = "none";
+            return;
+        }
+
+        if (seedKeyParam) {
+            tournament = all.find(t => t.seedKey === seedKeyParam);
+            if (!tournament) tournament = all.find(t => t.id === seedKeyParam);
+        }
+        if (!tournament && tidParam) {
+            tournament = all.find(t => t.id === tidParam);
+        }
+        if (!tournament && gameParam) {
+            const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
+            const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
+            const pool = open.length ? open : matching;
+            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+        }
+        if (!tournament) {
+            const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
+            const pool = open.length ? open : all;
+            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+        }
+        if (!tournament) {
+            showMessage("❌ No open tournament found. Please contact admin.", "error");
+            $("loading").style.display = "none";
+            return;
+        }
+
+        const urlMode = String(params.get("mode") || "").toLowerCase();
+        const tMode   = String(tournament.mode || "").trim().toLowerCase();
+        const rawMode = urlMode || tMode || "squad";
+
+        let lockedMode;
+        let is1v1 = false;
+        if (rawMode === "1v1" || rawMode === "solo") {
+            lockedMode = "solo";
+            is1v1 = (rawMode === "1v1");
+        } else if (rawMode === "2v2" || rawMode === "duo") {
+            lockedMode = "duo";
+        } else {
+            lockedMode = "squad";
+        }
+        window.__is1v1 = is1v1;
+
+        try {
+            const dupSnap = await getDocs(query(
+                collection(db, "tournament_registrations"),
+                where("userId", "==", currentUser.uid),
+                where("tournamentId", "==", tournament.id)
+            ));
+
+            if (!dupSnap.empty) {
+                const prior = dupSnap.docs[0].data();
+                const priorMode = String(prior.playingAs || prior.mode || "unknown").toLowerCase();
+                const priorModeLabel = priorMode === "solo" ? "Solo" : priorMode === "duo" ? "Duo" : priorMode;
+
+                alreadyRegistered = true;
+                $("loading").style.display = "none";
+                $("duplicateBlock").style.display = "block";
+                $("duplicateBlockMode").textContent = "Your registered mode: " + priorModeLabel;
+                $("tournamentBox").style.display = "none";
+                $("registrationForm").style.display = "none";
+                return;
+            }
+        } catch (e) {
+            console.warn("duplicate check failed:", e);
+        }
+
+        $("tournamentName").textContent = tournament.title || tournament.name || tournament.id;
+        $("gameName").textContent = tournament.game || "";
+        const fee = tournament.entryFee || tournament.entry_fee || 0;
+        $("entryFee").innerHTML = isFreeEvent
+            ? 'Entry Fee: <span style="color:#4ade80;">FREE 🎁</span>'
+            : "Entry Fee: Rs " + fee;
+        $("amountBox").textContent = "Amount to Pay: Rs " + fee;
+
+        const badge = $("modeBadge");
+        const badgeLabel = (window.__is1v1) ? "1v1"
+                 : lockedMode === "solo" ? "Solo"
+                 : lockedMode === "duo"  ? "Duo"
+                 : (tournament.mode || "Squad");
+        badge.textContent = "Mode: " + badgeLabel;
+        badge.classList.add(lockedMode);
+
+        const cg = $("confirmGameName");
+        if (cg) cg.textContent = tournament.title || tournament.game || "this tournament";
+        const w = $("tournamentWarning");
+        if (w) w.style.display = "block";
+
+        $("loading").style.display = "none";
+        $("tournamentBox").style.display = "block";
+        $("registrationForm").style.display = "block";
+
+        if (!isFreeEvent) {
+            const tType = String(tournament.entryType || "").toLowerCase();
+            const tFee = Number(tournament.entryFee || tournament.entry_fee || 0);
+            if (tType === "free" || tFee === 0) {
+                isFreeEvent = true;
+                console.log("✅ Auto-detected free tournament from Firestore data");
+            }
+        }
+
+        if (isFreeEvent) {
+            $("paymentSection").style.display = "none";
+            $("freeBanner").style.display = "flex";
+            $("amountBox").classList.add("free");
+            $("amountBox").textContent = "🎁 Free Entry — no payment required";
+            $("submitButton").classList.add("free");
+            $("submitButton").textContent = "Register Free";
+            $("formNote").textContent = "No payment needed. Submit and you're in — admin will finalize the bracket shortly before 9:00 PM.";
+        }
+
+        if (needsPayoutInfo) {
+            $("payoutSection").style.display = "block";
+            if (userProfilePhone) $("userPhone").value = userProfilePhone;
+            if (userProfileWallet) $("userWallet").value = userProfileWallet;
+        } else {
+            $("payoutSection").style.display = "none";
+        }
+
+        if (currentUser) {
+            const uEmail = currentUser.email || "";
+            $("email").value = uEmail;
+            $("soloEmail").value = uEmail;
+            try {
+    const uDoc = await getDoc(doc(db, "users", currentUser.uid));
+    if (uDoc.exists()) {
+        const u = uDoc.data();
+        if (u.username) {
+            $("soloIgn").value = u.username;
+            $("captainName").value = u.username;
+            $("player1").value = u.username;
+        }
+        // Prefill captain UID if user has saved it before
+        const storedUid = u.freeFireUid || u.ffUid || "";
+        if (storedUid) {
+            $("soloUid").value = storedUid;
+            $("player1Uid").value = storedUid;
+        }
+    }
+} catch (e) {}
+        }
+
+        if (!isFreeEvent) {
+            await loadPaymentMethods();
+        }
+        applyMode(lockedMode);
+
+        const status = String(tournament.status || "").toLowerCase();
+        if (status === "completed" || tournament.isFull) {
+            $("submitButton").disabled = true;
+            showMessage("⚠️ This tournament is not currently open for registration.", "error");
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage("❌ " + (err.message || "Failed to load tournament."), "error");
+        $("loading").style.display = "none";
+    }
+}
+
+async function loadPaymentMethods() {
+    let methods = [];
+    try {
+        const psDoc = await getDoc(doc(db, "payment_settings", "main"));
+        if (psDoc.exists()) {
+            const data = psDoc.data();
+            if (Array.isArray(data.methods)) methods = data.methods;
+            else {
+                if (data.eSewa)  methods.push({ id:"esewa",  name:"eSewa",  number:data.eSewa.number  || "9748835184", qrImage: data.eSewa.qrImage  || "/images/esewa-qr.png",  instructions: data.eSewa.instructions  || "Open eSewa → Send Money → enter number → confirm with MPIN." });
+                if (data.Khalti) methods.push({ id:"khalti", name:"Khalti", number:data.Khalti.number || "9766258368", qrImage: "/images/khalti-qr.png", instructions: data.Khalti.instructions || "Open Khalti → Send Money → enter number → confirm with MPIN." });
+                if (data.IMEPay || data.imePay) {
+                    const im = data.IMEPay || data.imePay;
+                    methods.push({ id:"imepay", name:"IME Pay", number:im.number || "9766258368", qrImage:"", instructions: im.instructions || "Open IME Pay → Send Money → enter number → confirm with MPIN." });
+                }
+            }
+        }
+    } catch (e) { console.warn(e); }
+
+    if (!methods.length) {
+        methods = [
+            { id:"esewa",  name:"eSewa",   number:"9748835184", qrImage:"/images/esewa-qr.png",  instructions:"Open eSewa → Send Money → enter number → confirm with MPIN." },
+            { id:"khalti", name:"Khalti",  number:"9766258368", qrImage:"/images/khalti-qr.png", instructions:"Open Khalti → Send Money → enter number → confirm with MPIN." },
+            { id:"imepay", name:"IME Pay", number:"9766258368", qrImage:"",                     instructions:"Open IME Pay → Send Money → enter number → confirm with MPIN." }
+        ];
+    }
+    renderPaymentMethods(methods);
+}
+
+function renderPaymentMethods(methods) {
+    paymentMethods = methods || [];
+    const container = $("paymentOptions");
+    const detailsContainer = $("paymentDetailsContainer");
+
+    if (!paymentMethods.length) {
+        container.innerHTML = "";
+        detailsContainer.innerHTML = '<div class="payment-no-methods">No payment methods available. Contact admin.</div>';
+        $("submitButton").disabled = true;
+        return;
+    }
+
+    container.innerHTML = paymentMethods.map(m => {
+        const id = escapeHTML(String(m.id || ""));
+        return `
+          <label class="payment-option" id="payment-opt-${id}" onclick="selectPayment('${id}')">
+            <input type="radio" name="paymentMethod" value="${id}" onclick="event.stopPropagation(); selectPayment('${id}')">
+            <span class="payment-name">${escapeHTML(m.name || "Method")}</span>
+          </label>`;
+    }).join("");
+
+    detailsContainer.innerHTML = paymentMethods.map(m => {
+        const id = escapeHTML(String(m.id || ""));
+        const qr = m.qrImage ? `<img src="${escapeHTML(m.qrImage)}" class="qr" alt="${escapeHTML(m.name)} QR">` : "";
+        const wallet = m.number
+            ? `<div class="wallet">${escapeHTML(m.name)} Number: <strong>${escapeHTML(m.number)}</strong> <button type="button" class="wallet-copy" onclick="copyToClipboard('${escapeHTML(m.number)}')">Copy</button></div>`
+            : `<div class="wallet" style="color:#a87918;">No number provided. Contact admin.</div>`;
+        const instr = m.instructions ? `<div class="payment-instructions">${escapeHTML(m.instructions)}</div>` : "";
+        return `
+          <div class="payment-details" id="payment-details-${id}">
+            <div class="payment-details-title">Pay using ${escapeHTML(m.name)}</div>
+            ${qr}${wallet}${instr}
+          </div>`;
+    }).join("");
+
+    if (paymentMethods.length) window.selectPayment(String(paymentMethods[0].id));
+}
+
+window.selectPayment = function(methodId) {
+    selectedPaymentId = methodId;
+    document.querySelectorAll(".payment-option").forEach(el => el.classList.remove("selected"));
+    document.querySelectorAll(".payment-details").forEach(el => el.classList.remove("active"));
+    const opt = document.getElementById("payment-opt-" + methodId);
+    if (opt) opt.classList.add("selected");
+    const det = document.getElementById("payment-details-" + methodId);
+    if (det) det.classList.add("active");
+    const radio = document.querySelector(`input[name="paymentMethod"][value="${methodId}"]`);
+    if (radio) radio.checked = true;
+    const m = paymentMethods.find(x => String(x.id) === String(methodId));
+    if (m) {
+        const tx = $("transactionId");
+        if (tx) tx.placeholder = `Enter your ${m.name} transaction ID`;
+    }
+};
+
+window.copyToClipboard = function(text) {
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast("Copied: " + text)).catch(() => fallbackCopy(text));
+    } else fallbackCopy(text);
+};
+function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); showToast("Copied: " + text); }
+    catch (e) { showToast("Copy failed"); }
+    document.body.removeChild(ta);
+}
+function showToast(msg) {
+    let el = document.getElementById("copyToast");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "copyToast";
+        el.style.cssText = "position:fixed;bottom:20px;right:20px;background:#0d3020;color:#6bea9a;border:1px solid #195f3a;padding:12px 16px;border-radius:8px;font-size:13px;font-weight:bold;z-index:999;display:none;box-shadow:0 10px 30px rgba(0,0,0,.4);";
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.display = "block";
+    setTimeout(() => { el.style.display = "none"; }, 1800);
+}
+
+$("registrationForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!currentUser) { showMessage("Please login first.", "error"); return; }
+    if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
+    if (alreadyRegistered) { showMessage("You already registered for tonight.", "error"); return; }
+
+    let finalPhone = userProfilePhone;
+    let finalWallet = userProfileWallet;
+
+    if (needsPayoutInfo) {
+        const phoneInput = $("userPhone")?.value.trim() || "";
+        const walletInput = $("userWallet")?.value || "";
+
+        if (!phoneInput) { showMessage("❌ Please enter your phone number.", "error"); return; }
+        if (!isValidPhone(phoneInput)) {
+            showMessage("❌ Enter a valid 10-digit Nepal number (starts with 98/97/96).", "error");
+            return;
+        }
+        if (!walletInput) { showMessage("❌ Please choose your preferred wallet.", "error"); return; }
+
+        finalPhone = phoneInput;
+        finalWallet = walletInput;
+    }
+
+    let selectedMethod = null;
+    const tType = String(tournament.entryType || "").toLowerCase();
+    const tFee = Number(tournament.entryFee || tournament.entry_fee || 0);
+    if (tType === "free" || tFee === 0) {
+        isFreeEvent = true;
+    }
+
+    if (!isFreeEvent) {
+        if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
+        selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
+        if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
+        const transactionId = $("transactionId").value.trim();
+        if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+    }
+
+    let body = {
+        username:        currentUsername || currentUser.email?.split("@")[0] || "Player",
+        userId:          currentUser.uid,
+        userEmail:       currentUser.email || "",
+        tournamentId:    tournament.id,
+        tournamentTitle: tournament.title || tournament.name || "",
+        tournamentSeedKey: tournament.seedKey || "",
+        game:            tournament.game || "",
+        tournamentMode:  tournament.mode || "Squad",
+        playingAs:       playingMode,
+        mode:            playingMode,
+        amount:          isFreeEvent ? 0 : Number(tournament.entryFee || tournament.entry_fee || 0),
+        message:         $("messageText").value.trim(),
+        status:          isFreeEvent ? "confirmed" : "pending",
+        entryType:       isFreeEvent ? "free" : "paid",
+        phone:           finalPhone,
+        wallet:          finalWallet,
+        registeredAt:    serverTimestamp()
+    };
+
+    if (isFreeEvent) {
+        body.isFree = true;
+    } else {
+        body.transactionId   = $("transactionId").value.trim();
+        body.paymentMethod   = selectedMethod.name;
+        body.paymentMethodId = selectedMethod.id;
+        body.payerName       = $("payerName").value.trim();
+        body.payerPhone      = $("payerPhone").value.trim();
+    }
+
+    if (playingMode === "solo") {
+        const soloIgn = $("soloIgn").value.trim();
+        const soloUid = $("soloUid").value.trim();
+        if (!soloIgn) { showMessage("Please enter your IGN.", "error"); return; }
+        if (!soloUid) { showMessage("Please enter your Free Fire UID.", "error"); return; }
+        if (!/^\d{6,15}$/.test(soloUid)) { showMessage("Free Fire UID must be 6–15 digits (numbers only).", "error"); return; }
+        body.teamSize = 1;
+        body.teamName = soloIgn + " (Solo)";
+        body.captainName = soloIgn;
+        body.ign = soloIgn;
+        body.uid = soloUid;
+        body.players = [soloIgn];
+        body.playerUids = [soloUid];
+        body.teammates = [{ ign: soloIgn, uid: soloUid, isCaptain: true }];
+    } else if (playingMode === "duo") {
+        const teamName = $("teamName").value.trim();
+        const captainName = $("captainName").value.trim();
+        const p1 = $("player1").value.trim();
+        const p2 = $("player2").value.trim();
+        const p1Uid = $("player1Uid").value.trim();
+        const p2Uid = $("player2Uid").value.trim();
+        if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
+        if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
+        if (!p1 || !p2) { showMessage("Both player IGNs are required for 2 vs 2.", "error"); return; }
+        if (!p1Uid || !p2Uid) { showMessage("Both Free Fire UIDs are required for 2 vs 2.", "error"); return; }
+        if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
+        body.teamSize = 2;
+        body.teamName = teamName;
+        body.captainName = captainName;
+        body.ign = captainName;
+        body.uid = p1Uid;
+        body.player1 = p1;
+        body.player2 = p2;
+        body.player1Uid = p1Uid;
+        body.player2Uid = p2Uid;
+        body.players = [p1, p2];
+        body.playerUids = [p1Uid, p2Uid];
+        body.teammates = [
+            { ign: p1, uid: p1Uid, isCaptain: true },
+            { ign: p2, uid: p2Uid }
+        ];
+    } else {
+        const teamName = $("teamName").value.trim();
+        const captainName = $("captainName").value.trim();
+        const p1 = $("player1").value.trim();
+        const p2 = $("player2").value.trim();
+        const p1Uid = $("player1Uid").value.trim();
+        const p2Uid = $("player2Uid").value.trim();
+        if (!teamName) { showMessage("Please enter your team name.", "error"); return; }
+        if (!captainName) { showMessage("Please enter captain name.", "error"); return; }
+        if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
+        if (!p1Uid || !p2Uid) { showMessage("At least Player 1 and Player 2 Free Fire UIDs are required.", "error"); return; }
+        if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
+        
+        // ⭐ FIX: Safe checks for optional players so it doesn't crash
+        const p3 = $("player3")?.value.trim() || "";
+        const p4 = $("player4")?.value.trim() || "";
+        const p5 = $("player5")?.value.trim() || "";
+        const p6 = $("player6")?.value.trim() || "";
+        const p3Uid = $("player3Uid")?.value.trim() || "";
+        const p4Uid = $("player4Uid")?.value.trim() || "";
+        const p5Uid = $("player5Uid")?.value.trim() || "";
+        const p6Uid = $("player6Uid")?.value.trim() || "";
+        
+        body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
+        body.teamName = teamName;
+        body.captainName = captainName;
+        body.ign = captainName;
+        body.uid = p1Uid;
+        body.email = $("email").value.trim();
+        body.player1 = p1;
+        body.player2 = p2;
+        body.player3 = p3;
+        body.player4 = p4;
+        body.player5 = p5;
+        body.player6 = p6;
+        body.player1Uid = p1Uid;
+        body.player2Uid = p2Uid;
+        body.player3Uid = p3Uid;
+        body.player4Uid = p4Uid;
+        body.player5Uid = p5Uid;
+        body.player6Uid = p6Uid;
+        body.players = [p1, p2, p3, p4, p5, p6].filter(Boolean);
+        body.playerUids = [p1Uid, p2Uid, p3Uid, p4Uid, p5Uid, p6Uid].filter(Boolean);
+        body.teammates = [
+            { ign: p1, uid: p1Uid, isCaptain: true },
+            { ign: p2, uid: p2Uid },
+            p3 && p3Uid ? { ign: p3, uid: p3Uid } : null,
+            p4 && p4Uid ? { ign: p4, uid: p4Uid } : null,
+            p5 && p5Uid ? { ign: p5, uid: p5Uid } : null,
+            p6 && p6Uid ? { ign: p6, uid: p6Uid } : null
+        ].filter(Boolean);
+    }
+    const btn = $("submitButton");
+    btn.disabled = true;
+    btn.textContent = isFreeEvent ? "Registering…" : "Submitting…";
+
+    try {
+        const dupCheck = await getDocs(query(
+            collection(db, "tournament_registrations"),
+            where("userId", "==", currentUser.uid),
+            where("tournamentId", "==", tournament.id)
+        ));
+        if (!dupCheck.empty) {
+            showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
+            btn.disabled = false;
+            btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
+            return;
+        }
+
+        await addDoc(collection(db, "tournament_registrations"), body);
+
+        if (needsPayoutInfo) {
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    phone: finalPhone,
+                    wallet: finalWallet,
+                    payoutUpdatedAt: serverTimestamp()
+                });
+                console.log("✅ Payout info saved to profile");
+            } catch (e) {
+                console.warn("⚠️ Could not save payout info to profile:", e);
+            }
+        }
+
+        showMessage(
+            isFreeEvent
+              ? "✅ Registered! You're in for tonight. Room details will be shared 30 minutes before 9:00 PM."
+              : "✅ Registration submitted! Admin will verify your payment.",
+            "success"
+        );
+        $("registrationForm").reset();
+        setTimeout(() => { window.location.href = "/member.html"; }, 2000);
+    } catch (err) {
+        console.error("submit error:", err);
+        const msg = (err && err.message) || "Submission failed.";
+
+        if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("insufficient")) {
+            showMessage("⚠️ Could not save your registration. Please try again in a moment. If this continues, contact admin on WhatsApp.", "error");
+        } else if (msg.toLowerCase().includes("already exists") || msg.toLowerCase().includes("duplicate")) {
+            showMessage("⛔ You already registered for tonight. Only one mode per player.", "error");
+        } else if (msg.toLowerCase().includes("network") || msg.toLowerCase().includes("failed to fetch")) {
+            showMessage("📡 Network error. Check your internet and try again.", "error");
+        } else {
+            showMessage("❌ " + msg, "error");
+        }
+
+        btn.disabled = false;
+        btn.textContent = isFreeEvent ? "Register Free" : "Submit Registration";
+    }
+});
+</script>
+
+<script type="module">
+(async () => {
+  try {
+    const { getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, doc, getDoc, setDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const app = getApps()[0];
+    if (!app) return;
+    const db = getFirestore(app);
+    const ref = doc(db, "site_stats", "main");
+
+    const SESSION_KEY = "nep_visit_logged";
+    const isNewSession = !sessionStorage.getItem(SESSION_KEY);
+
+    const now = new Date();
+    const nptMs = now.getTime() + (5 * 60 + 45) * 60 * 1000;
+    const today = new Date(nptMs).toISOString().slice(0, 10);
+
+    let lastDate = null;
+    try {
+      const snap = await getDoc(ref);
+      if (snap.exists()) lastDate = snap.data().todayDate;
+    } catch (e) {}
+
+    const patch = {
+      totalPageViews: increment(1),
+      lastVisitAt: new Date().toISOString()
+    };
+
+    if (isNewSession) {
+      patch.totalVisits = increment(1);
+      sessionStorage.setItem(SESSION_KEY, "1");
+    }
+
+    if (lastDate !== today) {
+      patch.todayDate = today;
+      patch.todayVisits = isNewSession ? 1 : 0;
+    } else if (isNewSession) {
+      patch.todayVisits = increment(1);
+    }
+
+    await setDoc(ref, patch, { merge: true });
+  } catch (e) {
+    console.warn("[visitor-tracker] failed:", e && e.message);
+  }
+})();
+</script>
+</body>
+</html>
