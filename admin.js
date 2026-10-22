@@ -1983,7 +1983,14 @@ async function populateResultTournamentDropdown() {
   if (!select) return;
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
-    const tournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // ⭐ FILTER: Only show upcoming/active games in the results dropdown
+    const tournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(t => {
+          const st = String(t.status || 'upcoming').toLowerCase();
+          return st === 'upcoming' || st === 'active' || st === 'ongoing';
+      })
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+
     select.innerHTML = '<option value="">— Choose a tournament —</option>' +
       tournaments.map(t => `<option value="${t.id}">${t.title || 'Untitled'} (${t.game || 'Game'})</option>`).join('');
   } catch (err) { console.warn(err); }
@@ -2515,15 +2522,25 @@ window.calculateShares = function() {
 // ============================================================
 window.loadRoomDetailsForm = async function() {
   const select = document.getElementById('roomTournamentSelect');
+  if (!select) return;
   const previousValue = select.value;
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
-    roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // ⭐ FILTER: Only load upcoming tournaments so old ones don't clutter
+    roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(t => {
+          const st = String(t.status || 'upcoming').toLowerCase();
+          return st === 'upcoming' || st === 'active' || st === 'ongoing';
+      })
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+
     select.innerHTML = '<option value="">— Select tournament —</option>' +
       roomTournaments.map(t =>
         `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} (${t.game || 'Game'})</option>`
       ).join('');
   } catch (err) { console.warn('loadRoomDetailsForm fetch failed:', err); return; }
+  
   const tid = select.value;
   const form = document.getElementById('roomDetailsForm');
   if (!tid) { form.style.display = 'none'; return; }
@@ -2537,7 +2554,8 @@ window.loadRoomDetailsForm = async function() {
   document.getElementById('roomRounds').value = t.roomRounds || '';
   document.getElementById('roomOpenTime').value = t.roomOpenTime || '';
   document.getElementById('roomRules').value = t.roomRules || '';
-    const revealMs = toMillis(t.roomRevealAt);
+  
+  const revealMs = toMillis(t.roomRevealAt);
   if (revealMs != null) {
     const d = new Date(revealMs);
     const pad = n => String(n).padStart(2, '0');
