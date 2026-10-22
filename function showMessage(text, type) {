@@ -634,6 +634,8 @@ function showMessage(text, type) {
     const box = $("message");
     box.textContent = text;
     box.className = "message " + type;
+    // This forces the page to scroll up so the player actually sees the red error!
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function escapeHTML(v) {
@@ -1160,14 +1162,14 @@ $("registrationForm").addEventListener("submit", async (event) => {
         if (!p1 || !p2) { showMessage("At least Player 1 and Player 2 IGNs are required.", "error"); return; }
         if (!p1Uid || !p2Uid) { showMessage("At least Player 1 and Player 2 Free Fire UIDs are required.", "error"); return; }
         if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
-        const p3 = $("player3").value.trim();
-        const p4 = $("player4").value.trim();
-        const p5 = $("player5").value.trim();
-        const p6 = $("player6").value.trim();
-        const p3Uid = $("player3Uid").value.trim();
-        const p4Uid = $("player4Uid").value.trim();
-        const p5Uid = $("player5Uid").value.trim();
-        const p6Uid = $("player6Uid").value.trim();
+                const p3 = $("player3")?.value.trim() || "";
+        const p4 = $("player4")?.value.trim() || "";
+        const p5 = $("player5")?.value.trim() || "";
+        const p6 = $("player6")?.value.trim() || "";
+        const p3Uid = $("player3Uid")?.value.trim() || "";
+        const p4Uid = $("player4Uid")?.value.trim() || "";
+        const p5Uid = $("player5Uid")?.value.trim() || "";
+        const p6Uid = $("player6Uid")?.value.trim() || "";
         body.teamSize = [p1, p2, p3, p4, p5, p6].filter(Boolean).length;
         body.teamName = teamName;
         body.captainName = captainName;
