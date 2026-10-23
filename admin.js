@@ -21,7 +21,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc,
   addDoc, query, where, serverTimestamp, onSnapshot, orderBy, limit,
-  arrayUnion, Timestamp
+  arrayUnion, Timestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -2154,8 +2154,21 @@ window.submitMatchResults = async function() {
       payoutRecords[0].note = `1st place + Top Killer, ${w1Kills} kills`;
       payoutRecords[0].rank = '1 + Top Killer';
     }
-    for (const rec of payoutRecords) {
+        for (const rec of payoutRecords) {
+      // 1. Create the payout record for history
       await addDoc(collection(db, 'tournament_payouts'), rec);
+
+      // 2. Credit the money to the player's wallet if we have their UID
+      if (rec.userId) {
+        try {
+          await updateDoc(doc(db, 'users', rec.userId), {
+            walletBalance: increment(rec.amount)
+          });
+          console.log(`✅ Credited Rs. ${rec.amount} to wallet for ${rec.winnerName}`);
+        } catch (e) {
+          console.warn(`⚠️ Could not credit wallet for ${rec.winnerName}:`, e);
+        }
+      }
     }
     await addDoc(collection(db, 'match_results'), {
       tournamentId: tid, tournamentTitle: tTitle,
