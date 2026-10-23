@@ -522,6 +522,18 @@ textarea{ min-height:100px; resize:vertical; }
             <div id="paymentSection">
                 <h2 class="section-title">Payment</h2>
                 <div id="amountBox" class="amount">Amount: Loading…</div>
+                                <!-- ⭐ WALLET PAYMENT OPTION -->
+                <div id="walletPaymentBox" style="display:none; background:linear-gradient(135deg, rgba(34,197,94,.15), rgba(20,12,45,.9)); border:2px solid #22c55e; padding:16px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                  <div>
+                    <div style="font-weight:900; color:#4ade80; font-size:1.05rem;">💳 Pay with NEPPLAY Wallet</div>
+                    <div style="font-size:13px; color:#a8a3c9; margin-top:4px;">Balance: <span id="regWalletBalance" style="color:#fff; font-weight:800;">Rs 0</span></div>
+                  </div>
+                  <button type="button" id="btnPayWallet" onclick="triggerWalletPayment()" style="background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:800; cursor:pointer; font-size:14px; box-shadow:0 4px 15px rgba(34,197,94,.4);">
+                    Pay with Wallet
+                  </button>
+                </div>
+
+                <div style="text-align:center; color:#6b7280; font-size:12px; margin: 15px 0; font-weight:700;">— OR PAY MANUALLY BELOW —</div>
 
                 <div id="paymentContainer">
                     <div class="payment-options" id="paymentOptions"></div>
@@ -597,7 +609,7 @@ textarea{ min-height:100px; resize:vertical; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc,
-  serverTimestamp, doc, getDoc, query, where
+  serverTimestamp, doc, getDoc, query, where, increment
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
@@ -1040,7 +1052,35 @@ function showToast(msg) {
     setTimeout(() => { el.style.display = "none"; }, 1800);
 }
 
-$("registrationForm").addEventListener("submit", async (event) => {
+let userWalletBal = 0;
+let isPayingWithWallet = false;
+
+// Fetch wallet balance when page loads
+const origLoadPage = loadRegistrationPage;
+loadRegistrationPage = async function() {
+    await origLoadPage();
+    if (currentUser && tournament) {
+        try {
+            const uDoc = await getDoc(doc(db, "users", currentUser.uid));
+            if (uDoc.exists()) {
+                userWalletBal = Number(uDoc.data().walletBalance || 0);
+                const fee = Number(tournament.entryFee || tournament.entry_fee || 0);
+                
+                if (userWalletBal >= fee && fee > 0) {
+                    $("walletPaymentBox").style.display = "flex";
+                    $("regWalletBalance").textContent = "Rs " + userWalletBal;
+                    $("btnPayWallet").textContent = "Pay Rs. " + fee;
+                }
+            }
+        } catch(e) {}
+    }
+};
+
+window.triggerWalletPayment = function() {
+    isPayingWithWallet = true;
+    $("registrationForm").dispatchEvent(new Event("submit", { cancelable: true }));
+};
+    $("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
@@ -1071,12 +1111,18 @@ $("registrationForm").addEventListener("submit", async (event) => {
         isFreeEvent = true;
     }
 
-    if (!isFreeEvent) {
-        if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
-        selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
-        if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
-        const transactionId = $("transactionId").value.trim();
-        if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+        if (!isFreeEvent) {
+        if (isPayingWithWallet) {
+            if (userWalletBal < Number(tournament.entryFee || 0)) {
+                showMessage("❌ Insufficient wallet balance.", "error"); return;
+            }
+        } else {
+            if (!selectedPaymentId) { showMessage("Please select a payment method.", "error"); return; }
+            selectedMethod = paymentMethods.find(m => String(m.id) === String(selectedPaymentId));
+            if (!selectedMethod) { showMessage("Please select a payment method.", "error"); return; }
+            const transactionId = $("transactionId").value.trim();
+            if (transactionId.length < 3) { showMessage("Please enter a valid transaction ID.", "error"); return; }
+        }
     }
 
     let body = {
@@ -1099,8 +1145,14 @@ $("registrationForm").addEventListener("submit", async (event) => {
         registeredAt:    serverTimestamp()
     };
 
-    if (isFreeEvent) {
+        if (isFreeEvent) {
         body.isFree = true;
+    } else if (isPayingWithWallet) {
+        body.transactionId = "WALLET_" + Date.now();
+        body.paymentMethod = "Wallet";
+        body.paymentMethodId = "wallet";
+        body.payerName = currentUsername;
+        body.status = "confirmed"; // Auto-confirm wallet payments!
     } else {
         body.transactionId   = $("transactionId").value.trim();
         body.paymentMethod   = selectedMethod.name;
@@ -1220,6 +1272,12 @@ $("registrationForm").addEventListener("submit", async (event) => {
         }
 
         await addDoc(collection(db, "tournament_registrations"), body);
+                // ⭐ DEDUCT WALLET BALANCE
+        if (isPayingWithWallet) {
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                walletBalance: increment(-Number(tournament.entryFee || 0))
+            });
+        }
 
         if (needsPayoutInfo) {
             try {
