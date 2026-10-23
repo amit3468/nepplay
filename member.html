@@ -878,6 +878,18 @@
     </div>
   </div>
 
+    <!-- ⭐ WALLET CARD -->
+  <section style="background:linear-gradient(135deg, rgba(34,197,94,.15), rgba(20,12,45,.95)); border:2px solid rgba(34,197,94,.6); border-radius:18px; padding:20px 22px; margin-bottom:26px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; position:relative; overflow:hidden;">
+    <div style="position:absolute; right:-20px; top:-20px; font-size:100px; opacity:0.05;">💳</div>
+    <div>
+      <div style="font-size:1.1rem; font-weight:900; color:#4ade80;">💳 My Wallet Balance</div>
+      <div style="font-size:.8rem; color:#a8a3c9; margin-top:4px;">Use this balance to instantly register for tournaments.</div>
+    </div>
+    <div style="text-align:right; z-index:1;">
+      <div id="walletBalanceDisplay" style="font-size:2rem; font-weight:900; color:#fff; line-height:1;">Rs. 0</div>
+      <button onclick="alert('To withdraw, please message the admin on WhatsApp.')" style="margin-top:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:6px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.8rem;">Withdraw Funds</button>
+    </div>
+  </section>
   <section class="hero">
     <div class="tags">
       <span class="tag gold">● REGISTRATIONS OPEN</span>
@@ -1350,6 +1362,10 @@ onAuthStateChanged(auth, async (user) => {
         const uDoc = await getDoc(doc(db, "users", user.uid));
         if (uDoc.exists()) {
             profile = uDoc.data();
+                      // ⭐ Load Wallet Balance
+            const wb = Number(profile.walletBalance || 0);
+            const wbEl = document.getElementById('walletBalanceDisplay');
+            if (wbEl) wbEl.textContent = 'Rs. ' + wb.toLocaleString();
             display = profile.fullName || profile.username || profile.email || display;
             currentUsername = profile.username || null;
         }
