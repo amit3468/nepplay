@@ -2055,15 +2055,19 @@ window.loadTournamentForResult = async function() {
 };
 window.updateResultTotal = function() {
   if (!selectedResultTournament) return;
-  const pool = Number(selectedResultTournament.prizePool || selectedResultTournament.prize_pool || 0);
-  const killsPrize = Number(selectedResultTournament.topKillsPrize || selectedResultTournament.top_kills_prize || 0);
-  const p1 = Math.round(pool * 0.50);
-  const p2 = Math.round(pool * 0.30);
-  const p3 = Math.round(pool * 0.20);
+  
+  // ⭐ Read directly from the input boxes now
+  const p1 = Number(document.getElementById('winner1Prize').value.replace(/[^0-9]/g, '')) || 0;
+  const p2 = Number(document.getElementById('winner2Prize').value.replace(/[^0-9]/g, '')) || 0;
+  const p3 = Number(document.getElementById('winner3Prize').value.replace(/[^0-9]/g, '')) || 0;
+  
   const w1Name = (document.getElementById('winner1Name').value || '').trim().toLowerCase();
   const tkName = (document.getElementById('topKillerName').value || '').trim().toLowerCase();
+  const tkPrize = Number(document.getElementById('topKillerPrize').value.replace(/[^0-9]/g, '')) || 0;
+  
   const sameAsFirst = !tkName || (w1Name && tkName === w1Name);
-  const topKillerPayout = sameAsFirst ? 0 : killsPrize;
+  const topKillerPayout = sameAsFirst ? 0 : tkPrize;
+  
   document.getElementById('resultTotalPayout').innerText = fmtRs(p1 + p2 + p3 + topKillerPayout);
 };
 
@@ -2086,11 +2090,11 @@ window.submitMatchResults = async function() {
   const w2Method = document.getElementById('winner2Method').value;
   const w3Method = document.getElementById('winner3Method').value;
   const tkMethod = document.getElementById('topKillerMethod').value;
-  const pool = Number(t.prizePool || t.prize_pool || 0);
-  const killsPrize = Number(t.topKillsPrize || t.top_kills_prize || 0);
-  const p1 = Math.round(pool * 0.50);
-  const p2 = Math.round(pool * 0.30);
-  const p3 = Math.round(pool * 0.20);
+    // ⭐ MANUAL PRIZE INPUTS
+  const p1 = Number(document.getElementById('winner1Prize').value.replace(/[^0-9]/g, '')) || 0;
+  const p2 = Number(document.getElementById('winner2Prize').value.replace(/[^0-9]/g, '')) || 0;
+  const p3 = Number(document.getElementById('winner3Prize').value.replace(/[^0-9]/g, '')) || 0;
+  const killsPrize = Number(document.getElementById('topKillerPrize').value.replace(/[^0-9]/g, '')) || 0;
   const btn = document.getElementById('submitResultsBtn');
   btn.disabled = true;
   btn.innerText = '⏳ Saving...';
