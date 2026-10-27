@@ -805,12 +805,12 @@ async function loadWinnersStrip() {
         const wName = String(w1.name || '').trim();
         const winnerPrize = Number(w1.prize || 0) + (tkName === wName && tkPrize > 0 ? tkPrize : 0);
 
-        let cards = `
+                let cards = `
           <div class="winner-card">
             <div class="wc-medal">🥇</div>
             <div class="wc-body">
               <div class="wc-name">${esc(wName || 'Winner')}</div>
-              <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')}</div>
+              <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')} · 1st Place</div>
               <div class="wc-meta">
                 <span class="wc-prize">💰 Rs ${esc(winnerPrize)}</span>
                 ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
@@ -818,6 +818,40 @@ async function loadWinnersStrip() {
             </div>
           </div>
         `;
+
+        const w2 = r.winner2 || {};
+        if (w2.name) {
+           cards += `
+            <div class="winner-card" style="border-color:rgba(192,192,192,.5); background:linear-gradient(135deg, rgba(192,192,192,.12), rgba(30,18,60,.85));">
+              <div class="wc-medal">🥈</div>
+              <div class="wc-body">
+                <div class="wc-name">${esc(w2.name)}</div>
+                <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')} · 2nd Place</div>
+                <div class="wc-meta">
+                  <span class="wc-prize" style="color:#c0c0c0;">💰 Rs ${esc(w2.prize || 0)}</span>
+                  ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+           `;
+        }
+
+        const w3 = r.winner3 || {};
+        if (w3.name) {
+           cards += `
+            <div class="winner-card" style="border-color:rgba(205,127,50,.5); background:linear-gradient(135deg, rgba(205,127,50,.12), rgba(30,18,60,.85));">
+              <div class="wc-medal">🥉</div>
+              <div class="wc-body">
+                <div class="wc-name">${esc(w3.name)}</div>
+                <div class="wc-game">${esc(r.tournamentTitle || 'Tournament')} · 3rd Place</div>
+                <div class="wc-meta">
+                  <span class="wc-prize" style="color:#cd7f32;">💰 Rs ${esc(w3.prize || 0)}</span>
+                  ${when ? `<span class="wc-date">📅 ${esc(when)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+           `;
+        }
 
         if (tkName && tkPrize > 0 && tkName !== wName) {
           cards += `
