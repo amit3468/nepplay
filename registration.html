@@ -62,7 +62,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
     <div class="card">
         <h1 class="title">Tournament Registration</h1>
         <p class="subtitle">Complete your information. Your registration will remain <b>Pending</b> until the admin verifies your entry.</p>
-        <div id="message" class="message"></div>
+        <div id="message" class="message" style="word-break: break-all;"></div>
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
         <div id="tournamentBox" class="tournament-box" style="display:none;">
             <div><span id="tournamentName" class="tournament-name">—</span><span id="modeBadge" class="mode-badge"></span></div>
@@ -81,8 +81,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-// ⭐ Notice the added getDocFromServer import
-import { getFirestore, doc, getDocFromServer, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDocFromServer, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -112,11 +111,8 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
 
     const params = new URLSearchParams(window.location.search);
-    // ⭐ CRITICAL FIX: Added .trim() to remove any invisible spaces from the URL
     const tidParam = (params.get("tournamentId") || params.get("tournament") || "").trim();
     
-    console.log("Looking for Tournament ID:", tidParam);
-
     if (!tidParam) {
         showMessage("❌ No tournament ID found in the link. Please go back and try again.", "error");
         $("loading").style.display = "none";
@@ -124,11 +120,13 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     try {
-        // ⭐ CRITICAL FIX: Fetch directly from the Firebase Server to bypass browser cache
         const tDoc = await getDocFromServer(doc(db, "tournaments", tidParam));
         
         if (!tDoc.exists()) {
-            showMessage("❌ Tournament not found. Please verify the ID in Firebase.", "error");
+            // ⭐ FETCHING ALL IDS TO SHOW YOU WHAT IS ACTUALLY IN THE DATABASE
+            const snap = await getDocs(collection(db, "tournaments"));
+            let allIds = snap.docs.map(d => d.id).join(" | ");
+            showMessage("❌ ID '" + tidParam + "' not found. Available IDs in Firebase: " + allIds, "error");
             $("loading").style.display = "none";
             return;
         }
@@ -147,7 +145,6 @@ onAuthStateChanged(auth, async (user) => {
 
     } catch (e) {
         console.error("Firebase Error:", e);
-        // ⭐ If Firebase throws a permissions error, we will show it here instead of "not found"
         showMessage("❌ Error: " + e.message, "error");
         $("loading").style.display = "none";
     }
