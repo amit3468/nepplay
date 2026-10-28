@@ -1008,6 +1008,28 @@
     <span style="background:rgba(205,127,50,.15); color:#cd7f32; padding:6px 12px; border-radius:8px;">🥉 3rd: Rs 1000</span>
   </div>
   <a href="/registration.html?tournamentId=ekMpxhrnT9NmzNKwQBxG" style="display:block; text-decoration:none; text-align:center; padding:16px; border-radius:12px; font-weight:900; color:#fff; background:linear-gradient(135deg,#ef4444,#f97316); box-shadow:0 6px 20px rgba(239,68,68,.5); letter-spacing:0.5px;">🔥 SECURE YOUR SLOT NOW</a>
+    <!-- Countdown Timer -->
+  <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+    <div style="font-size: 0.8rem; color: #a8a3c9; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 800;">⏳ Registration Closes In:</div>
+    <div style="display: flex; justify-content: center; gap: 10px; font-family: 'Courier New', monospace;">
+      <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; min-width: 60px; border: 1px solid rgba(239,68,68,0.3);">
+        <div id="cd-days" style="font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1;">00</div>
+        <div style="font-size: 0.6rem; color: #ef4444; font-weight: 800; margin-top: 4px;">DAYS</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; min-width: 60px; border: 1px solid rgba(239,68,68,0.3);">
+        <div id="cd-hours" style="font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1;">00</div>
+        <div style="font-size: 0.6rem; color: #ef4444; font-weight: 800; margin-top: 4px;">HRS</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; min-width: 60px; border: 1px solid rgba(239,68,68,0.3);">
+        <div id="cd-mins" style="font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1;">00</div>
+        <div style="font-size: 0.6rem; color: #ef4444; font-weight: 800; margin-top: 4px;">MINS</div>
+      </div>
+      <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; min-width: 60px; border: 1px solid rgba(239,68,68,0.3);">
+        <div id="cd-secs" style="font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1;">00</div>
+        <div style="font-size: 0.6rem; color: #ef4444; font-weight: 800; margin-top: 4px;">SECS</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ⭐ Tonight · FF Solo Fullmap -->
@@ -1183,6 +1205,47 @@ window.dismissRegConfirmed = function() {
         setTimeout(function() { card.classList.remove('show'); card.style.opacity = ''; card.style.transform = ''; }, 300);
     }
 };
+</script>
+  <script>
+  // ⭐ MEGA SUNDAY COUNTDOWN TIMER
+  function startMegaCountdown() {
+    // Target Date: Nov 1, 2026 at 21:00 (9:00 PM) Nepal Time
+    const targetDate = new Date("2026-11-01T21:00:00+05:45").getTime();
+
+    const timer = setInterval(function() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        const container = document.getElementById('cd-days').parentElement.parentElement;
+        if(container) container.innerHTML = '<div style="color:#fbbf24; font-weight:900; font-size:1.2rem;">🔥 REGISTRATION CLOSED</div>';
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      const format = (num) => String(num).padStart(2, '0');
+
+      const dEl = document.getElementById("cd-days");
+      const hEl = document.getElementById("cd-hours");
+      const mEl = document.getElementById("cd-mins");
+      const sEl = document.getElementById("cd-secs");
+
+      if (dEl && hEl && mEl && sEl) {
+        dEl.innerText = format(days);
+        hEl.innerText = format(hours);
+        mEl.innerText = format(minutes);
+        sEl.innerText = format(seconds);
+      }
+    }, 1000);
+  }
+
+  // Start the timer when the page loads
+  document.addEventListener('DOMContentLoaded', startMegaCountdown);
 </script>
 
 <script type="module">
