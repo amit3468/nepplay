@@ -42,6 +42,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
 .section-title{ font-size:19px; margin:25px 0 15px; color:#fff; }
 .amount{ background:#153b2b; border:1px solid #267a55; color:#8ef0bb; border-radius:10px; padding:15px; margin-bottom:15px; font-size:18px; font-weight:bold; }
 .submit{ width:100%; background:#ff3b30; color:white; border:0; border-radius:9px; padding:15px; font-size:17px; font-weight:bold; cursor:pointer; margin-top:10px; }
+.submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .message{ padding:15px; border-radius:9px; margin-bottom:18px; display:none; }
 .message.error{ display:block; background:#411818; border:1px solid #9e3030; color:#ffbaba; }
 .message.success{ display:block; background:#123c28; border:1px solid #2c8d5e; color:#a4f2c7; }
@@ -61,7 +62,6 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
 .wallet-copy{ display:inline-block; margin-left:8px; background:#1e3a5f; color:#7db7ff; border:none; border-radius:5px; padding:4px 10px; font-size:11px; font-weight:bold; text-transform:uppercase; cursor:pointer; }
 .wallet-copy:hover{ background:#3b82f6; color:white; }
 .payment-instructions{ color:#9cb5d3; font-size:13px; line-height:1.6; margin-top:12px; padding:12px; background:#0b1a2e; border-left:3px solid #3b82f6; border-radius:4px; }
-.payment-no-methods{ padding:30px 20px; text-align:center; color:#a87918; background:#1a1408; border:2px dashed #a87918; border-radius:10px; font-size:14px; line-height:1.6; }
 .duplicate-banner { background: linear-gradient(135deg, rgba(239,68,68,.22), rgba(220,38,38,.1)); border: 2px solid rgba(239,68,68,.6); border-radius: 14px; padding: 22px 24px; margin-bottom: 22px; text-align: center; color: #fca5a5; font-weight: 700; font-size: 15px; line-height: 1.6; display: none; }
 </style>
 </head>
@@ -82,7 +82,6 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
         <p class="subtitle">Complete your information. Your registration will remain <b>Pending</b> until the admin verifies your entry.</p>
         
         <div id="message" class="message"></div>
-        <div id="duplicateBlock" class="duplicate-banner"></div>
         <div id="loading" class="loading-state">⏳ Loading tournament…</div>
         
         <div id="tournamentBox" class="tournament-box" style="display:none;">
@@ -92,7 +91,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
         </div>
         
         <form id="registrationForm" style="display:none;">
-            <!-- SOLO / TEAM FIELDS WOULD GO HERE (Shortened for clarity to ensure the QR code gets loaded) -->
+            <!-- SOLO -->
             <div id="soloFields">
                 <h2 class="section-title">Your Details</h2>
                 <div class="form-group"><label>Your IGN (In-Game Name) *</label><input id="soloIgn" placeholder="e.g. ProGamer99"></div>
@@ -100,6 +99,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
                 <div class="form-group"><label>Account Email</label><input id="soloEmail" type="email" readonly></div>
             </div>
             
+            <!-- TEAM (DUO/SQUAD) -->
             <div id="teamFields" style="display:none;">
                 <h2 class="section-title">Team Information</h2>
                 <div class="form-group"><label>Team Name *</label><input id="teamName"></div>
@@ -129,6 +129,7 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
                 </div>
             </div>
 
+            <!-- PAYMENT -->
             <div id="paymentSection">
                 <h2 class="section-title">Payment</h2>
                 <div id="amountBox" class="amount">Amount: Loading…</div>
@@ -144,7 +145,6 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
 
                 <div style="text-align:center; color:#6b7280; font-size:12px; margin: 15px 0; font-weight:700;">— OR PAY MANUALLY BELOW —</div>
 
-                <!-- THIS IS WHERE THE QR CODES RENDER -->
                 <div id="paymentContainer">
                     <div class="payment-options" id="paymentOptions"></div>
                     <div id="paymentDetailsContainer"></div>
@@ -181,6 +181,7 @@ const auth = getAuth(app);
 
 const $ = id => document.getElementById(id);
 let currentUser = null;
+let currentUsername = "Player";
 let tournament = null;
 let playingMode = "squad";
 let userWalletBal = 0;
@@ -215,7 +216,6 @@ function applyMode(mode) {
     }
 }
 
-// LOAD PAYMENT METHODS & QR CODES
 async function loadPaymentMethods() {
     let methods = [];
     try {
@@ -303,10 +303,10 @@ onAuthStateChanged(auth, async (user) => {
 
         tournament = { id: tDoc.id, ...tDoc.data() };
         
-        // Load User Profile for Wallet & Payout info
         const uDoc = await getDocFromServer(doc(db, "users", user.uid));
         if (uDoc.exists()) {
             userWalletBal = Number(uDoc.data().walletBalance || 0);
+            if (uDoc.data().username) currentUsername = uDoc.data().username;
         }
 
         $("tournamentName").textContent = tournament.title || "Tournament";
@@ -319,16 +319,17 @@ onAuthStateChanged(auth, async (user) => {
         $("modeBadge").className = "mode-badge " + (mode === 'solo' ? 'solo' : (mode === 'duo' ? 'duo' : 'squad'));
         applyMode(mode);
         
-        $("soloEmail").value = user.email;
-        $("email").value = user.email;
+        $("soloEmail").value = user.email || "";
+        $("email").value = user.email || "";
+        $("soloIgn").value = currentUsername;
+        $("captainName").value = currentUsername;
+        $("player1").value = currentUsername;
 
-        // Wallet Button Check
         if (userWalletBal >= Number(tournament.entryFee || 0) && Number(tournament.entryFee || 0) > 0) {
             $("walletPaymentBox").style.display = "flex";
             $("regWalletBalance").textContent = "Rs " + userWalletBal;
         }
 
-        // THIS LOADS THE QR CODES
         await loadPaymentMethods();
 
         $("loading").style.display = "none";
@@ -337,8 +338,105 @@ onAuthStateChanged(auth, async (user) => {
 
     } catch (e) {
         console.error(e);
-        showMessage("❌ Error loading data.", "error");
+        showMessage("❌ Error loading data: " + e.message, "error");
         $("loading").style.display = "none";
+    }
+});
+
+// THIS IS THE SUBMIT LISTENER THAT WAS MISSING
+$("registrationForm").addEventListener("submit", async (event) => {
+    event.preventDefault(); // ⭐ THIS PREVENTS THE PAGE FROM RELOADING
+    
+    if (!currentUser || !tournament) return;
+
+    const btn = $("submitButton");
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+
+    let body = {
+        username: currentUsername,
+        userId: currentUser.uid,
+        userEmail: currentUser.email || "",
+        tournamentId: tournament.id,
+        tournamentTitle: tournament.title || "",
+        game: tournament.game || "",
+        tournamentMode: tournament.mode || "Squad",
+        playingAs: playingMode,
+        amount: Number(tournament.entryFee || 0),
+        entryType: "paid",
+        status: isPayingWithWallet ? "confirmed" : "pending",
+        registeredAt: serverTimestamp()
+    };
+
+    // PAYMENT LOGIC
+    if (isPayingWithWallet) {
+        if (userWalletBal < body.amount) {
+            showMessage("❌ Insufficient wallet balance.", "error");
+            btn.disabled = false; btn.textContent = "Submit Registration";
+            return;
+        }
+        body.transactionId = "WALLET_" + Date.now();
+        body.paymentMethod = "Wallet";
+    } else {
+        const txId = $("transactionId").value.trim();
+        if (txId.length < 3) {
+            showMessage("❌ Please enter a valid transaction ID.", "error");
+            btn.disabled = false; btn.textContent = "Submit Registration";
+            return;
+        }
+        body.transactionId = txId;
+        body.paymentMethod = selectedPaymentId;
+        body.payerName = $("payerName").value.trim();
+        body.payerPhone = $("payerPhone").value.trim();
+    }
+
+    // TEAM/FORM LOGIC
+    if (playingMode === "solo") {
+        const ign = $("soloIgn").value.trim();
+        const uid = $("soloUid").value.trim();
+        if (!ign || !uid) {
+            showMessage("❌ IGN and UID are required.", "error");
+            btn.disabled = false; btn.textContent = "Submit Registration";
+            return;
+        }
+        body.ign = ign; body.uid = uid;
+        body.teamName = ign + " (Solo)";
+        body.captainName = ign;
+        body.teammates = [{ ign, uid, isCaptain: true }];
+    } else {
+        const teamName = $("teamName").value.trim();
+        const capName = $("captainName").value.trim();
+        const p1 = $("player1").value.trim();
+        const p1Uid = $("player1Uid").value.trim();
+        
+        if (!teamName || !capName || !p1 || !p1Uid) {
+            showMessage("❌ Please fill all required team fields.", "error");
+            btn.disabled = false; btn.textContent = "Submit Registration";
+            return;
+        }
+        body.teamName = teamName;
+        body.captainName = capName;
+        body.ign = capName;
+        body.uid = p1Uid;
+        body.teammates = [{ ign: p1, uid: p1Uid, isCaptain: true }];
+    }
+
+    try {
+        await addDoc(collection(db, "tournament_registrations"), body);
+
+        if (isPayingWithWallet) {
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                walletBalance: increment(-body.amount)
+            });
+        }
+
+        showMessage("✅ Registration Successful! Room details will show on your dashboard.", "success");
+        setTimeout(() => { window.location.href = "/member.html"; }, 2000);
+
+    } catch (e) {
+        console.error(e);
+        showMessage("❌ Error submitting: " + e.message, "error");
+        btn.disabled = false; btn.textContent = "Submit Registration";
     }
 });
 </script>
