@@ -639,6 +639,8 @@ let alreadyRegistered = false;
 let userProfilePhone = "";
 let userProfileWallet = "";
 let needsPayoutInfo = false;
+let userWalletBal = 0;
+let isPayingWithWallet = false;
 
 const $ = id => document.getElementById(id);
 
@@ -646,7 +648,6 @@ function showMessage(text, type) {
     const box = $("message");
     box.textContent = text;
     box.className = "message " + type;
-    // ⭐ FIX: Auto-scroll to the error so users actually see it when they click submit
     box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -736,6 +737,7 @@ onAuthStateChanged(auth, async (user) => {
             userProfilePhone = u.phone || "";
             userProfileWallet = u.wallet || "";
             needsPayoutInfo = !userProfilePhone || !userProfileWallet;
+            userWalletBal = Number(u.walletBalance || 0);
         }
     } catch (e) {}
     currentUsername = display;
@@ -778,9 +780,9 @@ async function loadRegistrationPage() {
         let urlSaysFree = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
         isFreeEvent = urlSaysFree;
 
-        let all = []; // ⭐ Define `all` in the outer scope to prevent crash
+        let all = [];
 
-        // 1. Try to fetch by ID first (Fastest)
+        // 1. Fast Fetch by ID
         if (tidParam) {
             const tDoc = await getDoc(doc(db, "tournaments", tidParam));
             if (tDoc.exists()) {
@@ -788,7 +790,7 @@ async function loadRegistrationPage() {
             }
         }
 
-        // 2. If not found by ID, fetch all and search
+        // 2. Fallback fetch
         if (!tournament) {
             const snap = await getDocs(collection(db, "tournaments"));
             all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -799,7 +801,12 @@ async function loadRegistrationPage() {
                 return;
             }
 
-            if (seedKeyParam) {
+            // ⭐ Re-check ID in fallback
+            if (tidParam) {
+                tournament = all.find(t => t.id === tidParam);
+            }
+
+            if (!tournament && seedKeyParam) {
                 tournament = all.find(t => t.seedKey === seedKeyParam);
                 if (!tournament) tournament = all.find(t => t.id === seedKeyParam);
             }
@@ -938,6 +945,13 @@ async function loadRegistrationPage() {
 
         if (!isFreeEvent) {
             await loadPaymentMethods();
+            
+            // ⭐ Wallet Check
+            if (userWalletBal >= Number(tournament.entryFee || 0) && Number(tournament.entryFee || 0) > 0) {
+                $("walletPaymentBox").style.display = "flex";
+                $("regWalletBalance").textContent = "Rs " + userWalletBal;
+                $("btnPayWallet").textContent = "Pay Rs. " + fee;
+            }
         }
         applyMode(lockedMode);
 
@@ -1062,35 +1076,12 @@ function showToast(msg) {
     setTimeout(() => { el.style.display = "none"; }, 1800);
 }
 
-let userWalletBal = 0;
-let isPayingWithWallet = false;
-
-// Fetch wallet balance when page loads
-const origLoadPage = loadRegistrationPage;
-loadRegistrationPage = async function() {
-    await origLoadPage();
-    if (currentUser && tournament) {
-        try {
-            const uDoc = await getDoc(doc(db, "users", currentUser.uid));
-            if (uDoc.exists()) {
-                userWalletBal = Number(uDoc.data().walletBalance || 0);
-                const fee = Number(tournament.entryFee || tournament.entry_fee || 0);
-                
-                if (userWalletBal >= fee && fee > 0) {
-                    $("walletPaymentBox").style.display = "flex";
-                    $("regWalletBalance").textContent = "Rs " + userWalletBal;
-                    $("btnPayWallet").textContent = "Pay Rs. " + fee;
-                }
-            }
-        } catch(e) {}
-    }
-};
-
 window.triggerWalletPayment = function() {
     isPayingWithWallet = true;
     $("registrationForm").dispatchEvent(new Event("submit", { cancelable: true }));
 };
-    $("registrationForm").addEventListener("submit", async (event) => {
+
+$("registrationForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) { showMessage("Please login first.", "error"); return; }
     if (!tournament) { showMessage("Tournament not loaded.", "error"); return; }
@@ -1121,7 +1112,7 @@ window.triggerWalletPayment = function() {
         isFreeEvent = true;
     }
 
-        if (!isFreeEvent) {
+    if (!isFreeEvent) {
         if (isPayingWithWallet) {
             if (userWalletBal < Number(tournament.entryFee || 0)) {
                 showMessage("❌ Insufficient wallet balance.", "error"); return;
@@ -1155,7 +1146,7 @@ window.triggerWalletPayment = function() {
         registeredAt:    serverTimestamp()
     };
 
-        if (isFreeEvent) {
+    if (isFreeEvent) {
         body.isFree = true;
     } else if (isPayingWithWallet) {
         body.transactionId = "WALLET_" + Date.now();
@@ -1225,7 +1216,6 @@ window.triggerWalletPayment = function() {
         if (!p1Uid || !p2Uid) { showMessage("At least Player 1 and Player 2 Free Fire UIDs are required.", "error"); return; }
         if (!/^\d{6,15}$/.test(p1Uid) || !/^\d{6,15}$/.test(p2Uid)) { showMessage("Free Fire UIDs must be 6–15 digits (numbers only).", "error"); return; }
         
-        // ⭐ FIX: Safe checks for optional players so it doesn't crash
         const p3 = $("player3")?.value.trim() || "";
         const p4 = $("player4")?.value.trim() || "";
         const p5 = $("player5")?.value.trim() || "";
@@ -1282,7 +1272,8 @@ window.triggerWalletPayment = function() {
         }
 
         await addDoc(collection(db, "tournament_registrations"), body);
-                // ⭐ DEDUCT WALLET BALANCE
+
+        // ⭐ DEDUCT WALLET BALANCE
         if (isPayingWithWallet) {
             await updateDoc(doc(db, "users", currentUser.uid), {
                 walletBalance: increment(-Number(tournament.entryFee || 0))
