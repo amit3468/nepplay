@@ -778,7 +778,9 @@ async function loadRegistrationPage() {
         let urlSaysFree = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
         isFreeEvent = urlSaysFree;
 
-                // ⭐ OPTIMIZATION: Fetch only the specific tournament if ID is provided
+        let all = []; // ⭐ Define `all` in the outer scope to prevent crash
+
+        // 1. Try to fetch by ID first (Fastest)
         if (tidParam) {
             const tDoc = await getDoc(doc(db, "tournaments", tidParam));
             if (tDoc.exists()) {
@@ -786,10 +788,10 @@ async function loadRegistrationPage() {
             }
         }
 
-        // Fallback if not found by ID
+        // 2. If not found by ID, fetch all and search
         if (!tournament) {
             const snap = await getDocs(collection(db, "tournaments"));
-            const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
             if (!all.length) {
                 showMessage("❌ No tournaments found. Please contact admin.", "error");
@@ -801,17 +803,19 @@ async function loadRegistrationPage() {
                 tournament = all.find(t => t.seedKey === seedKeyParam);
                 if (!tournament) tournament = all.find(t => t.id === seedKeyParam);
             }
-        if (!tournament && gameParam) {
-            const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
-            const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
-            const pool = open.length ? open : matching;
-            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+            if (!tournament && gameParam) {
+                const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
+                const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
+                const pool = open.length ? open : matching;
+                tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+            }
+            if (!tournament) {
+                const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
+                const pool = open.length ? open : all;
+                tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
+            }
         }
-        if (!tournament) {
-            const open = all.filter(t => String(t.status || "").toLowerCase() !== "completed");
-            const pool = open.length ? open : all;
-            tournament = pool.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))[0];
-        }
+
         if (!tournament) {
             showMessage("❌ No open tournament found. Please contact admin.", "error");
             $("loading").style.display = "none";
@@ -915,22 +919,21 @@ async function loadRegistrationPage() {
             $("email").value = uEmail;
             $("soloEmail").value = uEmail;
             try {
-    const uDoc = await getDoc(doc(db, "users", currentUser.uid));
-    if (uDoc.exists()) {
-        const u = uDoc.data();
-        if (u.username) {
-            $("soloIgn").value = u.username;
-            $("captainName").value = u.username;
-            $("player1").value = u.username;
-        }
-        // Prefill captain UID if user has saved it before
-        const storedUid = u.freeFireUid || u.ffUid || "";
-        if (storedUid) {
-            $("soloUid").value = storedUid;
-            $("player1Uid").value = storedUid;
-        }
-    }
-} catch (e) {}
+                const uDoc = await getDoc(doc(db, "users", currentUser.uid));
+                if (uDoc.exists()) {
+                    const u = uDoc.data();
+                    if (u.username) {
+                        $("soloIgn").value = u.username;
+                        $("captainName").value = u.username;
+                        $("player1").value = u.username;
+                    }
+                    const storedUid = u.freeFireUid || u.ffUid || "";
+                    if (storedUid) {
+                        $("soloUid").value = storedUid;
+                        $("player1Uid").value = storedUid;
+                    }
+                }
+            } catch (e) {}
         }
 
         if (!isFreeEvent) {
