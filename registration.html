@@ -778,22 +778,29 @@ async function loadRegistrationPage() {
         let urlSaysFree = (freeParam === "1" || freeParam === "true" || freeParam === "yes");
         isFreeEvent = urlSaysFree;
 
-        const snap = await getDocs(collection(db, "tournaments"));
-        const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        if (!all.length) {
-            showMessage("❌ No tournaments found. Please contact admin.", "error");
-            $("loading").style.display = "none";
-            return;
+                // ⭐ OPTIMIZATION: Fetch only the specific tournament if ID is provided
+        if (tidParam) {
+            const tDoc = await getDoc(doc(db, "tournaments", tidParam));
+            if (tDoc.exists()) {
+                tournament = { id: tDoc.id, ...tDoc.data() };
+            }
         }
 
-        if (seedKeyParam) {
-            tournament = all.find(t => t.seedKey === seedKeyParam);
-            if (!tournament) tournament = all.find(t => t.id === seedKeyParam);
-        }
-        if (!tournament && tidParam) {
-            tournament = all.find(t => t.id === tidParam);
-        }
+        // Fallback if not found by ID
+        if (!tournament) {
+            const snap = await getDocs(collection(db, "tournaments"));
+            const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            if (!all.length) {
+                showMessage("❌ No tournaments found. Please contact admin.", "error");
+                $("loading").style.display = "none";
+                return;
+            }
+
+            if (seedKeyParam) {
+                tournament = all.find(t => t.seedKey === seedKeyParam);
+                if (!tournament) tournament = all.find(t => t.id === seedKeyParam);
+            }
         if (!tournament && gameParam) {
             const matching = all.filter(t => matchGame(t.game, t.title, t.id, gameParam));
             const open = matching.filter(t => String(t.status || "").toLowerCase() !== "completed");
