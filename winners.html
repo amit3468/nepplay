@@ -330,7 +330,7 @@
     </footer>
 
     <!-- ============================================================
-         WINTERS FIRESTORE LOGIC — unchanged
+         WINNERS FIRESTORE LOGIC
          ============================================================ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -394,6 +394,38 @@
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
+        /* ---------- duplicate detection: Top Killer === 1st place ---------- */
+        function normName(s) {
+            return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        }
+
+        function samePlayer(a, b) {
+            if (!a || !b) return false;
+            // 1) strongest match: same user id
+            const ua = a.userId || a.uid || a.playerId;
+            const ub = b.userId || b.uid || b.playerId;
+            if (ua && ub && String(ua) === String(ub)) return true;
+            // 2) fallback: same display name (ignores case / extra spaces)
+            const na = normName(playerName(a));
+            const nb = normName(playerName(b));
+            if (!na || !nb || na === 'player' || nb === 'player') return false;
+            return na === nb;
+        }
+
+        // Splits a tournament group into 1st place + Top Killer and flags duplicates
+        function splitKiller(group) {
+            const first     = group.find(w => rankNum(w.rank) === 1) || null;
+            const killerRaw = group.find(w => isKillerRank(w.rank)) || null;
+            const killerIsFirst = !!killerRaw && samePlayer(killerRaw, first);
+            return { first, killerRaw, killerIsFirst, killer: killerIsFirst ? null : killerRaw };
+        }
+
+        // Group with the duplicate Top-Killer record removed
+        function dedupeGroup(group) {
+            const { killerIsFirst, killerRaw } = splitKiller(group);
+            return killerIsFirst ? group.filter(w => w !== killerRaw) : group;
+        }
+
         async function loadWinners() {
             try {
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
@@ -401,7 +433,7 @@
                     .map(d => ({ id: d.id, ...d.data() }))
                     .filter(p => toNumber(p.prize || p.amount) > 0);
 
-                const winners = all
+                const winnersRaw = all
                     .filter(p => {
                         const r = rankNum(p.rank);
                         const isKiller = isKillerRank(p.rank);
@@ -416,36 +448,55 @@
 
                 loading.classList.add('hidden');
 
-                if (!winners.length) {
+                if (!winnersRaw.length) {
                     empty.classList.remove('hidden');
                     return;
                 }
+
+                /* ---- group by tournament (RAW, still contains the killer doc) ---- */
+                const byTournamentRaw = {};
+                winnersRaw.forEach(w => {
+                    const key = w.tournamentId || w.tournamentTitle || 'unknown';
+                    if (!byTournamentRaw[key]) byTournamentRaw[key] = [];
+                    byTournamentRaw[key].push(w);
+                });
+
+                const sortedKeys = Object.keys(byTournamentRaw).sort((a, b) => {
+                    const ta = Math.max(...byTournamentRaw[a].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
+                    const tb = Math.max(...byTournamentRaw[b].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
+                    return tb - ta;
+                });
+
+                /* ---- de-duplicated groups: killer removed when he is also 1st ---- */
+                const byTournament = {};
+                sortedKeys.forEach(k => { byTournament[k] = dedupeGroup(byTournamentRaw[k]); });
+
+                const winners = sortedKeys.flatMap(k => byTournament[k]);
 
                 statusPill.className = 'inline-block bg-green-500/20 border border-green-500/40 rounded-full px-3 py-1 text-xs font-bold text-green-400 mb-3';
                 statusPill.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Live Results';
                 subtitle.textContent = `${winners.length} winner${winners.length !== 1 ? 's' : ''} so far — congratulations!`;
 
-                const byTournament = {};
-                winners.forEach(w => {
-                    const key = w.tournamentId || w.tournamentTitle || 'unknown';
-                    if (!byTournament[key]) byTournament[key] = [];
-                    byTournament[key].push(w);
-                });
+                /* ---- latest tournament podium ---- */
+                const latest    = byTournament[sortedKeys[0]] || [];
+                const latestRaw = byTournamentRaw[sortedKeys[0]] || [];
 
-                const sortedKeys = Object.keys(byTournament).sort((a, b) => {
-                    const ta = Math.max(...byTournament[a].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
-                    const tb = Math.max(...byTournament[b].map(x => x.createdAt?.seconds || x.paidAt?.seconds || 0));
-                    return tb - ta;
-                });
-
-                const latest = byTournament[sortedKeys[0]] || [];
                 const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
-                const findKiller = latest.find(w => isKillerRank(w.rank));
-
                 const r1 = findRank(1), r2 = findRank(2), r3 = findRank(3);
-                const killer = findKiller;
 
-                renderPodium(document.getElementById('podium-1'), r1, '🥇', 'gold', 1);
+                const { killerRaw, killerIsFirst } = splitKiller(latestRaw);
+                const killer = killerIsFirst ? null : killerRaw;   // ← dedupe happens here
+
+                // merged badge shown on the 1st-place card instead of a second card
+                const killerBadge = killerIsFirst
+                    ? `<p class="text-[11px] font-bold mt-2" style="color:#c084fc;">🎯 Also Top Killer${
+                          toNumber(killerRaw.prize || killerRaw.amount) > 0
+                              ? ` · Rs. ${toNumber(killerRaw.prize || killerRaw.amount).toLocaleString()}`
+                              : ''
+                      }</p>`
+                    : '';
+
+                renderPodium(document.getElementById('podium-1'), r1, '🥇', 'gold', 1, killerBadge);
                 if (r2) {
                     renderPodium(document.getElementById('podium-2'), r2, '🥈', 'silver', 2);
                 } else if (killer) {
@@ -455,17 +506,15 @@
                 }
                 if (r3) {
                     renderPodium(document.getElementById('podium-3'), r3, '🥉', 'bronze', 3);
-                } else if (!r2 && !killer && killer) {
-                    renderPodium(document.getElementById('podium-3'), killer, '🎯', 'killer', 3);
                 } else {
                     renderPodium(document.getElementById('podium-3'), null, '🥉', 'bronze', 3);
                 }
                 podium.classList.remove('hidden');
 
-                loadAllTime(all);
-                renderTourneyCards(sortedKeys, byTournament);
+                loadAllTime(all);                              // all-time totals still use every payout ✔
+                renderTourneyCards(sortedKeys, byTournamentRaw);
 
-                listEl.innerHTML = winners.map(w => {
+                listEl.innerHTML = winners.map(w => {          // ← deduped list
                     const name = playerName(w);
                     const r = rankNum(w.rank);
                     const isKiller = isKillerRank(w.rank);
@@ -494,7 +543,7 @@
             }
         }
 
-        function renderPodium(el, w, emoji, medalClass, placeholder) {
+        function renderPodium(el, w, emoji, medalClass, placeholder, extraHtml) {
             const orderCls = placeholder === 1
                 ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
                 : placeholder === 2
@@ -520,6 +569,7 @@
                 <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
                 <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(label)}</p>
                 <p class="text-lg font-bold text-green-400">Rs. ${toNumber(w.prize || w.amount).toLocaleString()}</p>
+                ${extraHtml || ''}
             `;
         }
 
@@ -562,19 +612,22 @@
             allTimeWrap.classList.remove('hidden');
         }
 
-        function renderTourneyCards(sortedKeys, byTournament) {
+        function renderTourneyCards(sortedKeys, byTournamentRaw) {
             if (!sortedKeys.length) { tourneyCardsWrap.classList.add('hidden'); return; }
 
             tourneyCardsEl.innerHTML = sortedKeys.map(key => {
-                const w = byTournament[key];
+                const groupRaw = byTournamentRaw[key];
+                const { killerRaw, killerIsFirst } = splitKiller(groupRaw);
+                const w = killerIsFirst ? groupRaw.filter(x => x !== killerRaw) : groupRaw;   // ← dedupe
+
                 const title = w[0].tournamentTitle || w[0].tournament || 'Tournament';
                 const date = fmtDate(w[0].createdAt || w[0].paidAt);
 
                 const findR = (n) => w.find(x => rankNum(x.rank) === n);
                 const first = findR(1), second = findR(2), third = findR(3);
-                const tk = w.find(x => isKillerRank(x.rank));
+                const tk = killerIsFirst ? null : killerRaw;   // ← no separate killer row when duplicate
 
-                const slot = (winner, rank, medal, cls) => {
+                const slot = (winner, rank, medal, cls, badge) => {
                     if (!winner) {
                         return `<div class="tp-slot ${cls}">
                             <div class="tp-rank">${medal}</div>
@@ -586,6 +639,7 @@
                         <p class="tp-name">${escapeHtml(playerName(winner))}</p>
                         <p class="tp-prize">Rs. ${toNumber(winner.prize || winner.amount).toLocaleString()}</p>
                         ${winner.kills ? `<p class="tp-kills">${toNumber(winner.kills)} kills</p>` : ''}
+                        ${badge ? `<p class="tp-kills" style="color:#c084fc;">🎯 Top Killer</p>` : ''}
                     </div>`;
                 };
 
@@ -599,7 +653,7 @@
                         </div>
                         <div class="tourney-podium">
                             ${slot(second, 2, '🥈', 'r2')}
-                            ${slot(first, 1, '🥇', 'r1')}
+                            ${slot(first, 1, '🥇', 'r1', killerIsFirst)}
                             ${slot(third, 3, '🥉', 'r3')}
                         </div>
                         ${tk ? `
