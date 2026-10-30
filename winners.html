@@ -265,7 +265,7 @@
         </div>
 
         <div id="winners-empty" class="hidden empty-state-box max-w-2xl mx-auto">
-            <div class="text-5xl sm:text-6xl mb-4">🏆</div>
+            <div class="text-5xl sm:text-6xl mb-4"><i class="fa-solid fa-trophy text-gray-500"></i></div>
             <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">No Winners Yet</h2>
             <p class="text-sm sm:text-base text-gray-400 mb-5 max-w-md mx-auto">Once our first tournament finishes, the winners will be displayed here with their prizes. Sign up now to be among the first to compete!</p>
             <div class="flex flex-wrap gap-3 justify-center">
@@ -300,18 +300,18 @@
         </div>
 
         <div class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto text-center">
-            <h3 class="text-base sm:text-lg font-bold text-white mb-4">💰 Prize Distribution</h3>
+            <h3 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-sack-dollar text-green-400 mr-1"></i> Prize Distribution</h3>
             <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
                 <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                    <p class="text-yellow-400 font-bold mb-1">🥇 1st</p>
+                    <p class="text-yellow-400 font-bold mb-1"><i class="fa-solid fa-medal"></i> 1st</p>
                     <p class="text-white text-xs">50% of pool</p>
                 </div>
                 <div class="bg-gray-500/10 border border-gray-400/30 rounded-lg p-3">
-                    <p class="text-gray-300 font-bold mb-1">🥈 2nd</p>
+                    <p class="text-gray-300 font-bold mb-1"><i class="fa-solid fa-medal"></i> 2nd</p>
                     <p class="text-white text-xs">30% of pool</p>
                 </div>
                 <div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
-                    <p class="text-orange-400 font-bold mb-1">🥉 3rd</p>
+                    <p class="text-orange-400 font-bold mb-1"><i class="fa-solid fa-medal"></i> 3rd</p>
                     <p class="text-white text-xs">20% of pool</p>
                 </div>
             </div>
@@ -363,6 +363,13 @@
         const tourneyCardsWrap = document.getElementById('tourney-cards-wrap');
         const tourneyCardsEl = document.getElementById('tourney-cards');
 
+        /* ---- FontAwesome Icon HTML (Replaces broken emojis) ---- */
+        const iconGold = '<i class="fa-solid fa-medal text-yellow-400"></i>';
+        const iconSilver = '<i class="fa-solid fa-medal text-slate-300"></i>';
+        const iconBronze = '<i class="fa-solid fa-medal text-orange-400"></i>';
+        const iconKiller = '<i class="fa-solid fa-crosshairs text-purple-400"></i>';
+        const iconAward = '<i class="fa-solid fa-award text-gray-400"></i>';
+
         function avatarInitial(name) { return (name || '?').trim().charAt(0).toUpperCase(); }
         function escapeHtml(s) {
             return String(s || '').replace(/[&<>"']/g, c => ({
@@ -401,29 +408,27 @@
 
         function samePlayer(a, b) {
             if (!a || !b) return false;
-            // 1) strongest match: same user id
             const ua = a.userId || a.uid || a.playerId;
             const ub = b.userId || b.uid || b.playerId;
             if (ua && ub && String(ua) === String(ub)) return true;
-            // 2) fallback: same display name (ignores case / extra spaces)
             const na = normName(playerName(a));
             const nb = normName(playerName(b));
             if (!na || !nb || na === 'player' || nb === 'player') return false;
             return na === nb;
         }
 
-        // Splits a tournament group into 1st place + Top Killer and flags duplicates
         function splitKiller(group) {
             const first     = group.find(w => rankNum(w.rank) === 1) || null;
             const killerRaw = group.find(w => isKillerRank(w.rank)) || null;
-            const killerIsFirst = !!killerRaw && samePlayer(killerRaw, first);
+            const isSameDoc = killerRaw && first && killerRaw === first;
+            // If it's the exact same document, do not treat it as a separate duplicate
+            const killerIsFirst = !!killerRaw && !!first && samePlayer(killerRaw, first) && !isSameDoc;
             return { first, killerRaw, killerIsFirst, killer: killerIsFirst ? null : killerRaw };
         }
 
-        // Group with the duplicate Top-Killer record removed
         function dedupeGroup(group) {
-            const { killerIsFirst, killerRaw } = splitKiller(group);
-            return killerIsFirst ? group.filter(w => w !== killerRaw) : group;
+            const { killerIsFirst, killerRaw, first } = splitKiller(group);
+            return (killerIsFirst && killerRaw !== first) ? group.filter(w => w !== killerRaw) : group;
         }
 
         async function loadWinners() {
@@ -453,7 +458,6 @@
                     return;
                 }
 
-                /* ---- group by tournament (RAW, still contains the killer doc) ---- */
                 const byTournamentRaw = {};
                 winnersRaw.forEach(w => {
                     const key = w.tournamentId || w.tournamentTitle || 'unknown';
@@ -467,7 +471,6 @@
                     return tb - ta;
                 });
 
-                /* ---- de-duplicated groups: killer removed when he is also 1st ---- */
                 const byTournament = {};
                 sortedKeys.forEach(k => { byTournament[k] = dedupeGroup(byTournamentRaw[k]); });
 
@@ -485,40 +488,39 @@
                 const r1 = findRank(1), r2 = findRank(2), r3 = findRank(3);
 
                 const { killerRaw, killerIsFirst } = splitKiller(latestRaw);
-                const killer = killerIsFirst ? null : killerRaw;   // ← dedupe happens here
+                const killer = killerIsFirst ? null : killerRaw;
 
-                // merged badge shown on the 1st-place card instead of a second card
                 const killerBadge = killerIsFirst
-                    ? `<p class="text-[11px] font-bold mt-2" style="color:#c084fc;">🎯 Also Top Killer${
+                    ? `<p class="text-[11px] font-bold mt-2" style="color:#c084fc;"><i class="fa-solid fa-crosshairs"></i> Also Top Killer${
                           toNumber(killerRaw.prize || killerRaw.amount) > 0
                               ? ` · Rs. ${toNumber(killerRaw.prize || killerRaw.amount).toLocaleString()}`
                               : ''
                       }</p>`
                     : '';
 
-                renderPodium(document.getElementById('podium-1'), r1, '🥇', 'gold', 1, killerBadge);
+                renderPodium(document.getElementById('podium-1'), r1, iconGold, 'gold', 1, killerBadge);
                 if (r2) {
-                    renderPodium(document.getElementById('podium-2'), r2, '🥈', 'silver', 2);
+                    renderPodium(document.getElementById('podium-2'), r2, iconSilver, 'silver', 2);
                 } else if (killer) {
-                    renderPodium(document.getElementById('podium-2'), killer, '🎯', 'killer', 2);
+                    renderPodium(document.getElementById('podium-2'), killer, iconKiller, 'killer', 2);
                 } else {
-                    renderPodium(document.getElementById('podium-2'), null, '🥈', 'silver', 2);
+                    renderPodium(document.getElementById('podium-2'), null, iconSilver, 'silver', 2);
                 }
                 if (r3) {
-                    renderPodium(document.getElementById('podium-3'), r3, '🥉', 'bronze', 3);
+                    renderPodium(document.getElementById('podium-3'), r3, iconBronze, 'bronze', 3);
                 } else {
-                    renderPodium(document.getElementById('podium-3'), null, '🥉', 'bronze', 3);
+                    renderPodium(document.getElementById('podium-3'), null, iconBronze, 'bronze', 3);
                 }
                 podium.classList.remove('hidden');
 
-                loadAllTime(all);                              // all-time totals still use every payout ✔
+                loadAllTime(all);
                 renderTourneyCards(sortedKeys, byTournamentRaw);
 
-                listEl.innerHTML = winners.map(w => {          // ← deduped list
+                listEl.innerHTML = winners.map(w => {
                     const name = playerName(w);
                     const r = rankNum(w.rank);
                     const isKiller = isKillerRank(w.rank);
-                    const medal = isKiller ? '🎯' : r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '🏅';
+                    const medal = isKiller ? iconKiller : r === 1 ? iconGold : r === 2 ? iconSilver : r === 3 ? iconBronze : iconAward;
                     const rankLabel = isKiller ? 'Top Killer' : `Rank #${r || '—'}`;
                     return `
                         <div class="winner-row">
@@ -543,7 +545,7 @@
             }
         }
 
-        function renderPodium(el, w, emoji, medalClass, placeholder, extraHtml) {
+        function renderPodium(el, w, iconHtml, medalClass, placeholder, extraHtml) {
             const orderCls = placeholder === 1
                 ? 'order-1 md:order-2 md:scale-110 shadow-2xl shadow-yellow-500/10'
                 : placeholder === 2
@@ -553,7 +555,7 @@
             if (!w) {
                 el.className = `podium-slot ${orderCls}`;
                 el.innerHTML = `
-                    <div class="text-5xl mb-3">${emoji}</div>
+                    <div class="text-5xl mb-3">${iconHtml}</div>
                     <p class="text-sm text-gray-500">Waiting for winner</p>
                 `;
                 return;
@@ -564,7 +566,7 @@
 
             el.className = `podium-live ${medalClass} ${orderCls}`;
             el.innerHTML = `
-                <div class="text-5xl mb-3">${emoji}</div>
+                <div class="text-5xl mb-3">${iconHtml}</div>
                 <div class="winner-avatar">${avatarInitial(name)}</div>
                 <p class="text-xl font-bold text-white mb-1 truncate">${escapeHtml(name)}</p>
                 <p class="text-xs text-gray-400 mb-2 truncate">${escapeHtml(label)}</p>
@@ -592,12 +594,12 @@
 
             if (!ranked.length) { allTimeWrap.classList.add('hidden'); return; }
 
-            const medals = ['🥇', '🥈', '🥉'];
+            const medals = [iconGold, iconSilver, iconBronze];
             const classes = ['gold', 'silver', 'bronze'];
 
             allTimeGrid.innerHTML = ranked.map((p, i) => {
                 const isKillerOnly = p.wins === 0 && p.podiums === 0;
-                const medal = isKillerOnly ? '🎯' : medals[i];
+                const medal = isKillerOnly ? iconKiller : medals[i];
                 const cls = isKillerOnly ? 'killer' : classes[i];
                 return `
                 <div class="top-player-card ${cls}">
@@ -605,7 +607,7 @@
                     <div class="tp-avatar">${avatarInitial(p.name)}</div>
                     <p class="text-lg font-bold text-white mb-1 truncate">${escapeHtml(p.name)}</p>
                     <p class="text-2xl font-black text-green-400">Rs. ${p.total.toLocaleString()}</p>
-                    <p class="text-xs text-gray-400 mt-2">${isKillerOnly ? '🎯 Top Killer' : `${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}`}</p>
+                    <p class="text-xs text-gray-400 mt-2">${isKillerOnly ? '<i class="fa-solid fa-crosshairs"></i> Top Killer' : `${p.wins} win${p.wins !== 1 ? 's' : ''} • ${p.podiums} podium${p.podiums !== 1 ? 's' : ''}`}</p>
                 </div>`;
             }).join('');
 
@@ -617,15 +619,19 @@
 
             tourneyCardsEl.innerHTML = sortedKeys.map(key => {
                 const groupRaw = byTournamentRaw[key];
-                const { killerRaw, killerIsFirst } = splitKiller(groupRaw);
-                const w = killerIsFirst ? groupRaw.filter(x => x !== killerRaw) : groupRaw;   // ← dedupe
+                const { killerRaw, killerIsFirst, first } = splitKiller(groupRaw);
+                
+                // FIX: Ensure the array doesn't become empty if the same document is both 1st and Killer
+                const w = (killerIsFirst && killerRaw !== first) ? groupRaw.filter(x => x !== killerRaw) : groupRaw;
+                
+                if (!w || !w.length) return '';
 
                 const title = w[0].tournamentTitle || w[0].tournament || 'Tournament';
                 const date = fmtDate(w[0].createdAt || w[0].paidAt);
 
                 const findR = (n) => w.find(x => rankNum(x.rank) === n);
-                const first = findR(1), second = findR(2), third = findR(3);
-                const tk = killerIsFirst ? null : killerRaw;   // ← no separate killer row when duplicate
+                const firstPlace = findR(1), second = findR(2), third = findR(3);
+                const tk = killerIsFirst ? null : killerRaw;
 
                 const slot = (winner, rank, medal, cls, badge) => {
                     if (!winner) {
@@ -639,7 +645,7 @@
                         <p class="tp-name">${escapeHtml(playerName(winner))}</p>
                         <p class="tp-prize">Rs. ${toNumber(winner.prize || winner.amount).toLocaleString()}</p>
                         ${winner.kills ? `<p class="tp-kills">${toNumber(winner.kills)} kills</p>` : ''}
-                        ${badge ? `<p class="tp-kills" style="color:#c084fc;">🎯 Top Killer</p>` : ''}
+                        ${badge ? `<p class="tp-kills" style="color:#c084fc;"><i class="fa-solid fa-crosshairs"></i> Top Killer</p>` : ''}
                     </div>`;
                 };
 
@@ -652,13 +658,13 @@
                             </div>
                         </div>
                         <div class="tourney-podium">
-                            ${slot(second, 2, '🥈', 'r2')}
-                            ${slot(first, 1, '🥇', 'r1', killerIsFirst)}
-                            ${slot(third, 3, '🥉', 'r3')}
+                            ${slot(second, 2, iconSilver, 'r2')}
+                            ${slot(firstPlace, 1, iconGold, 'r1', killerIsFirst)}
+                            ${slot(third, 3, iconBronze, 'r3')}
                         </div>
                         ${tk ? `
                             <div class="killer-row">
-                                <span class="kr-label">🎯 Top Killer</span>
+                                <span class="kr-label"><i class="fa-solid fa-crosshairs"></i> Top Killer</span>
                                 <span class="kr-name">${escapeHtml(playerName(tk))}</span>
                                 <span class="kr-prize">Rs. ${toNumber(tk.prize || tk.amount).toLocaleString()}</span>
                             </div>
@@ -698,7 +704,7 @@
                             </div>
                             <div class="p-4">
                                 <p class="text-sm font-bold text-white mb-1 truncate">${escapeHtml(h.tournamentTitle || 'Tournament')}</p>
-                                <p class="text-xs text-gray-400">🥇 ${escapeHtml(w1.name || '—')} · Rs. ${toNumber(w1.prize)}</p>
+                                <p class="text-xs text-gray-400"><i class="fa-solid fa-medal text-yellow-400"></i> ${escapeHtml(w1.name || '—')} · Rs. ${toNumber(w1.prize)}</p>
                             </div>
                         </div>
                     `;
