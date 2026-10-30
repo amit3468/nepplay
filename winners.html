@@ -64,7 +64,7 @@
         .top-player-card.silver { border-color: #94a3b8; }
         .top-player-card.bronze { border-color: #ea580c; }
         .top-player-card.killer { border-color: #a855f7; box-shadow: 0 0 35px rgba(168,85,247,0.3); }
-        .top-player-card .crown { position: absolute; top: 8px; right: 12px; font-size: 22px; }
+        .top-player-card .crown { position: absolute; top: 12px; right: 12px; font-size: 22px; line-height: 1; }
         .top-player-card .tp-avatar { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; margin: 0 auto 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
 
         .tourney-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; margin-bottom: 16px; transition: all 0.3s; }
@@ -79,7 +79,7 @@
         .tp-slot.r2 { order: 1; }
         .tp-slot.r3 { order: 3; }
         @media (max-width: 500px) { .tp-slot.r1 { order: 1; transform: none; } }
-        .tp-slot .tp-rank { font-size: 22px; margin-bottom: 6px; }
+        .tp-slot .tp-rank { font-size: 22px; margin-bottom: 6px; line-height: 1; }
         .tp-slot .tp-name { color: #fff; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .tp-slot .tp-prize { color: #4ade80; font-weight: 800; font-size: 13px; margin-top: 4px; }
         .tp-slot .tp-kills { color: #9ca3af; font-size: 10px; margin-top: 2px; }
@@ -87,76 +87,25 @@
         .killer-row .kr-label { color: #c084fc; font-weight: 700; }
         .killer-row .kr-name { color: #fff; font-weight: 700; }
         .killer-row .kr-prize { color: #4ade80; font-weight: 800; }
-        .tourney-highlight { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; background: rgba(220,38,38,0.08); border-top: 1px solid rgba(220,38,38,0.2); color: #fca5a5; font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-        .tourney-highlight:hover { background: rgba(220,38,38,0.15); color: #fff; }
 
         /* ===== USER CHIP NAV ===== */
         .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
         #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
-        .user-chip {
-            display: flex; align-items: center; gap: 6px;
-            cursor: pointer; padding: 4px 8px 4px 4px;
-            border-radius: 999px;
-            background: rgba(124,58,237,.15);
-            border: 1px solid rgba(168,85,247,.35);
-            transition: background .2s;
-            user-select: none; -webkit-user-select: none;
-            -webkit-tap-highlight-color: rgba(168,85,247,.3);
-        }
+        .user-chip { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 999px; background: rgba(124,58,237,.15); border: 1px solid rgba(168,85,247,.35); transition: background .2s; user-select: none; -webkit-user-select: none; }
         .user-chip:hover { background: rgba(124,58,237,.3); }
         #chipToggle:checked ~ .user-chip { background: rgba(124,58,237,.35); }
-        .user-chip .avatar {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: linear-gradient(135deg,#6d28d9,#a855f7);
-            display: grid; place-items: center;
-            font-weight: 700; font-size: .78rem;
-            color: #fff; flex-shrink: 0;
-        }
-        .user-chip .uname {
-            color: #f5f3ff; font-weight: 700; font-size: .78rem;
-            max-width: 90px; overflow: hidden;
-            text-overflow: ellipsis; white-space: nowrap;
-        }
-        .user-chip .caret {
-            font-size: .5rem; color: #a8a3c9;
-            transition: transform .2s;
-        }
+        .user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#6d28d9,#a855f7); display: grid; place-items: center; font-weight: 700; font-size: .78rem; color: #fff; flex-shrink: 0; }
+        .user-chip .uname { color: #f5f3ff; font-weight: 700; font-size: .78rem; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chip .caret { font-size: .5rem; color: #a8a3c9; transition: transform .2s; }
         #chipToggle:checked ~ .user-chip .caret { transform: rotate(180deg); }
-        .user-menu {
-            position: absolute; top: calc(100% + 8px); right: 0;
-            background: #1a0b3d;
-            border: 1px solid rgba(168,85,247,.35);
-            border-radius: 12px; min-width: 210px; padding: 8px;
-            box-shadow: 0 12px 40px rgba(0,0,0,.55);
-            display: none; z-index: 100;
-        }
+        .user-menu { position: absolute; top: calc(100% + 8px); right: 0; background: #1a0b3d; border: 1px solid rgba(168,85,247,.35); border-radius: 12px; min-width: 210px; padding: 8px; box-shadow: 0 12px 40px rgba(0,0,0,.55); display: none; z-index: 100; }
         #chipToggle:checked ~ .user-menu { display: block; }
-        .user-menu a,
-        .user-menu .menu-btn {
-            display: flex; align-items: center; gap: 10px;
-            width: 100%; padding: 11px 14px;
-            border-radius: 8px;
-            color: #e9e5ff; text-decoration: none;
-            font-size: .85rem; font-weight: 600;
-            background: none; border: 0;
-            text-align: left; cursor: pointer; font-family: inherit;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .user-menu a:hover,
-        .user-menu .menu-btn:hover {
-            background: rgba(124,58,237,.25); color: #fff;
-        }
-        .user-menu .divider {
-            height: 1px; background: rgba(168,85,247,.25);
-            margin: 6px 4px; display: block;
-        }
+        .user-menu a, .user-menu .menu-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px; border-radius: 8px; color: #e9e5ff; text-decoration: none; font-size: .85rem; font-weight: 600; background: none; border: 0; text-align: left; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+        .user-menu a:hover, .user-menu .menu-btn:hover { background: rgba(124,58,237,.25); color: #fff; }
+        .user-menu .divider { height: 1px; background: rgba(168,85,247,.25); margin: 6px 4px; display: block; }
         .user-menu .menu-btn.danger { color: #fca5a5; }
         .user-menu .menu-btn.danger:hover { background: rgba(239,68,68,.2); }
-        .chip-backdrop {
-            position: fixed; inset: 0;
-            background: transparent;
-            display: none; z-index: 90;
-        }
+        .chip-backdrop { position: fixed; inset: 0; background: transparent; display: none; z-index: 90; }
         #chipToggle:checked ~ .chip-backdrop { display: block; }
         .user-chip, .user-menu { position: relative; z-index: 100; }
 
@@ -164,13 +113,8 @@
             .user-chip .uname { display: none; }
             .user-chip { padding: 3px 6px 3px 3px; gap: 4px; }
             .user-chip .avatar { width: 26px; height: 26px; font-size: .72rem; }
-            .user-menu {
-                min-width: 180px; padding: 6px;
-                max-width: calc(100vw - 20px);
-                right: 0;
-            }
-            .user-menu a,
-            .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
+            .user-menu { min-width: 180px; padding: 6px; max-width: calc(100vw - 20px); right: 0; }
+            .user-menu a, .user-menu .menu-btn { padding: 10px 12px; font-size: .82rem; }
         }
     </style>
 </head>
@@ -203,11 +147,7 @@
             <i class="fa-solid fa-gamepad text-blue-500 text-2xl flex-shrink-0"></i>
             <span class="text-lg font-bold text-white whitespace-nowrap">Nepal Gaming</span>
         </div>
-
-        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1">
-            <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
-        </button>
-
+        <button onclick="toggleMobileNav()" class="mobile-menu-toggle text-white text-2xl p-1"><i class="fa-solid fa-bars" id="hamburgerIcon"></i></button>
         <div id="mobileNav" class="mobile-nav-menu md:flex items-center gap-4 absolute md:static top-full left-0 right-0 md:bg-transparent bg-slate-900">
             <a href="index.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Home</a>
             <a href="tournaments.html" class="text-sm text-gray-300 hover:text-white transition px-3 py-2 md:py-0 rounded md:rounded-none hover:bg-gray-800 md:hover:bg-transparent">Tournaments</a>
@@ -403,7 +343,8 @@
 
         /* ---------- duplicate detection: Top Killer === 1st place ---------- */
         function normName(s) {
-            return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+            // Strips ALL spaces, dots, underscores, and special characters (e.g. "Pyro_Moon" === "PyroMoon")
+            return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         }
 
         function samePlayer(a, b) {
@@ -420,14 +361,16 @@
         function splitKiller(group) {
             const first     = group.find(w => rankNum(w.rank) === 1) || null;
             const killerRaw = group.find(w => isKillerRank(w.rank)) || null;
-            const isSameDoc = killerRaw && first && killerRaw === first;
-            // If it's the exact same document, do not treat it as a separate duplicate
-            const killerIsFirst = !!killerRaw && !!first && samePlayer(killerRaw, first) && !isSameDoc;
+            
+            // If the killer IS the first place winner (whether same doc or different doc with same name)
+            const killerIsFirst = !!killerRaw && !!first && (killerRaw === first || samePlayer(killerRaw, first));
+            
             return { first, killerRaw, killerIsFirst, killer: killerIsFirst ? null : killerRaw };
         }
 
         function dedupeGroup(group) {
             const { killerIsFirst, killerRaw, first } = splitKiller(group);
+            // Only filter out if it's a completely separate document
             return (killerIsFirst && killerRaw !== first) ? group.filter(w => w !== killerRaw) : group;
         }
 
@@ -492,7 +435,7 @@
 
                 const killerBadge = killerIsFirst
                     ? `<p class="text-[11px] font-bold mt-2" style="color:#c084fc;"><i class="fa-solid fa-crosshairs"></i> Also Top Killer${
-                          toNumber(killerRaw.prize || killerRaw.amount) > 0
+                          toNumber(killerRaw.prize || killerRaw.amount) > 0 && killerRaw !== r1
                               ? ` · Rs. ${toNumber(killerRaw.prize || killerRaw.amount).toLocaleString()}`
                               : ''
                       }</p>`
@@ -521,7 +464,7 @@
                     const r = rankNum(w.rank);
                     const isKiller = isKillerRank(w.rank);
                     const medal = isKiller ? iconKiller : r === 1 ? iconGold : r === 2 ? iconSilver : r === 3 ? iconBronze : iconAward;
-                    const rankLabel = isKiller ? 'Top Killer' : `Rank #${r || '—'}`;
+                    const rankLabel = r === 1 ? '1st Place' : r === 2 ? '2nd Place' : r === 3 ? '3rd Place' : (isKiller ? 'Top Killer' : 'Winner');
                     return `
                         <div class="winner-row">
                             <div class="text-3xl">${medal}</div>
@@ -561,8 +504,11 @@
                 return;
             }
             const name = playerName(w);
+            const r = rankNum(w.rank);
             const isKiller = isKillerRank(w.rank);
-            const label = isKiller ? 'Top Killer' : (rankNum(w.rank) === 1 ? 'Winner' : rankNum(w.rank) === 2 ? '2nd Place' : '3rd Place');
+            
+            // FIX: Prioritize 1st, 2nd, 3rd labels over the "Top Killer" label so Gold Card correctly says "Winner"
+            const label = r === 1 ? 'Winner' : r === 2 ? '2nd Place' : r === 3 ? '3rd Place' : (isKiller ? 'Top Killer' : 'Winner');
 
             el.className = `podium-live ${medalClass} ${orderCls}`;
             el.innerHTML = `
@@ -621,7 +567,6 @@
                 const groupRaw = byTournamentRaw[key];
                 const { killerRaw, killerIsFirst, first } = splitKiller(groupRaw);
                 
-                // FIX: Ensure the array doesn't become empty if the same document is both 1st and Killer
                 const w = (killerIsFirst && killerRaw !== first) ? groupRaw.filter(x => x !== killerRaw) : groupRaw;
                 
                 if (!w || !w.length) return '';
