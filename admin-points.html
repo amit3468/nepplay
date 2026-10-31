@@ -6,38 +6,27 @@
 <title>NEPPLAY — Admin Points Table</title>
 <style>
   :root {
-    --bg: #0a0618;
-    --purple: #7c3aed;
-    --purple-2: #a855f7;
-    --gold: #f59e0b;
-    --gold-2: #fbbf24;
-    --green: #22c55e;
-    --text: #f5f3ff;
-    --muted: #a8a3c9;
-    --border: rgba(168, 85, 247, 0.25);
-    --card: rgba(30, 18, 60, 0.75);
+    --bg: #0a0618; --purple: #7c3aed; --purple-2: #a855f7;
+    --gold: #f59e0b; --gold-2: #fbbf24; --green: #22c55e;
+    --text: #f5f3ff; --muted: #a8a3c9;
+    --border: rgba(168, 85, 247, 0.25); --card: rgba(30, 18, 60, 0.75);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #05030f;
-    color: var(--text);
-    min-height: 100vh;
-    padding: 20px;
-  }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05030f; color: var(--text); min-height: 100vh; padding: 20px; }
   .container { max-width: 1200px; margin: 0 auto; }
   
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   .header h1 { font-size: 1.5rem; font-weight: 900; color: #fff; }
   .header h1 span { color: var(--gold-2); }
   
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+  select { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(15,8,35,.8); color: #fff; font-weight: 700; outline: none; font-family: inherit; }
+  
   .btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: transform 0.15s; }
   .btn:hover { transform: translateY(-1px); }
   .btn.primary { background: linear-gradient(135deg, var(--purple), var(--purple-2)); color: #fff; }
   .btn.gold { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; }
   .btn.green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-  .btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
   
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
   .card h2 { font-size: 1.1rem; margin-bottom: 15px; color: #fff; border-bottom: 1px solid rgba(168,85,247,.25); padding-bottom: 10px; }
@@ -58,9 +47,7 @@
   .status-msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; font-weight: 700; font-size: 0.85rem; display: none; }
   .status-msg.success { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4); color: #4ade80; display: block; }
   .status-msg.error { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; display: block; }
-  
   .loading { text-align: center; padding: 40px; color: var(--muted); }
-  
   .leaderboard-table th { background: rgba(251,191,36,.15); color: var(--gold-2); }
   .leaderboard-table td { font-weight: 700; }
 </style>
@@ -70,10 +57,14 @@
 <div class="container">
   <div class="header">
     <h1>🏆 Admin <span>Points Table</span></h1>
-    <div style="font-size: 0.85rem; color: var(--muted);">FF Squad Points League — 18 Oct</div>
+    <div style="font-size: 0.85rem; color: var(--muted);">Select Tournament to Manage</div>
   </div>
 
   <div class="controls">
+    <select id="tournamentSelect" onchange="changeTournament()">
+      <option value="clash_squad_4v4">Tonight: Clash Squad 4v4</option>
+      <option value="ekMpxhrnT9NmzNKwQBxG">Tomorrow: Mega Sunday (Rs 7000)</option>
+    </select>
     <button class="btn primary" onclick="loadTeams()">🔄 Load Teams</button>
     <button class="btn green" onclick="saveAllScores()">💾 Save All Scores</button>
     <button class="btn gold" onclick="publishStandings()">📢 Publish Standings</button>
@@ -81,21 +72,20 @@
 
   <div id="statusMsg" class="status-msg"></div>
 
-  <!-- INPUT TABLE -->
   <div class="card">
-    <h2>📝 Enter Match Results (Map 1, 2, 3)</h2>
+    <h2>📝 Enter Match Results</h2>
     <div style="overflow-x: auto;">
       <table id="inputTable">
         <thead>
           <tr>
             <th>Team Name</th>
-            <th>Map 1 Place</th>
-            <th>Map 1 Kills</th>
-            <th>Map 2 Place</th>
-            <th>Map 2 Kills</th>
-            <th>Map 3 Place</th>
-            <th>Map 3 Kills</th>
-            <th>Penalty (-15/-3)</th>
+            <th>Match 1 Place</th>
+            <th>Match 1 Kills</th>
+            <th>Match 2 Place</th>
+            <th>Match 2 Kills</th>
+            <th>Match 3 Place</th>
+            <th>Match 3 Kills</th>
+            <th>Penalty</th>
             <th>Total Pts</th>
           </tr>
         </thead>
@@ -105,11 +95,11 @@
       </table>
     </div>
     <div style="margin-top: 15px; font-size: 0.78rem; color: var(--muted);">
-      💡 <b>Rules:</b> 1 Kill = 1 Pt | 1st=12, 2nd=9, 3rd=8, 4th=7, 5th=6, 6th=5, 7th=4, 8th=3, 9th=2, 10th=1, 11th/12th=0. Penalties: Banned Char (-12), Same Active Char (-10), Left spawn early (-3).
+      💡 <b>Rules:</b> 1 Kill = 1 Pt | 1st=12, 2nd=9, 3rd=8, 4th=7, 5th=6, 6th=5, 7th=4, 8th=3, 9th=2, 10th=1. <br>
+      <i>(For CS 4v4, if only playing 1 or 2 matches, leave the remaining maps blank).</i>
     </div>
   </div>
 
-  <!-- LEADERBOARD TABLE -->
   <div class="card">
     <h2>🏆 Live Leaderboard (Auto-Sorted)</h2>
     <div style="overflow-x: auto;">
@@ -120,7 +110,7 @@
             <th>Team Name</th>
             <th>Total Pts</th>
             <th>Kills</th>
-            <th>Booyahs</th>
+            <th>Wins (1st)</th>
           </tr>
         </thead>
         <tbody id="leaderboardBody">
@@ -133,7 +123,7 @@
 
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const cfg = {
     apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
@@ -146,12 +136,18 @@ const cfg = {
 const app = getApps().length ? getApps()[0] : initializeApp(cfg);
 const db = getFirestore(app);
 
-const TOURNAMENT_ID = 'squad22oct';
+let TOURNAMENT_ID = 'clash_squad_4v4';
 const PLACEMENT_PTS = {1:12, 2:9, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1, 11:0, 12:0};
 
 let teamsData = [];
 
-// ⭐ LOAD TEAMS FROM REGISTRATIONS (Fixed for Index Error)
+window.changeTournament = function() {
+    TOURNAMENT_ID = document.getElementById('tournamentSelect').value;
+    document.getElementById('inputBody').innerHTML = '<tr><td colspan="9" class="loading">⏳ Click "Load Teams" to fetch squads...</td></tr>';
+    document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="5" class="loading">Leaderboard will appear here...</td></tr>';
+    document.getElementById('statusMsg').className = 'status-msg';
+};
+
 window.loadTeams = async function() {
     const tbody = document.getElementById('inputBody');
     const status = document.getElementById('statusMsg');
@@ -159,40 +155,25 @@ window.loadTeams = async function() {
     status.className = 'status-msg';
     
     try {
-        // ⭐ Fetch ONLY by tournamentId to avoid Firestore index error
-        const snap = await getDocs(query(
-            collection(db, 'tournament_registrations'),
-            where('tournamentId', '==', TOURNAMENT_ID)
-        ));
-        
-        // ⭐ Filter confirmed teams locally
-        const confirmedTeams = snap.docs
-            .map(d => ({ id: d.id, ...d.data() }))
+        const snap = await getDocs(query(collection(db, 'tournament_registrations'), where('tournamentId', '==', TOURNAMENT_ID)));
+        const confirmedTeams = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .filter(t => {
                 const st = String(t.status || '').toLowerCase();
                 return st === 'confirmed' || st === 'approved';
             });
         
         if (confirmedTeams.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="loading">No confirmed teams found yet. Waiting for registrations.</td></tr>';
-            showStatus('⚠️ No confirmed teams yet. They will appear here once registrations are approved.', 'error');
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">No confirmed teams found yet.</td></tr>';
+            showStatus('⚠️ No confirmed teams yet.', 'error');
             return;
         }
 
         teamsData = confirmedTeams;
-        
-        // Try to load existing scores
         let existingScores = {};
         try {
-            const scoreSnap = await getDocs(query(
-                collection(db, 'tournament_scores'),
-                where('tournamentId', '==', TOURNAMENT_ID)
-            ));
-            scoreSnap.forEach(d => {
-                const data = d.data();
-                existingScores[data.registrationId] = data;
-            });
-        } catch (e) { console.warn('No existing scores found'); }
+            const scoreSnap = await getDocs(query(collection(db, 'tournament_scores'), where('tournamentId', '==', TOURNAMENT_ID)));
+            scoreSnap.forEach(d => { existingScores[d.data().registrationId] = d.data(); });
+        } catch (e) { console.warn('No existing scores'); }
 
         tbody.innerHTML = teamsData.map(t => {
             const teamName = t.teamName || t.captainName || 'Unknown Team';
@@ -205,9 +186,9 @@ window.loadTeams = async function() {
             return `
             <tr id="row_${t.id}">
                 <td style="font-weight:800; color:#fff;">
-    ${escapeHtml(teamName)}
-    <div style="font-size:0.75rem; color:#a8a3c9; font-weight:normal; margin-top:2px;">(IGN: ${escapeHtml(t.players && t.players[0] ? (typeof t.players[0] === 'string' ? t.players[0] : (t.players[0].ign || t.players[0].name || 'Unknown')) : (t.ign || t.captainName || 'Unknown'))})</div>
-</td>
+                    ${escapeHtml(teamName)}
+                    <div style="font-size:0.75rem; color:#a8a3c9; font-weight:normal; margin-top:2px;">(IGN: ${escapeHtml(t.players && t.players[0] ? (typeof t.players[0] === 'string' ? t.players[0] : (t.players[0].ign || t.players[0].name || 'Unknown')) : (t.ign || t.captainName || 'Unknown'))})</div>
+                </td>
                 <td><input type="number" min="1" max="12" placeholder="-" value="${m1.place}" onchange="calcRow('${t.id}')" id="m1_p_${t.id}"></td>
                 <td><input type="number" min="0" placeholder="0" value="${m1.kills}" onchange="calcRow('${t.id}')" id="m1_k_${t.id}"></td>
                 <td><input type="number" min="1" max="12" placeholder="-" value="${m2.place}" onchange="calcRow('${t.id}')" id="m2_p_${t.id}"></td>
@@ -220,18 +201,16 @@ window.loadTeams = async function() {
             `;
         }).join('');
         
-        // Calculate all totals immediately
         teamsData.forEach(t => calcRow(t.id));
         showStatus('✅ Teams loaded successfully!', 'success');
         
     } catch (e) {
-        console.error('Load error:', e);
-        tbody.innerHTML = '<tr><td colspan="9" class="loading" style="color:#fca5a5;">Error loading teams. Check console (F12).</td></tr>';
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="9" class="loading" style="color:#fca5a5;">Error loading teams.</td></tr>';
         showStatus('❌ Error: ' + e.message, 'error');
     }
 };
 
-// ⭐ CALCULATE SINGLE ROW
 window.calcRow = function(teamId) {
     const m1_p = parseInt(document.getElementById(`m1_p_${teamId}`).value) || 0;
     const m1_k = parseInt(document.getElementById(`m1_k_${teamId}`).value) || 0;
@@ -249,16 +228,9 @@ window.calcRow = function(teamId) {
     return total;
 };
 
-// ⭐ SAVE ALL SCORES TO FIRESTORE
 window.saveAllScores = async function() {
     const status = document.getElementById('statusMsg');
-    status.className = 'status-msg';
-    
-    if (teamsData.length === 0) {
-        showStatus('⚠️ No teams loaded. Click "Load Teams" first.', 'error');
-        return;
-    }
-
+    if (teamsData.length === 0) { showStatus('⚠️ No teams loaded.', 'error'); return; }
     showStatus('⏳ Saving scores...', 'success');
 
     try {
@@ -275,23 +247,17 @@ window.saveAllScores = async function() {
                 totalPoints: total,
                 updatedAt: new Date().toISOString()
             };
-            
-            const docId = `${TOURNAMENT_ID}_${t.id}`;
-            await setDoc(doc(db, 'tournament_scores', docId), data, { merge: true });
+            await setDoc(doc(db, 'tournament_scores', `${TOURNAMENT_ID}_${t.id}`), data, { merge: true });
         }
-        
-        showStatus('✅ All scores saved to Firestore!', 'success');
+        showStatus('✅ All scores saved!', 'success');
         renderLeaderboard();
     } catch (e) {
-        console.error('Save error:', e);
-        showStatus('❌ Error saving: ' + e.message, 'error');
+        showStatus('❌ Error: ' + e.message, 'error');
     }
 };
 
-// ⭐ RENDER LEADERBOARD (SORTED)
 window.renderLeaderboard = function() {
     const tbody = document.getElementById('leaderboardBody');
-    
     const scores = teamsData.map(t => {
         const m1_k = parseInt(document.getElementById(`m1_k_${t.id}`).value) || 0;
         const m2_k = parseInt(document.getElementById(`m2_k_${t.id}`).value) || 0;
@@ -299,7 +265,6 @@ window.renderLeaderboard = function() {
         const m1_p = parseInt(document.getElementById(`m1_p_${t.id}`).value) || 0;
         const m2_p = parseInt(document.getElementById(`m2_p_${t.id}`).value) || 0;
         const m3_p = parseInt(document.getElementById(`m3_p_${t.id}`).value) || 0;
-        
         return {
             name: t.teamName || t.captainName || 'Unknown',
             total: parseInt(document.getElementById(`total_${t.id}`).innerText) || 0,
@@ -308,7 +273,6 @@ window.renderLeaderboard = function() {
         };
     });
 
-    // Sort: Total Points -> Booyahs -> Kills
     scores.sort((a, b) => {
         if (b.total !== a.total) return b.total - a.total;
         if (b.booyahs !== a.booyahs) return b.booyahs - a.booyahs;
@@ -317,28 +281,15 @@ window.renderLeaderboard = function() {
 
     tbody.innerHTML = scores.map((s, i) => {
         const rank = i + 1;
-        let rankClass = '';
-        let rankIcon = rank;
+        let rankClass = '', rankIcon = rank;
         if (rank === 1) { rankClass = 'rank-1'; rankIcon = '🥇'; }
         else if (rank === 2) { rankClass = 'rank-2'; rankIcon = '🥈'; }
         else if (rank === 3) { rankClass = 'rank-3'; rankIcon = '🥉'; }
-        
-        return `
-            <tr>
-                <td class="${rankClass}">${rankIcon}</td>
-                <td style="color:#fff;">${escapeHtml(s.name)}</td>
-                <td class="total-cell">${s.total}</td>
-                <td>${s.kills}</td>
-                <td>${s.booyahs}</td>
-            </tr>
-        `;
+        return `<tr><td class="${rankClass}">${rankIcon}</td><td style="color:#fff;">${escapeHtml(s.name)}</td><td class="total-cell">${s.total}</td><td>${s.kills}</td><td>${s.booyahs}</td></tr>`;
     }).join('');
 };
 
-// ⭐ PUBLISH STANDINGS (Save sorted list for member side)
 window.publishStandings = async function() {
-    const status = document.getElementById('statusMsg');
-    
     const scores = teamsData.map(t => ({
         name: t.teamName || t.captainName || 'Unknown',
         total: parseInt(document.getElementById(`total_${t.id}`).innerText) || 0,
@@ -358,7 +309,7 @@ window.publishStandings = async function() {
             publishedAt: new Date().toISOString(),
             standings: scores
         });
-        showStatus('📢 Standings published! Members can now see the final results.', 'success');
+        showStatus('📢 Standings published! Players can now see the live table.', 'success');
     } catch (e) {
         showStatus('❌ Error publishing: ' + e.message, 'error');
     }
@@ -366,18 +317,12 @@ window.publishStandings = async function() {
 
 function showStatus(msg, type) {
     const el = document.getElementById('statusMsg');
-    el.textContent = msg;
-    el.className = 'status-msg ' + type;
+    el.textContent = msg; el.className = 'status-msg ' + type;
     setTimeout(() => { el.className = 'status-msg'; }, 5000);
 }
-
 function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[c]));
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
-
-// Auto-load on page open
 window.addEventListener('DOMContentLoaded', loadTeams);
 </script>
 </body>
