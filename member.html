@@ -758,6 +758,67 @@
     .quick-actions { grid-template-columns: 1fr; }
     .earn-card .ec-value { font-size: 0.9rem; }
   }
+  /* ⭐ DASHING WELCOME CARD */
+  .welcome-card {
+    background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(20,12,45,.95) 60%, rgba(168,85,247,.15));
+    border: 1px solid rgba(168,85,247,.5);
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 12px 40px rgba(124,58,237,.2), inset 0 0 0 1px rgba(255,255,255,0.05);
+    animation: welcomeFadeIn 0.6s ease-out both;
+  }
+  @keyframes welcomeFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .welcome-card::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(251,191,36,.2), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .welcome-card .wc-content { position: relative; z-index: 1; max-width: 650px; }
+  .welcome-card .wc-badge {
+    display: inline-block; padding: 5px 12px; border-radius: 999px;
+    font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a0b3d; margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(251,191,36,.3);
+  }
+  .welcome-card h2 {
+    font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 8px;
+  }
+  .welcome-card h2 span { color: #fbbf24; text-shadow: 0 0 15px rgba(251,191,36,.4); }
+  .welcome-card p { font-size: 0.9rem; color: #d8b4fe; line-height: 1.5; margin-bottom: 16px; }
+  .welcome-card .wc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .welcome-card .wc-tag {
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    padding: 5px 10px; border-radius: 8px; font-size: 0.72rem; color: #e9e5ff; font-weight: 700;
+  }
+  .welcome-card .wc-action {
+    position: relative; z-index: 1; flex-shrink: 0;
+  }
+  .welcome-card .wc-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff;
+    padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 0.95rem;
+    text-decoration: none; box-shadow: 0 8px 24px rgba(124,58,237,.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .welcome-card .wc-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(124,58,237,.7); }
+
+  @media (max-width: 720px) {
+    .welcome-card { padding: 20px; text-align: center; justify-content: center; }
+    .welcome-card .wc-content { display: flex; flex-direction: column; align-items: center; }
+    .welcome-card h2 { font-size: 1.4rem; }
+    .welcome-card .wc-tags { justify-content: center; }
+    .welcome-card .wc-btn { width: 100%; justify-content: center; }
+  }
 </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -825,6 +886,25 @@
 </nav>
 
 <div class="container">
+  <div class="container">
+
+  <!-- ⭐ DASHING WELCOME CARD -->
+  <div class="welcome-card">
+    <div class="wc-content">
+      <div class="wc-badge">👑 Nepal's #1 Esports Platform</div>
+      <h2>Welcome back, <span id="welcomeName">Player</span>!</h2>
+      <p>Ready to dominate the leaderboard? Register for daily paid tournaments, track your stats, and withdraw your winnings instantly to your wallet.</p>
+      <div class="wc-tags">
+        <div class="wc-tag">⚡ Instant Payouts</div>
+        <div class="wc-tag">🔥 Daily Tournaments</div>
+        <div class="wc-tag">💳 Wallet Supported</div>
+        <div class="wc-tag">🏆 Rs 7,000 Mega Sunday</div>
+      </div>
+    </div>
+    <div class="wc-action">
+      <a href="/tournaments.html" class="wc-btn">🎮 Play Now</a>
+    </div>
+  </div>
 
   <!-- ⭐ REGISTRATION CONFIRMED CARD -->
   <div id="regConfirmedCard" class="reg-confirmed">
@@ -1367,7 +1447,9 @@ onAuthStateChanged(auth, async (user) => {
         }
     } catch (e) {}
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
-    if (nameEl) nameEl.textContent = display;
+    if (nameEl) nameEl.textContent = display;    const welcomeNameEl = document.getElementById("welcomeName");
+    if (welcomeNameEl) welcomeNameEl.textContent = display;
+  
 
     if (currentUsername) {
         const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(currentUsername);
