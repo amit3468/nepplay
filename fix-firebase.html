@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Auto-Fixer</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #0a0618; color: white; text-align: center; }
+        .btn { padding: 15px 30px; background: #22c55e; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; margin-top: 20px; width: 100%; }
+        #log { margin-top: 20px; text-align: left; background: #15172b; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 14px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <h2>⚡ NEPPLAY Firebase Fixer ⚡</h2>
+    <p>Tap the button below to update tonight and tomorrow's matches automatically.</p>
+    <button class="btn" onclick="fixDatabase()" id="fixBtn">UPDATE FIREBASE NOW</button>
+    <div id="log"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDydTDF5_DOC3BDH6YAbkcNu_NT0qmRcTc",
+            authDomain: "nepplaygaming.firebaseapp.com",
+            projectId: "nepplaygaming",
+            storageBucket: "nepplaygaming.firebasestorage.app",
+            messagingSenderId: "893565645520",
+            appId: "1:893565645520:web:09d4cb4069dae55d6ee4d5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const logEl = document.getElementById('log');
+
+        function log(msg) {
+            logEl.innerHTML += `<div>👉 ${msg}</div>`;
+        }
+
+        window.fixDatabase = async function() {
+            const btn = document.getElementById('fixBtn');
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+            logEl.innerHTML = "";
+
+            try {
+                log("Adding Tonight's CS 4v4...");
+                await setDoc(doc(db, "tournaments", "cs_4v4_nov4"), {
+                    title: "Clash Squad 4v4",
+                    game: "Free Fire",
+                    mode: "Squad",
+                    date: "2026-11-04",
+                    time: "21:00",
+                    status: "upcoming",
+                    entryFee: 80,
+                    prizePool: 250
+                });
+                log("✅ Added cs_4v4_nov4");
+
+                log("Adding Tomorrow's Squad Fullmap...");
+                await setDoc(doc(db, "tournaments", "squad_fullmap_nov5"), {
+                    title: "FF Squad — Full Map",
+                    game: "Free Fire",
+                    mode: "Squad",
+                    date: "2026-11-05",
+                    time: "21:00",
+                    status: "upcoming",
+                    entryFee: 80,
+                    prizePool: 250
+                });
+                log("✅ Added squad_fullmap_nov5");
+
+                log("Updating Mega Sunday to Nov 6th...");
+                await setDoc(doc(db, "tournaments", "ekMpxhrnT9NmzNKwQBxG"), {
+                    date: "2026-11-06"
+                }, { merge: true });
+                log("✅ Updated Mega Sunday Date");
+
+                log("🎉 ALL DONE! Check your platform now.");
+                btn.innerText = "Success!";
+                btn.style.background = "#16a34a";
+                
+            } catch (e) {
+                console.error(e);
+                log(`❌ ERROR: ${e.message}`);
+                btn.innerText = "Failed. Try Again.";
+                btn.disabled = false;
+                btn.style.background = "#ef4444";
+            }
+        };
+    </script>
+</body>
+</html>
