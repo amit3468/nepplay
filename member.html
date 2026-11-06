@@ -819,6 +819,119 @@
     .welcome-card .wc-tags { justify-content: center; }
     .welcome-card .wc-btn { width: 100%; justify-content: center; }
   }
+<style>
+  /* ============ SOLO CHAMPIONSHIP CARD ============ */
+  .solo-champ-card {
+    background: linear-gradient(135deg, #1a0b2e 0%, #3d0a1c 100%);
+    border: 2px solid #ff8c00;
+    border-radius: 18px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(255, 140, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+  .solo-champ-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 60%);
+    animation: pulseGlow 4s infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes pulseGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.05); }
+  }
+  .solo-champ-badge {
+    background: #ff4500;
+    color: #fff;
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.6);
+    position: relative;
+    z-index: 2;
+  }
+  .solo-champ-title {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin: 0 0 5px;
+    text-shadow: 0 2px 10px rgba(255,215,0,0.5);
+    line-height: 1.15;
+    position: relative;
+    z-index: 2;
+  }
+  .solo-champ-subtitle {
+    color: #fbbf24;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+  }
+  .solo-prize-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+  }
+  @media (max-width: 500px) {
+    .solo-prize-grid { grid-template-columns: 1fr; }
+  }
+  .solo-prize-item {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .prize-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .prize-label { font-size: 0.65rem; color: #d1d5db; text-transform: uppercase; font-weight: 800; margin-bottom: 2px;}
+  .prize-value { font-size: 1.1rem; color: #fff; font-weight: 900; }
+  .solo-champ-btn {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 15px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    color: #fff;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+    transition: transform 0.2s;
+    position: relative;
+    z-index: 2;
+  }
+  .solo-champ-btn:hover { transform: scale(1.02); }
+  .solo-champ-footer {
+    color: #9ca3af;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+  }
+</style>
 </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1091,6 +1204,36 @@
   <a href="/registration.html?tournamentId=ekMpxhrnT9NmzNKwQBxG" style="display:block; text-decoration:none; text-align:center; padding:16px; border-radius:12px; font-weight:900; color:#fff; background:linear-gradient(135deg,#ef4444,#f97316); box-shadow:0 6px 20px rgba(239,68,68,.5); letter-spacing:0.5px;">🔥 SECURE YOUR SLOT NOW</a>
 </div>
 
+    <!-- ⭐ NEPPLAY SOLO CHAMPIONSHIP -->
+<div class="solo-champ-card">
+  <div class="solo-champ-badge">🔥 1st Edition</div>
+  <h2 class="solo-champ-title">NEPPLAY SOLO CHAMPIONSHIP</h2>
+  <p class="solo-champ-subtitle">🎮 FREE FIRE SOLO TOURNAMENT 🇳🇵</p>
+  
+  <div class="solo-prize-grid">
+    <div class="solo-prize-item">
+      <span class="prize-icon">🥇</span>
+      <span class="prize-label">1st Prize</span>
+      <span class="prize-value">Rs. 500</span>
+    </div>
+    <div class="solo-prize-item">
+      <span class="prize-icon">👑</span>
+      <span class="prize-label">MVP</span>
+      <span class="prize-value">Rs. 450</span>
+    </div>
+    <div class="solo-prize-item">
+      <span class="prize-icon">💀</span>
+      <span class="prize-label">Top Killer</span>
+      <span class="prize-value">Rs. 10/Kill</span>
+    </div>
+  </div>
+  
+  <a href="https://wa.me/9779816023400" target="_blank" class="solo-champ-btn">
+    📲 SECURE YOUR SLOT NOW
+  </a>
+  
+  <p class="solo-champ-footer">ONE PLAYER. ONE LOBBY. ONE CHAMPION! 👑</p>
+</div>
     <!-- ⭐ TODAY (06 NOV) · 2:00 PM DUO -->
 <div class="tomorrow-card" style="border-color:rgba(59,130,246,.6); background:linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95));">
   <span class="tc-tag" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">📅 TODAY (06 NOV) · 2:00 PM</span>
