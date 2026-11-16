@@ -86,6 +86,28 @@
   .nav-links > a.active { color: var(--gold-2); }
   .nav-links > a.winners-link { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
   .nav-links > a.store-link { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
+  
+  .nav-links > a.predictions-link {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+    animation: pulsePrediction 2s infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  @keyframes pulsePrediction {
+    0% { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 22px rgba(236, 72, 153, 0.9); transform: scale(1.05); }
+    100% { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); transform: scale(1); }
+  }
 
   .bell-wrap { position: relative; flex-shrink: 0; margin-right: 6px; }
   .bell-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(124,58,237,.15); border: 1px solid rgba(168,85,247,.35); display: grid; place-items: center; cursor: pointer; color: #f5f3ff; font-size: 0.95rem; position: relative; transition: background 0.15s; }
@@ -981,7 +1003,7 @@
     <a href="/tournaments.html">Tournaments</a>
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
     <a href="/store.html" class="store-link">🛒 Store</a>
-    <a href="/teams.html">Teams</a>
+    <a href="/predictions.html" class="predictions-link">🔮 Predictions</a>
     <a href="/support.html">Support</a>
 
     <div class="bell-wrap">
@@ -1316,7 +1338,6 @@
     <div style="font-size:0.9rem; color:#e9e5ff; line-height:1.8;">
       🥇 <b style="color:#fbbf24;">1st Place: Rs 150</b><br>
       💀 <b style="color:#fca5a5;">Top Killer: Rs 30 (Flat)</b>
-
     </div>
   </div>
 
@@ -1457,10 +1478,7 @@ window.dismissRegConfirmed = function() {
   <script>
   // ⭐ MEGA SUNDAY COUNTDOWN TIMER
   function startMegaCountdown() {
-    // Target Date: Nov 1, 2026 at 21:00 (9:00 PM) Nepal Time
     const targetDate = new Date("2026-11-05T21:00:00+05:45").getTime();
-
-
     const timer = setInterval(function() {
       const now = new Date().getTime();
       const distance = targetDate - now;
@@ -1476,7 +1494,6 @@ window.dismissRegConfirmed = function() {
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
       const format = (num) => String(num).padStart(2, '0');
 
       const dEl = document.getElementById("cd-days");
@@ -1492,8 +1509,6 @@ window.dismissRegConfirmed = function() {
       }
     }, 1000);
   }
-
-  // Start the timer when the page loads
   document.addEventListener('DOMContentLoaded', startMegaCountdown);
 </script>
 
@@ -1518,7 +1533,6 @@ const db   = getFirestore(app);
 const auth = getAuth(app);
 
 const POPULAR_GAMES = ['free fire', 'pubg', 'ludo'];
-
 
 const GAME_ALIASES = {
   'freefire':'freefire','free fire':'freefire','ff':'freefire',
@@ -1637,7 +1651,6 @@ onAuthStateChanged(auth, async (user) => {
         const uDoc = await getDoc(doc(db, "users", user.uid));
         if (uDoc.exists()) {
             profile = uDoc.data();
-                      // ⭐ Load Wallet Balance
             const wb = Number(profile.walletBalance || 0);
             const wbEl = document.getElementById('walletBalanceDisplay');
             if (wbEl) wbEl.textContent = 'Rs. ' + wb.toLocaleString();
@@ -1646,10 +1659,10 @@ onAuthStateChanged(auth, async (user) => {
         }
     } catch (e) {}
     if (avatar) avatar.textContent = (display[0] || "?").toUpperCase();
-    if (nameEl) nameEl.textContent = display;    const welcomeNameEl = document.getElementById("welcomeName");
+    if (nameEl) nameEl.textContent = display;    
+    const welcomeNameEl = document.getElementById("welcomeName");
     if (welcomeNameEl) welcomeNameEl.textContent = display;
   
-
     if (currentUsername) {
         const refUrl = window.location.origin + '/register.html?u=' + encodeURIComponent(currentUsername);
         const inp = document.getElementById('refLinkInput');
@@ -1744,7 +1757,6 @@ onAuthStateChanged(auth, async (user) => {
     loadBellNotifications(user.uid);
 });
 
-// ⭐ REGISTRATION CONFIRMED CARD
 async function loadRegConfirmedCard(uid) {
     const card = document.getElementById('regConfirmedCard');
     const bodyEl = document.getElementById('rcBody');
@@ -1764,7 +1776,6 @@ async function loadRegConfirmedCard(uid) {
             latest = { id: snap.docs[0].id, ...snap.docs[0].data() };
         }
     } catch (e) {
-        console.warn('[regConfirmed] query failed:', e && e.message);
         try {
             const snap = await getDocs(query(
                 collection(db, 'tournament_registrations'),
@@ -1774,14 +1785,12 @@ async function loadRegConfirmedCard(uid) {
                 .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0));
             if (arr.length) latest = arr[0];
         } catch (e2) {
-            console.warn('[regConfirmed] fallback failed:', e2 && e2.message);
             return;
         }
     }
 
     if (!latest) return;
 
-    // Check if user dismissed this specific registration
     try {
         if (localStorage.getItem('nep_reg_dismissed_' + latest.id) === '1') {
             card.classList.remove('show');
@@ -1789,10 +1798,8 @@ async function loadRegConfirmedCard(uid) {
         }
     } catch (e) {}
 
-    // Store the id for the dismiss handler
     window.__regConfirmedId = latest.id;
 
-    // Build the details
     const title = latest.tournamentTitle || latest.game || 'Tournament';
     const playingAs = String(latest.mode || latest.playingAs || '').toLowerCase();
     const tourMode  = String(latest.tournamentMode || '').toLowerCase();
@@ -1800,7 +1807,7 @@ async function loadRegConfirmedCard(uid) {
     let modeLabel, modeCls;
     if (tourMode === '1v1' || playingAs === '1v1') {
         modeLabel = '1 vs 1';
-        modeCls   = 'solo';       // reuse the green pill style
+        modeCls   = 'solo';
     } else if (playingAs === 'solo') {
         modeLabel = 'Solo';
         modeCls   = 'solo';
@@ -1825,7 +1832,6 @@ async function loadRegConfirmedCard(uid) {
                       : status === 'rejected' ? '#f87171'
                       : '#fbbf24';
 
-    // Update the pill
     if (pillEl) {
         pillEl.textContent = statusLabel;
         pillEl.style.background = statusColor + '40';
@@ -1833,7 +1839,6 @@ async function loadRegConfirmedCard(uid) {
         pillEl.style.borderColor = statusColor;
     }
 
-    // Build body rows
     bodyEl.innerHTML = `
         <div class="rc-row">
             <span class="rc-k">🏆 Tournament</span>
@@ -1859,7 +1864,6 @@ async function loadRegConfirmedCard(uid) {
         </div>
     `;
 
-    // Update note based on status
     if (noteEl) {
         if (status === 'rejected') {
             noteEl.innerHTML = '❌ This registration was rejected. Contact admin if you think this is a mistake.';
@@ -1873,7 +1877,6 @@ async function loadRegConfirmedCard(uid) {
     card.classList.add('show');
 }
 
-// ========== ANNOUNCEMENTS ==========
 async function loadAnnouncements() {
     const stack = document.getElementById('announcementStack');
     if (!stack) return;
@@ -1888,13 +1891,11 @@ async function loadAnnouncements() {
         ));
         docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
-        console.warn('[announcements] indexed query failed:', e && e.message);
         try {
             const snap = await getDocs(collection(db, 'announcements'));
             docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
                 .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         } catch (e2) {
-            console.warn('[announcements] fallback failed:', e2 && e2.message);
             return;
         }
     }
@@ -1938,7 +1939,6 @@ async function loadAnnouncements() {
     }).join('');
 }
 
-// ========== MY MATCHES ==========
 async function loadMyMatches(uid) {
     const listEl = document.getElementById("myMatchesList");
     const secEl  = document.getElementById("myMatchesSection");
@@ -1954,7 +1954,6 @@ async function loadMyMatches(uid) {
             if (!seen.has(d.id)) { seen.add(d.id); matches.push({ id: d.id, ...d.data() }); }
         });
     } catch (e) {
-        console.warn("[mymatches] query failed:", e && e.message);
         secEl.hidden = true;
         return;
     }
@@ -2044,7 +2043,6 @@ async function loadMyMatches(uid) {
     secEl.hidden = false;
 }
 
-// ========== MY REGISTRATIONS ==========
 async function loadMyRegistrations(uid) {
     const listEl = document.getElementById("myRegsList");
     const secEl  = document.getElementById("myRegsSection");
@@ -2060,7 +2058,6 @@ async function loadMyRegistrations(uid) {
         ));
         docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
-        console.warn("[myregs] query failed:", e && e.message);
         try {
             const snap = await getDocs(query(
                 collection(db, "tournament_registrations"),
@@ -2070,7 +2067,6 @@ async function loadMyRegistrations(uid) {
                 .sort((a, b) => (b.registeredAt?.seconds||0) - (a.registeredAt?.seconds||0))
                 .slice(0, 6);
         } catch (e2) {
-            console.warn("[myregs] fallback failed:", e2 && e2.message);
             listEl.innerHTML = 'Could not load your registrations right now.';
             secEl.hidden = false;
             return [];
@@ -2083,10 +2079,8 @@ async function loadMyRegistrations(uid) {
         return [];
     }
 
-    // ⭐ NEW: fetch tournament docs for each confirmed registration
-    // to get room details
     const now = Date.now();
-    const tourCache = {};       // tournamentId -> tournament data
+    const tourCache = {};
     for (const r of docs) {
         const st = String(r.status || '').toLowerCase();
         const isConfirmed = (st === 'confirmed' || st === 'approved');
@@ -2096,7 +2090,6 @@ async function loadMyRegistrations(uid) {
             const tSnap = await getDoc(doc(db, 'tournaments', tId));
             tourCache[tId] = tSnap.exists() ? tSnap.data() : null;
         } catch (err) {
-            console.warn('[myregs] tournament fetch failed for', tId, err);
             tourCache[tId] = null;
         }
     }
@@ -2112,7 +2105,6 @@ async function loadMyRegistrations(uid) {
         if (title) myRegisteredTitles.add(String(title).toLowerCase());
         if (r.tournamentId) myRegisteredTitles.add(String(r.tournamentId).toLowerCase());
 
-        // ⭐ Build the room details block (if confirmed + tournament + revealed)
         let roomHtml = '';
         const isConfirmed = (String(status).toLowerCase() === 'confirmed' || String(status).toLowerCase() === 'approved');
         const t = r.tournamentId ? tourCache[r.tournamentId] : null;
@@ -2169,7 +2161,6 @@ async function loadMyRegistrations(uid) {
     return docs.map(r => String(r.tournamentTitle || r.tournamentId || "").toLowerCase());
 }
 
-// ========== UPCOMING ==========
 async function loadUpcomingTournaments(uid) {
     const secEl = document.getElementById("upcomingSection");
     const content = document.getElementById("upcomingContent");
@@ -2185,7 +2176,6 @@ async function loadUpcomingTournaments(uid) {
         ));
         docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
-        console.warn("[upcoming] indexed query failed:", e && e.message);
         try {
             const snap = await getDocs(collection(db, "tournaments"));
             docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -2205,7 +2195,6 @@ async function loadUpcomingTournaments(uid) {
     const night = [];
     const other = [];
         docs.forEach(t => {
-        // ⭐ Skip Free Fire — shown in hardcoded card at top
         if (gameKey(t.game) === 'freefire') return;
 
         if (t.isTonight === true) { tonight.push(t); return; }
@@ -2409,7 +2398,6 @@ function renderGameCard(group, opts = {}) {
     `;
 }
 
-// ========== BELL ==========
 window.copyReferralLink = function() {
     const inp = document.getElementById('refLinkInput');
     if (!inp) return;
@@ -2458,7 +2446,6 @@ async function loadBellNotifications(uid) {
         }
         renderBellList(uid);
     } catch (e) {
-        console.warn('loadBellNotifications error:', e);
         listEl.innerHTML = '<div class="bell-empty">Could not load notifications</div>';
     }
 }
@@ -2554,7 +2541,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btn) btn.addEventListener('click', window.toggleBell);
     loadAnnouncements();
 });
-// ============ MY WEEKLY BONUS WIDGET ============
 function wbGetWeekIdM(date) {
     date = date || new Date();
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -2648,7 +2634,6 @@ async function loadMyWeeklyBonus(uid) {
 </script>
 
 <script type="module">
-// ⭐ VISITOR TRACKER
 (async () => {
   try {
     const { getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
@@ -2697,10 +2682,8 @@ async function loadMyWeeklyBonus(uid) {
 </script>
 <script>
 (function () {
-  // Nepal timezone: UTC+5:45
   function setHeroDate() {
     const now = new Date();
-    // Convert to NPT by adding the offset
     const nptMs = now.getTime() + (5 * 60 + 45) * 60 * 1000;
     const npt = new Date(nptMs);
 
@@ -2719,8 +2702,6 @@ async function loadMyWeeklyBonus(uid) {
   }
 
   setHeroDate();
-
-  // Re-check every 5 minutes in case user keeps the tab open past midnight
   setInterval(setHeroDate, 5 * 60 * 1000);
 })();
 </script>
