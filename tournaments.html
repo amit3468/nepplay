@@ -87,6 +87,28 @@
   .nav-links > a.active { color: var(--gold-2); }
   .nav-links > a.winners-link { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
   .nav-links > a.store-link { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff !important; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; }
+  
+  .nav-links > a.predictions-link {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+    animation: pulsePrediction 2s infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  @keyframes pulsePrediction {
+    0% { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 22px rgba(236, 72, 153, 0.9); transform: scale(1.05); }
+    100% { box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); transform: scale(1); }
+  }
 
   .user-chip-wrap { position: relative; flex-shrink: 0; }
   #chipToggle { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
@@ -393,9 +415,7 @@
   @media (max-width: 380px) {
     .nav-links > a.winners-link, .nav-links > a.store-link { padding: 3px 6px; font-size: 0.62rem; }
     .user-chip .avatar { width: 24px; height: 24px; font-size: 0.68rem; }
-    }
-</style>
-
+  }
 <style>
   /* ============ SOLO CHAMPIONSHIP CARD ============ */
   .solo-champ-card {
@@ -557,7 +577,7 @@
     <a href="/tournaments.html" class="active">Tournaments</a>
     <a href="/winners.html" class="winners-link">🏆 Winners</a>
     <a href="/store.html" class="store-link">🛒 Store</a>
-        <a href="/teams.html">Teams</a>
+    <a href="/predictions.html" class="predictions-link">🔮 Predictions</a>
     <a href="/support.html">Support</a>
     <a href="https://discord.gg/43bmxybpkm" target="_blank" rel="noopener" style="color:#7289da;font-weight:700;">Discord</a>
 
@@ -649,72 +669,71 @@
     </div>
     
     <!-- ⭐ TODAY (16 NOV) · 8:00 PM SOLO -->
-<div class="tomorrow-card" style="border: 2px solid rgba(168,85,247,.6); background: linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95)); padding: 22px 24px; border-radius: 18px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px;">
-  <span style="background: linear-gradient(135deg,#a855f7,#7c3aed); display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: #fff; width: fit-content;">📅 TODAY (16 NOV) · 8:00 PM</span>
-  
-  <div style="font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1.15;">FF Solo Fullmap</div>
-  <div style="font-size: 0.85rem; color: #a8a3c9; margin-top: -6px;">👤 Solo players · Bermuda · Real cash</div>
-  
-  <div style="background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <div style="font-weight: 900; color: #d8b4fe; font-size: 0.95rem;">🔥 FREE FIRE — SOLO</div>
-      <div style="font-size: 0.72rem; color: #a8a3c9;">Entry <b style="color: #fff;">Rs 40</b></div>
-    </div>
-    <a href="/registration.html?tournamentId=solo_8pm_nov16" style="display: block; text-decoration: none; text-align: center; padding: 16px 20px; border-radius: 12px; font-weight: 900; font-size: 1rem; color: #ffffff; background: linear-gradient(135deg,#a855f7,#7c3aed); box-shadow: 0 6px 20px rgba(168,85,247,.5); margin-top: 12px; letter-spacing: 0.5px;">🏆 REGISTER NOW — Rs 40</a>
-  </div>
+    <div class="tomorrow-card" style="border-color:rgba(168,85,247,.6); background:linear-gradient(180deg, rgba(168,85,247,.12), rgba(20,12,45,.95)); margin-bottom:26px;">
+      <span class="tc-tag" style="background:linear-gradient(135deg,#a855f7,#7c3aed);">📅 TODAY (16 NOV) · 8:00 PM</span>
+      <div class="tc-title">FF Solo Fullmap</div>
+      <div class="tc-sub">👤 Solo players · Bermuda · Real cash</div>
+      
+      <div style="background:linear-gradient(135deg, rgba(168,85,247,.12), rgba(20,12,45,.85)); border:1px solid rgba(168,85,247,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:900; color:#d8b4fe; font-size:0.95rem;">🔥 FREE FIRE — SOLO</div>
+          <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 40</b></div>
+        </div>
+        <a href="/registration.html?tournamentId=solo_8pm_nov16" style="display:block; text-decoration:none; text-align:center; padding:16px 20px; border-radius:12px; font-weight:900; font-size:1rem; color:#ffffff; background:linear-gradient(135deg,#a855f7,#7c3aed); box-shadow:0 6px 20px rgba(168,85,247,.5); margin-top:12px; letter-spacing:0.5px;">🏆 REGISTER NOW — Rs 40</a>
+      </div>
 
-  <div style="background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="font-weight: 900; color: #4ade80; font-size: 0.88rem; margin-bottom: 8px;">🏆 PRIZES</div>
-    <div style="font-size: 0.9rem; color: #e9e5ff; line-height: 1.8;">
-      🥇 <b style="color: #fbbf24;">1st Place: Rs 150</b><br>
-      💀 <b style="color: #fca5a5;">Top Killer: Rs 30 (Flat)</b>
-    </div>
-  </div>
+      <div style="background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="font-weight:900; color:#4ade80; font-size:0.88rem; margin-bottom:8px;">🏆 PRIZES</div>
+        <div style="font-size:0.9rem; color:#e9e5ff; line-height:1.8;">
+          🥇 <b style="color:#fbbf24;">1st Place: Rs 150</b><br>
+          💀 <b style="color:#fca5a5;">Top Killer: Rs 30 (Flat)</b>
+        </div>
+      </div>
 
-  <div style="background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="font-weight: 900; color: #fca5a5; font-size: 0.88rem; margin-bottom: 8px;">📜 RULES</div>
-    <div style="font-size: 0.82rem; color: #e9e5ff; line-height: 1.6;">
-      • Character Skills ON<br>
-      • Gun Attributes OFF<br>
-      • No teaming, no hacking.
+      <div style="background:linear-gradient(135deg, rgba(239,68,68,.12), rgba(20,12,45,.85)); border:1px solid rgba(239,68,68,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="font-weight:900; color:#fca5a5; font-size:0.88rem; margin-bottom:8px;">📜 RULES</div>
+        <div style="font-size:0.82rem; color:#e9e5ff; line-height:1.6;">
+          • Character Skills ON<br>
+          • Gun Attributes OFF<br>
+          • No teaming, no hacking.
+        </div>
+      </div>
+      <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">⏰ Reg closes 7:45 PM · 🔑 Room 7:50 PM · 🚀 Match 8:00 PM</div>
     </div>
-  </div>
-  <div style="font-size: 0.75rem; color: #a8a3c9; text-align: center; margin-top: 8px; line-height: 1.5;">⏰ Reg closes 7:45 PM · 🔑 Room 7:50 PM · 🚀 Match 8:00 PM</div>
-</div>
 
     <!-- ⭐ TODAY (16 NOV) · 9:30 PM SOLO -->
-<div class="tomorrow-card" style="border: 2px solid rgba(59,130,246,.6); background: linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95)); padding: 22px 24px; border-radius: 18px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px;">
-  <span style="background: linear-gradient(135deg,#3b82f6,#2563eb); display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: #fff; width: fit-content;">📅 TODAY (16 NOV) · 9:30 PM</span>
-  
-  <div style="font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1.15;">FF Solo Fullmap</div>
-  <div style="font-size: 0.85rem; color: #a8a3c9; margin-top: -6px;">👤 Solo players · Bermuda · Real cash</div>
-  
-  <div style="background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <div style="font-weight: 900; color: #93c5fd; font-size: 0.95rem;">🔥 FREE FIRE — SOLO</div>
-      <div style="font-size: 0.72rem; color: #a8a3c9;">Entry <b style="color: #fff;">Rs 40</b></div>
-    </div>
-    <a href="/registration.html?tournamentId=solo_930pm_nov16" style="display: block; text-decoration: none; text-align: center; padding: 16px 20px; border-radius: 12px; font-weight: 900; font-size: 1rem; color: #ffffff; background: linear-gradient(135deg,#3b82f6,#2563eb); box-shadow: 0 6px 20px rgba(59,130,246,.5); margin-top: 12px; letter-spacing: 0.5px;">🏆 REGISTER NOW — Rs 40</a>
-  </div>
+    <div class="tomorrow-card" style="border-color:rgba(59,130,246,.6); background:linear-gradient(180deg, rgba(59,130,246,.12), rgba(20,12,45,.95)); margin-bottom:26px;">
+      <span class="tc-tag" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">📅 TODAY (16 NOV) · 9:30 PM</span>
+      <div class="tc-title">FF Solo Fullmap</div>
+      <div class="tc-sub">👤 Solo players · Bermuda · Real cash</div>
+      
+      <div style="background:linear-gradient(135deg, rgba(59,130,246,.12), rgba(20,12,45,.85)); border:1px solid rgba(59,130,246,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div style="font-weight:900; color:#93c5fd; font-size:0.95rem;">🔥 FREE FIRE — SOLO</div>
+          <div style="font-size:0.72rem; color:#a8a3c9;">Entry <b style="color:#fff;">Rs 40</b></div>
+        </div>
+        <a href="/registration.html?tournamentId=solo_930pm_nov16" style="display:block; text-decoration:none; text-align:center; padding:16px 20px; border-radius:12px; font-weight:900; font-size:1rem; color:#ffffff; background:linear-gradient(135deg,#3b82f6,#2563eb); box-shadow:0 6px 20px rgba(59,130,246,.5); margin-top:12px; letter-spacing:0.5px;">🏆 REGISTER NOW — Rs 40</a>
+      </div>
 
-  <div style="background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="font-weight: 900; color: #4ade80; font-size: 0.88rem; margin-bottom: 8px;">🏆 PRIZES</div>
-    <div style="font-size: 0.9rem; color: #e9e5ff; line-height: 1.8;">
-      🥇 <b style="color: #fbbf24;">1st Place: Rs 150</b><br>
-      💀 <b style="color: #fca5a5;">Top Killer: Rs 30 (Flat)</b>
-    </div>
-  </div>
+      <div style="background:linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,12,45,.85)); border:1px solid rgba(34,197,94,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="font-weight:900; color:#4ade80; font-size:0.88rem; margin-bottom:8px;">🏆 PRIZES</div>
+        <div style="font-size:0.9rem; color:#e9e5ff; line-height:1.8;">
+          🥇 <b style="color:#fbbf24;">1st Place: Rs 150</b><br>
+          💀 <b style="color:#fca5a5;">Top Killer: Rs 30 (Flat)</b>
+        </div>
+      </div>
 
-  <div style="background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.5); border-radius: 12px; padding: 12px 14px; margin-top: 6px;">
-    <div style="font-weight: 900; color: #fca5a5; font-size: 0.88rem; margin-bottom: 8px;">📜 RULES</div>
-    <div style="font-size: 0.82rem; color: #e9e5ff; line-height: 1.6;">
-      • Character Skills ON<br>
-      • Gun Attributes OFF<br>
-      • No teaming, no hacking.
+      <div style="background:linear-gradient(135deg, rgba(239,68,68,.12), rgba(20,12,45,.85)); border:1px solid rgba(239,68,68,.5); border-radius:12px; padding:12px 14px; margin-top:6px;">
+        <div style="font-weight:900; color:#fca5a5; font-size:0.88rem; margin-bottom:8px;">📜 RULES</div>
+        <div style="font-size:0.82rem; color:#e9e5ff; line-height:1.6;">
+          • Character Skills ON<br>
+          • Gun Attributes OFF<br>
+          • No teaming, no hacking.
+        </div>
+      </div>
+      <div style="font-size:0.75rem; color:#a8a3c9; text-align:center; margin-top:8px; line-height:1.5;">⏰ Reg closes 9:15 PM · 🔑 Room 9:20 PM · 🚀 Match 9:30 PM</div>
     </div>
-  </div>
-  <div style="font-size: 0.75rem; color: #a8a3c9; text-align: center; margin-top: 8px; line-height: 1.5;">⏰ Reg closes 9:15 PM · 🔑 Room 9:20 PM · 🚀 Match 9:30 PM</div>
-</div>
+
   </div>
     <!-- ⭐ RECENT WINNERS -->
   <div id="winnersStrip"></div>
