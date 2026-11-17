@@ -747,6 +747,8 @@
       <a href="#prize" data-section="prize" class="sidebar-link"><span>🧮</span> Prize Calculator</a>
       <a href="#earnings" data-section="earnings" class="sidebar-link"><span>💵</span> Earnings</a>
       <a href="#payouts" data-section="payouts" class="sidebar-link"><span>📤</span> Payouts</a>
+      <a href="#quickpayout" data-section="quickpayout" class="sidebar-link"><span>⚡</span> Quick Payout</a>
+      <a href="#predictions" data-section="predictions" class="sidebar-link"><span>🔮</span> FFWS Predictions</a>
       <a href="#profitshare" data-section="profitshare" class="sidebar-link"><span>🤝</span> Profit Sharing</a>
       <a href="#referrals" data-section="referrals" class="sidebar-link">
         <span>🎁</span> Referrals
@@ -1211,6 +1213,46 @@
       </div>
       <h3 class="mt">🏆 Winner Payouts</h3>
       <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div></div>
+      <!-- QUICK PAYOUT SECTION -->
+    <section id="section-quickpayout" class="admin-section" style="display:none">
+      <h2>⚡ Quick Payout</h2>
+      <p class="muted">Instantly credit a player's wallet</p>
+      
+      <div style="background: #15172b; border: 1px solid #2a2d4a; border-radius: 10px; padding: 20px; max-width: 600px; margin-top: 20px;">
+        <div style="display: flex; gap: 8px;">
+          <input id="payoutSearchInput" type="text" placeholder="Enter player username or email..." autocomplete="off" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #2a2d4a; background: #0f1124; color: #fff;">
+          <button id="payoutSearchBtn" class="btn-primary" style="padding: 10px 16px; background: #4a6cf7; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">Search</button>
+        </div>
+
+        <div id="payoutResult" style="display:none; margin-top:16px;">
+          <div style="margin-bottom: 16px;">
+            <p style="margin: 6px 0;"><strong>Player:</strong> <span id="payoutName" style="color:#a5b4fc;"></span></p>
+            <p style="margin: 6px 0;"><strong>Email:</strong> <span id="payoutEmail" style="color:#9ca3af;"></span></p>
+            <p style="margin: 6px 0;"><strong>Current Balance:</strong> Rs <span id="payoutBalance" style="color:#4ade80; font-weight:800;">0</span></p>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <input id="payoutAmount" type="number" min="1" step="1" placeholder="Amount to credit (Rs)" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #2a2d4a; background: #0f1124; color: #fff;">
+            <button id="payoutCreditBtn" class="btn-success" style="padding: 10px 16px; background: #22c55e; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">Credit</button>
+          </div>
+          <p id="payoutMsg" style="margin-top:10px; font-weight:600;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FFWS PREDICTIONS VIEWER SECTION -->
+    <section id="section-predictions" class="admin-section" style="display:none">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">🔮 FFWS 2026 Predictions</h2>
+        <input id="predSearchInput" type="text" placeholder="Search player..." style="padding: 8px; border-radius: 6px; border: 1px solid #2a2d4a; background: #0f1124; color: #fff; width: 250px;">
+      </div>
+      
+      <button id="loadPredsBtn" class="btn-primary" style="width: 100%; margin-bottom: 20px; padding: 12px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Load All Predictions</button>
+      
+      <div id="predictionsList" style="display: flex; flex-direction: column; gap: 15px;">
+        <!-- Prediction cards will load here -->
+      </div>
+    </section>
     </section>
 
     <!-- PROFIT SHARING -->
@@ -1566,6 +1608,8 @@ window.togglePasswordVisibility = function() {
       tournaments: 'loadTournamentsAdmin',
       earnings: 'loadEarnings',
       payouts: 'loadPayouts',
+      quickpayout: 'initQuickPayout', 
+      predictions: 'fetchPredictions',
       daily: 'loadDailyCollections',
       profitshare: 'loadProfitShare',
       referrals: 'loadReferralBonuses',
@@ -1908,6 +1952,233 @@ window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn)
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() { window.loadWeekPicker(); }, 1500);
 });
+// ================= QUICK PAYOUT TOOL =================
+let selectedPlayer = null;
+let payoutInitialized = false;
+
+window.initQuickPayout = function() {
+  if (payoutInitialized) return; // Prevent duplicate event listeners
+  payoutInitialized = true;
+
+  const searchInput = document.getElementById('payoutSearchInput');
+  const searchBtn   = document.getElementById('payoutSearchBtn');
+  const resultBox   = document.getElementById('payoutResult');
+  const nameEl      = document.getElementById('payoutName');
+  const emailEl     = document.getElementById('payoutEmail');
+  const balanceEl   = document.getElementById('payoutBalance');
+  const amountInput = document.getElementById('payoutAmount');
+  const creditBtn   = document.getElementById('payoutCreditBtn');
+  const msgEl       = document.getElementById('payoutMsg');
+
+  const USERNAME_FIELD = 'username'; // change if needed
+  const EMAIL_FIELD    = 'email';
+  const BALANCE_FIELD  = 'walletBalance';
+
+  async function findPlayer(term) {
+    const usersRef = collection(wbDb, 'users');
+    let snap = await getDocs(query(usersRef, where(EMAIL_FIELD, '==', term)));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    snap = await getDocs(query(usersRef, where(USERNAME_FIELD, '==', term)));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    snap = await getDocs(query(usersRef, where('usernameLower', '==', term.toLowerCase())));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    return null;
+  }
+
+  async function handleSearch() {
+    const term = searchInput.value.trim();
+    if (!term) return;
+    msgEl.textContent = '';
+    resultBox.style.display = 'none';
+    selectedPlayer = null;
+
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Searching...';
+    try {
+      const player = await findPlayer(term);
+      if (!player) {
+        alert('No player found. Check username or email.');
+        return;
+      }
+      selectedPlayer = player;
+      nameEl.textContent    = player[USERNAME_FIELD] || '(no username)';
+      emailEl.textContent   = player[EMAIL_FIELD]    || '(no email)';
+      balanceEl.textContent = Number(player[BALANCE_FIELD] ?? 0).toLocaleString('en-IN');
+      amountInput.value     = '';
+      resultBox.style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      alert('Search failed: ' + err.message);
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }
+
+  async function handleCredit() {
+    if (!selectedPlayer) return;
+    const amount = Number(amountInput.value);
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
+      alert('Enter a valid whole number greater than 0.'); return;
+    }
+    
+    const ok = confirm(`Credit Rs ${amount.toLocaleString('en-IN')} to ${nameEl.textContent}?\n\nCurrent: Rs ${balanceEl.textContent}`);
+    if (!ok) return;
+
+    creditBtn.disabled = true;
+    creditBtn.textContent = 'Crediting...';
+    msgEl.textContent = '';
+
+    try {
+      const userRef = doc(wbDb, 'users', selectedPlayer.id);
+      await updateDoc(userRef, { [BALANCE_FIELD]: increment(amount) });
+
+      try {
+        await addDoc(collection(wbDb, 'wallet_ledger'), {
+          userId: selectedPlayer.id, username: nameEl.textContent, email: emailEl.textContent,
+          type: 'admin_credit', amount: amount, reason: 'Manual credit via admin panel',
+          createdAt: serverTimestamp(), createdBy: 'admin' // Adjust if you have admin auth
+        });
+      } catch (e) { console.warn('Ledger write failed:', e); }
+
+      const freshSnap = await getDoc(userRef);
+      const newBal = Number(freshSnap.data()?.[BALANCE_FIELD] ?? 0);
+
+      balanceEl.textContent = newBal.toLocaleString('en-IN');
+      msgEl.style.color = '#22c55e';
+      msgEl.textContent = `✅ Credited Rs ${amount.toLocaleString('en-IN')}. New: Rs ${newBal.toLocaleString('en-IN')}`;
+      amountInput.value = '';
+    } catch (err) {
+      console.error(err);
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Failed: ' + err.message;
+    } finally {
+      creditBtn.disabled = false;
+      creditBtn.textContent = 'Credit';
+    }
+  }
+
+  searchBtn.addEventListener('click', handleSearch);
+  creditBtn.addEventListener('click', handleCredit);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchBtn.click(); });
+  amountInput.addEventListener('keydown', e => { if (e.key === 'Enter') creditBtn.click(); });
+};
+
+// ================= FFWS PREDICTIONS VIEWER =================
+let allPredictionsData = [];
+let predsInitialized = false;
+
+window.fetchPredictions = async function() {
+  if (!predsInitialized) {
+    const loadPredsBtn = document.getElementById('loadPredsBtn');
+    const predSearchInput = document.getElementById('predSearchInput');
+    loadPredsBtn.addEventListener('click', window.fetchPredictions);
+    
+    predSearchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      if (!term) return renderPredictions(allPredictionsData);
+      
+      const filtered = allPredictionsData.filter(p => 
+        (p.username && p.username.toLowerCase().includes(term)) || 
+        (p.email && p.email.toLowerCase().includes(term)) ||
+        (p.userId && p.userId.toLowerCase().includes(term))
+      );
+      renderPredictions(filtered);
+    });
+    predsInitialized = true;
+  }
+
+  const loadPredsBtn = document.getElementById('loadPredsBtn');
+  const predictionsList = document.getElementById('predictionsList');
+  
+  loadPredsBtn.textContent = 'Loading...';
+  loadPredsBtn.disabled = true;
+  predictionsList.innerHTML = '';
+  allPredictionsData = [];
+
+  try {
+    const predsSnap = await getDocs(collection(wbDb, 'ffws_predictions'));
+    if (predsSnap.empty) {
+      predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No predictions submitted yet.</p>';
+      return;
+    }
+
+    const promises = predsSnap.docs.map(async (predDoc) => {
+      const pred = predDoc.data();
+      let username = 'Unknown User';
+      let email = 'No Email';
+
+      try {
+        const userSnap = await getDoc(doc(wbDb, 'users', pred.userId));
+        if (userSnap.exists()) {
+          const uData = userSnap.data();
+          username = uData.username || uData.name || 'Unnamed';
+          email = uData.email || 'No Email';
+        }
+      } catch (e) {}
+
+      let timeStr = 'Unknown Time';
+      if (pred.submittedAt) timeStr = pred.submittedAt.toDate().toLocaleString('en-IN');
+
+      return { id: predDoc.id, username, email, timeStr, ...pred };
+    });
+
+    allPredictionsData = await Promise.all(promises);
+    allPredictionsData.sort((a, b) => (b.submittedAt?.toMillis() || 0) - (a.submittedAt?.toMillis() || 0));
+    renderPredictions(allPredictionsData);
+
+  } catch (err) {
+    predictionsList.innerHTML = `<p style="color:#ef4444; text-align:center;">❌ Error: ${err.message}</p>`;
+  } finally {
+    loadPredsBtn.textContent = 'Refresh Predictions';
+    loadPredsBtn.disabled = false;
+  }
+};
+
+function renderPredictions(dataToRender) {
+  const predictionsList = document.getElementById('predictionsList');
+  predictionsList.innerHTML = '';
+  
+  if (dataToRender.length === 0) {
+    predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No results found.</p>';
+    return;
+  }
+
+  dataToRender.forEach(pred => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background: #0f1124; border: 1px solid #2a2d4a; border-radius: 8px; padding: 15px; font-size: 0.9rem;';
+    
+    const makeDayBox = (dayLabel, dayData) => `
+      <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+        <h4 style="color: #fbbf24; margin-bottom: 8px; font-size: 0.9rem; border-bottom: 1px dashed #444; padding-bottom: 4px;">📅 ${dayLabel}</h4>
+        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Top 2:</span> ${dayData?.topTeams || '-'}</p>
+        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Winner:</span> ${dayData?.winner || '-'}</p>
+        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Kills:</span> ${dayData?.kills || '-'} | <span style="color: #9ca3af; font-weight: 600;">Place:</span> ${dayData?.placement || '-'}</p>
+        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Booyah:</span> ${dayData?.booyah || '-'}</p>
+      </div>
+    `;
+
+    card.innerHTML = `
+      <div style="border-bottom: 1px solid #2a2d4a; padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div style="font-weight: bold; color: #a5b4fc; font-size: 1.05rem;">${pred.username}</div>
+          <div style="color: #9ca3af; font-size: 0.8rem;">${pred.email}</div>
+        </div>
+        <div style="color: #6b7280; font-size: 0.8rem;">${pred.timeStr}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+        ${makeDayBox('Day 1', pred.day1)}
+        ${makeDayBox('Day 2', pred.day2)}
+        ${makeDayBox('Day 3', pred.day3)}
+      </div>
+    `;
+    predictionsList.appendChild(card);
+  });
+}
+// ================= END OF NEW LOGIC =================
 </script>
 </body>
 </html>
