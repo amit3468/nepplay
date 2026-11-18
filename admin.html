@@ -7,34 +7,14 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 <link rel="stylesheet" href="style.css">
 <style>
-  .live-stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    margin: 16px 0 20px;
-  }
-  .live-stat {
-    background: #15172b;
-    border: 1px solid #2a2d4a;
-    border-radius: 12px;
-    padding: 14px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: transform 0.15s, border-color 0.15s;
-  }
+  /* ... (Your existing CSS stays here, I kept it all intact) ... */
+  .live-stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0 20px; }
+  .live-stat { background: #15172b; border: 1px solid #2a2d4a; border-radius: 12px; padding: 14px 12px; display: flex; align-items: center; gap: 10px; transition: transform 0.15s, border-color 0.15s; }
   .live-stat:hover { transform: translateY(-2px); }
   .live-stat .ls-icon { font-size: 22px; flex-shrink: 0; }
   .live-stat .ls-body { min-width: 0; flex: 1; }
-  .live-stat .ls-num {
-    color: #fff; font-size: 20px; font-weight: 800; line-height: 1.1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .live-stat .ls-lbl {
-    color: #9ca3af; font-size: 11px; text-transform: uppercase;
-    letter-spacing: 0.5px; font-weight: 700; margin-top: 3px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .live-stat .ls-num { color: #fff; font-size: 20px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live-stat .ls-lbl { color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .live-stat.highlight-yellow { border-color: #eab308; box-shadow: 0 0 20px rgba(234,179,8,0.15); }
   .live-stat.highlight-yellow .ls-num { color: #fbbf24; }
   .live-stat.highlight-green  { border-color: #22c55e; box-shadow: 0 0 20px rgba(34,197,94,0.15); }
@@ -43,623 +23,153 @@
   .live-stat.highlight-red    .ls-num { color: #f87171; }
   .live-stat.highlight-purple { border-color: #a855f7; box-shadow: 0 0 20px rgba(168,85,247,0.15); }
   .live-stat.highlight-purple .ls-num { color: #c084fc; }
-
-  .detail-modal-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,0.7);
-    align-items: center; justify-content: center;
-    padding: 20px;
-  }
+  .detail-modal-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; }
   .detail-modal-overlay.open { display: flex; }
-  .detail-modal {
-    background: #15172b;
-    border: 1px solid #2a2d4a;
-    border-radius: 16px;
-    max-width: 620px; width: 100%;
-    max-height: 90vh; overflow-y: auto;
-    padding: 24px;
-    box-shadow: 0 25px 70px rgba(0,0,0,0.7);
-  }
-  .detail-modal h2 {
-    color: #fff; font-size: 20px; margin: 0 0 4px;
-    display: flex; align-items: center; gap: 10px;
-    flex-wrap: wrap;
-  }
+  .detail-modal { background: #15172b; border: 1px solid #2a2d4a; border-radius: 16px; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.7); }
+  .detail-modal h2 { color: #fff; font-size: 20px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .detail-modal .dm-sub { color: #9ca3af; font-size: 13px; margin: 0 0 20px; }
-  .detail-modal .dm-close {
-    float: right; background: transparent; border: none;
-    color: #9ca3af; font-size: 22px; cursor: pointer; padding: 0;
-    margin-top: -4px;
-  }
+  .detail-modal .dm-close { float: right; background: transparent; border: none; color: #9ca3af; font-size: 22px; cursor: pointer; padding: 0; margin-top: -4px; }
   .detail-modal .dm-close:hover { color: #fff; }
   .dm-rows { display: flex; flex-direction: column; gap: 0; }
-  .dm-row {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-size: 13px; gap: 16px;
-  }
+  .dm-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; gap: 16px; }
   .dm-row:last-child { border-bottom: none; }
   .dm-row .dm-k { color: #9ca3af; flex-shrink: 0; }
   .dm-row .dm-v { color: #fff; font-weight: 600; text-align: right; word-break: break-word; }
   .dm-row .dm-v code { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-  .dm-section {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-top: 16px;
-  }
-  .dm-section h3 {
-    color: #a5b4fc; font-size: 12px; margin: 0 0 10px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .dm-actions {
-    display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
-  }
-  .dm-actions button, .dm-actions a {
-    flex: 1; min-width: 110px;
-    padding: 12px 16px; border-radius: 10px;
-    font-weight: 700; font-size: 13px;
-    cursor: pointer; border: none; text-decoration: none;
-    text-align: center;
-  }
+  .dm-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; margin-top: 16px; }
+  .dm-section h3 { color: #a5b4fc; font-size: 12px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .dm-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .dm-actions button, .dm-actions a { flex: 1; min-width: 110px; padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; border: none; text-decoration: none; text-align: center; }
   .dm-btn-primary { background: linear-gradient(135deg, #dc2626, #991b1b); color: #fff; }
   .dm-btn-green   { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
   .dm-btn-ghost   { background: transparent; border: 1px solid #2a2d4a !important; color: #fff; }
   .dm-btn-danger  { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
-  .dm-shot {
-    max-width: 100%; border-radius: 10px;
-    border: 1px solid #2a2d4a; margin-top: 8px;
-    cursor: zoom-in;
-  }
-  .clickable-row {
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-  }
+  .dm-shot { max-width: 100%; border-radius: 10px; border: 1px solid #2a2d4a; margin-top: 8px; cursor: zoom-in; }
+  .clickable-row { cursor: pointer; transition: background 0.15s, transform 0.1s; }
   .clickable-row:hover { background: rgba(99,102,241,0.08) !important; }
   .clickable-row:active { transform: scale(0.995); }
-
-  .bulk-bar {
-    display: none;
-    align-items: center;
-    gap: 12px;
-    background: rgba(34,197,94,0.08);
-    border: 1px solid rgba(34,197,94,0.3);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 12px 0;
-    flex-wrap: wrap;
-  }
+  .bulk-bar { display: none; align-items: center; gap: 12px; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3); border-radius: 12px; padding: 12px 16px; margin: 12px 0; flex-wrap: wrap; }
   .bulk-bar.show { display: flex; }
-  .bulk-bar .bulk-info {
-    color: #4ade80; font-size: 13px; font-weight: 700;
-  }
-  .bulk-btn {
-    padding: 9px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    border: none;
-    color: #fff;
-  }
+  .bulk-bar .bulk-info { color: #4ade80; font-size: 13px; font-weight: 700; }
+  .bulk-btn { padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; border: none; color: #fff; }
   .bulk-btn-approve { background: linear-gradient(135deg, #22c55e, #16a34a); }
   .bulk-btn-clear   { background: transparent; border: 1px solid #4ade80; color: #4ade80; }
-
-  .pay-checkbox-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-right: 10px;
-    flex-shrink: 0;
-  }
-  .pay-checkbox {
-    width: 20px; height: 20px;
-    accent-color: #22c55e;
-    cursor: pointer;
-  }
-
-  .export-toolbar {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-  }
-  .export-btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    border: 1px solid #2a2d4a;
-    background: #15172b;
-    color: #e2e8f0;
-    transition: all 0.15s;
-  }
-  .export-btn:hover {
-    background: #1f2340;
-    border-color: #6366f1;
-    color: #fff;
-  }
-
-  .tourney-count {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.4);
-    color: #a5b4fc;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-left: 6px;
-  }
-
+  .pay-checkbox-wrap { display: flex; align-items: center; justify-content: center; padding-right: 10px; flex-shrink: 0; }
+  .pay-checkbox { width: 20px; height: 20px; accent-color: #22c55e; cursor: pointer; }
+  .export-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .export-btn { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: 1px solid #2a2d4a; background: #15172b; color: #e2e8f0; transition: all 0.15s; }
+  .export-btn:hover { background: #1f2340; border-color: #6366f1; color: #fff; }
+  .tourney-count { display: inline-flex; align-items: center; gap: 4px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-left: 6px; }
   .pw-login-wrap { position: relative; }
   .pw-login-wrap input { padding-right: 44px !important; }
-  .pw-toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    color: #9ca3af;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-  }
+  .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 4px; }
   .pw-toggle:hover { color: #fff; }
-
   .reg-card.referral-pending { border-left: 4px solid #eab308; }
   .reg-card.referral-paid    { border-left: 4px solid #22c55e; }
-
-  .clickable-name {
-    color: #a5b4fc;
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.15s;
-  }
+  .clickable-name { color: #a5b4fc; cursor: pointer; text-decoration: none; transition: color 0.15s; }
   .clickable-name:hover { color: #fff; text-decoration: underline; }
-
-    /* ⭐ Registration payment thumbnail */
-  .reg-payment-preview {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .thumb {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #2a2d4a;
-    cursor: zoom-in;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-  }
-  .thumb:hover {
-    transform: scale(1.08);
-    border-color: #6366f1;
-    box-shadow: 0 4px 16px rgba(99,102,241,.4);
-  }
-  .method-tag {
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 800;
-    background: rgba(99,102,241,.18);
-    color: #a5b4fc;
-    border: 1px solid rgba(99,102,241,.4);
-  }
-  .status-tag {
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 800;
-  }
-  .status-tag.confirmed,
-  .status-tag.approved {
-    background: rgba(34,197,94,.18);
-    color: #4ade80;
-    border: 1px solid rgba(34,197,94,.4);
-  }
-  .status-tag.pending {
-    background: rgba(245,158,11,.18);
-    color: #fbbf24;
-    border: 1px solid rgba(245,158,11,.4);
-  }
-  .status-tag.rejected {
-    background: rgba(239,68,68,.18);
-    color: #f87171;
-    border: 1px solid rgba(239,68,68,.4);
-  }
-  .ref-thumb {
-    width: 60px; height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #2a2d4a;
-    cursor: zoom-in;
-    margin-right: 8px;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .ref-thumb:hover {
-    transform: scale(1.08);
-    border-color: #6366f1;
-  }
-  .ref-shot-wrap {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    padding-right: 8px;
-  }
-
+  .reg-payment-preview { margin-top: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #2a2d4a; cursor: zoom-in; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+  .thumb:hover { transform: scale(1.08); border-color: #6366f1; box-shadow: 0 4px 16px rgba(99,102,241,.4); }
+  .method-tag { padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; background: rgba(99,102,241,.18); color: #a5b4fc; border: 1px solid rgba(99,102,241,.4); }
+  .status-tag { padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+  .status-tag.confirmed, .status-tag.approved { background: rgba(34,197,94,.18); color: #4ade80; border: 1px solid rgba(34,197,94,.4); }
+  .status-tag.pending { background: rgba(245,158,11,.18); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
+  .status-tag.rejected { background: rgba(239,68,68,.18); color: #f87171; border: 1px solid rgba(239,68,68,.4); }
+  .ref-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #2a2d4a; cursor: zoom-in; margin-right: 8px; transition: transform 0.2s, border-color 0.2s; }
+  .ref-thumb:hover { transform: scale(1.08); border-color: #6366f1; }
+  .ref-shot-wrap { display: flex; align-items: center; flex-shrink: 0; padding-right: 8px; }
   #section-referrals .pay-status-tabs { margin-top: 4px; }
   #section-referrals .pay-status-tabs button { padding: 8px 16px; font-size: 12px; }
-
   .activity-list { display: flex; flex-direction: column; gap: 0; }
-  .activity-item {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 12px 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
+  .activity-item { display: flex; gap: 14px; align-items: flex-start; padding: 12px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .activity-item:last-child { border-bottom: none; }
   .activity-item:hover { background: rgba(99,102,241,0.05); border-radius: 8px; }
-  .activity-dot {
-    width: 36px; height: 36px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    border: 1.5px solid;
-    font-size: 15px;
-  }
+  .activity-dot { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.5px solid; font-size: 15px; }
   .activity-body { flex: 1; min-width: 0; }
-  .activity-summary {
-    color: #e2e8f0; font-size: 13px; font-weight: 600;
-    line-height: 1.4; word-break: break-word;
-  }
-  .activity-meta {
-    display: flex; gap: 14px; flex-wrap: wrap;
-    margin-top: 5px;
-    color: #6b7280; font-size: 11px; font-weight: 600;
-  }
+  .activity-summary { color: #e2e8f0; font-size: 13px; font-weight: 600; line-height: 1.4; word-break: break-word; }
+  .activity-meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 5px; color: #6b7280; font-size: 11px; font-weight: 600; }
   .activity-time { color: #9ca3af; }
   .activity-actor { color: #6b7280; }
-
-  .notif-form-wrap {
-    background: #15172b;
-    border: 1px solid #2a2d4a;
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 28px;
-  }
-  .notif-form-wrap h3 {
-    color: #fff; margin: 0 0 4px; font-size: 16px;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .notif-form-wrap { background: #15172b; border: 1px solid #2a2d4a; border-radius: 14px; padding: 24px; margin-bottom: 28px; }
+  .notif-form-wrap h3 { color: #fff; margin: 0 0 4px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
   .notif-form-wrap .notif-sub { color: #9ca3af; font-size: 12px; margin: 0 0 20px; }
   .notif-field { margin-bottom: 14px; }
-  .notif-field label {
-    display: block; color: #9ca3af; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    font-weight: 700; margin-bottom: 6px;
-  }
-  .notif-field input[type="text"],
-  .notif-field select,
-  .notif-field textarea {
-    width: 100%; padding: 11px 14px;
-    background: #0f1124; border: 1px solid #2a2d4a;
-    color: #fff; border-radius: 10px;
-    font-size: 13px; box-sizing: border-box;
-    font-family: inherit;
-  }
+  .notif-field label { display: block; color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px; }
+  .notif-field input[type="text"], .notif-field select, .notif-field textarea { width: 100%; padding: 11px 14px; background: #0f1124; border: 1px solid #2a2d4a; color: #fff; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; }
   .notif-field textarea { resize: vertical; min-height: 80px; }
-  .notif-field input:focus,
-  .notif-field select:focus,
-  .notif-field textarea:focus {
-    outline: none; border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-  }
+  .notif-field input:focus, .notif-field select:focus, .notif-field textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
   .notif-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 640px) { .notif-grid-2 { grid-template-columns: 1fr; } }
-  .notif-send-btn {
-    padding: 13px 28px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff; border: none; border-radius: 10px;
-    font-weight: 800; font-size: 14px; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
-  }
-  .notif-send-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(99,102,241,0.5);
-  }
+  .notif-send-btn { padding: 13px 28px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 14px rgba(99,102,241,0.35); }
+  .notif-send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
   .notif-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .notif-recent-list { display: flex; flex-direction: column; gap: 0; }
-  .sent-notif-item {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 14px 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
+  .sent-notif-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .sent-notif-item:last-child { border-bottom: none; }
   .sent-notif-item:hover { background: rgba(99,102,241,0.05); border-radius: 8px; }
-  .sent-notif-dot {
-    width: 36px; height: 36px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; font-size: 15px; border: 1.5px solid;
-  }
+  .sent-notif-dot { width: 36px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 15px; border: 1.5px solid; }
   .sent-notif-body { flex: 1; min-width: 0; }
   .sent-notif-target { color: #a5b4fc; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
   .sent-notif-title { color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
   .sent-notif-msg { color: #9ca3af; font-size: 12px; line-height: 1.4; word-break: break-word; }
   .sent-notif-meta { color: #6b7280; font-size: 11px; margin-top: 6px; }
   .notif-help { display: block; color: #6b7280; font-size: 11px; margin-top: 6px; line-height: 1.4; }
-
-  /* ⭐ v4.9 — Mode badges */
-  .mode-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    margin-left: 8px;
-    vertical-align: middle;
-    white-space: nowrap;
-  }
+  .mode-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 900; letter-spacing: 0.3px; text-transform: uppercase; margin-left: 8px; vertical-align: middle; white-space: nowrap; }
   .mode-badge-1v1   { background: rgba(34,197,94,0.18);  color: #4ade80; border: 1px solid rgba(34,197,94,0.5); }
   .mode-badge-2v2   { background: rgba(59,130,246,0.18); color: #7db7ff; border: 1px solid rgba(59,130,246,0.5); }
   .mode-badge-squad { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.5); }
-
-  /* ⭐ BRACKET MODAL */
-  .bk-overlay {
-    position: fixed; inset: 0;
-    background: rgba(5, 3, 15, 0.85);
-    backdrop-filter: blur(6px);
-    display: none; z-index: 10000;
-    align-items: center; justify-content: center;
-    padding: 20px;
-  }
+  .bk-overlay { position: fixed; inset: 0; background: rgba(5, 3, 15, 0.85); backdrop-filter: blur(6px); display: none; z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
   .bk-overlay.open { display: flex; }
-  .bk-modal {
-    background: #15172b;
-    border: 1px solid #2a2d4a;
-    border-radius: 16px;
-    width: 100%; max-width: 820px;
-    max-height: 92vh;
-    display: flex; flex-direction: column;
-    box-shadow: 0 30px 80px rgba(0,0,0,.7);
-  }
-  .bk-head {
-    padding: 18px 22px;
-    border-bottom: 1px solid #2a2d4a;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px;
-  }
+  .bk-modal { background: #15172b; border: 1px solid #2a2d4a; border-radius: 16px; width: 100%; max-width: 820px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 30px 80px rgba(0,0,0,.7); }
+  .bk-head { padding: 18px 22px; border-bottom: 1px solid #2a2d4a; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .bk-head h3 { font-size: 18px; font-weight: 800; color: #fff; margin: 0; }
   .bk-head .bk-sub { font-size: 12px; color: #9ca3af; margin-top: 3px; }
-  .bk-close {
-    background: rgba(239,68,68,.15); color: #fca5a5;
-    border: 1px solid rgba(239,68,68,.4);
-    width: 34px; height: 34px; border-radius: 50%;
-    font-size: 16px; cursor: pointer;
-    display: grid; place-items: center;
-    flex-shrink: 0;
-  }
+  .bk-close { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.4); width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer; display: grid; place-items: center; flex-shrink: 0; }
   .bk-close:hover { background: rgba(239,68,68,.3); }
   .bk-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
-  .bk-foot {
-    padding: 16px 22px;
-    border-top: 1px solid #2a2d4a;
-    display: flex; gap: 10px; flex-wrap: wrap;
-  }
-  .bk-stat-row {
-    display: flex; gap: 16px; flex-wrap: wrap;
-    font-size: 13px; color: #a5b4fc;
-    margin-bottom: 16px;
-  }
+  .bk-foot { padding: 16px 22px; border-top: 1px solid #2a2d4a; display: flex; gap: 10px; flex-wrap: wrap; }
+  .bk-stat-row { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #a5b4fc; margin-bottom: 16px; }
   .bk-stat-row b { color: #fbbf24; }
-  .bk-room-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    margin-bottom: 16px;
-  }
-  .bk-room-row label {
-    display: block; font-size: 11px;
-    color: #9ca3af; font-weight: 800;
-    margin-bottom: 5px; letter-spacing: .3px;
-    text-transform: uppercase;
-  }
-  .bk-room-row input {
-    padding: 10px 12px; border-radius: 8px;
-    border: 1px solid #2a2d4a;
-    background: #0f1124; color: #fff;
-    font-size: 13px; font-family: inherit;
-    outline: none; width: 100%;
-    box-sizing: border-box;
-  }
+  .bk-room-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .bk-room-row label { display: block; font-size: 11px; color: #9ca3af; font-weight: 800; margin-bottom: 5px; letter-spacing: .3px; text-transform: uppercase; }
+  .bk-room-row input { padding: 10px 12px; border-radius: 8px; border: 1px solid #2a2d4a; background: #0f1124; color: #fff; font-size: 13px; font-family: inherit; outline: none; width: 100%; box-sizing: border-box; }
   .bk-room-row input:focus { border-color: #6366f1; }
   .bk-pairs { display: flex; flex-direction: column; gap: 10px; }
-  .bk-pair {
-    background: #0f1124;
-    border: 1px solid #2a2d4a;
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex; align-items: center; gap: 10px;
-    flex-wrap: wrap;
-  }
-  .bk-pair .bk-pair-num {
-    font-size: 10px; font-weight: 800;
-    background: rgba(99,102,241,.25);
-    color: #a5b4fc;
-    padding: 3px 8px; border-radius: 999px;
-  }
-  .bk-pair .bk-player {
-    flex: 1; min-width: 140px;
-    font-size: 13px; font-weight: 700;
-    color: #fff; padding: 6px 0;
-  }
-  .bk-pair .bk-player small {
-    display: block; font-weight: 600;
-    color: #9ca3af; font-size: 11px;
-    margin-top: 2px;
-  }
-  .bk-pair .bk-vs {
-    font-size: 12px; font-weight: 900;
-    color: #fbbf24;
-    padding: 0 6px;
-  }
-  .bk-pair.bye {
-    background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(22,163,74,.08));
-    border-color: rgba(34,197,94,.4);
-  }
-  .bk-empty {
-    text-align: center; padding: 30px;
-    color: #9ca3af; font-size: 13px;
-  }
-  .bk-btn {
-    padding: 10px 16px; border-radius: 9px; border: 0;
-    font-weight: 800; font-size: 13px;
-    cursor: pointer; font-family: inherit;
-    display: inline-flex; align-items: center; gap: 8px;
-    text-decoration: none;
-    transition: transform .15s, background .2s;
-  }
+  .bk-pair { background: #0f1124; border: 1px solid #2a2d4a; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .bk-pair .bk-pair-num { font-size: 10px; font-weight: 800; background: rgba(99,102,241,.25); color: #a5b4fc; padding: 3px 8px; border-radius: 999px; }
+  .bk-pair .bk-player { flex: 1; min-width: 140px; font-size: 13px; font-weight: 700; color: #fff; padding: 6px 0; }
+  .bk-pair .bk-player small { display: block; font-weight: 600; color: #9ca3af; font-size: 11px; margin-top: 2px; }
+  .bk-pair .bk-vs { font-size: 12px; font-weight: 900; color: #fbbf24; padding: 0 6px; }
+  .bk-pair.bye { background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(22,163,74,.08)); border-color: rgba(34,197,94,.4); }
+  .bk-empty { text-align: center; padding: 30px; color: #9ca3af; font-size: 13px; }
+  .bk-btn { padding: 10px 16px; border-radius: 9px; border: 0; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: transform .15s, background .2s; }
   .bk-btn:hover { transform: translateY(-1px); }
-  .bk-btn.primary {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(99,102,241,.4);
-  }
-  .bk-btn.green {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(34,197,94,.4);
-  }
-  .bk-btn.gold {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: #1a0b3d;
-    box-shadow: 0 6px 18px rgba(245,158,11,.4);
-  }
-  .bk-btn.ghost {
-    background: rgba(99,102,241,.15);
-    color: #a5b4fc;
-    border: 1px solid rgba(99,102,241,.4);
-  }
-  .bk-btn.danger {
-    background: rgba(239,68,68,.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239,68,68,.4);
-  }
+  .bk-btn.primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,.4); }
+  .bk-btn.green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 6px 18px rgba(34,197,94,.4); }
+  .bk-btn.gold { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a0b3d; box-shadow: 0 6px 18px rgba(245,158,11,.4); }
+  .bk-btn.ghost { background: rgba(99,102,241,.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,.4); }
+  .bk-btn.danger { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.4); }
   .bk-btn[disabled] { opacity: .5; cursor: not-allowed; }
-  .bk-toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%);
-    background: #15172b;
-    border: 1px solid rgba(34,197,94,.5);
-    color: #4ade80;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 13px; font-weight: 700;
-    z-index: 10001;
-    display: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,.5);
-  }
+  .bk-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #15172b; border: 1px solid rgba(34,197,94,.5); color: #4ade80; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; z-index: 10001; display: none; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
   .bk-toast.show { display: block; }
-
-  .bk-section-title {
-    font-size: 12px; font-weight: 800;
-    color: #a5b4fc; letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin: 0 0 10px;
-  }
-  .bk-players {
-    background: #0f1124;
-    border: 1px solid #2a2d4a;
-    border-radius: 10px;
-    padding: 8px 12px;
-    max-height: 220px;
-    overflow-y: auto;
-  }
-  .bk-player-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 12px;
-    color: #e2e8f0;
-  }
+  .bk-section-title { font-size: 12px; font-weight: 800; color: #a5b4fc; letter-spacing: 0.5px; text-transform: uppercase; margin: 0 0 10px; }
+  .bk-players { background: #0f1124; border: 1px solid #2a2d4a; border-radius: 10px; padding: 8px 12px; max-height: 220px; overflow-y: auto; }
+  .bk-player-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #e2e8f0; }
   .bk-player-row:last-child { border-bottom: none; }
   .bk-player-row.assigned { opacity: 0.5; }
   .bk-player-row.assigned .bk-player-name { text-decoration: line-through; }
-  .bk-player-dot {
-    font-size: 14px;
-    color: #4ade80;
-    width: 14px;
-    flex-shrink: 0;
-  }
+  .bk-player-dot { font-size: 14px; color: #4ade80; width: 14px; flex-shrink: 0; }
   .bk-player-row.assigned .bk-player-dot { color: #6b7280; }
-  .bk-player-name {
-    font-weight: 800;
-    color: #fff;
-    min-width: 110px;
-    flex-shrink: 0;
-  }
-  .bk-player-ign {
-    color: #a5b4fc;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    min-width: 90px;
-    flex-shrink: 0;
-  }
-  .bk-player-phone {
-    color: #9ca3af;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    margin-left: auto;
-  }
-  .bk-newmatch {
-    background: #0f1124;
-    border: 1px solid #2a2d4a;
-    border-radius: 10px;
-    padding: 14px;
-  }
-  .bk-newmatch-row {
-    display: grid;
-    grid-template-columns: 90px 1fr;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .bk-newmatch-row label {
-    font-size: 11px; font-weight: 800;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-  .bk-newmatch-row select {
-    width: 100%;
-    padding: 10px 12px;
-    background: #0a0618;
-    border: 1px solid #2a2d4a;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-  }
+  .bk-player-name { font-weight: 800; color: #fff; min-width: 110px; flex-shrink: 0; }
+  .bk-player-ign { color: #a5b4fc; font-family: 'Courier New', monospace; font-size: 11px; min-width: 90px; flex-shrink: 0; }
+  .bk-player-phone { color: #9ca3af; font-family: 'Courier New', monospace; font-size: 11px; margin-left: auto; }
+  .bk-newmatch { background: #0f1124; border: 1px solid #2a2d4a; border-radius: 10px; padding: 14px; }
+  .bk-newmatch-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .bk-newmatch-row label { font-size: 11px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.3px; }
+  .bk-newmatch-row select { width: 100%; padding: 10px 12px; background: #0a0618; border: 1px solid #2a2d4a; color: #fff; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; }
   .bk-newmatch-row select:focus { border-color: #6366f1; }
-
-    /* ⭐ WEEKLY BONUS */
-  .wb-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 0.3px;
-  }
+  .wb-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 900; letter-spacing: 0.3px; }
   .wb-badge-bronze  { background: rgba(205,127,50,.18);  color: #cd7f32; border: 1px solid #cd7f32; }
   .wb-badge-silver  { background: rgba(192,192,192,.18); color: #c0c0c0; border: 1px solid #c0c0c0; }
   .wb-badge-gold    { background: rgba(251,191,36,.18);  color: #fbbf24; border: 1px solid #fbbf24; }
@@ -740,15 +250,18 @@
       </a>
       <a href="#create" data-section="create" class="sidebar-link"><span>➕</span> Create Tournament</a>
       <a href="#results" data-section="results" class="sidebar-link"><span>🏁</span> Match Results</a>
-            <a href="/admin-points.html" class="sidebar-link" style="color:#fbbf24; font-weight:800;">
+      <a href="/admin-points.html" class="sidebar-link" style="color:#fbbf24; font-weight:800;">
         <span>📊</span> Points Table Manager
       </a>
       <a href="#daily" data-section="daily" class="sidebar-link"><span>💹</span> Daily Collections</a>
       <a href="#prize" data-section="prize" class="sidebar-link"><span>🧮</span> Prize Calculator</a>
       <a href="#earnings" data-section="earnings" class="sidebar-link"><span>💵</span> Earnings</a>
       <a href="#payouts" data-section="payouts" class="sidebar-link"><span>📤</span> Payouts</a>
+      
+      <!-- NEW SIDEBAR LINKS -->
       <a href="#quickpayout" data-section="quickpayout" class="sidebar-link"><span>⚡</span> Quick Payout</a>
       <a href="#predictions" data-section="predictions" class="sidebar-link"><span>🔮</span> FFWS Predictions</a>
+
       <a href="#profitshare" data-section="profitshare" class="sidebar-link"><span>🤝</span> Profit Sharing</a>
       <a href="#referrals" data-section="referrals" class="sidebar-link">
         <span>🎁</span> Referrals
@@ -756,8 +269,8 @@
       </a>
       <a href="#roomdetails" data-section="roomdetails" class="sidebar-link"><span>🔑</span> Room Details</a>
       <a href="#weeklybonus" data-section="weeklybonus" class="sidebar-link">
-  <span>🎁</span> Weekly Bonus
-</a>
+        <span>🎁</span> Weekly Bonus
+      </a>
       <a href="#users" data-section="users" class="sidebar-link">
         <span>👥</span> Users
         <span class="badge" id="usersBadge">0</span>
@@ -804,7 +317,6 @@
       <h2>Dashboard</h2>
       <p class="muted">Real-time platform activity</p>
 
-            <!-- ⭐ VISITOR STATS -->
       <div class="live-stats-bar" style="margin-top:14px;">
         <div class="live-stat highlight-green">
           <div class="ls-icon">👣</div>
@@ -838,7 +350,7 @@
 
       <div class="live-stats-bar">
         <div class="live-stat"><div class="ls-icon">👥</div><div class="ls-body"><div class="ls-num" id="lsUsers">0</div><div class="ls-lbl">Total Users</div></div></div>
-<div class="live-stat highlight-green"><div class="ls-icon">🆕</div><div class="ls-body"><div class="ls-num" id="lsNewToday">0</div><div class="ls-lbl">New Today</div></div></div>
+        <div class="live-stat highlight-green"><div class="ls-icon">🆕</div><div class="ls-body"><div class="ls-num" id="lsNewToday">0</div><div class="ls-lbl">New Today</div></div></div>
         <div class="live-stat"><div class="ls-icon">📋</div><div class="ls-body"><div class="ls-num" id="lsRegs">0</div><div class="ls-lbl">Registrations</div></div></div>
         <div class="live-stat highlight-yellow"><div class="ls-icon">⏳</div><div class="ls-body"><div class="ls-num" id="lsPending">0</div><div class="ls-lbl">Pending Payments</div></div></div>
         <div class="live-stat highlight-green"><div class="ls-icon">✅</div><div class="ls-body"><div class="ls-num" id="lsConfirmedToday">0</div><div class="ls-lbl">Confirmed Today</div></div></div>
@@ -848,7 +360,7 @@
         <div class="live-stat highlight-purple"><div class="ls-icon">📊</div><div class="ls-body"><div class="ls-num" id="lsNetToday">Rs. 0</div><div class="ls-lbl">Net Today</div></div></div>
       </div>
 
-            <div style="margin-top:20px; padding:20px; background:#15172b; border:1px solid #2a2d4a; border-radius:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <div style="margin-top:20px; padding:20px; background:#15172b; border:1px solid #2a2d4a; border-radius:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
         <div>
           <h3 style="color:#fff; margin:0 0 5px; font-size:18px;">📊 Points Table Manager</h3>
           <p style="color:#9ca3af; margin:0; font-size:13px;">Update match placements and kills for Clash Squad 4v4 and Mega Sunday.</p>
@@ -1213,10 +725,12 @@
       </div>
       <h3 class="mt">🏆 Winner Payouts</h3>
       <div class="list" id="payoutList"><div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div></div>
-      <!-- QUICK PAYOUT SECTION -->
+    </section>
+
+    <!-- NEW QUICK PAYOUT SECTION -->
     <section id="section-quickpayout" class="admin-section" style="display:none">
       <h2>⚡ Quick Payout</h2>
-      <p class="muted">Instantly credit a player's wallet</p>
+      <p class="muted">Instantly credit a player's wallet using Firebase increment</p>
       
       <div style="background: #15172b; border: 1px solid #2a2d4a; border-radius: 10px; padding: 20px; max-width: 600px; margin-top: 20px;">
         <div style="display: flex; gap: 8px;">
@@ -1240,19 +754,16 @@
       </div>
     </section>
 
-    <!-- FFWS PREDICTIONS VIEWER SECTION -->
+    <!-- NEW FFWS PREDICTIONS VIEWER -->
     <section id="section-predictions" class="admin-section" style="display:none">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2 style="margin: 0;">🔮 FFWS 2026 Predictions</h2>
+        <h2 style="margin: 0; color:#fff;">🔮 FFWS 2026 Predictions</h2>
         <input id="predSearchInput" type="text" placeholder="Search player..." style="padding: 8px; border-radius: 6px; border: 1px solid #2a2d4a; background: #0f1124; color: #fff; width: 250px;">
       </div>
       
-      <button id="loadPredsBtn" class="btn-primary" style="width: 100%; margin-bottom: 20px; padding: 12px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Load All Predictions</button>
+      <button id="loadPredsBtn" style="width: 100%; margin-bottom: 20px; padding: 12px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Load All Predictions</button>
       
-      <div id="predictionsList" style="display: flex; flex-direction: column; gap: 15px;">
-        <!-- Prediction cards will load here -->
-      </div>
-    </section>
+      <div id="predictionsList" style="display: flex; flex-direction: column; gap: 15px;"></div>
     </section>
 
     <!-- PROFIT SHARING -->
@@ -1330,46 +841,47 @@
         <div id="roomSaveStatus" style="margin-top:14px;font-size:13px;color:#4ade80;display:none;"></div>
       </div>
     </section>
-     <!-- WEEKLY BONUS -->
-<section id="section-weeklybonus" class="admin-section" style="display:none">
-  <h2>🎁 Weekly Bonus</h2>
-  <p class="muted">Track weekly player stats — matches, wins, tier, bonus &amp; payout status</p>
+    
+    <!-- WEEKLY BONUS -->
+    <section id="section-weeklybonus" class="admin-section" style="display:none">
+      <h2>🎁 Weekly Bonus</h2>
+      <p class="muted">Track weekly player stats — matches, wins, tier, bonus &amp; payout status</p>
 
-  <div style="display:flex; gap:12px; flex-wrap:wrap; margin:20px 0;">
-    <button onclick="loadWeeklyStats()" class="btn-submit-pay" style="margin-top:0;max-width:180px;">🔄 Refresh</button>
-    <select id="weekPicker" onchange="loadWeeklyStats()" class="result-select" style="max-width:280px;"></select>
-    <button onclick="recalculateAllTiers()" class="export-btn" style="padding:12px 18px;">⚡ Recalculate Tiers</button>
-    <button onclick="exportWeeklyCSV()" class="export-btn" style="padding:12px 18px;">⬇️ Export CSV</button>
-  </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin:20px 0;">
+        <button onclick="loadWeeklyStats()" class="btn-submit-pay" style="margin-top:0;max-width:180px;">🔄 Refresh</button>
+        <select id="weekPicker" onchange="loadWeeklyStats()" class="result-select" style="max-width:280px;"></select>
+        <button onclick="recalculateAllTiers()" class="export-btn" style="padding:12px 18px;">⚡ Recalculate Tiers</button>
+        <button onclick="exportWeeklyCSV()" class="export-btn" style="padding:12px 18px;">⬇️ Export CSV</button>
+      </div>
 
-  <div class="stat-grid" style="margin-bottom:20px;">
-    <div class="stat-card"><small>ACTIVE PLAYERS</small><b id="wb-total">0</b><span>Played this week</span></div>
-    <div class="stat-card"><small>🥉 BRONZE</small><b id="wb-bronze" style="color:#cd7f32;">0</b><span>3+ matches</span></div>
-    <div class="stat-card"><small>🥈 SILVER</small><b id="wb-silver" style="color:#c0c0c0;">0</b><span>5+ matches</span></div>
-    <div class="stat-card"><small>🥇 GOLD</small><b id="wb-gold" style="color:#fbbf24;">0</b><span>7+ matches</span></div>
-    <div class="stat-card"><small>💎 DIAMOND</small><b id="wb-diamond" style="color:#22d3ee;">0</b><span>7+ matches &amp; 2+ wins</span></div>
-    <div class="stat-card"><small>TOTAL PAYOUT</small><b id="wb-payout" style="color:#4ade80;">Rs 0</b><span>All tiers combined</span></div>
-  </div>
+      <div class="stat-grid" style="margin-bottom:20px;">
+        <div class="stat-card"><small>ACTIVE PLAYERS</small><b id="wb-total">0</b><span>Played this week</span></div>
+        <div class="stat-card"><small>🥉 BRONZE</small><b id="wb-bronze" style="color:#cd7f32;">0</b><span>3+ matches</span></div>
+        <div class="stat-card"><small>🥈 SILVER</small><b id="wb-silver" style="color:#c0c0c0;">0</b><span>5+ matches</span></div>
+        <div class="stat-card"><small>🥇 GOLD</small><b id="wb-gold" style="color:#fbbf24;">0</b><span>7+ matches</span></div>
+        <div class="stat-card"><small>💎 DIAMOND</small><b id="wb-diamond" style="color:#22d3ee;">0</b><span>7+ matches &amp; 2+ wins</span></div>
+        <div class="stat-card"><small>TOTAL PAYOUT</small><b id="wb-payout" style="color:#4ade80;">Rs 0</b><span>All tiers combined</span></div>
+      </div>
 
-  <div style="overflow-x:auto; background:#15172b; border:1px solid #2a2d4a; border-radius:14px;">
-    <table style="width:100%; border-collapse:collapse; font-size:13px;">
-      <thead>
-        <tr style="background:rgba(99,102,241,.12); text-align:left; color:#a5b4fc;">
-          <th style="padding:12px;">Player</th>
-          <th style="padding:12px;">Matches</th>
-          <th style="padding:12px;">Wins</th>
-          <th style="padding:12px;">Tier</th>
-          <th style="padding:12px;">Bonus</th>
-          <th style="padding:12px;">Status</th>
-          <th style="padding:12px;">Action</th>
-        </tr>
-      </thead>
-      <tbody id="wb-table-body">
-        <tr><td colspan="7" style="padding:30px; text-align:center; color:#9ca3af;">Click Refresh to load</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section> 
+      <div style="overflow-x:auto; background:#15172b; border:1px solid #2a2d4a; border-radius:14px;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:rgba(99,102,241,.12); text-align:left; color:#a5b4fc;">
+              <th style="padding:12px;">Player</th>
+              <th style="padding:12px;">Matches</th>
+              <th style="padding:12px;">Wins</th>
+              <th style="padding:12px;">Tier</th>
+              <th style="padding:12px;">Bonus</th>
+              <th style="padding:12px;">Status</th>
+              <th style="padding:12px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="wb-table-body">
+            <tr><td colspan="7" style="padding:30px; text-align:center; color:#9ca3af;">Click Refresh to load</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section> 
 
     <!-- USERS -->
     <section id="section-users" class="admin-section" style="display:none">
@@ -1599,7 +1111,7 @@ window.togglePasswordVisibility = function() {
     document.querySelectorAll('.sidebar-link').forEach(function(a) { a.classList.remove('active'); });
     if (el) el.classList.add('active');
 
-        var loaders = {
+    var loaders = {
       payments: 'loadPayments',
       registrations: 'loadRegistrations',
       create: 'loadRecentCreated',
@@ -1608,7 +1120,7 @@ window.togglePasswordVisibility = function() {
       tournaments: 'loadTournamentsAdmin',
       earnings: 'loadEarnings',
       payouts: 'loadPayouts',
-      quickpayout: 'initQuickPayout', 
+      quickpayout: 'initQuickPayout',
       predictions: 'fetchPredictions',
       daily: 'loadDailyCollections',
       profitshare: 'loadProfitShare',
@@ -1952,233 +1464,6 @@ window.updateWeeklyStatsForMatch = async function(tournamentId, winnerNameOrIgn)
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() { window.loadWeekPicker(); }, 1500);
 });
-// ================= QUICK PAYOUT TOOL =================
-let selectedPlayer = null;
-let payoutInitialized = false;
-
-window.initQuickPayout = function() {
-  if (payoutInitialized) return; // Prevent duplicate event listeners
-  payoutInitialized = true;
-
-  const searchInput = document.getElementById('payoutSearchInput');
-  const searchBtn   = document.getElementById('payoutSearchBtn');
-  const resultBox   = document.getElementById('payoutResult');
-  const nameEl      = document.getElementById('payoutName');
-  const emailEl     = document.getElementById('payoutEmail');
-  const balanceEl   = document.getElementById('payoutBalance');
-  const amountInput = document.getElementById('payoutAmount');
-  const creditBtn   = document.getElementById('payoutCreditBtn');
-  const msgEl       = document.getElementById('payoutMsg');
-
-  const USERNAME_FIELD = 'username'; // change if needed
-  const EMAIL_FIELD    = 'email';
-  const BALANCE_FIELD  = 'walletBalance';
-
-  async function findPlayer(term) {
-    const usersRef = collection(wbDb, 'users');
-    let snap = await getDocs(query(usersRef, where(EMAIL_FIELD, '==', term)));
-    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    
-    snap = await getDocs(query(usersRef, where(USERNAME_FIELD, '==', term)));
-    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    
-    snap = await getDocs(query(usersRef, where('usernameLower', '==', term.toLowerCase())));
-    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
-    
-    return null;
-  }
-
-  async function handleSearch() {
-    const term = searchInput.value.trim();
-    if (!term) return;
-    msgEl.textContent = '';
-    resultBox.style.display = 'none';
-    selectedPlayer = null;
-
-    searchBtn.disabled = true;
-    searchBtn.textContent = 'Searching...';
-    try {
-      const player = await findPlayer(term);
-      if (!player) {
-        alert('No player found. Check username or email.');
-        return;
-      }
-      selectedPlayer = player;
-      nameEl.textContent    = player[USERNAME_FIELD] || '(no username)';
-      emailEl.textContent   = player[EMAIL_FIELD]    || '(no email)';
-      balanceEl.textContent = Number(player[BALANCE_FIELD] ?? 0).toLocaleString('en-IN');
-      amountInput.value     = '';
-      resultBox.style.display = 'block';
-    } catch (err) {
-      console.error(err);
-      alert('Search failed: ' + err.message);
-    } finally {
-      searchBtn.disabled = false;
-      searchBtn.textContent = 'Search';
-    }
-  }
-
-  async function handleCredit() {
-    if (!selectedPlayer) return;
-    const amount = Number(amountInput.value);
-    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
-      alert('Enter a valid whole number greater than 0.'); return;
-    }
-    
-    const ok = confirm(`Credit Rs ${amount.toLocaleString('en-IN')} to ${nameEl.textContent}?\n\nCurrent: Rs ${balanceEl.textContent}`);
-    if (!ok) return;
-
-    creditBtn.disabled = true;
-    creditBtn.textContent = 'Crediting...';
-    msgEl.textContent = '';
-
-    try {
-      const userRef = doc(wbDb, 'users', selectedPlayer.id);
-      await updateDoc(userRef, { [BALANCE_FIELD]: increment(amount) });
-
-      try {
-        await addDoc(collection(wbDb, 'wallet_ledger'), {
-          userId: selectedPlayer.id, username: nameEl.textContent, email: emailEl.textContent,
-          type: 'admin_credit', amount: amount, reason: 'Manual credit via admin panel',
-          createdAt: serverTimestamp(), createdBy: 'admin' // Adjust if you have admin auth
-        });
-      } catch (e) { console.warn('Ledger write failed:', e); }
-
-      const freshSnap = await getDoc(userRef);
-      const newBal = Number(freshSnap.data()?.[BALANCE_FIELD] ?? 0);
-
-      balanceEl.textContent = newBal.toLocaleString('en-IN');
-      msgEl.style.color = '#22c55e';
-      msgEl.textContent = `✅ Credited Rs ${amount.toLocaleString('en-IN')}. New: Rs ${newBal.toLocaleString('en-IN')}`;
-      amountInput.value = '';
-    } catch (err) {
-      console.error(err);
-      msgEl.style.color = '#ef4444';
-      msgEl.textContent = '❌ Failed: ' + err.message;
-    } finally {
-      creditBtn.disabled = false;
-      creditBtn.textContent = 'Credit';
-    }
-  }
-
-  searchBtn.addEventListener('click', handleSearch);
-  creditBtn.addEventListener('click', handleCredit);
-  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchBtn.click(); });
-  amountInput.addEventListener('keydown', e => { if (e.key === 'Enter') creditBtn.click(); });
-};
-
-// ================= FFWS PREDICTIONS VIEWER =================
-let allPredictionsData = [];
-let predsInitialized = false;
-
-window.fetchPredictions = async function() {
-  if (!predsInitialized) {
-    const loadPredsBtn = document.getElementById('loadPredsBtn');
-    const predSearchInput = document.getElementById('predSearchInput');
-    loadPredsBtn.addEventListener('click', window.fetchPredictions);
-    
-    predSearchInput.addEventListener('input', (e) => {
-      const term = e.target.value.toLowerCase();
-      if (!term) return renderPredictions(allPredictionsData);
-      
-      const filtered = allPredictionsData.filter(p => 
-        (p.username && p.username.toLowerCase().includes(term)) || 
-        (p.email && p.email.toLowerCase().includes(term)) ||
-        (p.userId && p.userId.toLowerCase().includes(term))
-      );
-      renderPredictions(filtered);
-    });
-    predsInitialized = true;
-  }
-
-  const loadPredsBtn = document.getElementById('loadPredsBtn');
-  const predictionsList = document.getElementById('predictionsList');
-  
-  loadPredsBtn.textContent = 'Loading...';
-  loadPredsBtn.disabled = true;
-  predictionsList.innerHTML = '';
-  allPredictionsData = [];
-
-  try {
-    const predsSnap = await getDocs(collection(wbDb, 'ffws_predictions'));
-    if (predsSnap.empty) {
-      predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No predictions submitted yet.</p>';
-      return;
-    }
-
-    const promises = predsSnap.docs.map(async (predDoc) => {
-      const pred = predDoc.data();
-      let username = 'Unknown User';
-      let email = 'No Email';
-
-      try {
-        const userSnap = await getDoc(doc(wbDb, 'users', pred.userId));
-        if (userSnap.exists()) {
-          const uData = userSnap.data();
-          username = uData.username || uData.name || 'Unnamed';
-          email = uData.email || 'No Email';
-        }
-      } catch (e) {}
-
-      let timeStr = 'Unknown Time';
-      if (pred.submittedAt) timeStr = pred.submittedAt.toDate().toLocaleString('en-IN');
-
-      return { id: predDoc.id, username, email, timeStr, ...pred };
-    });
-
-    allPredictionsData = await Promise.all(promises);
-    allPredictionsData.sort((a, b) => (b.submittedAt?.toMillis() || 0) - (a.submittedAt?.toMillis() || 0));
-    renderPredictions(allPredictionsData);
-
-  } catch (err) {
-    predictionsList.innerHTML = `<p style="color:#ef4444; text-align:center;">❌ Error: ${err.message}</p>`;
-  } finally {
-    loadPredsBtn.textContent = 'Refresh Predictions';
-    loadPredsBtn.disabled = false;
-  }
-};
-
-function renderPredictions(dataToRender) {
-  const predictionsList = document.getElementById('predictionsList');
-  predictionsList.innerHTML = '';
-  
-  if (dataToRender.length === 0) {
-    predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No results found.</p>';
-    return;
-  }
-
-  dataToRender.forEach(pred => {
-    const card = document.createElement('div');
-    card.style.cssText = 'background: #0f1124; border: 1px solid #2a2d4a; border-radius: 8px; padding: 15px; font-size: 0.9rem;';
-    
-    const makeDayBox = (dayLabel, dayData) => `
-      <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
-        <h4 style="color: #fbbf24; margin-bottom: 8px; font-size: 0.9rem; border-bottom: 1px dashed #444; padding-bottom: 4px;">📅 ${dayLabel}</h4>
-        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Top 2:</span> ${dayData?.topTeams || '-'}</p>
-        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Winner:</span> ${dayData?.winner || '-'}</p>
-        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Kills:</span> ${dayData?.kills || '-'} | <span style="color: #9ca3af; font-weight: 600;">Place:</span> ${dayData?.placement || '-'}</p>
-        <p style="margin: 4px 0; color: #ddd;"><span style="color: #9ca3af; font-weight: 600;">Booyah:</span> ${dayData?.booyah || '-'}</p>
-      </div>
-    `;
-
-    card.innerHTML = `
-      <div style="border-bottom: 1px solid #2a2d4a; padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <div style="font-weight: bold; color: #a5b4fc; font-size: 1.05rem;">${pred.username}</div>
-          <div style="color: #9ca3af; font-size: 0.8rem;">${pred.email}</div>
-        </div>
-        <div style="color: #6b7280; font-size: 0.8rem;">${pred.timeStr}</div>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-        ${makeDayBox('Day 1', pred.day1)}
-        ${makeDayBox('Day 2', pred.day2)}
-        ${makeDayBox('Day 3', pred.day3)}
-      </div>
-    `;
-    predictionsList.appendChild(card);
-  });
-}
-// ================= END OF NEW LOGIC =================
 </script>
 </body>
 </html>
