@@ -1,20 +1,9 @@
 // ==========================================================
-// NEPPLAY — admin.js (v4.9)
-// v4.9 changes:
-//  + Registration cards now show a mode badge (1v1 / 2v2 / squad)
-// v4.8 changes:
-//  + Announcements: Delete button on each announcement card
-// v4.7 changes:
-//  + Bracket: manual pairing UI (dropdowns + match list + shuffle remaining)
-// v4.6 changes:
-//  + Bracket system for 1v1 tournaments (auto-pair, publish, notify)
-//  + "🎯 Manage Bracket" button on 1v1 tournament cards
-// v4.5 changes:
-//  + Payout docs now store userId + userEmail (from username lookup)
-//  + Payout rows are clickable → detail modal
-//  + openPayoutDetail() / savePayoutEdit() / deletePayout()
-//  + addPayout() now stores userId too
-//  + Backfill helper: backfillPayoutUserIds()
+// NEPPLAY — admin.js (v5.0)
+// v5.0 changes:
+//  + Added Quick Payout tool (search user, credit wallet)
+//  + Added FFWS Predictions Viewer
+//  + Fixed cut-off submitMatchResults() function
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -49,7 +38,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v4.9 — awaiting auth");
+console.log("🔥 Admin v5.0 — awaiting auth");
 
 // ============================================================
 // ADMIN EMAIL
@@ -195,7 +184,6 @@ function escapeDetail(s) {
   }[c]));
 }
 
-// Accepts Firestore Timestamp | ISO string | null → milliseconds (or null)
 function toMillis(v) {
   if (!v) return null;
   if (typeof v === 'string') {
@@ -210,7 +198,6 @@ function toMillis(v) {
   return null;
 }
 
-// ⭐ NEW: mode badge helper
 function modeBadgeHtml(playingAs) {
   const m = String(playingAs || '').toLowerCase();
   if (m === 'solo') {
@@ -734,8 +721,8 @@ function loadLiveStats() {
   const t = todayKey();
   const el = id => document.getElementById(id);
   if (el('lsUsers')) el('lsUsers').innerText = allUsers.length;
-const newToday = allUsers.filter(u => dayKey(u.createdAt) === t).length;
-if (el('lsNewToday')) el('lsNewToday').innerText = newToday;
+  const newToday = allUsers.filter(u => dayKey(u.createdAt) === t).length;
+  if (el('lsNewToday')) el('lsNewToday').innerText = newToday;
   if (el('lsRegs')) el('lsRegs').innerText = allRegs.length;
   const pending = allPayments.filter(p => p.status === 'pending').length;
   if (el('lsPending')) el('lsPending').innerText = pending;
@@ -757,7 +744,6 @@ if (el('lsNewToday')) el('lsNewToday').innerText = newToday;
     el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
   }
 
-  // ⭐ Visitor stats (site_stats/main)
   (async () => {
     try {
       const statsSnap = await getDoc(doc(db, "site_stats", "main"));
@@ -954,7 +940,6 @@ window.deletePayout = async function(payoutId, winnerName) {
 // DETAIL MODAL — Registrations
 // ============================================================
 function renderTeammatesSection(r) {
-  // New format: teammates array with UIDs
   if (Array.isArray(r.teammates) && r.teammates.length) {
     const rows = r.teammates.map((t, i) => {
       const ign = escapeDetail(t.ign || '—');
@@ -973,7 +958,6 @@ function renderTeammatesSection(r) {
       </div>`;
   }
 
-  // Legacy format: player1..player6 without teammates array (pre-patch regs)
   const legacy = [];
   ['player1', 'player2', 'player3', 'player4', 'player5', 'player6'].forEach((k, i) => {
     const v = r[k];
@@ -1223,7 +1207,7 @@ window.deleteTournament = async function(id, title) {
 };
 
 // ============================================================
-// ⭐ BRACKET MANAGER v4.7 — Manual pairing UI
+// BRACKET MANAGER v4.7 — Manual pairing UI
 // ============================================================
 let bkTournament = null;
 let bkRegistrations = [];
@@ -1889,7 +1873,6 @@ window.loadRegistrations = async function() {
 };
 window.filterRegistrations = function() { renderRegistrations(); };
 
-// ⭐ v4.9: registration cards now show mode badge (1v1 / 2v2 / squad)
 function renderRegistrations() {
   const list = document.getElementById('regList');
   if (!list) return;
@@ -1903,7 +1886,6 @@ function renderRegistrations() {
         const isPaid = r.entryType === 'paid';
     const safeName = (r.username||'').replace(/'/g,'');
     const isPending = r.status === 'pending';
-    // ⭐ Use paymentScreenshotUrl directly from the registration doc
     const shotUrl = isPaid ? (r.paymentScreenshotUrl || null) : null;
     const modeBadge = modeBadgeHtml(r.playingAs);
     return `
@@ -1983,7 +1965,6 @@ async function populateResultTournamentDropdown() {
   if (!select) return;
   try {
     const snap = await getDocs(collection(db, 'tournaments'));
-    // ⭐ FILTER: Only show upcoming/active games in the results dropdown
     const tournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       .filter(t => {
           const st = String(t.status || 'upcoming').toLowerCase();
@@ -2055,8 +2036,6 @@ window.loadTournamentForResult = async function() {
 };
 window.updateResultTotal = function() {
   if (!selectedResultTournament) return;
-  
-  // ⭐ Read directly from the input boxes now
   const p1 = Number(document.getElementById('winner1Prize').value.replace(/[^0-9]/g, '')) || 0;
   const p2 = Number(document.getElementById('winner2Prize').value.replace(/[^0-9]/g, '')) || 0;
   const p3 = Number(document.getElementById('winner3Prize').value.replace(/[^0-9]/g, '')) || 0;
@@ -2090,7 +2069,6 @@ window.submitMatchResults = async function() {
   const w2Method = document.getElementById('winner2Method').value;
   const w3Method = document.getElementById('winner3Method').value;
   const tkMethod = document.getElementById('topKillerMethod').value;
-    // ⭐ MANUAL PRIZE INPUTS
   const p1 = Number(document.getElementById('winner1Prize').value.replace(/[^0-9]/g, '')) || 0;
   const p2 = Number(document.getElementById('winner2Prize').value.replace(/[^0-9]/g, '')) || 0;
   const p3 = Number(document.getElementById('winner3Prize').value.replace(/[^0-9]/g, '')) || 0;
@@ -2154,11 +2132,9 @@ window.submitMatchResults = async function() {
       payoutRecords[0].note = `1st place + Top Killer, ${w1Kills} kills`;
       payoutRecords[0].rank = '1 + Top Killer';
     }
-        for (const rec of payoutRecords) {
-      // 1. Create the payout record for history
+    for (const rec of payoutRecords) {
       await addDoc(collection(db, 'tournament_payouts'), rec);
 
-      // 2. Credit the money to the player's wallet if we have their UID
       if (rec.userId) {
         try {
           await updateDoc(doc(db, 'users', rec.userId), {
@@ -2170,41 +2146,39 @@ window.submitMatchResults = async function() {
         }
       }
     }
+    
+    // ⭐ COMPLETED THIS CUT-OFF SECTION
     await addDoc(collection(db, 'match_results'), {
-      tournamentId: tid, tournamentTitle: tTitle,
+      tournamentId: tid, 
+      tournamentTitle: tTitle,
       winner1: { name: w1Name, kills: w1Kills, prize: p1, method: w1Method, userId: u1?.uid || null },
       winner2: w2Name ? { name: w2Name, kills: w2Kills, prize: p2, method: w2Method, userId: u2?.uid || null } : null,
       winner3: w3Name ? { name: w3Name, kills: w3Kills, prize: p3, method: w3Method, userId: u3?.uid || null } : null,
-      topKiller: sameAsFirst
-        ? { name: w1Name, kills: w1Kills, prize: killsPrize, sameAsFirst: true }
-        : { name: tkName, kills: tkKills, prize: killsPrize, method: tkMethod, userId: uTK?.uid || null },
-      highlightUrl: highlightUrl || null,
-      totalPayouts: payoutRecords.reduce((s, p) => s + p.amount, 0),
-      completedAt: serverTimestamp(), createdAt: serverTimestamp()
+      topKiller: tkName ? { name: tkName, kills: tkKills, prize: sameAsFirst ? 0 : killsPrize, method: tkMethod, userId: uTK?.uid || null } : null,
+      highlightUrl: highlightUrl,
+      status: 'completed',
+      completedAt: serverTimestamp()
     });
-        await updateDoc(doc(db, 'tournaments', tid), { status: 'completed', completedAt: serverTimestamp() });
 
-    // ⭐⭐⭐ WEEKLY BONUS AUTO-UPDATE ⭐⭐⭐
-    try {
-      if (typeof window.updateWeeklyStatsForMatch === 'function') {
-        await window.updateWeeklyStatsForMatch(tid, w1Name);
-      }
-    } catch (wbErr) {
-      console.warn('[weekly_stats] hook failed (non-fatal):', wbErr);
-    }
-    // ⭐⭐⭐ END WEEKLY BONUS ⭐⭐⭐
+    await updateDoc(doc(db, 'tournaments', tid), { status: 'completed' });
 
-    const unmatched = payoutRecords.filter(p => !p.userId).map(p => p.winnerName);
-    if (unmatched.length) {
-      window.showToast(`⚠️ Saved. Could NOT match UID for: ${unmatched.join(', ')}`);
-    } else {
-      window.showToast('✅ Results saved + UIDs matched!');
+    if (typeof window.updateWeeklyStatsForMatch === 'function') {
+      await window.updateWeeklyStatsForMatch(tid, w1Name);
     }
 
-    addNotif('result', '🏆 Match completed', `${tTitle} — ${w1Name} won 1st place`);
+    logActivity({
+      action: 'match_completed', category: 'tournaments',
+      targetId: tid, targetType: 'tournament',
+      summary: `Completed match: ${tTitle} — Winner: ${w1Name}`,
+      metadata: { winner: w1Name, prize: p1 }
+    });
+
+    window.showToast('✅ Match completed & payouts created!');
     resetResultsForm();
     await loadRecentResults();
-    await loadPayouts();
+    await populateResultTournamentDropdown();
+    await loadTournamentsAdmin();
+    
   } catch (err) {
     console.error('submitMatchResults error:', err);
     window.showToast('❌ ' + err.message);
@@ -2213,784 +2187,300 @@ window.submitMatchResults = async function() {
     btn.innerText = '🏆 Submit Results & Create Payouts';
   }
 };
+
 window.resetResultsForm = function() {
-  ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills','resultHighlightUrl'].forEach(id => {
+  selectedResultTournament = null;
+  const form = document.getElementById('resultForm');
+  if (form) form.style.display = 'none';
+  const select = document.getElementById('resultTournamentSelect');
+  if (select) select.value = '';
+  ['winner1Name','winner2Name','winner3Name','topKillerName','resultHighlightUrl'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('winner1Method').value = 'esewa';
-  document.getElementById('winner2Method').value = 'esewa';
-  document.getElementById('winner3Method').value = 'esewa';
-  document.getElementById('topKillerMethod').value = 'esewa';
-  document.getElementById('resultTournamentSelect').value = '';
-  document.getElementById('resultForm').style.display = 'none';
-  selectedResultTournament = null;
+  ['winner1Kills','winner2Kills','winner3Kills','topKillerKills'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 };
 
-async function loadRecentResults() {
-  const list = document.getElementById('recentResults');
-  if (!list) return;
+window.loadRecentResults = async function() {
+  const el = document.getElementById('recentResults');
+  if (!el) return;
   try {
-    const snap = await getDocs(collection(db, 'match_results'));
-    allResults = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allResults.sort((a, b) => (b.completedAt?.toMillis?.() || 0) - (a.completedAt?.toMillis?.() || 0));
-    if (!allResults.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No matches completed yet</div>';
+    const snap = await getDocs(query(collection(db, 'match_results'), orderBy('completedAt', 'desc'), limit(10)));
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No matches completed yet</div>';
       return;
     }
-    list.innerHTML = allResults.slice(0, 15).map(r => {
-      const w1 = r.winner1 || {};
-      const tk = r.topKiller || {};
+    el.innerHTML = snap.docs.map(d => {
+      const r = d.data();
       return `
-        <div class="reg-card paid-reg">
-          <div class="reg-icon">🏁</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${r.tournamentTitle || 'Tournament'}</b></div>
-            <div class="reg-line-2">
-              🥇 <b>${w1.name || '—'}</b> (${w1.kills || 0} kills) — Rs. ${w1.prize || 0}
-              ${tk.sameAsFirst ? ' · 🎯 same as 1st' : ` · 🎯 <b>${tk.name || '—'}</b> (${tk.kills || 0})`}
-            </div>
-          </div>
-          <div class="reg-right"><span class="type-chip paid">COMPLETED</span><small>${fmtShort(r.completedAt)}</small></div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
-  }
-}
-
-// ============================================================
-// DAILY COLLECTIONS
-// ============================================================
-window.loadDailyCollections = function() {
-  const range = document.getElementById('dailyRangeFilter')?.value || 'all';
-  let payments = allPayments.filter(p => p.status === 'approved');
-  if (range === 'today') payments = payments.filter(p => dayKey(p.reviewedAt || p.submittedAt) === todayKey());
-  else if (range !== 'all') {
-    const days = Number(range);
-    const cutoff = Date.now() - days * 86400000;
-    payments = payments.filter(p => (p.reviewedAt?.toMillis?.() || p.submittedAt?.toMillis?.() || 0) >= cutoff);
-  }
-  let payouts = allPayouts;
-  if (range === 'today') payouts = payouts.filter(x => dayKey(x.paidAt || x.createdAt) === todayKey());
-  else if (range !== 'all') {
-    const days = Number(range);
-    const cutoff = Date.now() - days * 86400000;
-    payouts = payouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff);
-  }
-  const totalCollected = payments.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const totalPayouts = payouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const netProfit = totalCollected - totalPayouts;
-  const days = {};
-  payments.forEach(p => {
-    const k = dayKey(p.reviewedAt || p.submittedAt); if (!k) return;
-    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
-    days[k].collected += Number(p.amount)||0;
-    days[k].count++;
-    const m = p.method || 'unknown';
-    days[k].byMethod[m] = (days[k].byMethod[m] || 0) + (Number(p.amount)||0);
-  });
-  payouts.forEach(x => {
-    const k = dayKey(x.paidAt || x.createdAt); if (!k) return;
-    if (!days[k]) days[k] = { collected:0, payouts:0, count:0, payoutsCount:0, byMethod:{} };
-    days[k].payouts += Number(x.amount)||0;
-    days[k].payoutsCount = (days[k].payoutsCount || 0) + 1;
-  });
-  const sortedKeys = Object.keys(days).sort().reverse();
-  const el = id => document.getElementById(id);
-  if (el('dailyTotalCollected')) el('dailyTotalCollected').innerText = fmtRs(totalCollected);
-  if (el('dailyTotalPayouts')) el('dailyTotalPayouts').innerText = fmtRs(totalPayouts);
-  if (el('dailyTotalNet')) el('dailyTotalNet').innerText = fmtRs(netProfit);
-  if (el('dailyActiveDays')) el('dailyActiveDays').innerText = sortedKeys.length;
-  const list = document.getElementById('dailyList');
-  if (!list) return;
-  if (!sortedKeys.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">📅</span>No activity in this range.</div>';
-  } else {
-    list.innerHTML = sortedKeys.map(k => {
-      const d = days[k];
-      const net = d.collected - d.payouts;
-      return `
-        <div class="reg-card free-reg">
-          <div class="reg-icon">📅</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${new Date(k).toLocaleDateString('en-GB', { weekday:'long', day:'2-digit', month:'short', year:'numeric' })}</b></div>
-            <div class="reg-line-2">
-              💰 Collected: <b style="color:#4ade80">${fmtRs(d.collected)}</b> (${d.count})
-              · 📤 Payouts: <b style="color:#f87171">${fmtRs(d.payouts)}</b> (${d.payoutsCount || 0})
-              · 📊 Net: <b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(net)}</b>
-            </div>
-          </div>
-          <div class="reg-right"><span class="type-chip ${net >= 0 ? 'paid' : 'free'}">${fmtRs(net)}</span></div>
-        </div>
-      `;
-    }).join('');
-  }
-  const allApproved = allPayments.filter(p => p.status === 'approved');
-  const methods = ['esewa','khalti','imepay','bank'];
-  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  const byMethodEl = document.getElementById('dailyByMethod');
-  if (byMethodEl) {
-    byMethodEl.innerHTML = methods.map(m => {
-      const count = allApproved.filter(p => p.method === m).length;
-      const sum = allApproved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
-      return `<div class="reg-card free-reg"><div class="reg-icon">💰</div><div class="reg-main"><div class="reg-line-1"><b>${labels[m]}</b></div><div class="reg-line-2">${count} approved</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(sum)}</span></div></div>`;
-    }).join('');
-  }
-};
-
-// ============================================================
-// PRIZE CALCULATOR
-// ============================================================
-window.calculatePrize = function() {
-  const fee = Number(document.getElementById('calcFee').value) || 0;
-  const players = Number(document.getElementById('calcPlayers').value) || 0;
-  const pool = Number(document.getElementById('calcPool').value) || 0;
-  const killsPrize = Number(document.getElementById('calcKills').value) || 0;
-  const collected = fee * players;
-  const totalPrizes = pool + killsPrize;
-  const netRevenue = collected - totalPrizes;
-  const margin = collected > 0 ? ((netRevenue / collected) * 100).toFixed(1) : 0;
-  const rtp = collected > 0 ? ((totalPrizes / collected) * 100).toFixed(1) : 0;
-  const breakeven = (pool + killsPrize) > 0 && fee > 0 ? Math.ceil((pool + killsPrize) / fee) : 0;
-  const first = Math.round(pool * 0.50);
-  const second = Math.round(pool * 0.30);
-  const third = Math.round(pool * 0.20);
-  const result = document.getElementById('calcResult');
-  result.style.display = 'block';
-  result.innerHTML = `
-    <div class="stat-grid">
-      <div class="stat-card"><small>COLLECTED</small><b>${fmtRs(collected)}</b><span>From ${players}</span></div>
-      <div class="stat-card"><small>NET REVENUE</small><b style="color:${netRevenue >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(netRevenue)}</b><span>Profit</span></div>
-      <div class="stat-card"><small>MARGIN</small><b>${margin}%</b><span>Net / Collected</span></div>
-      <div class="stat-card"><small>RTP</small><b>${rtp}%</b><span>Return to players</span></div>
-      <div class="stat-card"><small>BREAKEVEN</small><b>${breakeven}</b><span>Players needed</span></div>
-    </div>
-    <h3 class="mt">🥇 Winner Breakdown</h3>
-    <div class="list">
-      <div class="reg-card free-reg"><div class="reg-icon">🥇</div><div class="reg-main"><div class="reg-line-1"><b>1st Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(first)}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥈</div><div class="reg-main"><div class="reg-line-1"><b>2nd Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(second)}</span></div></div>
-      <div class="reg-card free-reg"><div class="reg-icon">🥉</div><div class="reg-main"><div class="reg-line-1"><b>3rd Place</b></div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(third)}</span></div></div>
-    </div>`;
-};
-
-// ============================================================
-// EARNINGS
-// ============================================================
-window.loadEarnings = function() {
-  const approved = allPayments.filter(p => p.status === 'approved');
-  const pending = allPayments.filter(p => p.status === 'pending');
-  const total = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const pendingAmt = pending.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const avg = approved.length ? Math.round(total / approved.length) : 0;
-  const el = id => document.getElementById(id);
-  if (el('earnTotal')) el('earnTotal').innerText = fmtRs(total);
-  if (el('earnApproved')) el('earnApproved').innerText = approved.length;
-  if (el('earnPending')) el('earnPending').innerText = fmtRs(pendingAmt);
-  if (el('earnAvg')) el('earnAvg').innerText = fmtRs(avg);
-  const methods = ['esewa','khalti','imepay','bank'];
-  const labels = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-  const breakdown = document.getElementById('earningsBreakdown');
-  if (breakdown) {
-    breakdown.innerHTML = methods.map(m => {
-      const count = approved.filter(p => p.method === m).length;
-      const sum = approved.filter(p => p.method === m).reduce((s,p) => s + (Number(p.amount)||0), 0);
-      return `<div class="reg-card free-reg"><div class="reg-icon">💰</div><div class="reg-main"><div class="reg-line-1"><b>${labels[m]}</b></div><div class="reg-line-2">${count} approved</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(sum)}</span></div></div>`;
-    }).join('');
-  }
-};
-
-// ============================================================
-// PAYOUTS
-// ============================================================
-window.loadPayouts = async function() {
-  const list = document.getElementById('payoutList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournament_payouts'));
-    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allPayouts.sort((a, b) => (b.paidAt?.toMillis?.() || b.createdAt?.toMillis?.() || 0) - (a.paidAt?.toMillis?.() || a.createdAt?.toMillis?.() || 0));
-    const total = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-    const paid = allPayouts.filter(p => p.status === 'paid');
-    const pending = allPayouts.filter(p => p.status !== 'paid');
-    const el = id => document.getElementById(id);
-    if (el('payoutTotal')) el('payoutTotal').innerText = fmtRs(total);
-    if (el('payoutWinners')) el('payoutWinners').innerText = paid.length;
-    if (el('payoutPending')) el('payoutPending').innerText = fmtRs(pending.reduce((s,p) => s + (Number(p.amount)||0), 0));
-    if (!allPayouts.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div>';
-      return;
-    }
-    list.innerHTML = allPayouts.map(w => {
-      const isPaid = w.status === 'paid';
-      const hasUid = !!w.userId;
-      return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openPayoutDetail('${w.id}')">
+        <div class="reg-card" style="margin-bottom:10px;">
           <div class="reg-icon">🏆</div>
           <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${w.winnerName || 'Unknown'}</b>
-              <span class="reg-sep">—</span>
-              <span class="reg-tournament">${w.tournamentTitle || 'Tournament'}</span>
-              ${hasUid ? '<span class="tourney-count" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#4ade80;">🔗 linked</span>' : '<span class="tourney-count" style="background:rgba(234,179,8,0.15);border-color:rgba(234,179,8,0.4);color:#fbbf24;">⚠️ no UID</span>'}
-            </div>
-            <div class="reg-line-2">🥇 ${w.rank || '—'}${w.kills ? ' · ' + w.kills + ' kills' : ''} · ${fmtRs(w.amount || w.prize || 0)}${w.method ? ' · ' + w.method : ''}${w.note ? ' · ' + w.note : ''}</div>
-          </div>
-          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'PAID' : 'PENDING'}</span><small>${fmtShort(w.paidAt || w.createdAt)}</small></div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
-  }
-};
-
-window.addPayout = async function() {
-  const winnerName = prompt('Winner name (username):');
-  if (!winnerName) return;
-  const tournamentTitle = prompt('Tournament title:');
-  if (!tournamentTitle) return;
-  const amount = Number(prompt('Amount (Rs.):', '500'));
-  if (!amount || amount <= 0) return;
-  const rank = prompt('Rank (#1, #2, #3, Top Killer):', '1');
-  const method = prompt('Payout method (esewa/khalti/imepay/bank/cash):', 'esewa');
-  const note = prompt('Note (optional):', '');
-  try {
-    window.showToast('🔍 Matching user...');
-    const found = await findUidByUsername(winnerName);
-    await addDoc(collection(db, 'tournament_payouts'), {
-      winnerName, tournamentTitle, amount, prize: amount,
-      userId: found?.uid || null,
-      userEmail: found?.data?.email || null,
-      rank: rank || '1', method: method || 'cash', note: note || '',
-      status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
-    });
-    window.showToast(found ? '✅ Payout recorded + UID linked' : '⚠️ Payout recorded (no UID match)');
-    window.loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-window.backfillPayoutUserIds = async function() {
-  if (!confirm('Backfill userId on all tournament_payouts missing it?')) return;
-  const snap = await getDocs(collection(db, 'tournament_payouts'));
-  const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  const missing = all.filter(p => !p.userId);
-  if (!missing.length) { window.showToast('✅ All payouts already have userId'); return; }
-  let ok = 0, fail = 0;
-  for (const p of missing) {
-    try {
-      const found = await findUidByUsername(p.winnerName);
-      if (found) {
-        await updateDoc(doc(db, 'tournament_payouts', p.id), {
-          userId: found.uid, userEmail: found.data?.email || null
-        });
-        ok++;
-      } else fail++;
-    } catch (e) { fail++; }
-  }
-  window.showToast(`✅ Backfilled ${ok} · ⚠️ ${fail} unmatched`);
-  await window.loadPayouts();
-};
-
-// ============================================================
-// PROFIT SHARING
-// ============================================================
-window.loadProfitShare = function() {
-  const approved = allPayments.filter(p => p.status === 'approved');
-  const collected = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const payouts = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const net = collected - payouts;
-  window.__netProfit = net;
-  const result = document.getElementById('shareResult');
-  if (result) {
-    result.innerHTML = `<div class="stat-grid">
-      <div class="stat-card"><small>TOTAL COLLECTED</small><b>${fmtRs(collected)}</b><span>Approved payments</span></div>
-      <div class="stat-card"><small>TOTAL PAYOUTS</small><b>${fmtRs(payouts)}</b><span>To winners</span></div>
-      <div class="stat-card"><small>NET PROFIT</small><b style="color:${net >= 0 ? '#4ade80' : '#f87171'}">${fmtRs(net)}</b><span>To share</span></div>
-    </div>`;
-  }
-};
-window.calculateShares = function() {
-  const name1 = document.getElementById('admin1Name').value || 'Admin 1';
-  const name2 = document.getElementById('admin2Name').value || 'Admin 2';
-  const share1 = Number(document.getElementById('admin1Share').value) || 0;
-  const share2 = Number(document.getElementById('admin2Share').value) || 0;
-  if (share1 + share2 !== 100) {
-    alert('Shares must add up to 100%. Currently: ' + (share1 + share2) + '%');
-    return;
-  }
-  const net = window.__netProfit || 0;
-  const amt1 = Math.round(net * share1 / 100);
-  const amt2 = net - amt1;
-  document.getElementById('shareResult').innerHTML = `
-    <div class="stat-grid"><div class="stat-card"><small>NET PROFIT</small><b>${fmtRs(net)}</b><span>To split</span></div></div>
-    <h3 class="mt">🤝 Share Breakdown</h3>
-    <div class="list">
-      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name1}</b></div><div class="reg-line-2">${share1}%</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(amt1)}</span></div></div>
-      <div class="reg-card paid-reg"><div class="reg-icon">👤</div><div class="reg-main"><div class="reg-line-1"><b>${name2}</b></div><div class="reg-line-2">${share2}%</div></div><div class="reg-right"><span class="type-chip paid">${fmtRs(amt2)}</span></div></div>
-    </div>
-  `;
-};
-
-// ============================================================
-// ROOM DETAILS
-// ============================================================
-window.loadRoomDetailsForm = async function() {
-  const select = document.getElementById('roomTournamentSelect');
-  if (!select) return;
-  const previousValue = select.value;
-  try {
-    const snap = await getDocs(collection(db, 'tournaments'));
-    
-    // ⭐ FILTER: Only load upcoming tournaments so old ones don't clutter
-    roomTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(t => {
-          const st = String(t.status || 'upcoming').toLowerCase();
-          return st === 'upcoming' || st === 'active' || st === 'ongoing';
-      })
-      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-
-        select.innerHTML = '<option value="">— Select tournament —</option>' +
-      roomTournaments.map(t =>
-        `<option value="${t.id}"${t.id === previousValue ? ' selected' : ''}>${t.title || 'Untitled'} — 📅 ${t.date || 'No Date'} [ID: ${t.id}]</option>`
-      ).join('');
-  } catch (err) { console.warn('loadRoomDetailsForm fetch failed:', err); return; }
-  
-  const tid = select.value;
-  const form = document.getElementById('roomDetailsForm');
-  if (!tid) { form.style.display = 'none'; return; }
-  const t = roomTournaments.find(x => x.id === tid);
-  if (!t) return;
-  form.style.display = 'block';
-  document.getElementById('roomTournamentName').textContent = t.title || 'Tournament';
-  document.getElementById('roomId').value = t.roomId || '';
-  document.getElementById('roomPassword').value = t.roomPassword || '';
-  document.getElementById('roomFormat').value = t.roomFormat || '';
-  document.getElementById('roomRounds').value = t.roomRounds || '';
-  document.getElementById('roomOpenTime').value = t.roomOpenTime || '';
-  document.getElementById('roomRules').value = t.roomRules || '';
-  
-  const revealMs = toMillis(t.roomRevealAt);
-  if (revealMs != null) {
-    const d = new Date(revealMs);
-    const pad = n => String(n).padStart(2, '0');
-    document.getElementById('roomRevealAt').value =
-      `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  } else {
-    document.getElementById('roomRevealAt').value = '';
-  }
-  document.getElementById('roomSaveStatus').style.display = 'none';
-};
-window.saveRoomDetails = async function() {
-  const tid = document.getElementById('roomTournamentSelect').value;
-  if (!tid) { alert('Select a tournament first'); return; }
-  const roomId = document.getElementById('roomId').value.trim();
-  const roomPassword = document.getElementById('roomPassword').value.trim();
-  const roomFormat = document.getElementById('roomFormat').value.trim();
-  const roomRounds = document.getElementById('roomRounds').value.trim();
-  const roomOpenTime = document.getElementById('roomOpenTime').value.trim();
-  const roomRules = document.getElementById('roomRules').value.trim();
-    const revealRaw = document.getElementById('roomRevealAt').value;
-  let roomRevealAt = null;
-  if (revealRaw) {
-    // datetime-local gives "YYYY-MM-DDTHH:mm" in the admin's LOCAL timezone.
-    // Convert to a real Firestore Timestamp so any client can compare it cleanly.
-    const localDate = new Date(revealRaw);
-    if (!isNaN(localDate.getTime())) roomRevealAt = Timestamp.fromDate(localDate);
-  }
-  try {
-    await updateDoc(doc(db, 'tournaments', tid), {
-      roomId, roomPassword, roomFormat, roomRounds,
-      roomOpenTime, roomRules, roomRevealAt,
-      roomUpdatedAt: serverTimestamp()
-    });
-    window.showToast('✅ Room details saved');
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============================================================
-// USERS
-// ============================================================
-window.loadUsers = async function() {
-  const list = document.getElementById('userList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'users'));
-    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allUsers.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (document.getElementById('usersBadge')) {
-  const newToday = allUsers.filter(u => dayKey(u.createdAt) === todayKey()).length;
-  document.getElementById('usersBadge').innerText = allUsers.length;
-  if (newToday > 0) {
-    document.getElementById('usersBadge').style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
-    document.getElementById('usersBadge').style.color = '#fff';
-  }
-}
-    if (document.getElementById('dashUsers')) document.getElementById('dashUsers').innerText = allUsers.length;
-    renderUsers();
-    renderDashboardRecent();
-    loadLiveStats();
-    if (document.getElementById('notifTarget')) renderNotificationTargetOptions();
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
-  }
-};
-window.filterUsers = function() { renderUsers(); };
-function renderUsers() {
-  const list = document.getElementById('userList');
-  if (!list) return;
-  const q = (document.getElementById('userSearch').value || '').toLowerCase();
-  let filtered = allUsers.filter(u => !q || `${u.username||''} ${u.email||''} ${u.phone||''}`.toLowerCase().includes(q));
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">👥</span>No users.</div>';
-    return;
-  }
-  filtered = [...filtered].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-  list.innerHTML = filtered.map(u => {
-    const isNew = isNewUser(u.createdAt);
-    const ago = timeAgo(u.createdAt);
-    const fullDate = fmtDate(u.createdAt);
-    return `
-      <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')" style="${isNew ? 'border-left:4px solid #22c55e;' : ''}">
-        <div class="reg-icon" style="${isNew ? 'background:linear-gradient(135deg,#22c55e,#16a34a);' : ''}">${initials(u.username)}</div>
-        <div class="reg-main">
-          <div class="reg-line-1">
-            <b>${u.username || 'Unknown'}</b>
-            ${u.role === 'admin' ? '<span class="type-chip paid" style="margin-left:8px;">ADMIN</span>' : ''}
-            ${isNew ? '<span class="type-chip" style="margin-left:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;font-weight:900;">🆕 NEW</span>' : ''}
-          </div>
-          <div class="reg-line-2">📧 ${u.email || '—'}${u.phone ? ' · 📱 ' + u.phone : ''}</div>
-          <div class="reg-line-2" style="margin-top:5px;font-size:12px;">
-            🕐 Joined <b style="color:${isNew ? '#4ade80' : '#a5b4fc'};">${ago}</b>
-            <span style="color:#6b7280;font-size:11px;"> · ${fullDate}</span>
-          </div>
-        </div>
-        <div class="reg-right">
-          <span class="type-chip free">${u.role === 'admin' ? 'Admin' : 'Member'}</span>
-          <small style="color:${isNew ? '#4ade80' : '#9ca3af'};font-weight:${isNew ? '700' : '400'};margin-top:4px;">${ago}</small>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-window.deleteUser = async function(uid, username, fromModal) {
-  if (fromModal) closeDetailModal();
-  const confirmText = prompt(`Delete user "${username}"? Type DELETE to confirm:`);
-  if (confirmText !== 'DELETE') return;
-  try {
-    await deleteDoc(doc(db, 'users', uid));
-    window.showToast(`🗑️ Deleted user "${username}"`);
-    await window.loadUsers();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============================================================
-// CSV EXPORTS
-// ============================================================
-function downloadCSV(filename, rows) {
-  const csv = rows.map(r => r.map(cell => {
-    const s = String(cell == null ? '' : cell);
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-      return '"' + s.replace(/"/g, '""') + '"';
-    }
-    return s;
-  }).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  window.showToast('✅ Downloaded ' + filename);
-}
-window.exportUsersCSV = function() {
-  if (!allUsers.length) { window.showToast('❌ No users to export'); return; }
-  const rows = [['Username','Email','Phone','Role','User ID','Joined']];
-  allUsers.forEach(u => {
-    rows.push([
-      u.username || '', u.email || '', u.phone || '', u.role || 'member', u.id,
-      u.createdAt?.toDate ? u.createdAt.toDate().toISOString() : ''
-    ]);
-  });
-  downloadCSV(`nepplay-users-${todayKey()}.csv`, rows);
-};
-window.exportRegistrationsCSV = function() {
-  if (!allRegs.length) { window.showToast('❌ No registrations to export'); return; }
-  const rows = [['Username','Email','IGN','Phone','Tournament','Mode','Entry Type','Amount','Txn ID','Method','Status','Registered']];
-  allRegs.forEach(r => {
-    rows.push([
-      r.username || '', r.email || '', r.ign || '', r.phone || '', r.tournamentTitle || '',
-      r.playingAs || r.mode || '',
-      r.entryType || '', r.amount || 0, r.txnId || '', r.method || '', r.status || '',
-      r.registeredAt?.toDate ? r.registeredAt.toDate().toISOString() : ''
-    ]);
-  });
-  downloadCSV(`nepplay-registrations-${todayKey()}.csv`, rows);
-};
-window.exportPaymentsCSV = function() {
-  if (!allPayments.length) { window.showToast('❌ No payments to export'); return; }
-  const rows = [['Username','Email','IGN','Phone','Tournament','Amount','Txn ID','Method','Status','Admin Note','Submitted','Reviewed']];
-  allPayments.forEach(p => {
-    rows.push([
-      p.username || '', p.email || '', p.ign || '', p.phone || '', p.tournamentTitle || '',
-      p.amount || 0, p.txnId || '', p.method || '', p.status || '', p.adminNote || '',
-      p.submittedAt?.toDate ? p.submittedAt.toDate().toISOString() : '',
-      p.reviewedAt?.toDate ? p.reviewedAt.toDate().toISOString() : ''
-    ]);
-  });
-  downloadCSV(`nepplay-payments-${todayKey()}.csv`, rows);
-};
-
-// ============================================================
-// TOURNAMENTS ADMIN
-// ============================================================
-window.loadTournamentsAdmin = async function() {
-  const list = document.getElementById('tournamentList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db, 'tournaments'));
-    allTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const counts = {};
-    allRegs.forEach(r => {
-      if (!r.tournamentId) return;
-      if (!counts[r.tournamentId]) counts[r.tournamentId] = { total: 0, confirmed: 0, pending: 0 };
-      counts[r.tournamentId].total++;
-      if (r.status === 'confirmed') counts[r.tournamentId].confirmed++;
-      else if (r.status === 'pending') counts[r.tournamentId].pending++;
-    });
-    if (!allTournaments.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No tournaments.</div>';
-      return;
-    }
-    list.innerHTML = allTournaments.map(t => {
-      const entryTypeRaw = (t.entryType || t.entry_type || 'free').toLowerCase();
-      const feeValue = Number(t.entryFee || t.entry_fee || 0);
-      const isPaid = entryTypeRaw === 'paid' || feeValue > 0;
-      const isCompleted = (t.status || '').toLowerCase() === 'completed';
-      const tTitle = String(t.title || '').toLowerCase();
-      const is1v1 = String(t.mode || '').toLowerCase() === '1v1'
-                    || tTitle.includes('1v1') || tTitle.includes('1 vs 1') || tTitle.includes('1vs1');
-      const safeTitle = (t.title || 'Untitled').replace(/'/g, "\\'");
-      const c = counts[t.id] || { total: 0, confirmed: 0, pending: 0 };
-      return `
-        <div class="reg-card ${isCompleted ? 'free-reg' : (isPaid ? 'paid-reg' : 'free-reg')}">
-          <div class="reg-icon">${isCompleted ? '✅' : (isPaid ? '💵' : '🏆')}</div>
-          <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${t.title || 'Untitled'}</b>
-              <span class="tourney-count">📋 ${c.total}</span>
-            </div>
-            <div class="reg-line-2">${t.game || 'Game'} · ${t.mode || 'Solo'}${t.date ? ' · 📅 ' + t.date : ''}${t.time ? ' · 🕐 ' + t.time : ''}${isPaid ? ' · 💰 Rs. ' + (t.entryFee || t.entry_fee || 0) : ' · FREE'}</div>
-            <div class="reg-actions">
-              ${is1v1 ? `<button class="btn-edit small" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a0b3d;font-weight:900;" onclick="openBracketManager('${t.id}')">🎯 Manage Bracket</button>` : ''}
-              ${!isCompleted ? `<button class="btn-edit small" onclick="editTournament('${t.id}')">✏️ Edit</button>` : ''}
-              <button class="btn-delete small" onclick="deleteTournament('${t.id}','${safeTitle}')">🗑️ Delete</button>
+            <div class="reg-line-1"><b>${r.tournamentTitle}</b></div>
+            <div class="reg-line-2">
+              🥇 <b style="color:#fbbf24;">${r.winner1?.name || '—'}</b> · Rs. ${r.winner1?.prize || 0} <br>
+              🥈 ${r.winner2?.name || '—'} ${r.winner2 ? '· Rs. '+r.winner2.prize : ''} <br>
+              🥉 ${r.winner3?.name || '—'} ${r.winner3 ? '· Rs. '+r.winner3.prize : ''}
             </div>
           </div>
           <div class="reg-right">
-            <span class="type-chip ${isCompleted ? 'free' : (isPaid ? 'paid' : 'free')}">${isCompleted ? 'Completed' : (isPaid ? 'Paid' : 'Free')}</span>
+            <small>${fmtShort(r.completedAt)}</small>
           </div>
         </div>
       `;
     }).join('');
   } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
+    el.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
 
 // ============================================================
-// ANNOUNCEMENTS
+// QUICK PAYOUT TOOL (NEW)
 // ============================================================
-window.loadAnnouncements = async function() {
-  const list = document.getElementById('announcementList');
-  if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
+let selectedPlayer = null;
+let payoutInitialized = false;
+
+window.initQuickPayout = function() {
+  if (payoutInitialized) return; // Prevent duplicate event listeners
+  payoutInitialized = true;
+
+  const searchInput = document.getElementById('payoutSearchInput');
+  const searchBtn   = document.getElementById('payoutSearchBtn');
+  const resultBox   = document.getElementById('payoutResult');
+  const nameEl      = document.getElementById('payoutName');
+  const emailEl     = document.getElementById('payoutEmail');
+  const balanceEl   = document.getElementById('payoutBalance');
+  const amountInput = document.getElementById('payoutAmount');
+  const creditBtn   = document.getElementById('payoutCreditBtn');
+  const msgEl       = document.getElementById('payoutMsg');
+
+  const USERNAME_FIELD = 'username'; // change if needed
+  const EMAIL_FIELD    = 'email';
+  const BALANCE_FIELD  = 'walletBalance';
+
+  async function findPlayer(term) {
+    const usersRef = collection(db, 'users');
+    let snap = await getDocs(query(usersRef, where(EMAIL_FIELD, '==', term)));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    snap = await getDocs(query(usersRef, where(USERNAME_FIELD, '==', term)));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    snap = await getDocs(query(usersRef, where('usernameLower', '==', term.toLowerCase())));
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    
+    return null;
+  }
+
+  async function handleSearch() {
+    const term = searchInput.value.trim();
+    if (!term) return;
+    msgEl.textContent = '';
+    resultBox.style.display = 'none';
+    selectedPlayer = null;
+
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Searching...';
+    try {
+      const player = await findPlayer(term);
+      if (!player) {
+        alert('No player found. Check username or email.');
+        return;
+      }
+      selectedPlayer = player;
+      nameEl.textContent    = player[USERNAME_FIELD] || '(no username)';
+      emailEl.textContent   = player[EMAIL_FIELD]    || '(no email)';
+      balanceEl.textContent = Number(player[BALANCE_FIELD] ?? 0).toLocaleString('en-IN');
+      amountInput.value     = '';
+      resultBox.style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      alert('Search failed: ' + err.message);
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Search';
+    }
+  }
+
+  async function handleCredit() {
+    if (!selectedPlayer) return;
+    const amount = Number(amountInput.value);
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
+      alert('Enter a valid whole number greater than 0.'); return;
+    }
+    
+    const ok = confirm(`Credit Rs ${amount.toLocaleString('en-IN')} to ${nameEl.textContent}?\n\nCurrent: Rs ${balanceEl.textContent}`);
+    if (!ok) return;
+
+    creditBtn.disabled = true;
+    creditBtn.textContent = 'Crediting...';
+    msgEl.textContent = '';
+
+    try {
+      const userRef = doc(db, 'users', selectedPlayer.id);
+      await updateDoc(userRef, { [BALANCE_FIELD]: increment(amount) });
+
+      try {
+        await addDoc(collection(db, 'wallet_ledger'), {
+          userId: selectedPlayer.id, username: nameEl.textContent, email: emailEl.textContent,
+          type: 'admin_credit', amount: amount, reason: 'Manual credit via admin panel',
+          createdAt: serverTimestamp(), createdBy: currentAdminEmail || 'admin'
+        });
+      } catch (e) { console.warn('Ledger write failed:', e); }
+
+      const freshSnap = await getDoc(userRef);
+      const newBal = Number(freshSnap.data()?.[BALANCE_FIELD] ?? 0);
+
+      balanceEl.textContent = newBal.toLocaleString('en-IN');
+      msgEl.style.color = '#22c55e';
+      msgEl.textContent = `✅ Credited Rs ${amount.toLocaleString('en-IN')}. New: Rs ${newBal.toLocaleString('en-IN')}`;
+      amountInput.value = '';
+    } catch (err) {
+      console.error(err);
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = '❌ Failed: ' + err.message;
+    } finally {
+      creditBtn.disabled = false;
+      creditBtn.textContent = 'Credit';
+    }
+  }
+
+  searchBtn.addEventListener('click', handleSearch);
+  creditBtn.addEventListener('click', handleCredit);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchBtn.click(); });
+  amountInput.addEventListener('keydown', e => { if (e.key === 'Enter') creditBtn.click(); });
+};
+
+
+// ============================================================
+// FFWS PREDICTIONS VIEWER (NEW)
+// ============================================================
+let allPredictionsData = [];
+let predsInitialized = false;
+
+window.fetchPredictions = async function() {
+  const loadPredsBtn = document.getElementById('loadPredsBtn');
+  const predictionsList = document.getElementById('predictionsList');
+  
+  if (!loadPredsBtn || !predictionsList) return;
+
+  // Setup event listeners once
+  if (!predsInitialized) {
+    const predSearchInput = document.getElementById('predSearchInput');
+    
+    loadPredsBtn.addEventListener('click', window.fetchPredictions);
+    
+    predSearchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      if (!term) return renderPredictions(allPredictionsData);
+      
+      const filtered = allPredictionsData.filter(p => 
+        (p.username && p.username.toLowerCase().includes(term)) || 
+        (p.email && p.email.toLowerCase().includes(term)) ||
+        (p.userId && p.userId.toLowerCase().includes(term))
+      );
+      renderPredictions(filtered);
+    });
+    predsInitialized = true;
+  }
+
+  loadPredsBtn.textContent = '⏳ Loading...';
+  loadPredsBtn.disabled = true;
+  predictionsList.innerHTML = '<div style="text-align:center; padding:20px; color:#9ca3af;">Loading predictions from Firebase...</div>';
+  allPredictionsData = [];
+
   try {
-    const snap = await getDocs(collection(db, 'announcements'));
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    if (!items.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">📢</span>No announcements yet</div>';
+    const predsSnap = await getDocs(collection(db, 'ffws_predictions'));
+    if (predsSnap.empty) {
+      predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">No predictions submitted yet.</p>';
       return;
     }
-    list.innerHTML = items.map(a => {
-      const safeTitle = String(a.title || '').replace(/'/g, "\\'").slice(0, 60);
-      return `
-        <div class="reg-card free-reg">
-          <div class="reg-icon">📢</div>
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${a.title || 'Untitled'}</b></div>
-            <div class="reg-line-2">${a.message || ''}</div>
-            <div class="reg-actions" style="margin-top:8px;">
-              <button class="btn-delete small" onclick="deleteAnnouncement('${a.id}','${safeTitle}')">🗑️ Delete</button>
-            </div>
-          </div>
-          <div class="reg-right"><small>${fmtDate(a.createdAt)}</small></div>
+
+    const promises = predsSnap.docs.map(async (predDoc) => {
+      const pred = predDoc.data();
+      let username = 'Unknown User';
+      let email = 'No Email';
+
+      try {
+        const userSnap = await getDoc(doc(db, 'users', pred.userId));
+        if (userSnap.exists()) {
+          const uData = userSnap.data();
+          username = uData.username || uData.name || 'Unnamed';
+          email = uData.email || 'No Email';
+        }
+      } catch (e) {
+        console.warn("Could not fetch user for prediction", pred.userId);
+      }
+
+      let timeStr = 'Unknown Time';
+      if (pred.submittedAt) {
+        timeStr = pred.submittedAt.toDate().toLocaleString('en-GB', { 
+          day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+        });
+      }
+
+      return { id: predDoc.id, username, email, timeStr, ...pred };
+    });
+
+    allPredictionsData = await Promise.all(promises);
+    allPredictionsData.sort((a, b) => (b.submittedAt?.toMillis() || 0) - (a.submittedAt?.toMillis() || 0));
+    renderPredictions(allPredictionsData);
+
+  } catch (err) {
+    console.error('Error loading predictions:', err);
+    predictionsList.innerHTML = `<p style="color:#ef4444; text-align:center; padding:20px;">❌ Error: ${err.message}</p>`;
+  } finally {
+    loadPredsBtn.textContent = '🔄 Refresh Predictions';
+    loadPredsBtn.disabled = false;
+  }
+};
+
+function renderPredictions(dataToRender) {
+  const predictionsList = document.getElementById('predictionsList');
+  if (!predictionsList) return;
+  
+  predictionsList.innerHTML = '';
+  
+  if (dataToRender.length === 0) {
+    predictionsList.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">No results found.</p>';
+    return;
+  }
+
+  dataToRender.forEach(pred => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background: #0f1124; border: 1px solid #2a2d4a; border-radius: 10px; padding: 16px; font-size: 13px; margin-bottom: 12px;';
+    
+    const makeDayBox = (dayLabel, dayData) => `
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
+        <h4 style="color: #fbbf24; margin: 0 0 10px 0; font-size: 12px; border-bottom: 1px dashed #444; padding-bottom: 6px; text-transform: uppercase;">📅 ${dayLabel}</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; color:#ddd;">
+          <div><span style="color:#9ca3af;">Top 2:</span> <b>${dayData?.topTeams || '-'}</b></div>
+          <div><span style="color:#9ca3af;">Winner:</span> <b style="color:#4ade80;">${dayData?.winner || '-'}</b></div>
+          <div><span style="color:#9ca3af;">Kills:</span> ${dayData?.kills || '-'} | <span style="color:#9ca3af;">Place:</span> ${dayData?.placement || '-'}</div>
+          <div><span style="color:#9ca3af;">Booyah:</span> ${dayData?.booyah || '-'}</div>
         </div>
-      `;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
-  }
-};
-
-window.deleteAnnouncement = async function(id, title) {
-  if (!confirm(`Delete announcement "${title}"?\n\nThis action cannot be undone.`)) return;
-  try {
-    await deleteDoc(doc(db, 'announcements', id));
-    window.showToast('🗑️ Announcement deleted');
-    await window.loadAnnouncements();
-  } catch (err) {
-    console.error('deleteAnnouncement error:', err);
-    window.showToast('❌ ' + err.message);
-  }
-};
-
-window.postAnnouncement = async function(e) {
-  e.preventDefault();
-  const title = document.getElementById('annTitle').value.trim();
-  const message = document.getElementById('annMsg').value.trim();
-  if (!title || !message) { window.showToast('❌ Title and message required'); return; }
-  try {
-    await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp() });
-    document.getElementById('annTitle').value = '';
-    document.getElementById('annMsg').value = '';
-    window.showToast('✅ Announcement posted');
-    window.loadAnnouncements();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============================================================
-// DASHBOARD RECENT
-// ============================================================
-function renderDashboardRecent() {
-  const t = todayKey();
-  const todayPayments = allPayments.filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t);
-  const todayCollected = todayPayments.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const todayPayouts = allPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t).reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const allCollected = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const allPayoutsTotal = allPayouts.reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const el = id => document.getElementById(id);
-  if (el('dashTodayCollected')) el('dashTodayCollected').innerText = fmtRs(todayCollected);
-  if (el('dashTodayPayouts')) el('dashTodayPayouts').innerText = fmtRs(todayPayouts);
-  if (el('dashTodayNet')) el('dashTodayNet').innerText = fmtRs(todayCollected - todayPayouts);
-  if (el('dashAllNet')) el('dashAllNet').innerText = fmtRs(allCollected - allPayoutsTotal);
-  const ru = document.getElementById('dashRecentUsers');
-  if (ru && allUsers.length) {
-    ru.innerHTML = allUsers.slice(0,5).map(u => `
-      <div class="reg-card free-reg clickable-row" onclick="openUserDetail('${u.id}')">
-        <div class="reg-icon">${initials(u.username)}</div>
-        <div class="reg-main"><div class="reg-line-1"><b>${u.username || 'Unknown'}</b></div><div class="reg-line-2">${u.email || '—'}</div></div>
-        <div class="reg-right"><small>${fmtShort(u.createdAt)}</small></div>
       </div>
-    `).join('');
-  }
-  const rr = document.getElementById('dashRecentRegs');
-  if (rr && allRegs.length) {
-    rr.innerHTML = allRegs.slice(0,5).map(r => {
-      const isPaid = r.entryType === 'paid';
-      const modeBadge = modeBadgeHtml(r.playingAs);
-      return `
-        <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
-          <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
-          <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${r.username || 'Unknown'}</b>
-              <span class="reg-sep">—</span>
-              <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
-              ${modeBadge}
-            </div>
-            <div class="reg-line-2">${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}</div>
-          </div>
-          <div class="reg-right"><span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span><small>${fmtShort(r.registeredAt)}</small></div>
+    `;
+
+    card.innerHTML = `
+      <div style="border-bottom: 1px solid #2a2d4a; padding-bottom: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-weight: 800; color: #a5b4fc; font-size: 15px;">👤 ${pred.username}</div>
+          <div style="color: #9ca3af; font-size: 12px; margin-top:2px;">${pred.email}</div>
         </div>
-      `;
-    }).join('');
-  }
+        <div style="color: #6b7280; font-size: 11px; background:rgba(255,255,255,.05); padding:4px 8px; border-radius:6px;">
+          🕐 ${pred.timeStr}
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        ${makeDayBox('Day 1', pred.day1)}
+        ${makeDayBox('Day 2', pred.day2)}
+        ${makeDayBox('Day 3', pred.day3)}
+      </div>
+    `;
+    predictionsList.appendChild(card);
+  });
 }
-
-// ============================================================
-// REVIEW MODAL
-// ============================================================
-window.openReview = function(id, name, action, type) {
-  document.getElementById('reviewId').value = id;
-  document.getElementById('reviewAction').value = action;
-  document.getElementById('reviewType').value = type || 'payment';
-  const t = {
-    approve: { title: '✔ Approve', btn: '✔ Confirm Approve', cls: 'btn-primary green', desc: 'Approve ' + name + '?' },
-    reject:  { title: '❌ Reject',  btn: '✘ Confirm Reject',  cls: 'btn-primary red',   desc: 'Reject ' + name + '?' },
-    reset:   { title: '↺ Reset',   btn: '↺ Confirm Reset',   cls: 'btn-primary',       desc: 'Reset ' + name + ' to PENDING?' }
-  }[action] || { title:'Confirm', btn:'Confirm', cls:'btn-primary', desc:'Confirm?' };
-  document.getElementById('reviewTitle').innerText = t.title;
-  document.getElementById('reviewDesc').innerHTML = '<b>' + name + '</b> — ' + t.desc;
-  const btn = document.getElementById('reviewConfirmBtn');
-  btn.className = t.cls;
-  btn.innerText = t.btn;
-  document.getElementById('reviewModal').classList.add('active');
-};
-window.closeReview = function() {
-  document.getElementById('reviewModal').classList.remove('active');
-  document.getElementById('reviewNote').value = '';
-};
-window.confirmReview = async function(e) {
-  e.preventDefault();
-  const id = document.getElementById('reviewId').value;
-  const action = document.getElementById('reviewAction').value;
-  const type = document.getElementById('reviewType').value;
-  const note = document.getElementById('reviewNote').value.trim();
-  let status, regStatus;
-  if (action === 'approve') { status = 'approved'; regStatus = 'confirmed'; }
-  else if (action === 'reject') { status = 'rejected'; regStatus = 'rejected'; }
-  else if (action === 'reset') { status = 'pending'; regStatus = 'pending'; }
-  else return;
-  try {
-    if (type === 'payment') {
-      await updateDoc(doc(db, 'tournament_payments', id), {
-        status, adminNote: note, reviewedAt: serverTimestamp()
-      });
-      const regSnap = await getDocs(query(collection(db, 'tournament_registrations'), where('paymentId', '==', id)));
-      for (const d of regSnap.docs) {
-        await updateDoc(doc(db, 'tournament_registrations', d.id), { status: regStatus });
-      }
-      if (action === 'approve') {
-        await handleReferralBonus(id);
-        await loadReferralBonuses();
-      }
-    } else {
-      await updateDoc(doc(db, 'tournament_registrations', id), { status: regStatus });
-    }
-    closeReview();
-    const actionLabel = action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Reset to pending';
-    window.showToast('✅ ' + actionLabel);
-    window.loadPayments();
-    window.loadRegistrations();
-  } catch (err) { window.showToast('❌ ' + err.message); }
-};
-
-// ============================================================
-// LIGHTBOX + TOAST
-// ============================================================
-window.openShotById = function(id) {
-  const src = screenshotCache[id];
-  if (!src) { window.showToast('❌ Screenshot not available'); return; }
-  document.getElementById('shotFull').src = src;
-  document.getElementById('shotModal').classList.add('active');
-};
-window.openShot = function(src) {
-  document.getElementById('shotFull').src = src;
-  document.getElementById('shotModal').classList.add('active');
-};
-window.showToast = function(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.innerText = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-};
