@@ -1,11 +1,5 @@
 // ==========================================================
-// NEPPLAY — admin.js (v5.1 - FULL)
-// v5.1 changes:
-//  + Restored all missing core functions (Users, Dashboard, Payouts, etc.)
-//  + Fixed "renderDashboardRecent is not defined" error
-//  + Added Quick Payout tool
-//  + Added FFWS Predictions Viewer
-//  + Fixed cut-off submitMatchResults() function
+// NEPPLAY — admin.js (v5.2 - ABSOLUTE FULL)
 // ==========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -40,7 +34,7 @@ initActivity(db, auth);
 window.loadActivityFeed = loadActivityFeed;
 window.loadActivityPage = loadActivityPage;
 
-console.log("🔥 Admin v5.1 — awaiting auth");
+console.log("🔥 Admin v5.2 — awaiting auth");
 
 // ============================================================
 // GLOBAL HELPERS & TOASTS
@@ -300,10 +294,60 @@ async function bootstrapAdminPanel() {
 }
 
 // ============================================================
+// LIVE STATS
+// ============================================================
+function loadLiveStats() {
+  const t = todayKey();
+  const el = id => document.getElementById(id);
+  if (el('lsUsers')) el('lsUsers').innerText = allUsers.length;
+  const newToday = allUsers.filter(u => dayKey(u.createdAt) === t).length;
+  if (el('lsNewToday')) el('lsNewToday').innerText = newToday;
+  if (el('lsRegs')) el('lsRegs').innerText = allRegs.length;
+  const pending = allPayments.filter(p => p.status === 'pending').length;
+  if (el('lsPending')) el('lsPending').innerText = pending;
+  const confirmedToday = allRegs.filter(r => r.status === 'confirmed' && dayKey(r.registeredAt) === t).length;
+  if (el('lsConfirmedToday')) el('lsConfirmedToday').innerText = confirmedToday;
+  const liveStreamers = allRegs.filter(r => r.streamUrl && r.status === 'confirmed').length;
+  if (el('lsLiveStreamers')) el('lsLiveStreamers').innerText = liveStreamers;
+  const todayCollected = allPayments
+    .filter(p => p.status === 'approved' && dayKey(p.reviewedAt || p.submittedAt) === t)
+    .reduce((s,p) => s + (Number(p.amount)||0), 0);
+  if (el('lsCollectedToday')) el('lsCollectedToday').innerText = fmtRs(todayCollected);
+  const todayPayouts = allPayouts
+    .filter(x => dayKey(x.paidAt || x.createdAt) === t)
+    .reduce((s,p) => s + (Number(p.amount)||0), 0);
+  if (el('lsPaidToday')) el('lsPaidToday').innerText = fmtRs(todayPayouts);
+  const net = todayCollected - todayPayouts;
+  if (el('lsNetToday')) {
+    el('lsNetToday').innerText = fmtRs(net);
+    el('lsNetToday').style.color = net >= 0 ? '#4ade80' : '#f87171';
+  }
+
+  (async () => {
+    try {
+      const statsSnap = await getDoc(doc(db, "site_stats", "main"));
+      if (!statsSnap.exists()) return;
+      const s = statsSnap.data();
+      const totalVisits   = Number(s.totalVisits || 0);
+      const todayVisits   = Number(s.todayVisits || 0);
+      const totalViews    = Number(s.totalPageViews || 0);
+      const viewsPerVisit = totalVisits > 0 ? (totalViews / totalVisits).toFixed(1) : '0';
+
+      if (el('lsTotalVisits'))   el('lsTotalVisits').innerText   = totalVisits;
+      if (el('lsTodayVisits'))   el('lsTodayVisits').innerText   = todayVisits;
+      if (el('lsTotalViews'))    el('lsTotalViews').innerText    = totalViews;
+      if (el('lsViewsPerVisit')) el('lsViewsPerVisit').innerText = viewsPerVisit;
+    } catch (e) {}
+  })();
+}
+setInterval(() => {
+  if (document.getElementById('admin-panel')?.style.display === 'block') loadLiveStats();
+}, 30000);
+
+// ============================================================
 // DASHBOARD RECENTS
 // ============================================================
 window.renderDashboardRecent = function() {
-  // Recent Users
   const ru = document.getElementById('dashRecentUsers');
   if (ru) {
     if (!allUsers.length) { ru.innerHTML = '<div class="empty-state">No users yet</div>'; }
@@ -322,7 +366,6 @@ window.renderDashboardRecent = function() {
     }
   }
 
-  // Recent Regs
   const rr = document.getElementById('dashRecentRegs');
   if (rr) {
     if (!allRegs.length) { rr.innerHTML = '<div class="empty-state">No registrations yet</div>'; }
@@ -340,6 +383,446 @@ window.renderDashboardRecent = function() {
       `).join('');
     }
   }
+};
+
+// ============================================================
+// NOTIFICATIONS (admin bell) & REALTIME
+// ============================================================
+let notifications = [];
+
+function addNotif(type, title, message) {
+  notifications.unshift({ id: Date.now() + Math.random(), type, title, message, time: new Date(), read: false });
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  renderNotifBell();
+  renderNotifPanel();
+}
+function renderNotifBell() {
+  const unread = notifications.filter(n => !n.read).length;
+  const c = document.getElementById('notifCount');
+  if (!c) return;
+  if (unread > 0) { c.innerText = unread > 9 ? '9+' : unread; c.style.display = 'block'; }
+  else c.style.display = 'none';
+}
+function renderNotifPanel() {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  if (!notifications.length) {
+    list.innerHTML = '<div style="padding:20px; text-align:center; color:#6b7280; font-size:13px;">No new notifications</div>';
+    return;
+  }
+  const icons = { user:'👤', registration:'📋', payment:'💰', review:'✅', result:'🏆', referral:'🤝' };
+  const colors = { user:'#3b82f6', registration:'#a855f7', payment:'#f59e0b', review:'#22c55e', result:'#eab308', referral:'#ec4899' };
+  list.innerHTML = notifications.map(n => `
+    <div class="notif-item" style="${n.read ? 'opacity:.5' : ''}">
+      <div class="notif-icon" style="background:${colors[n.type] || '#6366f1'};">${icons[n.type] || '🔔'}</div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-msg">${n.message}</div>
+        <div class="notif-time">${n.time.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}</div>
+      </div>
+    </div>
+  `).join('');
+}
+window.toggleNotifPanel = function(e) {
+  if (e) e.stopPropagation();
+  const p = document.getElementById('notifPanel');
+  if (!p) return;
+  p.classList.toggle('open');
+  p.style.display = p.classList.contains('open') ? 'block' : 'none';
+  if (p.classList.contains('open')) {
+    setTimeout(() => { notifications.forEach(n => n.read = true); renderNotifBell(); }, 1500);
+  }
+};
+window.clearAllNotifs = function() {
+  notifications.forEach(n => n.read = true);
+  renderNotifBell();
+  renderNotifPanel();
+};
+document.addEventListener('click', function(e) {
+  const p = document.getElementById('notifPanel');
+  const b = document.querySelector('.notif-bell-btn');
+  if (p && b && !p.contains(e.target) && !b.contains(e.target)) {
+    p.style.display = 'none';
+    p.classList.remove('open');
+  }
+});
+
+function attachRealtimeListeners() {
+  let i1 = true;
+  onSnapshot(collection(db, 'users'), snap => {
+    if (i1) { i1 = false; return; }
+    snap.docChanges().forEach(c => {
+      if (c.type === 'added') {
+        const u = c.doc.data();
+        addNotif('user', '👤 New user registered', `${u.username || 'User'} (${u.email || ''})`);
+      }
+    });
+  });
+  let i2 = true;
+  onSnapshot(collection(db, 'tournament_registrations'), snap => {
+    if (i2) { i2 = false; return; }
+    snap.docChanges().forEach(c => {
+      if (c.type === 'added') {
+        const r = c.doc.data();
+        const modeLabel = (r.playingAs || r.mode || '').toLowerCase() === 'solo' ? '1v1'
+                       : (r.playingAs || r.mode || '').toLowerCase() === 'duo' ? '2v2'
+                       : '';
+        addNotif('registration', `${r.entryType === 'paid' ? '💵' : '🆓'} New registration${modeLabel ? ' · ' + modeLabel : ''}`, `${r.username || 'User'} joined ${r.tournamentTitle || 'a tournament'}`);
+      }
+    });
+  });
+  let i3 = true;
+  onSnapshot(collection(db, 'tournament_payments'), snap => {
+    if (i3) { i3 = false; return; }
+    snap.docChanges().forEach(c => {
+      if (c.type === 'added') {
+        const p = c.doc.data();
+        addNotif('payment', '💰 Payment submitted', `${p.username} — Rs. ${p.amount} via ${p.method}`);
+      }
+    });
+  });
+}
+
+// ============================================================
+// REFERRAL BONUSES
+// ============================================================
+const REFERRAL_BONUS_AMOUNT = 20;
+
+async function handleReferralBonus(paymentId) {
+  try {
+    const paySnap = await getDoc(doc(db, 'tournament_payments', paymentId));
+    if (!paySnap.exists()) return;
+    const payment = paySnap.data();
+    const payerUid = payment.userId;
+    if (!payerUid) return;
+
+    const dupSnap = await getDocs(query(
+      collection(db, 'referral_bonuses'),
+      where('referredPaymentId', '==', paymentId)
+    ));
+    if (!dupSnap.empty) return;
+
+    const payerDoc = await getDoc(doc(db, 'users', payerUid));
+    if (!payerDoc.exists()) return;
+    const payer = payerDoc.data();
+    const referrerUid = payer.referredBy;
+    if (!referrerUid) return;
+
+    const refDoc = await getDoc(doc(db, 'users', referrerUid));
+    const referrer = refDoc.exists() ? refDoc.data() : {};
+
+    await addDoc(collection(db, 'referral_bonuses'), {
+      referrerUid, referrerName: referrer.username || referrer.fullName || 'Unknown',
+      referrerEmail: referrer.email || '',
+      referredUid: payerUid, referredName: payer.username || payer.fullName || 'Unknown',
+      referredEmail: payer.email || '',
+      referredIgn: payment.ign || '', referredPhone: payment.phone || '',
+      referredPaymentId: paymentId,
+      tournamentId: payment.tournamentId || '', tournamentTitle: payment.tournamentTitle || '',
+      paymentMethod: payment.method || '', txnId: payment.txnId || '',
+      amount: REFERRAL_BONUS_AMOUNT,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      paidAt: null, adminNote: ''
+    });
+
+    logActivity({
+      action: 'referral_credited', category: 'referrals',
+      targetId: payerUid, targetType: 'user',
+      summary: `Referral credited — ${referrer.username || 'referrer'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'referred user'}`,
+      metadata: { referrer: referrer.username || '', referred: payer.username || '', amount: REFERRAL_BONUS_AMOUNT },
+      actorType: 'system'
+    });
+
+    const currentCount = Number(referrer.referralCount || 0);
+    const currentEarnings = Number(referrer.referralEarnings || 0);
+    await updateDoc(doc(db, 'users', referrerUid), {
+      referralCount: currentCount + 1,
+      referralEarnings: currentEarnings + REFERRAL_BONUS_AMOUNT
+    });
+
+    addNotif('referral', '🤝 Referral bonus earned',
+      `${referrer.username || 'A member'} earned Rs. ${REFERRAL_BONUS_AMOUNT} from ${payer.username || 'a referred friend'}`);
+  } catch (err) { console.error('handleReferralBonus error:', err); }
+}
+
+async function loadReferralBonuses() {
+  try {
+    const snap = await getDocs(collection(db, 'referral_bonuses'));
+    allReferralBonuses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allReferralBonuses.sort((a, b) =>
+      (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+    );
+    const badge = document.getElementById('referralsBadge');
+    if (badge) {
+      const pending = allReferralBonuses.filter(b => b.status === 'pending').length;
+      badge.innerText = pending;
+      badge.style.display = pending > 0 ? 'inline-block' : 'none';
+    }
+    renderReferralBonuses();
+  } catch (err) { console.warn('loadReferralBonuses error:', err); }
+}
+window.loadReferralBonuses = loadReferralBonuses;
+
+window.filterRefStatus = function(status, btn) {
+  currentRefFilter = status;
+  document.querySelectorAll('#section-referrals .pay-status-tabs button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderReferralBonuses();
+};
+
+window.filterRefSearch = function() {
+  currentRefSearch = (document.getElementById('refSearch')?.value || '').toLowerCase().trim();
+  renderReferralBonuses();
+};
+
+function renderReferralBonuses() {
+  const totalCount = allReferralBonuses.length;
+  const pending = allReferralBonuses.filter(b => b.status === 'pending');
+  const paid = allReferralBonuses.filter(b => b.status === 'paid');
+  const pendingAmt = pending.reduce((s, b) => s + Number(b.amount || 0), 0);
+  const paidAmt = paid.reduce((s, b) => s + Number(b.amount || 0), 0);
+
+  const byReferrer = {};
+  allReferralBonuses.forEach(b => {
+    const key = b.referrerUid;
+    if (!key) return;
+    if (!byReferrer[key]) byReferrer[key] = { name: b.referrerName || 'Unknown', count: 0, total: 0 };
+    byReferrer[key].count++;
+    byReferrer[key].total += Number(b.amount || 0);
+  });
+  const topList = Object.values(byReferrer).sort((a, b) => b.total - a.total);
+  const top = topList[0] || null;
+
+  const el = id => document.getElementById(id);
+  if (el('refTotalCount')) el('refTotalCount').innerText = totalCount;
+  if (el('refPendingAmt')) el('refPendingAmt').innerText = fmtRs(pendingAmt);
+  if (el('refPaidAmt')) el('refPaidAmt').innerText = fmtRs(paidAmt);
+  if (el('refTopReferrer')) {
+    el('refTopReferrer').innerText = top ? top.name : '—';
+    const sub = el('refTopReferrerSub');
+    if (sub) sub.innerText = top ? `${top.count} referral${top.count !== 1 ? 's' : ''} · ${fmtRs(top.total)}` : 'No referrers yet';
+  }
+  if (el('refCntPending')) el('refCntPending').innerText = pending.length;
+  if (el('refCntPaid')) el('refCntPaid').innerText = paid.length;
+  if (el('refCntAll')) el('refCntAll').innerText = totalCount;
+
+  const list = document.getElementById('referralList');
+  if (!list) return;
+
+  let filtered = allReferralBonuses.filter(b => {
+    if (currentRefFilter !== 'all' && b.status !== currentRefFilter) return false;
+    if (currentRefSearch) {
+      const hay = `${b.referrerName||''} ${b.referredName||''} ${b.referredEmail||''} ${b.referredIgn||''} ${b.tournamentTitle||''} ${b.txnId||''}`.toLowerCase();
+      if (!hay.includes(currentRefSearch)) return false;
+    }
+    return true;
+  });
+
+  if (!allReferralBonuses.length) {
+    list.innerHTML = `<div class="empty-state"><span class="icon">🤝</span>No referral bonuses yet.</div>`;
+    return;
+  }
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><span class="icon">🔍</span>No referral bonuses match your filter.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(b => {
+    const isPaid = b.status === 'paid';
+    const payment = allPayments.find(p => p.id === b.referredPaymentId);
+    const shotId = payment ? registerScreenshot(payment) : null;
+    const shotHtml = shotId
+      ? `<img src="${screenshotCache[shotId]}" class="ref-thumb" onclick="event.stopPropagation(); openShotById('${shotId}')" alt="Payment">`
+      : '';
+    const safeReferrer = (b.referrerName || '').replace(/'/g, '');
+
+    return `
+      <div class="reg-card ref-card ${isPaid ? 'referral-paid' : 'referral-pending'}">
+        <div class="reg-icon">🤝</div>
+        <div class="reg-main">
+          <div class="reg-line-1">
+            <b class="clickable-name" onclick="openUserDetail('${b.referrerUid || ''}')" title="View referrer">
+              ${escapeDetail(b.referrerName || 'Unknown')}
+            </b>
+            <span class="reg-sep">→</span>
+            <b class="clickable-name" onclick="openUserDetail('${b.referredUid || ''}')" title="View referred user">
+              ${escapeDetail(b.referredName || 'Unknown')}
+            </b>
+          </div>
+          <div class="reg-line-2">
+            🏆 ${escapeDetail(b.tournamentTitle || 'Paid tournament')}
+            · 💰 <b style="color:#fbbf24;">${fmtRs(b.amount || REFERRAL_BONUS_AMOUNT)}</b>
+          </div>
+          <div class="reg-line-2" style="font-size:11px;color:#6b7280;">
+            🕐 ${fmtShort(b.createdAt)}
+          </div>
+        </div>
+        ${shotHtml ? `<div class="ref-shot-wrap">${shotHtml}</div>` : ''}
+        <div class="reg-right">
+          <span class="status-pill ${isPaid ? 'approved' : 'pending'}" style="font-size:10px;padding:3px 8px;">${isPaid ? 'PAID' : 'PENDING'}</span>
+          ${!isPaid ? `<button class="btn-approve small" style="margin-top:6px;" onclick="markReferralPaid('${b.id}','${safeReferrer}')">✔ Mark Paid</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.markReferralPaid = async function(bonusId, referrerName) {
+  if (!confirm(`Mark this referral bonus as paid to ${referrerName}?`)) return;
+  try {
+    await updateDoc(doc(db, 'referral_bonuses', bonusId), {
+      status: 'paid',
+      paidAt: serverTimestamp(),
+      adminNote: 'Manually marked paid by admin'
+    });
+    window.showToast('✅ Referral bonus marked as paid');
+    await loadReferralBonuses();
+  } catch (err) { window.showToast('❌ ' + err.message, true); }
+};
+
+window.exportReferralsCSV = function() {
+  if (!allReferralBonuses.length) { window.showToast('❌ No referral bonuses to export', true); return; }
+  const rows = [['Referrer','Referrer Email','Referred','Referred Email','Referred IGN','Referred Phone','Tournament','Payment Method','Txn ID','Amount','Status','Created','Paid At','Note']];
+  allReferralBonuses.forEach(b => {
+    rows.push([
+      b.referrerName || '', b.referrerEmail || '',
+      b.referredName || '', b.referredEmail || '', b.referredIgn || '', b.referredPhone || '',
+      b.tournamentTitle || '', b.paymentMethod || '', b.txnId || '',
+      b.amount || 0, b.status || '',
+      b.createdAt?.toDate ? b.createdAt.toDate().toISOString() : '',
+      b.paidAt?.toDate ? b.paidAt.toDate().toISOString() : '',
+      b.adminNote || ''
+    ]);
+  });
+  downloadCSV(`nepplay-referrals-${todayKey()}.csv`, rows);
+};
+
+// ============================================================
+// NOTIFICATIONS PAGE
+// ============================================================
+const NOTIF_TYPE_META = {
+  info:    { icon: 'ℹ️', color: '#60a5fa' },
+  success: { icon: '✅', color: '#4ade80' },
+  warning: { icon: '⚠️', color: '#facc15' },
+  error:   { icon: '❌', color: '#f87171' },
+  trophy:  { icon: '🏆', color: '#fbbf24' },
+  money:   { icon: '💰', color: '#4ade80' }
+};
+
+function renderNotificationTargetOptions() {
+  const sel = document.getElementById('notifTarget');
+  if (!sel) return;
+  const currentVal = sel.value;
+  const users = [...allUsers].filter(u => u.id).sort((a, b) =>
+    String(a.username || a.email || '').localeCompare(String(b.username || b.email || ''))
+  );
+  let html = '<option value="">— Pick a recipient —</option>';
+  html += '<option value="ALL" style="font-weight:700;">📢 All users (broadcast)</option>';
+  if (users.length) {
+    html += '<optgroup label="Individual users">';
+    users.forEach(u => {
+      const label = `${u.username || 'Unknown'}${u.email ? ' — ' + u.email : ''}`;
+      html += `<option value="${escapeDetail(u.id)}">${escapeDetail(label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if (currentVal) sel.value = currentVal;
+}
+
+async function loadSentNotifications() {
+  const list = document.getElementById('sentNotifList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
+  try {
+    const snap = await getDocs(query(collection(db, 'notifications'), orderBy('createdAt', 'desc'), limit(30)));
+    allSentNotifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!allSentNotifications.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">📭</span>No notifications sent yet.</div>';
+      return;
+    }
+    list.innerHTML = allSentNotifications.map(n => {
+      const meta = NOTIF_TYPE_META[n.type] || NOTIF_TYPE_META.info;
+      const isBroadcast = n.targetUid === 'ALL';
+      const targetLabel = isBroadcast ? '📢 All users (broadcast)' : `🎯 ${escapeDetail(n.targetName || n.targetUid || 'Unknown')}`;
+      const readCount = Array.isArray(n.readBy) ? n.readBy.length : 0;
+      const sentAt = fmtShort(n.createdAt);
+      const truncMsg = (n.message || '').length > 140 ? n.message.slice(0, 140) + '…' : (n.message || '');
+      return `
+        <div class="sent-notif-item">
+          <div class="sent-notif-dot" style="background:${meta.color}20; border-color:${meta.color}; color:${meta.color};">${meta.icon}</div>
+          <div class="sent-notif-body">
+            <div class="sent-notif-target">${targetLabel}</div>
+            <div class="sent-notif-title">${escapeDetail(n.title || '(no title)')}</div>
+            <div class="sent-notif-msg">${escapeDetail(truncMsg)}</div>
+            <div class="sent-notif-meta">🕐 ${sentAt} · 👤 ${escapeDetail(n.createdBy || '—')}${!isBroadcast ? ' · ✅ read by ' + readCount : ''}</div>
+          </div>
+          <div><button class="btn-delete small" onclick="deleteNotification('${n.id}')" title="Delete">🗑️</button></div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('loadSentNotifications error:', err);
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + escapeDetail(err.message) + '</div>';
+  }
+}
+
+async function loadNotificationsPage() {
+  renderNotificationTargetOptions();
+  await loadSentNotifications();
+}
+window.loadNotificationsPage = loadNotificationsPage;
+
+window.sendNotification = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('notifSendBtn');
+  const targetUidRaw = document.getElementById('notifTarget').value;
+  const type = document.getElementById('notifType').value || 'info';
+  const title = document.getElementById('notifTitle').value.trim();
+  const message = document.getElementById('notifMessage').value.trim();
+  if (!targetUidRaw) { window.showToast('❌ Pick a recipient', true); return; }
+  if (!title) { window.showToast('❌ Title required', true); return; }
+  if (!message) { window.showToast('❌ Message required', true); return; }
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Sending...';
+  try {
+    const isBroadcast = targetUidRaw === 'ALL';
+    let targetName = 'All users';
+    if (!isBroadcast) {
+      const u = allUsers.find(x => x.id === targetUidRaw);
+      targetName = u ? (u.username || u.email || targetUidRaw) : targetUidRaw;
+    }
+    await addDoc(collection(db, 'notifications'), {
+      targetUid: isBroadcast ? 'ALL' : targetUidRaw, targetName,
+      type, title, message,
+      createdBy: currentAdminEmail || 'admin',
+      createdAt: serverTimestamp(),
+      readBy: []
+    });
+    window.showToast('✅ Notification sent');
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifMessage').value = '';
+    document.getElementById('notifType').value = 'info';
+    document.getElementById('notifTarget').value = '';
+    await loadSentNotifications();
+  } catch (err) {
+    console.error('sendNotification error:', err);
+    window.showToast('❌ ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+};
+
+window.deleteNotification = async function(id) {
+  if (!confirm('Delete this notification?')) return;
+  try {
+    await deleteDoc(doc(db, 'notifications', id));
+    window.showToast('🗑️ Notification deleted');
+    await loadSentNotifications();
+  } catch (err) { window.showToast('❌ ' + err.message, true); }
 };
 
 // ============================================================
@@ -463,266 +946,105 @@ window.loadTournamentsAdmin = async function() {
 };
 
 // ============================================================
-// PAYOUTS
+// REGISTRATIONS
 // ============================================================
-window.loadPayouts = async function() {
-  const list = document.getElementById('payoutList');
+window.loadRegistrations = async function() {
+  const list = document.getElementById('regList');
   if (!list) return;
   list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
-    const snap = await getDocs(collection(db, 'tournament_payouts'));
-    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    allPayouts.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-    
-    let total = 0, pending = 0, winners = 0;
-    allPayouts.forEach(p => {
-      total += Number(p.amount || 0);
-      if (p.status === 'paid') winners++;
-      else pending += Number(p.amount || 0);
-    });
-    
-    if (document.getElementById('payoutTotal')) document.getElementById('payoutTotal').innerText = fmtRs(total);
-    if (document.getElementById('payoutWinners')) document.getElementById('payoutWinners').innerText = winners;
-    if (document.getElementById('payoutPending')) document.getElementById('payoutPending').innerText = fmtRs(pending);
-    
-    if (!allPayouts.length) {
-      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div>';
-      return;
-    }
-    
-    list.innerHTML = allPayouts.map(w => {
-      const isPaid = w.status === 'paid';
-      return `
-        <div class="reg-card clickable-row" onclick="openPayoutDetail('${w.id}')" style="padding:16px; margin-bottom:10px;">
-          <div class="reg-icon" style="background:${isPaid ? '#22c55e' : '#f59e0b'}; color:#fff;">🏆</div>
-          <div class="reg-main">
-            <div class="reg-line-1">
-              <b>${escapeDetail(w.winnerName || '—')}</b>
-              <span class="reg-sep">—</span>
-              <span class="reg-tournament">${escapeDetail(w.tournamentTitle || 'Tournament')}</span>
-            </div>
-            <div class="reg-line-2">
-              Rank: <b>${escapeDetail(w.rank || '—')}</b> · Kills: ${w.kills || 0} · Amount: <b style="color:#fbbf24;">${fmtRs(w.amount)}</b>
-            </div>
-          </div>
-          <div class="reg-right">
-            <span class="status-pill ${isPaid ? 'approved' : 'pending'}">${isPaid ? 'PAID' : 'PENDING'}</span>
-            <small>${fmtShort(w.createdAt)}</small>
-          </div>
-        </div>
-      `;
-    }).join('');
+    const snap = await getDocs(collection(db, 'tournament_registrations'));
+    allRegs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allRegs.sort((a, b) => (b.registeredAt?.toMillis?.() || 0) - (a.registeredAt?.toMillis?.() || 0));
+    if (document.getElementById('dashRegs')) document.getElementById('dashRegs').innerText = allRegs.length;
+    if (document.getElementById('regsBadge')) document.getElementById('regsBadge').innerText = allRegs.length;
+    renderRegistrations();
+    renderDashboardRecent();
+    loadLiveStats();
   } catch (err) {
     list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
   }
 };
+window.filterRegistrations = function() { renderRegistrations(); };
 
-window.addPayout = async function() {
-  const name = prompt('Winner Username:');
-  if (!name) return;
-  const amount = Number(prompt('Amount (Rs.):', '0'));
-  if (!amount) return;
-  const title = prompt('Tournament Title:');
-  if (!title) return;
-  
-  try {
-    await addDoc(collection(db, 'tournament_payouts'), {
-      winnerName: name.trim(),
-      amount: amount,
-      prize: amount,
-      tournamentTitle: title.trim(),
-      tournamentId: 'manual',
-      rank: prompt('Rank:', '1') || '1',
-      status: 'paid',
-      paidAt: serverTimestamp(),
-      createdAt: serverTimestamp()
-    });
-    window.showToast('✅ Manual payout recorded');
-    await window.loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message, true); }
-};
-
-// ============================================================
-// DAILY COLLECTIONS & EARNINGS
-// ============================================================
-window.loadDailyCollections = async function() {
-  const list = document.getElementById('dailyList');
-  const byMethod = document.getElementById('dailyByMethod');
+function renderRegistrations() {
+  const list = document.getElementById('regList');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
-  
-  try {
-    const range = document.getElementById('dailyRangeFilter')?.value || 'all';
-    const now = Date.now();
-    
-    let filteredPays = allPayments.filter(p => p.status === 'approved');
-    let filteredPayouts = allPayouts;
-    
-    if (range === 'today') {
-      const t = todayKey();
-      filteredPays = filteredPays.filter(p => dayKey(p.reviewedAt || p.submittedAt) === t);
-      filteredPayouts = filteredPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t);
-    } else if (range !== 'all') {
-      const days = Number(range);
-      const cutoff = now - (days * 24 * 60 * 60 * 1000);
-      filteredPays = filteredPays.filter(p => (p.reviewedAt?.toMillis?.() || 0) >= cutoff);
-      filteredPayouts = filteredPayouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff);
-    }
-    
-    let totalCollected = 0, totalPayouts = 0;
-    const dailyData = {};
-    const methodData = {};
-    
-    filteredPays.forEach(p => {
-      totalCollected += Number(p.amount || 0);
-      const dk = dayKey(p.reviewedAt || p.submittedAt);
-      if (dk) dailyData[dk] = (dailyData[dk] || 0) + Number(p.amount || 0);
-      const m = p.method || 'other';
-      methodData[m] = (methodData[m] || 0) + Number(p.amount || 0);
-    });
-    
-    filteredPayouts.forEach(p => {
-      totalPayouts += Number(p.amount || 0);
-      const dk = dayKey(p.paidAt || p.createdAt);
-      if (dk) dailyData[dk] = (dailyData[dk] || 0) - Number(p.amount || 0);
-    });
-    
-    if (document.getElementById('dailyTotalCollected')) document.getElementById('dailyTotalCollected').innerText = fmtRs(totalCollected);
-    if (document.getElementById('dailyTotalPayouts')) document.getElementById('dailyTotalPayouts').innerText = fmtRs(totalPayouts);
-    if (document.getElementById('dailyTotalNet')) document.getElementById('dailyTotalNet').innerText = fmtRs(totalCollected - totalPayouts);
-    if (document.getElementById('dailyActiveDays')) document.getElementById('dailyActiveDays').innerText = Object.keys(dailyData).length;
-    
-    const sortedDays = Object.keys(dailyData).sort((a,b) => b.localeCompare(a));
-    if (!sortedDays.length) {
-      list.innerHTML = '<div class="empty-state">No activity for this period.</div>';
-    } else {
-      list.innerHTML = sortedDays.map(d => `
-        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
-          <div class="reg-icon">📅</div>
-          <div class="reg-main"><div class="reg-line-1"><b>${d}</b></div></div>
-          <div class="reg-right"><b style="color:${dailyData[d] >= 0 ? '#4ade80' : '#f87171'};">${fmtRs(dailyData[d])}</b></div>
-        </div>
-      `).join('');
-    }
-    
-    if (byMethod) {
-      const chips = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-      byMethod.innerHTML = Object.keys(methodData).map(m => `
-        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
-          <div class="reg-icon">💳</div>
-          <div class="reg-main"><div class="reg-line-1"><b>${chips[m] || m}</b></div></div>
-          <div class="reg-right"><b style="color:#fbbf24;">${fmtRs(methodData[m])}</b></div>
-        </div>
-      `).join('');
-    }
-  } catch (err) {
-    if (list) list.innerHTML = '<div class="empty-state">Error loading stats.</div>';
+  const q = (document.getElementById('regSearch').value || '').toLowerCase();
+  let filtered = allRegs.filter(r => !q || `${r.username||''} ${r.tournamentTitle||''} ${r.ign||''} ${r.txnId||''} ${r.email||''}`.toLowerCase().includes(q));
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">📋</span>No registrations.</div>';
+    return;
   }
-};
-
-window.loadEarnings = async function() {
-  try {
-    const approved = allPayments.filter(p => p.status === 'approved');
-    const total = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
-    const pending = allPayments.filter(p => p.status === 'pending').reduce((s,p) => s + (Number(p.amount)||0), 0);
-    
-    if (document.getElementById('earnTotal')) document.getElementById('earnTotal').innerText = fmtRs(total);
-    if (document.getElementById('earnApproved')) document.getElementById('earnApproved').innerText = approved.length;
-    if (document.getElementById('earnPending')) document.getElementById('earnPending').innerText = fmtRs(pending);
-    if (document.getElementById('earnAvg')) document.getElementById('earnAvg').innerText = fmtRs(approved.length ? total / approved.length : 0);
-    
-    const methodData = {};
-    approved.forEach(p => {
-      const m = p.method || 'other';
-      methodData[m] = (methodData[m] || 0) + Number(p.amount || 0);
-    });
-    
-    const el = document.getElementById('earningsBreakdown');
-    if (el) {
-      const chips = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
-      el.innerHTML = Object.keys(methodData).map(m => `
-        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
-          <div class="reg-icon">💳</div>
-          <div class="reg-main"><div class="reg-line-1"><b>${chips[m] || m}</b></div></div>
-          <div class="reg-right"><b style="color:#fbbf24;">${fmtRs(methodData[m])}</b></div>
+  list.innerHTML = filtered.map(r => {
+    const isPaid = r.entryType === 'paid';
+    const safeName = (r.username||'').replace(/'/g,'');
+    const isPending = r.status === 'pending';
+    const shotUrl = isPaid ? (r.paymentScreenshotUrl || null) : null;
+    const modeBadge = modeBadgeHtml(r.playingAs);
+    return `
+      <div class="reg-card ${isPaid ? 'paid-reg' : 'free-reg'} clickable-row" onclick="openRegDetail('${r.id}')">
+        <div class="reg-icon">${isPaid ? '💵' : '🏆'}</div>
+        <div class="reg-main">
+          <div class="reg-line-1">
+            <b>${r.username || 'Unknown'}</b>
+            <span class="reg-sep">—</span>
+            <span class="reg-tournament">${r.tournamentTitle || 'Tournament'}</span>
+            ${modeBadge}
+            ${r.teammates && r.teammates.length ? `<span class="tourney-count" style="margin-left:6px;">👥 ${r.teammates.length} players</span>` : ''}
+          </div>
+          <div class="reg-line-2">
+            ${r.ign ? 'IGN: <b>' + r.ign + '</b> · ' : ''}
+            ${r.phone ? '📱 ' + r.phone + ' · ' : ''}
+            ${isPaid ? 'Txn: <code>' + (r.transactionId || r.txnId || '—') + '</code> · ' : ''}
+            ${isPaid ? 'Rs. ' + (r.amount||0) : 'Free Entry'}
+          </div>
+          ${isPaid && shotUrl ? `
+            <div class="reg-payment-preview">
+              <img src="${shotUrl}" class="thumb" onclick="event.stopPropagation(); openShot('${shotUrl}')" alt="Payment Screenshot" title="Click to view full">
+              <span class="method-tag">${(r.paymentMethod || 'PAID').toUpperCase()}</span>
+              <span class="status-tag ${r.status}">${(r.status||'').toUpperCase()}</span>
+            </div>
+          ` : ''}
+          <div class="reg-actions" onclick="event.stopPropagation();">
+            ${isPending ? `
+              <button class="btn-approve small" onclick="openReview('${r.id}','${safeName}','approve','registration')">✔ Approve</button>
+              <button class="btn-reject small"  onclick="openReview('${r.id}','${safeName}','reject','registration')">✘ Reject</button>
+            ` : ''}
+            <button class="btn-edit small" onclick="editRegistration('${r.id}')">✏️ Edit</button>
+            <button class="btn-delete small" onclick="deleteRegistration('${r.id}','${safeName}')">🗑️ Delete</button>
+          </div>
         </div>
-      `).join('');
-    }
-  } catch (e) {}
-};
-
-// ============================================================
-// PROFIT SHARE & ROOM DETAILS & ANNOUNCEMENTS & SUPPORT
-// ============================================================
-window.loadProfitShare = function() {
-  const r = document.getElementById('shareResult');
-  if (r) r.innerHTML = '';
-};
-window.calculateShares = function() {
-  const a1 = document.getElementById('admin1Name').value || 'Admin 1';
-  const s1 = Number(document.getElementById('admin1Share').value) || 0;
-  const a2 = document.getElementById('admin2Name').value || 'Admin 2';
-  const s2 = Number(document.getElementById('admin2Share').value) || 0;
-  
-  const totalNet = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + Number(p.amount||0), 0) 
-                 - allPayouts.reduce((s,p) => s + Number(p.amount||0), 0);
-                 
-  const r = document.getElementById('shareResult');
-  if (r) {
-    r.innerHTML = `
-      <div class="result-total-card" style="margin-top:20px;">
-        <div><span>Total Net Profit</span><b>${fmtRs(totalNet)}</b></div>
-        <div><span>${escapeDetail(a1)} (${s1}%)</span><b style="color:#4ade80;">${fmtRs(totalNet * (s1/100))}</b></div>
-        <div><span>${escapeDetail(a2)} (${s2}%)</span><b style="color:#60a5fa;">${fmtRs(totalNet * (s2/100))}</b></div>
+        <div class="reg-right">
+          <span class="type-chip ${isPaid ? 'paid' : 'free'}">${isPaid ? 'Paid' : 'Free'}</span>
+          <span class="status-pill ${r.status}" style="font-size:10px;padding:3px 8px;">${(r.status||'').toUpperCase()}</span>
+          <small>${fmtShort(r.registeredAt)}</small>
+        </div>
       </div>
     `;
-  }
-};
+  }).join('');
+}
 
-window.loadRoomDetailsForm = async function() {
-  const select = document.getElementById('roomTournamentSelect');
-  if (!select) return;
-  select.innerHTML = '<option value="">— Select tournament —</option>' + 
-    allTournaments.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
-};
-window.saveRoomDetails = function() { window.showToast('✅ Room details saved (Simulation)'); };
-
-window.loadAnnouncements = async function() {
-  const list = document.getElementById('announcementList');
-  if (!list) return;
+window.editRegistration = async function(id) {
+  const reg = allRegs.find(r => r.id === id);
+  if (!reg) return;
+  const newIgn = prompt('Edit IGN:', reg.ign || '');
+  if (newIgn === null) return;
+  const newPhone = prompt('Edit Phone:', reg.phone || '');
+  if (newPhone === null) return;
   try {
-    const snap = await getDocs(query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(10)));
-    if (snap.empty) { list.innerHTML = '<div class="empty-state">No announcements yet</div>'; return; }
-    list.innerHTML = snap.docs.map(d => {
-      const a = d.data();
-      return `
-        <div class="reg-card" style="padding:16px; margin-bottom:10px;">
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${escapeDetail(a.title)}</b></div>
-            <div class="reg-line-2">${escapeDetail(a.message)}</div>
-            <div class="reg-line-2" style="font-size:11px;color:#6b7280;">🕐 ${fmtShort(a.createdAt)}</div>
-          </div>
-          <div class="reg-right"><button class="btn-delete small" onclick="deleteDoc(doc(db,'announcements','${d.id}')).then(()=>loadAnnouncements())">🗑️</button></div>
-        </div>
-      `;
-    }).join('');
-  } catch(e) {}
+    await updateDoc(doc(db, 'tournament_registrations', id), { ign: newIgn.trim(), phone: newPhone.trim() });
+    window.showToast('✅ Updated');
+    window.loadRegistrations();
+  } catch (err) { window.showToast('❌ ' + err.message, true); }
 };
-window.postAnnouncement = async function(e) {
-  e.preventDefault();
-  const title = document.getElementById('annTitle').value;
-  const message = document.getElementById('annMsg').value;
-  if (!title || !message) return;
-  await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp(), createdBy: currentAdminEmail });
-  document.getElementById('annTitle').value = '';
-  document.getElementById('annMsg').value = '';
-  window.showToast('📢 Announcement posted');
-  loadAnnouncements();
-};
-
-window.loadSupport = function() {
-  const list = document.getElementById('supportList');
-  if (list) list.innerHTML = '<div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div>';
+window.deleteRegistration = async function(id, name) {
+  if (!confirm('Delete registration for ' + name + '?')) return;
+  try {
+    await deleteDoc(doc(db, 'tournament_registrations', id));
+    window.showToast('🗑️ Deleted');
+    window.loadRegistrations();
+  } catch (err) { window.showToast('❌ ' + err.message, true); }
 };
 
 // ============================================================
@@ -961,214 +1283,263 @@ window.confirmReview = async function(e) {
 };
 
 // ============================================================
-// DETAIL MODAL — Users
+// PAYOUTS
 // ============================================================
-window.closeDetailModal = function() { document.getElementById('detailModal').classList.remove('open'); };
-
-window.openUserDetail = function(uid) {
-  if (!uid) return;
-  const u = allUsers.find(x => x.id === uid);
-  if (!u) { window.showToast('❌ User not found', true); return; }
-  const myRegs = allRegs.filter(r => r.userId === uid);
-  const myPays = allPayments.filter(p => p.userId === uid);
-  const myPayouts = allPayouts.filter(p =>
-    (p.userId && p.userId === uid) ||
-    (p.winnerName && u.username && p.winnerName.toLowerCase() === u.username.toLowerCase())
-  );
-  const myReferrals = allReferralBonuses.filter(b => b.referrerUid === uid);
-
-  const totalSpent = myPays.filter(p => p.status === 'approved').reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const totalWon = myPayouts.filter(p => p.status === 'paid').reduce((s,p) => s + (Number(p.amount)||0), 0);
-  const totalReferralEarnings = myReferrals.reduce((s,b) => s + Number(b.amount || 0), 0);
-
-  const regsHtml = myRegs.length
-    ? myRegs.map(r => `
-      <div class="dm-row">
-        <span class="dm-k">${escapeDetail(r.tournamentTitle || 'Tournament')}</span>
-        <span class="dm-v">${r.entryType === 'paid' ? 'Rs. ' + (r.amount||0) : 'FREE'} · ${(r.status||'').toUpperCase()} ${modeBadgeHtml(r.playingAs)}</span>
-      </div>`).join('')
-    : '<div class="dm-row"><span class="dm-k">No registrations yet</span><span class="dm-v">—</span></div>';
-
-  document.getElementById('detailModalContent').innerHTML = `
-    <h2>👤 ${escapeDetail(u.username || 'User')}${u.role === 'admin' ? ' <span style="background:#6366f1;color:#fff;padding:2px 10px;border-radius:8px;font-size:11px;">ADMIN</span>' : ''}</h2>
-    <p class="dm-sub">Member profile & activity</p>
-    <div class="dm-rows">
-      <div class="dm-row"><span class="dm-k">📧 Email</span><span class="dm-v">${escapeDetail(u.email || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(u.phone || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">🔑 User ID</span><span class="dm-v"><code>${escapeDetail(u.id)}</code></span></div>
-      <div class="dm-row"><span class="dm-k">📅 Joined</span><span class="dm-v">${fmtDate(u.createdAt)}</span></div>
-      <div class="dm-row"><span class="dm-k">🎭 Role</span><span class="dm-v">${u.role || 'member'}</span></div>
-    </div>
-    <div class="dm-section">
-      <h3>📊 Activity Summary</h3>
-      <div class="dm-rows">
-        <div class="dm-row"><span class="dm-k">Registrations</span><span class="dm-v">${myRegs.length}</span></div>
-        <div class="dm-row"><span class="dm-k">Payments submitted</span><span class="dm-v">${myPays.length}</span></div>
-        <div class="dm-row"><span class="dm-k">💰 Total spent</span><span class="dm-v" style="color:#fbbf24;">${fmtRs(totalSpent)}</span></div>
-        <div class="dm-row"><span class="dm-k">🏆 Total won</span><span class="dm-v" style="color:#4ade80;">${fmtRs(totalWon)}</span></div>
-        <div class="dm-row"><span class="dm-k">🤝 Referral earnings</span><span class="dm-v" style="color:#c084fc;">${fmtRs(totalReferralEarnings)} (${myReferrals.length})</span></div>
-      </div>
-    </div>
-    <div class="dm-section">
-      <h3>📋 Registrations</h3>
-      <div class="dm-rows">${regsHtml}</div>
-    </div>
-    <div class="dm-actions">
-      <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
-      <button class="dm-btn-primary" onclick="closeDetailModal(); showSection('notifications', document.querySelector('[data-section=notifications]')); setTimeout(()=>{ document.getElementById('notifTarget').value='${u.id}'; }, 200);">🔔 Send Notification</button>
-      ${u.role === 'admin' ? '' : `<button class="dm-btn-danger" onclick="deleteUser('${u.id}','${(u.username||'').replace(/'/g,"\\'")}')">🗑️ Delete User</button>`}
-    </div>
-  `;
-  document.getElementById('detailModal').classList.add('open');
-};
-
-// ============================================================
-// DETAIL MODAL — Payouts
-// ============================================================
-window.openPayoutDetail = async function(payoutId) {
-  const w = allPayouts.find(x => x.id === payoutId);
-  if (!w) { window.showToast('❌ Payout not found', true); return; }
-
-  let linkedUser = null;
-  if (w.userId) linkedUser = allUsers.find(u => u.id === w.userId);
-  if (!linkedUser && w.winnerName) {
-    const lower = w.winnerName.toLowerCase();
-    linkedUser = allUsers.find(u =>
-      (u.username || '').toLowerCase() === lower ||
-      (u.fullName || '').toLowerCase() === lower
-    );
-  }
-
-  const isPaid = w.status === 'paid';
-  const amount = Number(w.amount || w.prize || 0);
-
-  document.getElementById('detailModalContent').innerHTML = `
-    <h2>🏆 Payout Details</h2>
-    <p class="dm-sub">${escapeDetail(w.tournamentTitle || 'Tournament')}</p>
-    <div class="dm-rows">
-      <div class="dm-row"><span class="dm-k">👤 Winner</span><span class="dm-v">${escapeDetail(w.winnerName || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">🥇 Rank</span><span class="dm-v">${escapeDetail(w.rank || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">🎯 Kills</span><span class="dm-v">${w.kills != null ? w.kills : '—'}</span></div>
-      <div class="dm-row"><span class="dm-k">💰 Amount</span><span class="dm-v" style="color:#fbbf24;font-size:18px;">${fmtRs(amount)}</span></div>
-      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${isPaid ? '#4ade80' : '#fbbf24'};font-weight:800;">${isPaid ? '✅ PAID' : '⏳ PENDING'}</span></div>
-      <div class="dm-row"><span class="dm-k">🕐 Created</span><span class="dm-v">${fmtDate(w.createdAt)}</span></div>
-    </div>
-    <div class="dm-section">
-      <h3>👥 Linked Member Account</h3>
-      ${linkedUser ? `
-        <div class="dm-rows">
-          <div class="dm-row"><span class="dm-k">Username</span><span class="dm-v"><a href="javascript:void(0)" onclick="closeDetailModal(); openUserDetail('${linkedUser.id}')" style="color:#a5b4fc;font-weight:700;">${escapeDetail(linkedUser.username || linkedUser.fullName || '—')} →</a></span></div>
-          <div class="dm-row"><span class="dm-k">Email</span><span class="dm-v">${escapeDetail(linkedUser.email || '—')}</span></div>
-        </div>
-      ` : `<div class="dm-rows"><div class="dm-row"><span class="dm-k">Status</span><span class="dm-v" style="color:#f87171;">⚠️ No matching member found</span></div></div>`}
-    </div>
-    <div class="dm-section">
-      <h3>⚙️ Quick Actions</h3>
-      <div class="dm-actions" style="margin-top:0;">
-        ${!isPaid ? `<button class="dm-btn-green" onclick="markPayoutPaid('${w.id}')">✅ Mark as Paid</button>` : `<button class="dm-btn-ghost" onclick="markPayoutPending('${w.id}')">↺ Mark as Pending</button>`}
-        <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
-      </div>
-    </div>
-    <div class="dm-actions">
-      <button class="dm-btn-primary" onclick="editPayoutField('${w.id}')">✏️ Edit Amount / Rank</button>
-      <button class="dm-btn-danger" onclick="deletePayout('${w.id}','${(w.winnerName||'').replace(/'/g,"\\'")}')">🗑️ Delete Payout</button>
-    </div>
-  `;
-  document.getElementById('detailModal').classList.add('open');
-};
-
-window.markPayoutPaid = async function(payoutId) {
-  if (!confirm('Mark this payout as PAID?')) return;
+window.loadPayouts = async function() {
+  const list = document.getElementById('payoutList');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
   try {
-    await updateDoc(doc(db, 'tournament_payouts', payoutId), { status: 'paid', paidAt: serverTimestamp() });
-    window.showToast('✅ Marked paid');
-    closeDetailModal();
-    await loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message, true); }
-};
-
-window.markPayoutPending = async function(payoutId) {
-  if (!confirm('Mark this payout as PENDING again?')) return;
-  try {
-    await updateDoc(doc(db, 'tournament_payouts', payoutId), { status: 'pending', paidAt: null });
-    window.showToast('↺ Marked pending');
-    closeDetailModal();
-    await loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message, true); }
-};
-
-window.editPayoutField = async function(payoutId) {
-  const w = allPayouts.find(x => x.id === payoutId);
-  if (!w) return;
-  const newAmt = prompt('Amount (Rs.):', w.amount || w.prize || 0);
-  if (newAmt === null) return;
-  const newRank = prompt('Rank:', w.rank || '1');
-  if (newRank === null) return;
-  const newNote = prompt('Note:', w.note || '');
-  if (newNote === null) return;
-  try {
-    await updateDoc(doc(db, 'tournament_payouts', payoutId), {
-      amount: Number(newAmt) || 0,
-      prize: Number(newAmt) || 0,
-      rank: newRank,
-      note: newNote
+    const snap = await getDocs(collection(db, 'tournament_payouts'));
+    allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allPayouts.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+    
+    let total = 0, pending = 0, winners = 0;
+    allPayouts.forEach(p => {
+      total += Number(p.amount || 0);
+      if (p.status === 'paid') winners++;
+      else pending += Number(p.amount || 0);
     });
-    window.showToast('✅ Payout updated');
-    closeDetailModal();
-    await loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message, true); }
-};
-
-window.deletePayout = async function(payoutId, winnerName) {
-  if (!confirm(`Delete payout for "${winnerName}"?`)) return;
-  try {
-    await deleteDoc(doc(db, 'tournament_payouts', payoutId));
-    window.showToast('🗑️ Payout deleted');
-    closeDetailModal();
-    await loadPayouts();
-  } catch (err) { window.showToast('❌ ' + err.message, true); }
-};
-
-// ============================================================
-// DETAIL MODAL — Registrations
-// ============================================================
-window.openRegDetail = function(regId) {
-  const r = allRegs.find(x => x.id === regId);
-  if (!r) return;
-  const isPaid = r.entryType === 'paid';
-  const payment = isPaid ? allPayments.find(p => p.id === r.paymentId) : null;
-  const shotSrc = payment ? (payment.screenshotBase64 ? 'data:image/jpeg;base64,' + payment.screenshotBase64 : payment.screenshotUrl || null) : null;
-
-  document.getElementById('detailModalContent').innerHTML = `
-    <h2>📋 ${escapeDetail(r.tournamentTitle || 'Registration')} ${modeBadgeHtml(r.playingAs)}</h2>
-    <p class="dm-sub">Registered by ${escapeDetail(r.username || 'Unknown')} · ${fmtDate(r.registeredAt)}</p>
-    <div class="dm-rows">
-      <div class="dm-row"><span class="dm-k">👤 Username</span><span class="dm-v">${escapeDetail(r.username || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">📧 Email</span><span class="dm-v">${escapeDetail(r.email || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">🎮 IGN</span><span class="dm-v">${escapeDetail(r.ign || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">📱 Phone</span><span class="dm-v">${escapeDetail(r.phone || '—')}</span></div>
-      <div class="dm-row"><span class="dm-k">🎯 Mode</span><span class="dm-v">${modeBadgeHtml(r.playingAs) || '—'}</span></div>
-      <div class="dm-row"><span class="dm-k">💰 Type</span><span class="dm-v">${isPaid ? 'PAID' : 'FREE'}</span></div>
-      ${isPaid ? `<div class="dm-row"><span class="dm-k">💵 Amount</span><span class="dm-v" style="color:#fbbf24;">Rs. ${r.amount || 0}</span></div>` : ''}
-      <div class="dm-row"><span class="dm-k">📋 Status</span><span class="dm-v" style="color:${r.status === 'confirmed' || r.status === 'approved' ? '#4ade80' : (r.status === 'pending' ? '#fbbf24' : '#f87171')};">${(r.status || '').toUpperCase()}</span></div>
-    </div>
-    ${isPaid && payment ? `
-      <div class="dm-section">
-        <h3>💳 Payment Details</h3>
-        <div class="dm-rows">
-          <div class="dm-row"><span class="dm-k">Payment status</span><span class="dm-v">${(payment.status || '').toUpperCase()}</span></div>
-          <div class="dm-row"><span class="dm-k">Submitted</span><span class="dm-v">${fmtDate(payment.submittedAt)}</span></div>
+    
+    if (document.getElementById('payoutTotal')) document.getElementById('payoutTotal').innerText = fmtRs(total);
+    if (document.getElementById('payoutWinners')) document.getElementById('payoutWinners').innerText = winners;
+    if (document.getElementById('payoutPending')) document.getElementById('payoutPending').innerText = fmtRs(pending);
+    
+    if (!allPayouts.length) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">🏆</span>No payouts yet.</div>';
+      return;
+    }
+    
+    list.innerHTML = allPayouts.map(w => {
+      const isPaid = w.status === 'paid';
+      return `
+        <div class="reg-card clickable-row" onclick="openPayoutDetail('${w.id}')" style="padding:16px; margin-bottom:10px;">
+          <div class="reg-icon" style="background:${isPaid ? '#22c55e' : '#f59e0b'}; color:#fff;">🏆</div>
+          <div class="reg-main">
+            <div class="reg-line-1">
+              <b>${escapeDetail(w.winnerName || '—')}</b>
+              <span class="reg-sep">—</span>
+              <span class="reg-tournament">${escapeDetail(w.tournamentTitle || 'Tournament')}</span>
+            </div>
+            <div class="reg-line-2">
+              Rank: <b>${escapeDetail(w.rank || '—')}</b> · Kills: ${w.kills || 0} · Amount: <b style="color:#fbbf24;">${fmtRs(w.amount)}</b>
+            </div>
+          </div>
+          <div class="reg-right">
+            <span class="status-pill ${isPaid ? 'approved' : 'pending'}">${isPaid ? 'PAID' : 'PENDING'}</span>
+            <small>${fmtShort(w.createdAt)}</small>
+          </div>
         </div>
-        ${shotSrc ? `<img class="dm-shot" src="${shotSrc}" onclick="openShot('${shotSrc}')">` : ''}
+      `;
+    }).join('');
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><span class="icon">❌</span>' + err.message + '</div>';
+  }
+};
+
+window.addPayout = async function() {
+  const name = prompt('Winner Username:');
+  if (!name) return;
+  const amount = Number(prompt('Amount (Rs.):', '0'));
+  if (!amount) return;
+  const title = prompt('Tournament Title:');
+  if (!title) return;
+  
+  try {
+    await addDoc(collection(db, 'tournament_payouts'), {
+      winnerName: name.trim(),
+      amount: amount,
+      prize: amount,
+      tournamentTitle: title.trim(),
+      tournamentId: 'manual',
+      rank: prompt('Rank:', '1') || '1',
+      status: 'paid',
+      paidAt: serverTimestamp(),
+      createdAt: serverTimestamp()
+    });
+    window.showToast('✅ Manual payout recorded');
+    await window.loadPayouts();
+  } catch (err) { window.showToast('❌ ' + err.message, true); }
+};
+
+// ============================================================
+// DAILY COLLECTIONS & EARNINGS & PROFIT SHARE
+// ============================================================
+window.loadDailyCollections = async function() {
+  const list = document.getElementById('dailyList');
+  const byMethod = document.getElementById('dailyByMethod');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state"><span class="icon">⏳</span>Loading...</div>';
+  
+  try {
+    const range = document.getElementById('dailyRangeFilter')?.value || 'all';
+    const now = Date.now();
+    
+    let filteredPays = allPayments.filter(p => p.status === 'approved');
+    let filteredPayouts = allPayouts;
+    
+    if (range === 'today') {
+      const t = todayKey();
+      filteredPays = filteredPays.filter(p => dayKey(p.reviewedAt || p.submittedAt) === t);
+      filteredPayouts = filteredPayouts.filter(x => dayKey(x.paidAt || x.createdAt) === t);
+    } else if (range !== 'all') {
+      const days = Number(range);
+      const cutoff = now - (days * 24 * 60 * 60 * 1000);
+      filteredPays = filteredPays.filter(p => (p.reviewedAt?.toMillis?.() || 0) >= cutoff);
+      filteredPayouts = filteredPayouts.filter(x => (x.paidAt?.toMillis?.() || x.createdAt?.toMillis?.() || 0) >= cutoff);
+    }
+    
+    let totalCollected = 0, totalPayouts = 0;
+    const dailyData = {};
+    const methodData = {};
+    
+    filteredPays.forEach(p => {
+      totalCollected += Number(p.amount || 0);
+      const dk = dayKey(p.reviewedAt || p.submittedAt);
+      if (dk) dailyData[dk] = (dailyData[dk] || 0) + Number(p.amount || 0);
+      const m = p.method || 'other';
+      methodData[m] = (methodData[m] || 0) + Number(p.amount || 0);
+    });
+    
+    filteredPayouts.forEach(p => {
+      totalPayouts += Number(p.amount || 0);
+      const dk = dayKey(p.paidAt || p.createdAt);
+      if (dk) dailyData[dk] = (dailyData[dk] || 0) - Number(p.amount || 0);
+    });
+    
+    if (document.getElementById('dailyTotalCollected')) document.getElementById('dailyTotalCollected').innerText = fmtRs(totalCollected);
+    if (document.getElementById('dailyTotalPayouts')) document.getElementById('dailyTotalPayouts').innerText = fmtRs(totalPayouts);
+    if (document.getElementById('dailyTotalNet')) document.getElementById('dailyTotalNet').innerText = fmtRs(totalCollected - totalPayouts);
+    if (document.getElementById('dailyActiveDays')) document.getElementById('dailyActiveDays').innerText = Object.keys(dailyData).length;
+    
+    const sortedDays = Object.keys(dailyData).sort((a,b) => b.localeCompare(a));
+    if (!sortedDays.length) {
+      list.innerHTML = '<div class="empty-state">No activity for this period.</div>';
+    } else {
+      list.innerHTML = sortedDays.map(d => `
+        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
+          <div class="reg-icon">📅</div>
+          <div class="reg-main"><div class="reg-line-1"><b>${d}</b></div></div>
+          <div class="reg-right"><b style="color:${dailyData[d] >= 0 ? '#4ade80' : '#f87171'};">${fmtRs(dailyData[d])}</b></div>
+        </div>
+      `).join('');
+    }
+    
+    if (byMethod) {
+      const chips = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+      byMethod.innerHTML = Object.keys(methodData).map(m => `
+        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
+          <div class="reg-icon">💳</div>
+          <div class="reg-main"><div class="reg-line-1"><b>${chips[m] || m}</b></div></div>
+          <div class="reg-right"><b style="color:#fbbf24;">${fmtRs(methodData[m])}</b></div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    if (list) list.innerHTML = '<div class="empty-state">Error loading stats.</div>';
+  }
+};
+
+window.loadEarnings = async function() {
+  try {
+    const approved = allPayments.filter(p => p.status === 'approved');
+    const total = approved.reduce((s,p) => s + (Number(p.amount)||0), 0);
+    const pending = allPayments.filter(p => p.status === 'pending').reduce((s,p) => s + (Number(p.amount)||0), 0);
+    
+    if (document.getElementById('earnTotal')) document.getElementById('earnTotal').innerText = fmtRs(total);
+    if (document.getElementById('earnApproved')) document.getElementById('earnApproved').innerText = approved.length;
+    if (document.getElementById('earnPending')) document.getElementById('earnPending').innerText = fmtRs(pending);
+    if (document.getElementById('earnAvg')) document.getElementById('earnAvg').innerText = fmtRs(approved.length ? total / approved.length : 0);
+    
+    const methodData = {};
+    approved.forEach(p => {
+      const m = p.method || 'other';
+      methodData[m] = (methodData[m] || 0) + Number(p.amount || 0);
+    });
+    
+    const el = document.getElementById('earningsBreakdown');
+    if (el) {
+      const chips = { esewa:'💚 eSewa', khalti:'💜 Khalti', imepay:'🟠 IME Pay', bank:'🏦 Bank' };
+      el.innerHTML = Object.keys(methodData).map(m => `
+        <div class="reg-card" style="padding:12px; margin-bottom:8px;">
+          <div class="reg-icon">💳</div>
+          <div class="reg-main"><div class="reg-line-1"><b>${chips[m] || m}</b></div></div>
+          <div class="reg-right"><b style="color:#fbbf24;">${fmtRs(methodData[m])}</b></div>
+        </div>
+      `).join('');
+    }
+  } catch (e) {}
+};
+
+window.loadProfitShare = function() {
+  const r = document.getElementById('shareResult');
+  if (r) r.innerHTML = '';
+};
+window.calculateShares = function() {
+  const a1 = document.getElementById('admin1Name').value || 'Admin 1';
+  const s1 = Number(document.getElementById('admin1Share').value) || 0;
+  const a2 = document.getElementById('admin2Name').value || 'Admin 2';
+  const s2 = Number(document.getElementById('admin2Share').value) || 0;
+  
+  const totalNet = allPayments.filter(p => p.status === 'approved').reduce((s,p) => s + Number(p.amount||0), 0) 
+                 - allPayouts.reduce((s,p) => s + Number(p.amount||0), 0);
+                 
+  const r = document.getElementById('shareResult');
+  if (r) {
+    r.innerHTML = `
+      <div class="result-total-card" style="margin-top:20px;">
+        <div><span>Total Net Profit</span><b>${fmtRs(totalNet)}</b></div>
+        <div><span>${escapeDetail(a1)} (${s1}%)</span><b style="color:#4ade80;">${fmtRs(totalNet * (s1/100))}</b></div>
+        <div><span>${escapeDetail(a2)} (${s2}%)</span><b style="color:#60a5fa;">${fmtRs(totalNet * (s2/100))}</b></div>
       </div>
-    ` : ''}
-    <div class="dm-actions">
-      ${r.status === 'pending' ? `<button class="dm-btn-green" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','approve','registration');">✔ Approve</button>` : ''}
-      ${r.status === 'pending' ? `<button class="dm-btn-primary" onclick="closeDetailModal(); openReview('${r.id}','${(r.username||'').replace(/'/g,"\\'")}','reject','registration');">✘ Reject</button>` : ''}
-      <button class="dm-btn-ghost" onclick="closeDetailModal()">Close</button>
-    </div>
-  `;
-  document.getElementById('detailModal').classList.add('open');
+    `;
+  }
+};
+
+window.loadRoomDetailsForm = async function() {
+  const select = document.getElementById('roomTournamentSelect');
+  if (!select) return;
+  select.innerHTML = '<option value="">— Select tournament —</option>' + 
+    allTournaments.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+};
+window.saveRoomDetails = function() { window.showToast('✅ Room details saved (Simulation)'); };
+
+window.loadAnnouncements = async function() {
+  const list = document.getElementById('announcementList');
+  if (!list) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(10)));
+    if (snap.empty) { list.innerHTML = '<div class="empty-state">No announcements yet</div>'; return; }
+    list.innerHTML = snap.docs.map(d => {
+      const a = d.data();
+      return `
+        <div class="reg-card" style="padding:16px; margin-bottom:10px;">
+          <div class="reg-main">
+            <div class="reg-line-1"><b>${escapeDetail(a.title)}</b></div>
+            <div class="reg-line-2">${escapeDetail(a.message)}</div>
+            <div class="reg-line-2" style="font-size:11px;color:#6b7280;">🕐 ${fmtShort(a.createdAt)}</div>
+          </div>
+          <div class="reg-right"><button class="btn-delete small" onclick="deleteDoc(doc(db,'announcements','${d.id}')).then(()=>loadAnnouncements())">🗑️</button></div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {}
+};
+window.postAnnouncement = async function(e) {
+  e.preventDefault();
+  const title = document.getElementById('annTitle').value;
+  const message = document.getElementById('annMsg').value;
+  if (!title || !message) return;
+  await addDoc(collection(db, 'announcements'), { title, message, createdAt: serverTimestamp(), createdBy: currentAdminEmail });
+  document.getElementById('annTitle').value = '';
+  document.getElementById('annMsg').value = '';
+  window.showToast('📢 Announcement posted');
+  loadAnnouncements();
+};
+
+window.loadSupport = function() {
+  const list = document.getElementById('supportList');
+  if (list) list.innerHTML = '<div class="empty-state"><span class="icon">🎧</span>No support tickets yet</div>';
 };
 
 // ============================================================
