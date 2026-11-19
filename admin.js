@@ -1510,20 +1510,26 @@ window.loadAnnouncements = async function() {
   try {
     const snap = await getDocs(query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(10)));
     if (snap.empty) { list.innerHTML = '<div class="empty-state">No announcements yet</div>'; return; }
+    
     list.innerHTML = snap.docs.map(d => {
       const a = d.data();
       return `
-        <div class="reg-card" style="padding:16px; margin-bottom:10px;">
-          <div class="reg-main">
-            <div class="reg-line-1"><b>${escapeDetail(a.title)}</b></div>
-            <div class="reg-line-2">${escapeDetail(a.message)}</div>
-            <div class="reg-line-2" style="font-size:11px;color:#6b7280;">🕐 ${fmtShort(a.createdAt)}</div>
+        <div class="reg-card" style="padding:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; width:100%; box-sizing:border-box;">
+          
+          <div style="flex:1; min-width:0; text-align:left;">
+            <div style="font-weight:800; color:#fff; font-size:16px; margin-bottom:6px;">${escapeDetail(a.title)}</div>
+            <div style="color:#cbd5e1; font-size:14px; line-height:1.5; white-space:pre-wrap; word-break:break-word;">${escapeDetail(a.message)}</div>
+            <div style="font-size:11px; color:#6b7280; margin-top:8px;">🕐 ${fmtShort(a.createdAt)}</div>
           </div>
-          <div class="reg-right"><button class="btn-delete small" onclick="deleteDoc(doc(db,'announcements','${d.id}')).then(()=>loadAnnouncements())">🗑️</button></div>
+          
+          <div style="flex-shrink:0;">
+            <button class="btn-delete small" onclick="deleteAnnouncement('${d.id}')">🗑️</button>
+          </div>
+          
         </div>
       `;
     }).join('');
-  } catch(e) {}
+  } catch(e) { console.error(e); }
 };
 window.postAnnouncement = async function(e) {
   e.preventDefault();
@@ -1788,3 +1794,13 @@ function renderPredictions(dataToRender) {
     predictionsList.appendChild(card);
   });
 }
+window.deleteAnnouncement = async function(id) {
+  if (!confirm('Are you sure you want to delete this announcement?')) return;
+  try {
+    await deleteDoc(doc(db, 'announcements', id));
+    window.showToast('🗑️ Announcement deleted');
+    window.loadAnnouncements(); // Refresh the list
+  } catch (err) {
+    window.showToast('❌ ' + err.message, true);
+  }
+};
