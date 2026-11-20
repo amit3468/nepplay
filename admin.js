@@ -1560,155 +1560,210 @@ window.loadSupport = function() {
 // MATCH RESULTS & PAYOUTS
 // ============================================================
 
-// 1. Populate the dropdown when the page loads
-window.loadMatchResultsDropdown = function() {
-  const select = document.getElementById('matchTournamentSelect'); // 👈 Check your admin.html for the exact ID
+window.loadMatchResultsSection = function() {
+  const select = document.getElementById('resultTournamentSelect');
   if (!select) return;
-  
-  // We only want 'upcoming' or 'live' tournaments that haven't been completed yet
-  const availableTournaments = allTournaments.filter(t => {
-    const status = String(t.status || '').toLowerCase();
-    return status === 'upcoming' || status === 'live';
+
+  // Show upcoming or live tournaments
+  const available = allTournaments.filter(t => {
+    const st = String(t.status || '').toLowerCase();
+    return st === 'upcoming' || st === 'live';
   });
 
-  select.innerHTML = '<option value="">— Choose a tournament —</option>' + 
-    availableTournaments.map(t => `<option value="${t.id}">${escapeDetail(t.title)} (${t.date})</option>`).join('');
+  select.innerHTML = '<option value="">— Choose a tournament —</option>' +
+    available.map(t => `<option value="${t.id}">${escapeDetail(t.title)} (${t.date})</option>`).join('');
 };
 
-// 2. When a tournament is selected, load its players
-window.handleResultTournamentSelect = async function(e) {
-  const tournamentId = e.target.value;
-  const container = document.getElementById('resultPlayersContainer'); // 👈 Check ID in admin.html
-  
-  if (!tournamentId || !container) return;
-  
-  selectedResultTournament = allTournaments.find(t => t.id === tournamentId);
-  
-  container.innerHTML = '<div style="text-align:center; padding:20px; color:#9ca3af;">⏳ Loading players...</div>';
-  
-  try {
-    // Fetch registrations for this specific tournament
-    const q = query(collection(db, 'tournament_registrations'), where('tournamentId', '==', tournamentId));
-    const snap = await getDocs(q);
-    
-    const players = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(r => r.status === 'confirmed' || r.status === 'pending'); // Only include valid players
+window.loadTournamentForResult = function() {
+  const select = document.getElementById('resultTournamentSelect');
+  const tId = select.value;
+  const formDiv = document.getElementById('resultForm');
 
-    if (players.length === 0) {
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#f87171;">❌ No players registered for this tournament.</div>';
-      return;
-    }
-
-    // Render the UI for admin to input stats
-    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
-    players.forEach((p, index) => {
-      html += `
-        <div style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px; border:1px solid #2a2d4a;">
-          <div style="flex:1;">
-            <div style="font-weight:800; color:#fff;">${escapeDetail(p.username)}</div>
-            <div style="font-size:12px; color:#9ca3af;">IGN: ${escapeDetail(p.ign || '—')}</div>
-          </div>
-          <div>
-            <input type="number" placeholder="Kills" id="kills_${p.userId}" style="width:70px; padding:6px; border-radius:6px; border:1px solid #444; background:#111; color:#fff;">
-          </div>
-          <div>
-            <select id="rank_${p.userId}" style="padding:6px; border-radius:6px; border:1px solid #444; background:#111; color:#fff;">
-              <option value="0">Did not win</option>
-              <option value="1">🥇 1st Place</option>
-              <option value="2">🥈 2nd Place</option>
-              <option value="3">🥉 3rd Place</option>
-            </select>
-          </div>
-        </div>
-      `;
-    });
-    html += '</div>';
-    
-    // Add the save button
-    html += `
-      <button onclick="window.submitMatchResults('${tournamentId}')" style="margin-top:15px; width:100%; padding:14px; border-radius:8px; background:linear-gradient(135deg, #22c55e, #16a34a); color:#fff; font-weight:900; border:none; cursor:pointer;">
-        💾 Save Results & Process Payouts
-      </button>
-    `;
-    
-    container.innerHTML = html;
-
-  } catch (err) {
-    container.innerHTML = `<div style="color:#ef4444;">❌ Error loading players: ${err.message}</div>`;
+  if (!tId) {
+    formDiv.style.display = 'none';
+    return;
   }
+
+  const t = allTournaments.find(x => x.id === tId);
+  if (!t) return;
+
+  formDiv.style.display = 'block';
+
+  // 1. Update Tournament Summary
+  const regs = allRegs.filter(r => r.tournamentId === tId && r.status === 'confirmed');
+  document.getElementById('resultTournamentSummary').innerHTML = `
+    <div style="font-weight:800; color:#fff; font-size:16px;">${escapeDetail(t.title)}</div>
+    <div style="color:#9ca3af; font-size:13px; margin-top:4px;">
+      ${escapeDetail(t.game)} · ${escapeDetail(t.mode)} · Entry: Rs ${t.entryFee || 0} · Confirmed Players: ${regs.length}
+    </div>
+  `;
+
+  // 2. Auto-fill the prize inputs based on the tournament data
+  const pool = Number(t.prizePool || 0);
+  const topKill = Number(t.topKillsPrize || t.topKills || 0);
+
+  document.getElementById('winner1Prize').value = pool;
+  document.getElementById('winner2Prize').value = 0;
+  document.getElementById('winner3Prize').value = 0;
+  document.getElementById('topKillerPrize').value = topKill;
+  document.getElementById('resultPool').innerText = 'Rs ' + pool;
+
+  // 3. Attach live calculation listeners
+  ['winner1Prize', 'winner2Prize', 'winner3Prize', 'topKillerPrize'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.oninput = window.calculateResultSummary;
+  });
+
+  window.calculateResultSummary();
 };
 
-// 3. Save results and process wallet payouts
-window.submitMatchResults = async function(tournamentId) {
-  if (!confirm("Are you sure? This will credit wallets and mark the match as completed.")) return;
+window.calculateResultSummary = function() {
+  const p1 = Number(document.getElementById('winner1Prize').value) || 0;
+  const p2 = Number(document.getElementById('winner2Prize').value) || 0;
+  const p3 = Number(document.getElementById('winner3Prize').value) || 0;
+  const pTK = Number(document.getElementById('topKillerPrize').value) || 0;
   
-  const tData = allTournaments.find(t => t.id === tournamentId);
-  if (!tData) return;
+  const total = p1 + p2 + p3 + pTK;
+  document.getElementById('resultTotalPayout').innerText = 'Rs ' + total;
+  
+  const tId = document.getElementById('resultTournamentSelect').value;
+  const regs = allRegs.filter(r => r.tournamentId === tId && r.status === 'confirmed');
+  const collection = regs.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  
+  document.getElementById('resultCollection').innerText = 'Rs ' + collection;
+  document.getElementById('resultNetProfit').innerText = 'Rs ' + (collection - total);
+};
 
-  const container = document.getElementById('resultPlayersContainer');
-  const inputs = container.querySelectorAll('input[type="number"]');
-  
+window.submitMatchResults = async function() {
+  const select = document.getElementById('resultTournamentSelect');
+  const tId = select.value;
+  if (!tId) return alert('Please select a tournament first.');
+
+  if (!confirm('Submit results and process payouts? This will credit the players\' wallets instantly.')) return;
+
+  const t = allTournaments.find(x => x.id === tId);
+  const submitBtn = document.getElementById('submitResultsBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerText = '⏳ Processing Payouts...';
+
   try {
-    let payoutsToProcess = [];
+    // 1. Get all inputs
+    const w1Name = document.getElementById('winner1Name').value.trim();
+    const w1Kills = Number(document.getElementById('winner1Kills').value) || 0;
+    const w1Method = document.getElementById('winner1Method').value;
+    const w1Prize = Number(document.getElementById('winner1Prize').value) || 0;
+
+    const w2Name = document.getElementById('winner2Name').value.trim();
+    const w2Kills = Number(document.getElementById('winner2Kills').value) || 0;
+    const w2Method = document.getElementById('winner2Method').value;
+    const w2Prize = Number(document.getElementById('winner2Prize').value) || 0;
+
+    const w3Name = document.getElementById('winner3Name').value.trim();
+    const w3Kills = Number(document.getElementById('winner3Kills').value) || 0;
+    const w3Method = document.getElementById('winner3Method').value;
+    const w3Prize = Number(document.getElementById('winner3Prize').value) || 0;
+
+    const tkName = document.getElementById('topKillerName').value.trim() || w1Name; // Default to 1st place
+    const tkKills = Number(document.getElementById('topKillerKills').value) || 0;
+    const tkMethod = document.getElementById('topKillerMethod').value;
+    const tkPrize = Number(document.getElementById('topKillerPrize').value) || 0;
+
+    const highlightUrl = document.getElementById('resultHighlightUrl').value.trim();
+
+    let totalPayout = 0;
+    const payoutsToProcess = [];
+
+    // 2. Map usernames to UIDs and prepare payouts
+    if (w1Name && w1Prize > 0) {
+      const user = await findUidByUsername(w1Name);
+      if (user) payoutsToProcess.push({ uid: user.uid, name: w1Name, prize: w1Prize, method: w1Method, rank: '1st' });
+      else alert(`User "${w1Name}" not found! Skipping 1st place payout.`);
+    }
+    if (w2Name && w2Prize > 0) {
+      const user = await findUidByUsername(w2Name);
+      if (user) payoutsToProcess.push({ uid: user.uid, name: w2Name, prize: w2Prize, method: w2Method, rank: '2nd' });
+      else alert(`User "${w2Name}" not found! Skipping 2nd place payout.`);
+    }
+    if (w3Name && w3Prize > 0) {
+      const user = await findUidByUsername(w3Name);
+      if (user) payoutsToProcess.push({ uid: user.uid, name: w3Name, prize: w3Prize, method: w3Method, rank: '3rd' });
+      else alert(`User "${w3Name}" not found! Skipping 3rd place payout.`);
+    }
     
-    // 1. Loop through inputs and calculate prizes
-    // (Assuming standard payouts based on tournament data, adjust if you have specific prize distributions)
-    for (const input of inputs) {
-      const userId = input.id.replace('kills_', '');
-      const kills = parseInt(input.value) || 0;
-      const rankSelect = document.getElementById(`rank_${userId}`);
-      const rank = parseInt(rankSelect.value) || 0;
-      
-      const player = allRegs.find(r => r.userId === userId && r.tournamentId === tournamentId);
-      
-      let prizeAmount = 0;
-      // Simple logic: 1st gets Prize Pool, Top Killer gets Top Kill Prize
-      if (rank === 1) prizeAmount += Number(tData.prizePool || 120); 
-      if (kills > 0) prizeAmount += (kills * Number(tData.topKillsPrize || 10)); 
-      
-      if (prizeAmount > 0) {
-        payoutsToProcess.push({ userId, username: player?.username || 'Player', amount: prizeAmount, kills, rank });
+    // Handle Top Killer (Check if they already won 1st/2nd/3rd to combine prizes)
+    if (tkName && tkPrize > 0) {
+      const existing = payoutsToProcess.find(p => p.name.toLowerCase() === tkName.toLowerCase());
+      if (existing) {
+        existing.prize += tkPrize;
+        existing.rank += ' + Top Killer';
+      } else {
+        const user = await findUidByUsername(tkName);
+        if (user) payoutsToProcess.push({ uid: user.uid, name: tkName, prize: tkPrize, method: tkMethod, rank: 'Top Killer' });
+        else alert(`User "${tkName}" (Top Killer) not found! Skipping payout.`);
       }
     }
 
-    if (payoutsToProcess.length === 0) {
-      if (!confirm("No winners or kills entered. Mark match as completed without payouts?")) return;
-    }
-
-    // 2. Process Payouts (Update User Wallets)
-    for (const payout of payoutsToProcess) {
-      // Add to user's wallet
-      await updateDoc(doc(db, 'users', payout.userId), {
-        walletBalance: increment(payout.amount)
-      });
+    // 3. Execute Wallet Updates & Database Writes
+    for (const p of payoutsToProcess) {
+      totalPayout += p.prize;
       
-      // Add to wallet ledger
+      // Credit Wallet
+      await updateDoc(doc(db, 'users', p.uid), { walletBalance: increment(p.prize) });
+
+      // Add to Ledger
       await addDoc(collection(db, 'wallet_ledger'), {
-        userId: payout.userId,
-        username: payout.username,
-        type: 'match_winning',
-        amount: payout.amount,
-        reason: `Won in ${tData.title} (Rank: ${payout.rank}, Kills: ${payout.kills})`,
+        userId: p.uid, username: p.name, type: 'match_winning',
+        amount: p.prize, reason: `Won ${p.rank} in ${t.title}`,
         createdAt: serverTimestamp()
       });
+
+      // Add to Admin Payouts List
+      await addDoc(collection(db, 'tournament_payouts'), {
+        winnerUid: p.uid, winnerName: p.name, amount: p.prize, prize: p.prize,
+        tournamentId: t.id, tournamentTitle: t.title, rank: p.rank,
+        method: p.method, status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
+      });
     }
 
-    // 3. Mark Tournament as Completed
-    await updateDoc(doc(db, 'tournaments', tournamentId), {
-      status: 'completed'
+    // 4. Save Match Result for the public Winners page
+    await addDoc(collection(db, 'match_results'), {
+      tournamentId: t.id,
+      tournamentTitle: t.title,
+      winner1: w1Name ? { name: w1Name, kills: w1Kills, prize: w1Prize } : null,
+      winner2: w2Name ? { name: w2Name, kills: w2Kills, prize: w2Prize } : null,
+      winner3: w3Name ? { name: w3Name, kills: w3Kills, prize: w3Prize } : null,
+      topKiller: tkName ? { name: tkName, kills: tkKills, prize: tkPrize } : null,
+      highlightUrl: highlightUrl,
+      completedAt: serverTimestamp()
     });
 
-    window.showToast(`✅ Results saved! Payouts processed for ${payoutsToProcess.length} players.`);
+    // 5. Mark Tournament as Completed
+    await updateDoc(doc(db, 'tournaments', t.id), { status: 'completed' });
+
+    alert(`✅ Success! Results saved and Rs ${totalPayout} distributed to wallets.`);
     
-    // 4. Refresh UI
-    await window.loadTournamentsAdmin();
-    window.loadMatchResultsDropdown();
-    document.getElementById('resultPlayersContainer').innerHTML = '';
-    
-  } catch (err) {
-    console.error(err);
-    window.showToast('❌ Error saving results: ' + err.message, true);
+    // Refresh UI
+    window.resetResultsForm();
+    await window.loadTournamentsAdmin(); 
+    window.loadMatchResultsSection(); 
+
+  } catch (e) {
+    console.error(e);
+    alert('❌ Error saving results: ' + e.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = '🏆 Submit Results & Create Payouts';
   }
+};
+
+window.resetResultsForm = function() {
+  document.getElementById('resultTournamentSelect').value = '';
+  document.getElementById('resultForm').style.display = 'none';
+  const inputs = ['winner1Name','winner1Kills','winner2Name','winner2Kills','winner3Name','winner3Kills','topKillerName','topKillerKills','resultHighlightUrl'];
+  inputs.forEach(id => { 
+    const el = document.getElementById(id); 
+    if (el) el.value = ''; 
+  });
 };
 // QUICK PAYOUT TOOL 
 // ============================================================
