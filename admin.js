@@ -285,11 +285,18 @@ async function bootstrapAdminPanel() {
     allPayouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) { console.warn('payouts load failed:', e); }
   
-  await loadReferralBonuses();
+    await loadReferralBonuses();
   renderDashboardRecent();
   loadActivityFeed();
   loadLiveStats();
   attachRealtimeListeners();
+  
+  // 👇 ADD THESE TWO LINES 👇
+  window.loadMatchResultsDropdown();
+  const matchSelect = document.getElementById('matchTournamentSelect'); // 👈 Ensure ID matches your HTML
+  if (matchSelect) matchSelect.addEventListener('change', window.handleResultTournamentSelect);
+  // 👆 END ADDITION 👆
+
   console.log("✅ Admin panel booted for:", currentAdminEmail);
 }
 
@@ -1549,6 +1556,160 @@ window.loadSupport = function() {
 };
 
 // ============================================================
+// ============================================================
+// MATCH RESULTS & PAYOUTS
+// ============================================================
+
+// 1. Populate the dropdown when the page loads
+window.loadMatchResultsDropdown = function() {
+  const select = document.getElementById('matchTournamentSelect'); // 👈 Check your admin.html for the exact ID
+  if (!select) return;
+  
+  // We only want 'upcoming' or 'live' tournaments that haven't been completed yet
+  const availableTournaments = allTournaments.filter(t => {
+    const status = String(t.status || '').toLowerCase();
+    return status === 'upcoming' || status === 'live';
+  });
+
+  select.innerHTML = '<option value="">— Choose a tournament —</option>' + 
+    availableTournaments.map(t => `<option value="${t.id}">${escapeDetail(t.title)} (${t.date})</option>`).join('');
+};
+
+// 2. When a tournament is selected, load its players
+window.handleResultTournamentSelect = async function(e) {
+  const tournamentId = e.target.value;
+  const container = document.getElementById('resultPlayersContainer'); // 👈 Check ID in admin.html
+  
+  if (!tournamentId || !container) return;
+  
+  selectedResultTournament = allTournaments.find(t => t.id === tournamentId);
+  
+  container.innerHTML = '<div style="text-align:center; padding:20px; color:#9ca3af;">⏳ Loading players...</div>';
+  
+  try {
+    // Fetch registrations for this specific tournament
+    const q = query(collection(db, 'tournament_registrations'), where('tournamentId', '==', tournamentId));
+    const snap = await getDocs(q);
+    
+    const players = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.status === 'confirmed' || r.status === 'pending'); // Only include valid players
+
+    if (players.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#f87171;">❌ No players registered for this tournament.</div>';
+      return;
+    }
+
+    // Render the UI for admin to input stats
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+    players.forEach((p, index) => {
+      html += `
+        <div style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px; border:1px solid #2a2d4a;">
+          <div style="flex:1;">
+            <div style="font-weight:800; color:#fff;">${escapeDetail(p.username)}</div>
+            <div style="font-size:12px; color:#9ca3af;">IGN: ${escapeDetail(p.ign || '—')}</div>
+          </div>
+          <div>
+            <input type="number" placeholder="Kills" id="kills_${p.userId}" style="width:70px; padding:6px; border-radius:6px; border:1px solid #444; background:#111; color:#fff;">
+          </div>
+          <div>
+            <select id="rank_${p.userId}" style="padding:6px; border-radius:6px; border:1px solid #444; background:#111; color:#fff;">
+              <option value="0">Did not win</option>
+              <option value="1">🥇 1st Place</option>
+              <option value="2">🥈 2nd Place</option>
+              <option value="3">🥉 3rd Place</option>
+            </select>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    
+    // Add the save button
+    html += `
+      <button onclick="window.submitMatchResults('${tournamentId}')" style="margin-top:15px; width:100%; padding:14px; border-radius:8px; background:linear-gradient(135deg, #22c55e, #16a34a); color:#fff; font-weight:900; border:none; cursor:pointer;">
+        💾 Save Results & Process Payouts
+      </button>
+    `;
+    
+    container.innerHTML = html;
+
+  } catch (err) {
+    container.innerHTML = `<div style="color:#ef4444;">❌ Error loading players: ${err.message}</div>`;
+  }
+};
+
+// 3. Save results and process wallet payouts
+window.submitMatchResults = async function(tournamentId) {
+  if (!confirm("Are you sure? This will credit wallets and mark the match as completed.")) return;
+  
+  const tData = allTournaments.find(t => t.id === tournamentId);
+  if (!tData) return;
+
+  const container = document.getElementById('resultPlayersContainer');
+  const inputs = container.querySelectorAll('input[type="number"]');
+  
+  try {
+    let payoutsToProcess = [];
+    
+    // 1. Loop through inputs and calculate prizes
+    // (Assuming standard payouts based on tournament data, adjust if you have specific prize distributions)
+    for (const input of inputs) {
+      const userId = input.id.replace('kills_', '');
+      const kills = parseInt(input.value) || 0;
+      const rankSelect = document.getElementById(`rank_${userId}`);
+      const rank = parseInt(rankSelect.value) || 0;
+      
+      const player = allRegs.find(r => r.userId === userId && r.tournamentId === tournamentId);
+      
+      let prizeAmount = 0;
+      // Simple logic: 1st gets Prize Pool, Top Killer gets Top Kill Prize
+      if (rank === 1) prizeAmount += Number(tData.prizePool || 120); 
+      if (kills > 0) prizeAmount += (kills * Number(tData.topKillsPrize || 10)); 
+      
+      if (prizeAmount > 0) {
+        payoutsToProcess.push({ userId, username: player?.username || 'Player', amount: prizeAmount, kills, rank });
+      }
+    }
+
+    if (payoutsToProcess.length === 0) {
+      if (!confirm("No winners or kills entered. Mark match as completed without payouts?")) return;
+    }
+
+    // 2. Process Payouts (Update User Wallets)
+    for (const payout of payoutsToProcess) {
+      // Add to user's wallet
+      await updateDoc(doc(db, 'users', payout.userId), {
+        walletBalance: increment(payout.amount)
+      });
+      
+      // Add to wallet ledger
+      await addDoc(collection(db, 'wallet_ledger'), {
+        userId: payout.userId,
+        username: payout.username,
+        type: 'match_winning',
+        amount: payout.amount,
+        reason: `Won in ${tData.title} (Rank: ${payout.rank}, Kills: ${payout.kills})`,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    // 3. Mark Tournament as Completed
+    await updateDoc(doc(db, 'tournaments', tournamentId), {
+      status: 'completed'
+    });
+
+    window.showToast(`✅ Results saved! Payouts processed for ${payoutsToProcess.length} players.`);
+    
+    // 4. Refresh UI
+    await window.loadTournamentsAdmin();
+    window.loadMatchResultsDropdown();
+    document.getElementById('resultPlayersContainer').innerHTML = '';
+    
+  } catch (err) {
+    console.error(err);
+    window.showToast('❌ Error saving results: ' + err.message, true);
+  }
+};
 // QUICK PAYOUT TOOL 
 // ============================================================
 let selectedPlayer = null;
