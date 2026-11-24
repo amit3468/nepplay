@@ -230,10 +230,11 @@ async function loadPaymentMethods() {
         }
     } catch (e) { console.warn("No custom payment settings found, using defaults"); }
 
-    if (!methods.length) {
+        if (!methods.length) {
         methods = [
             { id:"esewa",  name:"eSewa",   number:"9748835184", qrImage:"/images/esewa-qr.png",  instructions:"Open eSewa → Send Money → enter number → confirm with MPIN." },
-            { id:"khalti", name:"Khalti",  number:"9766258368", qrImage:"/images/khalti-qr.png", instructions:"Open Khalti → Send Money → enter number → confirm with MPIN." }
+            { id:"khalti", name:"Khalti",  number:"9766258368", qrImage:"/images/khalti-qr.png", instructions:"Open Khalti → Send Money → enter number → confirm with MPIN." },
+            { id:"bank",   name:"Bank Transfer", number:"Your Account Number", qrImage:"/images/bank-qr.png", instructions:"Scan the QR code using your mobile banking app to transfer the amount." }
         ];
     }
     
