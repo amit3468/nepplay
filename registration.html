@@ -198,7 +198,7 @@ function showMessage(text, type) {
 
 function applyMode(mode) {
     playingMode = mode;
-    if (mode === "solo") {
+        if (mode === "solo" || mode === "1v1") {
         $("soloFields").style.display = "block";
         $("teamFields").style.display = "none";
         $("duoPlayers").style.display = "none";
@@ -317,7 +317,7 @@ onAuthStateChanged(auth, async (user) => {
         
         const mode = String(tournament.mode || "Squad").toLowerCase();
         $("modeBadge").textContent = "Mode: " + tournament.mode;
-        $("modeBadge").className = "mode-badge " + (mode === 'solo' ? 'solo' : (mode === 'duo' ? 'duo' : 'squad'));
+                $("modeBadge").className = "mode-badge " + ((mode === 'solo' || mode === '1v1') ? 'solo' : (mode === 'duo' ? 'duo' : 'squad'));
         applyMode(mode);
         
         $("soloEmail").value = user.email || "";
@@ -392,7 +392,7 @@ $("registrationForm").addEventListener("submit", async (event) => {
     }
 
     // TEAM/FORM LOGIC
-    if (playingMode === "solo") {
+        if (playingMode === "solo" || playingMode === "1v1") {
         const ign = $("soloIgn").value.trim();
         const uid = $("soloUid").value.trim();
         if (!ign || !uid) {
