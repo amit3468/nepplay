@@ -260,6 +260,7 @@
       
       <!-- NEW SIDEBAR LINKS -->
       <a href="#quickpayout" data-section="quickpayout" class="sidebar-link"><span>⚡</span> Quick Payout</a>
+      <a href="#quickcoin" data-section="quickcoin" class="sidebar-link"><span>🪙</span> Give Coins</a>
       <a href="#predictions" data-section="predictions" class="sidebar-link"><span>🔮</span> FFWS Predictions</a>
 
       <a href="#profitshare" data-section="profitshare" class="sidebar-link"><span>🤝</span> Profit Sharing</a>
@@ -753,6 +754,29 @@
         </div>
       </div>
     </section>
+       <!-- NEW COIN SECTION -->
+    <section id="section-quickcoin" class="admin-section" style="display:none">
+      <h2>🪙 Give NEP Coins</h2>
+      <p class="muted">Reward players for match wins or participation.</p>
+      
+      <div style="background: #15172b; border: 1px solid #2a2d4a; border-radius: 10px; padding: 20px; max-width: 600px; margin-top: 20px;">
+        <div style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:#9ca3af;">PLAYER USERNAME</label>
+          <input id="coinSearchInput" type="text" placeholder="e.g. GetHighKINGGG" style="width: 100%; padding: 10px; border-radius: 6px; background: #0f1124; color: #fff; border: 1px solid #2a2d4a;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:#9ca3af;">AMOUNT OF COINS</label>
+          <input id="coinAmount" type="number" placeholder="e.g. 100" style="width: 100%; padding: 10px; border-radius: 6px; background: #0f1124; color: #fff; border: 1px solid #2a2d4a;">
+        </div>
+
+        <button onclick="giveCoins()" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a0b3d; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 900; cursor: pointer; width: 100%;">
+          🪙 Give Coins
+        </button>
+
+        <p id="coinMsg" style="margin-top: 15px; font-weight: bold; text-align: center;"></p>
+      </div>
+    </section>
 
     <!-- NEW FFWS PREDICTIONS VIEWER -->
     <section id="section-predictions" class="admin-section" style="display:none">
@@ -1121,6 +1145,7 @@ window.togglePasswordVisibility = function() {
       earnings: 'loadEarnings',
       payouts: 'loadPayouts',
       quickpayout: 'initQuickPayout',
+      quickcoin: 'initQuickCoin',
       predictions: 'fetchPredictions',
       daily: 'loadDailyCollections',
       profitshare: 'loadProfitShare',
