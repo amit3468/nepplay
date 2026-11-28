@@ -142,6 +142,15 @@ input, textarea, select{ width:100%; padding:12px; border-radius:8px; border:1px
                   </div>
                   <button type="button" onclick="triggerWalletPayment()" style="background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:800; cursor:pointer; font-size:14px;">Pay with Wallet</button>
                 </div>
+                              <!-- COIN OPTION -->
+                <div id="coinPaymentBox" style="display:none; background:linear-gradient(135deg, rgba(251,191,36,.15), rgba(20,12,45,.9)); border:2px solid #fbbf24; padding:16px; border-radius:12px; margin-bottom:20px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                  <div>
+                    <div style="font-weight:900; color:#fbbf24; font-size:1.05rem;">🪙 Pay with NEP Coins</div>
+                    <div style="font-size:13px; color:#a8a3c9; margin-top:4px;">Balance: <span id="regCoinBalance" style="color:#fff; font-weight:800;">0</span> Coins</div>
+                    <div style="font-size:11px; color:#fca5a5; margin-top:2px;">Required: <span id="regCoinRequired">0</span> Coins (1 NPR = 100 Coins)</div>
+                  </div>
+                  <button type="button" onclick="triggerCoinPayment()" style="background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#1a0b3d; border:none; padding:12px 24px; border-radius:10px; font-weight:800; cursor:pointer; font-size:14px;">Pay with Coins</button>
+                </div>
 
                 <div style="text-align:center; color:#6b7280; font-size:12px; margin: 15px 0; font-weight:700;">— OR PAY MANUALLY BELOW —</div>
 
@@ -186,6 +195,7 @@ let tournament = null;
 let playingMode = "squad";
 let userWalletBal = 0;
 let isPayingWithWallet = false;
+let isPayingWithCoins = false;
 let paymentMethods = [];
 let selectedPaymentId = "";
 
@@ -280,6 +290,10 @@ window.triggerWalletPayment = function() {
     isPayingWithWallet = true;
     $("registrationForm").dispatchEvent(new Event("submit", { cancelable: true }));
 };
+  window.triggerCoinPayment = function() {
+    isPayingWithCoins = true;
+    $("registrationForm").dispatchEvent(new Event("submit", { cancelable: true }));
+};
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = "/login.html"; return; }
@@ -326,9 +340,19 @@ onAuthStateChanged(auth, async (user) => {
         $("captainName").value = currentUsername;
         $("player1").value = currentUsername;
 
-        if (userWalletBal >= Number(tournament.entryFee || 0) && Number(tournament.entryFee || 0) > 0) {
+                const entryFee = Number(tournament.entryFee || 0);
+        const userCoins = Number(uDoc.data().coinBalance || 0);
+        const requiredCoins = entryFee * 100; // 1 NPR = 100 Coins
+
+        if (userWalletBal >= entryFee && entryFee > 0) {
             $("walletPaymentBox").style.display = "flex";
             $("regWalletBalance").textContent = "Rs " + userWalletBal;
+        }
+
+        if (userCoins >= requiredCoins && requiredCoins > 0) {
+            $("coinPaymentBox").style.display = "flex";
+            $("regCoinBalance").textContent = userCoins.toLocaleString();
+            $("regCoinRequired").textContent = requiredCoins.toLocaleString();
         }
 
         await loadPaymentMethods();
@@ -370,7 +394,19 @@ $("registrationForm").addEventListener("submit", async (event) => {
     };
 
     // PAYMENT LOGIC
-    if (isPayingWithWallet) {
+        if (isPayingWithCoins) {
+        const entryFee = Number(tournament.entryFee || 0);
+        const reqCoins = entryFee * 100;
+        if (userCoins < reqCoins) { // Ensure userCoins is fetched in auth state
+            showMessage("❌ Insufficient coin balance.", "error");
+            btn.disabled = false; btn.textContent = "Submit Registration";
+            return;
+        }
+        body.transactionId = "COIN_" + Date.now();
+        body.paymentMethod = "Coins";
+        body.status = "confirmed";
+    }
+  if (isPayingWithWallet) {
         if (userWalletBal < body.amount) {
             showMessage("❌ Insufficient wallet balance.", "error");
             btn.disabled = false; btn.textContent = "Submit Registration";
