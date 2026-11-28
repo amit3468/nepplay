@@ -72,21 +72,15 @@
         .tourney-header { padding: 16px 20px; background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
         .tourney-header h3 { font-weight: 800; color: #fff; font-size: 16px; margin: 0; }
         .tourney-header .meta { color: #9ca3af; font-size: 12px; }
-        .tourney-podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 16px; align-items: end; }
+        .tourney-podium { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 16px; align-items: end; }
         @media (max-width: 500px) { .tourney-podium { grid-template-columns: 1fr; } }
         .tp-slot { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 10px; text-align: center; position: relative; }
-        .tp-slot.r1 { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); order: 2; transform: translateY(-6px); }
-        .tp-slot.r2 { order: 1; }
-        .tp-slot.r3 { order: 3; }
-        @media (max-width: 500px) { .tp-slot.r1 { order: 1; transform: none; } }
+        .tp-slot.r1 { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); order: 1; }
+        .tp-slot.r3 { order: 2; border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.06); }
         .tp-slot .tp-rank { font-size: 22px; margin-bottom: 6px; line-height: 1; }
         .tp-slot .tp-name { color: #fff; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .tp-slot .tp-prize { color: #4ade80; font-weight: 800; font-size: 13px; margin-top: 4px; }
         .tp-slot .tp-kills { color: #9ca3af; font-size: 10px; margin-top: 2px; }
-        .killer-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(168,85,247,0.06); border-top: 1px solid rgba(168,85,247,0.15); font-size: 13px; }
-        .killer-row .kr-label { color: #c084fc; font-weight: 700; }
-        .killer-row .kr-name { color: #fff; font-weight: 700; }
-        .killer-row .kr-prize { color: #4ade80; font-weight: 800; }
 
         /* ===== USER CHIP NAV ===== */
         .user-chip-wrap { position: relative; flex-shrink: 0; display: inline-block; }
@@ -134,7 +128,7 @@
                 <div class="w-9 h-9 rounded-full bg-pink-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-headset text-pink-400"></i></div>
                 <div><p class="text-sm font-bold">Support Page</p><p class="text-xs text-gray-500">Full help center</p></div>
             </a>
-            <a href="https://chat.whatsapp.com/https://chat.whatsapp.com/Itn4tQkyG9N4ilVk3ZMEaV" target="_blank" class="support-menu-item pr">
+            <a href="https://chat.whatsapp.com/Itn4tQkyG9N4ilVk3ZMEaV" target="_blank" class="support-menu-item pr">
                 <div class="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-users text-purple-400"></i></div>
                 <div><p class="text-sm font-bold">Join Community</p><p class="text-xs text-gray-500">Public group chat</p></div>
             </a>
@@ -239,23 +233,20 @@
             <div id="winners-list" class="space-y-3"></div>
         </div>
 
+        <!-- UPDATED STATIC PRIZE DISTRIBUTION CARD -->
         <div class="glass-panel rounded-xl p-6 mt-8 max-w-2xl mx-auto text-center">
             <h3 class="text-base sm:text-lg font-bold text-white mb-4"><i class="fa-solid fa-sack-dollar text-green-400 mr-1"></i> Prize Distribution</h3>
-            <div class="grid grid-cols-3 gap-3 text-xs sm:text-sm">
+            <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm">
                 <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-                    <p class="text-yellow-400 font-bold mb-1"><i class="fa-solid fa-medal"></i> 1st</p>
-                    <p class="text-white text-xs">50% of pool</p>
+                    <p class="text-yellow-400 font-bold mb-1"><i class="fa-solid fa-medal"></i> 1st Place</p>
+                    <p class="text-white text-xs">Winning Prize</p>
                 </div>
-                <div class="bg-gray-500/10 border border-gray-400/30 rounded-lg p-3">
-                    <p class="text-gray-300 font-bold mb-1"><i class="fa-solid fa-medal"></i> 2nd</p>
-                    <p class="text-white text-xs">30% of pool</p>
-                </div>
-                <div class="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3">
-                    <p class="text-orange-400 font-bold mb-1"><i class="fa-solid fa-medal"></i> 3rd</p>
-                    <p class="text-white text-xs">20% of pool</p>
+                <div class="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
+                    <p class="text-purple-400 font-bold mb-1"><i class="fa-solid fa-crosshairs"></i> Top Killer</p>
+                    <p class="text-white text-xs">Kill Prize</p>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 mt-4">Plus a separate Top Killer prize where applicable.</p>
+            <p class="text-xs text-gray-500 mt-4">Exact prize amounts vary per tournament.</p>
         </div>
     </main>
 
@@ -317,6 +308,7 @@
             }[c]));
         }
         function playerName(p) {
+            // Uses EXACT name typed in Admin Panel
             return p.winnerName || p.username || p.ign || p.playerName || 'Player';
         }
         function toNumber(v) {
@@ -343,7 +335,6 @@
 
         /* ---------- duplicate detection: Top Killer === 1st place ---------- */
         function normName(s) {
-            // Strips ALL spaces, dots, underscores, and special characters (e.g. "Pyro_Moon" === "PyroMoon")
             return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         }
 
@@ -362,7 +353,6 @@
             const first     = group.find(w => rankNum(w.rank) === 1) || null;
             const killerRaw = group.find(w => isKillerRank(w.rank)) || null;
             
-            // If the killer IS the first place winner (whether same doc or different doc with same name)
             const killerIsFirst = !!killerRaw && !!first && (killerRaw === first || samePlayer(killerRaw, first));
             
             return { first, killerRaw, killerIsFirst, killer: killerIsFirst ? null : killerRaw };
@@ -370,7 +360,6 @@
 
         function dedupeGroup(group) {
             const { killerIsFirst, killerRaw, first } = splitKiller(group);
-            // Only filter out if it's a completely separate document
             return (killerIsFirst && killerRaw !== first) ? group.filter(w => w !== killerRaw) : group;
         }
 
@@ -379,7 +368,7 @@
                 const snap = await getDocs(collection(db, 'tournament_payouts'));
                 const all = snap.docs
                     .map(d => ({ id: d.id, ...d.data() }))
-                    .filter(p => toNumber(p.prize || p.amount) > 0);
+                    .filter(p => toNumber(p.prize || p.amount) > 0); // Filters out ANY Rs 0 entries immediately
 
                 const winnersRaw = all
                     .filter(p => {
@@ -427,7 +416,8 @@
                 const latest    = byTournament[sortedKeys[0]] || [];
                 const latestRaw = byTournamentRaw[sortedKeys[0]] || [];
 
-                const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank);
+                // Only find 2nd/3rd if prize > 0
+                const findRank = (rank) => latest.find(w => rankNum(w.rank) === rank && toNumber(w.prize || w.amount) > 0);
                 const r1 = findRank(1), r2 = findRank(2), r3 = findRank(3);
 
                 const { killerRaw, killerIsFirst } = splitKiller(latestRaw);
@@ -442,6 +432,8 @@
                     : '';
 
                 renderPodium(document.getElementById('podium-1'), r1, iconGold, 'gold', 1, killerBadge);
+                
+                // If 2nd place is empty, show Top Killer on podium, otherwise show blank
                 if (r2) {
                     renderPodium(document.getElementById('podium-2'), r2, iconSilver, 'silver', 2);
                 } else if (killer) {
@@ -449,6 +441,7 @@
                 } else {
                     renderPodium(document.getElementById('podium-2'), null, iconSilver, 'silver', 2);
                 }
+                
                 if (r3) {
                     renderPodium(document.getElementById('podium-3'), r3, iconBronze, 'bronze', 3);
                 } else {
@@ -507,7 +500,6 @@
             const r = rankNum(w.rank);
             const isKiller = isKillerRank(w.rank);
             
-            // FIX: Prioritize 1st, 2nd, 3rd labels over the "Top Killer" label so Gold Card correctly says "Winner"
             const label = r === 1 ? 'Winner' : r === 2 ? '2nd Place' : r === 3 ? '3rd Place' : (isKiller ? 'Top Killer' : 'Winner');
 
             el.className = `podium-live ${medalClass} ${orderCls}`;
@@ -574,16 +566,14 @@
                 const title = w[0].tournamentTitle || w[0].tournament || 'Tournament';
                 const date = fmtDate(w[0].createdAt || w[0].paidAt);
 
-                const findR = (n) => w.find(x => rankNum(x.rank) === n);
+                // ONLY look for 2nd/3rd place if they actually have a prize > 0
+                const findR = (n) => w.find(x => rankNum(x.rank) === n && toNumber(x.prize || x.amount) > 0);
                 const firstPlace = findR(1), second = findR(2), third = findR(3);
                 const tk = killerIsFirst ? null : killerRaw;
 
                 const slot = (winner, rank, medal, cls, badge) => {
                     if (!winner) {
-                        return `<div class="tp-slot ${cls}">
-                            <div class="tp-rank">${medal}</div>
-                            <p class="text-gray-500 text-xs">—</p>
-                        </div>`;
+                        return `<div class="tp-slot ${cls}" style="display:none;"></div>`; // HIDDEN if no winner
                     }
                     return `<div class="tp-slot ${cls}">
                         <div class="tp-rank">${medal}</div>
@@ -602,12 +592,13 @@
                                 <div class="meta">${escapeHtml(date)}</div>
                             </div>
                         </div>
-                        <div class="tourney-podium">
-                            ${slot(second, 2, iconSilver, 'r2')}
+                        <div class="tourney-podium" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
                             ${slot(firstPlace, 1, iconGold, 'r1', killerIsFirst)}
+                            ${slot(second, 2, iconSilver, 'r2')}
                             ${slot(third, 3, iconBronze, 'r3')}
+                            ${!second && !third ? slot(tk, 'TK', iconKiller, 'r3') : ''}
                         </div>
-                        ${tk ? `
+                        ${tk && (second || third) ? `
                             <div class="killer-row">
                                 <span class="kr-label"><i class="fa-solid fa-crosshairs"></i> Top Killer</span>
                                 <span class="kr-name">${escapeHtml(playerName(tk))}</span>
