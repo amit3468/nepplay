@@ -2041,19 +2041,20 @@ window.deleteAnnouncement = async function(id) {
 // ============================================================
 // QUICK COIN GIVER TOOL (MANUAL)
 // ============================================================
-window.initQuickCoin = function() {
-  const msgEl = document.getElementById('coinMsg');
-  if (msgEl) msgEl.textContent = '';
+window.calcCoins = function() {
+  const npr = Number(document.getElementById('nprAmount').value) || 0;
+  document.getElementById('coinAmount').value = npr * 100; // 1 NPR = 100 Coins
 };
 
 window.giveCoins = async function() {
   const username = document.getElementById('coinSearchInput').value.trim();
-  const amount = Number(document.getElementById('coinAmount').value);
+  const npr = Number(document.getElementById('nprAmount').value) || 0;
+  const amount = Number(document.getElementById('coinAmount').value) || 0;
   const msgEl = document.getElementById('coinMsg');
 
-  if (!username || !amount || amount <= 0) {
+  if (!username || amount <= 0) {
     msgEl.style.color = '#ef4444';
-    msgEl.textContent = '❌ Enter a valid username and amount.';
+    msgEl.textContent = '❌ Enter a valid username and NPR amount.';
     return;
   }
 
@@ -2061,25 +2062,22 @@ window.giveCoins = async function() {
   msgEl.textContent = '⏳ Searching...';
 
   try {
-    // Uses the findUidByUsername function already in your file
     const user = await findUidByUsername(username);
-    
     if (!user) {
       msgEl.style.color = '#ef4444';
       msgEl.textContent = `❌ User "${username}" not found.`;
       return;
     }
 
-    // Add the coins atomically
     await updateDoc(doc(db, 'users', user.uid), {
       coinBalance: increment(amount)
     });
 
     msgEl.style.color = '#4ade80';
-    msgEl.textContent = `✅ Successfully gave ${amount} coins to ${username}!`;
+    msgEl.textContent = `✅ Successfully gave ${amount.toLocaleString()} coins for Rs ${npr} deposit to ${username}!`;
     
-    // Clear inputs
-    document.getElementById('coinAmount').value = ''; 
+    document.getElementById('nprAmount').value = ''; 
+    document.getElementById('coinAmount').value = '';
     
   } catch (err) {
     console.error(err);
