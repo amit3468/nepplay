@@ -1703,14 +1703,23 @@ window.submitMatchResults = async function() {
       }
     }
 
-    // 3. Execute Wallet Updates & Database Writes
+        // 3. Execute Wallet Updates & Database Writes (WITH AUTOMATIC COINS)
     for (const p of payoutsToProcess) {
       totalPayout += p.prize;
       
-      // Credit Wallet
-      await updateDoc(doc(db, 'users', p.uid), { walletBalance: increment(p.prize) });
+      // Calculate Coins based on rank
+      let coinsToAward = 0;
+      if (p.rank.includes('1st')) coinsToAward += 100;
+      if (p.rank.includes('Top Killer')) coinsToAward += 50;
+      if (p.rank.includes('2nd') || p.rank.includes('3rd')) coinsToAward += 25;
 
-      // Add to Ledger
+      // Credit Wallet AND Coins
+      await updateDoc(doc(db, 'users', p.uid), { 
+        walletBalance: increment(p.prize),
+        coinBalance: increment(coinsToAward)
+      });
+
+      // Add to Wallet Ledger
       await addDoc(collection(db, 'wallet_ledger'), {
         userId: p.uid, username: p.name, type: 'match_winning',
         amount: p.prize, reason: `Won ${p.rank} in ${t.title}`,
@@ -1723,8 +1732,16 @@ window.submitMatchResults = async function() {
         tournamentId: t.id, tournamentTitle: t.title, rank: p.rank,
         method: p.method, status: 'paid', paidAt: serverTimestamp(), createdAt: serverTimestamp()
       });
-    }
 
+      // Add to Coin Ledger
+      if (coinsToAward > 0) {
+         await addDoc(collection(db, 'coin_ledger'), {
+            userId: p.uid, username: p.name, type: 'match_reward',
+            amount: coinsToAward, reason: `Earned from ${p.rank} in ${t.title}`,
+            createdAt: serverTimestamp()
+         });
+      }
+    }
     // 4. Save Match Result for the public Winners page
     await addDoc(collection(db, 'match_results'), {
       tournamentId: t.id,
@@ -2018,5 +2035,55 @@ window.deleteAnnouncement = async function(id) {
     window.loadAnnouncements(); // Refresh the list
   } catch (err) {
     window.showToast('❌ ' + err.message, true);
+  }
+};
+
+// ============================================================
+// QUICK COIN GIVER TOOL (MANUAL)
+// ============================================================
+window.initQuickCoin = function() {
+  const msgEl = document.getElementById('coinMsg');
+  if (msgEl) msgEl.textContent = '';
+};
+
+window.giveCoins = async function() {
+  const username = document.getElementById('coinSearchInput').value.trim();
+  const amount = Number(document.getElementById('coinAmount').value);
+  const msgEl = document.getElementById('coinMsg');
+
+  if (!username || !amount || amount <= 0) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = '❌ Enter a valid username and amount.';
+    return;
+  }
+
+  msgEl.style.color = '#fbbf24';
+  msgEl.textContent = '⏳ Searching...';
+
+  try {
+    // Uses the findUidByUsername function already in your file
+    const user = await findUidByUsername(username);
+    
+    if (!user) {
+      msgEl.style.color = '#ef4444';
+      msgEl.textContent = `❌ User "${username}" not found.`;
+      return;
+    }
+
+    // Add the coins atomically
+    await updateDoc(doc(db, 'users', user.uid), {
+      coinBalance: increment(amount)
+    });
+
+    msgEl.style.color = '#4ade80';
+    msgEl.textContent = `✅ Successfully gave ${amount} coins to ${username}!`;
+    
+    // Clear inputs
+    document.getElementById('coinAmount').value = ''; 
+    
+  } catch (err) {
+    console.error(err);
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = '❌ Error: ' + err.message;
   }
 };
